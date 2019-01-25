@@ -25,7 +25,7 @@ export const apiVersion: msRest.OperationQueryParameter = {
   mapper: {
     required: true,
     serializedName: "api-version",
-    defaultValue: '2018-09-15',
+    defaultValue: '2222-01-21',
     type: {
       name: "String"
     }
