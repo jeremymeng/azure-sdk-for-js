@@ -1,4 +1,2 @@
-import MD5Wrapper from "./md5.node";
-export {
-    MD5Wrapper
-};
+import Md5Wrapper from "./md5";
+export { Md5Wrapper };

@@ -4,6 +4,10 @@
   "description": "Common libraries for other sdk libraries",
   "main": "dist/index.js",
   "module": "dist-esm/lib/index.js",
+  "browser": {
+    "./dist/index.js": "./browser/index.js",
+    "./dist-esm/lib/common/md5-wrapper/md5.js": "./dist-esm/lib/common/md5-wrapper/md5.browser.js"
+  },
   "types": "dist-esm/index.d.ts",
   "repository": "github:Azure/azure-sdk-for-js",
   "keywords": [
