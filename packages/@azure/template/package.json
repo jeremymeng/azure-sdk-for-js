@@ -16,6 +16,7 @@
     "build-test": "tsc -p . && rollup -c rollup.test.config.js",
     "build-browser": "tsc -p . && cross-env ONLY_BROWSER=true rollup -c",
     "build-node": "tsc -p . && cross-env ONLY_NODE=true rollup -c",
+    "eslint": "eslint **/*.ts",
     "test": "mocha test-dist/**/*.js --reporter spec",
     "pretest": "npm run build-test"
   },
@@ -36,7 +37,10 @@
   "devDependencies": {
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.7.1",
+    "@typescript-eslint/eslint-plugin": "^1.3.0",
+    "@typescript-eslint/parser": "^1.3.0",
     "cross-env": "^5.2.0",
+    "eslint": "^5.14.0",
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.18.0",
     "rimraf": "^2.6.2",
