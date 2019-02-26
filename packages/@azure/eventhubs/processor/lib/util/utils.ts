@@ -113,8 +113,8 @@ export enum EPHActionStrings {
  * @ignore
  */
 export async function retry<T>(config: RetryConfig<T>): Promise<T> {
-  let createdOK: boolean = false;
-  let retryCount: number = 0;
+  let createdOK = false;
+  let retryCount = 0;
   let result: T = undefined as any;
   let innerError: Error | undefined = undefined;
   do {

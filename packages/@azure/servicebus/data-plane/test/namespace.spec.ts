@@ -340,7 +340,7 @@ describe("Errors with non existing Queue/Topic/Subscription", async function(): 
 describe("Test createFromAadTokenCredentials", function(): void {
   let namespace: Namespace;
   let tokenCreds: ApplicationTokenCredentials;
-  let errorWasThrown: boolean = false;
+  let errorWasThrown = false;
   if (!process.env.SERVICEBUS_CONNECTION_STRING) {
     throw new Error(
       "Define SERVICEBUS_CONNECTION_STRING in your environment before running integration tests."

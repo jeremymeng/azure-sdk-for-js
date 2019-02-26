@@ -873,7 +873,7 @@ export class MessageSession extends LinkEntity {
         // be of size upto maxMessageCount. Then the user needs to accordingly dispose
         // (complete,/abandon/defer/deadletter) the messages from the array.
         this._receiver!.addCredit(maxMessageCount);
-        let msg: string = "[%s] Setting the wait timer for %d seconds for receiver '%s'.";
+        let msg = "[%s] Setting the wait timer for %d seconds for receiver '%s'.";
         if (reuse) msg += " Receiver link already present, hence reusing it.";
         log.batching(msg, this._context.namespace.connectionId, idleTimeoutInSeconds, this.name);
         firstMessageWaitTimer = setTimeout(
@@ -997,7 +997,7 @@ export class MessageSession extends LinkEntity {
           this._receiver.source &&
           this._receiver.source.filter &&
           this._receiver.source.filter[Constants.sessionFilterName];
-        let errorMessage: string = "";
+        let errorMessage = "";
         // SB allows a sessionId with empty string value :)
         if (receivedSessionId == undefined) {
           errorMessage =

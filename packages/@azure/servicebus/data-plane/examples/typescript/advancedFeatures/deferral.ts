@@ -33,7 +33,7 @@ async function sendMessages(): Promise<void> {
     { step: 4, title: "Cook" },
     { step: 5, title: "Eat" }
   ];
-  const promises = new Array();
+  const promises = [];
   for (let index = 0; index < data.length; index++) {
     const message = {
       body: data[index],

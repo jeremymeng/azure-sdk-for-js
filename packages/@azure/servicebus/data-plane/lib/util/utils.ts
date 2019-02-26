@@ -6,6 +6,7 @@ import * as log from "../log";
 import { generate_uuid, string_to_uuid } from "rhea-promise";
 import { isBuffer } from "util";
 import { ConnectionContext } from "../connectionContext";
+import os from "os";
 
 /**
  * A constant that indicates whether the environment is node.js or browser based.
@@ -120,7 +121,7 @@ export function calculateRenewAfterDuration(lockedUntilUtc: Date): number {
  * @returns Date The JS Date object.
  */
 export function convertTicksToDate(buf: number[]): Date {
-  const epochMicroDiff: number = 621355968000000000;
+  const epochMicroDiff = 621355968000000000;
   const longValue: Long = Long.fromBytesBE(buf);
   const timeInMS = longValue
     .sub(epochMicroDiff)
@@ -136,7 +137,6 @@ export function convertTicksToDate(buf: number[]): Date {
  */
 export function getProcessorCount(): number {
   if (isNode) {
-    const os = require("os");
     return os.cpus().length;
   } else {
     return navigator.hardwareConcurrency || 1;

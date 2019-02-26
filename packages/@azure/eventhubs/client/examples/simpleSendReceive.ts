@@ -20,7 +20,7 @@ async function main(): Promise<void> {
     const onError: OnError = (err: MessagingError | Error) => {
       console.log(">>>>> Error occurred: ", err);
     };
-   const rcvrHandler = client.receive(ids[i], onMessage, onError, {
+    const rcvrHandler = client.receive(ids[i], onMessage, onError, {
       enableReceiverRuntimeMetric: true,
       eventPosition: EventPosition.fromEnqueuedTime(Date.now())
     });

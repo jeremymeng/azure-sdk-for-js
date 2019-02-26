@@ -158,7 +158,7 @@ export class BatchingReceiver extends EventHubReceiver {
         log.batching("[%s] Receiver '%s', adding credit for receiving %d messages.",
           this._context.connectionId, this.name, maxMessageCount);
         this._receiver!.addCredit(maxMessageCount);
-        let msg: string = "[%s] Setting the wait timer for %d seconds for receiver '%s'.";
+        let msg = "[%s] Setting the wait timer for %d seconds for receiver '%s'.";
         if (reuse) msg += " Receiver link already present, hence reusing it.";
         log.batching(msg, this._context.connectionId, maxWaitTimeInSeconds, this.name);
         waitTimer = setTimeout(actionAfterWaitTimeout, (maxWaitTimeInSeconds as number) * 1000);

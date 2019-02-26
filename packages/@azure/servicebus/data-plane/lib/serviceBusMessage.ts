@@ -233,7 +233,7 @@ export interface SendableMessageInfo {
 /**
  * Describes the message to be sent to ServiceBus.
  */
-export module SendableMessageInfo {
+export namespace SendableMessageInfo {
   export function validate(msg: SendableMessageInfo): void {
     if (!msg) {
       throw new Error("'msg' cannot be null or undefined.");
@@ -532,7 +532,7 @@ export interface ReceivedMessageInfo extends SendableMessageInfo {
  * Describes the module that is responsible for converting the message received from ServiceBus
  * to/from AmqpMessage.
  */
-export module ReceivedMessageInfo {
+export namespace ReceivedMessageInfo {
   export function validate(msg: ReceivedMessageInfo): void {
     SendableMessageInfo.validate(msg);
     if (msg.lockToken != undefined && typeof msg.lockToken !== "string") {

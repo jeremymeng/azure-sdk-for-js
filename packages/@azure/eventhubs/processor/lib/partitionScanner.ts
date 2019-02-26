@@ -114,9 +114,9 @@ export class PartitionScanner {
       this._desiredCount++;
     }
 
-    const sortedHosts: Array<string> = Array.from(uniqueOwners).sort();
+    const sortedHosts: string[] = Array.from(uniqueOwners).sort();
     let hostOrdinal: number = -1;
-    let startingPoint: number = 0;
+    let startingPoint = 0;
     if (isFirst) {
       // If the entire system is starting up, the list of hosts is probably not complete and we
       // can not really compute a meaningful hostOrdinal. But we only want hostOrdinal to
@@ -134,7 +134,7 @@ export class PartitionScanner {
     log.partitionScanner(withHost("Host ordinal: %d. Rotating leases to start at: %d."),
       hostOrdinal, startingPoint);
     if (startingPoint !== 0) {
-      const rotatedList: Array<BaseLease> = [];
+      const rotatedList: BaseLease[] = [];
       for (let i = 0; i < this._allLeaseStates.length; i++) {
         const index = (i + startingPoint) % this._allLeaseStates.length;
         rotatedList.push(this._allLeaseStates[index]);
@@ -255,7 +255,7 @@ export class PartitionScanner {
     }
 
     // Extract hosts which own more than the desired count
-    const bigOwners: Array<string> = [];
+    const bigOwners: string[] = [];
     const withHost = this._context.withHost;
     for (const entry of hostOwns.entries()) {
       if (entry[1] > this._desiredCount) {

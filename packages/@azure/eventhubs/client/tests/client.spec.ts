@@ -66,7 +66,7 @@ describe("EventHubClient", function (): void {
   });
 });
 
-function arrayOfIncreasingNumbersFromZero(length: any): Array<string> {
+function arrayOfIncreasingNumbersFromZero(length: any): string[] {
   // tslint:disable-next-line: no-null-keyword
   return Array.apply(null, new Array(length)).map((x: any, i: any) => { return `${i}`; });
 }

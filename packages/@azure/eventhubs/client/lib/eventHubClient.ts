@@ -264,7 +264,7 @@ export class EventHubClient {
    * Provides an array of partitionIds.
    * @returns {Promise<Array<string>>} A promise that resolves with an Array of strings.
    */
-  async getPartitionIds(): Promise<Array<string>> {
+  async getPartitionIds(): Promise<string[]> {
     try {
       const runtimeInfo = await this.getHubRuntimeInformation();
       return runtimeInfo.partitionIds;

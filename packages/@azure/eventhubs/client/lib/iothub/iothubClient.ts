@@ -46,7 +46,7 @@ export class IotHubClient {
   async getEventHubConnectionString(options?: ConnectionContextOptions): Promise<string> {
     const iothubconfig = IotHubConnectionConfig.create(this.connectionString);
     const config = IotHubConnectionConfig.convertToEventHubConnectionConfig(iothubconfig);
-    let result: string = "";
+    let result = "";
     if (!options) options = {};
     options.tokenProvider = new IotSasTokenProvider(config.endpoint, config.sharedAccessKeyName, config.sharedAccessKey);
     options.managementSessionAddress = `/messages/events/$management`;

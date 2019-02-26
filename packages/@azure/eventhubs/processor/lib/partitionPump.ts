@@ -119,7 +119,7 @@ export class PartitionPump {
 
   private async _leaseRenewer(): Promise<void> {
     const withHostAndPartition = this._context.withHostAndPartition;
-    let result: boolean = true;
+    let result = true;
     let error: Error | undefined;
     log.partitionPump(withHostAndPartition(this._lease, "Lease renewer is active after " +
       "%d seconds. Trying to renew the lease"), this._context.leaseRenewInterval);

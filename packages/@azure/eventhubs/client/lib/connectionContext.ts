@@ -52,7 +52,7 @@ export interface ConnectionContextOptions extends ClientOptions {
 
 export namespace ConnectionContext {
 
-  const userAgent: string = "/js-event-hubs";
+  const userAgent = "/js-event-hubs";
 
   export function getUserAgent(options: ConnectionContextOptions): string {
     const finalUserAgent = options.userAgent ? `${userAgent},${options.userAgent}` : userAgent;

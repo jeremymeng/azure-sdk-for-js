@@ -205,7 +205,7 @@ export namespace HostContext {
         return `[${hostName}] ${msg}`;
       },
       withHostAndPartition: (partition: string | PartitionContext | BaseLease, msg: string) => {
-        let id: string = "N/A";
+        let id = "N/A";
         if (typeof partition === "string") {
           id = partition;
         } else if (typeof partition === "object") {

@@ -434,16 +434,16 @@ describe("getRules()", function(): void {
     should.equal(rules.length, 1, "Unexpected number of rules");
     rules.forEach((rule) => {
       should.equal(
-        (<CorrelationFilter>rule.filter).correlationId,
+        (rule.filter as CorrelationFilter).correlationId,
         expectedFilter.correlationId,
         "MessageId is different than expected"
       );
       should.equal(
-        (<CorrelationFilter>rule.filter).label,
+        (rule.filter as CorrelationFilter).label,
         expectedFilter.label,
         "Filter-label is different than expected"
       );
-      const userProperties = (<CorrelationFilter>rule.filter).userProperties;
+      const userProperties = (rule.filter as CorrelationFilter).userProperties;
       should.equal(Array.isArray(userProperties), true, "`ReceivedMessages` is not an array");
       should.equal(userProperties.length, 0, "Unexpected number of messages");
     });

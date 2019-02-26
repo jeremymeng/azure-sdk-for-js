@@ -412,7 +412,7 @@ async function testBatchReceiverManualLockRenewalErrorOnLockExpiry(
 
   await delay(lockDurationInMilliseconds + 1000);
 
-  let errorWasThrown: boolean = false;
+  let errorWasThrown = false;
   await msgs[0].complete().catch((err) => {
     should.equal(err.name, "SessionLockLostError", "ErrorName is different than expected");
     errorWasThrown = true;
@@ -564,7 +564,7 @@ async function testAutoLockRenewalConfigBehavior(
 
   should.equal(messagesReceived.length, 1, "Mismatch in number of messages received");
 
-  let errorWasThrown: boolean = false;
+  let errorWasThrown = false;
   await messagesReceived[0].complete().catch((err) => {
     should.equal(err.name, "SessionLockLostError", "ErrorName is different than expected");
     errorWasThrown = true;

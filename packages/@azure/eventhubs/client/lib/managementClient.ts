@@ -146,7 +146,7 @@ export class ManagementClient extends LinkEntity {
    * @param {Connection} connection - The established amqp connection
    * @returns {Promise<Array<string>>}
    */
-  async getPartitionIds(): Promise<Array<string>> {
+  async getPartitionIds(): Promise<string[]> {
     const runtimeInfo = await this.getHubRuntimeInformation();
     return runtimeInfo.partitionIds;
   }

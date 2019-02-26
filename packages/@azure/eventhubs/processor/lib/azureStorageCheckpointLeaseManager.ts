@@ -210,7 +210,7 @@ export class AzureStorageCheckpointLeaseManager implements CheckpointManager, Le
       // LeaseIdMissing || BlobAlreadyExists
       if ((statusCode === 412 && code && code.toLowerCase() === "leaseidmissing") ||
         (statusCode === 409 && code && code.toLowerCase() === "blobalreadyexists")) {
-        returnLease = <AzureBlobLease>await this.getLease(partitionId);
+        returnLease = (await this.getLease(partitionId)) as AzureBlobLease;
       } else {
         log.error(withHostAndPartition(partitionId, "An error occurred while creating lease if " +
           "it does not exist: %O."), error);
@@ -233,12 +233,12 @@ export class AzureStorageCheckpointLeaseManager implements CheckpointManager, Le
   }
 
   async acquireLease(lease: AzureBlobLease): Promise<boolean> {
-    let result: boolean = true;
+    let result = true;
     const newLeaseId: string = uuid();
     const withHostAndPartition = this._context.withHostAndPartition;
     try {
       // TODO: We are initializing newToken to empty string.
-      let newToken: string = "";
+      let newToken = "";
       const blobResult = await lease.blob.getBlobProperties();
       if (blobResult.lease && blobResult.lease.state && blobResult.lease.state === "leased") {
         if (!lease.token) {
@@ -288,7 +288,7 @@ export class AzureStorageCheckpointLeaseManager implements CheckpointManager, Le
   }
 
   async renewLease(lease: AzureBlobLease): Promise<boolean> {
-    let result: boolean = false;
+    let result = false;
     try {
       const options: StorageBlobService.LeaseRequestOptions = {
         timeoutIntervalInMs: this.leaseRenewInterval * 1000,
@@ -481,7 +481,7 @@ export class AzureStorageCheckpointLeaseManager implements CheckpointManager, Le
   }
 
   private _wasLeaseLost(partitionId: string, err: StorageError): boolean {
-    let result: boolean = false;
+    let result = false;
     const statusCode = err.statusCode;
     const code = err.code;
     const withHostAndPartition = this._context.withHostAndPartition;

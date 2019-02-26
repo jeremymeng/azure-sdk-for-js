@@ -26,7 +26,7 @@ describe("RuntimeInformation", function (): void {
     await client.close();
   });
 
-  function arrayOfIncreasingNumbersFromZero(length: any): Array<string> {
+  function arrayOfIncreasingNumbersFromZero(length: any): string[] {
     return Array.apply(undefined, new Array(length)).map((x: any, i: any) => { return `${i}`; });
   }
 
