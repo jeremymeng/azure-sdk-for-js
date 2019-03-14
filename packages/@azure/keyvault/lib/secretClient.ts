@@ -1,4 +1,4 @@
-import { HttpClient as IHttpClient, HttpPipelineLogger as IHttpPipelineLogger, ServiceClientOptions as Pipeline, ServiceClientCredentials, RequestPolicyFactory, deserializationPolicy, signingPolicy } from "@azure/ms-rest-js";
+import { HttpClient as IHttpClient, HttpPipelineLogger as IHttpPipelineLogger, ServiceClientOptions as Pipeline, ServiceClientCredentials, RequestPolicyFactory, deserializationPolicy, signingPolicy, RequestOptionsBase } from "@azure/ms-rest-js";
 import { IRetryOptions, RetryPolicyFactory } from "./RetryPolicyFactory";
 import {
   ITelemetryOptions,
@@ -49,9 +49,10 @@ export class SecretClient {
       new TelemetryPolicyFactory(pipelineOptions.telemetry),
       // TODO: new UniqueRequestIDPolicyFactory(),
       // TODO: new BrowserPolicyFactory(),
-      deserializationPolicy(), // Default deserializationPolicy is provided by protocol layer
+      // TODO deserializationPolicy(), // Default deserializationPolicy is provided by protocol layer
       new RetryPolicyFactory(pipelineOptions.retryOptions),
       // TODO: new LoggingPolicyFactory(),
+      // TODO: the KeyVaultClient constructor already takes a credential.
       signingPolicy(credential)
     ];
 
@@ -74,20 +75,36 @@ export class SecretClient {
     this.client = new KeyVaultClient(
       credential,
       {
-        httpClient: pipeline.httpClient,
-        httpPipelineLogger: pipeline.httpPipelineLogger,
-        requestPolicyFactories: pipeline.requestPolicyFactories
+        // httpClient: pipeline.httpClient,
+        // httpPipelineLogger: pipeline.httpPipelineLogger,
+        // requestPolicyFactories: pipeline.requestPolicyFactories
       }
     );
   }
 
   // TODO: do we want Aborter as well?
-  setSecret(secretName: string, value: string, options: Models.KeyVaultClientSetSecretOptionalParams = {}): Promise<Models.SetSecretResponse> {
+  public setSecret(secretName: string, value: string, options: Models.KeyVaultClientSetSecretOptionalParams = {}): Promise<Models.SetSecretResponse> {
     return this.client.setSecret(
         this.vaultBaseUrl,
         secretName,
         value,
         options
-    )
+    );
+  }
+
+  public getSecret(secretName: string, version: string, options: RequestOptionsBase = {}) {
+    return this.client.getSecret(
+      this.vaultBaseUrl,
+      secretName,
+      version
+    );
+  }
+
+  public getSecretVersions(secretName: string, options: Models.KeyVaultClientGetSecretVersionsOptionalParams = {}) {
+    return this.client.getSecretVersions(
+      this.vaultBaseUrl,
+      secretName,
+      options
+    );
   }
 }
