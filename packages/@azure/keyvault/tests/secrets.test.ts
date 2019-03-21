@@ -5,16 +5,20 @@ import { getKeyvaultName, getCredentialWithServicePrincipalSecret, getUniqueName
 import { SecretsClient, Pipeline } from "../lib/secretsClient";
 import { signingPolicy, exponentialRetryPolicy, deserializationPolicy, ServiceClientCredentials, RestError } from '@azure/ms-rest-js';
 import { stringify } from 'querystring';
+import { createResourceGroup, createVaults } from './utils/utils.vault';
 
 describe("Secret client", () => {
   let credential: ServiceClientCredentials;
-  let keyVaultName: string;
+  const resourceGrupName = getUniqueName("keyvault-test-group");
+  const location = "westus2";
+  const keyVaultName = getUniqueName("vault");
   let keyVaultUrl: string;
   let client: SecretsClient;
 
   before(async () => {
-    credential = await getCredentialWithServicePrincipalSecret()
-    keyVaultName = getKeyvaultName();
+    credential = await getCredentialWithServicePrincipalSecret();
+    await createResourceGroup(credential, resourceGrupName, location);
+    await createVaults(credential, resourceGrupName, keyVaultName, location);
     keyVaultUrl = `https://${keyVaultName}.vault.azure.net`;
     client = new SecretsClient(keyVaultUrl, credential);
   });
