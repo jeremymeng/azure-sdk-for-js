@@ -1,0 +1,662 @@
+# Storage (Blob) JS/TS API proposals
+
+## Client names?
+
+### Prefix `ServiceURL` to `BlobServiceURL`?
+
+### Rename `ServiceURL` to `BlobServiceClient`?
+
+There are three `ServiceURL` in storage libraries for three different types of
+blob storage (Blob, File, and Queue). Even though they are packed in different
+packages, having different and explicit names could help (e.g., using more than
+one in the same code file).
+
+We will probably use the same names as the corresponding .NET types.
+
+## Don't create pipeline explicitly for default pipeline
+
+**Before**
+
+```typescript
+  // Use sharedKeyCredential, tokenCredential or anonymousCredential to create a pipeline
+  const pipeline = StorageURL.newPipeline(sharedKeyCredential);
+
+  // List containers
+  const serviceURL = new ServiceURL(
+    // When using AnonymousCredential, following url should include a valid SAS or support public access
+    `https://${account}.blob.core.windows.net`,
+    pipeline
+  );
+```
+
+**After**
+
+```typescript
+  const serviceURL = new ServiceURL(
+    `https://${account}.blob.core.windows.net`,
+    sharedKeyCredential
+  );
+```
+
+In the `ServiceURL` constructor, `newPipeline()` is called to create a default
+pipeline. In addition, the constructor can also take a `Pipeline` parameter to
+allow users to have total control on the pipeline.
+
+```typescript
+  const customPipeline = {
+    requestPolicyFactories: [
+      deserializationPolicy(),
+      exponentialRetryPolicy(),
+      signingPolicy(credential),
+    ]
+  };
+  const serviceURL = new ServiceURL(
+    `https://${account}.blob.core.windows.net`,
+    customPipeline
+  );
+```
+
+Proposed constructor example:
+
+  ``` typescript
+  constructor(url: string, credentialOrPipeline: Credential | Pipeline, pipelineOptions?: INewPipelineOptions)
+  ```
+
+  - If the second argument is of type `Credential`, a default pipeline is
+    created with the credential and the pipeline options then used to create the
+    instance.
+  - otherwise, the instance is created with the custom pipeline passed in and
+    the third argument is ignored.
+
+Also consider renaming `newPipeline()` to `createDefaultPipeline()`.
+
+## Remove `I-` prefix from interface name
+
+It's an anti-pattern in TypeScript world. Though tslint has this (adding `I-`
+prefix for interface names) as a recommended rule, which we should disabled.
+
+**Before**:
+
+```typescript
+  export interface INewPipelineOptions {
+```
+
+**After**:
+
+```typescript
+  export interface NewPipelineOptions {
+```
+
+## Use async iterators to list resources
+
+For example, listing containers within a Storage account
+
+**Before**:
+
+```typescript
+  let marker;
+  do {
+    const listContainersResponse = await serviceURL.listContainersSegment(
+      Aborter.none,
+      marker
+    );
+
+    marker = listContainersResponse.nextMarker;
+    for (const container of listContainersResponse.containerItems) {
+      console.log(`Container: ${container.name}`);
+    }
+  } while (marker);
+```
+
+**After**:
+
+```typescript
+  for await (const container of serviceURL.listContainers(Aborter.none)) {
+    console.log(`Container: ${container.name}`);
+  }
+```
+
+Note that in this proposal we return the containers to the users, instead of
+them having to retrieve them from the `ListContainerResponse` object.
+
+Listing with paging:
+
+```typescript
+  // iterate over all items by page
+  for await (const page of serviceURL.listContainers(Aborter.none).byPage()) {
+    for (const container of page) {
+      console.log(`Container: ${container}`);
+    }
+  }
+```
+
+Get all the items (possibly bad, would get EVERYTHING)
+
+```typescript
+
+  const items = await listItems(Aborter.none);
+```
+
+Question: would this make it harder for users who are not familiar with async iterators?
+
+## Make all Aborter parameters optional with default value
+
+Question: what should be the default value? `Aborter.none`, or an aborter with
+certain timeout for some methods (e.g., uploading/downloading).
+
+**Before**:
+
+```typescript
+  const createContainerResponse = await containerURL.create(Aborter.none);
+```
+
+**After**:
+
+```typescript
+  const createContainerResponse = await containerURL.create();
+```
+
+There are several options to implement this:
+
+01. Option 1. move the `Aborter` parameter to the end and specify a default value
+    of `Aborter.none`.
+
+    ``` typescript
+    public async getProperties(
+      aborter: Aborter = Aborter.none
+    ): Promise<Models.ServiceGetPropertiesResponse>;
+    ```
+
+    The call site can then be updated to
+
+    ``` typescript
+    const properties = await serviceURL.getProperties();
+    ```
+
+    However, many methods also take other optional parameters, including an
+    optional options interface parameter. If we move `Aborter` parameter to the
+    end
+
+    ``` typescript
+    public async listContainersSegment(
+      marker?: string,
+      options: IServiceListContainersSegmentOptions = {},
+      aborter: Aborter = Aborter.none,
+    ): Promise<Models.ServiceListContainersSegmentResponse>;
+    ```
+
+    it makes passing a non-default aborter awkward:
+
+    ``` typescript
+    const result = await serviceURL.listContainersSegment(marker, {}, Aborter.timeout(1000));
+    ```
+
+   Similar happens if we place `Aborter` before the options parameter and want to pass
+   an options object but not the aborter.
+
+02. Option 2. Pass `Aborter` as part of the options parameter.
+
+    ``` typescript
+    public async listContainersSegment(
+      marker?: string,
+      options: IServiceListContainersSegmentOptions = {},
+    ): Promise<Models.ServiceListContainersSegmentResponse>;
+    ```
+
+    where `IServiceListContainersSegmentOptions` has a property `abortSignal?: Aborter`.
+    The call site with a custom aborter becomes
+
+    ``` typescript
+    const result = await serviceURL.listContainersSegment(marker, { abortSignal: Aborter.timeout(1000) });
+    ```
+
+    The drawback: currently Storage API does not use generated
+    `Models.XxxxxxOptionalParams` interfaces. Instead new interfaces are defined
+    to expose just relevant properties. For example:
+
+    ``` typescript
+    export interface IContainerListBlobsSegmentOptions {
+      prefix?: string;
+      maxresults?: number;
+      include?: Models.ListBlobsIncludeItem[];
+    }
+    ```
+
+    If we keep using these new interfaces, we would need to add property
+    `abortSignal?: Aborter` for them, probably via a base interface.
+
+    Question: do we also want to use this option for methods that currently
+    don’t take an options parameter? i.e.,
+
+    ``` typescript
+    public async getProperties(
+      aborter: Aborter
+    ): Promise<Models.ServiceGetPropertiesResponse>
+    ```
+
+    after adding a options interface, becomes
+
+    ``` typescript
+    public async getProperties(
+      options: IServiceGetPropertiesOptions = {},
+    ): Promise<Models.ServiceGetPropertiesResponse>;
+    ```
+
+    where `IServiceGetPropertiesOptions` contains only one `abortSignal?: Aborter`
+    property.
+
+03. Option 3. Use a union type of `Aborter` and options interface
+
+    ```typescript
+      public async appendBlock(
+        body: HttpRequestBody,
+        contentLength: number,
+        aborterOrOptions?: Aborter | IAppendBlobAppendBlockOptions,
+        options: IAppendBlobAppendBlockOptions = {}
+      ): Promise<Models.AppendBlobAppendBlockResponse> {
+        let aborter: Aborter;
+        if (aborterOrOptions instanceof Aborter) {
+          aborter = aborterOrOptions;
+        } else {
+          aborter = Aborter.none;
+          // the 4th argument is ignored in this case.
+          options = aborterOrOptions || {};
+        }
+        ...
+    ```
+
+    - when the an `Aborter` type instance is passed as the third argument, the fourth
+    argument`options` is the optional `IAppendBlobAppendBlockOptions` parameter;
+
+    - otherwise, the third argument, if specified, is of the type
+    `IAppendBlobAppendBlockOptions` parameter. The fourth argument `options`
+    argument is ignored, and `options` got re-assigned to have value `aborterOrOptions || {}`.
+
+    Cons: mixing parameter types in this way might confuse users.
+
+## Make `length`, `offset`, etc. parameters optional with reasonable default values
+
+**Before**:
+
+```typescript
+  const downloadBlockBlobResponse = await blobURL.download(Aborter.none, 0);
+```
+
+**After**:
+
+```typescript
+  // use Aborter.none if aborter parameter not specified.
+  // start from position 0 if position parameter not specified.
+  const downloadBlockBlobResponse = await blobURL.download();
+```
+
+**Before**
+
+```typescript
+  const uploadBlobResponse = await blockBlobURL.upload(
+    Aborter.none,
+    content,
+    content.length
+  );
+```
+
+**After**
+
+```typescript
+  const uploadBlobResponse = await blockBlobURL.upload(content);
+```
+
+## Provide convenience helpers to convert download response into string, Blob, or Buffer
+
+**Before**:
+
+```typescript
+  console.log(
+    "Downloaded blob content",
+    await streamToString(downloadBlockBlobResponse.readableStreamBody)
+  );
+
+  // A helper method used to read a Node.js readable stream into string
+  async function streamToString(readableStream) {
+    return new Promise((resolve, reject) => {
+      const chunks = [];
+      readableStream.on("data", data => {
+        chunks.push(data.toString());
+      });
+      readableStream.on("end", () => {
+        resolve(chunks.join(""));
+      });
+      readableStream.on("error", reject);
+    });
+  }
+```
+
+**After**:
+
+```typescript
+  const content = await downloadBlockBlobResponse.text(); // also, .blob() and .buffer()
+  console.log("Downloaded blob content", content);
+```
+
+## Make `getProperties()` and `setProperties()` more specific
+
+For example, `ServiceURL.getProperties()` retrieves the following
+
+```typescript
+/**
+ * @interface
+ * An interface representing StorageServiceProperties.
+ * Storage Service Properties.
+ *
+ */
+export interface StorageServiceProperties {
+  /**
+   * @member {Logging} [logging]
+   */
+  logging?: Logging;
+  /**
+   * @member {Metrics} [hourMetrics]
+   */
+  hourMetrics?: Metrics;
+  /**
+   * @member {Metrics} [minuteMetrics]
+   */
+  minuteMetrics?: Metrics;
+  /**
+   * @member {CorsRule[]} [cors] The set of CORS rules.
+   */
+  cors?: CorsRule[];
+  /**
+   * @member {string} [defaultServiceVersion] The default version to use for
+   * requests to the Blob service if an incoming request's version is not
+   * specified. Possible values include version 2008-10-27 and all more recent
+   * versions
+   */
+  defaultServiceVersion?: string;
+  /**
+   * @member {RetentionPolicy} [deleteRetentionPolicy]
+   */
+  deleteRetentionPolicy?: RetentionPolicy;
+  /**
+   * @member {StaticWebsite} [staticWebsite]
+   */
+  staticWebsite?: StaticWebsite;
+}
+```
+
+It might help improve the discover-ability by having more specific methods:
+
+```typescript
+  public async getLoggingSettings();
+  public async getHourMetrics();
+  public async getMinuteMetrics();
+  public async getCorsRules();
+  ...
+```
+
+Similarly add more specific methods instead of `setProperties()`.
+
+## Rename `XxxxxxURL.create()` to explicit stating what is being created
+
+Does the name imply creating URL objects or creating the resource object?
+
+Before:
+
+```typescript
+  await containerURL.create();
+  await appendBlockURL.create();
+  await pageBlockURL.create();
+```
+
+After:
+
+```typescript
+  await containerURL.createContainer();
+  await appendBlobURL.createAppendBlob();
+  await pageBlobURL.createPageBlob();
+```
+
+## Procedural or OOP?
+
+How about moving `fromXxxxxURL()` static methods to be instance methods of
+containing resources to make it more Object-Oriented?
+
+**Before**
+
+```typescript
+  const blockBlobURL = BlockBlobURL.fromContainerURL(containerURL, blobName);
+```
+
+**After**:
+
+```typescript
+  const blockBlobURL = containerURL.getBlockBlobURL(blobName);
+```
+
+## E2E basic example
+
+**Before**:
+
+```typescript
+const {
+  Aborter,
+  BlobURL,
+  BlockBlobURL,
+  ContainerURL,
+  ServiceURL,
+  StorageURL,
+  SharedKeyCredential,
+  AnonymousCredential,
+  TokenCredential
+} = require("@azure/storage-blob");
+
+async function main() {
+  // Enter your storage account name and shared key
+  const account = "account";
+  const accountKey = "accountkey";
+
+  // Use SharedKeyCredential with storage account and account key
+  const sharedKeyCredential = new SharedKeyCredential(account, accountKey);
+
+  // Use TokenCredential with OAuth token
+  const tokenCredential = new TokenCredential("token");
+  tokenCredential.token = "renewedToken"; // Renew the token by updating token field of token credential
+
+  // Use AnonymousCredential when url already includes a SAS signature
+  const anonymousCredential = new AnonymousCredential();
+
+  // Use sharedKeyCredential, tokenCredential or anonymousCredential to create a pipeline
+  const pipeline = StorageURL.newPipeline(sharedKeyCredential);
+
+  // List containers
+  const serviceURL = new ServiceURL(
+    // When using AnonymousCredential, following url should include a valid SAS or support public access
+    `https://${account}.blob.core.windows.net`,
+    pipeline
+  );
+
+  let marker;
+  do {
+    const listContainersResponse = await serviceURL.listContainersSegment(
+      Aborter.none,
+      marker
+    );
+
+    marker = listContainersResponse.nextMarker;
+    for (const container of listContainersResponse.containerItems) {
+      console.log(`Container: ${container.name}`);
+    }
+  } while (marker);
+
+  // Create a container
+  const containerName = `newcontainer${new Date().getTime()}`;
+  const containerURL = ContainerURL.fromServiceURL(serviceURL, containerName);
+
+  const createContainerResponse = await containerURL.create(Aborter.none);
+  console.log(
+    `Create container ${containerName} successfully`,
+    createContainerResponse.requestId
+  );
+
+  // Create a blob
+  const content = "hello";
+  const blobName = "newblob" + new Date().getTime();
+  const blobURL = BlobURL.fromContainerURL(containerURL, blobName);
+  const blockBlobURL = BlockBlobURL.fromBlobURL(blobURL);
+  const uploadBlobResponse = await blockBlobURL.upload(
+    Aborter.none,
+    content,
+    content.length
+  );
+  console.log(
+    `Upload block blob ${blobName} successfully`,
+    uploadBlobResponse.requestId
+  );
+
+  // List blobs
+  marker = undefined;
+  do {
+    const listBlobsResponse = await containerURL.listBlobFlatSegment(
+      Aborter.none,
+      marker
+    );
+
+    marker = listBlobsResponse.nextMarker;
+    for (const blob of listBlobsResponse.segment.blobItems) {
+      console.log(`Blob: ${blob.name}`);
+    }
+  } while (marker);
+
+  // Get blob content from position 0 to the end
+  // In Node.js, get downloaded data by accessing downloadBlockBlobResponse.readableStreamBody
+  // In browsers, get downloaded data by accessing downloadBlockBlobResponse.blobBody
+  const downloadBlockBlobResponse = await blobURL.download(Aborter.none, 0);
+  console.log(
+    "Downloaded blob content",
+    await streamToString(downloadBlockBlobResponse.readableStreamBody)
+  );
+
+  // Delete container
+  await containerURL.delete(Aborter.none);
+
+  console.log("deleted container");
+}
+
+// A helper method used to read a Node.js readable stream into string
+async function streamToString(readableStream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    readableStream.on("data", data => {
+      chunks.push(data.toString());
+    });
+    readableStream.on("end", () => {
+      resolve(chunks.join(""));
+    });
+    readableStream.on("error", reject);
+  });
+}
+
+// An async method returns a Promise object, which is compatible with then().catch() coding style.
+main()
+  .then(() => {
+    console.log("Successfully executed sample.");
+  })
+  .catch(err => {
+    console.log(err.message);
+  });
+```
+
+**After**:
+
+```typescript
+const {
+  Aborter,
+  BlobURL,
+  BlockBlobURL,
+  ContainerURL,
+  ServiceURL,
+  StorageURL,
+  SharedKeyCredential,
+  AnonymousCredential,
+  TokenCredential
+} = require("@azure/storage-blob");
+
+// Enter your storage account name and shared key
+const account = "account";
+const accountKey = "accountkey";
+
+// Use SharedKeyCredential with storage account and account key
+const sharedKeyCredential = new SharedKeyCredential(account, accountKey);
+
+async function main() {
+  // EDIT: No explicit pipeline.
+
+  // List containers
+  const serviceURL = new ServiceURL(
+    `https://${account}.blob.core.windows.net`,
+    sharedKeyCredential
+  );
+  // EDIT: Pass your creds to the service URL.
+
+  for await (const container of serviceURL.listContainers()) {
+    console.log(`Container: ${container.name}`);
+  }
+  // EDIT: async iterator rather than low-level marker passing.
+
+  // Create a container
+  const containerName = `newcontainer${new Date().getTime()}`;
+  const containerURL = ContainerURL.fromServiceURL(serviceURL, containerName);
+
+  const createContainerResponse = await containerURL.create();
+  // EDIT: optional aborter.
+
+  console.log(
+    `Create container ${containerName} successfully`,
+    createContainerResponse.requestId
+  );
+
+  // Create a blob
+  const content = "hello";
+  const blobName = "newblob" + new Date().getTime();
+  const blockBlobURL = BlockBlobURL.fromContainerURL(containerURL, blobName);
+
+  const uploadBlobResponse = await blockBlobURL.upload(content);
+  // EDIT: No explicit aborter, content length accessed via `.length` unless specified.
+
+  console.log(
+    `Upload block blob ${blobName} successfully`,
+    uploadBlobResponse.requestId
+  );
+
+  // List blobs
+  for await (const blob of containerURL.listBlobs()) {
+    console.log(`Blob: ${blob.name}`);
+  }
+
+  // Get blob content from position 0 to the end
+  // In Node.js, get downloaded data by accessing downloadBlockBlobResponse.readableStreamBody
+  // In browsers, get downloaded data by accessing downloadBlockBlobResponse.blobBody
+  const downloadBlockBlobResponse = await blobURL.download();
+  // EDIT: Optional aborter, starting from 0 is the 99% use case so just start there unless an offset is specified.
+
+  const content = await downloadBlockBlobResponse.text(); // also, .blob() and .buffer()
+  // EDIT: easy APIs for getting a blob as a UTF-8-encoded string, blob, or buffer.
+  // PROPOSED EDIT: Async iterator over low-level chunks.
+
+  console.log("Downloaded blob content", content);
+
+  // Delete container
+  await containerURL.delete();
+
+  console.log("deleted container");
+}
+
+// An async method returns a Promise object, which is compatible with then().catch() coding style.
+main()
+  .then(() => {
+    console.log("Successfully executed sample.");
+  })
+  .catch(err => {
+    console.log(err.message);
+  });
+```
