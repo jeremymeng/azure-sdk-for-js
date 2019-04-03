@@ -1,7 +1,3 @@
-// Steps to run this sample
-// 1. npm install
-// 2. Enter your storage account name and shared key in main()
-
 const {
   Aborter,
   BlobURL,
@@ -12,51 +8,37 @@ const {
   SharedKeyCredential,
   AnonymousCredential,
   TokenCredential
-} = require(".."); // Change to "@azure/storage-blob" in your package
+} = require("@azure/storage-blob");
+
+// Enter your storage account name and shared key
+const account = "account";
+const accountKey = "accountkey";
+
+// Use SharedKeyCredential with storage account and account key
+const sharedKeyCredential = new SharedKeyCredential(account, accountKey);
 
 async function main() {
-  // Enter your storage account name and shared key
-  const account = "account";
-  const accountKey = "accountkey";
-
-  // Use SharedKeyCredential with storage account and account key
-  const sharedKeyCredential = new SharedKeyCredential(account, accountKey);
-
-  // Use TokenCredential with OAuth token
-  const tokenCredential = new TokenCredential("token");
-  tokenCredential.token = "renewedToken"; // Renew the token by updating token field of token credential
-
-  // Use AnonymousCredential when url already includes a SAS signature
-  const anonymousCredential = new AnonymousCredential();
-
-  // Use sharedKeyCredential, tokenCredential or anonymousCredential to create a pipeline
-  const pipeline = StorageURL.newPipeline(sharedKeyCredential);
+  // EDIT: No explicit pipeline.
 
   // List containers
   const serviceURL = new ServiceURL(
-    // When using AnonymousCredential, following url should include a valid SAS or support public access
     `https://${account}.blob.core.windows.net`,
-    pipeline
+    sharedKeyCredential
   );
+  // EDIT: Pass your creds to the service URL.
 
-  let marker;
-  do {
-    const listContainersResponse = await serviceURL.listContainersSegment(
-      Aborter.none,
-      marker
-    );
-
-    marker = listContainersResponse.nextMarker;
-    for (const container of listContainersResponse.containerItems) {
-      console.log(`Container: ${container.name}`);
-    }
-  } while (marker);
+  for await (const container of serviceURL.listContainers()) {
+    console.log(`Container: ${container.name}`);
+  }
+  // EDIT: async iterator rather than low-level marker passing.
 
   // Create a container
   const containerName = `newcontainer${new Date().getTime()}`;
   const containerURL = ContainerURL.fromServiceURL(serviceURL, containerName);
 
-  const createContainerResponse = await containerURL.create(Aborter.none);
+  const createContainerResponse = await containerURL.create();
+  // EDIT: optional aborter.
+
   console.log(
     `Create container ${containerName} successfully`,
     createContainerResponse.requestId
@@ -65,59 +47,37 @@ async function main() {
   // Create a blob
   const content = "hello";
   const blobName = "newblob" + new Date().getTime();
-  const blobURL = BlobURL.fromContainerURL(containerURL, blobName);
-  const blockBlobURL = BlockBlobURL.fromBlobURL(blobURL);
-  const uploadBlobResponse = await blockBlobURL.upload(
-    Aborter.none,
-    content,
-    content.length
-  );
+  const blockBlobURL = BlockBlobURL.fromContainerURL(containerURL, blobName);
+
+  const uploadBlobResponse = await blockBlobURL.upload(content);
+  // EDIT: No explicit aborter, content length accessed via `.length` unless specified.
+
   console.log(
     `Upload block blob ${blobName} successfully`,
     uploadBlobResponse.requestId
   );
 
   // List blobs
-  marker = undefined;
-  do {
-    const listBlobsResponse = await containerURL.listBlobFlatSegment(
-      Aborter.none,
-      marker
-    );
-
-    marker = listBlobsResponse.nextMarker;
-    for (const blob of listBlobsResponse.segment.blobItems) {
-      console.log(`Blob: ${blob.name}`);
-    }
-  } while (marker);
+  for await (const blob of containerURL.listBlobs()) {
+    console.log(`Blob: ${blob.name}`);
+  }
 
   // Get blob content from position 0 to the end
   // In Node.js, get downloaded data by accessing downloadBlockBlobResponse.readableStreamBody
   // In browsers, get downloaded data by accessing downloadBlockBlobResponse.blobBody
-  const downloadBlockBlobResponse = await blobURL.download(Aborter.none, 0);
-  console.log(
-    "Downloaded blob content",
-    await streamToString(downloadBlockBlobResponse.readableStreamBody)
-  );
+  const downloadBlockBlobResponse = await blobURL.download();
+  // EDIT: Optional aborter, starting from 0 is the 99% use case so just start there unless an offset is specified.
+
+  const content = await downloadBlockBlobResponse.text(); // also, .blob() and .buffer()
+  // EDIT: easy APIs for getting a blob as a UTF-8-encoded string, blob, or buffer.
+  // PROPOSED EDIT: Async iterator over low-level chunks.
+
+  console.log("Downloaded blob content", content);
 
   // Delete container
-  await containerURL.delete(Aborter.none);
+  await containerURL.delete();
 
   console.log("deleted container");
-}
-
-// A helper method used to read a Node.js readable stream into string
-async function streamToString(readableStream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    readableStream.on("data", data => {
-      chunks.push(data.toString());
-    });
-    readableStream.on("end", () => {
-      resolve(chunks.join(""));
-    });
-    readableStream.on("error", reject);
-  });
 }
 
 // An async method returns a Promise object, which is compatible with then().catch() coding style.
