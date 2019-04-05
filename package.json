@@ -64,7 +64,7 @@
     "pack-client": "npm-run-all -p -l pack-client-*",
     "test-client-template": "cd sdk/template/template && npm run test",
     "test-client": "npm-run-all -p -l \"test-client-* -- {@}\"",
-    "test-client-cosmos": "echo skipped",
+    "test-client-cosmos": "cd sdk/cosmosdb/cosmos && npm run test",
     "test-client-eventhubs-client": "echo skipped",
     "test-client-eventhubs-processor": "echo skipped",
     "test-client-servicebus": "echo skipped",    
