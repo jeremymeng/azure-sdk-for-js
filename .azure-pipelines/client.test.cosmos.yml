@@ -26,7 +26,7 @@ jobs:
       - script: npm run build-client-cosmos
         displayName: "npm run build-client-cosmos"
 
-      - bash: ACCOUNT_HOST=$COSMOSDBEMULATOR_ENDPOINT NODE_TLS_REJECT_UNAUTHORIZED="0" cd sdk/cosmosdb/cosmos && npm run test
+      - bash: cd sdk/cosmosdb/cosmos && ACCOUNT_HOST=$COSMOSDBEMULATOR_ENDPOINT NODE_TLS_REJECT_UNAUTHORIZED="0" npm run test
         failOnStderr: true
         displayName: "npm test"
         env:
