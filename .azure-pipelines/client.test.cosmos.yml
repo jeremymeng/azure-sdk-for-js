@@ -31,6 +31,14 @@ jobs:
         displayName: "npm test"
         env:
           MOCHA_TIMEOUT: 100000
+
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFiles: '**/test-results.xml'
+          testRunTitle: 'Cosmos $(OSName) Node $(NodeVersion) - Node'
+        condition: succeededOrFailed()
+        displayName: 'Publish node test results'
+
   # - job: NightlyEmulator
   #   pool:
   #     vmImage: vs2017-win2016
