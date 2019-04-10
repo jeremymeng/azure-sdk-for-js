@@ -20,13 +20,13 @@ jobs:
           versionSpec: "6.x"
         displayName: "Install Node.js"
 
-      - script: npm install
+      - script: npm install-client-cosmos
         displayName: "npm install"
 
-      - script: npm run build
+      - script: npm run build-client-cosmos
         displayName: "npm run build"
 
-      - bash: ACCOUNT_HOST=$COSMOSDBEMULATOR_ENDPOINT NODE_TLS_REJECT_UNAUTHORIZED="0" npm run test
+      - bash: cd sdk/cosmosdb/cosmos && ACCOUNT_HOST=$COSMOSDBEMULATOR_ENDPOINT NODE_TLS_REJECT_UNAUTHORIZED="0" npm run test -- --reporter mocha-multi --reporter-options spec=-,mocha-junit-reporter=- $(AdditionalTestArguments)
         failOnStderr: true
         displayName: "npm test"
         env:
