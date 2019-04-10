@@ -46,7 +46,6 @@
     "execa": "1.0.0",
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.15.0",
-    "mocha-multi": "^1.0.1",
     "mocha-multi-reporters": "^1.1.7",
     "prettier": "1.14.3",
     "requirejs": "^2.3.5",
