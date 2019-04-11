@@ -2,8 +2,6 @@
 
 ## Client names?
 
-### Prefix `ServiceURL` to `BlobServiceURL`?
-
 ### Rename `ServiceURL` to `BlobServiceClient`?
 
 There are three `ServiceURL` in storage libraries for three different types of
@@ -11,7 +9,7 @@ blob storage (Blob, File, and Queue). Even though they are packed in different
 packages, having different and explicit names could help (e.g., using more than
 one in the same code file).
 
-We will probably use the same names as the corresponding .NET types.
+We will probably use the same names as the corresponding .NET/Python types.
 
 ## Don't create pipeline explicitly for default pipeline
 
@@ -62,9 +60,9 @@ Proposed constructor example:
   constructor(url: string, credentialOrPipeline: Credential | Pipeline, pipelineOptions?: INewPipelineOptions)
   ```
 
-  - If the second argument is of type `Credential`, a default pipeline is
-    created with the credential and the pipeline options then used to create the
-    instance.
+  - If the second argument is of type `Credential` or `undefined`, a default
+    pipeline instance is created with the credential (AnonymousCredential in the
+    `undefined` case) and the pipeline options are used to create the instance.
   - otherwise, the instance is created with the custom pipeline passed in and
     the third argument is ignored.
 
@@ -119,17 +117,6 @@ For example, listing containers within a Storage account
 Note that in this proposal we return the containers to the users, instead of
 them having to retrieve them from the `ListContainerResponse` object.
 
-Listing with paging:
-
-```typescript
-  // iterate over all items by page
-  for await (const page of serviceURL.listContainers(Aborter.none).byPage()) {
-    for (const container of page) {
-      console.log(`Container: ${container}`);
-    }
-  }
-```
-
 Get all the items (possibly bad, would get EVERYTHING)
 
 ```typescript
@@ -137,7 +124,8 @@ Get all the items (possibly bad, would get EVERYTHING)
   const items = await listItems(Aborter.none);
 ```
 
-Question: would this make it harder for users who are not familiar with async iterators?
+And resumeable:
+
 
 ## Make all Aborter parameters optional with default value
 
@@ -191,8 +179,8 @@ There are several options to implement this:
     const result = await serviceURL.listContainersSegment(marker, {}, Aborter.timeout(1000));
     ```
 
-   Similar happens if we place `Aborter` before the options parameter and want to pass
-   an options object but not the aborter.
+   Similar happens if we place `Aborter` before the options parameter and want
+   to pass an options object but not the aborter.
 
 02. Option 2. Pass `Aborter` as part of the options parameter.
 
@@ -272,8 +260,6 @@ There are several options to implement this:
     `IAppendBlobAppendBlockOptions` parameter. The fourth argument `options`
     argument is ignored, and `options` got re-assigned to have value `aborterOrOptions || {}`.
 
-    Cons: mixing parameter types in this way might confuse users.
-
 ## Make `length`, `offset`, etc. parameters optional with reasonable default values
 
 **Before**:
@@ -337,64 +323,6 @@ There are several options to implement this:
   const content = await downloadBlockBlobResponse.text(); // also, .blob() and .buffer()
   console.log("Downloaded blob content", content);
 ```
-
-## Make `getProperties()` and `setProperties()` more specific
-
-For example, `ServiceURL.getProperties()` retrieves the following
-
-```typescript
-/**
- * @interface
- * An interface representing StorageServiceProperties.
- * Storage Service Properties.
- *
- */
-export interface StorageServiceProperties {
-  /**
-   * @member {Logging} [logging]
-   */
-  logging?: Logging;
-  /**
-   * @member {Metrics} [hourMetrics]
-   */
-  hourMetrics?: Metrics;
-  /**
-   * @member {Metrics} [minuteMetrics]
-   */
-  minuteMetrics?: Metrics;
-  /**
-   * @member {CorsRule[]} [cors] The set of CORS rules.
-   */
-  cors?: CorsRule[];
-  /**
-   * @member {string} [defaultServiceVersion] The default version to use for
-   * requests to the Blob service if an incoming request's version is not
-   * specified. Possible values include version 2008-10-27 and all more recent
-   * versions
-   */
-  defaultServiceVersion?: string;
-  /**
-   * @member {RetentionPolicy} [deleteRetentionPolicy]
-   */
-  deleteRetentionPolicy?: RetentionPolicy;
-  /**
-   * @member {StaticWebsite} [staticWebsite]
-   */
-  staticWebsite?: StaticWebsite;
-}
-```
-
-It might help improve the discover-ability by having more specific methods:
-
-```typescript
-  public async getLoggingSettings();
-  public async getHourMetrics();
-  public async getMinuteMetrics();
-  public async getCorsRules();
-  ...
-```
-
-Similarly add more specific methods instead of `setProperties()`.
 
 ## Rename `XxxxxxURL.create()` to explicit stating what is being created
 
