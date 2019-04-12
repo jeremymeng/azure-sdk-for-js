@@ -37,7 +37,7 @@ We will probably use the same names as the corresponding .NET/Python types.
 ```
 
 In the `ServiceURL` constructor, `newPipeline()` is called to create a default
-pipeline. In addition, the constructor can also take a `Pipeline` parameter to
+pipeline. Alternatively, the constructor can also take a `Pipeline` parameter to
 allow users to have total control on the pipeline.
 
 ```typescript
@@ -124,7 +124,63 @@ Get all the items (possibly bad, would get EVERYTHING)
   const items = await listItems(Aborter.none);
 ```
 
-And resumeable:
+And resumable:
+
+```typescript
+async function doListBlobs() {
+
+  let iter = listBlobs();
+
+  for await (let blob of iter) {
+    // process a blob or two, then...
+    break;
+  }
+
+  // sometime later, resume where we left off...
+  let iter2 = listBlobs({ restartPoint: iter.restartPoint });
+}
+```
+
+Prototype:
+
+```typescript
+interface RestartPoint {
+  nextMarker: string,
+  lastIndex: number
+}
+
+interface ResumableAsyncIterableIterator<T> extends AsyncIterableIterator<T> {
+  restartPoint: RestartPoint
+}
+
+interface Blob {
+  name: string,
+  contents: string
+}
+
+function listBlobs(options?: {restartPoint?: RestartPoint}): ResumableAsyncIterableIterator<Blob> {
+  const iter: ResumableAsyncIterableIterator<Blob> = (async function* items(): AsyncIterableIterator<Blob> {
+    do {
+      const listContainersResponse = await serviceURL.listContainersSegment(
+        Aborter.none,
+        iter.nextMarker
+      );
+
+      const items = listContainersResponse.containerItems;
+      for (let i = iter.lastIndex; i < items.length; i++) {
+        iter.lastIndex = i;
+        yield items[i];
+      }
+
+      iter.restartPoint.nextMarker = listContainersResponse.nextMarker;
+      iter.restartPoint.lastIndex = 0;
+    } while (iter.restartPoint.nextMarker);
+  })() as any;
+
+  iter.restartPoint = { ... restartPoint };
+  return iter;
+}
+```
 
 
 ## Make all Aborter parameters optional with default value
@@ -260,6 +316,8 @@ There are several options to implement this:
     `IAppendBlobAppendBlockOptions` parameter. The fourth argument `options`
     argument is ignored, and `options` got re-assigned to have value `aborterOrOptions || {}`.
 
+    Cons: There would be a lot of `if` checking in every methods.
+
 ## Make `length`, `offset`, etc. parameters optional with reasonable default values
 
 **Before**:
@@ -328,7 +386,7 @@ There are several options to implement this:
 
 Does the name imply creating URL objects or creating the resource object?
 
-Before:
+**Before**:
 
 ```typescript
   await containerURL.create();
@@ -336,7 +394,7 @@ Before:
   await pageBlockURL.create();
 ```
 
-After:
+**After**:
 
 ```typescript
   await containerURL.createContainer();
@@ -344,10 +402,13 @@ After:
   await pageBlobURL.createPageBlob();
 ```
 
+Note: these creation methods could be moved one level up if we are going with
+the Python API's approach.
+
 ## Procedural or OOP?
 
-How about moving `fromXxxxxURL()` static methods to be instance methods of
-containing resources to make it more Object-Oriented?
+Move `fromXxxxxURL()` static methods to be instance methods of containing
+resources to make it more Object-Oriented?
 
 **Before**
 
@@ -359,6 +420,73 @@ containing resources to make it more Object-Oriented?
 
 ```typescript
   const blockBlobURL = containerURL.getBlockBlobURL(blobName);
+```
+
+## Top-level convenience methods
+
+Currently there are top-level methods for uploading and downloading blobs which
+take `BlobURL` parameters.
+
+```typescript
+  export function downloadBlobToBuffer(
+    aborter: Aborter,
+    buffer: Buffer,
+    blobURL: BlobURL,
+    offset: number,
+    count?: number,
+    options?: IDownloadFromBlobOptions): Promise<void>;
+
+  export function uploadBrowserDataToBlockBlob(
+    aborter: Aborter,
+    browserData: Blob | ArrayBuffer | ArrayBufferView,
+    blockBlobURL: BlockBlobURL,
+    options?: IUploadToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
+
+  export function uploadFileToBlockBlob(aborter: Aborter,
+    filePath: string,
+    blockBlobURL: BlockBlobURL,
+    options?: IUploadToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
+
+  export function uploadStreamToBlockBlob(aborter: Aborter,
+    stream: Readable,
+    blockBlobURL: BlockBlobURL,
+    bufferSize: number,
+    maxBuffers: number,
+    options?: IUploadStreamToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
+```
+
+It would be more convenient to just take a url and optional credential/pipeline
+options. For example,
+
+```typescript
+  export function downloadBlobToBuffer(
+    buffer: Buffer,
+    blobURL: string,
+    offset?: number,
+    count?: number,
+    options?: IDownloadFromBlobOptions): Promise<void>;
+```
+
+**Before**:
+
+```typescript
+  const url = "https://url.to.blob/";
+  const buf = Buffer.alloc(size);
+  const pipeline = StorageURL.newPipeline(credential, pipelineOptions);
+  const blockBlobURL = new BlockBlobURL(url, pipeline);
+  await downloadBlobToBuffer(Aborter.none, buf, url, blockBlobURL, 0);
+```
+
+
+**After**:
+
+```typescript
+  const url = "https://url.to.blob/";
+  const buf = Buffer.alloc(size);
+  // anonymous access
+  await downloadBlobToBuffer(buf, url);
+  // with credential and pipeline options
+  await downloadBlobToBuffer(buf, url, { credentialOrPipeline: credential, pipelineOptions: pipelineOptions })
 ```
 
 ## E2E basic example
