@@ -67,7 +67,7 @@
     "test-client-cosmos": "echo skipped",
     "test-client-eventhubs-client": "echo skipped",
     "test-client-eventhubs-processor": "echo skipped",
-    "test-client-servicebus": "echo skipped",    
+    "test-client-servicebus": "echo skipped",
     "test-client-storage-blob": "echo skipped",
     "test-client-storage-file": "echo skipped",
     "test-client-storage-queue": "echo skipped",
