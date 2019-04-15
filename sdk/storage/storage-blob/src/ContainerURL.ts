@@ -586,7 +586,7 @@ export class ContainerURL extends StorageURL {
     options?: IContainerListBlobsSegmentOptions
   ): ResumableAsyncIterableIterator<Models.BlobItem> {
     const serviceURL = this;
-    const resumePoint = !options || !options.resumePoint ? { nextMarker: "", lastIndex: 0 } : options.resumePoint;
+    const resumePoint = !options || !options.resumePoint ? { nextMarker: undefined, lastIndex: 0 } : options.resumePoint;
     const aborter = !options || !options.abortSignal ? Aborter.none : options.abortSignal;
     const iter: ResumableAsyncIterableIterator<Models.BlobItem> =
      (async function* items(): AsyncIterableIterator<Models.BlobItem> {
@@ -642,7 +642,7 @@ export class ContainerURL extends StorageURL {
    * @returns {Promise<Models.ContainerListBlobFlatSegmentResponse>}
    * @memberof ContainerURL
    */
-  private async listBlobFlatSegment(
+  public async listBlobFlatSegment(
     marker?: string,
     options: IContainerListBlobsSegmentOptions = {}
   ): Promise<Models.ContainerListBlobFlatSegmentResponse> {
