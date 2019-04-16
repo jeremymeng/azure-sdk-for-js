@@ -75,7 +75,6 @@ describe("PageBlobURL", () => {
     await waitForCopy();
 
     let listBlobResponse = await containerURL.listBlobFlatSegment(
-      Aborter.none,
       undefined,
       {
         include: ["copy", "snapshots"]
@@ -96,7 +95,6 @@ describe("PageBlobURL", () => {
     await waitForCopy();
 
     listBlobResponse = await containerURL.listBlobFlatSegment(
-      Aborter.none,
       undefined,
       {
         include: ["copy", "snapshots"]

@@ -220,7 +220,6 @@ describe("BlobURL", () => {
     await blobURL.delete(Aborter.none);
 
     const result2 = await containerURL.listBlobFlatSegment(
-      Aborter.none,
       undefined,
       {
         include: ["snapshots"]
@@ -239,7 +238,6 @@ describe("BlobURL", () => {
     await blobSnapshotURL.getProperties(Aborter.none);
 
     const result3 = await containerURL.listBlobFlatSegment(
-      Aborter.none,
       undefined,
       {
         include: ["snapshots"]
@@ -282,7 +280,6 @@ describe("BlobURL", () => {
     await blobURL.delete(Aborter.none);
 
     const result = await containerURL.listBlobFlatSegment(
-      Aborter.none,
       undefined,
       {
         include: ["deleted"]
@@ -292,7 +289,6 @@ describe("BlobURL", () => {
 
     await blobURL.undelete(Aborter.none);
     const result2 = await containerURL.listBlobFlatSegment(
-      Aborter.none,
       undefined,
       {
         include: ["deleted"]
