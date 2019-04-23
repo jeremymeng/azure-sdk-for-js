@@ -1,4 +1,4 @@
-# Storage (Blob) JS/TS API proposals
+# Storage JS/TS API proposals (Blob)
 
 ## Client names?
 
@@ -9,7 +9,12 @@ blob storage (Blob, File, and Queue). Even though they are packed in different
 packages, having different and explicit names could help (e.g., using more than
 one in the same code file).
 
-We will probably use the same names as the corresponding .NET/Python types.
+**After**
+- `BlobServiceClient`
+- `FileServiceClient`
+- `QueueServiceClient`
+
+Anyway we will probably use the same/similar names as in other languages.
 
 ## Don't create pipeline explicitly for default pipeline
 
@@ -61,8 +66,9 @@ Proposed constructor example:
   ```
 
   - If the second argument is of type `Credential` or `undefined`, a default
-    pipeline instance is created with the credential (AnonymousCredential in the
-    `undefined` case) and the pipeline options are used to create the instance.
+    storage client pipeline is created with the given credential or
+    `AnonymousCredential` in the `undefined` case and the pipeline options are
+    used to create the instance.
   - otherwise, the instance is created with the custom pipeline passed in and
     the third argument is ignored.
 
@@ -70,8 +76,8 @@ Also consider renaming `newPipeline()` to `createDefaultPipeline()`.
 
 ## Remove `I-` prefix from interface name
 
-It's an anti-pattern in TypeScript world. Though tslint has this (adding `I-`
-prefix for interface names) as a recommended rule, which we should disabled.
+It's an anti-pattern in TypeScript world even though tslint has this (adding `I-`
+prefix for interface names) as a recommended rule.
 
 **Before**:
 
@@ -200,7 +206,7 @@ certain timeout for some methods (e.g., uploading/downloading).
   const createContainerResponse = await containerURL.create();
 ```
 
-There are several options to implement this:
+There are several options to achive this:
 
 01. Option 1. move the `Aborter` parameter to the end and specify a default value
     of `Aborter.none`.
@@ -238,7 +244,7 @@ There are several options to implement this:
    Similar happens if we place `Aborter` before the options parameter and want
    to pass an options object but not the aborter.
 
-02. Option 2. Pass `Aborter` as part of the options parameter.
+02. Option 2. Pass `Aborter` as part of the options interface.
 
     ``` typescript
     public async listContainersSegment(
@@ -254,22 +260,7 @@ There are several options to implement this:
     const result = await serviceURL.listContainersSegment(marker, { abortSignal: Aborter.timeout(1000) });
     ```
 
-    The drawback: currently Storage API does not use generated
-    `Models.XxxxxxOptionalParams` interfaces. Instead new interfaces are defined
-    to expose just relevant properties. For example:
-
-    ``` typescript
-    export interface IContainerListBlobsSegmentOptions {
-      prefix?: string;
-      maxresults?: number;
-      include?: Models.ListBlobsIncludeItem[];
-    }
-    ```
-
-    If we keep using these new interfaces, we would need to add property
-    `abortSignal?: Aborter` for them, probably via a base interface.
-
-    Question: do we also want to use this option for methods that currently
+    **Question**: do we also want to use this option for methods that currently
     don’t take an options parameter? i.e.,
 
     ``` typescript
@@ -289,7 +280,35 @@ There are several options to implement this:
     where `IServiceGetPropertiesOptions` contains only one `abortSignal?: Aborter`
     property.
 
-03. Option 3. Use a union type of `Aborter` and options interface
+03. Option 3. Use intersection type.
+
+    ```typescript
+      public async appendBlock(
+        body: HttpRequestBody,
+        contentLength: number,
+        options: IAppendBlobAppendBlockOptions & CancellationOptions = {}
+      ): Promise<Models.AppendBlobAppendBlockResponse> {
+    ```
+
+    where `CancellationOptions` just holds the aborter:
+
+    ```typescript
+      export interface CancellationOptions {
+        /**
+         * Aborter instance to cancel request. It can be created with Aborter.none
+         * or Aborter.timeout(). Go to documents of {@link Aborter} for more examples
+         * about request cancellation.
+         *
+         * @type {Aborter}
+         * @memberof CancellationOptions
+         */
+        abortSignal? : Aborter;
+      }
+    ```
+
+    We like this option.
+
+04. Option 4. Use a union type of `Aborter` and options interface
 
     ```typescript
       public async appendBlock(
@@ -318,12 +337,12 @@ There are several options to implement this:
 
     Cons: There would be a lot of `if` checking in every methods.
 
-## Make `length`, `offset`, etc. parameters optional with reasonable default values
+## Make parameters optional with reasonable default values when possible
 
 **Before**:
 
 ```typescript
-  const downloadBlockBlobResponse = await blobURL.download(Aborter.none, 0);
+  const downloadBlockBlobResponse = await blobURL.download(Aborter.none, 0); // offset
 ```
 
 **After**:
@@ -382,9 +401,7 @@ There are several options to implement this:
   console.log("Downloaded blob content", content);
 ```
 
-## Rename `XxxxxxURL.create()` to explicit stating what is being created
-
-Does the name imply creating URL objects or creating the resource object?
+## Rename `XxxxxxURL.create()` to be explicit on what is being created
 
 **Before**:
 
@@ -403,7 +420,7 @@ Does the name imply creating URL objects or creating the resource object?
 ```
 
 Note: these creation methods could be moved one level up if we are going with
-the Python API's approach.
+the hierarchical approach.
 
 ## Procedural or OOP?
 
@@ -419,7 +436,7 @@ resources to make it more Object-Oriented?
 **After**:
 
 ```typescript
-  const blockBlobURL = containerURL.getBlockBlobURL(blobName);
+  const blockBlobURL = containerURL.createBlockBlobURL(blobName);
 ```
 
 ## Top-level convenience methods
@@ -459,12 +476,12 @@ It would be more convenient to just take a url and optional credential/pipeline
 options. For example,
 
 ```typescript
-  export function downloadBlobToBuffer(
+  export function downloadBlobFromUrlToBuffer(
     buffer: Buffer,
-    blobURL: string,
+    url: string,
     offset?: number,
     count?: number,
-    options?: IDownloadFromBlobOptions): Promise<void>;
+    options?: IDownloadFromBlobOptions & CredentialOptions & INewPipelineOptions): Promise<void>;
 ```
 
 **Before**:
@@ -477,16 +494,32 @@ options. For example,
   await downloadBlobToBuffer(Aborter.none, buf, url, blockBlobURL, 0);
 ```
 
-
 **After**:
 
 ```typescript
   const url = "https://url.to.blob/";
   const buf = Buffer.alloc(size);
   // anonymous access
-  await downloadBlobToBuffer(buf, url);
+  await downloadBlobFromUrlToBuffer(buf, url);
+
   // with credential and pipeline options
-  await downloadBlobToBuffer(buf, url, { credentialOrPipeline: credential, pipelineOptions: pipelineOptions })
+  await downloadBlobFromUrlToBuffer(buf, url, {
+    // credential options
+    credential: credential,
+
+    // new pipeline options
+    // logger: new ConsoleHttpPipelineLogger(HttpPipelineLogLevel.INFO)
+
+    // download options
+    // blockSize: 4 * 1024 * 1024,
+    // parallelism: 5
+    })
+```
+
+Alias types can also be used if we think the number of types to intersect is too many
+
+```typescript
+type DownloadBlobFromUrlToBufferOptions = IDownloadFromBlobOptions & CredentialOptions & INewPipelineOptions
 ```
 
 ## E2E basic example
