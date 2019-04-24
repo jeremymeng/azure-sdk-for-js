@@ -11,6 +11,16 @@ trigger:
   paths:
     include:
     - sdk/cosmosdb/cosmos/*
+
+pr:
+  branches:
+    include:
+    - master
+    - cosmos-build-master
+  paths:
+    include:
+    - sdk/cosmosdb/cosmos/*
+
 jobs:
   - job: Emulator
     pool:
