@@ -1,4 +1,23 @@
-# Storage JS/TS API proposals (Blob)
+# Storage JS/TS API Improvement Proposal (Blob)
+
+## Current API
+
+Resource-based
+
+- `ServiceURL`
+- `ContainerURL`
+- `BlobURL`
+  - `AppendBlockURL`
+  - `BlockBlobURL`
+  - `PageBlobURL`
+
+All derives from a base class `StorageURL`.
+
+There are also high level helpers at module level: 
+- `downloadBlobToBuffer()`
+- `uploadBrowserDataToBlockBlob()`
+- `uploadFileToBlockBlob()`
+- `uploadStreamToBlockBlob()`
 
 ## Client names?
 
