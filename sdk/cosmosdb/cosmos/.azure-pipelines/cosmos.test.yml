@@ -4,7 +4,22 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-  - cosmos-build-master
+  branches:
+    include:
+    - master
+    - cosmos-build-master
+  paths:
+    include:
+    - sdk/cosmosdb/cosmos
+
+pr:
+  branches:
+    include:
+    - master
+    - cosmos-build-master
+  paths:
+    include:
+    - sdk/cosmosdb/cosmos
 
 jobs:
   - job: Emulator
