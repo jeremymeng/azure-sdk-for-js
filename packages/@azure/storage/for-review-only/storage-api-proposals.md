@@ -13,7 +13,8 @@ Resource-based
 
 All derives from a base class `StorageURL`.
 
-There are also high level helpers at module level: 
+There are also high level helpers at module level:
+
 - `downloadBlobToBuffer()`
 - `uploadBrowserDataToBlockBlob()`
 - `uploadFileToBlockBlob()`
@@ -78,7 +79,7 @@ allow users to have total control on the pipeline.
   );
 ```
 
-Proposed constructor example:
+Proposed constructor using union types:
 
   ``` typescript
   constructor(url: string, credentialOrPipeline: Credential | Pipeline, pipelineOptions?: INewPipelineOptions)
@@ -92,23 +93,6 @@ Proposed constructor example:
     the third argument is ignored.
 
 Also consider renaming `newPipeline()` to `createDefaultPipeline()`.
-
-## Remove `I-` prefix from interface name
-
-It's an anti-pattern in TypeScript world even though tslint has this (adding `I-`
-prefix for interface names) as a recommended rule.
-
-**Before**:
-
-```typescript
-  export interface INewPipelineOptions {
-```
-
-**After**:
-
-```typescript
-  export interface NewPipelineOptions {
-```
 
 ## Use async iterators to list resources
 
@@ -142,27 +126,20 @@ For example, listing containers within a Storage account
 Note that in this proposal we return the containers to the users, instead of
 them having to retrieve them from the `ListContainerResponse` object.
 
-Get all the items (possibly bad, would get EVERYTHING)
-
-```typescript
-
-  const items = await listItems(Aborter.none);
-```
-
-And resumable:
+And the iterating can be resumed:
 
 ```typescript
 async function doListBlobs() {
 
-  let iter = listBlobs();
+  let iter1 = listBlobs();
 
-  for await (let blob of iter) {
+  for await (let blob of iter1) {
     // process a blob or two, then...
     break;
   }
 
   // sometime later, resume where we left off...
-  let iter2 = listBlobs({ restartPoint: iter.restartPoint });
+  let iter2 = listBlobs({ restartPoint: iter1.restartPoint });
 }
 ```
 
@@ -207,7 +184,6 @@ function listBlobs(options?: {restartPoint?: RestartPoint}): ResumableAsyncItera
 }
 ```
 
-
 ## Make all Aborter parameters optional with default value
 
 Question: what should be the default value? `Aborter.none`, or an aborter with
@@ -225,7 +201,7 @@ certain timeout for some methods (e.g., uploading/downloading).
   const createContainerResponse = await containerURL.create();
 ```
 
-There are several options to achive this:
+There are several options to achieve this:
 
 01. Option 1. move the `Aborter` parameter to the end and specify a default value
     of `Aborter.none`.
@@ -263,7 +239,7 @@ There are several options to achive this:
    Similar happens if we place `Aborter` before the options parameter and want
    to pass an options object but not the aborter.
 
-02. Option 2. Pass `Aborter` as part of the options interface.
+02. Option 2. Make `Aborter` part of the options interface.
 
     ``` typescript
     public async listContainersSegment(
@@ -299,7 +275,7 @@ There are several options to achive this:
     where `IServiceGetPropertiesOptions` contains only one `abortSignal?: Aborter`
     property.
 
-03. Option 3. Use intersection type.
+03. Option 3. Use intersection types.
 
     ```typescript
       public async appendBlock(
@@ -309,23 +285,15 @@ There are several options to achive this:
       ): Promise<Models.AppendBlobAppendBlockResponse> {
     ```
 
-    where `CancellationOptions` just holds the aborter:
+    where `CancellationOptions` holds the aborter:
 
     ```typescript
       export interface CancellationOptions {
-        /**
-         * Aborter instance to cancel request. It can be created with Aborter.none
-         * or Aborter.timeout(). Go to documents of {@link Aborter} for more examples
-         * about request cancellation.
-         *
-         * @type {Aborter}
-         * @memberof CancellationOptions
-         */
         abortSignal? : Aborter;
       }
     ```
 
-    We like this option.
+    We like this option. It groups related options into separate types.
 
 04. Option 4. Use a union type of `Aborter` and options interface
 
@@ -344,7 +312,8 @@ There are several options to achive this:
           // the 4th argument is ignored in this case.
           options = aborterOrOptions || {};
         }
-        ...
+
+        // rest omitted
     ```
 
     - when the an `Aborter` type instance is passed as the third argument, the fourth
@@ -355,6 +324,90 @@ There are several options to achive this:
     argument is ignored, and `options` got re-assigned to have value `aborterOrOptions || {}`.
 
     Cons: There would be a lot of `if` checking in every methods.
+
+## Top-level convenience methods
+
+Currently there are top-level methods for uploading and downloading blobs which
+take `BlobURL` parameters so `BlobURL` instances need to be created first before
+using these.
+
+```typescript
+  export function downloadBlobToBuffer(
+    aborter: Aborter,
+    buffer: Buffer,
+    blobURL: BlobURL,
+    offset: number,
+    count?: number,
+    options?: IDownloadFromBlobOptions): Promise<void>;
+
+  export function uploadBrowserDataToBlockBlob(
+    aborter: Aborter,
+    browserData: Blob | ArrayBuffer | ArrayBufferView,
+    blockBlobURL: BlockBlobURL,
+    options?: IUploadToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
+
+  export function uploadFileToBlockBlob(aborter: Aborter,
+    filePath: string,
+    blockBlobURL: BlockBlobURL,
+    options?: IUploadToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
+
+  export function uploadStreamToBlockBlob(aborter: Aborter,
+    stream: Readable,
+    blockBlobURL: BlockBlobURL,
+    bufferSize: number,
+    maxBuffers: number,
+    options?: IUploadStreamToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
+```
+
+It would be more convenient to just take a url and optional credential/pipeline
+options. For example,
+
+```typescript
+  export function downloadBlobFromUrlToBuffer(
+    buffer: Buffer,
+    url: string,
+    offset?: number,
+    count?: number,
+    options?: IDownloadFromBlobOptions & CredentialOptions & INewPipelineOptions): Promise<void>;
+```
+
+**Before**:
+
+```typescript
+  const url = "https://url.to.blob/";
+  const buf = Buffer.alloc(size);
+  const pipeline = StorageURL.newPipeline(credential, pipelineOptions);
+  const blockBlobURL = new BlockBlobURL(url, pipeline);
+  await downloadBlobToBuffer(Aborter.none, buf, url, blockBlobURL, 0);
+```
+
+**After**:
+
+```typescript
+  const url = "https://url.to.blob/";
+  const buf = Buffer.alloc(size);
+  // anonymous access
+  await downloadBlobFromUrlToBuffer(buf, url);
+
+  // with credential and pipeline options
+  await downloadBlobFromUrlToBuffer(buf, url, {
+    // credential options
+    credential: credential,
+
+    // new pipeline options
+    // logger: new ConsoleHttpPipelineLogger(HttpPipelineLogLevel.INFO)
+
+    // download options
+    // blockSize: 4 * 1024 * 1024,
+    // parallelism: 5
+    })
+```
+
+Alias types can also be used if we think the number of types to intersect is too many
+
+```typescript
+type DownloadBlobFromUrlToBufferOptions = IDownloadFromBlobOptions & CredentialOptions & INewPipelineOptions
+```
 
 ## Make parameters optional with reasonable default values when possible
 
@@ -458,87 +511,21 @@ resources to make it more Object-Oriented?
   const blockBlobURL = containerURL.createBlockBlobURL(blobName);
 ```
 
-## Top-level convenience methods
+## Remove `I-` prefix from interface name
 
-Currently there are top-level methods for uploading and downloading blobs which
-take `BlobURL` parameters.
-
-```typescript
-  export function downloadBlobToBuffer(
-    aborter: Aborter,
-    buffer: Buffer,
-    blobURL: BlobURL,
-    offset: number,
-    count?: number,
-    options?: IDownloadFromBlobOptions): Promise<void>;
-
-  export function uploadBrowserDataToBlockBlob(
-    aborter: Aborter,
-    browserData: Blob | ArrayBuffer | ArrayBufferView,
-    blockBlobURL: BlockBlobURL,
-    options?: IUploadToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
-
-  export function uploadFileToBlockBlob(aborter: Aborter,
-    filePath: string,
-    blockBlobURL: BlockBlobURL,
-    options?: IUploadToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
-
-  export function uploadStreamToBlockBlob(aborter: Aborter,
-    stream: Readable,
-    blockBlobURL: BlockBlobURL,
-    bufferSize: number,
-    maxBuffers: number,
-    options?: IUploadStreamToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
-```
-
-It would be more convenient to just take a url and optional credential/pipeline
-options. For example,
-
-```typescript
-  export function downloadBlobFromUrlToBuffer(
-    buffer: Buffer,
-    url: string,
-    offset?: number,
-    count?: number,
-    options?: IDownloadFromBlobOptions & CredentialOptions & INewPipelineOptions): Promise<void>;
-```
+It's an anti-pattern in TypeScript world even though tslint has this (adding `I-`
+prefix for interface names) as a recommended rule.
 
 **Before**:
 
 ```typescript
-  const url = "https://url.to.blob/";
-  const buf = Buffer.alloc(size);
-  const pipeline = StorageURL.newPipeline(credential, pipelineOptions);
-  const blockBlobURL = new BlockBlobURL(url, pipeline);
-  await downloadBlobToBuffer(Aborter.none, buf, url, blockBlobURL, 0);
+  export interface INewPipelineOptions {
 ```
 
 **After**:
 
 ```typescript
-  const url = "https://url.to.blob/";
-  const buf = Buffer.alloc(size);
-  // anonymous access
-  await downloadBlobFromUrlToBuffer(buf, url);
-
-  // with credential and pipeline options
-  await downloadBlobFromUrlToBuffer(buf, url, {
-    // credential options
-    credential: credential,
-
-    // new pipeline options
-    // logger: new ConsoleHttpPipelineLogger(HttpPipelineLogLevel.INFO)
-
-    // download options
-    // blockSize: 4 * 1024 * 1024,
-    // parallelism: 5
-    })
-```
-
-Alias types can also be used if we think the number of types to intersect is too many
-
-```typescript
-type DownloadBlobFromUrlToBufferOptions = IDownloadFromBlobOptions & CredentialOptions & INewPipelineOptions
+  export interface NewPipelineOptions {
 ```
 
 ## E2E basic example
