@@ -1,52 +1,26 @@
 # Storage JS/TS API Improvement Proposal (Blob)
 
-## Current API
+This document lists proposed improvements to the current Blob API to make it
+easier to consume.
 
-Resource-based
+## Client names
 
-- `ServiceURL`
-- `ContainerURL`
-- `BlobURL`
-  - `AppendBlockURL`
-  - `BlockBlobURL`
-  - `PageBlobURL`
-
-All derives from a base class `StorageURL`.
-
-There are also high level helpers at module level:
-
-- `downloadBlobToBuffer()`
-- `uploadBrowserDataToBlockBlob()`
-- `uploadFileToBlockBlob()`
-- `uploadStreamToBlockBlob()`
-
-## Client names?
-
-### Rename `ServiceURL` to `BlobServiceClient`?
-
-There are three `ServiceURL` in storage libraries for three different types of
-blob storage (Blob, File, and Queue). Even though they are packed in different
-packages, having different and explicit names could help (e.g., using more than
-one in the same code file).
+### Rename `ServiceURL` to `BlobServiceClient`
 
 **After**
 - `BlobServiceClient`
 - `FileServiceClient`
 - `QueueServiceClient`
 
-Anyway we will probably use the same/similar names as in other languages.
+Rename all other `xxxxURL` types to `xxxxClient`. Remove `URL` from method/property/variable names.
 
 ## Don't create pipeline explicitly for default pipeline
 
 **Before**
 
 ```typescript
-  // Use sharedKeyCredential, tokenCredential or anonymousCredential to create a pipeline
   const pipeline = StorageURL.newPipeline(sharedKeyCredential);
-
-  // List containers
   const serviceURL = new ServiceURL(
-    // When using AnonymousCredential, following url should include a valid SAS or support public access
     `https://${account}.blob.core.windows.net`,
     pipeline
   );
@@ -92,7 +66,12 @@ Proposed constructor using union types:
   - otherwise, the instance is created with the custom pipeline passed in and
     the third argument is ignored.
 
-Also consider renaming `newPipeline()` to `createDefaultPipeline()`.
+Also consider renaming `newPipeline()` to `createDefaultPipeline()` and renaming `INewPipelineOptions` to `PipelineOptions`.
+
+## Ensure constructors are consistent with .NET/Python
+
+Investigate adding client constructors that take connection strings as
+parameters.
 
 ## Use async iterators to list resources
 
@@ -123,10 +102,10 @@ For example, listing containers within a Storage account
   }
 ```
 
-Note that in this proposal we return the containers to the users, instead of
-them having to retrieve them from the `ListContainerResponse` object.
+We return the containers to the users, instead of them having to retrieve
+containers from the `ListContainerResponse` object.
 
-And the iterating can be resumed:
+The iterating can be resumed:
 
 ```typescript
 async function doListBlobs() {
@@ -139,20 +118,20 @@ async function doListBlobs() {
   }
 
   // sometime later, resume where we left off...
-  let iter2 = listBlobs({ restartPoint: iter1.restartPoint });
+  let iter2 = listBlobs({ resumePoint: iter1.resumePoint });
 }
 ```
 
 Prototype:
 
 ```typescript
-interface RestartPoint {
-  nextMarker: string,
+interface ResumePoint {
+  marker: string,
   lastIndex: number
 }
 
 interface ResumableAsyncIterableIterator<T> extends AsyncIterableIterator<T> {
-  restartPoint: RestartPoint
+  resumePoint: ResumePoint
 }
 
 interface Blob {
@@ -160,12 +139,12 @@ interface Blob {
   contents: string
 }
 
-function listBlobs(options?: {restartPoint?: RestartPoint}): ResumableAsyncIterableIterator<Blob> {
+function listBlobs(options?: {resumePoint?: ResumePoint; options?: OtherOptions}): ResumableAsyncIterableIterator<Blob> {
   const iter: ResumableAsyncIterableIterator<Blob> = (async function* items(): AsyncIterableIterator<Blob> {
     do {
       const listContainersResponse = await serviceURL.listContainersSegment(
-        Aborter.none,
-        iter.nextMarker
+        options.abortSignal,
+        iter.marker
       );
 
       const items = listContainersResponse.containerItems;
@@ -174,20 +153,19 @@ function listBlobs(options?: {restartPoint?: RestartPoint}): ResumableAsyncItera
         yield items[i];
       }
 
-      iter.restartPoint.nextMarker = listContainersResponse.nextMarker;
-      iter.restartPoint.lastIndex = 0;
-    } while (iter.restartPoint.nextMarker);
+      iter.resumePoint.marker = listContainersResponse.nextMarker;
+      iter.resumePoint.lastIndex = 0;
+    } while (iter.resumePoint.marker);
   })() as any;
 
-  iter.restartPoint = { ... restartPoint };
+  iter.resumePoint = { ... resumePoint };
   return iter;
 }
 ```
 
 ## Make all Aborter parameters optional with default value
 
-Question: what should be the default value? `Aborter.none`, or an aborter with
-certain timeout for some methods (e.g., uploading/downloading).
+Use `Aborter.none` as the default value for `Aborter` parameter.
 
 **Before**:
 
@@ -201,7 +179,8 @@ certain timeout for some methods (e.g., uploading/downloading).
   const createContainerResponse = await containerURL.create();
 ```
 
-There are several options to achieve this:
+There are several options to achieve this below. The review decision is that we
+are going with option 2.
 
 01. Option 1. move the `Aborter` parameter to the end and specify a default value
     of `Aborter.none`.
@@ -255,8 +234,7 @@ There are several options to achieve this:
     const result = await serviceURL.listContainersSegment(marker, { abortSignal: Aborter.timeout(1000) });
     ```
 
-    **Question**: do we also want to use this option for methods that currently
-    don’t take an options parameter? i.e.,
+    Also add option interfaces for methods that currently only takes a single `Aborter` parameter.
 
     ``` typescript
     public async getProperties(
@@ -271,9 +249,6 @@ There are several options to achieve this:
       options: IServiceGetPropertiesOptions = {},
     ): Promise<Models.ServiceGetPropertiesResponse>;
     ```
-
-    where `IServiceGetPropertiesOptions` contains only one `abortSignal?: Aborter`
-    property.
 
 03. Option 3. Use intersection types.
 
@@ -292,8 +267,6 @@ There are several options to achieve this:
         abortSignal? : Aborter;
       }
     ```
-
-    We like this option. It groups related options into separate types.
 
 04. Option 4. Use a union type of `Aborter` and options interface
 
@@ -359,16 +332,23 @@ using these.
     options?: IUploadStreamToBlockBlobOptions): Promise<BlobUploadCommonResponse>;
 ```
 
-It would be more convenient to just take a url and optional credential/pipeline
-options. For example,
+It would be more convenient to just take a url string and optional
+credential/pipeline options. For example,
 
 ```typescript
   export function downloadBlobFromUrlToBuffer(
-    buffer: Buffer,
     url: string,
+    buffer: Buffer,
     offset?: number,
     count?: number,
-    options?: IDownloadFromBlobOptions & CredentialOptions & INewPipelineOptions): Promise<void>;
+    options?: IDownloadFromBlobOptions & CommonOptions): Promise<void>;
+```
+
+where `CommonOptions` is a option bag that contains optional cancellation option,
+credential options, and pipeline options.
+
+```typescript
+type CommonOptions = CancellationOptions & CredentialOptions & PipelineOptions;
 ```
 
 **Before**:
@@ -378,7 +358,7 @@ options. For example,
   const buf = Buffer.alloc(size);
   const pipeline = StorageURL.newPipeline(credential, pipelineOptions);
   const blockBlobURL = new BlockBlobURL(url, pipeline);
-  await downloadBlobToBuffer(Aborter.none, buf, url, blockBlobURL, 0);
+  await downloadBlobToBuffer(Aborter.none, buf, blockBlobURL, 0);
 ```
 
 **After**:
@@ -386,27 +366,36 @@ options. For example,
 ```typescript
   const url = "https://url.to.blob/";
   const buf = Buffer.alloc(size);
-  // anonymous access
-  await downloadBlobFromUrlToBuffer(buf, url);
+  await downloadBlobFromUrlToBuffer(url, buf, { credential: credential });
+```
 
-  // with credential and pipeline options
-  await downloadBlobFromUrlToBuffer(buf, url, {
+With credential, pipeline, and download options
+
+```typescript
+  await downloadBlobFromUrlToBuffer(url, buf, {
     // credential options
     credential: credential,
 
     // new pipeline options
-    // logger: new ConsoleHttpPipelineLogger(HttpPipelineLogLevel.INFO)
+    logger: new ConsoleHttpPipelineLogger(HttpPipelineLogLevel.INFO)
 
     // download options
-    // blockSize: 4 * 1024 * 1024,
-    // parallelism: 5
-    })
+    blockSize: 4 * 1024 * 1024,
+    parallelism: 5
+  })
 ```
 
-Alias types can also be used if we think the number of types to intersect is too many
+Also we should provide high-level functions to downloads into files for NodeJS.
+
+TODO: investigate the scenario when user-allocated buffer is smaller than the
+size of the blob being downloaded.
 
 ```typescript
-type DownloadBlobFromUrlToBufferOptions = IDownloadFromBlobOptions & CredentialOptions & INewPipelineOptions
+  const url = "https://url.to.blob/";
+  const buf = Buffer.alloc(size);
+  // anonymous access
+  await downloadBlobFromUrlToBuffer(url, buf);
+
 ```
 
 ## Make parameters optional with reasonable default values when possible
@@ -441,7 +430,9 @@ type DownloadBlobFromUrlToBufferOptions = IDownloadFromBlobOptions & CredentialO
   const uploadBlobResponse = await blockBlobURL.upload(content);
 ```
 
-## Provide convenience helpers to convert download response into string, Blob, or Buffer
+Note: some parameters may not have known `.length` or `.size`.
+
+## Provide convenience helpers to download response into File, string, Blob, or Buffer
 
 **Before**:
 
@@ -473,31 +464,10 @@ type DownloadBlobFromUrlToBufferOptions = IDownloadFromBlobOptions & CredentialO
   console.log("Downloaded blob content", content);
 ```
 
-## Rename `XxxxxxURL.create()` to be explicit on what is being created
-
-**Before**:
-
-```typescript
-  await containerURL.create();
-  await appendBlockURL.create();
-  await pageBlockURL.create();
-```
-
-**After**:
-
-```typescript
-  await containerURL.createContainer();
-  await appendBlobURL.createAppendBlob();
-  await pageBlobURL.createPageBlob();
-```
-
-Note: these creation methods could be moved one level up if we are going with
-the hierarchical approach.
-
 ## Procedural or OOP?
 
 Move `fromXxxxxURL()` static methods to be instance methods of containing
-resources to make it more Object-Oriented?
+resources. It looks more logical.
 
 **Before**
 
