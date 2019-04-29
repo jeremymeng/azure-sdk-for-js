@@ -1,9 +1,9 @@
 import { HttpRequestBody, TransferProgressEvent } from "@azure/ms-rest-js";
 
-import * as Models from "../src/generated/lib/models";
+import * as Models from "./generated/lib/models";
 import { Aborter } from "./Aborter";
-import { BlobURL } from "./BlobURL";
-import { ContainerURL } from "./ContainerURL";
+import { BlobClient } from "./BlobClient";
+import { ContainerClient } from "./ContainerClient";
 import { PageBlob } from "./generated/lib/operations";
 import { rangeToString } from "./IRange";
 import {
@@ -54,42 +54,42 @@ export interface IPageBlobStartCopyIncrementalOptions {
 }
 
 /**
- * PageBlobURL defines a set of operations applicable to page blobs.
+ * PageBlobClient defines a set of operations applicable to page blobs.
  *
  * @export
- * @class PageBlobURL
- * @extends {StorageURL}
+ * @class PageBlobClient
+ * @extends {StorageClient}
  */
-export class PageBlobURL extends BlobURL {
+export class PageBlobClient extends BlobClient {
   /**
-   * Creates a PageBlobURL object from ContainerURL instance.
+   * Creates a PageBlobClient object from ContainerClient instance.
    *
    * @static
-   * @param {ContainerURL} containerURL A ContainerURL object
+   * @param {ContainerClient} containerClient A ContainerClient object
    * @param {string} blobName A page blob name
-   * @returns {PageBlobURL}
-   * @memberof PageBlobURL
+   * @returns {PageBlobClient}
+   * @memberof PageBlobClient
    */
-  public static fromContainerURL(
-    containerURL: ContainerURL,
+  public static fromContainerClient(
+    containerClient: ContainerClient,
     blobName: string
-  ): PageBlobURL {
-    return new PageBlobURL(
-      appendToURLPath(containerURL.url, encodeURIComponent(blobName)),
-      containerURL.pipeline
+  ): PageBlobClient {
+    return new PageBlobClient(
+      appendToURLPath(containerClient.url, encodeURIComponent(blobName)),
+      containerClient.pipeline
     );
   }
 
   /**
-   * Creates a PageBlobURL object from BlobURL instance.
+   * Creates a PageBlobClient object from BlobClient instance.
    *
    * @static
-   * @param {BlobURL} blobURL
-   * @returns {PageBlobURL}
-   * @memberof PageBlobURL
+   * @param {BlobClient} blobClient
+   * @returns {PageBlobClient}
+   * @memberof PageBlobClient
    */
-  public static fromBlobURL(blobURL: BlobURL): PageBlobURL {
-    return new PageBlobURL(blobURL.url, blobURL.pipeline);
+  public static fromBlobClient(blobClient: BlobClient): PageBlobClient {
+    return new PageBlobClient(blobClient.url, blobClient.pipeline);
   }
 
   /**
@@ -97,12 +97,12 @@ export class PageBlobURL extends BlobURL {
    *
    * @private
    * @type {PageBlobs}
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   private pageBlobContext: PageBlob;
 
   /**
-   * Creates an instance of PageBlobURL.
+   * Creates an instance of PageBlobClient.
    * This method accepts an encoded URL or non-encoded URL pointing to a page blob.
    * Encoded URL string will NOT be escaped twice, only special characters in URL path will be escaped.
    * If a blob name includes ? or %, blob name must be encoded in the URL.
@@ -115,9 +115,9 @@ export class PageBlobURL extends BlobURL {
    *                     Encoded URL string will NOT be escaped twice, only special characters in URL path will be escaped.
    *                     However, if a blob name includes ? or %, blob name must be encoded in the URL.
    *                     Such as a blob named "my?blob%", the URL should be "https://myaccount.blob.core.windows.net/mycontainer/my%3Fblob%25".
-   * @param {Pipeline} pipeline Call StorageURL.newPipeline() to create a default
+   * @param {Pipeline} pipeline Call StorageClient.newPipeline() to create a default
    *                            pipeline, or provide a customized pipeline.
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   constructor(url: string, pipeline: Pipeline) {
     super(url, pipeline);
@@ -125,28 +125,28 @@ export class PageBlobURL extends BlobURL {
   }
 
   /**
-   * Creates a new PageBlobURL object identical to the source but with the
+   * Creates a new PageBlobClient object identical to the source but with the
    * specified request policy pipeline.
    *
    * @param {Pipeline} pipeline
-   * @returns {PageBlobURL}
-   * @memberof PageBlobURL
+   * @returns {PageBlobClient}
+   * @memberof PageBlobClient
    */
-  public withPipeline(pipeline: Pipeline): PageBlobURL {
-    return new PageBlobURL(this.url, pipeline);
+  public withPipeline(pipeline: Pipeline): PageBlobClient {
+    return new PageBlobClient(this.url, pipeline);
   }
 
   /**
-   * Creates a new PageBlobURL object identical to the source but with the
+   * Creates a new PageBlobClient object identical to the source but with the
    * specified snapshot timestamp.
-   * Provide "" will remove the snapshot and return a URL to the base blob.
+   * Provide "" will remove the snapshot and return a Client to the base blob.
    *
    * @param {string} snapshot
-   * @returns {PageBlobURL}
-   * @memberof PageBlobURL
+   * @returns {PageBlobClient}
+   * @memberof PageBlobClient
    */
-  public withSnapshot(snapshot: string): PageBlobURL {
-    return new PageBlobURL(
+  public withSnapshot(snapshot: string): PageBlobClient {
+    return new PageBlobClient(
       setURLParameter(
         this.url,
         URLConstants.Parameters.SNAPSHOT,
@@ -166,7 +166,7 @@ export class PageBlobURL extends BlobURL {
    * @param {number} size
    * @param {IPageBlobCreateOptions} [options]
    * @returns {Promise<Models.PageBlobCreateResponse>}
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   public async create(
     aborter: Aborter,
@@ -196,7 +196,7 @@ export class PageBlobURL extends BlobURL {
    * @param {number} count Content length of body, also how many bytes to be uploaded
    * @param {IPageBlobUploadPagesOptions} [options]
    * @returns {Promise<Models.PageBlobsUploadPagesResponse>}
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   public async uploadPages(
     aborter: Aborter,
@@ -229,7 +229,7 @@ export class PageBlobURL extends BlobURL {
    * @param {number} count
    * @param {IPageBlobClearPagesOptions} [options]
    * @returns {Promise<Models.PageBlobClearPagesResponse>}
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   public async clearPages(
     aborter: Aborter,
@@ -259,7 +259,7 @@ export class PageBlobURL extends BlobURL {
    * @param {number} count
    * @param {IPageBlobGetPageRangesOptions} [options]
    * @returns {Promise<Models.PageBlobGetPageRangesResponse>}
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   public async getPageRanges(
     aborter: Aborter,
@@ -288,7 +288,7 @@ export class PageBlobURL extends BlobURL {
    * @param {string} prevSnapshot
    * @param {IPageBlobGetPageRangesDiffOptions} [options]
    * @returns {Promise<Models.PageBlobGetPageRangesDiffResponse>}
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   public async getPageRangesDiff(
     aborter: Aborter,
@@ -317,7 +317,7 @@ export class PageBlobURL extends BlobURL {
    * @param {number} size
    * @param {IPageBlobResizeOptions} [options]
    * @returns {Promise<Models.PageBlobResizeResponse>}
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   public async resize(
     aborter: Aborter,
@@ -343,7 +343,7 @@ export class PageBlobURL extends BlobURL {
    * @param {number} [sequenceNumber] Required if sequenceNumberAction is max or update
    * @param {IPageBlobUpdateSequenceNumberOptions} [options]
    * @returns {Promise<Models.PageBlobUpdateSequenceNumberResponse>}
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   public async updateSequenceNumber(
     aborter: Aborter,
@@ -375,7 +375,7 @@ export class PageBlobURL extends BlobURL {
    *                            https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>
    * @param {IPageBlobStartCopyIncrementalOptions} [options]
    * @returns {Promise<Models.PageBlobCopyIncrementalResponse>}
-   * @memberof PageBlobURL
+   * @memberof PageBlobClient
    */
   public async startCopyIncremental(
     aborter: Aborter,

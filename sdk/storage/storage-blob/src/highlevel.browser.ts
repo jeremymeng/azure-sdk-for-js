@@ -1,7 +1,7 @@
 import { generateUuid } from "@azure/ms-rest-js";
 
 import { Aborter } from "./Aborter";
-import { BlockBlobURL } from "./BlockBlobURL";
+import { BlockBlobClient } from "./BlockBlobClient";
 import {
   BlobUploadCommonResponse,
   IUploadToBlockBlobOptions
@@ -28,14 +28,14 @@ import { generateBlockID } from "./utils/utils.common";
  * @param {Aborter} aborter Create a new Aborter instance with Aborter.none or Aborter.timeout(),
  *                          goto documents of Aborter for more examples about request cancellation
  * @param {Blob | ArrayBuffer | ArrayBufferView} browserData Blob, File, ArrayBuffer or ArrayBufferView
- * @param {BlockBlobURL} blockBlobURL
+ * @param {BlockBlobClient} blockBlobClient
  * @param {IUploadToBlockBlobOptions} [options]
  * @returns {Promise<BlobUploadCommonResponse>}
  */
 export async function uploadBrowserDataToBlockBlob(
   aborter: Aborter,
   browserData: Blob | ArrayBuffer | ArrayBufferView,
-  blockBlobURL: BlockBlobURL,
+  blockBlobClient: BlockBlobClient,
   options?: IUploadToBlockBlobOptions
 ): Promise<BlobUploadCommonResponse> {
   const browserBlob = new Blob([browserData]);
@@ -45,7 +45,7 @@ export async function uploadBrowserDataToBlockBlob(
       return browserBlob.slice(offset, offset + size);
     },
     browserBlob.size,
-    blockBlobURL,
+    blockBlobClient,
     options
   );
 }
@@ -64,7 +64,7 @@ export async function uploadBrowserDataToBlockBlob(
  *                          goto documents of Aborter for more examples about request cancellation
  * @param {(offset: number, size: number) => Blob} blobFactory
  * @param {number} size
- * @param {BlockBlobURL} blockBlobURL
+ * @param {BlockBlobClient} blockBlobClient
  * @param {IUploadToBlockBlobOptions} [options]
  * @returns {Promise<BlobUploadCommonResponse>}
  */
@@ -72,7 +72,7 @@ async function UploadSeekableBlobToBlockBlob(
   aborter: Aborter,
   blobFactory: (offset: number, size: number) => Blob,
   size: number,
-  blockBlobURL: BlockBlobURL,
+  blockBlobClient: BlockBlobClient,
   options: IUploadToBlockBlobOptions = {}
 ): Promise<BlobUploadCommonResponse> {
   if (!options.blockSize) {
@@ -118,7 +118,7 @@ async function UploadSeekableBlobToBlockBlob(
   }
 
   if (size <= options.maxSingleShotSize) {
-    return blockBlobURL.upload(aborter, blobFactory(0, size), size, options);
+    return blockBlobClient.upload(aborter, blobFactory(0, size), size, options);
   }
 
   const numBlocks: number = Math.floor((size - 1) / options.blockSize) + 1;
@@ -142,7 +142,7 @@ async function UploadSeekableBlobToBlockBlob(
         const end = i === numBlocks - 1 ? size : start + options.blockSize!;
         const contentLength = end - start;
         blockList.push(blockID);
-        await blockBlobURL.stageBlock(
+        await blockBlobClient.stageBlock(
           aborter,
           blockID,
           blobFactory(start, contentLength),
@@ -165,5 +165,5 @@ async function UploadSeekableBlobToBlockBlob(
   }
   await batch.do();
 
-  return blockBlobURL.commitBlockList(aborter, blockList, options);
+  return blockBlobClient.commitBlockList(aborter, blockList, options);
 }

@@ -1,9 +1,9 @@
 import { URLBuilder } from "@azure/ms-rest-js";
 import * as assert from "assert";
 
-import { RestError, StorageURL } from "../src";
-import { Aborter } from "../src/Aborter";
-import { ContainerURL } from "../src/ContainerURL";
+import { RestError, StorageClient } from "../src";
+import { Aborter } from "../src/Aborter"
+import { ContainerClient } from "../src/ContainerClient";
 import { Pipeline } from "../src/Pipeline";
 import { getBSU, getUniqueName } from "./utils";
 import { InjectorPolicyFactory } from "./utils/InjectorPolicyFactory";
@@ -11,18 +11,18 @@ import * as dotenv from "dotenv";
 dotenv.config({path:"../.env"});
 
 describe("RetryPolicy", () => {
-  const serviceURL = getBSU();
+  const serviceClient = getBSU();
   let containerName: string = getUniqueName("container");
-  let containerURL = ContainerURL.fromServiceURL(serviceURL, containerName);
+  let containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
 
   beforeEach(async () => {
     containerName = getUniqueName("container");
-    containerURL = ContainerURL.fromServiceURL(serviceURL, containerName);
-    await containerURL.create(Aborter.none);
+    containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
+    await containerClient.create(Aborter.none);
   });
 
   afterEach(async () => {
-    await containerURL.delete(Aborter.none);
+    await containerClient.delete(Aborter.none);
   });
 
   it("Retry Policy should work when first request fails with 500", async () => {
@@ -37,19 +37,19 @@ describe("RetryPolicy", () => {
         );
       }
     });
-    const factories = containerURL.pipeline.factories.slice(); // clone factories array
+    const factories = containerClient.pipeline.factories.slice(); // clone factories array
     factories.push(injector);
     const pipeline = new Pipeline(factories);
-    const injectContainerURL = containerURL.withPipeline(pipeline);
+    const injectContainerClient = containerClient.withPipeline(pipeline);
 
     const metadata = {
       key0: "val0",
       keya: "vala",
       keyb: "valb"
     };
-    await injectContainerURL.setMetadata(Aborter.none, metadata);
+    await injectContainerClient.setMetadata(Aborter.none, metadata);
 
-    const result = await containerURL.getProperties(Aborter.none);
+    const result = await containerClient.getProperties(Aborter.none);
     assert.deepEqual(result.metadata, metadata);
   });
 
@@ -59,15 +59,15 @@ describe("RetryPolicy", () => {
     });
 
     const credential =
-      containerURL.pipeline.factories[
-        containerURL.pipeline.factories.length - 1
+      containerClient.pipeline.factories[
+        containerClient.pipeline.factories.length - 1
       ];
-    const factories = StorageURL.newPipeline(credential, {
+    const factories = StorageClient.newPipeline(credential, {
       retryOptions: { maxTries: 3 }
     }).factories;
     factories.push(injector);
     const pipeline = new Pipeline(factories);
-    const injectContainerURL = containerURL.withPipeline(pipeline);
+    const injectContainerClient = containerClient.withPipeline(pipeline);
 
     let hasError = false;
     try {
@@ -76,7 +76,7 @@ describe("RetryPolicy", () => {
         keya: "vala",
         keyb: "valb"
       };
-      await injectContainerURL.setMetadata(Aborter.none, metadata);
+      await injectContainerClient.setMetadata(Aborter.none, metadata);
     } catch (err) {
       hasError = true;
     }
@@ -95,7 +95,7 @@ describe("RetryPolicy", () => {
       }
     });
 
-    const url = serviceURL.url;
+    const url = serviceClient.url;
     const urlParsed = URLBuilder.parse(url);
     const host = urlParsed.getHost()!;
     const hostParts = host.split(".");
@@ -105,19 +105,19 @@ describe("RetryPolicy", () => {
     const secondaryHost = hostParts.join(".");
 
     const credential =
-      containerURL.pipeline.factories[
-        containerURL.pipeline.factories.length - 1
+      containerClient.pipeline.factories[
+        containerClient.pipeline.factories.length - 1
       ];
-    const factories = StorageURL.newPipeline(credential, {
+    const factories = StorageClient.newPipeline(credential, {
       retryOptions: { maxTries: 2, secondaryHost }
     }).factories;
     factories.push(injector);
     const pipeline = new Pipeline(factories);
-    const injectContainerURL = containerURL.withPipeline(pipeline);
+    const injectContainerClient = containerClient.withPipeline(pipeline);
 
     let finalRequestURL = "";
     try {
-      const response = await injectContainerURL.getProperties(Aborter.none);
+      const response = await injectContainerClient.getProperties(Aborter.none);
       finalRequestURL = response._response.request.url;
     } catch (err) {
       finalRequestURL = err.request ? err.request.url : "";

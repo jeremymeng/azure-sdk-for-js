@@ -1,16 +1,16 @@
 import * as assert from "assert";
 
 import { Aborter } from "../src/Aborter";
-import { ContainerURL } from "../src/ContainerURL";
-import { ServiceURL } from "../src/ServiceURL";
+import { ContainerClient } from "../src/ContainerClient";
+import { ServiceClient } from "../src/ServiceClient";
 import { getAlternateBSU, getBSU, getUniqueName, wait } from "./utils";
 import * as dotenv from "dotenv";
 dotenv.config({path:"../.env"});
 
-describe("ServiceURL", () => {
+describe("ServiceClient", () => {
   it("ListContainers with default parameters", async () => {
-    const serviceURL = getBSU();
-    const result = await serviceURL.listContainersSegment(Aborter.none);
+    const serviceClient = getBSU();
+    const result = await serviceClient.listContainersSegment(Aborter.none);
     assert.ok(typeof result.requestId);
     assert.ok(result.requestId!.length > 0);
     assert.ok(typeof result.version);
@@ -28,23 +28,23 @@ describe("ServiceURL", () => {
   });
 
   it("ListContainers with all parameters configured", async () => {
-    const serviceURL = getBSU();
+    const serviceClient = getBSU();
 
     const containerNamePrefix = getUniqueName("container");
     const containerName1 = `${containerNamePrefix}x1`;
     const containerName2 = `${containerNamePrefix}x2`;
-    const containerURL1 = ContainerURL.fromServiceURL(
-      serviceURL,
+    const containerClient1 = ContainerClient.fromServiceClient(
+      serviceClient,
       containerName1
     );
-    const containerURL2 = ContainerURL.fromServiceURL(
-      serviceURL,
+    const containerClient2 = ContainerClient.fromServiceClient(
+      serviceClient,
       containerName2
     );
-    await containerURL1.create(Aborter.none, { metadata: { key: "val" } });
-    await containerURL2.create(Aborter.none, { metadata: { key: "val" } });
+    await containerClient1.create(Aborter.none, { metadata: { key: "val" } });
+    await containerClient2.create(Aborter.none, { metadata: { key: "val" } });
 
-    const result1 = await serviceURL.listContainersSegment(
+    const result1 = await serviceClient.listContainersSegment(
       Aborter.none,
       undefined,
       {
@@ -71,7 +71,7 @@ describe("ServiceURL", () => {
     );
     assert.deepEqual(result1.containerItems![0].metadata!.key, "val");
 
-    const result2 = await serviceURL.listContainersSegment(
+    const result2 = await serviceClient.listContainersSegment(
       Aborter.none,
       result1.nextMarker,
       {
@@ -98,13 +98,13 @@ describe("ServiceURL", () => {
     );
     assert.deepEqual(result2.containerItems![0].metadata!.key, "val");
 
-    await containerURL1.delete(Aborter.none);
-    await containerURL2.delete(Aborter.none);
+    await containerClient1.delete(Aborter.none);
+    await containerClient2.delete(Aborter.none);
   });
 
   it("GetProperties", async () => {
-    const serviceURL = getBSU();
-    const result = await serviceURL.getProperties(Aborter.none);
+    const serviceClient = getBSU();
+    const result = await serviceClient.getProperties(Aborter.none);
 
     assert.ok(typeof result.requestId);
     assert.ok(result.requestId!.length > 0);
@@ -121,9 +121,9 @@ describe("ServiceURL", () => {
   });
 
   it("SetProperties", async () => {
-    const serviceURL = getBSU();
+    const serviceClient = getBSU();
 
-    const serviceProperties = await serviceURL.getProperties(Aborter.none);
+    const serviceProperties = await serviceClient.getProperties(Aborter.none);
 
     serviceProperties.logging = {
       deleteProperty: true,
@@ -176,10 +176,10 @@ describe("ServiceURL", () => {
       };
     }
 
-    await serviceURL.setProperties(Aborter.none, serviceProperties);
+    await serviceClient.setProperties(Aborter.none, serviceProperties);
     await wait(5 * 1000);
 
-    const result = await serviceURL.getProperties(Aborter.none);
+    const result = await serviceClient.getProperties(Aborter.none);
     assert.ok(typeof result.requestId);
     assert.ok(result.requestId!.length > 0);
     assert.ok(typeof result.version);
@@ -188,15 +188,15 @@ describe("ServiceURL", () => {
   });
 
   it("getStatistics", done => {
-    let serviceURL: ServiceURL | undefined;
+    let serviceClient: ServiceClient | undefined;
     try {
-      serviceURL = getAlternateBSU();
+      serviceClient = getAlternateBSU();
     } catch (err) {
       done();
       return;
     }
 
-    serviceURL!
+    serviceClient!
       .getStatistics(Aborter.none)
       .then(result => {
         assert.ok(result.geoReplication!.lastSyncTime);
@@ -206,9 +206,9 @@ describe("ServiceURL", () => {
   });
 
   it("getAccountInfo", async () => {
-    const serviceURL = getBSU();
+    const serviceClient = getBSU();
 
-    const accountInfo = await serviceURL.getAccountInfo(Aborter.none);
+    const accountInfo = await serviceClient.getAccountInfo(Aborter.none);
     assert.ok(accountInfo.accountKind);
     assert.ok(accountInfo.skuName);
   });
