@@ -13,11 +13,11 @@ dotenv.config({path:"../.env"});
 describe("RetryPolicy", () => {
   const serviceClient = getBSU();
   let containerName: string = getUniqueName("container");
-  let containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
+  let containerClient = ContainerClient.fromBlobServiceClient(serviceClient, containerName);
 
   beforeEach(async () => {
     containerName = getUniqueName("container");
-    containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
+    containerClient = ContainerClient.fromBlobServiceClient(serviceClient, containerName);
     await containerClient.create(Aborter.none);
   });
 

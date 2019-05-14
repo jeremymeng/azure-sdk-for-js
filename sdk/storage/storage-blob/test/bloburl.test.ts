@@ -11,7 +11,7 @@ dotenv.config({ path: "../.env" });
 describe("BlobClient", () => {
   const serviceClient = getBSU();
   let containerName: string = getUniqueName("container");
-  let containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
+  let containerClient = ContainerClient.fromBlobServiceClient(serviceClient, containerName);
   let blobName: string = getUniqueName("blob");
   let blobClient = BlobClient.fromContainerClient(containerClient, blobName);
   let blockBlobClient = BlockBlobClient.fromBlobClient(blobClient);
@@ -19,7 +19,7 @@ describe("BlobClient", () => {
 
   beforeEach(async () => {
     containerName = getUniqueName("container");
-    containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
+    containerClient = ContainerClient.fromBlobServiceClient(serviceClient, containerName);
     await containerClient.create(Aborter.none);
     blobName = getUniqueName("blob");
     blobClient = BlobClient.fromContainerClient(containerClient, blobName);

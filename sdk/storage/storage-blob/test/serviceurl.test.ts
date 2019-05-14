@@ -2,12 +2,12 @@ import * as assert from "assert";
 
 import { Aborter } from "../src/Aborter";
 import { ContainerClient } from "../src/ContainerClient";
-import { ServiceClient } from "../src/ServiceClient";
+import { BlobServiceClient } from "../src/BlobServiceClient";
 import { getAlternateBSU, getBSU, getUniqueName, wait } from "./utils";
 import * as dotenv from "dotenv";
 dotenv.config({path:"../.env"});
 
-describe("ServiceClient", () => {
+describe("BlobServiceClient", () => {
   it("ListContainers with default parameters", async () => {
     const serviceClient = getBSU();
     const result = await serviceClient.listContainersSegment(Aborter.none);
@@ -33,11 +33,11 @@ describe("ServiceClient", () => {
     const containerNamePrefix = getUniqueName("container");
     const containerName1 = `${containerNamePrefix}x1`;
     const containerName2 = `${containerNamePrefix}x2`;
-    const containerClient1 = ContainerClient.fromServiceClient(
+    const containerClient1 = ContainerClient.fromBlobServiceClient(
       serviceClient,
       containerName1
     );
-    const containerClient2 = ContainerClient.fromServiceClient(
+    const containerClient2 = ContainerClient.fromBlobServiceClient(
       serviceClient,
       containerName2
     );
@@ -188,7 +188,7 @@ describe("ServiceClient", () => {
   });
 
   it("getStatistics", done => {
-    let serviceClient: ServiceClient | undefined;
+    let serviceClient: BlobServiceClient | undefined;
     try {
       serviceClient = getAlternateBSU();
     } catch (err) {

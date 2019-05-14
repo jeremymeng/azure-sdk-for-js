@@ -22,7 +22,7 @@ import {
 describe("Highlevel", () => {
   const serviceClient = getBSU();
   let containerName = getUniqueName("container");
-  let containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
+  let containerClient = ContainerClient.fromBlobServiceClient(serviceClient, containerName);
   let blobName = getUniqueName("blob");
   let blobClient = BlobClient.fromContainerClient(containerClient, blobName);
   let blockBlobClient = BlockBlobClient.fromBlobClient(blobClient);
@@ -34,7 +34,7 @@ describe("Highlevel", () => {
 
   beforeEach(async () => {
     containerName = getUniqueName("container");
-    containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
+    containerClient = ContainerClient.fromBlobServiceClient(serviceClient, containerName);
     await containerClient.create(Aborter.none);
     blobName = getUniqueName("blob");
     blobClient = BlobClient.fromContainerClient(containerClient, blobName);

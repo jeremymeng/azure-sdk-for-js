@@ -10,11 +10,11 @@ dotenv.config({path:"../.env"});
 describe("Aborter", () => {
   const serviceClient = getBSU();
   let containerName: string = getUniqueName("container");
-  let containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
+  let containerClient = ContainerClient.fromBlobServiceClient(serviceClient, containerName);
 
   beforeEach(async () => {
     containerName = getUniqueName("container");
-    containerClient = ContainerClient.fromServiceClient(serviceClient, containerName);
+    containerClient = ContainerClient.fromBlobServiceClient(serviceClient, containerName);
   });
 
   it("should set value and get value successfully", async () => {
