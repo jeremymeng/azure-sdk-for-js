@@ -3,9 +3,11 @@ import { Aborter } from "./Aborter";
 import { ListContainersIncludeType } from "./generated/lib/models/index";
 import { Service } from "./generated/lib/operations";
 import { Pipeline } from "./Pipeline";
-import { StorageClient } from "./internal";
+import { NewPipelineOptions, StorageClient } from "./internal";
 import { ContainerClient } from "./ContainerClient";
 import { appendToURLPath } from "./utils/utils.common";
+import { Credential } from "./credentials/Credential";
+import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
 
 export interface ServiceGetPropertiesOptions {
   abortSignal?: Aborter;
@@ -76,11 +78,26 @@ export class BlobServiceClient extends StorageClient {
    *                            pipeline, or provide a customized pipeline.
    * @memberof BlobServiceClient
    */
-  constructor(url: string, pipeline: Pipeline) {
-    super(url, pipeline);
+  constructor(connectionString: string, options?: NewPipelineOptions)
+  constructor(url: string, credential: Credential, options?: NewPipelineOptions)
+  constructor(url: string, pipeline: Pipeline)
+  constructor(
+    s: string,
+    credentialOrPipelineOrOptions?: Credential | Pipeline | NewPipelineOptions,
+    options?: NewPipelineOptions) {
+    let pipeline: Pipeline;
+    if (credentialOrPipelineOrOptions instanceof Pipeline) {
+      pipeline = credentialOrPipelineOrOptions;
+    } else if (credentialOrPipelineOrOptions instanceof Credential) {
+      pipeline = StorageClient.newPipeline(credentialOrPipelineOrOptions, options);
+    } else {
+      options = credentialOrPipelineOrOptions || {};
+      const sharedKeyCredential = new SharedKeyCredential("name", "key");
+      pipeline = StorageClient.newPipeline(sharedKeyCredential, options);
+    }
+    super(s, pipeline);
     this.serviceContext = new Service(this.storageClientContext);
   }
-
   /**
    * Creates a new BlobServiceClient object identical to the source but with the
    * specified request policy pipeline.

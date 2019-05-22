@@ -2,13 +2,16 @@ import { HttpRequestBody, TransferProgressEvent } from "@azure/ms-rest-js";
 
 import * as Models from "./generated/lib/models";
 import { Aborter } from "./Aborter";
-import { BlobClient } from "./internal";
+import { BlobClient, NewPipelineOptions, StorageClient } from "./internal";
 import { PageBlob } from "./generated/lib/operations";
 import { rangeToString } from "./Range";
 import { BlobAccessConditions, Metadata, PageBlobAccessConditions } from "./models";
 import { Pipeline } from "./Pipeline";
 import { URLConstants } from "./utils/constants";
 import { setURLParameter } from "./utils/utils.common";
+import { Credential } from "./credentials/Credential";
+import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
+import { AnonymousCredential } from "./credentials/AnonymousCredential";
 
 export interface PageBlobCreateOptions {
   abortSignal?: Aborter;
@@ -92,8 +95,34 @@ export class PageBlobClient extends BlobClient {
    *                            pipeline, or provide a customized pipeline.
    * @memberof PageBlobClient
    */
-  constructor(url: string, pipeline: Pipeline) {
-    super(url, pipeline);
+  constructor(connectionString: string, containerName: string, blobName: string,  options?: NewPipelineOptions)
+  constructor(url: string, credential?: Credential, options?: NewPipelineOptions)
+  constructor(url: string, pipeline: Pipeline)
+  constructor(
+    s: string,
+    credentialOrPipelineOrContainerNameOrOptions?: string | Credential | Pipeline,
+    blobNameOrOptions?: string | NewPipelineOptions,
+    options?: NewPipelineOptions) {
+    // cannot do
+    // super(s, credentialOrPipelineOrContainerNameOrOptions, blobNameOrOptions, options);
+    let pipeline: Pipeline;
+    if (credentialOrPipelineOrContainerNameOrOptions instanceof Pipeline) {
+      pipeline = credentialOrPipelineOrContainerNameOrOptions;
+    } else if (credentialOrPipelineOrContainerNameOrOptions instanceof Credential) {
+      pipeline = StorageClient.newPipeline(credentialOrPipelineOrContainerNameOrOptions, options);
+    } else if (!credentialOrPipelineOrContainerNameOrOptions && typeof blobNameOrOptions !== "string") {
+      // optional credential not specified
+      pipeline = StorageClient.newPipeline(new AnonymousCredential(), blobNameOrOptions);
+    } else if (credentialOrPipelineOrContainerNameOrOptions && blobNameOrOptions && typeof blobNameOrOptions === "string") {
+      const containerName = credentialOrPipelineOrContainerNameOrOptions;
+      const blobName = blobNameOrOptions;
+      const sharedKeyCredential = new SharedKeyCredential("name", "key");
+      s = "endpoint from connection string" + containerName + "/" + blobName;
+      pipeline = StorageClient.newPipeline(sharedKeyCredential, options);
+    } else {
+      throw new Error("Expecting non-empty strings for containerName and blobName parameters");
+    }
+    super(s, pipeline);
     this.pageBlobContext = new PageBlob(this.storageClientContext);
   }
 

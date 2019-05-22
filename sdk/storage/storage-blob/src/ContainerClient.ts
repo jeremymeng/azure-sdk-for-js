@@ -4,13 +4,16 @@ import { Aborter } from "./Aborter";
 import { Container } from "./generated/lib/operations";
 import { ContainerAccessConditions, Metadata } from "./models";
 import { Pipeline } from "./Pipeline";
-import { StorageClient } from "./internal";
+import { StorageClient, NewPipelineOptions } from "./internal";
 import { ETagNone } from "./utils/constants";
 import { appendToURLPath, truncatedISO8061Date } from "./utils/utils.common";
 import { BlobClient } from "./internal";
 import { AppendBlobClient } from "./internal";
 import { BlockBlobClient } from "./internal";
 import { PageBlobClient } from "./internal";
+import { Credential } from "./credentials/Credential";
+import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
+import { AnonymousCredential } from "./credentials/AnonymousCredential";
 
 export interface ContainerCreateOptions {
   abortSignal?: Aborter;
@@ -166,8 +169,30 @@ export class ContainerClient extends StorageClient {
    *                            pipeline, or provide a customized pipeline.
    * @memberof ContainerClient
    */
-  constructor(url: string, pipeline: Pipeline) {
-    super(url, pipeline);
+  constructor(connectionString: string, containerName: string, options?: NewPipelineOptions)
+  constructor(url: string, credential?: Credential, options?: NewPipelineOptions)
+  constructor(url: string, pipeline: Pipeline)
+  constructor(
+    s: string,
+    credentialOrPipelineOrContainerName?: string | Credential | Pipeline,
+    options?: NewPipelineOptions) {
+    let pipeline: Pipeline;
+    if (credentialOrPipelineOrContainerName instanceof Pipeline) {
+      pipeline = credentialOrPipelineOrContainerName;
+    } else if (credentialOrPipelineOrContainerName instanceof Credential) {
+      pipeline = StorageClient.newPipeline(credentialOrPipelineOrContainerName, options);
+    } else if (!credentialOrPipelineOrContainerName) {
+      // optional credential not specified
+      pipeline = StorageClient.newPipeline(new AnonymousCredential(), options);
+    } else if (credentialOrPipelineOrContainerName) {
+      const containerName = credentialOrPipelineOrContainerName;
+      const sharedKeyCredential = new SharedKeyCredential("name", "key");
+      s = "endpoint from connection string" + containerName + "/";
+      pipeline = StorageClient.newPipeline(sharedKeyCredential, options);
+    } else {
+      throw new Error("Expecting non-empty strings for containerName parameter");
+    }
+    super(s, pipeline);
     this.containerContext = new Container(this.storageClientContext);
   }
 
