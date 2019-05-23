@@ -2,13 +2,13 @@ import { HttpRequestBody, TransferProgressEvent } from "@azure/ms-rest-js";
 
 import * as Models from "./generated/lib/models";
 import { Aborter } from "./Aborter";
-import { BlobClient, NewPipelineOptions, StorageClient } from "./internal";
+import { BlobClient } from "./internal";
 import { BlockBlob } from "./generated/lib/operations";
 import { Range, rangeToString } from "./Range";
 import { BlobAccessConditions, Metadata } from "./models";
 import { Pipeline } from "./Pipeline";
 import { URLConstants } from "./utils/constants";
-import { setURLParameter } from "./utils/utils.common";
+import { setURLParameter, newPipeline, NewPipelineOptions } from "./utils/utils.common";
 import { Credential } from "./credentials/Credential";
 import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
@@ -79,7 +79,7 @@ export class BlockBlobClient extends BlobClient {
    *                     Encoded URL string will NOT be escaped twice, only special characters in URL path will be escaped.
    *                     However, if a blob name includes ? or %, blob name must be encoded in the URL.
    *                     Such as a blob named "my?blob%", the URL should be "https://myaccount.blob.core.windows.net/mycontainer/my%3Fblob%25".
-   * @param {Pipeline} pipeline Call StorageClient.newPipeline() to create a default
+   * @param {Pipeline} pipeline Call newPipeline() to create a default
    *                            pipeline, or provide a customized pipeline.
    * @memberof BlockBlobClient
    */
@@ -97,16 +97,16 @@ export class BlockBlobClient extends BlobClient {
     if (credentialOrPipelineOrContainerName instanceof Pipeline) {
       pipeline = credentialOrPipelineOrContainerName;
     } else if (credentialOrPipelineOrContainerName instanceof Credential) {
-      pipeline = StorageClient.newPipeline(credentialOrPipelineOrContainerName, options);
+      pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
     } else if (!credentialOrPipelineOrContainerName && typeof blobNameOrOptions !== "string") {
       // optional credential not specified
-      pipeline = StorageClient.newPipeline(new AnonymousCredential(), blobNameOrOptions);
+      pipeline = newPipeline(new AnonymousCredential(), blobNameOrOptions);
     } else if (credentialOrPipelineOrContainerName && blobNameOrOptions && typeof blobNameOrOptions === "string") {
       const containerName = credentialOrPipelineOrContainerName;
       const blobName = blobNameOrOptions;
       const sharedKeyCredential = new SharedKeyCredential("name", "key");
       s = "endpoint from connection string" + containerName + "/" + blobName;
-      pipeline = StorageClient.newPipeline(sharedKeyCredential, options);
+      pipeline = newPipeline(sharedKeyCredential, options);
     } else {
       throw new Error("Expecting non-empty strings for containerName and blobName parameters");
     }

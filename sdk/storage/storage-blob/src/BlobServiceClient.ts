@@ -3,11 +3,12 @@ import { Aborter } from "./Aborter";
 import { ListContainersIncludeType } from "./generated/lib/models/index";
 import { Service } from "./generated/lib/operations";
 import { Pipeline } from "./Pipeline";
-import { NewPipelineOptions, StorageClient } from "./internal";
+import { StorageClient } from "./internal";
 import { ContainerClient } from "./ContainerClient";
-import { appendToURLPath } from "./utils/utils.common";
+import { appendToURLPath, newPipeline, NewPipelineOptions } from "./utils/utils.common";
 import { Credential } from "./credentials/Credential";
 import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
+import { StorageClientContext } from './generated/lib/storageClientContext';
 
 export interface ServiceGetPropertiesOptions {
   abortSignal?: Aborter;
@@ -58,7 +59,8 @@ export interface ServiceListContainersSegmentOptions {
  * @class BlobServiceClient
  * @extends {StorageClient}
  */
-export class BlobServiceClient extends StorageClient {
+export class BlobServiceClient // extends StorageClient
+{
   /**
    * serviceContext provided by protocol layer.
    *
@@ -74,7 +76,7 @@ export class BlobServiceClient extends StorageClient {
    * @param {string} url A Client string pointing to Azure Storage blob service, such as
    *                     "https://myaccount.blob.core.windows.net". You can append a SAS
    *                     if using AnonymousCredential, such as "https://myaccount.blob.core.windows.net?sasString".
-   * @param {Pipeline} pipeline Call StorageClient.newPipeline() to create a default
+   * @param {Pipeline} pipeline Call newPipeline() to create a default
    *                            pipeline, or provide a customized pipeline.
    * @memberof BlobServiceClient
    */
@@ -89,15 +91,31 @@ export class BlobServiceClient extends StorageClient {
     if (credentialOrPipelineOrOptions instanceof Pipeline) {
       pipeline = credentialOrPipelineOrOptions;
     } else if (credentialOrPipelineOrOptions instanceof Credential) {
-      pipeline = StorageClient.newPipeline(credentialOrPipelineOrOptions, options);
+      pipeline = newPipeline(credentialOrPipelineOrOptions, options);
     } else {
       options = credentialOrPipelineOrOptions || {};
       const sharedKeyCredential = new SharedKeyCredential("name", "key");
-      pipeline = StorageClient.newPipeline(sharedKeyCredential, options);
+      pipeline = newPipeline(sharedKeyCredential, options);
     }
-    super(s, pipeline);
+    // super(s, pipeline);
+    this._foo = new StorageClient(s, pipeline);
     this.serviceContext = new Service(this.storageClientContext);
   }
+
+  private _foo: StorageClient;
+
+  public get url(): string {
+    return this._foo.url;
+  }
+
+  protected get pipeline(): Pipeline {
+    return this._foo.pipeline;
+  }
+  protected get storageClientContext(): StorageClientContext {
+    return this._foo.storageClientContext;
+  }
+
+
   /**
    * Creates a new BlobServiceClient object identical to the source but with the
    * specified request policy pipeline.

@@ -4,9 +4,9 @@ import { Aborter } from "./Aborter";
 import { Container } from "./generated/lib/operations";
 import { ContainerAccessConditions, Metadata } from "./models";
 import { Pipeline } from "./Pipeline";
-import { StorageClient, NewPipelineOptions } from "./internal";
+import { StorageClient } from "./internal";
 import { ETagNone } from "./utils/constants";
-import { appendToURLPath, truncatedISO8061Date } from "./utils/utils.common";
+import { appendToURLPath, truncatedISO8061Date, newPipeline, NewPipelineOptions } from "./utils/utils.common";
 import { BlobClient } from "./internal";
 import { AppendBlobClient } from "./internal";
 import { BlockBlobClient } from "./internal";
@@ -14,6 +14,7 @@ import { PageBlobClient } from "./internal";
 import { Credential } from "./credentials/Credential";
 import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
+import { StorageClientContext } from './generated/lib/storageClient';
 
 export interface ContainerCreateOptions {
   abortSignal?: Aborter;
@@ -149,7 +150,9 @@ export interface ContainerListBlobsSegmentOptions {
  * @class ContainerClient
  * @extends {StorageClient}
  */
-export class ContainerClient extends StorageClient {
+export class ContainerClient // extends StorageClient
+{
+  private _foo: StorageClient;
   /**
    * containerContext provided by protocol layer.
    *
@@ -165,7 +168,7 @@ export class ContainerClient extends StorageClient {
    *                     "https://myaccount.blob.core.windows.net/mycontainer". You can
    *                     append a SAS if using AnonymousCredential, such as
    *                     "https://myaccount.blob.core.windows.net/mycontainer?sasString".
-   * @param {Pipeline} pipeline Call StorageClient.newPipeline() to create a default
+   * @param {Pipeline} pipeline Call newPipeline() to create a default
    *                            pipeline, or provide a customized pipeline.
    * @memberof ContainerClient
    */
@@ -180,20 +183,32 @@ export class ContainerClient extends StorageClient {
     if (credentialOrPipelineOrContainerName instanceof Pipeline) {
       pipeline = credentialOrPipelineOrContainerName;
     } else if (credentialOrPipelineOrContainerName instanceof Credential) {
-      pipeline = StorageClient.newPipeline(credentialOrPipelineOrContainerName, options);
+      pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
     } else if (!credentialOrPipelineOrContainerName) {
       // optional credential not specified
-      pipeline = StorageClient.newPipeline(new AnonymousCredential(), options);
+      pipeline = newPipeline(new AnonymousCredential(), options);
     } else if (credentialOrPipelineOrContainerName) {
       const containerName = credentialOrPipelineOrContainerName;
       const sharedKeyCredential = new SharedKeyCredential("name", "key");
       s = "endpoint from connection string" + containerName + "/";
-      pipeline = StorageClient.newPipeline(sharedKeyCredential, options);
+      pipeline = newPipeline(sharedKeyCredential, options);
     } else {
       throw new Error("Expecting non-empty strings for containerName parameter");
     }
-    super(s, pipeline);
-    this.containerContext = new Container(this.storageClientContext);
+    // super(s, pipeline);
+    this._foo = new StorageClient(s, pipeline);
+    this.containerContext = new Container(this._foo.storageClientContext);
+  }
+
+  public get url(): string {
+    return this._foo.url;
+  }
+
+  protected get pipeline(): Pipeline {
+    return this._foo.pipeline;
+  }
+  protected get storageClientContext(): StorageClientContext {
+    return this._foo.storageClientContext;
   }
 
   /**
@@ -205,7 +220,7 @@ export class ContainerClient extends StorageClient {
    * @memberof ContainerClient
    */
   public withPipeline(pipeline: Pipeline): ContainerClient {
-    return new ContainerClient(this.url, pipeline);
+    return new ContainerClient(this._foo.url, pipeline);
   }
 
   /**
