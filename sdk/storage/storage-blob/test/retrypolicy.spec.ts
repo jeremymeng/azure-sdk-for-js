@@ -1,7 +1,7 @@
 import { URLBuilder } from "@azure/ms-rest-js";
 import * as assert from "assert";
 
-import { RestError } from "../src";
+import { RestError, ContainerClient } from "../src";
 import { Pipeline } from "../src/Pipeline";
 import { getBSU, getUniqueName } from "./utils";
 import { InjectorPolicyFactory } from "./utils/InjectorPolicyFactory";
@@ -35,7 +35,7 @@ describe("RetryPolicy", () => {
     const factories = (containerClient as any).pipeline.factories.slice(); // clone factories array
     factories.push(injector);
     const pipeline = new Pipeline(factories);
-    const injectContainerClient = containerClient.withPipeline(pipeline);
+    const injectContainerClient = new ContainerClient(containerClient.url, pipeline);
 
     const metadata = {
       key0: "val0",
@@ -60,7 +60,7 @@ describe("RetryPolicy", () => {
     }).factories;
     factories.push(injector);
     const pipeline = new Pipeline(factories);
-    const injectContainerClient = containerClient.withPipeline(pipeline);
+    const injectContainerClient = new ContainerClient(containerClient.url, pipeline);
 
     let hasError = false;
     try {
@@ -100,7 +100,7 @@ describe("RetryPolicy", () => {
     }).factories;
     factories.push(injector);
     const pipeline = new Pipeline(factories);
-    const injectContainerClient = containerClient.withPipeline(pipeline);
+    const injectContainerClient = new ContainerClient(containerClient.url, pipeline);
 
     let finalRequestURL = "";
     try {

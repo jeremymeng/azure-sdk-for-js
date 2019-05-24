@@ -212,17 +212,6 @@ export class ContainerClient // extends StorageClient
     return this._foo.storageClientContext;
   }
 
-  /**
-   * Creates a new ContainerClient object identical to the source but with the
-   * specified request policy pipeline.
-   *
-   * @param {Pipeline} pipeline
-   * @returns {ContainerClient}
-   * @memberof ContainerClient
-   */
-  public withPipeline(pipeline: Pipeline): ContainerClient {
-    return new ContainerClient(this._foo.url, pipeline);
-  }
 
   /**
    * Creates a new container under the specified account. If the container with
