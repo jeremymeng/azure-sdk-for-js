@@ -15,6 +15,7 @@ import { Credential } from "./credentials/Credential";
 import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
 import { StorageClientContext } from './generated/lib/storageClient';
+import { Lease } from './Lease';
 
 export interface ContainerCreateOptions {
   abortSignal?: Aborter;
@@ -539,14 +540,19 @@ export class ContainerClient // extends StorageClient
     proposedLeaseId: string,
     duration: number,
     options: ContainerAcquireLeaseOptions = {}
-  ): Promise<Models.ContainerAcquireLeaseResponse> {
+  ) {
     const aborter = options.abortSignal || Aborter.none;
-    return this.containerContext.acquireLease({
+    const response = await this.containerContext.acquireLease({
       abortSignal: aborter,
       duration,
       modifiedAccessConditions: options.modifiedAccessConditions,
       proposedLeaseId
     });
+    if (!response.errorCode && response.leaseId) {
+      return new Lease(response.leaseId, this.containerContext);
+    } else {
+      throw new Error("Error acquiring lease" + response.errorCode);
+    }
   }
 
   /**
@@ -559,16 +565,16 @@ export class ContainerClient // extends StorageClient
    * @returns {Promise<Models.ContainerReleaseLeaseResponse>}
    * @memberof ContainerClient
    */
-  public async releaseLease(
-    leaseId: string,
-    options: ContainerReleaseLeaseOptions = {}
-  ): Promise<Models.ContainerReleaseLeaseResponse> {
-    const aborter = options.abortSignal || Aborter.none;
-    return this.containerContext.releaseLease(leaseId, {
-      abortSignal: aborter,
-      modifiedAccessConditions: options.modifiedAccessConditions
-    });
-  }
+  // public async releaseLease(
+  //   leaseId: string,
+  //   options: ContainerReleaseLeaseOptions = {}
+  // ): Promise<Models.ContainerReleaseLeaseResponse> {
+  //   const aborter = options.abortSignal || Aborter.none;
+  //   return this.containerContext.releaseLease(leaseId, {
+  //     abortSignal: aborter,
+  //     modifiedAccessConditions: options.modifiedAccessConditions
+  //   });
+  // }
 
   /**
    * To renew an existing lease.
@@ -579,16 +585,16 @@ export class ContainerClient // extends StorageClient
    * @returns {Promise<Models.ContainerRenewLeaseResponse>}
    * @memberof ContainerClient
    */
-  public async renewLease(
-    leaseId: string,
-    options: ContainerRenewLeaseOptions = {}
-  ): Promise<Models.ContainerRenewLeaseResponse> {
-    const aborter = options.abortSignal || Aborter.none;
-    return this.containerContext.renewLease(leaseId, {
-      abortSignal: aborter,
-      modifiedAccessConditions: options.modifiedAccessConditions
-    });
-  }
+  // public async renewLease(
+  //   leaseId: string,
+  //   options: ContainerRenewLeaseOptions = {}
+  // ): Promise<Models.ContainerRenewLeaseResponse> {
+  //   const aborter = options.abortSignal || Aborter.none;
+  //   return this.containerContext.renewLease(leaseId, {
+  //     abortSignal: aborter,
+  //     modifiedAccessConditions: options.modifiedAccessConditions
+  //   });
+  // }
 
   /**
    * To end the lease but ensure that another client cannot acquire a new lease
@@ -622,17 +628,17 @@ export class ContainerClient // extends StorageClient
    * @returns {Promise<Models.ContainerChangeLeaseResponse>}
    * @memberof ContainerClient
    */
-  public async changeLease(
-    leaseId: string,
-    proposedLeaseId: string,
-    options: ContainerChangeLeaseOptions = {}
-  ): Promise<Models.ContainerChangeLeaseResponse> {
-    const aborter = options.abortSignal || Aborter.none;
-    return this.containerContext.changeLease(leaseId, proposedLeaseId, {
-      abortSignal: aborter,
-      modifiedAccessConditions: options.modifiedAccessConditions
-    });
-  }
+  // public async changeLease(
+  //   leaseId: string,
+  //   proposedLeaseId: string,
+  //   options: ContainerChangeLeaseOptions = {}
+  // ): Promise<Models.ContainerChangeLeaseResponse> {
+  //   const aborter = options.abortSignal || Aborter.none;
+  //   return this.containerContext.changeLease(leaseId, proposedLeaseId, {
+  //     abortSignal: aborter,
+  //     modifiedAccessConditions: options.modifiedAccessConditions
+  //   });
+  // }
 
   /**
    * listBlobFlatSegment returns a single segment of blobs starting from the

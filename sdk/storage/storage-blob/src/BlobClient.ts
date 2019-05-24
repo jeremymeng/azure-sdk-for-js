@@ -17,6 +17,7 @@ import { Credential } from "./credentials/Credential";
 import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
 import { StorageClientContext } from './generated/lib/storageClientContext';
+import { Lease } from './Lease';
 
 export interface BlobDownloadOptions {
   abortSignal?: Aborter;
@@ -491,14 +492,19 @@ export class BlobClient // extends StorageClient
     proposedLeaseId: string,
     duration: number,
     options: BlobAcquireLeaseOptions = {}
-  ): Promise<Models.BlobAcquireLeaseResponse> {
+  ) {
     const aborter = options.abortSignal || Aborter.none;
-    return this.blobContext.acquireLease({
+    const response = await this.blobContext.acquireLease({
       abortSignal: aborter,
       duration,
       modifiedAccessConditions: options.modifiedAccessConditions,
       proposedLeaseId
     });
+    if (!response.errorCode && response.leaseId) {
+      return new Lease(response.leaseId, this.blobContext);
+    } else {
+      throw new Error("Error acquiring lease" + response.errorCode);
+    }
   }
 
   /**
@@ -511,16 +517,16 @@ export class BlobClient // extends StorageClient
    * @returns {Promise<Models.BlobReleaseLeaseResponse>}
    * @memberof BlobClient
    */
-  public async releaseLease(
-    leaseId: string,
-    options: BlobReleaseLeaseOptions = {}
-  ): Promise<Models.BlobReleaseLeaseResponse> {
-    const aborter = options.abortSignal || Aborter.none;
-    return this.blobContext.releaseLease(leaseId, {
-      abortSignal: aborter,
-      modifiedAccessConditions: options.modifiedAccessConditions
-    });
-  }
+  // public async releaseLease(
+  //   leaseId: string,
+  //   options: BlobReleaseLeaseOptions = {}
+  // ): Promise<Models.BlobReleaseLeaseResponse> {
+  //   const aborter = options.abortSignal || Aborter.none;
+  //   return this.blobContext.releaseLease(leaseId, {
+  //     abortSignal: aborter,
+  //     modifiedAccessConditions: options.modifiedAccessConditions
+  //   });
+  // }
 
   /**
    * To renew an existing lease.
@@ -531,16 +537,16 @@ export class BlobClient // extends StorageClient
    * @returns {Promise<Models.BlobRenewLeaseResponse>}
    * @memberof BlobClient
    */
-  public async renewLease(
-    leaseId: string,
-    options: BlobRenewLeaseOptions = {}
-  ): Promise<Models.BlobRenewLeaseResponse> {
-    const aborter = options.abortSignal || Aborter.none;
-    return this.blobContext.renewLease(leaseId, {
-      abortSignal: aborter,
-      modifiedAccessConditions: options.modifiedAccessConditions
-    });
-  }
+  // public async renewLease(
+  //   leaseId: string,
+  //   options: BlobRenewLeaseOptions = {}
+  // ): Promise<Models.BlobRenewLeaseResponse> {
+  //   const aborter = options.abortSignal || Aborter.none;
+  //   return this.blobContext.renewLease(leaseId, {
+  //     abortSignal: aborter,
+  //     modifiedAccessConditions: options.modifiedAccessConditions
+  //   });
+  // }
 
   /**
    * To change the ID of an existing lease.
@@ -552,17 +558,17 @@ export class BlobClient // extends StorageClient
    * @returns {Promise<Models.BlobChangeLeaseResponse>}
    * @memberof BlobClient
    */
-  public async changeLease(
-    leaseId: string,
-    proposedLeaseId: string,
-    options: BlobChangeLeaseOptions = {}
-  ): Promise<Models.BlobChangeLeaseResponse> {
-    const aborter = options.abortSignal || Aborter.none;
-    return this.blobContext.changeLease(leaseId, proposedLeaseId, {
-      abortSignal: aborter,
-      modifiedAccessConditions: options.modifiedAccessConditions
-    });
-  }
+  // public async changeLease(
+  //   leaseId: string,
+  //   proposedLeaseId: string,
+  //   options: BlobChangeLeaseOptions = {}
+  // ): Promise<Models.BlobChangeLeaseResponse> {
+  //   const aborter = options.abortSignal || Aborter.none;
+  //   return this.blobContext.changeLease(leaseId, proposedLeaseId, {
+  //     abortSignal: aborter,
+  //     modifiedAccessConditions: options.modifiedAccessConditions
+  //   });
+  // }
 
   /**
    * To end the lease but ensure that another client cannot acquire a new lease

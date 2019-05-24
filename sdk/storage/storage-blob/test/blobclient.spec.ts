@@ -104,33 +104,33 @@ describe("BlobClient", () => {
   it("acquireLease", async () => {
     const guid = "ca761232ed4211cebacd00aa0057b223";
     const duration = 30;
-    await blobClient.acquireLease(guid, duration);
+    const lease = await blobClient.acquireLease(guid, duration);
 
     const result = await blobClient.getProperties();
     assert.equal(result.leaseDuration, "fixed");
     assert.equal(result.leaseState, "leased");
     assert.equal(result.leaseStatus, "locked");
 
-    await blobClient.releaseLease(guid);
+    await lease.release();
   });
 
   it("releaseLease", async () => {
     const guid = "ca761232ed4211cebacd00aa0057b223";
     const duration = -1;
-    await blobClient.acquireLease(guid, duration);
+    const lease = await blobClient.acquireLease(guid, duration);
 
     const result = await blobClient.getProperties();
     assert.equal(result.leaseDuration, "infinite");
     assert.equal(result.leaseState, "leased");
     assert.equal(result.leaseStatus, "locked");
 
-    await blobClient.releaseLease(guid);
+    await lease.release();
   });
 
   it("renewLease", async () => {
     const guid = "ca761232ed4211cebacd00aa0057b223";
     const duration = 15;
-    await blobClient.acquireLease(guid, duration);
+    const lease = await blobClient.acquireLease(guid, duration);
 
     const result = await blobClient.getProperties();
     assert.equal(result.leaseDuration, "fixed");
@@ -144,19 +144,19 @@ describe("BlobClient", () => {
     assert.equal(result2.leaseState, "expired");
     assert.equal(result2.leaseStatus, "unlocked");
 
-    await blobClient.renewLease(guid);
+    await lease.renew();
     const result3 = await blobClient.getProperties();
     assert.equal(result3.leaseDuration, "fixed");
     assert.equal(result3.leaseState, "leased");
     assert.equal(result3.leaseStatus, "locked");
 
-    await blobClient.releaseLease(guid);
+    await lease.release();
   });
 
   it("changeLease", async () => {
     const guid = "ca761232ed4211cebacd00aa0057b223";
     const duration = 15;
-    await blobClient.acquireLease(guid, duration);
+    const lease = await blobClient.acquireLease(guid, duration);
 
     const result = await blobClient.getProperties();
     assert.equal(result.leaseDuration, "fixed");
@@ -164,10 +164,14 @@ describe("BlobClient", () => {
     assert.equal(result.leaseStatus, "locked");
 
     const newGuid = "3c7e72ebb4304526bc53d8ecef03798f";
-    await blobClient.changeLease(guid, newGuid);
-
+    await lease.chanageId(newGuid);
     await blobClient.getProperties();
-    await blobClient.releaseLease(newGuid);
+
+    // change again
+    await lease.chanageId(newGuid);
+    await blobClient.getProperties();
+
+    await lease.release();
   });
 
   it("breakLease", async () => {

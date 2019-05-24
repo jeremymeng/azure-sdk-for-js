@@ -17,7 +17,7 @@ import {
 import { SASProtocol } from "../../src/SASQueryParameters";
 import { getBSU, getUniqueName } from "../utils";
 
-describe.only("Shared Access Signature (SAS) generation Node.js only", () => {
+describe("Shared Access Signature (SAS) generation Node.js only", () => {
   const blobServiceClient = getBSU();
 
   it("generateAccountSASQueryParameters should work", async () => {
