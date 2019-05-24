@@ -8,7 +8,6 @@ import { ContainerClient } from "./ContainerClient";
 import { appendToURLPath, newPipeline, NewPipelineOptions } from "./utils/utils.common";
 import { Credential } from "./credentials/Credential";
 import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
-import { StorageClientContext } from './generated/lib/storageClientContext';
 
 export interface ServiceGetPropertiesOptions {
   abortSignal?: Aborter;
@@ -61,6 +60,8 @@ export interface ServiceListContainersSegmentOptions {
  */
 export class BlobServiceClient // extends StorageClient
 {
+  private _foo: StorageClient;
+
   /**
    * serviceContext provided by protocol layer.
    *
@@ -99,22 +100,12 @@ export class BlobServiceClient // extends StorageClient
     }
     // super(s, pipeline);
     this._foo = new StorageClient(s, pipeline);
-    this.serviceContext = new Service(this.storageClientContext);
+    this.serviceContext = new Service(this._foo.storageClientContext);
   }
-
-  private _foo: StorageClient;
 
   public get url(): string {
     return this._foo.url;
   }
-
-  protected get pipeline(): Pipeline {
-    return this._foo.pipeline;
-  }
-  protected get storageClientContext(): StorageClientContext {
-    return this._foo.storageClientContext;
-  }
-
 
   /**
    * Creates a ContainerClient object
@@ -128,7 +119,7 @@ export class BlobServiceClient // extends StorageClient
   ): ContainerClient {
     return new ContainerClient(
       appendToURLPath(this.url, encodeURIComponent(containerName)),
-      this.pipeline
+      this._foo.pipeline
     );
   }
 

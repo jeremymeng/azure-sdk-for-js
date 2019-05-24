@@ -14,7 +14,6 @@ import { PageBlobClient } from "./internal";
 import { Credential } from "./credentials/Credential";
 import { SharedKeyCredential } from "./credentials/SharedKeyCredential";
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
-import { StorageClientContext } from './generated/lib/storageClient';
 import { Lease } from './Lease';
 
 export interface ContainerCreateOptions {
@@ -208,10 +207,6 @@ export class ContainerClient // extends StorageClient
   protected get pipeline(): Pipeline {
     return this._foo.pipeline;
   }
-  protected get storageClientContext(): StorageClientContext {
-    return this._foo.storageClientContext;
-  }
-
 
   /**
    * Creates a new container under the specified account. If the container with
