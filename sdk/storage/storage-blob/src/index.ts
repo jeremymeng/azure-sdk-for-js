@@ -39,4 +39,5 @@ export * from "./TelemetryPolicyFactory";
 export * from "./policies/TokenCredentialPolicy";
 export * from "./UniqueRequestIDPolicyFactory";
 export * from "./SASQueryParameters";
+export { NewPipelineOptions, newPipeline } from "./utils/utils.common";
 export { Models, RestError };
