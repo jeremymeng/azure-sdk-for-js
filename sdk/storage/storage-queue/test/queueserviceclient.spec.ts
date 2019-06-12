@@ -1,7 +1,6 @@
 import * as assert from "assert";
 
 import { QueueServiceClient } from "../src/QueueServiceClient";
-import { QueueClient } from "../src/QueueClient";
 import { getAlternateQSU, getQSU, wait } from "./utils";
 import { record } from "./utils/recorder";
 import * as dotenv from "dotenv";
@@ -75,7 +74,7 @@ describe("QueueServiceClient", () => {
   it("Verify AsyncIterator(generator .next() syntax) for listQueues", async () => {
     const queueServiceClient = getQSU();
 
-    const queueNamePrefix = getUniqueName("queue");
+    const queueNamePrefix = recorder.getUniqueName("queue");
     const queueName1 = `${queueNamePrefix}x1`;
     const queueName2 = `${queueNamePrefix}x2`;
 
@@ -103,7 +102,7 @@ describe("QueueServiceClient", () => {
   it("Verify AsyncIterator(for-loop syntax) for listQueues", async () => {
     const queueClients = [];
     const queueServiceClient = getQSU();
-    const queueNamePrefix = getUniqueName("queue");
+    const queueNamePrefix = recorder.getUniqueName("queue");
 
     for (let i = 0; i < 4; i++) {
       const queueClient = queueServiceClient.createQueueClient(`${queueNamePrefix}x${i}`);

@@ -13,7 +13,7 @@ describe("QueueClient", () => {
 
   let recorder: any;
 
-  beforeEach(async () => {
+  beforeEach(async function() {
     recorder = record(this);
     queueName = recorder.getUniqueName("queue");
     queueClient = queueServiceClient.createQueueClient(queueName);
@@ -68,7 +68,7 @@ describe("QueueClient", () => {
   });
 
   it("create with all parameters", async () => {
-    const qURL = queueServiceClient.createQueueClient(serviceURL, recorder.getUniqueName(queueName));
+    const qURL = queueServiceClient.createQueueClient(recorder.getUniqueName(queueName));
     const metadata = { key: "value" };
     await qURL.create({ metadata });
     const result = await qURL.getProperties();

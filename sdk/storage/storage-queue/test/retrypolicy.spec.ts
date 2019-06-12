@@ -11,9 +11,12 @@ dotenv.config({ path: "../.env" });
 
 describe("RetryPolicy", () => {
   const queueServiceClient = getQSU();
+  let queueName: string;
   let queueClient: QueueClient;
 
-  beforeEach(async () => {
+  let recorder: any;
+
+  beforeEach(async function() {
     recorder = record(this);
     queueName = recorder.getUniqueName("queue");
     queueClient = queueServiceClient.createQueueClient(queueName);

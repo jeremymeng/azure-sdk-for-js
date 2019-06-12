@@ -1,6 +1,5 @@
 import * as assert from "assert";
 
-import { Aborter } from "../src/Aborter";
 import { QueueClient } from "../src/QueueClient";
 import { getQSU, sleep } from "./utils";
 import { record } from "./utils/recorder";

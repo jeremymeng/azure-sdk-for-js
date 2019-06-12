@@ -8,7 +8,6 @@ dotenv.config({ path: "../.env" });
 
 describe("MessagesClient", () => {
   const queueServiceClient = getQSU();
-  const serviceURL = getQSU();
   let queueName: string;
   let queueClient: QueueClient;
   const messageContent = "Hello World";
