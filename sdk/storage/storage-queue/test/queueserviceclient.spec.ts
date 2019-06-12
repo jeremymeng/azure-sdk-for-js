@@ -1,11 +1,23 @@
 import * as assert from "assert";
 
 import { QueueServiceClient } from "../src/QueueServiceClient";
-import { getAlternateQSU, getQSU, getUniqueName, wait } from "./utils";
+import { QueueClient } from "../src/QueueClient";
+import { getAlternateQSU, getQSU, wait } from "./utils";
+import { record } from "./utils/recorder";
 import * as dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
 
 describe("QueueServiceClient", () => {
+  let recorder: any;
+
+  beforeEach(function() {
+    recorder = record(this);
+  });
+
+  afterEach(() => {
+    recorder.stop();
+  });
+
   it("listQueuesSegment with default parameters", async () => {
     const queueServiceClient = getQSU();
     const result = await queueServiceClient.listQueuesSegment();
@@ -26,7 +38,7 @@ describe("QueueServiceClient", () => {
   it("listQueuesSegment with all parameters", async () => {
     const queueServiceClient = getQSU();
 
-    const queueNamePrefix = getUniqueName("queue");
+    const queueNamePrefix = recorder.getUniqueName("queue");
     const queueName1 = `${queueNamePrefix}x1`;
     const queueName2 = `${queueNamePrefix}x2`;
     const queueClient1 = queueServiceClient.createQueueClient(queueName1);

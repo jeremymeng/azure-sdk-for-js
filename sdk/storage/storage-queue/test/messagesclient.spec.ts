@@ -1,23 +1,30 @@
 import * as assert from "assert";
 
-import { getQSU, getUniqueName } from "./utils";
+import { QueueClient } from "../src/QueueClient";
+import { getQSU } from "./utils";
+import { record } from "./utils/recorder";
 import * as dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
 
 describe("MessagesClient", () => {
   const queueServiceClient = getQSU();
-  let queueName = getUniqueName("queue");
-  let queueClient = queueServiceClient.createQueueClient(queueName);
+  const serviceURL = getQSU();
+  let queueName: string;
+  let queueClient: QueueClient;
   const messageContent = "Hello World";
 
-  beforeEach(async () => {
-    queueName = getUniqueName("queue");
+  let recorder: any;
+
+  beforeEach(async function() {
+    recorder = record(this);
+    queueName = recorder.getUniqueName("queue");
     queueClient = queueServiceClient.createQueueClient(queueName);
     await queueClient.create();
   });
 
   afterEach(async () => {
     await queueClient.delete();
+    recorder.stop();
   });
 
   it("enqueue, peek, dequeue and clear message with default parameters", async () => {

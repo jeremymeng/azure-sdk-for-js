@@ -3,24 +3,26 @@ import * as assert from "assert";
 
 import { QueueClient, RestError, newPipeline } from "../src";
 import { Pipeline } from "../src/Pipeline";
-import { getQSU, getUniqueName } from "./utils";
+import { getQSU } from "./utils";
 import { InjectorPolicyFactory } from "./utils/InjectorPolicyFactory";
+import { record } from "./utils/recorder";
 import * as dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
 
 describe("RetryPolicy", () => {
   const queueServiceClient = getQSU();
-  let queueName: string = getUniqueName("queue");
-  let queueClient = queueServiceClient.createQueueClient(queueName);
+  let queueClient: QueueClient;
 
   beforeEach(async () => {
-    queueName = getUniqueName("queue");
+    recorder = record(this);
+    queueName = recorder.getUniqueName("queue");
     queueClient = queueServiceClient.createQueueClient(queueName);
     await queueClient.create();
   });
 
   afterEach(async () => {
     await queueClient.delete();
+    recorder.stop();
   });
 
   it("Retry policy should work when first request fails with 500", async () => {

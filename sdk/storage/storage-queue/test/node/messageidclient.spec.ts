@@ -1,21 +1,27 @@
 import * as assert from "assert";
 
-import { getQSU, getUniqueName } from "../utils";
+import { QueueClient } from "../../src/QueueClient";
+import { getQSU } from "../utils";
+import { record } from "../utils/recorder";
 
 describe("MessageIdClient Node", () => {
   const queueServiceClient = getQSU();
-  let queueName = getUniqueName("queue");
-  let queueClient = queueServiceClient.createQueueClient(queueName);
+  let queueName: string;
+  let queueClient: QueueClient;
   const messageContent = "Hello World";
 
-  beforeEach(async () => {
-    queueName = getUniqueName("queue");
+  let recorder: any;
+
+  beforeEach(async function() {
+    recorder = record(this);
+    queueName = recorder.getUniqueName("queue");
     queueClient = queueServiceClient.createQueueClient(queueName);
     await queueClient.create();
   });
 
   afterEach(async () => {
     await queueClient.delete();
+    recorder.stop();
   });
 
   it("update message with 64KB characters including special char which is computed after encoding", async () => {
