@@ -31,6 +31,14 @@ module.exports = function(config) {
       // polyfill service supporting IE11 missing features
       // Promise,String.prototype.startsWith,String.prototype.endsWith,String.prototype.repeat,String.prototype.includes,Array.prototype.includes,Object.keys
       "https://cdn.polyfill.io/v2/polyfill.js?features=Promise,String.prototype.startsWith,String.prototype.endsWith,String.prototype.repeat,String.prototype.includes,Array.prototype.includes,Object.keys|always",
+      //"https://unpkg.com/core-js-pure@3.1.4/features/symbol/async-iterator.js",
+      //"https://unpkg.com/core-js@3.1.4/stable/index.js",
+      //"https://unpkg.com/regenerator-runtime@0.13.2/runtime.js",
+      //"https://unpkg.com/babel-polyfill@6.26.0/dist/polyfill.min.js",
+      //"https://unpkg.com/core-js@2.5.0/modules/es7.symbol.async-iterator.js",
+      //"https://unpkg.com/core-js@2.5.0/fn/symbol/async-iterator.js",
+      "https://unpkg.com/core-js@2.5.0/shim.js",
+      "https://unpkg.com/regenerator-runtime@0.10.5/runtime.js",
       "dist-test/index.browser.js",
       "recordings/browsers/**/*.json"
     ],
@@ -120,7 +128,7 @@ module.exports = function(config) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     // 'ChromeHeadless', 'Chrome', 'Firefox', 'Edge', 'IE'
-    browsers: ["ChromeHeadless"],
+    browsers: ["IE"],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits

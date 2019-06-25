@@ -141,7 +141,6 @@
     "karma-json-preprocessor": "^0.3.3",
     "karma-json-to-file-reporter": "^1.0.1",
     "nise": "^1.4.10",
-    "nock": "^10.0.6",
-    "query-string": "^6.5.0"
+    "nock": "^10.0.6"
   }
 }

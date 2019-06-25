@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import nise from "nise";
-import queryString from "query-string";
+// import queryString from "query-string";
 import { getUniqueName, isBrowser } from "../utils";
 import { delay as restDelay } from "@azure/core-http";
 import { blobToString } from "./index.browser";
@@ -244,7 +244,7 @@ class NiseRecorder extends Recorder {
     // We're not storing SAS Query Parameters because they may contain sensitive information
     // We're ignoring the "_" parameter as well because it's not being added by our code
     // More info on "_": https://stackoverflow.com/questions/3687729/who-add-single-underscore-query-parameter
-    const parsedUrl = queryString.parseUrl(request.url);
+    const parsedUrl = request.url; // queryString.parseUrl(request.url);
     const query: any = {};
     for (const param in parsedUrl.query) {
       if (!this.sasQueryParameters.includes(param) && param !== "_") {
@@ -356,7 +356,7 @@ class NiseRecorder extends Recorder {
         reqSend.call(req, data);
 
         // formattedRequest contains all the necessary information to look for a match in our recordings
-        const parsedUrl = queryString.parseUrl(req.url);
+        const parsedUrl = req.url; // queryString.parseUrl(req.url);
         const formattedRequest = {
           method: req.method,
           url: parsedUrl.url,
