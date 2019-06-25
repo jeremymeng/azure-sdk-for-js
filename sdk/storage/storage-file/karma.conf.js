@@ -29,9 +29,9 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       // polyfill service supporting IE11 missing features
-      // Promise,String.prototype.startsWith,String.prototype.endsWith,String.prototype.repeat,String.prototype.includes,Array.prototype.includes,Object.keys
-      // "https://cdn.polyfill.io/v2/polyfill.js?features=Promise,String.prototype.startsWith,String.prototype.endsWith,String.prototype.repeat,String.prototype.includes,Array.prototype.includes,Object.keys|always",
-      "https://unpkg.com/babel-polyfill@6.26.0/dist/polyfill.js",
+      // Symbol,Promise,String.prototype.startsWith,String.prototype.endsWith,String.prototype.repeat,String.prototype.includes,Array.prototype.includes,Object.keys
+      "https://cdn.polyfill.io/v2/polyfill.js?features=Symbol,Promise,String.prototype.startsWith,String.prototype.endsWith,String.prototype.repeat,String.prototype.includes,Array.prototype.includes,Object.keys|always",
+      "asyncIterator-polyfill.js", // for Symbol.asyncIterator
       "dist-test/index.browser.js",
       "recordings/browsers/**/*.json"
     ],
