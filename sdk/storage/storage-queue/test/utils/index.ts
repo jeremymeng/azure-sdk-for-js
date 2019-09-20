@@ -46,7 +46,10 @@ export function getGenericQSU(
       // Enable logger when debugging
       // logger: new ConsoleHttpPipelineLogger(HttpPipelineLogLevel.INFO)
     });
-    const queuePrimaryURL = `https://${accountName}${accountNameSuffix}.queue.core.windows.net/`;
+    const queuePrimaryURL =
+      accountName === "devstoreaccount1"
+        ? "http://127.0.0.1:10001/devstoreaccount1/"
+        : `https://${accountName}${accountNameSuffix}.queue.core.windows.net/`;
     return new QueueServiceClient(queuePrimaryURL, pipeline);
   }
 }

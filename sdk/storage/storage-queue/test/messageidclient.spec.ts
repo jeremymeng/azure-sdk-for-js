@@ -35,7 +35,7 @@ describe("MessageIdClient", () => {
     assert.ok(eResult.messageId);
     assert.ok(eResult.popReceipt);
     assert.ok(eResult.requestId);
-    assert.ok(eResult.clientRequestId);
+    //assert.ok(eResult.clientRequestId);
     assert.ok(eResult.timeNextVisible);
     assert.ok(eResult.version);
 
@@ -46,7 +46,7 @@ describe("MessageIdClient", () => {
     assert.ok(uResult.timeNextVisible);
     assert.ok(uResult.date);
     assert.ok(uResult.requestId);
-    assert.ok(eResult.clientRequestId);
+    //assert.ok(eResult.clientRequestId);
     assert.ok(uResult.popReceipt);
 
     let pResult = await messagesClient.peek();
