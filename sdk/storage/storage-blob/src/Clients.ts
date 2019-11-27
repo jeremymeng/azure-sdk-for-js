@@ -55,7 +55,7 @@ import {
   appendToURLPath,
   getValueInConnString
 } from "./utils/utils.common";
-import { readStreamToLocalFile } from "./utils/utils.node";
+//import { readStreamToLocalFile } from "./utils/utils.node";
 import { StorageSharedKeyCredential } from "./credentials/StorageSharedKeyCredential";
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
 import { Batch } from "./utils/Batch";
@@ -1185,10 +1185,12 @@ export class BlobClient extends StorageClient {
           //   }, options: ${JSON.stringify(updatedOptions)}`
           // );
 
-          return (await this.blobContext.download({
-            abortSignal: options.abortSignal,
-            ...updatedOptions
-          })).readableStreamBody!;
+          return (
+            await this.blobContext.download({
+              abortSignal: options.abortSignal,
+              ...updatedOptions
+            })
+          ).readableStreamBody!;
         },
         offset,
         res.contentLength!,
@@ -1887,7 +1889,13 @@ export class BlobClient extends StorageClient {
         }
       });
       if (response.readableStreamBody) {
-        await readStreamToLocalFile(response.readableStreamBody, filePath);
+        const stream = fs.createWriteStream(filePath, { flags: "wx" });
+        response.readableStreamBody.pipe(stream);
+        await new Promise((resolve, reject) => {
+          stream.on("finish", resolve);
+          stream.on("error", reject);
+        });
+        // await readStreamToLocalFile(response.readableStreamBody, filePath);
       }
 
       // The stream is no longer accessible so setting it to undefined.
@@ -6260,7 +6268,7 @@ export class ContainerClient extends StorageClient {
    *
    * // Gets next marker
    * let marker = response.continuationToken;
-   * 
+   *
    * // Passing next marker as continuationToken
    *
    * iterator = containerClient.listBlobsFlat().byPage({ continuationToken: marker, maxPageSize: 10 });
@@ -6377,7 +6385,7 @@ export class ContainerClient extends StorageClient {
   private async *listItemsByHierarchy(
     delimiter: string,
     options: ContainerListBlobsSegmentOptions = {}
-  ): AsyncIterableIterator<{ kind: "prefix" } & BlobPrefix | { kind: "blob" } & BlobItem> {
+  ): AsyncIterableIterator<({ kind: "prefix" } & BlobPrefix) | ({ kind: "blob" } & BlobItem)> {
     let marker: string | undefined;
     for await (const listBlobsHierarchySegmentResponse of this.listHierarchySegments(
       delimiter,
@@ -6481,7 +6489,7 @@ export class ContainerClient extends StorageClient {
     delimiter: string,
     options: ContainerListBlobsOptions = {}
   ): PagedAsyncIterableIterator<
-    { kind: "prefix" } & BlobPrefix | { kind: "blob" } & BlobItem,
+    ({ kind: "prefix" } & BlobPrefix) | ({ kind: "blob" } & BlobItem),
     ContainerListBlobHierarchySegmentResponse
   > {
     const include: ListBlobsIncludeItem[] = [];

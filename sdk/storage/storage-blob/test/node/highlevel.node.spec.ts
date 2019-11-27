@@ -550,13 +550,25 @@ describe("Highlevel", () => {
     fs.unlinkSync(downloadedFile);
   });
 
+  it("downloadToFile should fail when saving to directory", async () => {
+    const rs = fs.createReadStream(tempFileSmall);
+    await blockBlobClient.uploadStream(rs, 4 * 1024 * 1024, 20);
+
+    try {
+      await blobClient.downloadToFile(__dirname);
+      throw new Error("Test failure.");
+    } catch (err) {
+      assert.notEqual(err.message, "Test failure.");
+    }
+  });
+
   it("downloadToFile should success", async () => {
     recorder.skip("node", "Temp file - recorder doesn't support saving the file");
     const downloadedFilePath = recorder.getUniqueName("downloadedtofile.");
     const rs = fs.createReadStream(tempFileSmall);
     await blockBlobClient.uploadStream(rs, 4 * 1024 * 1024, 20);
 
-    const response = await blobClient.downloadToFile(downloadedFilePath, 0, undefined);
+    const response = await blobClient.downloadToFile(downloadedFilePath);
 
     assert.ok(
       response.contentLength === tempFileSmallLength,
