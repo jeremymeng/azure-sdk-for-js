@@ -37,10 +37,10 @@ async function runSamples(language, extension) {
 
   if (language === "typescript") {
     cmd = "ts-node";
-    await exec(`npm run build:ts-samples`, directory);
+    await exec(`npm run build:ts-samples`, "./");
   } else {
     cmd = "node";
-    await exec(`npm run build:js-samples`, directory);
+    await exec(`npm run build:js-samples`, "./");
   }
 
   console.log(`Running ${language} samples...`);
