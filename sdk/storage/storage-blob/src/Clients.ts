@@ -6,7 +6,8 @@ import {
   TransferProgressEvent,
   TokenCredential,
   isTokenCredential,
-  getDefaultProxySettings} from "@azure/core-http";
+  getDefaultProxySettings
+} from "@azure/core-http";
 import { CanonicalCode } from "@opentelemetry/types";
 import {
   BlobDownloadResponseModel,
@@ -1196,10 +1197,12 @@ export class BlobClient extends StorageClient {
           //   }, options: ${JSON.stringify(updatedOptions)}`
           // );
 
-          return (await this.blobContext.download({
-            abortSignal: options.abortSignal,
-            ...updatedOptions
-          })).readableStreamBody!;
+          return (
+            await this.blobContext.download({
+              abortSignal: options.abortSignal,
+              ...updatedOptions
+            })
+          ).readableStreamBody!;
         },
         offset,
         res.contentLength!,
@@ -6394,7 +6397,7 @@ export class ContainerClient extends StorageClient {
   private async *listItemsByHierarchy(
     delimiter: string,
     options: ContainerListBlobsSegmentOptions = {}
-  ): AsyncIterableIterator<{ kind: "prefix" } & BlobPrefix | { kind: "blob" } & BlobItem> {
+  ): AsyncIterableIterator<({ kind: "prefix" } & BlobPrefix) | ({ kind: "blob" } & BlobItem)> {
     let marker: string | undefined;
     for await (const listBlobsHierarchySegmentResponse of this.listHierarchySegments(
       delimiter,
@@ -6498,7 +6501,7 @@ export class ContainerClient extends StorageClient {
     delimiter: string,
     options: ContainerListBlobsOptions = {}
   ): PagedAsyncIterableIterator<
-    { kind: "prefix" } & BlobPrefix | { kind: "blob" } & BlobItem,
+    ({ kind: "prefix" } & BlobPrefix) | ({ kind: "blob" } & BlobItem),
     ContainerListBlobHierarchySegmentResponse
   > {
     const include: ListBlobsIncludeItem[] = [];

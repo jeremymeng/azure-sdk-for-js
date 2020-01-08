@@ -24,7 +24,7 @@ export class PollerCancelledError extends Error {
   }
 }
 
-export interface PollerLike<TState, TResult> {
+export interface PollerLike<TState, TResult, TResponseType = unknown> {
   poll(options?: { abortSignal?: AbortSignal }): Promise<void>;
   pollUntilDone(): Promise<TResult>;
   onProgress(callback: (state: TState) => void): CancelOnProgress;
@@ -34,10 +34,11 @@ export interface PollerLike<TState, TResult> {
   cancelOperation(options?: { abortSignal?: AbortSignal }): Promise<void>;
   getOperationState(): PollOperationState<TResult>;
   getResult(): TResult | undefined;
+  getLastResponse(): TResponseType | Error | undefined;
   toString(): string;
 }
 
-export abstract class Poller<TState, TResult> implements PollerLike<TState, TResult> {
+export abstract class Poller<TState, TResult, TResponseType = unknown> implements PollerLike<TState, TResult, TResponseType> {
   private stopped: boolean = true;
   private resolve?: (value?: TResult) => void;
   private reject?: (error: PollerStoppedError | PollerCancelledError | Error) => void;
@@ -45,9 +46,9 @@ export abstract class Poller<TState, TResult> implements PollerLike<TState, TRes
   private cancelPromise?: Promise<void>;
   private promise: Promise<TResult>;
   private pollProgressCallbacks: PollProgressCallback<TState>[] = [];
-  protected operation: PollOperation<TState, TResult>;
+  protected operation: PollOperation<TState, TResult, TResponseType>;
 
-  constructor(operation: PollOperation<TState, TResult>) {
+  constructor(operation: PollOperation<TState, TResult, TResponseType>) {
     this.operation = operation;
     this.promise = new Promise(
       (
@@ -172,6 +173,15 @@ export abstract class Poller<TState, TResult> implements PollerLike<TState, TRes
   public getResult(): TResult | undefined {
     const state = this.getOperationState();
     return state.result;
+  }
+
+  public getLastResponse(): TResponseType | Error | undefined {
+    const state = this.getOperationState();
+    if (state.error) {
+      return state.error;
+    } else {
+      return this.operation.lastResponse;
+    }
   }
 
   public toString(): string {

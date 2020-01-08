@@ -56,9 +56,11 @@ export interface BlobBeginCopyFromUrlPollState
  * @ignore
  */
 export interface BlobBeginCopyFromURLPollOperation
-  extends PollOperation<BlobBeginCopyFromUrlPollState, BlobBeginCopyFromURLResponse> {
-  lastResponse?: BlobStartCopyFromURLResponse | BlobGetPropertiesResponse;
-}
+  extends PollOperation<
+    BlobBeginCopyFromUrlPollState,
+    BlobBeginCopyFromURLResponse,
+    BlobStartCopyFromURLResponse | BlobGetPropertiesResponse
+  > {}
 
 /**
  * The set of options used to configure the poller.
@@ -83,7 +85,8 @@ export interface BlobBeginCopyFromUrlPollerOptions {
  */
 export class BlobBeginCopyFromUrlPoller extends Poller<
   BlobBeginCopyFromUrlPollState,
-  BlobBeginCopyFromURLResponse
+  BlobBeginCopyFromURLResponse,
+  BlobStartCopyFromURLResponse | BlobGetPropertiesResponse
 > {
   public intervalInMs: number;
 
