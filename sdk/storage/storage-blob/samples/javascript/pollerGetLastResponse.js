@@ -6,6 +6,7 @@
 */
 
 const { AnonymousCredential, ContainerClient } = require("../../dist");
+const { AbortController } = require("@azure/abort-controller");
 const { delay } = require("@azure/core-http");
 
 // Load the .env file if it exists
@@ -16,7 +17,7 @@ require("dotenv").config();
 // Alternatively, logging can be enabled at runtime by calling `setLogLevel("info");`
 // `setLogLevel` can be imported from the `@azure/logger` package
 const { setLogLevel } = require("@azure/logger");
-setLogLevel("info");
+//setLogLevel("info");
 
 async function main() {
   // Fill in following settings before running this sample
@@ -43,13 +44,30 @@ async function main() {
   const blobName = "newblob";
   const blobClient = containerClient.getBlobClient(blobName);
 
-  const copyPoller = await blobClient.beginCopyFromURL(sourceUrl);
+  const aborter = new AbortController();
+  const copyPoller = await blobClient.beginCopyFromURL(sourceUrl, {
+    abortSignal: aborter.signal,
+    onProgress(state) {
+      if (state.copyProgress) {
+        const parts = state.copyProgress.split("/");
+        const ratio = Number.parseFloat(parts[0]) / Number.parseInt(parts[1]);
+        console.log(`progress: ${ratio * 100} %`);
+        if (ratio > 0.1) {
+          copyPoller.cancelOperation();
+        }
+      }
+    }
+  });
 
   while (!copyPoller.isDone()) {
     await copyPoller.poll();
-    await delay(10000);
+    await delay(5000);
     const last = copyPoller.getLastResponse();
-    console.log(last);
+    if (last instanceof Error) {
+      console.log(`Error ${last.message}`);
+    } else {
+      console.log(last);
+    }
   }
 
   const result = copyPoller.getResult();

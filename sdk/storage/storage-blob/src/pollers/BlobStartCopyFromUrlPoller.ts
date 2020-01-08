@@ -4,7 +4,11 @@
 import { delay } from "@azure/core-http";
 import { PollOperation, PollOperationState, Poller } from "@azure/core-lro";
 import { BlobClient, BlobStartCopyFromURLOptions, BlobBeginCopyFromURLResponse } from "../Clients";
-import { BlobStartCopyFromURLResponse, BlobGetPropertiesResponse } from "../generated/src/models";
+import {
+  BlobStartCopyFromURLResponse,
+  BlobGetPropertiesResponse,
+  BlobAbortCopyFromURLResponse
+} from "../generated/src/models";
 
 /**
  * Defines the operations from a {@link BlobClient} that are needed for the poller
@@ -59,7 +63,7 @@ export interface BlobBeginCopyFromURLPollOperation
   extends PollOperation<
     BlobBeginCopyFromUrlPollState,
     BlobBeginCopyFromURLResponse,
-    BlobStartCopyFromURLResponse | BlobGetPropertiesResponse
+    BlobStartCopyFromURLResponse | BlobGetPropertiesResponse | BlobAbortCopyFromURLResponse
   > {}
 
 /**
@@ -86,7 +90,7 @@ export interface BlobBeginCopyFromUrlPollerOptions {
 export class BlobBeginCopyFromUrlPoller extends Poller<
   BlobBeginCopyFromUrlPollState,
   BlobBeginCopyFromURLResponse,
-  BlobStartCopyFromURLResponse | BlobGetPropertiesResponse
+  BlobStartCopyFromURLResponse | BlobGetPropertiesResponse | BlobAbortCopyFromURLResponse
 > {
   public intervalInMs: number;
 
@@ -243,7 +247,11 @@ const toString: BlobBeginCopyFromURLPollOperation["toString"] = function toStrin
  */
 function makeBlobBeginCopyFromURLPollOperation(
   state: BlobBeginCopyFromUrlPollState,
-  rawResponse: BlobStartCopyFromURLResponse | BlobGetPropertiesResponse | undefined
+  rawResponse:
+    | BlobStartCopyFromURLResponse
+    | BlobGetPropertiesResponse
+    | BlobAbortCopyFromURLResponse
+    | undefined
 ): BlobBeginCopyFromURLPollOperation {
   return {
     state: { ...state },

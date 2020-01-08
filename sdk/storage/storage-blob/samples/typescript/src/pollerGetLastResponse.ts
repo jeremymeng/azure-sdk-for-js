@@ -6,6 +6,7 @@
 */
 
 import { AnonymousCredential, ContainerClient } from "../../../src";
+import { AbortController } from "@azure/abort-controller";
 import { delay } from "@azure/core-http";
 
 // Load the .env file if it exists
@@ -37,11 +38,22 @@ async function main() {
   const blobName = "newblob";
   const blobClient = containerClient.getBlobClient(blobName);
 
-  const copyPoller = await blobClient.beginCopyFromURL(sourceUrl);
+  const aborter = new AbortController();
+  const copyPoller = await blobClient.beginCopyFromURL(sourceUrl, {
+    abortSignal: aborter.signal,
+    onProgress(state) {
+      if (state.copyProgress) {
+        const parts = state.copyProgress!.split("/");
+        if (Number.parseFloat(parts[0]) / Number.parseInt(parts[1]) > 0.3) {
+          copyPoller.cancelOperation();
+        }
+      }
+    }
+  });
 
   while (!copyPoller.isDone()) {
     await copyPoller.poll();
-    await delay(10000);
+    await delay(5000);
     const last = copyPoller.getLastResponse();
     console.log(last);
   }
