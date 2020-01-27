@@ -565,6 +565,51 @@ describe("deserializationPolicy", function() {
         assert.strictEqual(e.response.parsedBody.message, "InvalidResourceNameBody");
       }
     });
+
+    it(`with http error the RestError instance should have stuatsCode and message`, async function() {
+      const HeadersMapper: CompositeMapper = {
+        serializedName: "getproperties-headers",
+        type: {
+          name: "Composite",
+          className: "PropertiesHeaders",
+          modelProperties: {
+            errorCode: {
+              serializedName: "x-ms-error-code",
+              type: {
+                name: "String"
+              }
+            }
+          }
+        }
+      };
+      const serializer = new Serializer(HeadersMapper, true);
+      const operationSpec: OperationSpec = {
+        httpMethod: "GET",
+        responses: {
+          default: {
+            headersMapper: undefined,
+            bodyMapper: undefined
+          }
+        },
+        serializer
+      };
+
+      const response: HttpOperationResponse = {
+        request: createRequest(operationSpec),
+        status: 400,
+        headers: new HttpHeaders({
+          "content-type": "application/xml"
+        })
+      };
+
+      try {
+        await deserializeResponse(response);
+        assert.fail("Expecting an error but got none")
+      } catch (err) {
+        assert.equal(err.statusCode, 400);
+        assert.equal(err.message, "Unexpected status code: 400");
+      }
+    });
   });
 });
 

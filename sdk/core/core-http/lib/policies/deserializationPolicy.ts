@@ -161,7 +161,7 @@ export function deserializeResponseBody(
         if (!isExpectedStatusCode) {
           const defaultResponseSpec: OperationResponse = operationSpec.responses.default;
           if (defaultResponseSpec) {
-            const initialErrorMessage: string = isStreamOperation(operationSpec)
+            const initialErrorMessage: string = isStreamOperation(operationSpec) || !parsedResponse.bodyAsText
               ? `Unexpected status code: ${statusCode}`
               : (parsedResponse.bodyAsText as string);
 
