@@ -38,7 +38,6 @@ import { toContainerPublicAccessType, toPublicAccessType, toPermissions } from "
 import { createSpan } from "./utils/tracing";
 import { appendToURLPath } from "./utils/utils.common";
 import { DataLakeFileClient, DataLakeDirectoryClient } from "./clients";
-import { Pipeline as BlobPipeline } from "@azure/storage-blob";
 
 /**
  * A DataLakeFileSystemClient represents a URL to the Azure Storage file system
@@ -119,7 +118,7 @@ export class DataLakeFileSystemClient extends StorageClient {
     }
 
     this.fileSystemContext = new FileSystemOperations(this.storageClientContext);
-    this.blobContainerClient = new ContainerClient(this.blobEndpointUrl, this.pipeline as BlobPipeline);
+    this.blobContainerClient = new ContainerClient(this.blobEndpointUrl, this.pipeline);
   }
 
   /**
