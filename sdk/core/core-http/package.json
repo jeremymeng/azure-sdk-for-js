@@ -141,7 +141,7 @@
     "tslib": "^1.10.0",
     "tunnel": "^0.0.6",
     "uuid": "^3.3.2",
-    "xml2js": "^0.4.19"
+    "fast-xml-parser": "^3.16.0"
   },
   "devDependencies": {
     "@azure/eslint-plugin-azure-sdk": "^2.0.1",
