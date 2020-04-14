@@ -60,6 +60,15 @@ xml2jsBuilderSettings.renderOpts = {
   pretty: false
 };
 
+
+const toXMLOptions = {
+  attributeNamePrefix: "$",
+  attributeNodeName: "$",
+  ignoreAttributes: false,
+  format: false,
+
+}
+
 /**
  * Converts given JSON object to XML string
  * @param obj JSON object to be converted into XML string
@@ -68,8 +77,8 @@ xml2jsBuilderSettings.renderOpts = {
  */
 export function stringifyXML(obj: any, opts?: { rootName?: string }) {
   console.log(opts)
-  const j2x = new j2xParser({})
-  return j2x.parse(obj)
+  const j2x = new j2xParser(toXMLOptions)
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${j2x.parse(obj)}`
 }
 
 /**
