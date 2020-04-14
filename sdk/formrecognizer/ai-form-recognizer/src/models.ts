@@ -246,6 +246,10 @@ export interface FormField {
    * Value of the field.
    */
   value?: FieldValueTypes;
+  /**
+   * Data type of the value property
+   */
+  valueType: ValueTypes;
 }
 
 /**
@@ -305,7 +309,7 @@ export interface RecognizedForm {
 /**
  * Properties common to the recognized text field
  */
-export interface CommonFieldValue {
+interface CommonFieldValue {
   /**
    * Text content of the recognized field.
    */
@@ -335,6 +339,16 @@ export type FieldValueTypes =
   | number
   | FieldValue[]
   | { [propertyName: string]: FieldValue };
+
+export type ValueTypes =
+  | "string"
+  | "date"
+  | "time"
+  | "phoneNumber"
+  | "number"
+  | "integer"
+  | "array"
+  | "object";
 
 /**
  * Represents a field of string value.
@@ -507,56 +521,6 @@ export interface RawUSReceipt {
 }
 
 /**
- * Represents text values in a receipt
- */
-export interface Receipt {
-  /**
-   * Receipt type, e.g., "Itemized"
-   */
-  receiptType: string;
-  /**
-   * Merchant name
-   */
-  merchantName?: string;
-  /**
-   * Merchant phone number
-   */
-  merchantPhoneNumber?: string;
-  /**
-   * Merchant address
-   */
-  merchantAddress?: string;
-  /**
-   * items in the receipt
-   */
-  items: ReceiptItem[];
-  /**
-   * Subtotal
-   */
-  subtotal?: number;
-  /**
-   * Tax
-   */
-  tax?: number;
-  /**
-   * Tip
-   */
-  tip?: number;
-  /**
-   * Total
-   */
-  total?: number;
-  /**
-   * Transaction date
-   */
-  transactionDate?: Date;
-  /**
-   * Transaction time
-   */
-  transactionTime?: string;
-}
-
-/**
  * Represents an recognized receipt
  */
 export interface RawReceiptResult {
@@ -574,10 +538,86 @@ export interface RawReceiptResult {
   fields: { [propertyName: string]: FieldValue };
 }
 
-/**
- * Recognized receipt and values in it
+/*
+ * Recognized Receipt
  */
-export type RecognizedReceipt = RawReceiptResult & Receipt;
+export interface RecognizedReceipt extends RecognizedForm {
+  /**
+   * Locale of the receipt
+   */
+  receiptLocale?: string;
+}
+
+export interface USReceiptItem {
+  /**
+   * Name of the receipt item
+   */
+  name?: FormField;
+  /**
+   * Price of the receipt item
+   */
+  price?: FormField;
+  /**
+   * Quantity of the receipt item
+   */
+  quantity?: FormField;
+  /**
+   * Total price of the receipt item
+   */
+  totalPrice?: FormField;
+}
+
+export type USReceiptType = "unrecognized" | "itemized" | "creditCard" | "gas" | "parking";
+
+/**
+ * United States receipt
+ */
+export interface USReceipt extends RecognizedReceipt {
+  /**
+   * Receipt type field
+   */
+  receiptType: USReceiptType;
+  /**
+   * Merchant name field
+   */
+  merchantName: FormField;
+  /**
+   * Merchant phone number field
+   */
+  merchantPhoneNumber: FormField;
+  /**
+   * Merchant address field
+   */
+  merchantAddress: FormField;
+  /**
+   * Receipt item list field
+   */
+  items: USReceiptItem[];
+  /**
+   * Subtotal field
+   */
+  subtotal: FormField;
+  /**
+   * Tax field
+   */
+  tax: FormField;
+  /**
+   * Tip field
+   */
+  tip: FormField;
+  /**
+   * Total field
+   */
+  total: FormField;
+  /**
+   * Transaction date field
+   */
+  transactionDate: FormField;
+  /**
+   * Transaction time field
+   */
+  transactionTime: FormField;
+}
 
 /**
  * Raw texts recognized from a page in the input document.
@@ -638,7 +678,7 @@ export interface RecognizeReceiptResult {
   /**
    * List of receipts recognized from input document
    */
-  extractedReceipts?: RecognizedReceipt[];
+  recognizedReceipts?: RecognizedReceipt[];
 }
 
 /**

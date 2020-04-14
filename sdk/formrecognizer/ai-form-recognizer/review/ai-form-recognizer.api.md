@@ -75,15 +75,6 @@ export type BeginTrainingWithLabelsOptions = FormRecognizerOperationOptions & {
 };
 
 // @public
-export interface CommonFieldValue {
-    boundingBox?: Point2D[];
-    confidence?: number;
-    pageNumber?: number;
-    text?: string;
-    textContent?: FormElement[];
-}
-
-// @public
 export type ContentPollerLike = PollerLike<PollOperationState<RecognizeContentResultResponse>, RecognizeContentResultResponse>;
 
 // @public
@@ -115,6 +106,8 @@ export interface CustomFormSubModelField {
     name: string;
 }
 
+// Warning: (ae-forgotten-export) The symbol "CommonFieldValue" needs to be exported by the entry point index.d.ts
+//
 // @public
 export type DateFieldValue = {
     type: "date";
@@ -157,6 +150,7 @@ export interface FormField {
     name?: string;
     value?: FieldValueTypes;
     valueText?: FormText;
+    valueType: ValueTypes;
 }
 
 // @public
@@ -445,21 +439,6 @@ export interface RawUSReceipt {
 }
 
 // @public
-export interface Receipt {
-    items: ReceiptItem[];
-    merchantAddress?: string;
-    merchantName?: string;
-    merchantPhoneNumber?: string;
-    receiptType: string;
-    subtotal?: number;
-    tax?: number;
-    tip?: number;
-    total?: number;
-    transactionDate?: Date;
-    transactionTime?: string;
-}
-
-// @public
 export interface ReceiptItem {
     name?: string;
     price?: number;
@@ -530,8 +509,10 @@ export interface RecognizedPage {
     pageNumber: number;
 }
 
-// @public
-export type RecognizedReceipt = RawReceiptResult & Receipt;
+// @public (undocumented)
+export interface RecognizedReceipt extends RecognizedForm {
+    receiptLocale?: string;
+}
 
 // @public
 export type RecognizeFormOperationResult = Partial<FormResult> & {
@@ -562,8 +543,8 @@ export type RecognizeReceiptOperationResult = {
 
 // @public
 export interface RecognizeReceiptResult {
-    extractedReceipts?: RecognizedReceipt[];
     rawExtractedPages: FormPage[];
+    recognizedReceipts?: RecognizedReceipt[];
     version: string;
 }
 
@@ -618,6 +599,35 @@ export interface TrainResult {
 
 // @public
 export type TrainStatus = "succeeded" | "partiallySucceeded" | "failed";
+
+// @public
+export interface USReceipt extends RecognizedReceipt {
+    items: USReceiptItem[];
+    merchantAddress: FormField;
+    merchantName: FormField;
+    merchantPhoneNumber: FormField;
+    receiptType: USReceiptType;
+    subtotal: FormField;
+    tax: FormField;
+    tip: FormField;
+    total: FormField;
+    transactionDate: FormField;
+    transactionTime: FormField;
+}
+
+// @public (undocumented)
+export interface USReceiptItem {
+    name?: FormField;
+    price?: FormField;
+    quantity?: FormField;
+    totalPrice?: FormField;
+}
+
+// @public (undocumented)
+export type USReceiptType = "unrecognized" | "itemized" | "creditCard" | "gas" | "parking";
+
+// @public (undocumented)
+export type ValueTypes = "string" | "date" | "time" | "phoneNumber" | "number" | "integer" | "array" | "object";
 
 
 // Warnings were encountered during analysis:
