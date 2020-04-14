@@ -458,9 +458,9 @@ export function toUSReceiptItems(items: ReceiptItemArrayField): USReceiptItem[] 
 
 export function toUSReceipt(receipt: RecognizedReceipt): USReceipt {
   return {
-    ...(receipt as USReceipt),
+    ...(receipt),
     receiptLocale: "US",
-    items: toUSReceiptItems((receipt.fields["Items"].value as unknown) as ReceiptItemArrayField),
+    items: toUSReceiptItems((receipt.fields["Items"] as unknown) as ReceiptItemArrayField),
     merchantAddress: receipt.fields["MerchantAddress"],
     merchantName: receipt.fields["MerchantName"],
     merchantPhoneNumber: receipt.fields["MerchantPhoneNumber"],

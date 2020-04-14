@@ -5,15 +5,15 @@
  * Recognize receipt from url
  */
 
-const { FormRecognizerClient, AzureKeyCredential } = require("../../dist");
+const { FormRecognizerClient, AzureKeyCredential, toUSReceipt } = require("../../dist");
 
 // Load the .env file if it exists
 require("dotenv").config();
 
 async function main() {
   // You will need to set these environment variables or edit the following values
-  const endpoint = process.env["COGNITIVE_SERVICE_ENDPOINT"] || "<cognitive services endpoint>";
-  const apiKey = process.env["COGNITIVE_SERVICE_API_KEY"] || "<api key>";
+  const endpoint = process.env["COGNITIVE_SERVICE_ENDPOINT"] || "https://jeremy-fr-canary.cognitiveservices.azure.com/";
+  const apiKey = process.env["COGNITIVE_SERVICE_API_KEY"] || "30ce916e0da0492dbee4aae761c978cc";
 
   const client = new FormRecognizerClient(endpoint, new AzureKeyCredential(apiKey));
   const imageUrl = "https://raw.githubusercontent.com/Azure-Samples/cognitive-services-REST-api-samples/master/curl/form-recognizer/contoso-allinone.jpg";
@@ -34,18 +34,18 @@ async function main() {
     throw new Error("Expecting analysis result");
   }
 
-  if (!response.extractedReceipts || response.extractedReceipts.length <= 0)
+  if (!response.recognizedReceipts || response.recognizedReceipts.length <= 0)
   {
     throw new Error("Expecting at lease one receipt in analysis result");
   }
 
   console.log("### First receipt:")
-  console.log(response.extractedReceipts[0]);
+  console.log(response.recognizedReceipts[0]);
   console.log("### Items:")
-  console.table(response.extractedReceipts[0].items, ["name", "quantity", "price", "totalPrice"]);
-
+  const usReceipt = toUSReceipt(response.recognizedReceipts[0]);
+  console.table(usReceipt.items, ["name", "quantity", "price", "totalPrice"]);
   console.log("### Raw 'MerchantAddress' fields:");
-  console.log(response.extractedReceipts[0].fields["MerchantAddress"])
+  console.log(usReceipt.fields["MerchantAddress"])
 }
 
 main().catch((err) => {

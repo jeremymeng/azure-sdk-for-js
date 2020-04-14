@@ -575,6 +575,9 @@ export type TimeFieldValue = {
     value?: string;
 } & CommonFieldValue;
 
+// @public (undocumented)
+export function toUSReceipt(receipt: RecognizedReceipt): USReceipt;
+
 // @public
 export interface TrainingDocumentInfo {
     documentName: string;
