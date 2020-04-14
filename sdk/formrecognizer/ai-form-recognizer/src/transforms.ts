@@ -391,7 +391,7 @@ function toRecognizedReceipt(result: DocumentResultModel, pages: FormPage[]): Re
 
   const form = toRecognizedForm(result, pages);
   return {
-    ...form,
+    recognizedForm: form,
     receiptLocale: undefined
   };
 }
@@ -404,46 +404,46 @@ function toReceiptType(type: FormField): USReceiptType {
   }
 }
 
-export function toUSReceiptItems(items: ReceiptItemArrayField): USReceiptItem[] {
+function toUSReceiptItems(items: ReceiptItemArrayField): USReceiptItem[] {
   return items.value?.map((item) => {
     const name: FormField = {
       name: "Name",
-      value: item.value.Name.value,
-      valueType: item.value.Name.type,
+      value: item.value.Name?.value,
+      valueType: item.value.Name?.type,
       valueText: {
-        text: item.value.Name.text,
-        boundingBox: item.value.Name.boundingBox,
-        textContent: item.value.Name.textContent
+        text: item.value.Name?.text,
+        boundingBox: item.value.Name?.boundingBox,
+        textContent: item.value.Name?.textContent
       }
     };
     const quantity: FormField = {
       name: "Quantity",
-      value: item.value.Quantity.value,
-      valueType: item.value.Quantity.type,
+      value: item.value.Quantity?.value,
+      valueType: item.value.Quantity?.type,
       valueText: {
-        text: item.value.Quantity.text,
-        boundingBox: item.value.Quantity.boundingBox,
-        textContent: item.value.Quantity.textContent
+        text: item.value.Quantity?.text,
+        boundingBox: item.value.Quantity?.boundingBox,
+        textContent: item.value.Quantity?.textContent
       }
     };
     const price: FormField = {
       name: "Price",
-      value: item.value.Price.value,
-      valueType: item.value.Price.type,
+      value: item.value.Price?.value,
+      valueType: item.value.Price?.type,
       valueText: {
-        text: item.value.Price.text,
-        boundingBox: item.value.Price.boundingBox,
-        textContent: item.value.Price.textContent
+        text: item.value.Price?.text,
+        boundingBox: item.value.Price?.boundingBox,
+        textContent: item.value.Price?.textContent
       }
     };
     const totalPrice: FormField = {
       name: "TotalPrice",
-      value: item.value.TotalPrice.value,
-      valueType: item.value.TotalPrice.type,
+      value: item.value.TotalPrice?.value,
+      valueType: item.value.TotalPrice?.type,
       valueText: {
-        text: item.value.TotalPrice.text,
-        boundingBox: item.value.TotalPrice.boundingBox,
-        textContent: item.value.TotalPrice.textContent
+        text: item.value.TotalPrice?.text,
+        boundingBox: item.value.TotalPrice?.boundingBox,
+        textContent: item.value.TotalPrice?.textContent
       }
     };
 
@@ -457,20 +457,21 @@ export function toUSReceiptItems(items: ReceiptItemArrayField): USReceiptItem[] 
 }
 
 export function toUSReceipt(receipt: RecognizedReceipt): USReceipt {
+  const form = receipt.recognizedForm;
   return {
     ...(receipt),
     receiptLocale: "US",
-    items: toUSReceiptItems((receipt.fields["Items"] as unknown) as ReceiptItemArrayField),
-    merchantAddress: receipt.fields["MerchantAddress"],
-    merchantName: receipt.fields["MerchantName"],
-    merchantPhoneNumber: receipt.fields["MerchantPhoneNumber"],
-    receiptType: toReceiptType(receipt.fields["ReceiptType"]),
-    subtotal: receipt.fields["Subtotal"],
-    tax: receipt.fields["Tax"],
-    tip: receipt.fields["Tip"],
-    total: receipt.fields["Total"],
-    transactionDate: receipt.fields["TransactionDate"],
-    transactionTime: receipt.fields["TransactionTime"]
+    items: toUSReceiptItems((form.fields["Items"] as unknown) as ReceiptItemArrayField),
+    merchantAddress: form.fields["MerchantAddress"],
+    merchantName: form.fields["MerchantName"],
+    merchantPhoneNumber: form.fields["MerchantPhoneNumber"],
+    receiptType: toReceiptType(form.fields["ReceiptType"]),
+    subtotal: form.fields["Subtotal"],
+    tax: form.fields["Tax"],
+    tip: form.fields["Tip"],
+    total: form.fields["Total"],
+    transactionDate: form.fields["TransactionDate"],
+    transactionTime: form.fields["TransactionTime"]
   };
 }
 

@@ -150,7 +150,7 @@ export interface FormField {
     name?: string;
     value?: FieldValueTypes;
     valueText?: FormText;
-    valueType: ValueTypes;
+    valueType?: ValueTypes;
 }
 
 // @public
@@ -415,38 +415,6 @@ export { PollerLike }
 export { PollOperationState }
 
 // @public
-export interface RawReceiptResult {
-    docType: "prebuilt:receipt";
-    fields: {
-        [propertyName: string]: FieldValue;
-    };
-    pageRange: FormPageRange;
-}
-
-// @public
-export interface RawUSReceipt {
-    Items: ReceiptItemArrayField;
-    MerchantAddress: StringFieldValue;
-    MerchantName: StringFieldValue;
-    MerchantPhoneNumber: PhoneNumberFieldValue;
-    ReceiptType: StringFieldValue;
-    Subtotal: NumberFieldValue;
-    Tax: NumberFieldValue;
-    Tip: NumberFieldValue;
-    Total: NumberFieldValue;
-    TransactionDate: DateFieldValue;
-    TransactionTime: TimeFieldValue;
-}
-
-// @public
-export interface ReceiptItem {
-    name?: string;
-    price?: number;
-    quantity?: number;
-    totalPrice?: number;
-}
-
-// @public
 export interface ReceiptItemArrayField {
     // (undocumented)
     type: "array";
@@ -458,10 +426,10 @@ export interface ReceiptItemArrayField {
 export type ReceiptItemField = {
     type: "object";
     value: {
-        Name: StringFieldValue;
-        Quantity: NumberFieldValue;
-        Price: NumberFieldValue;
-        TotalPrice: NumberFieldValue;
+        Name?: StringFieldValue;
+        Quantity?: NumberFieldValue;
+        Price?: NumberFieldValue;
+        TotalPrice?: NumberFieldValue;
     };
 } & CommonFieldValue;
 
@@ -502,16 +470,11 @@ export interface RecognizedForm {
     pages: FormPage[];
 }
 
-// @public
-export interface RecognizedPage {
-    fields?: FormField[];
-    formTypeId?: number;
-    pageNumber: number;
-}
-
 // @public (undocumented)
-export interface RecognizedReceipt extends RecognizedForm {
+export interface RecognizedReceipt {
     receiptLocale?: string;
+    // (undocumented)
+    recognizedForm: RecognizedForm;
 }
 
 // @public

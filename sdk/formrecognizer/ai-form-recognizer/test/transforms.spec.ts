@@ -499,7 +499,7 @@ describe("Transforms", () => {
     const transformed = toReceiptResultResponse(original);
 
     assert.ok(transformed.recognizedReceipts, "Expecting non-empty recognized receipts");
-    assert.equal(transformed.recognizedReceipts![0].formType, "prebuilt:receipt");
+    assert.equal(transformed.recognizedReceipts![0].recognizedForm.formType, "prebuilt:receipt");
     assert.equal(
       transformed.recognizedReceipts![0].receiptLocale,
       undefined,

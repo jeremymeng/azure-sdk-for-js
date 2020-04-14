@@ -249,25 +249,7 @@ export interface FormField {
   /**
    * Data type of the value property
    */
-  valueType: ValueTypes;
-}
-
-/**
- * Recognized information from a single page.
- */
-export interface RecognizedPage {
-  /**
-   * Page number
-   */
-  pageNumber: number;
-  /**
-   * Id of recognized form type
-   */
-  formTypeId?: number;
-  /**
-   * List of name/value pairs recognized from the page
-   */
-  fields?: FormField[];
+  valueType?: ValueTypes;
 }
 
 /**
@@ -433,34 +415,12 @@ export type FieldValue =
 export type ReceiptItemField = {
   type: "object";
   value: {
-    Name: StringFieldValue;
-    Quantity: NumberFieldValue;
-    Price: NumberFieldValue;
-    TotalPrice: NumberFieldValue;
+    Name?: StringFieldValue;
+    Quantity?: NumberFieldValue;
+    Price?: NumberFieldValue;
+    TotalPrice?: NumberFieldValue;
   };
 } & CommonFieldValue;
-
-/**
- * The values in an recognized receipt item field
- */
-export interface ReceiptItem {
-  /**
-   * Name of the receipt item
-   */
-  name?: string;
-  /**
-   * Price of the receipt item
-   */
-  price?: number;
-  /**
-   * Quantity of the receipt item
-   */
-  quantity?: number;
-  /**
-   * Total price of the receipt item
-   */
-  totalPrice?: number;
-}
 
 /**
  * Represents a list of recognized receipt items in a receipt.
@@ -470,82 +430,15 @@ export interface ReceiptItemArrayField {
   value: ReceiptItemField[];
 }
 
-/**
- * Represents recognized receipt fields in a receipt
- */
-export interface RawUSReceipt {
-  /**
-   * Receipt type field
-   */
-  ReceiptType: StringFieldValue;
-  /**
-   * Merchant name field
-   */
-  MerchantName: StringFieldValue;
-  /**
-   * Merchant phone number field
-   */
-  MerchantPhoneNumber: PhoneNumberFieldValue;
-  /**
-   * Merchant address field
-   */
-  MerchantAddress: StringFieldValue;
-  /**
-   * Receipt item list field
-   */
-  Items: ReceiptItemArrayField;
-  /**
-   * Subtotal field
-   */
-  Subtotal: NumberFieldValue;
-  /**
-   * Tax field
-   */
-  Tax: NumberFieldValue;
-  /**
-   * Tip field
-   */
-  Tip: NumberFieldValue;
-  /**
-   * Total field
-   */
-  Total: NumberFieldValue;
-  /**
-   * Transaction date field
-   */
-  TransactionDate: DateFieldValue;
-  /**
-   * Transaction time field
-   */
-  TransactionTime: TimeFieldValue;
-}
-
-/**
- * Represents an recognized receipt
- */
-export interface RawReceiptResult {
-  /**
-   * Document type.
-   */
-  docType: "prebuilt:receipt";
-  /**
-   * First and last page number where the document is found.
-   */
-  pageRange: FormPageRange;
-  /**
-   * Dictionary of named field values.
-   */
-  fields: { [propertyName: string]: FieldValue };
-}
-
 /*
  * Recognized Receipt
  */
-export interface RecognizedReceipt extends RecognizedForm {
+export interface RecognizedReceipt {
   /**
    * Locale of the receipt
    */
   receiptLocale?: string;
+  recognizedForm: RecognizedForm;
 }
 
 export interface USReceiptItem {

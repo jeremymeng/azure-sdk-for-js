@@ -43,7 +43,7 @@ async function main() {
   const usReceipt = toUSReceipt(response.recognizedReceipts[0]);
   console.table(usReceipt.items, ["name", "quantity", "price", "totalPrice"]);
   console.log("### Raw 'MerchantAddress' fields:");
-  console.log(usReceipt.fields["MerchantAddress"])
+  console.log(usReceipt.recognizedForm.fields["MerchantAddress"]);
 }
 
 main().catch((err) => {
