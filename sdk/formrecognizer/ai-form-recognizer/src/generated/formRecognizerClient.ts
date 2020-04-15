@@ -11,6 +11,28 @@ import * as Parameters from "./models/parameters";
 import * as Models from "./models";
 import * as Mappers from "./models/mappers";
 import { FormRecognizerClientContext } from "./formRecognizerClientContext";
+import {
+  TrainRequest,
+  FormRecognizerClientTrainCustomModelAsyncResponse,
+  FormRecognizerClientGetCustomModelOptionalParams,
+  FormRecognizerClientGetCustomModelResponse,
+  ContentType,
+  FormRecognizerClientAnalyzeWithCustomModel$binaryOptionalParams,
+  FormRecognizerClientAnalyzeWithCustomModel$jsonOptionalParams,
+  FormRecognizerClientAnalyzeWithCustomModelResponse,
+  FormRecognizerClientGetAnalyzeFormResultResponse,
+  FormRecognizerClientAnalyzeReceiptAsync$binaryOptionalParams,
+  FormRecognizerClientAnalyzeReceiptAsync$jsonOptionalParams,
+  FormRecognizerClientAnalyzeReceiptAsyncResponse,
+  FormRecognizerClientGetAnalyzeReceiptResultResponse,
+  FormRecognizerClientAnalyzeLayoutAsync$binaryOptionalParams,
+  FormRecognizerClientAnalyzeLayoutAsync$jsonOptionalParams,
+  FormRecognizerClientAnalyzeLayoutAsyncResponse,
+  FormRecognizerClientGetAnalyzeLayoutResultResponse,
+  FormRecognizerClientListCustomModelsResponse,
+  FormRecognizerClientGetCustomModelsResponse,
+  FormRecognizerClientListCustomModelsNextResponse
+} from "./models";
 
 class FormRecognizerClient extends FormRecognizerClientContext {
   /**
@@ -41,13 +63,16 @@ class FormRecognizerClient extends FormRecognizerClientContext {
    * @param options The options parameters.
    */
   trainCustomModelAsync(
-    trainRequest: Models.TrainRequest,
+    trainRequest: TrainRequest,
     options?: coreHttp.OperationOptions
-  ): Promise<Models.FormRecognizerClientTrainCustomModelAsyncResponse> {
+  ): Promise<FormRecognizerClientTrainCustomModelAsyncResponse> {
+    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
+      options || {}
+    );
     return this.sendOperationRequest(
-      { trainRequest, options },
+      { trainRequest, options: operationOptions },
       trainCustomModelAsyncOperationSpec
-    ) as Promise<Models.FormRecognizerClientTrainCustomModelAsyncResponse>;
+    ) as Promise<FormRecognizerClientTrainCustomModelAsyncResponse>;
   }
 
   /**
@@ -57,12 +82,15 @@ class FormRecognizerClient extends FormRecognizerClientContext {
    */
   getCustomModel(
     modelId: string,
-    options?: Models.FormRecognizerClientGetCustomModelOptionalParams
-  ): Promise<Models.FormRecognizerClientGetCustomModelResponse> {
+    options?: FormRecognizerClientGetCustomModelOptionalParams
+  ): Promise<FormRecognizerClientGetCustomModelResponse> {
+    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
+      options || {}
+    );
     return this.sendOperationRequest(
-      { modelId, options },
+      { modelId, options: operationOptions },
       getCustomModelOperationSpec
-    ) as Promise<Models.FormRecognizerClientGetCustomModelResponse>;
+    ) as Promise<FormRecognizerClientGetCustomModelResponse>;
   }
 
   /**
@@ -74,8 +102,11 @@ class FormRecognizerClient extends FormRecognizerClientContext {
     modelId: string,
     options?: coreHttp.OperationOptions
   ): Promise<coreHttp.RestResponse> {
+    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
+      options || {}
+    );
     return this.sendOperationRequest(
-      { modelId, options },
+      { modelId, options: operationOptions },
       deleteCustomModelOperationSpec
     ) as Promise<coreHttp.RestResponse>;
   }
@@ -86,28 +117,82 @@ class FormRecognizerClient extends FormRecognizerClientContext {
    * 'image/tiff'. Alternatively, use 'application/json' type to specify the location (Uri or local path)
    * of the document to be analyzed.
    * @param modelId Model identifier.
+   * @param contentType Upload file type
+   * @param fileStream .json, .pdf, .jpg, .png or .tiff type file stream.
    * @param options The options parameters.
    */
   analyzeWithCustomModel(
     modelId: string,
-    options?: Models.FormRecognizerClientAnalyzeWithCustomModelOptionalParams
-  ): Promise<Models.FormRecognizerClientAnalyzeWithCustomModelResponse> {
+    contentType: ContentType,
+    fileStream: coreHttp.HttpRequestBody,
+    options?: FormRecognizerClientAnalyzeWithCustomModel$binaryOptionalParams
+  ): Promise<FormRecognizerClientAnalyzeWithCustomModelResponse>;
+  /**
+   * Extract key-value pairs, tables, and semantic values from a given document. The input document must
+   * be of one of the supported content types - 'application/pdf', 'image/jpeg', 'image/png' or
+   * 'image/tiff'. Alternatively, use 'application/json' type to specify the location (Uri or local path)
+   * of the document to be analyzed.
+   * @param modelId Model identifier.
+   * @param contentType Body Parameter content-type
+   * @param options The options parameters.
+   */
+  analyzeWithCustomModel(
+    modelId: string,
+    contentType: "application/json",
+    options?: FormRecognizerClientAnalyzeWithCustomModel$jsonOptionalParams
+  ): Promise<FormRecognizerClientAnalyzeWithCustomModelResponse>;
+  /**
+   * Extract key-value pairs, tables, and semantic values from a given document. The input document must
+   * be of one of the supported content types - 'application/pdf', 'image/jpeg', 'image/png' or
+   * 'image/tiff'. Alternatively, use 'application/json' type to specify the location (Uri or local path)
+   * of the document to be analyzed.
+   * @param args Includes all the parameters for this operation.
+   */
+  analyzeWithCustomModel(
+    ...args:
+      | [
+          string,
+          ContentType,
+          coreHttp.HttpRequestBody,
+          FormRecognizerClientAnalyzeWithCustomModel$binaryOptionalParams?
+        ]
+      | [
+          string,
+          "application/json",
+          FormRecognizerClientAnalyzeWithCustomModel$jsonOptionalParams?
+        ]
+  ): Promise<FormRecognizerClientAnalyzeWithCustomModelResponse> {
     let operationSpec: coreHttp.OperationSpec;
+    let operationArguments: coreHttp.OperationArguments;
     if (
-      options &&
-      "contentType" in options &&
-      ["application/pdf", "image/jpeg", "image/png", "image/tiff"].indexOf(
-        options.contentType ?? ""
-      ) > -1
+      args[0] === "application/pdf" ||
+      args[0] === "image/jpeg" ||
+      args[0] === "image/png" ||
+      args[0] === "image/tiff"
     ) {
       operationSpec = analyzeWithCustomModel$binaryOperationSpec;
-    } else {
+      operationArguments = {
+        modelId: args[0],
+        contentType: args[1],
+        fileStream: args[2],
+        options: args[3]
+      };
+    } else if (args[0] === "application/json") {
       operationSpec = analyzeWithCustomModel$jsonOperationSpec;
+      operationArguments = {
+        modelId: args[0],
+        contentType: args[1],
+        options: args[2]
+      };
+    } else {
+      throw new TypeError(
+        `"contentType" must be a valid value but instead was "${args[0]}".`
+      );
     }
     return this.sendOperationRequest(
-      { modelId, options },
+      operationArguments,
       operationSpec
-    ) as Promise<Models.FormRecognizerClientAnalyzeWithCustomModelResponse>;
+    ) as Promise<FormRecognizerClientAnalyzeWithCustomModelResponse>;
   }
 
   /**
@@ -120,11 +205,14 @@ class FormRecognizerClient extends FormRecognizerClientContext {
     modelId: string,
     resultId: string,
     options?: coreHttp.OperationOptions
-  ): Promise<Models.FormRecognizerClientGetAnalyzeFormResultResponse> {
+  ): Promise<FormRecognizerClientGetAnalyzeFormResultResponse> {
+    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
+      options || {}
+    );
     return this.sendOperationRequest(
-      { modelId, resultId, options },
+      { modelId, resultId, options: operationOptions },
       getAnalyzeFormResultOperationSpec
-    ) as Promise<Models.FormRecognizerClientGetAnalyzeFormResultResponse>;
+    ) as Promise<FormRecognizerClientGetAnalyzeFormResultResponse>;
   }
 
   /**
@@ -132,26 +220,75 @@ class FormRecognizerClient extends FormRecognizerClientContext {
    * one of the supported content types - 'application/pdf', 'image/jpeg', 'image/png' or 'image/tiff'.
    * Alternatively, use 'application/json' type to specify the location (Uri or local path) of the
    * document to be analyzed.
+   * @param contentType Upload file type
+   * @param fileStream .json, .pdf, .jpg, .png or .tiff type file stream.
    * @param options The options parameters.
    */
   analyzeReceiptAsync(
-    options?: Models.FormRecognizerClientAnalyzeReceiptAsyncOptionalParams
-  ): Promise<Models.FormRecognizerClientAnalyzeReceiptAsyncResponse> {
+    contentType: ContentType,
+    fileStream: coreHttp.HttpRequestBody,
+    options?: FormRecognizerClientAnalyzeReceiptAsync$binaryOptionalParams
+  ): Promise<FormRecognizerClientAnalyzeReceiptAsyncResponse>;
+  /**
+   * Extract field text and semantic values from a given receipt document. The input document must be of
+   * one of the supported content types - 'application/pdf', 'image/jpeg', 'image/png' or 'image/tiff'.
+   * Alternatively, use 'application/json' type to specify the location (Uri or local path) of the
+   * document to be analyzed.
+   * @param contentType Body Parameter content-type
+   * @param options The options parameters.
+   */
+  analyzeReceiptAsync(
+    contentType: "application/json",
+    options?: FormRecognizerClientAnalyzeReceiptAsync$jsonOptionalParams
+  ): Promise<FormRecognizerClientAnalyzeReceiptAsyncResponse>;
+  /**
+   * Extract field text and semantic values from a given receipt document. The input document must be of
+   * one of the supported content types - 'application/pdf', 'image/jpeg', 'image/png' or 'image/tiff'.
+   * Alternatively, use 'application/json' type to specify the location (Uri or local path) of the
+   * document to be analyzed.
+   * @param args Includes all the parameters for this operation.
+   */
+  analyzeReceiptAsync(
+    ...args:
+      | [
+          ContentType,
+          coreHttp.HttpRequestBody,
+          FormRecognizerClientAnalyzeReceiptAsync$binaryOptionalParams?
+        ]
+      | [
+          "application/json",
+          FormRecognizerClientAnalyzeReceiptAsync$jsonOptionalParams?
+        ]
+  ): Promise<FormRecognizerClientAnalyzeReceiptAsyncResponse> {
     let operationSpec: coreHttp.OperationSpec;
+    let operationArguments: coreHttp.OperationArguments;
     if (
-      options &&
-      "contentType" in options &&
-      ["application/pdf", "image/jpeg", "image/png", "image/tiff"].indexOf(
-        options.contentType ?? ""
-      ) > -1
+      args[0] === "application/pdf" ||
+      args[0] === "image/jpeg" ||
+      args[0] === "image/png" ||
+      args[0] === "image/tiff"
     ) {
       operationSpec = analyzeReceiptAsync$binaryOperationSpec;
-    } else {
+      operationArguments = {
+        contentType: args[0],
+        fileStream: args[1],
+        options: args[2]
+      };
+    } else if (args[0] === "application/json") {
       operationSpec = analyzeReceiptAsync$jsonOperationSpec;
+      operationArguments = {
+        contentType: args[0],
+        options: args[1]
+      };
+    } else {
+      throw new TypeError(
+        `"contentType" must be a valid value but instead was "${args[0]}".`
+      );
     }
-    return this.sendOperationRequest({ options }, operationSpec) as Promise<
-      Models.FormRecognizerClientAnalyzeReceiptAsyncResponse
-    >;
+    return this.sendOperationRequest(
+      operationArguments,
+      operationSpec
+    ) as Promise<FormRecognizerClientAnalyzeReceiptAsyncResponse>;
   }
 
   /**
@@ -162,11 +299,14 @@ class FormRecognizerClient extends FormRecognizerClientContext {
   getAnalyzeReceiptResult(
     resultId: string,
     options?: coreHttp.OperationOptions
-  ): Promise<Models.FormRecognizerClientGetAnalyzeReceiptResultResponse> {
+  ): Promise<FormRecognizerClientGetAnalyzeReceiptResultResponse> {
+    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
+      options || {}
+    );
     return this.sendOperationRequest(
-      { resultId, options },
+      { resultId, options: operationOptions },
       getAnalyzeReceiptResultOperationSpec
-    ) as Promise<Models.FormRecognizerClientGetAnalyzeReceiptResultResponse>;
+    ) as Promise<FormRecognizerClientGetAnalyzeReceiptResultResponse>;
   }
 
   /**
@@ -174,26 +314,75 @@ class FormRecognizerClient extends FormRecognizerClientContext {
    * supported content types - 'application/pdf', 'image/jpeg', 'image/png' or 'image/tiff'.
    * Alternatively, use 'application/json' type to specify the location (Uri or local path) of the
    * document to be analyzed.
+   * @param contentType Upload file type
+   * @param fileStream .json, .pdf, .jpg, .png or .tiff type file stream.
    * @param options The options parameters.
    */
   analyzeLayoutAsync(
-    options?: Models.FormRecognizerClientAnalyzeLayoutAsyncOptionalParams
-  ): Promise<Models.FormRecognizerClientAnalyzeLayoutAsyncResponse> {
+    contentType: ContentType,
+    fileStream: coreHttp.HttpRequestBody,
+    options?: FormRecognizerClientAnalyzeLayoutAsync$binaryOptionalParams
+  ): Promise<FormRecognizerClientAnalyzeLayoutAsyncResponse>;
+  /**
+   * Extract text and layout information from a given document. The input document must be of one of the
+   * supported content types - 'application/pdf', 'image/jpeg', 'image/png' or 'image/tiff'.
+   * Alternatively, use 'application/json' type to specify the location (Uri or local path) of the
+   * document to be analyzed.
+   * @param contentType Body Parameter content-type
+   * @param options The options parameters.
+   */
+  analyzeLayoutAsync(
+    contentType: "application/json",
+    options?: FormRecognizerClientAnalyzeLayoutAsync$jsonOptionalParams
+  ): Promise<FormRecognizerClientAnalyzeLayoutAsyncResponse>;
+  /**
+   * Extract text and layout information from a given document. The input document must be of one of the
+   * supported content types - 'application/pdf', 'image/jpeg', 'image/png' or 'image/tiff'.
+   * Alternatively, use 'application/json' type to specify the location (Uri or local path) of the
+   * document to be analyzed.
+   * @param args Includes all the parameters for this operation.
+   */
+  analyzeLayoutAsync(
+    ...args:
+      | [
+          ContentType,
+          coreHttp.HttpRequestBody,
+          FormRecognizerClientAnalyzeLayoutAsync$binaryOptionalParams?
+        ]
+      | [
+          "application/json",
+          FormRecognizerClientAnalyzeLayoutAsync$jsonOptionalParams?
+        ]
+  ): Promise<FormRecognizerClientAnalyzeLayoutAsyncResponse> {
     let operationSpec: coreHttp.OperationSpec;
+    let operationArguments: coreHttp.OperationArguments;
     if (
-      options &&
-      "contentType" in options &&
-      ["application/pdf", "image/jpeg", "image/png", "image/tiff"].indexOf(
-        options.contentType ?? ""
-      ) > -1
+      args[0] === "application/pdf" ||
+      args[0] === "image/jpeg" ||
+      args[0] === "image/png" ||
+      args[0] === "image/tiff"
     ) {
       operationSpec = analyzeLayoutAsync$binaryOperationSpec;
-    } else {
+      operationArguments = {
+        contentType: args[0],
+        fileStream: args[1],
+        options: args[2]
+      };
+    } else if (args[0] === "application/json") {
       operationSpec = analyzeLayoutAsync$jsonOperationSpec;
+      operationArguments = {
+        contentType: args[0],
+        options: args[1]
+      };
+    } else {
+      throw new TypeError(
+        `"contentType" must be a valid value but instead was "${args[0]}".`
+      );
     }
-    return this.sendOperationRequest({ options }, operationSpec) as Promise<
-      Models.FormRecognizerClientAnalyzeLayoutAsyncResponse
-    >;
+    return this.sendOperationRequest(
+      operationArguments,
+      operationSpec
+    ) as Promise<FormRecognizerClientAnalyzeLayoutAsyncResponse>;
   }
 
   /**
@@ -204,11 +393,14 @@ class FormRecognizerClient extends FormRecognizerClientContext {
   getAnalyzeLayoutResult(
     resultId: string,
     options?: coreHttp.OperationOptions
-  ): Promise<Models.FormRecognizerClientGetAnalyzeLayoutResultResponse> {
+  ): Promise<FormRecognizerClientGetAnalyzeLayoutResultResponse> {
+    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
+      options || {}
+    );
     return this.sendOperationRequest(
-      { resultId, options },
+      { resultId, options: operationOptions },
       getAnalyzeLayoutResultOperationSpec
-    ) as Promise<Models.FormRecognizerClientGetAnalyzeLayoutResultResponse>;
+    ) as Promise<FormRecognizerClientGetAnalyzeLayoutResultResponse>;
   }
 
   /**
@@ -217,11 +409,14 @@ class FormRecognizerClient extends FormRecognizerClientContext {
    */
   listCustomModels(
     options?: coreHttp.OperationOptions
-  ): Promise<Models.FormRecognizerClientListCustomModelsResponse> {
+  ): Promise<FormRecognizerClientListCustomModelsResponse> {
+    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
+      options || {}
+    );
     return this.sendOperationRequest(
-      { options },
+      { options: operationOptions },
       listCustomModelsOperationSpec
-    ) as Promise<Models.FormRecognizerClientListCustomModelsResponse>;
+    ) as Promise<FormRecognizerClientListCustomModelsResponse>;
   }
 
   /**
@@ -230,11 +425,14 @@ class FormRecognizerClient extends FormRecognizerClientContext {
    */
   getCustomModels(
     options?: coreHttp.OperationOptions
-  ): Promise<Models.FormRecognizerClientGetCustomModelsResponse> {
+  ): Promise<FormRecognizerClientGetCustomModelsResponse> {
+    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
+      options || {}
+    );
     return this.sendOperationRequest(
-      { options },
+      { options: operationOptions },
       getCustomModelsOperationSpec
-    ) as Promise<Models.FormRecognizerClientGetCustomModelsResponse>;
+    ) as Promise<FormRecognizerClientGetCustomModelsResponse>;
   }
 
   /**
@@ -245,11 +443,14 @@ class FormRecognizerClient extends FormRecognizerClientContext {
   listCustomModelsNext(
     nextLink: string,
     options?: coreHttp.OperationOptions
-  ): Promise<Models.FormRecognizerClientListCustomModelsNextResponse> {
+  ): Promise<FormRecognizerClientListCustomModelsNextResponse> {
+    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
+      options || {}
+    );
     return this.sendOperationRequest(
-      { nextLink, options },
+      { nextLink, options: operationOptions },
       listCustomModelsNextOperationSpec
-    ) as Promise<Models.FormRecognizerClientListCustomModelsNextResponse>;
+    ) as Promise<FormRecognizerClientListCustomModelsNextResponse>;
   }
 }
 // Operation Specifications
@@ -269,6 +470,7 @@ const trainCustomModelAsyncOperationSpec: coreHttp.OperationSpec = {
   },
   requestBody: Parameters.trainRequest,
   urlParameters: [Parameters.endpoint],
+  headerParameters: [Parameters.contentType],
   serializer
 };
 const getCustomModelOperationSpec: coreHttp.OperationSpec = {
@@ -312,7 +514,7 @@ const analyzeWithCustomModel$binaryOperationSpec: coreHttp.OperationSpec = {
   requestBody: Parameters.fileStream,
   queryParameters: [Parameters.includeTextDetails],
   urlParameters: [Parameters.endpoint, Parameters.modelId],
-  headerParameters: [Parameters.contentType],
+  headerParameters: [Parameters.contentType1],
   serializer
 };
 const analyzeWithCustomModel$jsonOperationSpec: coreHttp.OperationSpec = {
@@ -329,6 +531,7 @@ const analyzeWithCustomModel$jsonOperationSpec: coreHttp.OperationSpec = {
   requestBody: Parameters.fileStream1,
   queryParameters: [Parameters.includeTextDetails],
   urlParameters: [Parameters.endpoint, Parameters.modelId],
+  headerParameters: [Parameters.contentType2],
   serializer
 };
 const getAnalyzeFormResultOperationSpec: coreHttp.OperationSpec = {
@@ -359,7 +562,7 @@ const analyzeReceiptAsync$binaryOperationSpec: coreHttp.OperationSpec = {
   requestBody: Parameters.fileStream,
   queryParameters: [Parameters.includeTextDetails],
   urlParameters: [Parameters.endpoint],
-  headerParameters: [Parameters.contentType],
+  headerParameters: [Parameters.contentType1],
   serializer
 };
 const analyzeReceiptAsync$jsonOperationSpec: coreHttp.OperationSpec = {
@@ -376,6 +579,7 @@ const analyzeReceiptAsync$jsonOperationSpec: coreHttp.OperationSpec = {
   requestBody: Parameters.fileStream1,
   queryParameters: [Parameters.includeTextDetails],
   urlParameters: [Parameters.endpoint],
+  headerParameters: [Parameters.contentType2],
   serializer
 };
 const getAnalyzeReceiptResultOperationSpec: coreHttp.OperationSpec = {
@@ -405,7 +609,7 @@ const analyzeLayoutAsync$binaryOperationSpec: coreHttp.OperationSpec = {
   },
   requestBody: Parameters.fileStream,
   urlParameters: [Parameters.endpoint],
-  headerParameters: [Parameters.contentType],
+  headerParameters: [Parameters.contentType1],
   serializer
 };
 const analyzeLayoutAsync$jsonOperationSpec: coreHttp.OperationSpec = {
@@ -421,6 +625,7 @@ const analyzeLayoutAsync$jsonOperationSpec: coreHttp.OperationSpec = {
   },
   requestBody: Parameters.fileStream1,
   urlParameters: [Parameters.endpoint],
+  headerParameters: [Parameters.contentType2],
   serializer
 };
 const getAnalyzeLayoutResultOperationSpec: coreHttp.OperationSpec = {

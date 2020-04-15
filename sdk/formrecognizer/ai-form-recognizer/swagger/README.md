@@ -16,7 +16,7 @@ source-code-folder-path: ./src/generated
 input-file: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/e500fcb5e7483595fb1f1a2a16586fd15d0882eb/specification/cognitiveservices/data-plane/FormRecognizer/preview/v2.0/FormRecognizer.json
 add-credentials: true
 use-extension:
-  "@autorest/typescript": "6.0.0-dev.20200320.1"
+  "@autorest/typescript": "6.0.0-dev.20200415.3"
 ```
 
 ## Customizations for Track 2 Generator
@@ -52,4 +52,19 @@ directive:
     where: $.definitions..properties.lastUpdatedDateTime
     transform: >
       $["x-ms-client-name"] = "lastUpdatedOn";
+```
+
+### Hide LROs
+``` yaml
+directive:
+- from: swagger-document
+  where: $["paths"]
+  transform: >
+    for (var path in $) {
+        for (var op of Object.values($[path])) {
+            if (op["x-ms-long-running-operation"]) {
+                delete op["x-ms-long-running-operation"];
+            }
+        }
+    }
 ```

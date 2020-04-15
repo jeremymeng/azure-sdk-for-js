@@ -9,6 +9,18 @@
 import * as coreHttp from "@azure/core-http";
 import * as Mappers from "../models/mappers";
 
+export const contentType: coreHttp.OperationParameter = {
+  parameterPath: ["options", "contentType"],
+  mapper: {
+    defaultValue: "application/json",
+    serializedName: "Content-Type",
+    isConstant: true,
+    type: {
+      name: "String"
+    }
+  }
+};
+
 export const trainRequest: coreHttp.OperationParameter = {
   parameterPath: "trainRequest",
   mapper: Mappers.TrainRequest
@@ -47,10 +59,11 @@ export const includeKeys: coreHttp.OperationQueryParameter = {
   }
 };
 
-export const contentType: coreHttp.OperationParameter = {
-  parameterPath: ["options", "contentType"],
+export const contentType1: coreHttp.OperationParameter = {
+  parameterPath: "contentType",
   mapper: {
     serializedName: "Content-Type",
+    required: true,
     type: {
       name: "Enum",
       allowedValues: [
@@ -64,11 +77,24 @@ export const contentType: coreHttp.OperationParameter = {
 };
 
 export const fileStream: coreHttp.OperationParameter = {
-  parameterPath: ["options", "fileStream"],
+  parameterPath: "fileStream",
   mapper: {
     serializedName: "fileStream",
+    required: true,
     type: {
       name: "Stream"
+    }
+  }
+};
+
+export const contentType2: coreHttp.OperationParameter = {
+  parameterPath: "contentType",
+  mapper: {
+    defaultValue: "application/json",
+    serializedName: "Content-Type",
+    isConstant: true,
+    type: {
+      name: "String"
     }
   }
 };

@@ -650,16 +650,7 @@ export type FormRecognizerClientGetCustomModelResponse = Model & {
  * Optional parameters.
  */
 export interface FormRecognizerClientAnalyzeWithCustomModel$binaryOptionalParams
-  extends coreHttp.OperationOptions {
-  /**
-   * Upload file type
-   */
-  contentType?: ContentType;
-  /**
-   * .json, .pdf, .jpg, .png or .tiff type file stream.
-   */
-  fileStream?: coreHttp.HttpRequestBody;
-}
+  extends coreHttp.OperationOptions {}
 
 /**
  * Optional parameters.
@@ -671,13 +662,6 @@ export interface FormRecognizerClientAnalyzeWithCustomModel$jsonOptionalParams
    */
   fileStream?: SourcePath;
 }
-
-/**
- * Optional parameters.
- */
-export type FormRecognizerClientAnalyzeWithCustomModelOptionalParams =
-  | FormRecognizerClientAnalyzeWithCustomModel$binaryOptionalParams
-  | FormRecognizerClientAnalyzeWithCustomModel$jsonOptionalParams;
 
 /**
  * Contains response data for the analyzeWithCustomModel operation.
@@ -718,16 +702,7 @@ export type FormRecognizerClientGetAnalyzeFormResultResponse = AnalyzeOperationR
  * Optional parameters.
  */
 export interface FormRecognizerClientAnalyzeReceiptAsync$binaryOptionalParams
-  extends coreHttp.OperationOptions {
-  /**
-   * Upload file type
-   */
-  contentType?: ContentType;
-  /**
-   * .json, .pdf, .jpg, .png or .tiff type file stream.
-   */
-  fileStream?: coreHttp.HttpRequestBody;
-}
+  extends coreHttp.OperationOptions {}
 
 /**
  * Optional parameters.
@@ -739,13 +714,6 @@ export interface FormRecognizerClientAnalyzeReceiptAsync$jsonOptionalParams
    */
   fileStream?: SourcePath;
 }
-
-/**
- * Optional parameters.
- */
-export type FormRecognizerClientAnalyzeReceiptAsyncOptionalParams =
-  | FormRecognizerClientAnalyzeReceiptAsync$binaryOptionalParams
-  | FormRecognizerClientAnalyzeReceiptAsync$jsonOptionalParams;
 
 /**
  * Contains response data for the analyzeReceiptAsync operation.
@@ -786,16 +754,7 @@ export type FormRecognizerClientGetAnalyzeReceiptResultResponse = AnalyzeOperati
  * Optional parameters.
  */
 export interface FormRecognizerClientAnalyzeLayoutAsync$binaryOptionalParams
-  extends coreHttp.OperationOptions {
-  /**
-   * Upload file type
-   */
-  contentType?: ContentType;
-  /**
-   * .json, .pdf, .jpg, .png or .tiff type file stream.
-   */
-  fileStream?: coreHttp.HttpRequestBody;
-}
+  extends coreHttp.OperationOptions {}
 
 /**
  * Optional parameters.
@@ -807,13 +766,6 @@ export interface FormRecognizerClientAnalyzeLayoutAsync$jsonOptionalParams
    */
   fileStream?: SourcePath;
 }
-
-/**
- * Optional parameters.
- */
-export type FormRecognizerClientAnalyzeLayoutAsyncOptionalParams =
-  | FormRecognizerClientAnalyzeLayoutAsync$binaryOptionalParams
-  | FormRecognizerClientAnalyzeLayoutAsync$jsonOptionalParams;
 
 /**
  * Contains response data for the analyzeLayoutAsync operation.

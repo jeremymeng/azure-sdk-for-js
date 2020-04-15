@@ -25,7 +25,8 @@ import {
   FormRecognizerClientAnalyzeWithCustomModelResponse as AnalyzeWithCustomModelResponseModel,
   FormRecognizerClientAnalyzeLayoutAsyncResponse as AnalyzeLayoutAsyncResponseModel,
   FormRecognizerClientAnalyzeReceiptAsyncResponse as AnalyzeReceiptAsyncResponseModel,
-  ContentType
+  ContentType,
+  SourcePath
 } from "./generated/models";
 import { PollOperationState, PollerLike } from "@azure/core-lro";
 import {
@@ -728,11 +729,19 @@ async function recognizeLayoutInternal(
     contentType !== undefined ? contentType : await getContentType(requestBody);
 
   try {
-    return await client.analyzeLayoutAsync({
-      contentType: requestContentType,
-      fileStream: requestBody,
-      ...operationOptionsToRequestOptionsBase(finalOptions)
-    });
+    if (requestContentType) {
+      return await client.analyzeLayoutAsync(
+        requestContentType,
+        requestBody,{
+          ...operationOptionsToRequestOptionsBase(finalOptions)
+        });
+    } else {
+      return await client.analyzeLayoutAsync(
+        "application/json", {
+          fileStream: requestBody as SourcePath,
+          ...operationOptionsToRequestOptionsBase(finalOptions)
+        });
+    }
   } catch (e) {
     span.setStatus({
       code: CanonicalCode.UNKNOWN,
@@ -760,11 +769,20 @@ async function recognizeCustomFormInternal(
     contentType !== undefined ? contentType : await getContentType(requestBody);
 
   try {
-    return await client.analyzeWithCustomModel(modelId!, {
-      contentType: requestContentType,
-      fileStream: requestBody,
-      ...operationOptionsToRequestOptionsBase(finalOptions)
-    });
+    if (requestContentType){
+      return await client.analyzeWithCustomModel(
+        modelId!,
+        requestContentType,
+        requestBody, {
+          ...operationOptionsToRequestOptionsBase(finalOptions)
+      });} else {
+        return await client.analyzeWithCustomModel(
+          modelId!,
+          "application/json", {
+            fileStream: requestBody as SourcePath,
+            ...operationOptionsToRequestOptionsBase(finalOptions)
+          })
+      }
   } catch (e) {
     span.setStatus({
       code: CanonicalCode.UNKNOWN,
@@ -793,11 +811,19 @@ async function recognizeReceiptInternal(
     contentType !== undefined ? contentType : await getContentType(requestBody);
 
   try {
-    return await client.analyzeReceiptAsync({
-      contentType: requestContentType,
-      fileStream: requestBody,
-      ...operationOptionsToRequestOptionsBase(finalOptions)
-    });
+    if (requestContentType) {
+      return await client.analyzeReceiptAsync(
+        requestContentType,
+        requestBody, {
+
+          ...operationOptionsToRequestOptionsBase(finalOptions)
+        });
+    } else {
+      return await client.analyzeReceiptAsync(
+        "application/json", {
+          fileStream: requestBody as SourcePath,
+          ...operationOptionsToRequestOptionsBase(finalOptions)
+        });        }
   } catch (e) {
     span.setStatus({
       code: CanonicalCode.UNKNOWN,
