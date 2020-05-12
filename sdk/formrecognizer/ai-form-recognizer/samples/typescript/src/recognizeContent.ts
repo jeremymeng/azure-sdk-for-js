@@ -35,9 +35,15 @@ export async function main() {
   console.log(response.status);
 
   for (const page of response.pages!) {
-    console.log(
-      `Page ${page.pageNumber}: width ${page.width} and height ${page.height} with unit ${page.unit}`
-    );
+    console.log(`    Page number: ${page.pageNumber} has ${(page.lines || []).length} lines`);
+    for (let i = 0; i < (page.lines || []).length; i ++) {
+      const line = page.lines![i];
+      console.log(`      Line ${i} has ${line.words.length} word(s)`)
+      for (let j = 0; j < line.words.length; j++) {
+        const word = line.words[j];
+        console.log(`        Word ${j} has text of ${word.text} with confidence score of ${word.confidence}`);
+      }
+    }
     for (const table of page.tables!) {
       for (const row of table.rows) {
         for (const cell of row.cells) {
