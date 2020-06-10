@@ -155,40 +155,10 @@ async function main() {
   });
 
   await poller.pollUntilDone();
-  const response = poller.getResult();
+  const receipts = poller.getResult();
 
   if (!receipts || receipts.length <= 0) {
     throw new Error("Expecting at lease one receipt in analysis result");
-  }
-
-  const receipt = receipts[0];
-  console.log("First receipt:");
-  const receiptTypeField = receipt.recognizedForm.fields["MerchantName"];
-  if (receiptTypeField.valueType === "string") {
-    console.log(`  Receipt Type: '${receiptTypeField.value || "<missing>"}', with confidence of ${receiptTypeField.confidence}`);
-  }
-  const merchantNameField = receipt.recognizedForm.fields["MerchantName"];
-  if (merchantNameField.valueType === "string") {
-    console.log(`  Merchant Name: '${merchantNameField.value || "<missing>"}', with confidence of ${merchantNameField.confidence}`);
-  }
-  const transactionDate = receipt.recognizedForm.fields["TransactionDate"];
-  if (transactionDate.valueType === "date") {
-    console.log(`  Transaction Date: '${transactionDate.value || "<missing>"}', with confidence of ${transactionDate.confidence}`);
-  }
-  const itemsField = receipt.recognizedForm.fields["Items"];
-  if (itemsField.valueType === "array") {
-    for (const itemField of itemsField.value || []) {
-      if (itemField.valueType === "object") {
-        const itemNameField = itemField.value["Name"];
-        if (itemNameField.valueType === "string") {
-          console.log(`    Item Name: '${itemNameField.value || "<missing>"}', with confidence of ${itemNameField.confidence}`);
-        }
-      }
-    }
-  }
-  const totalField = receipt.recognizedForm.fields["Total"];
-  if (totalField.valueType === "number") {
-    console.log(`  Total: '${totalField.value || "<missing>"}', with confidence of ${totalField.confidence}`);
   }
 }
 
@@ -213,24 +183,10 @@ async function main() {
   const client = new FormRecognizerClient(endpoint, new AzureKeyCredential(apiKey));
   const poller = await client.beginRecognizeContent(readStream);
   await poller.pollUntilDone();
-  const response = poller.getResult();
+  const pages = poller.getResult();
 
-  if (!response) {
-    throw new Error("Expecting valid response!");
-  }
-
-  console.log(response.status);
-  for (const page of response.pages) {
-    console.log(
-      `Page ${page.pageNumber}: width ${page.width} and height ${page.height} with unit ${page.unit}`
-    );
-    for (const table of page.tables) {
-      for (const row of table.rows) {
-        for (const cell of row.cells) {
-          console.log(`cell [${cell.rowIndex},${cell.columnIndex}] has text ${cell.text}`);
-        }
-      }
-    }
+  if (!pages || pages.length === 0) {
+    throw new Error("Expecting non-empty list of pages!");
   }
 }
 
@@ -257,28 +213,6 @@ async function main() {
 
   await poller.pollUntilDone();
   const response = poller.getResult();
-  console.log(`Model ID: ${response.modelId}`);
-  console.log(`Status: ${response.status}`);
-  console.log(`Created on: ${response.createdOn}`);
-  console.log(`Last modified: ${response.lastModified}`);
-
-  if (response.submodels) {
-    for (const submodel of response.submodels) {
-      console.log("We have recognized the following fields");
-      for (const key in submodel.fields) {
-        const field = submodel.fields[key];
-        console.log(`The model found field '${field.name}'`)
-      }
-    }
-  }
-  if (response.trainingDocuments) {
-    for (const doc of response.trainingDocuments) {
-      console.log(`Document name: ${doc.documentName}`);
-      console.log(`Document status: ${doc.status}`);
-      console.log(`Document page count: ${doc.pageCount}`);
-      console.log(`Document errors: ${doc.errors}`);
-    }
-  }
 }
 
 main();
@@ -302,32 +236,7 @@ async function main() {
     onProgress: (state) => { console.log(`status: ${state.status}`); }
   });
   await poller.pollUntilDone();
-  const response = poller.getResult();
-
-  console.log(response.status);
-  console.log("Forms:")
-  for (const form of response.forms || []) {
-    console.log(`${form.formType}, page range: ${form.pageRange}`);
-    console.log("Pages:")
-    for (const page of form.pages || []) {
-      console.log(`Page number: ${page.pageNumber}`);
-      console.log("Tables");
-      for (const table of page.tables || []) {
-        for (const row of table.rows) {
-          for (const cell of row.cells) {
-            console.log(`cell (${cell.rowIndex},${cell.columnIndex}) ${cell.text}`);
-          }
-        }
-      }
-    }
-
-    console.log("Fields:");
-    for (const fieldName in form.fields) {
-      // each field is of type FormField
-      const field = form.fields[fieldName];
-      console.log(`Field ${fieldName} has value '${field.value}' with a confidence score of ${field.confidence}`)
-    }
-  }
+  const forms = poller.getResult();
 }
 
 main()
@@ -411,6 +320,6 @@ If you'd like to contribute to this library, please read the [contributing guide
 [multi_and_single_service]: https://docs.microsoft.com/azure/cognitive-services/cognitive-services-apis-create-account?tabs=multiservice%2Cwindows
 [azure_portal_create_FR_resource]: https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesFormRecognizer
 [azure_cli_create_FR_resource]: https://docs.microsoft.com/azure/cognitive-services/cognitive-services-apis-create-account-cli?tabs=windows
-[fr-labeling-tool]: https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/quickstarts/label-tool
-[fr-train-without-labels]: https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/overview#train-without-labels
-[fr-train-with-labels]: https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/overview#train-with-labels
+[fr-labeling-tool]: https://docs.microsoft.com/azure/cognitive-services/form-recognizer/quickstarts/label-tool
+[fr-train-without-labels]: https://docs.microsoft.com/azure/cognitive-services/form-recognizer/overview#train-without-labels
+[fr-train-with-labels]: https://docs.microsoft.com/azure/cognitive-services/form-recognizer/overview#train-with-labels
