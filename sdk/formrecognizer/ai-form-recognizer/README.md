@@ -154,6 +154,11 @@ async function main() {
     onProgress: (state) => { console.log(`status: ${state.status}`); }
   });
 
+  // Use the following method on url inputs
+  // const poller = await client.beginRecognizeReceiptsFromUrl(url, {
+  //   onProgress: (state) => { console.log(`status: ${state.status}`); }
+  // });
+
   await poller.pollUntilDone();
   const receipts = poller.getResult();
 
