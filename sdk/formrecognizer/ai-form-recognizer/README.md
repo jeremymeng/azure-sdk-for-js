@@ -111,9 +111,9 @@ const client = new FormRecognizerClient("<endpoint>", new DefaultAzureCredential
 ### FormRecognizerClient
 `FormRecognizerClient` provides operations for:
 
- - Recognizing form fields and content using custom models trained to recognize your custom forms. These values are returned in a collection of `RecognizedForm` objects.
  - Recognizing form content, including tables, lines and words, without the need to train a model. Form content is returned in a collection of `FormPage` objects.
  - Recognizing common fields from receipts, using a pre-trained receipt model on the Form Recognizer service. These fields and meta-data are returned in a collection of `RecognizedReceipt`.
+ - Recognizing form fields and content using custom models trained to recognize your custom forms. These values are returned in a collection of `RecognizedForm` objects.
 
 ### FormTrainingClient
 `FormTrainingClient` provides operations for:
@@ -133,6 +133,34 @@ to illustrate using long-running operations [below](#Examples).
 
 ## Examples
 The following section provides several JavaScript code snippets illustrating common patterns used in the Form Recognizer client libraries.
+
+### Recognize content
+
+Recognize text and table structures, along with their bounding box, from documents
+
+```javascript
+const { FormRecognizerClient, AzureKeyCredential } = require("@azure/ai-form-recognizer");
+const fs = require("fs");
+
+async function main() {
+  const endpoint = "<cognitive services endpoint>";
+  const apiKey = "<api key>";
+  const path = "<path to your receipt document>"; // pdf/jpeg/png/tiff formats
+
+  const readStream = fs.createReadStream(path);
+
+  const client = new FormRecognizerClient(endpoint, new AzureKeyCredential(apiKey));
+  const poller = await client.beginRecognizeContent(readStream);
+  await poller.pollUntilDone();
+  const pages = poller.getResult();
+
+  if (!pages || pages.length === 0) {
+    throw new Error("Expecting non-empty list of pages!");
+  }
+}
+
+main();
+```
 
 ### Recognize receipts
 
@@ -164,34 +192,6 @@ async function main() {
 
   if (!receipts || receipts.length <= 0) {
     throw new Error("Expecting at lease one receipt in analysis result");
-  }
-}
-
-main();
-```
-
-### Recognize content
-
-Recognize text and table structures, along with their bounding box, from documents
-
-```javascript
-const { FormRecognizerClient, AzureKeyCredential } = require("@azure/ai-form-recognizer");
-const fs = require("fs");
-
-async function main() {
-  const endpoint = "<cognitive services endpoint>";
-  const apiKey = "<api key>";
-  const path = "<path to your receipt document>"; // pdf/jpeg/png/tiff formats
-
-  const readStream = fs.createReadStream(path);
-
-  const client = new FormRecognizerClient(endpoint, new AzureKeyCredential(apiKey));
-  const poller = await client.beginRecognizeContent(readStream);
-  await poller.pollUntilDone();
-  const pages = poller.getResult();
-
-  if (!pages || pages.length === 0) {
-    throw new Error("Expecting non-empty list of pages!");
   }
 }
 
