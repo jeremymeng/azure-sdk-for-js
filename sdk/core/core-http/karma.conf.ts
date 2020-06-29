@@ -8,8 +8,10 @@ module.exports = function(config: any) {
   config.set({
     plugins: [
       "karma-mocha",
+      "karma-mocha-reporter",
       "karma-chrome-launcher",
       "karma-edge-launcher",
+      "karma-ie-launcher",
       "karma-firefox-launcher"
     ],
 
@@ -19,14 +21,20 @@ module.exports = function(config: any) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: "dist-test/coreHttp.browser.test.js" },
-      { pattern: "dist-test/coreHttp.browser.test.js.map", included: false }
+            // polyfill service supporting IE11 missing features
+      // Promise,String.prototype.startsWith,String.prototype.endsWith,String.prototype.repeat,String.prototype.includes,Array.prototype.includes,Object.assign,Object.keys,Symbol.iterator
+      {
+        pattern: "https://cdn.polyfill.io/v2/polyfill.js?features=Symbol,Promise,Set,Number.isNaN,String.prototype.startsWith,String.prototype.endsWith,String.prototype.repeat,String.prototype.includes,Array.prototype.includes,Object.assign,Object.keys|always,Symbol.iterator",
+        type: "js"
+      },
+      "dist-test/coreHttp.browser.test.js",
+      { pattern: "dist-test/coreHttp.browser.test.js.map", type:"html", included: false, served: true }
     ],
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ["progress"],
+    reporters: ["mocha"],
 
     // web server port
     port: defaults.port,
@@ -51,6 +59,10 @@ module.exports = function(config: any) {
     // how many browser should be started simultaneous
     concurrency: Infinity,
 
+    browserNoActivityTimeout: 1200000,
+    browserDisconnectTimeout: 10000,
+    browserDisconnectTolerance: 3,
+
     customLaunchers: {
       ChromeNoSecurity: {
         base: "ChromeHeadless",
@@ -67,6 +79,14 @@ module.exports = function(config: any) {
       FirefoxDebugging: {
         base: "Firefox",
         flags: ["-url", `http://localhost:${defaults.port}/debug.html`, "-devtools"]
+      }
+    },
+
+    client: {
+      mocha: {
+        // change Karma's debug.html to the mocha web reporter
+        reporter: "html",
+        timeout: "600000"
       }
     }
   });
