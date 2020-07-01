@@ -90,6 +90,35 @@ describe("Highlevel", () => {
     fs.unlinkSync(tempFile);
   }).timeout(timeoutForLargeFileUploadingTest);
 
+  it.only("put blob with maximum size ArrayBuffer", async () => {
+    recorder.skip("node", "Temp file - recorder doesn't support saving the file");
+    const MB = 1024 * 1024;
+    const maxPutBlobSizeLimitInMB = 5000;
+    const arrBuf = new ArrayBuffer(maxPutBlobSizeLimitInMB * MB);
+
+    const bufferSize = 1000 * MB;
+    let offset = 0;
+    const inputStream = new PassThrough();
+
+    while (offset + bufferSize < arrBuf.byteLength) {
+      inputStream.push(Buffer.from(arrBuf, offset, bufferSize));
+      offset += bufferSize;
+    }
+    inputStream.push(Buffer.from(arrBuf, offset, arrBuf.byteLength - offset));
+    inputStream.push(null);
+
+    try {
+      await blockBlobClient.upload(() => inputStream, maxPutBlobSizeLimitInMB * MB, {
+        //abortSignal: AbortController.timeout(20 * 1000) // takes too long to upload the file
+        onProgress: (state) => {
+          console.log(state.loadedBytes);
+        }
+      });
+    } catch (err) {
+      assert.equal(err.name, "AbortError");
+    }
+  }).timeout(timeoutForLargeFileUploadingTest);
+
   it("uploadFile should success when blob >= BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES", async () => {
     recorder.skip("node", "Temp file - recorder doesn't support saving the file");
     await blockBlobClient.uploadFile(tempFileLarge, {
