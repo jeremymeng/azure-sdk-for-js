@@ -102,6 +102,7 @@ export {
   UrlParameterValue,
   serializeObject
 } from "./serializer";
+export { ObjectSerializer } from "./objectSerializer";
 export {
   stripRequest,
   stripResponse,

@@ -444,6 +444,12 @@ export const MapperType: {
     Enum: "Enum";
 };
 
+// @public (undocumented)
+export interface ObjectSerializer {
+    deserialize(stream: any, returnType: object): unknown;
+    serialize(stream: any, value: unknown): void;
+}
+
 // @public
 export interface OperationArguments {
     [parameterName: string]: any;

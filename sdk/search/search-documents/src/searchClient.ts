@@ -7,6 +7,7 @@ import {
   PipelineOptions,
   InternalPipelineOptions,
   createPipelineFromOptions,
+  ObjectSerializer,
   OperationOptions,
   operationOptionsToRequestOptionsBase
 } from "@azure/core-http";
@@ -51,7 +52,9 @@ import * as utils from "./serviceUtils";
 /**
  * Client options used to configure Cognitive Search API requests.
  */
-export type SearchClientOptions = PipelineOptions;
+export type SearchClientOptions = PipelineOptions & {
+  objectSerializer?: ObjectSerializer;
+};
 
 /**
  * Class used to perform operations against a search index,
@@ -85,6 +88,13 @@ export class SearchClient<T> {
   private readonly client: GeneratedClient;
 
   /**
+   * @internal
+   * @ignore
+   * A reference to the auto-generated SearchClient
+   */
+  private readonly objectSerializer: ObjectSerializer | undefined;
+
+  /**
    * Creates an instance of SearchClient.
    *
    * Example usage:
@@ -110,6 +120,7 @@ export class SearchClient<T> {
   ) {
     this.endpoint = endpoint;
     this.indexName = indexName;
+    this.objectSerializer = options.objectSerializer;
 
     const libInfo = `azsdk-js-search-documents/${SDK_VERSION}`;
     if (!options.userAgentOptions) {
@@ -263,6 +274,10 @@ export class SearchClient<T> {
         continuationToken: this.encodeContinuationToken(nextLink, nextPageParameters)
       };
 
+      if (this.objectSerializer) {
+        return this.objectSerializer.deserialize(converted, {}) as SearchDocumentsPageResult<Pick<T, Fields>>;
+      }
+
       return deserialize<SearchDocumentsPageResult<Pick<T, Fields>>>(converted);
     } catch (e) {
       span.setStatus({
@@ -414,6 +429,9 @@ export class SearchClient<T> {
         result
       );
 
+      if (this.objectSerializer) {
+        return this.objectSerializer.deserialize(modifiedResult, {}) as SuggestDocumentsResult<Pick<T, Fields>>;
+      }
       return deserialize<SuggestDocumentsResult<Pick<T, Fields>>>(modifiedResult);
     } catch (e) {
       span.setStatus({
@@ -441,6 +459,11 @@ export class SearchClient<T> {
         key,
         operationOptionsToRequestOptionsBase(updatedOptions)
       );
+
+      if (this.objectSerializer) {
+        return this.objectSerializer.deserialize(result.body, {}) as T;
+      }
+
       return deserialize<T>(result.body);
     } catch (e) {
       span.setStatus({
