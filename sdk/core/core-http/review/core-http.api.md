@@ -107,6 +107,12 @@ export class BearerTokenAuthenticationPolicy extends BaseRequestPolicy {
 // @public
 export function bearerTokenAuthenticationPolicy(credential: TokenCredential, scopes: string | string[]): RequestPolicyFactory;
 
+// @public
+export interface CommonReadable {
+    // (undocumented)
+    [Symbol.asyncIterator](): AsyncIterableIterator<Uint8Array>;
+}
+
 // @public (undocumented)
 export interface CompositeMapper extends BaseMapper {
     // (undocumented)
@@ -446,8 +452,9 @@ export const MapperType: {
 
 // @public (undocumented)
 export interface ObjectSerializer {
-    deserialize(stream: any, returnType: object): unknown;
-    serialize(stream: any, value: unknown): void;
+    deserialize<T = unknown>(stream: CommonReadable, returnType: object): T;
+    // Warning: (ae-forgotten-export) The symbol "CommonWritable" needs to be exported by the entry point coreHttp.d.ts
+    serialize(stream: CommonWritable, value: unknown): void;
 }
 
 // @public
@@ -686,6 +693,9 @@ export interface RequestPrepareOptions {
     spanOptions?: SpanOptions;
     url?: string;
 }
+
+// @public (undocumented)
+export function responseToCommonReadable(response: HttpOperationResponse): Promise<CommonReadable>;
 
 // @public (undocumented)
 export class RestError extends Error {

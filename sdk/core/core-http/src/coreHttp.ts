@@ -102,7 +102,8 @@ export {
   UrlParameterValue,
   serializeObject
 } from "./serializer";
-export { ObjectSerializer } from "./objectSerializer";
+export { CommonReadable, ObjectSerializer } from "./objectSerializer";
+export { responseToCommonReadable } from "./commonReadable";
 export {
   stripRequest,
   stripResponse,

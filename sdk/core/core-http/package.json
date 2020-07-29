@@ -55,6 +55,7 @@
     "./es/src/util/base64.js": "./es/src/util/base64.browser.js",
     "./es/src/util/xml.js": "./es/src/util/xml.browser.js",
     "./es/src/defaultHttpClient.js": "./es/src/defaultHttpClient.browser.js",
+    "./es/src/commonReadable.js": "./es/src/commonReadable.browser.js",
     "./es/src/util/inspect.js": "./es/src/util/inspect.browser.js"
   },
   "license": "MIT",
