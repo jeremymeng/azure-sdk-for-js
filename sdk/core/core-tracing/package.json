@@ -43,7 +43,12 @@
     "LICENSE"
   ],
   "repository": "github:Azure/azure-sdk-for-js",
-  "keywords": ["azure", "tracing", "Azure", "cloud"],
+  "keywords": [
+    "azure",
+    "tracing",
+    "Azure",
+    "cloud"
+  ],
   "author": "Microsoft Corporation",
   "license": "MIT",
   "bugs": {
@@ -68,7 +73,7 @@
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-replace": "^2.2.0",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^8.0.0",
+    "@types/node": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
     "assert": "^1.4.1",

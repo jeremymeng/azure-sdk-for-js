@@ -99,7 +99,7 @@
     "@rollup/plugin-multi-entry": "^3.0.0",
     "@types/fast-json-stable-stringify": "^2.0.0",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^8.0.0",
+    "@types/node": "^10.0.0",
     "@types/node-fetch": "^2.5.0",
     "@types/priorityqueuejs": "^1.0.1",
     "@types/semaphore": "^1.1.0",

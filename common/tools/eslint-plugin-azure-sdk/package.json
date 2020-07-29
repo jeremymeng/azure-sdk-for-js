@@ -76,7 +76,7 @@
     "@types/estree": "0.0.39",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^8.0.0",
+    "@types/node": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/experimental-utils": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
