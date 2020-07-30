@@ -5,21 +5,21 @@ import { CommonReadable } from "./objectSerializer";
 import { HttpOperationResponse } from './httpOperationResponse';
 
 export class BrowserReadable implements CommonReadable {
-  constructor(private readonly _blob: Blob) { }
+  constructor(private readonly _stream: ReadableStream) { }
 
-  async *toIterator() {
-    const reader = this._blob.stream().getReader();
-    let {value: chunk, done: readerDone} = await reader.read();
-    while(!readerDone) {
-      if (!chunk) {
-        yield chunk;
+  async *[Symbol.asyncIterator]() {
+    const reader = this._stream.getReader();
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          return;
+        }
+        yield value;
       }
-      ({ value: chunk, done: readerDone} = await reader.read());
+    } finally {
+      reader.releaseLock();
     }
-  }
-
-  [Symbol.asyncIterator]() {
-    return this.toIterator();
   }
 }
 
@@ -28,5 +28,6 @@ export async function responseToCommonReadable(response: HttpOperationResponse):
     throw new Error("Expect valid blobBody in response")
   }
 
-  return new BrowserReadable(await response.blobBody);
+  const stream = (await response.blobBody).stream();
+  return new BrowserReadable(stream);
 }

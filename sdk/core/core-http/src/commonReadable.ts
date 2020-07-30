@@ -7,7 +7,7 @@ import { HttpOperationResponse } from './httpOperationResponse';
 export class NodeReadable implements CommonReadable {
   constructor(private readonly _stream: NodeJS.ReadableStream) { }
 
-  async *toIterator() {
+  async *[Symbol.asyncIterator]() {
     for await (const chunk of this._stream) {
       if (typeof chunk === "string") {
         yield Buffer.from(chunk);
@@ -16,10 +16,6 @@ export class NodeReadable implements CommonReadable {
         yield chunk;
       }
     }
-  }
-
-  [Symbol.asyncIterator]() {
-    return this.toIterator();
   }
 }
 

@@ -4,9 +4,7 @@
 /**
  * A Readable stream abstraction for both NodeJS and browsers.
  */
-export interface CommonReadable {
-  [Symbol.asyncIterator](): AsyncIterableIterator<Uint8Array>
-}
+export interface CommonReadable extends AsyncIterable<string | Uint8Array> {}
 
 /**
  * A Readable stream abstraction for both NodeJS and browsers.

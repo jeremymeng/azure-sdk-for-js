@@ -108,9 +108,7 @@ export class BearerTokenAuthenticationPolicy extends BaseRequestPolicy {
 export function bearerTokenAuthenticationPolicy(credential: TokenCredential, scopes: string | string[]): RequestPolicyFactory;
 
 // @public
-export interface CommonReadable {
-    // (undocumented)
-    [Symbol.asyncIterator](): AsyncIterableIterator<Uint8Array>;
+export interface CommonReadable extends AsyncIterable<string | Uint8Array> {
 }
 
 // @public (undocumented)
