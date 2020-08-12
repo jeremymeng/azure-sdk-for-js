@@ -66,7 +66,6 @@ const toXMLOptions = {
   attributeNodeName: "$",
   ignoreAttributes: false,
   format: false,
-
 }
 
 /**
@@ -78,7 +77,11 @@ const toXMLOptions = {
 export function stringifyXML(obj: any, opts?: { rootName?: string }) {
   console.log(opts)
   const j2x = new j2xParser(toXMLOptions)
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${j2x.parse(obj)}`
+  let xml = j2x.parse(obj);
+  if (opts?.rootName) {
+    xml = `<${opts.rootName}>${xml}</${opts.rootName}`
+  }
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${xml}`
 }
 
 /**
