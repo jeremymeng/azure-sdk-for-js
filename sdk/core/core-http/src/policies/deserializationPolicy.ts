@@ -262,23 +262,28 @@ function handleErrorResponse(
     // Then try to deserialize it using default body mapper
     if (parsedResponse.parsedBody) {
       const parsedBody = parsedResponse.parsedBody;
-      const internalError: any = parsedBody.error || parsedBody;
-      error.code = internalError.code;
-      if (internalError.message) {
-        error.message = internalError.message;
-      }
-
+      let parsedError;
       if (defaultBodyMapper) {
         let valueToDeserialize: any = parsedBody;
         if (operationSpec.isXML && defaultBodyMapper.type.name === MapperType.Sequence) {
           valueToDeserialize =
             typeof parsedBody === "object" ? parsedBody[defaultBodyMapper.xmlElementName!] : [];
         }
-        error.response!.parsedBody = operationSpec.serializer.deserialize(
+        parsedError = operationSpec.serializer.deserialize(
           defaultBodyMapper,
           valueToDeserialize,
           "error.response.parsedBody"
         );
+      }
+
+      const internalError: any = parsedBody.error || parsedError || parsedBody;
+      error.code = internalError.code;
+      if (internalError.message) {
+        error.message = internalError.message;
+      }
+
+      if (defaultBodyMapper) {
+        error.response!.parsedBody = parsedError;
       }
     }
 
