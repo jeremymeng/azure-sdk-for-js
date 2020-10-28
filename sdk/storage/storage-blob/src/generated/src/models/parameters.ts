@@ -686,6 +686,22 @@ export const defaultEncryptionScope: coreHttp.OperationParameter = {
     }
   }
 };
+export const deleteSnapshots: coreHttp.OperationParameter = {
+  parameterPath: [
+    "options",
+    "deleteSnapshots"
+  ],
+  mapper: {
+    serializedName: "x-ms-delete-snapshots",
+    type: {
+      name: "Enum",
+      allowedValues: [
+        "include",
+        "only"
+      ]
+    }
+  }
+};
 export const deletedContainerName: coreHttp.OperationParameter = {
   parameterPath: [
     "options",
@@ -707,22 +723,6 @@ export const deletedContainerVersion: coreHttp.OperationParameter = {
     serializedName: "x-ms-deleted-container-version",
     type: {
       name: "String"
-    }
-  }
-};
-export const deleteSnapshots: coreHttp.OperationParameter = {
-  parameterPath: [
-    "options",
-    "deleteSnapshots"
-  ],
-  mapper: {
-    serializedName: "x-ms-delete-snapshots",
-    type: {
-      name: "Enum",
-      allowedValues: [
-        "include",
-        "only"
-      ]
     }
   }
 };
@@ -1220,6 +1220,18 @@ export const prefix: coreHttp.OperationQueryParameter = {
     }
   }
 };
+export const prevSnapshotUrl: coreHttp.OperationParameter = {
+  parameterPath: [
+    "options",
+    "prevSnapshotUrl"
+  ],
+  mapper: {
+    serializedName: "x-ms-previous-snapshot-url",
+    type: {
+      name: "String"
+    }
+  }
+};
 export const preventEncryptionScopeOverride: coreHttp.OperationParameter = {
   parameterPath: [
     "options",
@@ -1240,18 +1252,6 @@ export const prevsnapshot: coreHttp.OperationQueryParameter = {
   ],
   mapper: {
     serializedName: "prevsnapshot",
-    type: {
-      name: "String"
-    }
-  }
-};
-export const prevSnapshotUrl: coreHttp.OperationParameter = {
-  parameterPath: [
-    "options",
-    "prevSnapshotUrl"
-  ],
-  mapper: {
-    serializedName: "x-ms-previous-snapshot-url",
     type: {
       name: "String"
     }

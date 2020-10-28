@@ -91,7 +91,8 @@ describe("PageBlobClient", () => {
       const properties = await blobClient.getProperties();
       assert.equal(properties.accessTier, options.tier);
     } catch (err) {
-      if (err.message.indexOf("AccessTierNotSupportedForBlobType") == -1) {
+      console.log(err);
+      if (err.code !== "AccessTierNotSupportedForBlobType") {
         // not found
         assert.fail("Error thrown while it's not AccessTierNotSupportedForBlobType.");
       }
@@ -258,18 +259,24 @@ describe("PageBlobClient", () => {
   it("uploadPages with invalid CRC64 should fail", async () => {
     await pageBlobClient.create(1024);
 
-    let exceptionCaught = false;
     try {
       await pageBlobClient.uploadPages("b".repeat(1024), 0, 1024, {
         transactionalContentCrc64: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
       });
+      assert.fail();
     } catch (err) {
-      if (err instanceof Error && err.message.indexOf("Crc64Mismatch") != -1) {
-        exceptionCaught = true;
-      }
+      assert.equal(
+        err.code,
+        "Crc64Mismatch",
+        "Error does not have the expected code 'Crc64Mismatch'"
+      );
+      assert.ok(
+        err.message.startsWith(
+          "The CRC64 value specified in the request did not match with the CRC64 value calculated by the server."
+        ),
+        `Error does not have the expected message, actual message: ${err.message}`
+      );
     }
-
-    assert.ok(exceptionCaught);
   });
 
   it("can be created with a sas connection string", async () => {

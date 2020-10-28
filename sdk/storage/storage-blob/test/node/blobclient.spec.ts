@@ -243,7 +243,12 @@ describe("BlobClient Node.js only", () => {
         "AbortCopyFromClient should be failed and throw exception for an completed copy operation."
       );
     } catch (err) {
-      assert.ok((err as any).response.parsedBody.Code === "InvalidHeaderValue");
+      console.dir(err);
+      assert.equal(
+        err.code,
+        "InvalidHeaderValue",
+        `Expected error code of 'InvalidHeaderValue' but actual code is ${err.code}.`
+      );
     }
   });
 

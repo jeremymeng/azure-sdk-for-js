@@ -142,24 +142,23 @@ describe("AppendBlobClient", () => {
     await appendBlobClient.create();
 
     const content = "Hello World!";
-    let exceptionCaught = false;
     try {
       await appendBlobClient.appendBlock(content, content.length, {
         transactionalContentCrc64: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
       });
     } catch (err) {
-      if (err instanceof Error && err.message.indexOf("Crc64Mismatch") != -1) {
-        exceptionCaught = true;
-      }
-
       assert.equal(
-        err.details.errorCode,
+        err.code,
         "Crc64Mismatch",
-        "Error does not contain details property"
+        "Error does not have the expected code 'Crc64Mismatch'"
+      );
+      assert.ok(
+        err.message.startsWith(
+          "The CRC64 value specified in the request did not match with the CRC64 value calculated by the server."
+        ),
+        `Error does not have the expected message, actual message: ${err.message}`
       );
     }
-
-    assert.ok(exceptionCaught);
   });
 
   it("Seal append blob", async () => {
