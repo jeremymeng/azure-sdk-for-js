@@ -96,7 +96,11 @@ export class Serializer {
     objectName?: string,
     options: SerializerOptions = {}
   ): any {
-    const updatedOptions = options.xmlCharKey ? options : { ...options, xmlCharKey: XML_CHARKEY };
+    const updatedOptions: Omit<SerializerOptions, "xmlCharKey"> & {
+      xmlCharKey: string;
+    } = options.xmlCharKey
+      ? (options as Omit<SerializerOptions, "xmlCharKey"> & { xmlCharKey: string })
+      : { ...options, xmlCharKey: XML_CHARKEY };
     let payload: any = {};
     const mapperType = mapper.type.name as string;
     if (!objectName) {
@@ -516,7 +520,7 @@ function serializeSequenceType(
   object: any,
   objectName: string,
   isXml: boolean,
-  options: SerializerOptions
+  options: Omit<SerializerOptions, "xmlCharKey"> & { xmlCharKey: string }
 ): any[] {
   if (!Array.isArray(object)) {
     throw new Error(`${objectName} must be of type Array.`);
@@ -541,7 +545,7 @@ function serializeSequenceType(
         tempArray[i][XML_ATTRKEY] = { [xmlnsKey]: elementType.xmlNamespace };
       } else {
         tempArray[i] = {};
-        tempArray[i][options?.xmlCharKey ?? XML_CHARKEY] = serializedValue;
+        tempArray[i][options.xmlCharKey] = serializedValue;
         tempArray[i][XML_ATTRKEY] = { [xmlnsKey]: elementType.xmlNamespace };
       }
     } else {
