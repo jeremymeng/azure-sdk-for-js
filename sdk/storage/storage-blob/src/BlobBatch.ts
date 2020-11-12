@@ -11,7 +11,9 @@ import {
   TokenCredential,
   isTokenCredential,
   bearerTokenAuthenticationPolicy,
-  isNode
+  isNode,
+  isIdentifiableFactory,
+  BearTokenAuthPolicyFactoryId
 } from "@azure/core-http";
 import { CanonicalCode } from "@opentelemetry/api";
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
@@ -41,16 +43,6 @@ export interface BatchSubRequest {
    * @memberof BatchSubRequest
    */
   url: string;
-
-  /**
-   * The credential used for sub request.
-   * Such as AnonymousCredential, StorageSharedKeyCredential or any credential from the @azure/identity package to authenticate requests to the service.
-   * You can also provide an object that implements the TokenCredential interface. If not specified, AnonymousCredential is used.
-   *
-   * @type {StorageSharedKeyCredential | AnonymousCredential | TokenCredential}
-   * @memberof BatchSubRequest
-   */
-  credential: StorageSharedKeyCredential | AnonymousCredential | TokenCredential;
 }
 
 /**
@@ -169,6 +161,7 @@ export class BlobBatch {
   ): Promise<void> {
     let url: string;
     let credential: StorageSharedKeyCredential | AnonymousCredential | TokenCredential;
+    let pipeline: Pipeline;
 
     if (
       typeof urlOrBlobClient === "string" &&
@@ -179,10 +172,12 @@ export class BlobBatch {
       // First overload
       url = urlOrBlobClient;
       credential = credentialOrOptions;
+      pipeline = this.batchRequest.createPipeline(credential);
     } else if (urlOrBlobClient instanceof BlobClient) {
       // Second overload
       url = urlOrBlobClient.url;
       credential = urlOrBlobClient.credential;
+      pipeline = this.batchRequest.createPipeline(urlOrBlobClient);
       options = credentialOrOptions as BlobDeleteOptions;
     } else {
       throw new RangeError(
@@ -203,11 +198,10 @@ export class BlobBatch {
       this.setBatchType("delete");
       await this.addSubRequestInternal(
         {
-          url: url,
-          credential: credential
+          url: url
         },
         async () => {
-          await new BlobClient(url, this.batchRequest.createPipeline(credential)).delete({
+          await new BlobClient(url, pipeline).delete({
             ...options,
             tracingOptions: { ...options!.tracingOptions, spanOptions }
           });
@@ -287,6 +281,7 @@ export class BlobBatch {
     let url: string;
     let credential: StorageSharedKeyCredential | AnonymousCredential | TokenCredential;
     let tier: AccessTier;
+    let pipeline: Pipeline;
 
     if (
       typeof urlOrBlobClient === "string" &&
@@ -301,10 +296,12 @@ export class BlobBatch {
         | AnonymousCredential
         | TokenCredential;
       tier = tierOrOptions as AccessTier;
+      pipeline = this.batchRequest.createPipeline(credential);
     } else if (urlOrBlobClient instanceof BlobClient) {
       // Second overload
       url = urlOrBlobClient.url;
       credential = urlOrBlobClient.credential;
+      pipeline = this.batchRequest.createPipeline(urlOrBlobClient);
       tier = credentialOrTier as AccessTier;
       options = tierOrOptions as BlobSetTierOptions;
     } else {
@@ -326,17 +323,13 @@ export class BlobBatch {
       this.setBatchType("setAccessTier");
       await this.addSubRequestInternal(
         {
-          url: url,
-          credential: credential
+          url: url
         },
         async () => {
-          await new BlobClient(url, this.batchRequest.createPipeline(credential)).setAccessTier(
-            tier,
-            {
-              ...options,
-              tracingOptions: { ...options!.tracingOptions, spanOptions }
-            }
-          );
+          await new BlobClient(url, pipeline).setAccessTier(tier, {
+            ...options,
+            tracingOptions: { ...options!.tracingOptions, spanOptions }
+          });
         }
       );
     } catch (e) {
@@ -389,23 +382,41 @@ class InnerBatchRequest {
    * credential and serialization/deserialization components, with additional policies to
    * filter unnecessary headers, assemble sub requests into request's body
    * and intercept request from going to wire.
-   * @param {StorageSharedKeyCredential | AnonymousCredential | TokenCredential} credential  Such as AnonymousCredential, StorageSharedKeyCredential or any credential from the @azure/identity package to authenticate requests to the service. You can also provide an object that implements the TokenCredential interface. If not specified, AnonymousCredential is used.
+   * @param {StorageSharedKeyCredential | AnonymousCredential | TokenCredential} credentialOrClient  Such as AnonymousCredential, StorageSharedKeyCredential or any credential from the @azure/identity package to authenticate requests to the service. You can also provide an object that implements the TokenCredential interface. If not specified, AnonymousCredential is used.
    */
   public createPipeline(
-    credential: StorageSharedKeyCredential | AnonymousCredential | TokenCredential
+    credentialOrClient:
+      | StorageSharedKeyCredential
+      | AnonymousCredential
+      | TokenCredential
+      | BlobClient
   ): Pipeline {
-    const isAnonymousCreds = credential instanceof AnonymousCredential;
-    const policyFactoryLength = 3 + (isAnonymousCreds ? 0 : 1); // [deserializationPolicy, BatchHeaderFilterPolicyFactory, (Optional)Credential, BatchRequestAssemblePolicyFactory]
-    let factories: RequestPolicyFactory[] = new Array(policyFactoryLength);
+    let factories: RequestPolicyFactory[] = [];
 
-    factories[0] = deserializationPolicy(); // Default deserializationPolicy is provided by protocol layer
-    factories[1] = new BatchHeaderFilterPolicyFactory(); // Use batch header filter policy to exclude unnecessary headers
-    if (!isAnonymousCreds) {
-      factories[2] = isTokenCredential(credential)
-        ? bearerTokenAuthenticationPolicy(credential, StorageOAuthScopes)
-        : credential;
+    factories.push(deserializationPolicy()); // Default deserializationPolicy is provided by protocol layer
+    factories.push(new BatchHeaderFilterPolicyFactory()); // Use batch header filter policy to exclude unnecessary headers
+    if (credentialOrClient instanceof BlobClient) {
+      for (const factory of (credentialOrClient as any).pipeline.factories) {
+        if (
+          (isNode && factory instanceof StorageSharedKeyCredential) ||
+          (isIdentifiableFactory(factory) && factory.factoryId === BearTokenAuthPolicyFactoryId)
+        ) {
+          factories.push(factory);
+        }
+      }
+    } else {
+      factories.push(new BatchHeaderFilterPolicyFactory()); // Use batch header filter policy to exclude unnecessary headers
+      const isAnonymousCreds = credentialOrClient instanceof AnonymousCredential;
+      if (!isAnonymousCreds) {
+        factories.push(
+          isTokenCredential(credentialOrClient)
+            ? bearerTokenAuthenticationPolicy(credentialOrClient, StorageOAuthScopes)
+            : credentialOrClient
+        );
+      }
     }
-    factories[policyFactoryLength - 1] = new BatchRequestAssemblePolicyFactory(this); // Use batch assemble policy to assemble request and intercept request from going to wire
+
+    factories.push(new BatchRequestAssemblePolicyFactory(this)); // Use batch assemble policy to assemble request and intercept request from going to wire
 
     return new Pipeline(factories, {});
   }

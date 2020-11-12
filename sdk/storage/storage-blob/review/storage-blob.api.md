@@ -259,7 +259,6 @@ export { BaseRequestPolicy }
 
 // @public
 export interface BatchSubRequest {
-    credential: StorageSharedKeyCredential | AnonymousCredential | TokenCredential;
     url: string;
 }
 

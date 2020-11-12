@@ -15,6 +15,21 @@ import { WebResourceLike } from "../webResource";
 import { AccessTokenCache, ExpiringAccessTokenCache } from "../credentials/accessTokenCache";
 import { AccessTokenRefresher } from "../credentials/accessTokenRefresher";
 
+export interface IdentifiableRequestPolicyFactory extends RequestPolicyFactory {
+  factoryId: string;
+}
+
+export function isIdentifiableFactory(factory: any): factory is IdentifiableRequestPolicyFactory {
+  return (
+    factory &&
+    "factoryId" in factory &&
+    "create" in factory &&
+    typeof factory["create"] === "function"
+  );
+}
+
+export const BearTokenAuthPolicyFactoryId = "bearerTokenAuthenticationPolicy"; // uuid better?
+
 /**
  * Creates a new BearerTokenAuthenticationPolicy factory.
  *
@@ -24,7 +39,7 @@ import { AccessTokenRefresher } from "../credentials/accessTokenRefresher";
 export function bearerTokenAuthenticationPolicy(
   credential: TokenCredential,
   scopes: string | string[]
-): RequestPolicyFactory {
+): IdentifiableRequestPolicyFactory {
   const tokenCache: AccessTokenCache = new ExpiringAccessTokenCache();
   const tokenRefresher = new AccessTokenRefresher(
     credential,
@@ -35,7 +50,8 @@ export function bearerTokenAuthenticationPolicy(
   return {
     create: (nextPolicy: RequestPolicy, options: RequestPolicyOptions) => {
       return new BearerTokenAuthenticationPolicy(nextPolicy, options, tokenCache, tokenRefresher);
-    }
+    },
+    factoryId: BearTokenAuthPolicyFactoryId
   };
 }
 

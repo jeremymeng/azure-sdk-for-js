@@ -95,8 +95,13 @@ export class BasicAuthenticationCredentials implements ServiceClientCredentials 
     userName: string;
 }
 
+// Warning: (ae-forgotten-export) The symbol "IdentifiableRequestPolicyFactory" needs to be exported by the entry point coreHttp.d.ts
+//
 // @public
-export function bearerTokenAuthenticationPolicy(credential: TokenCredential, scopes: string | string[]): RequestPolicyFactory;
+export function bearerTokenAuthenticationPolicy(credential: TokenCredential, scopes: string | string[]): IdentifiableRequestPolicyFactory;
+
+// @public (undocumented)
+export const BearTokenAuthPolicyFactoryId = "bearerTokenAuthenticationPolicy";
 
 // @public (undocumented)
 export interface CompositeMapper extends BaseMapper {
@@ -348,6 +353,9 @@ export interface InternalPipelineOptions extends PipelineOptions {
 
 // @public
 export function isDuration(value: string): boolean;
+
+// @public (undocumented)
+export function isIdentifiableFactory(factory: any): factory is IdentifiableRequestPolicyFactory;
 
 // @public
 export const isNode: boolean;
