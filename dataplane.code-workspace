@@ -165,6 +165,10 @@
       "path": "sdk/test-utils/perfstress"
     },
     {
+      "name": "multi-version test",
+      "path": "sdk/test-utils/multi-version"
+    },
+    {
       "path": "sdk\\digitaltwins\\digital-twins-core"
     }
   ],
