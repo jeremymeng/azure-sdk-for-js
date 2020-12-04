@@ -4,6 +4,7 @@
 export {
   supports,
   versionsToTest,
+  testServiceVersions,
   SupportedVersions,
   MultiVersionTestOptions,
   TestFunctionWrapper

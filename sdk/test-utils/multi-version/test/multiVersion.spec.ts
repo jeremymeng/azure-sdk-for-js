@@ -3,9 +3,15 @@
 
 /* eslint-disable no-use-before-define */
 import { assert } from "chai";
-import { isVersionInSupportedRange, lessThanOrEqual } from "../src/multiVersion";
+import {
+  getCurrentVersion,
+  isVersionInSupportedRange,
+  onVersions,
+  testServiceVersions
+} from "../src/multiVersion";
 
-describe("Multi-service-version test support", () => {
+describe.skip("Multi-service-version test support", () => {
+  const allVersions = ["1.0", "1.1", "1.2"];
   describe("isVersionInSupportedRange() on version list", () => {
     [
       { currentVersion: "1.0", supported: ["1.0", "1.1"], expected: true },
@@ -26,39 +32,60 @@ describe("Multi-service-version test support", () => {
           "<unspecified>"}]`;
       }
       it(`returns ${expected} for ${currentVersion} and supported versions ${versions}`, function() {
-        const result = isVersionInSupportedRange(currentVersion, supported);
+        const result = isVersionInSupportedRange(currentVersion, supported, allVersions);
         assert.equal(result.isSupported, expected);
       });
     });
   });
+});
 
-  describe("lessThanOrEqual()", () => {
-    const func1 = function(a: string, b: string): number {
-      if (a === b) {
-        return 0;
+testServiceVersions(["7.0", "7.1"]).describe("test suite 1", function() {
+  beforeEach(async function() {
+    console.log(` beforeEach. testing service version ${getCurrentVersion(this)}`);
+    if (!getCurrentVersion(this)) {
+      throw new Error("Expecting valid current version");
+    }
+  });
+
+  afterEach(async function() {
+    console.log(` afterEach. testing service version ${getCurrentVersion(this)}`);
+    if (!getCurrentVersion(this)) {
+      throw new Error("Expecting valid current version");
+    }
+  });
+
+  it("test case 2", function() {
+    console.log(` 2. testing service version ${getCurrentVersion(this)}`);
+    if (!getCurrentVersion(this)) {
+      throw new Error("Expecting valid current version");
+    }
+  });
+
+  describe("nested test suite 3", function() {
+    console.log(` 3. suite for service version ${getCurrentVersion(this)}`);
+    if (!getCurrentVersion(this)) {
+      throw new Error("Expecting valid current version");
+    }
+
+    it("nested test 4", function() {
+      console.log(` 4. testing service version ${getCurrentVersion(this)}`);
+      if (!getCurrentVersion(this)) {
+        throw new Error("Expecting valid current version");
       }
-      if (a.startsWith(b)) {
-        return -1;
-      } else if (b.startsWith(a)) {
-        return 1;
-      }
-
-      return a < b ? -1 : 1;
-    };
-
-    [
-      { a: "1.0", b: "1.1", compareFunc: undefined, expected: true },
-      { a: "1.1", b: "1.0", compareFunc: undefined, expected: false },
-      { a: "1.0", b: "1.0-beta.1", compareFunc: undefined, expected: true },
-      { a: "1.0", b: "1.0-beta.1", compareFunc: func1, expected: false }
-    ].forEach((arg) => {
-      const { a, b, compareFunc, expected } = arg;
-      it(`returns ${expected} for comparing '${a}' and '${b}'${
-        compareFunc ? " custom func" : ""
-      }`, () => {
-        const result = lessThanOrEqual(a, b, compareFunc);
-        assert.equal(result, expected);
-      });
     });
+  });
+
+  onVersions(["7.0"]).it("test case 5", function() {
+    console.log(` 5. testing service version ${getCurrentVersion(this)}`);
+    if (!getCurrentVersion(this)) {
+      throw new Error("Expecting valid current version");
+    }
+  });
+
+  onVersions({ minVer: "7.1" }).it("test case 6", async function() {
+    console.log(` 6. testing service version ${getCurrentVersion(this)}`);
+    if (!getCurrentVersion(this)) {
+      throw new Error("Expecting valid current version");
+    }
   });
 });

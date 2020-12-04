@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import * as Mocha from "mocha";
+
 import { isLiveMode } from "@azure/test-utils-recorder";
 import { getGlobalObject } from "./global";
 
@@ -17,18 +19,7 @@ export interface TestFunctionWrapper {
         only: Mocha.ExclusiveSuiteFunction;
       });
   xdescribe: Mocha.PendingSuiteFunction;
-  global: NodeJS.Global;
-}
-
-export function lessThanOrEqual(
-  a: string,
-  b: string,
-  compareFunc?: (a: string, b: string) => number
-): boolean {
-  if (compareFunc) {
-    return compareFunc(a, b) <= 0;
-  }
-  return a <= b;
+  //global: NodeJS.Global;
 }
 
 /**
@@ -51,15 +42,33 @@ function skipReason(currentVersion: string, supported: SupportedVersions): strin
   }
 }
 
+/**
+ *
+ * @param currentVersion current service version to run test with
+ * @param supported service versions supported by a test suite or test case
+ * @param allVersions all service versions supported by the SDK library being tested.
+ *                    NOTE: The versions must be in order from oldest to latest.
+ */
 export function isVersionInSupportedRange(
   currentVersion: string,
   supported: SupportedVersions,
-  compareFunc?: (a: string, b: string) => number
+  allVersions: string[]
 ): { isSupported: boolean; skipReason?: string } {
+  const lessThanOrEqual = function(a: string, b: string) {
+    const idxA = allVersions.indexOf(a);
+    const idxB = allVersions.indexOf(b);
+    if (idxA === -1) {
+      throw new Error(`version '${a}' is not in versions supported by the SDK`);
+    }
+    if (idxB === -1) {
+      throw new Error(`version '${b}' is not in versions supported by the SDK`);
+    }
+    return idxA <= idxB;
+  };
+
   let run: boolean;
   if (supported instanceof Array) {
-    console.log(`Test ${currentVersion} for supported versions ${supported.join()}?`);
-    supported.sort(compareFunc);
+    console.log(`Test ${currentVersion} for supported versions [${supported.join()}]?`);
 
     run = supported.includes(currentVersion);
 
@@ -75,17 +84,17 @@ export function isVersionInSupportedRange(
     }
   } else {
     console.log(
-      `Test ${currentVersion} for supported version range: min ${supported.minVer} max ${supported.maxVer}`
+      `Test ${currentVersion} for supported version range: [min ${supported.minVer} max ${supported.maxVer}]`
     );
     if (supported.minVer && supported.maxVer) {
       if (
         lessThanOrEqual(supported.minVer, currentVersion) &&
         lessThanOrEqual(currentVersion, supported.maxVer)
       ) {
-        console.log(`  Test ${currentVersion} because it's within range`);
+        console.log(`  Test ${currentVersion} because it is within range`);
         return { isSupported: true };
       } else {
-        console.log(`  Skipping ${currentVersion} because it's out of range`);
+        console.log(`  Skipping ${currentVersion} because it is out of range`);
         return {
           isSupported: false,
           skipReason: skipReason(currentVersion, supported)
@@ -93,10 +102,10 @@ export function isVersionInSupportedRange(
       }
     } else if (supported.minVer) {
       if (lessThanOrEqual(supported.minVer, currentVersion)) {
-        console.log(`  Test ${currentVersion} because it's above minVer`);
+        console.log(`  Test ${currentVersion} because it is above minVer`);
         return { isSupported: true };
       } else {
-        console.log(`  Skip ${currentVersion} because it's below minVer`);
+        console.log(`  Skip ${currentVersion} because it is below minVer`);
         return {
           isSupported: false,
           skipReason: skipReason(currentVersion, supported)
@@ -126,17 +135,18 @@ export function isVersionInSupportedRange(
  * of versions or a range of versions supported by the test/test suite.
  * @param currentVersion version to check wether to run or skip
  * @param supported supported versions for a test/test suite
- * @param compareFunc custom string comparison function to determine the order of versions
+ * @param allVersions all service versions supported by the SDK library being tested.
+ *                    NOTE: The versions must be in order from oldest to latest.
  */
 export function supports(
   currentVersion: string,
   supported: SupportedVersions,
-  compareFunc?: (a: string, b: string) => number
+  allVersions: string[]
 ): TestFunctionWrapper {
-  const run = isVersionInSupportedRange(currentVersion, supported, compareFunc);
-  const either = function(match: any, skip: any) {
+  const run = isVersionInSupportedRange(currentVersion, supported, allVersions);
+  const either = function(keep: any, skip: any) {
     return run.isSupported
-      ? match
+      ? keep
       : isLiveMode()
       ? // only append skip reason to titles in live TEST_MODE.
         // Record and playback depends on titles for recording file names so keeping them
@@ -172,7 +182,7 @@ export function supports(
   });
 
   const chain: TestFunctionWrapper = {
-    global: getGlobalObject(),
+    //global: getGlobalObject(),
     it,
     xit: supports.global.xit,
     describe,
@@ -192,10 +202,6 @@ export interface MultiVersionTestOptions {
    * version to used for record/playback
    */
   versionForRecording?: string;
-  /**
-   * Compare function to determine the ascending order of a list of service versions.
-   */
-  compareFunc?: (a: string, b: string) => number;
 }
 
 /**
@@ -203,6 +209,7 @@ export interface MultiVersionTestOptions {
  * - For live tests loop through all the versions and run tests for each version.
  * - For record and playback, use the defaultVersion in options if specified, otherwise use the latest version.
  * @param versions list of service versions to run the tests
+ *                 NOTE: The versions must be in order from oldest to latest.
  * @param options Optional settings such as version to use for record/playback, and
  *                custom string comparison function to determines order of version strings.
  */
@@ -213,7 +220,6 @@ export function versionsToTest(
   if (versions.length <= 0) {
     throw new Error("invalid list of service versions to run the tests.");
   }
-  versions.sort(options.compareFunc);
 
   // all versions are used in live TEST_MODE
   if (isLiveMode()) {
@@ -224,3 +230,143 @@ export function versionsToTest(
     ? [options.versionForRecording]
     : versions.slice(versions.length - 1);
 }
+
+export function testServiceVersions(versions: string[], options: MultiVersionTestOptions = {}) {
+  const toTest: string[] = isLiveMode()
+    ? versions
+    : options.versionForRecording
+    ? [options.versionForRecording]
+    : versions.slice(versions.length - 1);
+
+  // @ts-ignore skip and only are defined below
+  const loopingDescribe: Mocha.SuiteFunction = function(
+    title: string,
+    fn: (this: Mocha.Suite) => void
+  ) {
+    if (isLiveMode()) {
+      for (const v of toTest) {
+        const newFn = function(this: Mocha.Suite) {
+          this.ctx.allVersions = versions;
+          this.ctx.currentVersion = v;
+          // @ts-ignore
+          fn(this);
+        };
+
+        testServiceVersions.global.describe(`${title} - (service version '${v}')`, newFn);
+      }
+    } else {
+      const newFn = function(this: Mocha.Suite) {
+        this.ctx.allVersions = versions;
+        this.ctx.currentVersion = toTest[0];
+        // @ts-ignore
+        fn(this);
+      };
+
+      testServiceVersions.global.describe(title, newFn);
+    }
+  };
+  Object.defineProperty(loopingDescribe, "only", {
+    value: testServiceVersions.global.describe.only
+  });
+  Object.defineProperty(loopingDescribe, "skip", {
+    value: testServiceVersions.global.describe.skip
+  });
+  return {
+    describe: loopingDescribe
+  };
+}
+testServiceVersions.global = getGlobalObject();
+
+function getPropertyFromMocha(name: string, context: Mocha.Suite | Mocha.Context) {
+  let pointer: Mocha.Context | Mocha.Suite | Mocha.Test | undefined = context;
+  while (pointer) {
+    if (pointer instanceof Mocha.Context) {
+      if (pointer[name]) {
+        return pointer[name];
+      }
+      pointer = pointer.test?.parent;
+    } else {
+      if (pointer.ctx[name]) {
+        return pointer.ctx[name];
+      }
+      pointer = pointer.parent;
+    }
+  }
+
+  return undefined;
+}
+
+export function getCurrentVersion(context: Mocha.Context | Mocha.Suite) {
+  return getPropertyFromMocha("currentVersion", context);
+}
+
+export function getAllVersions(context: Mocha.Context | Mocha.Suite) {
+  return getPropertyFromMocha("allVersions", context);
+}
+
+export function onVersions(
+  supported: SupportedVersions
+): {
+  it: Mocha.TestFunction;
+} {
+  if (!isLiveMode()) {
+    return {
+      it: onVersions.global.it
+    };
+  }
+
+  // @ts-ignore only, skip, and retries are defined below
+  const wrappedIt: Mocha.TestFunction = function(title: string, fn: Mocha.Func | Mocha.AsyncFunc) {
+    const newFn = function(this: Mocha.Context) {
+      const currentVersion = getCurrentVersion(this);
+      const allVersions = getAllVersions(this);
+      if (isVersionInSupportedRange(currentVersion, supported, allVersions).isSupported) {
+        // @ts-ignore
+        fn(this);
+      } else {
+        if (this.test) {
+          this.test.pending = true;
+        }
+        // @ts-ignore
+        fn(this);
+      }
+    };
+    return onVersions.global.it(title, newFn);
+  };
+
+  const wrappedItOnly = function(title: string, fn: Mocha.Func | Mocha.AsyncFunc): Mocha.Test {
+    const newFn = function(this: Mocha.Context) {
+      const currentVersion = getCurrentVersion(this);
+      const allVersions = getAllVersions(this);
+      if (isVersionInSupportedRange(currentVersion, supported, allVersions).isSupported) {
+        // @ts-ignore
+        fn(this);
+      } else {
+        if (this.test) {
+          this.test.pending = true;
+        }
+        // @ts-ignore
+        fn(this);
+      }
+    };
+    return onVersions.global.it.only(title, newFn);
+  };
+
+  Object.defineProperty(wrappedIt, "only", {
+    value: wrappedItOnly
+  });
+
+  Object.defineProperty(wrappedIt, "skip", {
+    value: testServiceVersions.global.it.skip
+  });
+
+  Object.defineProperty(wrappedIt, "retries", {
+    value: testServiceVersions.global.it.retries
+  });
+
+  return {
+    it: wrappedIt
+  };
+}
+
+onVersions.global = getGlobalObject();

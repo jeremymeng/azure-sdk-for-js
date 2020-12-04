@@ -9,11 +9,28 @@ import { assertThrowsAbortError } from "../utils/utils.common";
 import { testPollerProperties } from "../utils/recorderUtils";
 import { authenticate } from "../utils/testAuthentication";
 import TestClient from "../utils/testClient";
-import { supports, versionsToTest, SupportedVersions } from "@azure/test-utils-multi-version";
+import {
+  supports,
+  versionsToTest,
+  SupportedVersions,
+  testServiceVersions
+} from "@azure/test-utils-multi-version";
 
-versionsToTest(["7.0", "7.1"]).forEach((serviceVersion) => {
+testServiceVersions(
+  ["7.0", "7.1"],
+  undefined,
+  describe("test suite 1", function() {
+    it("test case 2", function() {});
+    describe("nested test suite 3", function() {
+      it("nested test 4", function() {});
+    });
+  })
+);
+
+const allSupportedServiceVersions = ["7.0", "7.1"];
+versionsToTest(allSupportedServiceVersions).forEach((serviceVersion) => {
   const versions = function(versions: SupportedVersions) {
-    return supports(serviceVersion, versions);
+    return supports(serviceVersion, versions, allSupportedServiceVersions);
   };
 
   versions(["7.0", "7.1"]).describe.only(
