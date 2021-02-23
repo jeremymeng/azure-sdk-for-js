@@ -1241,7 +1241,9 @@ export class BlobClient extends StorageClient {
             encodeURIComponent(blobName)
           ) +
           "?" +
-          extractedCreds.accountSas;
+          (extractedCreds.accountSas?.startsWith("?")
+            ? extractedCreds.accountSas!.substr(1)
+            : extractedCreds.accountSas);
         pipeline = newPipeline(new AnonymousCredential(), options);
       } else {
         throw new Error(
@@ -2927,7 +2929,9 @@ export class AppendBlobClient extends BlobClient {
             encodeURIComponent(blobName)
           ) +
           "?" +
-          extractedCreds.accountSas;
+          (extractedCreds.accountSas?.startsWith("?")
+            ? extractedCreds.accountSas!.substr(1)
+            : extractedCreds.accountSas);
         pipeline = newPipeline(new AnonymousCredential(), options);
       } else {
         throw new Error(
@@ -4181,7 +4185,9 @@ export class BlockBlobClient extends BlobClient {
             encodeURIComponent(blobName)
           ) +
           "?" +
-          extractedCreds.accountSas;
+          (extractedCreds.accountSas?.startsWith("?")
+            ? extractedCreds.accountSas!.substr(1)
+            : extractedCreds.accountSas);
         pipeline = newPipeline(new AnonymousCredential(), options);
       } else {
         throw new Error(
@@ -5598,7 +5604,9 @@ export class PageBlobClient extends BlobClient {
             encodeURIComponent(blobName)
           ) +
           "?" +
-          extractedCreds.accountSas;
+          (extractedCreds.accountSas?.startsWith("?")
+            ? extractedCreds.accountSas!.substr(1)
+            : extractedCreds.accountSas);
         pipeline = newPipeline(new AnonymousCredential(), options);
       } else {
         throw new Error(
