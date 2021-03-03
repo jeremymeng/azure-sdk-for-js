@@ -15,6 +15,7 @@ import {
   ContainerRegistryBlobCheckBlobExistsResponse,
   ContainerRegistryBlobDeleteBlobResponse,
   ContainerRegistryBlobMountBlobResponse,
+  ContainerRegistryBlobMonolithicUploadResponse,
   ContainerRegistryBlobGetUploadStatusResponse,
   ContainerRegistryBlobUploadChunkResponse,
   ContainerRegistryBlobCompleteUploadResponse,
@@ -124,6 +125,34 @@ export class ContainerRegistryBlob {
       operationArguments,
       mountBlobOperationSpec
     ) as Promise<ContainerRegistryBlobMountBlobResponse>;
+  }
+
+  /**
+   * Upload a single chunk of data provided in body. This completes the upload.
+   * @param name Name of the image (including the namespace)
+   * @param uuid A uuid identifying the upload.
+   * @param digest Digest of a BLOB
+   * @param value Raw data of blob
+   * @param options The options parameters.
+   */
+  monolithicUpload(
+    name: string,
+    uuid: string,
+    digest: string,
+    value: coreHttp.HttpRequestBody,
+    options?: coreHttp.OperationOptions
+  ): Promise<ContainerRegistryBlobMonolithicUploadResponse> {
+    const operationArguments: coreHttp.OperationArguments = {
+      name,
+      uuid,
+      digest,
+      value,
+      options: coreHttp.operationOptionsToRequestOptionsBase(options || {})
+    };
+    return this.client.sendOperationRequest(
+      operationArguments,
+      monolithicUploadOperationSpec
+    ) as Promise<ContainerRegistryBlobMonolithicUploadResponse>;
   }
 
   /**
@@ -361,6 +390,24 @@ const mountBlobOperationSpec: coreHttp.OperationSpec = {
   queryParameters: [Parameters.fromParam, Parameters.mount],
   urlParameters: [Parameters.url, Parameters.name],
   headerParameters: [Parameters.accept],
+  serializer
+};
+const monolithicUploadOperationSpec: coreHttp.OperationSpec = {
+  path: "/v2/{name}/blobs/uploads/{uuid}",
+  httpMethod: "POST",
+  responses: {
+    201: {
+      headersMapper: Mappers.ContainerRegistryBlobMonolithicUploadHeaders
+    },
+    default: {
+      bodyMapper: Mappers.AcrErrors
+    }
+  },
+  requestBody: Parameters.value1,
+  queryParameters: [Parameters.digest2],
+  urlParameters: [Parameters.url, Parameters.name, Parameters.uuid],
+  headerParameters: [Parameters.contentType2, Parameters.accept3],
+  mediaType: "binary",
   serializer
 };
 const getUploadStatusOperationSpec: coreHttp.OperationSpec = {

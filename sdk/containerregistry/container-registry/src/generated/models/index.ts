@@ -452,6 +452,16 @@ export interface ContainerRegistryBlobMountBlobHeaders {
   dockerContentDigest?: string;
 }
 
+/** Defines headers for ContainerRegistryBlob_monolithicUpload operation. */
+export interface ContainerRegistryBlobMonolithicUploadHeaders {
+  /** Provided location for blob */
+  location?: string;
+  /** Range indicating the current progress of the upload. */
+  range?: string;
+  /** Digest of the targeted content for the request. */
+  dockerContentDigest?: string;
+}
+
 /** Defines headers for ContainerRegistryBlob_getUploadStatus operation. */
 export interface ContainerRegistryBlobGetUploadStatusHeaders {
   /** Range indicating the current progress of the upload. */
@@ -746,6 +756,15 @@ export type ContainerRegistryBlobMountBlobResponse = ContainerRegistryBlobMountB
   _response: coreHttp.HttpResponse & {
     /** The parsed HTTP response headers. */
     parsedHeaders: ContainerRegistryBlobMountBlobHeaders;
+  };
+};
+
+/** Contains response data for the monolithicUpload operation. */
+export type ContainerRegistryBlobMonolithicUploadResponse = ContainerRegistryBlobMonolithicUploadHeaders & {
+  /** The underlying HTTP response. */
+  _response: coreHttp.HttpResponse & {
+    /** The parsed HTTP response headers. */
+    parsedHeaders: ContainerRegistryBlobMonolithicUploadHeaders;
   };
 };
 

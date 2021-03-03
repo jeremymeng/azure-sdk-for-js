@@ -1386,6 +1386,33 @@ export const ContainerRegistryBlobMountBlobHeaders: coreHttp.CompositeMapper = {
   }
 };
 
+export const ContainerRegistryBlobMonolithicUploadHeaders: coreHttp.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ContainerRegistryBlobMonolithicUploadHeaders",
+    modelProperties: {
+      location: {
+        serializedName: "location",
+        type: {
+          name: "String"
+        }
+      },
+      range: {
+        serializedName: "range",
+        type: {
+          name: "String"
+        }
+      },
+      dockerContentDigest: {
+        serializedName: "docker-content-digest",
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
 export const ContainerRegistryBlobGetUploadStatusHeaders: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",

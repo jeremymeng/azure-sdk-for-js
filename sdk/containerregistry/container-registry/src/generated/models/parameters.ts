@@ -191,18 +191,6 @@ export const mount: OperationQueryParameter = {
   }
 };
 
-export const location: OperationURLParameter = {
-  parameterPath: "location",
-  mapper: {
-    serializedName: "nextBlobUuidLink",
-    required: true,
-    type: {
-      name: "String"
-    }
-  },
-  skipEncoding: true
-};
-
 export const contentType2: OperationParameter = {
   parameterPath: ["options", "contentType"],
   mapper: {
@@ -238,6 +226,17 @@ export const accept3: OperationParameter = {
   }
 };
 
+export const uuid: OperationURLParameter = {
+  parameterPath: "uuid",
+  mapper: {
+    serializedName: "uuid",
+    required: true,
+    type: {
+      name: "String"
+    }
+  }
+};
+
 export const digest2: OperationQueryParameter = {
   parameterPath: "digest",
   mapper: {
@@ -247,6 +246,18 @@ export const digest2: OperationQueryParameter = {
       name: "String"
     }
   }
+};
+
+export const location: OperationURLParameter = {
+  parameterPath: "location",
+  mapper: {
+    serializedName: "nextBlobUuidLink",
+    required: true,
+    type: {
+      name: "String"
+    }
+  },
+  skipEncoding: true
 };
 
 export const range: OperationParameter = {

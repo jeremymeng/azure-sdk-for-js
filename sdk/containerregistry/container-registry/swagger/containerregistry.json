@@ -413,6 +413,62 @@
         }
       }
     },
+  "/v2/{name}/blobs/uploads/{uuid}": {
+    "post": {
+      "tags": [
+        "ContainerRegistryBlob"
+      ],
+      "description": "Upload a single chunk of data provided in body. This completes the upload.",
+      "operationId": "ContainerRegistryBlob_MonolithicUpload",
+      "x-ms-examples": {
+        "Perform a monolithic blob upload": {
+          "$ref": "./examples/MonolithicBlobUpload.json"
+        }
+      },
+      "consumes": [
+        "application/octet-stream"
+      ],
+      "parameters": [
+        {
+          "$ref": "#/parameters/ImageName"
+        },
+        {
+          "$ref": "#/parameters/Uuid"
+        },
+        {
+          "$ref": "#/parameters/RawData"
+        },
+        {
+          "$ref": "#/parameters/BlobQueryDigest"
+        }
+      ],
+      "responses": {
+        "201": {
+          "description": "The upload has been completed and accepted by the registry.",
+          "headers": {
+            "Location": {
+              "description": "Provided location for blob",
+              "type": "string"
+            },
+            "Range": {
+              "description": "Range indicating the current progress of the upload.",
+              "type": "string"
+            },
+            "Docker-Content-Digest": {
+              "description": "Digest of the targeted content for the request.",
+              "type": "string"
+            }
+          }
+        },
+        "default": {
+          "description": "ACR error response describing why the operation failed.",
+          "schema": {
+            "$ref": "#/definitions/AcrErrors"
+          }
+        }
+      }
+    }
+  },
     "/{nextBlobUuidLink}": {
       "get": {
         "tags": [
