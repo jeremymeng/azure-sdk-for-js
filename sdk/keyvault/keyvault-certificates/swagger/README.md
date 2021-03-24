@@ -8,6 +8,7 @@ typescript:
 disable-async-iterators: true
 api-version-parameter: choice
 v3: true
+use-core-v2: true
 use-extension:
   "@autorest/typescript": "6.0.0-dev.20210114.1"
 azure-arm: false
