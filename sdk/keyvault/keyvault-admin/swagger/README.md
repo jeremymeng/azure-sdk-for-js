@@ -4,6 +4,7 @@
 
 ```yaml
 package-name: "@azure/keyvault-admin"
+use-core-v2: true
 use-extension:
   "@autorest/typescript": "6.0.0-dev.20200917.1"
 azure-arm: false

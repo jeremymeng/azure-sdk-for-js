@@ -6,13 +6,10 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import * as coreHttp from "@azure/core-http";
+import * as coreClient from "@azure/core-client";
 import { KeyVaultClientOptionalParams } from "./models";
 
-const packageName = "@azure/keyvault-admin";
-export const packageVersion = "4.0.0-beta.3";
-
-export class KeyVaultClientContext extends coreHttp.ServiceClient {
+export class KeyVaultClientContext extends coreClient.ServiceClient {
   apiVersion: string;
 
   /**
@@ -25,18 +22,19 @@ export class KeyVaultClientContext extends coreHttp.ServiceClient {
       options = {};
     }
 
-    if (!options.userAgent) {
-      const defaultUserAgent = coreHttp.getDefaultUserAgentValue();
-      options.userAgent = `${packageName}/${packageVersion} ${defaultUserAgent}`;
-    }
+    const defaults: KeyVaultClientOptionalParams = {
+      requestContentType: "application/json; charset=utf-8"
+    };
 
-    super(undefined, options);
+    const optionsWithDefaults = {
+      ...defaults,
+      ...options,
+      baseUri: options.endpoint || "{vaultBaseUrl}"
+    };
 
-    this.requestContentType = "application/json; charset=utf-8";
-
-    this.baseUri = options.endpoint || "{vaultBaseUrl}";
+    super(optionsWithDefaults);
 
     // Assigning values to Constant parameters
-    this.apiVersion = options.apiVersion || "7.2";
+    this.apiVersion = options.apiVersion || "7.2-preview";
   }
 }

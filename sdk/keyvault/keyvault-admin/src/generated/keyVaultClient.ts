@@ -6,7 +6,7 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import * as coreHttp from "@azure/core-http";
+import * as coreClient from "@azure/core-client";
 import { RoleDefinitions, RoleAssignments } from "./operations";
 import * as Parameters from "./models/parameters";
 import * as Mappers from "./models/mappers";
@@ -43,13 +43,10 @@ export class KeyVaultClient extends KeyVaultClientContext {
     vaultBaseUrl: string,
     options?: KeyVaultClientFullBackupOptionalParams
   ): Promise<KeyVaultClientFullBackupResponse> {
-    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
-      options || {}
-    );
     return this.sendOperationRequest(
-      { vaultBaseUrl, options: operationOptions },
+      { vaultBaseUrl, options },
       fullBackupOperationSpec
-    ) as Promise<KeyVaultClientFullBackupResponse>;
+    );
   }
 
   /**
@@ -61,15 +58,12 @@ export class KeyVaultClient extends KeyVaultClientContext {
   fullBackupStatus(
     vaultBaseUrl: string,
     jobId: string,
-    options?: coreHttp.OperationOptions
+    options?: coreClient.OperationOptions
   ): Promise<KeyVaultClientFullBackupStatusResponse> {
-    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
-      options || {}
-    );
     return this.sendOperationRequest(
-      { vaultBaseUrl, jobId, options: operationOptions },
+      { vaultBaseUrl, jobId, options },
       fullBackupStatusOperationSpec
-    ) as Promise<KeyVaultClientFullBackupStatusResponse>;
+    );
   }
 
   /**
@@ -82,13 +76,10 @@ export class KeyVaultClient extends KeyVaultClientContext {
     vaultBaseUrl: string,
     options?: KeyVaultClientFullRestoreOperationOptionalParams
   ): Promise<KeyVaultClientFullRestoreOperationResponse> {
-    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
-      options || {}
-    );
     return this.sendOperationRequest(
-      { vaultBaseUrl, options: operationOptions },
+      { vaultBaseUrl, options },
       fullRestoreOperationOperationSpec
-    ) as Promise<KeyVaultClientFullRestoreOperationResponse>;
+    );
   }
 
   /**
@@ -100,15 +91,12 @@ export class KeyVaultClient extends KeyVaultClientContext {
   restoreStatus(
     vaultBaseUrl: string,
     jobId: string,
-    options?: coreHttp.OperationOptions
+    options?: coreClient.OperationOptions
   ): Promise<KeyVaultClientRestoreStatusResponse> {
-    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
-      options || {}
-    );
     return this.sendOperationRequest(
-      { vaultBaseUrl, jobId, options: operationOptions },
+      { vaultBaseUrl, jobId, options },
       restoreStatusOperationSpec
-    ) as Promise<KeyVaultClientRestoreStatusResponse>;
+    );
   }
 
   /**
@@ -123,23 +111,19 @@ export class KeyVaultClient extends KeyVaultClientContext {
     keyName: string,
     options?: KeyVaultClientSelectiveKeyRestoreOperationOptionalParams
   ): Promise<KeyVaultClientSelectiveKeyRestoreOperationResponse> {
-    const operationOptions: coreHttp.RequestOptionsBase = coreHttp.operationOptionsToRequestOptionsBase(
-      options || {}
-    );
     return this.sendOperationRequest(
-      { vaultBaseUrl, keyName, options: operationOptions },
+      { vaultBaseUrl, keyName, options },
       selectiveKeyRestoreOperationOperationSpec
-    ) as Promise<KeyVaultClientSelectiveKeyRestoreOperationResponse>;
+    );
   }
 
   roleDefinitions: RoleDefinitions;
   roleAssignments: RoleAssignments;
 }
 // Operation Specifications
+const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
-const serializer = new coreHttp.Serializer(Mappers, /* isXml */ false);
-
-const fullBackupOperationSpec: coreHttp.OperationSpec = {
+const fullBackupOperationSpec: coreClient.OperationSpec = {
   path: "/backup",
   httpMethod: "POST",
   responses: {
@@ -154,11 +138,11 @@ const fullBackupOperationSpec: coreHttp.OperationSpec = {
   requestBody: Parameters.azureStorageBlobContainerUri,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.vaultBaseUrl],
-  headerParameters: [Parameters.contentType, Parameters.accept1],
+  headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
   serializer
 };
-const fullBackupStatusOperationSpec: coreHttp.OperationSpec = {
+const fullBackupStatusOperationSpec: coreClient.OperationSpec = {
   path: "/backup/{jobId}/pending",
   httpMethod: "GET",
   responses: {
@@ -174,7 +158,7 @@ const fullBackupStatusOperationSpec: coreHttp.OperationSpec = {
   headerParameters: [Parameters.accept],
   serializer
 };
-const fullRestoreOperationOperationSpec: coreHttp.OperationSpec = {
+const fullRestoreOperationOperationSpec: coreClient.OperationSpec = {
   path: "/restore",
   httpMethod: "PUT",
   responses: {
@@ -189,11 +173,11 @@ const fullRestoreOperationOperationSpec: coreHttp.OperationSpec = {
   requestBody: Parameters.restoreBlobDetails,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.vaultBaseUrl],
-  headerParameters: [Parameters.contentType, Parameters.accept1],
+  headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
   serializer
 };
-const restoreStatusOperationSpec: coreHttp.OperationSpec = {
+const restoreStatusOperationSpec: coreClient.OperationSpec = {
   path: "/restore/{jobId}/pending",
   httpMethod: "GET",
   responses: {
@@ -209,7 +193,7 @@ const restoreStatusOperationSpec: coreHttp.OperationSpec = {
   headerParameters: [Parameters.accept],
   serializer
 };
-const selectiveKeyRestoreOperationOperationSpec: coreHttp.OperationSpec = {
+const selectiveKeyRestoreOperationOperationSpec: coreClient.OperationSpec = {
   path: "/keys/{keyName}/restore",
   httpMethod: "PUT",
   responses: {
@@ -224,7 +208,7 @@ const selectiveKeyRestoreOperationOperationSpec: coreHttp.OperationSpec = {
   requestBody: Parameters.restoreBlobDetails1,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.vaultBaseUrl, Parameters.keyName],
-  headerParameters: [Parameters.contentType, Parameters.accept1],
+  headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
   serializer
 };

@@ -10,7 +10,7 @@ import {
   OperationParameter,
   OperationURLParameter,
   OperationQueryParameter
-} from "@azure/core-http";
+} from "@azure/core-client";
 import {
   RoleDefinitionCreateParameters as RoleDefinitionCreateParametersMapper,
   RoleAssignmentCreateParameters as RoleAssignmentCreateParametersMapper,
@@ -69,7 +69,7 @@ export const roleDefinitionName: OperationURLParameter = {
 export const apiVersion: OperationQueryParameter = {
   parameterPath: "apiVersion",
   mapper: {
-    defaultValue: "7.2",
+    defaultValue: "7.2-preview",
     isConstant: true,
     serializedName: "api-version",
     type: {
@@ -93,18 +93,6 @@ export const contentType: OperationParameter = {
 export const parameters: OperationParameter = {
   parameterPath: "parameters",
   mapper: RoleDefinitionCreateParametersMapper
-};
-
-export const accept1: OperationParameter = {
-  parameterPath: "accept",
-  mapper: {
-    defaultValue: "application/json",
-    isConstant: true,
-    serializedName: "Accept",
-    type: {
-      name: "String"
-    }
-  }
 };
 
 export const filter: OperationQueryParameter = {
