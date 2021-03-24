@@ -3,14 +3,8 @@
 /* eslint @typescript-eslint/member-ordering: 0 */
 /// <reference lib="esnext.asynciterable" />
 
-import {
-  PipelineOptions,
-  TokenCredential,
-  createPipelineFromOptions,
-  isTokenCredential,
-  signingPolicy,
-  operationOptionsToRequestOptionsBase
-} from "@azure/core-http";
+import { isTokenCredential, TokenCredential } from "@azure/core-auth";
+import { PipelineOptions, createPipelineFromOptions } from "@azure/core-rest-pipeline";
 
 import { logger } from "./log";
 
@@ -235,10 +229,6 @@ export class KeyClient {
           : libInfo
     };
 
-    const authPolicy = isTokenCredential(credential)
-      ? challengeBasedAuthenticationPolicy(credential)
-      : signingPolicy(credential);
-
     const internalPipelineOptions = {
       ...pipelineOptions,
       loggingOptions: {
@@ -251,10 +241,10 @@ export class KeyClient {
       }
     };
 
-    this.client = new KeyVaultClient(
-      pipelineOptions.serviceVersion || LATEST_API_VERSION,
-      createPipelineFromOptions(internalPipelineOptions, authPolicy)
-    );
+    this.client = new KeyVaultClient(pipelineOptions.serviceVersion || LATEST_API_VERSION, {
+      pipeline: createPipelineFromOptions(internalPipelineOptions)
+    });
+    this.client.pipeline.addPolicy(challengeBasedAuthenticationPolicy(credential));
   }
 
   /**

@@ -1,12 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import {
-  createPipelineFromOptions,
-  isTokenCredential,
-  TokenCredential,
-  signingPolicy
-} from "@azure/core-http";
+import { isTokenCredential, TokenCredential } from "@azure/core-auth";
+import { createPipelineFromOptions } from "@azure/core-rest-pipeline";
 import {
   EncryptParameters,
   EncryptOptions,

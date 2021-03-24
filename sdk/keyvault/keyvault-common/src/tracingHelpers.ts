@@ -3,7 +3,7 @@
 
 import { Span, CanonicalCode } from "@opentelemetry/api";
 
-import { OperationOptions } from "@azure/core-http";
+import { OperationOptions } from "@azure/core-client";
 import { createSpanFunction } from "@azure/core-tracing";
 
 export interface TracedFunction {

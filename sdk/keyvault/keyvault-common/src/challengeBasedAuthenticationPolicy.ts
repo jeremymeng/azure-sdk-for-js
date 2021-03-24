@@ -2,16 +2,13 @@
 // Licensed under the MIT license.
 /* eslint-disable @azure/azure-sdk/ts-use-interface-parameters */
 
-import { TokenCredential } from "@azure/core-http";
+import { TokenCredential } from "@azure/core-auth";
 import {
-  BaseRequestPolicy,
-  RequestPolicy,
-  RequestPolicyOptions,
-  RequestPolicyFactory
-} from "@azure/core-http";
-import { Constants } from "@azure/core-http";
-import { HttpOperationResponse } from "@azure/core-http";
-import { WebResource } from "@azure/core-http";
+  PipelinePolicy,
+  PipelineRequest,
+  PipelineResponse,
+  SendRequest
+} from "@azure/core-rest-pipeline";
 import { AccessTokenCache, ExpiringAccessTokenCache } from "@azure/core-http";
 
 type ValidParsedWWWAuthenticateProperties =
@@ -60,27 +57,16 @@ export class AuthenticationChallengeCache {
   }
 }
 
+export const challengeBasedAuthenticationPolicyName = "challengeBasedAuthenticationPolicy";
 /**
  * Creates a new ChallengeBasedAuthenticationPolicy factory.
  *
  * @param credential - The TokenCredential implementation that can supply the challenge token.
  */
-export function challengeBasedAuthenticationPolicy(
-  credential: TokenCredential
-): RequestPolicyFactory {
+export function challengeBasedAuthenticationPolicy(credential: TokenCredential): PipelinePolicy {
   const tokenCache: AccessTokenCache = new ExpiringAccessTokenCache();
   const challengeCache = new AuthenticationChallengeCache();
-  return {
-    create: (nextPolicy: RequestPolicy, options: RequestPolicyOptions) => {
-      return new ChallengeBasedAuthenticationPolicy(
-        nextPolicy,
-        options,
-        credential,
-        tokenCache,
-        challengeCache
-      );
-    }
-  };
+  return new ChallengeBasedAuthenticationPolicy(credential, tokenCache, challengeCache);
 }
 
 /**
@@ -118,7 +104,8 @@ export function parseWWWAuthenticate(wwwAuthenticate: string): ParsedWWWAuthenti
  * as a Bearer token.
  *
  */
-export class ChallengeBasedAuthenticationPolicy extends BaseRequestPolicy {
+export class ChallengeBasedAuthenticationPolicy implements PipelinePolicy {
+  public name: string = "challengeBasedAuthenticationPolicy";
   private parseWWWAuthenticate: (
     wwwAuthenticate: string
   ) => ParsedWWWAuthenticate = parseWWWAuthenticate;
@@ -132,99 +119,39 @@ export class ChallengeBasedAuthenticationPolicy extends BaseRequestPolicy {
    * @param tokenCache - The cache for the most recent AccessToken returned by the TokenCredential.
    */
   constructor(
-    nextPolicy: RequestPolicy,
-    options: RequestPolicyOptions,
     private credential: TokenCredential,
     private tokenCache: AccessTokenCache,
     private challengeCache: AuthenticationChallengeCache
-  ) {
-    super(nextPolicy, options);
-  }
-
-  /**
-   * Gets or updates the token from the token cache into the headers of the received web resource.
-   */
-  private async loadToken(webResource: WebResource): Promise<void> {
-    let accessToken = this.tokenCache.getCachedToken();
-
-    // If there's no cached token in the cache, we try to get a new one.
-    if (accessToken === undefined) {
-      const receivedToken = await this.credential.getToken(this.challengeCache.challenge!.scope);
-      accessToken = receivedToken || undefined;
-      this.tokenCache.setCachedToken(accessToken);
-    }
-
-    if (accessToken) {
-      webResource.headers.set(
-        Constants.HeaderConstants.AUTHORIZATION,
-        `Bearer ${accessToken.token}`
-      );
-    }
-  }
-
-  /**
-   * Parses the given WWW-Authenticate header, generates a new AuthenticationChallenge,
-   * then if the challenge is different from the one cached, resets the token and forces
-   * a re-authentication, otherwise continues with the existing challenge and token.
-   * @param wwwAuthenticate - Value of the incoming WWW-Authenticate header.
-   * @param webResource - Ongoing HTTP request.
-   */
-  private async regenerateChallenge(
-    wwwAuthenticate: string,
-    webResource: WebResource
-  ): Promise<HttpOperationResponse> {
-    // The challenge based authentication will contain both:
-    // - An authorization URI with a token,
-    // - The resource to which that token is valid against (also called the scope).
-    const parsedWWWAuth = this.parseWWWAuthenticate(wwwAuthenticate);
-    const authorization = parsedWWWAuth.authorization!;
-    const resource = parsedWWWAuth.resource! || parsedWWWAuth.scope!;
-
-    if (!(authorization && resource)) {
-      return this._nextPolicy.sendRequest(webResource);
-    }
-
-    const challenge = new AuthenticationChallenge(authorization, resource + "/.default");
-
-    // Either if there's no cached challenge at this point (could have happen in parallel),
-    // or if the cached challenge has a different scope,
-    // we store the just received challenge and reset the cached token, to force a re-authentication.
-    if (!this.challengeCache.challenge?.equalTo(challenge)) {
-      this.challengeCache.setCachedChallenge(challenge);
-      this.tokenCache.setCachedToken(undefined);
-    }
-
-    await this.loadToken(webResource);
-    return this._nextPolicy.sendRequest(webResource);
-  }
+  ) {}
 
   /**
    * Applies the Bearer token to the request through the Authorization header.
-   * @param webResource - Ongoing HTTP request.
+   * @param request - Ongoing HTTP request.
+   * @param next -
    */
-  public async sendRequest(webResource: WebResource): Promise<HttpOperationResponse> {
+  public async sendRequest(request: PipelineRequest, next: SendRequest): Promise<PipelineResponse> {
     // Ensure that we're about to use a secure connection.
-    if (!webResource.url.startsWith("https:")) {
+    if (!request.url.startsWith("https:")) {
       throw new Error("The resource address for authorization must use the 'https' protocol.");
     }
 
     // The next request will happen differently whether we have a challenge or not.
-    let response: HttpOperationResponse;
+    let response: PipelineResponse;
 
     if (
       this.challengeCache.challenge === undefined ||
       this.challengeCache.challenge === undefined
     ) {
       // If there's no challenge in cache, a blank body will start the challenge.
-      const originalBody = webResource.body;
-      webResource.body = "";
-      response = await this._nextPolicy.sendRequest(webResource);
-      webResource.body = originalBody;
+      const originalBody = request.body;
+      request.body = "";
+      response = await next(request);
+      request.body = originalBody;
     } else {
       // If we did have a challenge in memory,
       // we attempt to load the token from the cache into the request before we try to send the request.
-      await this.loadToken(webResource);
-      response = await this._nextPolicy.sendRequest(webResource);
+      await this.loadToken(request);
+      response = await next(request);
     }
 
     // If we don't receive a response with a 401 status code,
@@ -240,6 +167,61 @@ export class ChallengeBasedAuthenticationPolicy extends BaseRequestPolicy {
     }
 
     // We re-generate the challenge and see if we have to re-authenticate.
-    return this.regenerateChallenge(wwwAuthenticate, webResource);
+    return this.regenerateChallenge(wwwAuthenticate, request, next);
+  }
+
+  /**
+   * Gets or updates the token from the token cache into the headers of the received web resource.
+   */
+  private async loadToken(request: PipelineRequest): Promise<void> {
+    let accessToken = this.tokenCache.getCachedToken();
+
+    // If there's no cached token in the cache, we try to get a new one.
+    if (accessToken === undefined) {
+      const receivedToken = await this.credential.getToken(this.challengeCache.challenge!.scope);
+      accessToken = receivedToken || undefined;
+      this.tokenCache.setCachedToken(accessToken);
+    }
+
+    if (accessToken) {
+      request.headers.set("Authorization", `Bearer ${accessToken.token}`);
+    }
+  }
+
+  /**
+   * Parses the given WWW-Authenticate header, generates a new AuthenticationChallenge,
+   * then if the challenge is different from the one cached, resets the token and forces
+   * a re-authentication, otherwise continues with the existing challenge and token.
+   * @param wwwAuthenticate - Value of the incoming WWW-Authenticate header.
+   * @param request - Ongoing HTTP request.
+   */
+  private async regenerateChallenge(
+    wwwAuthenticate: string,
+    request: PipelineRequest,
+    next: SendRequest
+  ): Promise<PipelineResponse> {
+    // The challenge based authentication will contain both:
+    // - An authorization URI with a token,
+    // - The resource to which that token is valid against (also called the scope).
+    const parsedWWWAuth = this.parseWWWAuthenticate(wwwAuthenticate);
+    const authorization = parsedWWWAuth.authorization!;
+    const resource = parsedWWWAuth.resource! || parsedWWWAuth.scope!;
+
+    if (!(authorization && resource)) {
+      return next(request);
+    }
+
+    const challenge = new AuthenticationChallenge(authorization, resource + "/.default");
+
+    // Either if there's no cached challenge at this point (could have happen in parallel),
+    // or if the cached challenge has a different scope,
+    // we store the just received challenge and reset the cached token, to force a re-authentication.
+    if (!this.challengeCache.challenge?.equalTo(challenge)) {
+      this.challengeCache.setCachedChallenge(challenge);
+      this.tokenCache.setCachedToken(undefined);
+    }
+
+    await this.loadToken(request);
+    return next(request);
   }
 }

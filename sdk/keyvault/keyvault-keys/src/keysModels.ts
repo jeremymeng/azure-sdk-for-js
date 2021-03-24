@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as coreHttp from "@azure/core-http";
+import { PipelineOptions } from "@azure/core-rest-pipeline";
+import { OperationOptions } from "@azure/core-client";
 import {
   DeletionRecoveryLevel,
   JsonWebKeyType as KeyType,
@@ -21,7 +22,7 @@ export const LATEST_API_VERSION = "7.2";
 /**
  * The optional parameters accepted by the KeyVault's KeyClient
  */
-export interface KeyClientOptions extends coreHttp.PipelineOptions {
+export interface KeyClientOptions extends PipelineOptions {
   /**
    * The accepted versions of the KeyVault's service API.
    */
@@ -269,7 +270,7 @@ export interface DeletedKey {
  * An interface representing the optional parameters that can be
  * passed to {@link createKey}
  */
-export interface CreateKeyOptions extends coreHttp.OperationOptions {
+export interface CreateKeyOptions extends OperationOptions {
   /**
    * Application specific metadata in the form of key-value pairs.
    */
@@ -306,7 +307,7 @@ export interface CreateKeyOptions extends coreHttp.OperationOptions {
  * An interface representing the optional parameters that can be
  * passed to {@link beginDeleteKey} and {@link beginRecoverDeletedKey}
  */
-export interface KeyPollerOptions extends coreHttp.OperationOptions {
+export interface KeyPollerOptions extends OperationOptions {
   /**
    * Time between each polling
    */
@@ -369,7 +370,7 @@ export interface CreateOctKeyOptions extends CreateKeyOptions {
  * An interface representing the optional parameters that can be
  * passed to {@link importKey}
  */
-export interface ImportKeyOptions extends coreHttp.OperationOptions {
+export interface ImportKeyOptions extends OperationOptions {
   /**
    * Application specific metadata in the form of key-value pairs.
    */
@@ -395,7 +396,7 @@ export interface ImportKeyOptions extends coreHttp.OperationOptions {
 /**
  * Options for {@link updateKeyProperties}.
  */
-export interface UpdateKeyPropertiesOptions extends coreHttp.OperationOptions {
+export interface UpdateKeyPropertiesOptions extends OperationOptions {
   /**
    * Json web key operations. For more
    * information on possible key operations, see KeyOperation.
@@ -422,7 +423,7 @@ export interface UpdateKeyPropertiesOptions extends coreHttp.OperationOptions {
 /**
  * Options for {@link getKey}.
  */
-export interface GetKeyOptions extends coreHttp.OperationOptions {
+export interface GetKeyOptions extends OperationOptions {
   /**
    * The version of the secret to retrieve. If not
    * specified the latest version of the secret will be retrieved.
@@ -433,56 +434,56 @@ export interface GetKeyOptions extends coreHttp.OperationOptions {
 /**
  * An interface representing optional parameters for KeyClient paged operations passed to {@link listKeys}.
  */
-export interface ListKeysOptions extends coreHttp.OperationOptions {}
+export interface ListKeysOptions extends OperationOptions {}
 
 /**
  * An interface representing optional parameters for KeyClient paged operations passed to {@link listPropertiesOfKeys}.
  */
-export interface ListPropertiesOfKeysOptions extends coreHttp.OperationOptions {}
+export interface ListPropertiesOfKeysOptions extends OperationOptions {}
 
 /**
  * An interface representing optional parameters for KeyClient paged operations passed to {@link listPropertiesOfKeyVersions}.
  */
-export interface ListPropertiesOfKeyVersionsOptions extends coreHttp.OperationOptions {}
+export interface ListPropertiesOfKeyVersionsOptions extends OperationOptions {}
 
 /**
  * An interface representing optional parameters for KeyClient paged operations passed to {@link listDeletedKeys}.
  */
-export interface ListDeletedKeysOptions extends coreHttp.OperationOptions {}
+export interface ListDeletedKeysOptions extends OperationOptions {}
 
 /**
  * Options for {@link getDeletedKey}.
  */
-export interface GetDeletedKeyOptions extends coreHttp.OperationOptions {}
+export interface GetDeletedKeyOptions extends OperationOptions {}
 
 /**
  * Options for {@link purgeDeletedKey}.
  */
-export interface PurgeDeletedKeyOptions extends coreHttp.OperationOptions {}
+export interface PurgeDeletedKeyOptions extends OperationOptions {}
 
 /**
  * @internal
  * Options for {@link recoverDeletedKey}.
  */
-export interface RecoverDeletedKeyOptions extends coreHttp.OperationOptions {}
+export interface RecoverDeletedKeyOptions extends OperationOptions {}
 
 /**
  * @internal
  * Options for {@link deleteKey}.
  */
-export interface DeleteKeyOptions extends coreHttp.OperationOptions {}
+export interface DeleteKeyOptions extends OperationOptions {}
 
 /**
  * Options for {@link backupKey}.
  */
-export interface BackupKeyOptions extends coreHttp.OperationOptions {}
+export interface BackupKeyOptions extends OperationOptions {}
 
 /**
  * Options for {@link restoreKeyBackup}.
  */
-export interface RestoreKeyBackupOptions extends coreHttp.OperationOptions {}
+export interface RestoreKeyBackupOptions extends OperationOptions {}
 
 /**
  * An interface representing the options of the cryptography API methods, go to the {@link CryptographyClient} for more information.
  */
-export interface CryptographyOptions extends coreHttp.OperationOptions {}
+export interface CryptographyOptions extends OperationOptions {}
