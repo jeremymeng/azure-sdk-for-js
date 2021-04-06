@@ -4,7 +4,7 @@
 import { assert } from "chai";
 import { createPipelineRequest } from "@azure/core-rest-pipeline";
 import { stringifyXML } from "@azure/core-xml";
-import { createSerializer, MapperTypeNames } from "../src";
+import { createSerializer, MapperTypeNames, OperationSpec } from "../src";
 import { serializeRequestBody, serializeHeaders } from "../src/serializationPolicy";
 import { Mappers } from "./testMappers";
 
@@ -899,6 +899,71 @@ describe("serializationPolicy", function() {
         }
       );
       assert.strictEqual(httpRequest.body, "body value");
+    });
+
+    it.only("should serialize x-www-form-urlencoded parameters", () => {
+      const httpRequest = createPipelineRequest({ url: "https://example.com" });
+      const operationSpec: OperationSpec = {
+        path: "/oauth2/exchange",
+        httpMethod: "POST",
+        responses: {
+          200: {}
+        },
+        formDataParameters: [
+          {
+            parameterPath: ["path1", "aadAccesstoken"],
+            mapper: {
+              type: {
+                name: "Composite",
+                modelProperties: {
+                  grantType: {
+                    defaultValue: "access_token",
+                    isConstant: true,
+                    serializedName: "grant_type",
+                    type: {
+                      name: "String"
+                    }
+                  },
+                  service: {
+                    serializedName: "service",
+                    required: true,
+                    type: {
+                      name: "String"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        headerParameters: [
+          {
+            parameterPath: ["options", "contentType"],
+            mapper: {
+              defaultValue: "application/x-www-form-urlencoded",
+              isConstant: true,
+              serializedName: "Content-Type",
+              type: {
+                name: "String"
+              }
+            }
+          }
+        ],
+        serializer: createSerializer()
+      };
+      serializeRequestBody(
+        httpRequest,
+        {
+          path1: {
+            aadAccesstoken: {
+              grantType: "refresh_token",
+              service: "myregistry.azurecr.io"
+            }
+          }
+        },
+        operationSpec
+      );
+      assert.strictEqual(httpRequest.body, "grant_type=access_token&service=myregistry.azurecr.io");
     });
   });
 
