@@ -3,7 +3,7 @@ import { Recorder } from "@azure/test-utils-recorder";
 import { assert } from "chai";
 import { createClient, createRecorder } from "./utils/recordedClient";
 
-describe("DataFlow", () => {
+describe.only("DataFlow", () => {
   let recorder: Recorder;
   let client: ArtifactsClient;
   const dataFlowName = "testdataflow";

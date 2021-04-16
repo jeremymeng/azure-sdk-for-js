@@ -5,7 +5,13 @@
 
 import { Context } from "mocha";
 
-import { env, Recorder, record, RecorderEnvironmentSetup } from "@azure/test-utils-recorder";
+import {
+  env,
+  Recorder,
+  record,
+  RecorderEnvironmentSetup,
+  isPlaybackMode
+} from "@azure/test-utils-recorder";
 import { TokenCredential, ClientSecretCredential } from "@azure/identity";
 
 import { ArtifactsClient, ArtifactsClientOptionalParams } from "../../../src";
@@ -25,7 +31,9 @@ export const environmentSetup: RecorderEnvironmentSetup = {
   replaceableVariables,
   customizationsOnRecordings: [
     (recording: string): string =>
-      recording.replace(/"access_token"\s?:\s?"[^"]*"/g, `"access_token":"access_token"`),
+      recording
+        .replace(/"access_token"\s?:\s?"[^"]*"/g, `"access_token":"access_token"`)
+        .replace(/scope=https(.+?)(&+|$)/, `scope=https%3A%2F%2Fsanitized%2F$2`),
     // If we put ENDPOINT in replaceableVariables above, it will not capture
     // the endpoint string used with nock, which will be expanded to
     // https://<endpoint>:443/ and therefore will not match, so we have to do
@@ -50,7 +58,13 @@ export function createClient(options?: ArtifactsClientOptionalParams): Artifacts
     env.AZURE_CLIENT_SECRET
   );
 
-  return new ArtifactsClient(credential, env.ENDPOINT, options);
+  const updatedOptions = isPlaybackMode()
+    ? {
+        ...options,
+        credentialScopes: "https://sanitized/"
+      }
+    : options;
+  return new ArtifactsClient(credential, env.ENDPOINT, updatedOptions);
 }
 
 /**
