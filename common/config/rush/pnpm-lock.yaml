@@ -52,6 +52,7 @@ dependencies:
   '@rush-temp/perf-ai-form-recognizer': file:projects/perf-ai-form-recognizer.tgz
   '@rush-temp/perf-ai-metrics-advisor': file:projects/perf-ai-metrics-advisor.tgz
   '@rush-temp/perf-ai-text-analytics': file:projects/perf-ai-text-analytics.tgz
+  '@rush-temp/perf-container-registry': file:projects/perf-container-registry.tgz
   '@rush-temp/perf-core-rest-pipeline': file:projects/perf-core-rest-pipeline.tgz
   '@rush-temp/perf-eventgrid': file:projects/perf-eventgrid.tgz
   '@rush-temp/perf-identity': file:projects/perf-identity.tgz
@@ -8477,7 +8478,7 @@ packages:
     dev: false
     name: '@rush-temp/communication-network-traversal'
     resolution:
-      integrity: sha512-TiAaj+lKLZcDUYyHRHwI8FlzizgzZgfwzvK3G9kg/Ir/DxOqcfYgXTlIU/7xHxes+qOlAKq0YZ9n2Ubd2m0KwQ==
+      integrity: sha512-N88lKt80ujiHhV3UMcNY5PCISjoCWSlBFYHHlemV03g7cr8otgorw79ULT08cloA6JEB8YM4iZWJsNuutp9BIQ==
       tarball: file:projects/communication-network-traversal.tgz
     version: 0.0.0
   file:projects/communication-phone-numbers.tgz:
@@ -9836,7 +9837,7 @@ packages:
     dev: false
     name: '@rush-temp/iot-modelsrepository'
     resolution:
-      integrity: sha512-zfDbETZZ9e9rmZgLSHNBmToZ+6TwgKL+6LehqplCIT55R03tcce9p1L0vvkvtdZCKlQaTWp8RmXak9xzOd7QFg==
+      integrity: sha512-csqklvJd5klXZ+hOJgFxqSshaWno6micUzgQr4YYUeWwuYH+CSArTT9NT6XVBHrWVzh/VdmwCRIgB2o63MS8xQ==
       tarball: file:projects/iot-modelsrepository.tgz
     version: 0.0.0
   file:projects/keyvault-admin.tgz:
@@ -10262,6 +10263,22 @@ packages:
     resolution:
       integrity: sha512-WRKlYq5E3/zAp5qMYA5yQagbJYlfuIUsxCBp+WSfENbW/m4WzpjkNC/01TLJ6tO2CEoLc+RRPXCDFpA30H432g==
       tarball: file:projects/perf-ai-text-analytics.tgz
+    version: 0.0.0
+  file:projects/perf-container-registry.tgz:
+    dependencies:
+      '@types/node': 8.10.66
+      dotenv: 8.6.0
+      eslint: 7.26.0
+      prettier: 1.19.1
+      rimraf: 3.0.2
+      ts-node: 9.1.1_typescript@4.2.4
+      tslib: 2.2.0
+      typescript: 4.2.4
+    dev: false
+    name: '@rush-temp/perf-container-registry'
+    resolution:
+      integrity: sha512-4ujkzjGIbG+4ZFg6pRR8/7cgnIQRCXggA4xTnIwH5s21nOqUaKRGoryFyxrLd9aKcXbdaM5g6Yu6tvf/i/QYDA==
+      tarball: file:projects/perf-container-registry.tgz
     version: 0.0.0
   file:projects/perf-core-rest-pipeline.tgz:
     dependencies:
@@ -11659,6 +11676,7 @@ specifiers:
   '@rush-temp/perf-ai-form-recognizer': file:./projects/perf-ai-form-recognizer.tgz
   '@rush-temp/perf-ai-metrics-advisor': file:./projects/perf-ai-metrics-advisor.tgz
   '@rush-temp/perf-ai-text-analytics': file:./projects/perf-ai-text-analytics.tgz
+  '@rush-temp/perf-container-registry': file:./projects/perf-container-registry.tgz
   '@rush-temp/perf-core-rest-pipeline': file:./projects/perf-core-rest-pipeline.tgz
   '@rush-temp/perf-eventgrid': file:./projects/perf-eventgrid.tgz
   '@rush-temp/perf-identity': file:./projects/perf-identity.tgz
