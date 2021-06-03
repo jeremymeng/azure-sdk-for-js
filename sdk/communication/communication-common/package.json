@@ -84,7 +84,7 @@
     "@types/chai": "^4.1.6",
     "@types/jwt-decode": "~2.2.1",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^8.0.0",
+    "@types/node": "^10.0.0",
     "@types/sinon": "^9.0.4",
     "assert": "^1.4.1",
     "chai-as-promised": "^7.1.1",

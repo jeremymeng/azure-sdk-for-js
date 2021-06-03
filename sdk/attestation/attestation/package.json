@@ -104,7 +104,7 @@
     "@types/chai-as-promised": "^7.1.0",
     "@types/jsrsasign": "^8.0.12",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^8.0.0",
+    "@types/node": "^10.0.0",
     "buffer": "^5.2.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
