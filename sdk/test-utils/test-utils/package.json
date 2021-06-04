@@ -9,7 +9,7 @@
   },
   "types": "./types/src/index.d.ts",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "scripts": {
     "audit": "node ../../../common/scripts/rush-audit.js && rimraf node_modules package-lock.json && npm i --package-lock-only 2>&1 && npm audit",
@@ -53,7 +53,7 @@
     "url": "https://github.com/Azure/azure-sdk-for-js/issues"
   },
   "engine": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "homepage": "https://github.com/Azure/azure-sdk-for-js/tree/master/sdk/test-utils/test-utils/README.md",
   "sideEffects": false,

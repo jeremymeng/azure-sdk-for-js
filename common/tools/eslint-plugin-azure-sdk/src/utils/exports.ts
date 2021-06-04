@@ -9,7 +9,7 @@
 import { ParserServices, TSESTree } from "@typescript-eslint/experimental-utils";
 import { Rule } from "eslint";
 import { SourceFile, Symbol as TSSymbol } from "typescript";
-import { ClassDeclaration, MethodDefinition } from "estree";
+import { ClassDeclaration, MethodDefinition, PropertyDefinition } from "estree";
 
 /**
  * Gets all Symbols of Types of all top-level exports from a package.
@@ -116,7 +116,10 @@ export const getLocalExports = (context: Rule.RuleContext): TSSymbol[] | undefin
 };
 
 export const getPublicMethods = (node: ClassDeclaration): MethodDefinition[] =>
-  node.body.body.filter((method: MethodDefinition): boolean => {
+  node.body.body.filter((method: MethodDefinition | PropertyDefinition): boolean => {
+    if (method.type !== "MethodDefinition") {
+      return false;
+    }
     const TSMethod = method as TSESTree.MethodDefinition;
-    return method.type === "MethodDefinition" && TSMethod.accessibility !== "private";
-  });
+    return TSMethod.accessibility !== "private";
+  }) as MethodDefinition[];

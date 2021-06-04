@@ -22,7 +22,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "license": "MIT",
   "homepage": "https://github.com/Azure/azure-sdk-for-js/tree/master/sdk/core/core-asynciterator-polyfill/README.md",

@@ -13,7 +13,7 @@ import { getRuleMetaData, getVerifiers, stripPath } from "../utils";
  * definition of LTS Node versions
  * * needs updating as definitions change
  */
-const LTS = ">=8.0.0";
+const LTS = ">=10.0.0";
 
 //------------------------------------------------------------------------------
 // Rule Definition
@@ -56,7 +56,7 @@ export = {
           "ExpressionStatement > ObjectExpression > Property[key.value='engines']":
             verifiers.isMemberOf,
 
-          // check the node corresponding to engines.node to see if it is set to '>=8.0.0'
+          // check the node corresponding to engines.node to see if it is set to '>=10.0.0'
           "ExpressionStatement > ObjectExpression > Property[key.value='engines'] > ObjectExpression > Property[key.value='node']":
             verifiers.innerMatchesExpected
         } as Rule.RuleListener)

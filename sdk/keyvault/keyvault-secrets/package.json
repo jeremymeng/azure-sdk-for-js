@@ -23,10 +23,10 @@
   "module": "dist-esm/keyvault-secrets/src/index.js",
   "types": "./types/keyvault-secrets.d.ts",
   "engine": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "files": [
     "types/keyvault-secrets.d.ts",

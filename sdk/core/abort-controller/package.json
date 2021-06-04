@@ -46,7 +46,7 @@
     }
   },
   "engine": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "files": [
     "dist/",
@@ -58,7 +58,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "repository": "github:Azure/azure-sdk-for-js",
   "keywords": [

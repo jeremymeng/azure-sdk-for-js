@@ -168,11 +168,11 @@ export class RetriableReadableStream extends Readable {
     }
   };
 
-  _destroy(error: Error | null, callback: (error?: Error) => void): void {
+  _destroy(error: Error | null, callback: (error: Error | null) => void): void {
     // remove listener from source and release source
     this.removeSourceEventHandlers();
     (this.source as Readable).destroy();
 
-    callback(error === null ? undefined : error);
+    callback(error);
   }
 }

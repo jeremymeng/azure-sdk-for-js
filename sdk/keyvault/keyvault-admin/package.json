@@ -27,10 +27,10 @@
   "module": "dist-esm/keyvault-admin/src/index.js",
   "types": "./types/keyvault-admin.d.ts",
   "engine": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "files": [
     "types/keyvault-admin.d.ts",

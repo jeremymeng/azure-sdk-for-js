@@ -60,7 +60,7 @@
     "docs": "typedoc --excludePrivate --excludeNotExported --excludeExternals --stripInternal --mode file --out ./dist/docs ./src"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "homepage": "https://github.com/Azure/azure-sdk-for-js/blob/master/sdk/core/core-amqp/README.md",
   "sideEffects": false,

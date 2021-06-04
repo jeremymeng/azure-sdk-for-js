@@ -23,7 +23,7 @@
   "module": "dist-esm/keyvault-certificates/src/index.js",
   "types": "./types/keyvault-certificates.d.ts",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "files": [
     "types/keyvault-certificates.d.ts",

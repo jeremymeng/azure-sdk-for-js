@@ -18,7 +18,7 @@
   "browser": {},
   "types": "./types/ai-metrics-advisor.d.ts",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "homepage": "https://github.com/Azure/azure-sdk-for-js/tree/master/sdk/metricsadvisor/ai-metrics-advisor/README.md",
   "repository": "github:Azure/azure-sdk-for-js",

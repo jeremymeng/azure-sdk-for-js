@@ -42,7 +42,7 @@ const examplePackageGood = `{
   },
   "types": "./typings/service-bus.d.ts",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "dependencies": {
     "@azure/amqp-common": "^1.0.0-preview.5",
@@ -257,7 +257,7 @@ ruleTester.run("ts-package-json-engine-is-present", rule, {
   valid: [
     {
       // only the fields we care about
-      code: '{"engines": { "node": ">=8.0.0" }}',
+      code: '{"engines": { "node": ">=10.0.0" }}',
       filename: "package.json"
     },
     {
@@ -293,7 +293,7 @@ ruleTester.run("ts-package-json-engine-is-present", rule, {
     },
     {
       // engines is in a nested object
-      code: '{"outer": {"engines": { "node": ">=8.0.0" }}}',
+      code: '{"outer": {"engines": { "node": ">=10.0.0" }}}',
       filename: "package.json",
       errors: [
         {
@@ -317,10 +317,10 @@ ruleTester.run("ts-package-json-engine-is-present", rule, {
       filename: "package.json",
       errors: [
         {
-          message: "engines.node is set to >=6.0.0 when it should be set to >=8.0.0"
+          message: "engines.node is set to >=6.0.0 when it should be set to >=10.0.0"
         }
       ],
-      output: '{"engines": { "node": ">=8.0.0" }}'
+      output: '{"engines": { "node": ">=10.0.0" }}'
     },
     {
       // example file with engines.node set to >=6.0.0
@@ -328,18 +328,18 @@ ruleTester.run("ts-package-json-engine-is-present", rule, {
       filename: "package.json",
       errors: [
         {
-          message: "engines.node is set to >=6.0.0 when it should be set to >=8.0.0"
+          message: "engines.node is set to >=6.0.0 when it should be set to >=10.0.0"
         }
       ],
       output: examplePackageGood
     },
     {
       // override was provided but the version does not match
-      code: '{"engines": { "node": ">=8.0.0" }}',
+      code: '{"engines": { "node": ">=10.0.0" }}',
       filename: "package.json",
       errors: [
         {
-          message: "engines.node is set to >=8.0.0 when it should be set to >=6.5.0"
+          message: "engines.node is set to >=10.0.0 when it should be set to >=6.5.0"
         }
       ],
       options: [
