@@ -87,6 +87,21 @@ const client = new ContainerRegistryClient(
 
 For more information on using AAD with Azure Container Registry, please see the service's [Authentication Overview](https://docs.microsoft.com/azure/container-registry/container-registry-authentication).
 
+#### Anonymous access
+
+A common use case for Azure Container Registries is to view the repositories, artifacts, or tags
+in a public registry that belongs to someone else. In this case, the user would need to access
+the registry anonymously. Anonymous access allows a user to list all the collections there, but
+they wouldn't have permissions to modify or delete any of the images in the registry. In this case
+you don't need to authenticate the client.
+
+```javascript
+const { ContainerRegistryClient } = require("@azure/container-registry");
+
+const endpoint = process.env.CONTAINER_REGISTRY_ENDPOINT;
+const client = new ContainerRegistryClient(endpoint);
+```
+
 ## Key concepts
 
 A **registry** stores Docker images and [OCI Artifacts](https://opencontainers.org/). An image or artifact consists of a **manifest** and **layers**. An image's manifest describes the layers that make up the image, and is uniquely identified by its **digest**. An image can also be "tagged" to give it a human-readable alias. An image or artifact can have zero or more **tags** associated with it, and each tag uniquely identifies the image. A collection of images that share the same name but have different tags, is referred to as a **repository**.
