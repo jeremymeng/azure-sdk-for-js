@@ -181,7 +181,7 @@ async function main() {
   const image = client.getArtifact("library/hello-world", "v1");
 
   // Set permissions on the image's "latest" tag
-  await image.setTagProperties("latest", { canWrite: false, canDelete: false });
+  await image.updateTagProperties("latest", { canWrite: false, canDelete: false });
 }
 
 main().catch((err) => {
@@ -237,7 +237,7 @@ main().catch((err) => {
 Enabling logging may help uncover useful information about failures. In order to see a log of HTTP requests and responses, set the `AZURE_LOG_LEVEL` environment variable to `info`. Alternatively, logging can be enabled at runtime by calling `setLogLevel` in the `@azure/logger`:
 
 ```javascript
-import { setLogLevel } from "@azure/logger";
+const { setLogLevel } = require("@azure/logger");
 
 setLogLevel("info");
 ```
