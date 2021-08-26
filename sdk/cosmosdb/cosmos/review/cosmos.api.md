@@ -5,6 +5,7 @@
 ```ts
 
 import { AbortSignal } from 'node-abort-controller';
+import { Pipeline } from '@azure/core-rest-pipeline';
 import { TokenCredential } from '@azure/core-auth';
 
 // @public (undocumented)
@@ -71,6 +72,14 @@ export class ChangeFeedResponse<T> {
 // @public (undocumented)
 export class ClientContext {
     constructor(cosmosClientOptions: CosmosClientOptions, globalEndpointManager: GlobalEndpointManager);
+    // (undocumented)
+    batch<T>({ body, path, partitionKey, resourceId, options }: {
+        body: T;
+        path: string;
+        partitionKey: string;
+        resourceId: string;
+        options?: RequestOptions;
+    }): Promise<Response<any>>;
     // (undocumented)
     bulk<T>({ body, path, partitionKeyRangeId, resourceId, bulkOptions, options }: {
         body: T;
@@ -404,6 +413,10 @@ export const Constants: {
         MinInclusive: string;
         MaxExclusive: string;
         min: string;
+    };
+    EffectiveParitionKeyConstants: {
+        MinimumInclusiveEffectivePartitionKey: string;
+        MaximumExclusiveEffectivePartitionKey: string;
     };
     EffectivePartitionKeyConstants: {
         MinimumInclusiveEffectivePartitionKey: string;
@@ -848,6 +861,7 @@ export class ItemResponse<T extends ItemDefinition> extends ResourceResponse<T &
 // @public
 export class Items {
     constructor(container: Container, clientContext: ClientContext);
+    batch(operations: OperationInput[], partitionKey?: string, options?: RequestOptions): Promise<Response<any>>;
     bulk(operations: OperationInput[], bulkOptions?: BulkOptions, options?: RequestOptions): Promise<OperationResponse[]>;
     changeFeed(partitionKey: string | number | boolean, changeFeedOptions?: ChangeFeedOptions): ChangeFeedIterator<any>;
     changeFeed(changeFeedOptions?: ChangeFeedOptions): ChangeFeedIterator<any>;
@@ -1301,6 +1315,8 @@ export type ReplaceOperation = OperationWithItem & {
 // @public (undocumented)
 export interface ReplaceOperationInput {
     // (undocumented)
+    id: string;
+    // (undocumented)
     ifMatch?: string;
     // (undocumented)
     ifNoneMatch?: string;
@@ -1338,6 +1354,8 @@ export interface RequestContext {
     partitionKeyRangeId?: string;
     // (undocumented)
     path?: string;
+    // (undocumented)
+    pipeline?: Pipeline;
     // (undocumented)
     plugins: PluginConfig[];
     // (undocumented)

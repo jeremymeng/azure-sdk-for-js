@@ -558,8 +558,10 @@ export function promiseToServiceCallback<T>(promise: Promise<HttpOperationRespon
 // @public (undocumented)
 export type ProxyOptions = ProxySettings;
 
-// @public (undocumented)
-export function proxyPolicy(proxySettings?: ProxySettings): RequestPolicyFactory;
+// @public
+export function proxyPolicy(proxySettings?: ProxySettings, options?: {
+    customNoProxyList?: string[];
+}): RequestPolicyFactory;
 
 // @public
 export interface ProxySettings {
@@ -611,7 +613,6 @@ export interface RequestOptionsBase {
     onUploadProgress?: (progress: TransferProgressEvent) => void;
     serializerOptions?: SerializerOptions;
     shouldDeserialize?: boolean | ((response: HttpOperationResponse) => boolean);
-    spanOptions?: SpanOptions;
     timeout?: number;
     tracingContext?: Context;
 }
@@ -973,7 +974,6 @@ export interface WebResourceLike {
     };
     requestId: string;
     shouldDeserialize?: boolean | ((response: HttpOperationResponse) => boolean);
-    spanOptions?: SpanOptions;
     // @deprecated (undocumented)
     streamResponseBody?: boolean;
     streamResponseStatusCodes?: Set<number>;

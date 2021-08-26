@@ -3,9 +3,6 @@
 
 import { createProcessingSpan, trace } from "../../src/partitionPump";
 import {
-  NoOpSpan,
-  TestSpan,
-  TestTracer,
   SpanStatusCode,
   SpanKind,
   SpanOptions,
@@ -13,6 +10,7 @@ import {
   setSpanContext,
   context
 } from "@azure/core-tracing";
+import { TestSpan, TestTracer } from "@azure/test-utils";
 import chai from "chai";
 import { ReceivedEventData } from "../../src/eventData";
 import { instrumentEventData } from "../../src/diagnostics/instrumentEventData";
@@ -36,13 +34,16 @@ describe("PartitionPump", () => {
         this.spanName = nameArg;
         this.spanOptions = optionsArg;
         this.context = contextArg;
-        return super.startSpan(nameArg, optionsArg);
+        return super.startSpan(nameArg, optionsArg, this.context);
       }
     }
 
     it("basic span properties are set", async () => {
-      const fakeParentSpanContext = setSpanContext(context.active(), new NoOpSpan().spanContext());
       const { tracer, resetTracer } = setTracerForTest(new TestTracer2());
+      const fakeParentSpanContext = setSpanContext(
+        context.active(),
+        tracer.startSpan("test").spanContext()
+      );
 
       await createProcessingSpan([], eventHubProperties, {
         tracingOptions: {
@@ -56,7 +57,8 @@ describe("PartitionPump", () => {
       tracer.spanOptions!.kind!.should.equal(SpanKind.CONSUMER);
       tracer.context!.should.equal(fakeParentSpanContext);
 
-      const attributes = tracer.getRootSpans()[0].attributes;
+      const attributes = tracer.getActiveSpans().find((s) => s.name === "Azure.EventHubs.process")
+        ?.attributes;
 
       attributes!.should.deep.equal({
         "az.namespace": "Microsoft.EventHub",
@@ -85,9 +87,27 @@ describe("PartitionPump", () => {
       const thirdEvent = tracer.startSpan("c");
 
       const receivedEvents: ReceivedEventData[] = [
-        instrumentEventData({ ...requiredEventProperties }, firstEvent) as ReceivedEventData,
+        instrumentEventData(
+          { ...requiredEventProperties },
+          {
+            tracingOptions: {
+              tracingContext: setSpanContext(context.active(), firstEvent.spanContext())
+            }
+          },
+          "entityPath",
+          "host"
+        ).event as ReceivedEventData,
         { properties: {}, ...requiredEventProperties }, // no diagnostic ID means it gets skipped
-        instrumentEventData({ ...requiredEventProperties }, thirdEvent) as ReceivedEventData
+        instrumentEventData(
+          { ...requiredEventProperties },
+          {
+            tracingOptions: {
+              tracingContext: setSpanContext(context.active(), thirdEvent.spanContext())
+            }
+          },
+          "entityPath",
+          "host"
+        ).event as ReceivedEventData
       ];
 
       await createProcessingSpan(receivedEvents, eventHubProperties, {});

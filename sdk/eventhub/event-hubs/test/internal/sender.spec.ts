@@ -23,7 +23,7 @@ import {
   getStartingPositionsForTests,
   setTracerForTest
 } from "../public/utils/testUtils";
-import { SpanGraph, TestSpan } from "@azure/core-tracing";
+import { SpanGraph, TestSpan } from "@azure/test-utils";
 import { TRACEPARENT_PROPERTY } from "../../src/diagnostics/instrumentEventData";
 import { SubscriptionHandlerForTests } from "../public/utils/subscriptionHandlerForTests";
 import { setSpan, context } from "@azure/core-tracing";
@@ -352,6 +352,23 @@ describe("EventHub Sender", function(): void {
       tracer.getSpanGraph(rootSpan.spanContext().traceId).should.eql(expectedGraph);
       tracer.getActiveSpans().length.should.equal(0, "All spans should have had end called.");
       resetTracer();
+    });
+
+    it("doesn't create empty spans when tracing is disabled", async () => {
+      const events: EventData[] = [{ body: "foo" }, { body: "bar" }];
+
+      const eventDataBatch = await producerClient.createBatch();
+
+      for (const event of events) {
+        eventDataBatch.tryAdd(event);
+      }
+
+      should.equal(eventDataBatch.count, 2, "Unexpected number of events in batch.");
+      should.equal(
+        eventDataBatch["_messageSpanContexts"].length,
+        0,
+        "Unexpected number of span contexts in batch."
+      );
     });
 
     function legacyOptionsUsingSpanContext(rootSpan: TestSpan): Pick<TryAddOptions, "parentSpan"> {

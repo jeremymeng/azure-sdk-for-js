@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { setTracer, SpanGraph, TestTracer } from "@azure/core-tracing";
-import { isLiveMode, record, Recorder } from "@azure/test-utils-recorder";
+import { SpanGraph, setTracer } from "@azure/test-utils";
+import { isLiveMode, record, Recorder } from "@azure-tools/test-recorder";
 import { setSpan, context } from "@azure/core-tracing";
 import * as assert from "assert";
 import * as dotenv from "dotenv";
@@ -57,8 +57,7 @@ describe("DataLakeFileSystemClient", () => {
   });
 
   it("setMetadata with tracing", async () => {
-    const tracer = new TestTracer();
-    setTracer(tracer);
+    const tracer = setTracer();
     const rootSpan = tracer.startSpan("root");
 
     const metadata = {

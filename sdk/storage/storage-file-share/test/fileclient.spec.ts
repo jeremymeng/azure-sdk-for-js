@@ -6,8 +6,8 @@ import * as dotenv from "dotenv";
 
 import { AbortController } from "@azure/abort-controller";
 import { isNode, URLBuilder, URLQuery } from "@azure/core-http";
-import { setTracer, SpanGraph, TestTracer } from "@azure/core-tracing";
-import { delay, isLiveMode, record, Recorder } from "@azure/test-utils-recorder";
+import { SpanGraph, setTracer } from "@azure/test-utils";
+import { delay, isLiveMode, record, Recorder } from "@azure-tools/test-recorder";
 
 import { FileStartCopyOptions, ShareClient, ShareDirectoryClient, ShareFileClient } from "../src";
 import { FileSystemAttributes } from "../src/FileSystemAttributes";
@@ -837,8 +837,7 @@ describe("FileClient", () => {
   });
 
   it("create with tracing", async () => {
-    const tracer = new TestTracer();
-    setTracer(tracer);
+    const tracer = setTracer();
     const rootSpan = tracer.startSpan("root");
     await fileClient.create(content.length, {
       tracingOptions: {
