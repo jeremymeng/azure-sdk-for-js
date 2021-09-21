@@ -7,12 +7,12 @@
  */
 
 import * as coreClient from "@azure/core-client";
-import { GeneratedClientOptionalParams } from "./models";
+import { ApiVersion20210701, GeneratedClientOptionalParams } from "./models";
 
 /** @internal */
 export class GeneratedClientContext extends coreClient.ServiceClient {
   url: string;
-  apiVersion?: string;
+  apiVersion?: ApiVersion20210701;
 
   /**
    * Initializes a new instance of the GeneratedClientContext class.
@@ -49,8 +49,5 @@ export class GeneratedClientContext extends coreClient.ServiceClient {
     super(optionsWithDefaults);
     // Parameter assignments
     this.url = url;
-
-    // Assigning values to Constant parameters
-    this.apiVersion = options.apiVersion || "2021-07-01";
   }
 }

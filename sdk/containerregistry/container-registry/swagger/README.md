@@ -5,7 +5,6 @@
 ## Configuration
 
 ```yaml
-v3: true
 package-name: "@azure/container-registry"
 title: GeneratedClient
 description: Container Registry Client
@@ -19,9 +18,10 @@ add-credentials: false
 override-client-name: GeneratedClient
 disable-async-iterators: true
 hide-clients: true
-use-extension:
-  "@autorest/typescript": "6.0.0-beta.4"
+api-version-parameter: choice
 package-version: 1.0.0-beta.6
+typescript: true
+v3: true
 ```
 
 ## Customizations for Track 2 Generator
@@ -68,5 +68,3 @@ directive:
     transform: >
       delete $.properties.configMediaType
 ```
-
-
