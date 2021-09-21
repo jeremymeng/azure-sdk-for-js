@@ -29,6 +29,8 @@ import {
 import { RegistryArtifact } from "./registryArtifact";
 import { ContainerRegistryRefreshTokenCredential } from "./containerRegistryTokenCredential";
 
+export const LATEST_API_VERSION = "2021-07-01";
+
 /**
  * Client options used to configure Container Registry Repository API requests.
  */
@@ -39,6 +41,10 @@ export interface ContainerRegistryClientOptions extends PipelineOptions {
    * See {@link KnownContainerRegistryAudience} for known audience values.
    */
   audience?: string;
+  /**
+   * The version of service API to make calls against.
+   */
+  serviceVersion?: string;
 }
 
 /**
@@ -102,7 +108,7 @@ export class ContainerRegistryClient {
   constructor(
     endpoint: string,
     credentialOrOptions?: TokenCredential | ContainerRegistryClientOptions,
-    clientOptions: ContainerRegistryClientOptions = {}
+    clientOptions: ContainerRegistryClientOptions = { serviceVersion: LATEST_API_VERSION }
   ) {
     if (!endpoint) {
       throw new Error("invalid endpoint");
@@ -116,7 +122,7 @@ export class ContainerRegistryClient {
       credential = credentialOrOptions;
       options = clientOptions;
     } else {
-      options = credentialOrOptions ?? {};
+      options = credentialOrOptions ?? { serviceVersion: LATEST_API_VERSION };
     }
 
     const internalPipelineOptions: InternalPipelineOptions = {
@@ -135,8 +141,9 @@ export class ContainerRegistryClient {
       );
     }
     const defaultScope = `${options.audience}/.default`;
-    const authClient = new GeneratedClient(endpoint, internalPipelineOptions);
-    this.client = new GeneratedClient(endpoint, internalPipelineOptions);
+    const serviceClientOptions = { ...internalPipelineOptions, apiVersion: options.serviceVersion };
+    const authClient = new GeneratedClient(endpoint, serviceClientOptions);
+    this.client = new GeneratedClient(endpoint, serviceClientOptions);
     this.client.pipeline.addPolicy(
       bearerTokenAuthenticationPolicy({
         credential,
