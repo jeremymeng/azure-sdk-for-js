@@ -69,7 +69,7 @@ export interface Descriptor {
   /** Specifies a list of URIs from which this object may be downloaded. */
   urls?: string[];
   /** Additional information provided through arbitrary metadata. */
-  annotations?: Annotations;
+  annotations?: Annotations | null;
 }
 
 /** Additional information provided through arbitrary metadata. */
@@ -341,12 +341,12 @@ export interface ManifestAttributesBase {
    * CPU architecture
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly architecture?: ArtifactArchitecture;
+  readonly architecture?: ArtifactArchitecture | null;
   /**
    * Operating system
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly operatingSystem?: ArtifactOperatingSystem;
+  readonly operatingSystem?: ArtifactOperatingSystem | null;
   /**
    * List of artifacts that are referenced by this manifest list, with information about the platform each supports.  This list will be empty if this is a leaf manifest and not a manifest list.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -434,12 +434,12 @@ export interface ArtifactManifestProperties {
    * CPU architecture
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly architecture?: ArtifactArchitecture;
+  readonly architecture?: ArtifactArchitecture | null;
   /**
    * Operating system
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly operatingSystem?: ArtifactOperatingSystem;
+  readonly operatingSystem?: ArtifactOperatingSystem | null;
   /**
    * List of artifacts that are referenced by this manifest list, with information about the platform each supports.  This list will be empty if this is a leaf manifest and not a manifest list.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -539,7 +539,7 @@ export type ManifestWrapper = Manifest & {
   /** (V2, OCI) List of V2 image layer information */
   layers?: Descriptor[];
   /** (OCI, OCIIndex) Additional metadata */
-  annotations?: Annotations;
+  annotations?: Annotations | null;
   /** (V1) CPU architecture */
   architecture?: string;
   /** (V1) Image name */
@@ -579,7 +579,7 @@ export type OCIManifest = Manifest & {
   /** List of V2 image layer information */
   layers?: Descriptor[];
   /** Additional information provided through arbitrary metadata. */
-  annotations?: Annotations;
+  annotations?: Annotations | null;
 };
 
 /** Returns the requested OCI index file */
@@ -587,7 +587,7 @@ export type OCIIndex = Manifest & {
   /** List of OCI image layer information */
   manifests?: ManifestListAttributes[];
   /** Additional information provided through arbitrary metadata. */
-  annotations?: Annotations;
+  annotations?: Annotations | null;
 };
 
 /** Returns the requested V1 manifest file */

@@ -5,66 +5,12 @@
 ## Configuration
 
 ```yaml
-package-name: "@azure/container-registry"
-title: GeneratedClient
-description: Container Registry Client
-generate-metadata: false
-license-header: MICROSOFT_MIT_NO_VERSION
-output-folder: ../
-source-code-folder-path: ./src/generated
-#input-file: ./containerregistry.json
-input-file: https://github.com/Azure/azure-rest-api-specs/blob/76b7298087a2969842566b7b225e57942b31cb65/specification/containerregistry/data-plane/Azure.ContainerRegistry/stable/2021-07-01/containerregistry.json
-add-credentials: false
-override-client-name: GeneratedClient
-disable-async-iterators: true
-hide-clients: true
-api-version-parameter: choice
+tag: package-2021-07
+require: /workspaces/rest-specs/specification/containerregistry/data-plane/Azure.ContainerRegistry/readme.md
 package-version: 1.0.0-beta.6
-typescript: true
-v3: true
 ```
 
 ## Customizations for Track 2 Generator
 
 See the [AutoRest samples](https://github.com/Azure/autorest/tree/master/Samples/3b-custom-transformations)
 for more about how we're customizing things.
-
-### Remove response for "ContainerRegistry_DeleteRepository" operation
-
-```yaml
-directive:
-  - from: swagger-document
-    where: $["paths"]["/acr/v1/{name}"]
-    transform: >
-      delete $.delete["responses"]["202"].schema
-```
-
-### Remove "Authentication_GetAcrAccessTokenFromLogin" operation
-
-```yaml
-directive:
-  - from: swagger-document
-    where: $["paths"]["/oauth2/token"]
-    transform: >
-      delete $.get
-```
-
-### Remove "definitions.TagAttributesBase.properties.signed"
-
-```yaml
-directive:
-  - from: swagger-document
-    where: $.definitions.TagAttributesBase
-    transform: >
-      delete $.properties.signed
-```
-
-### Remove "definitions.ManifestAttributesBase.properties.configMediaType"
-
-```yaml
-directive:
-  - from: swagger-document
-    where: $.definitions.ManifestAttributesBase
-    transform: >
-      delete $.properties.configMediaType
-```
