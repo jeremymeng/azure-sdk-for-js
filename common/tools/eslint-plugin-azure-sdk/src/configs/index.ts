@@ -39,6 +39,7 @@ export = {
       "@azure/azure-sdk/ts-config-sourcemap": "error",
       "@azure/azure-sdk/ts-config-strict": "error",
       "@azure/azure-sdk/ts-config-target": "error",
+      "@azure/azure-sdk/ts-createspan-op-name": "warn",
       "@azure/azure-sdk/ts-doc-internal": "error",
       "@azure/azure-sdk/ts-error-handling": "off",
       "@azure/azure-sdk/ts-modules-only-named": "error",

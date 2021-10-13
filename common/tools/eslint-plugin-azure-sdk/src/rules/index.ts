@@ -23,6 +23,7 @@ import tsConfigNoExperimentalDecorators from "./ts-config-no-experimentaldecorat
 import tsConfigSourceMap from "./ts-config-sourcemap";
 import tsConfigStrict from "./ts-config-strict";
 import tsConfigTarget from "./ts-config-target";
+import tsCreateSpanSeparator from "./ts-createspan-op-name";
 import tsDocInternal from "./ts-doc-internal";
 import tsErrorHandling from "./ts-error-handling";
 import tsModulesOnlyNamed from "./ts-modules-only-named";
@@ -73,6 +74,7 @@ export = {
   "ts-config-sourcemap": tsConfigSourceMap,
   "ts-config-strict": tsConfigStrict,
   "ts-config-target": tsConfigTarget,
+  "ts-createspan-op-name": tsCreateSpanSeparator,
   "ts-doc-internal": tsDocInternal,
   "ts-error-handling": tsErrorHandling,
   "ts-modules-only-named": tsModulesOnlyNamed,
