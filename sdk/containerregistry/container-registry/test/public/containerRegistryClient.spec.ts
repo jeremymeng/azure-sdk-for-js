@@ -10,7 +10,7 @@ import { ContainerRegistryClient } from "../../src";
 import { versionsToTest } from "@azure/test-utils";
 import { env, record, Recorder } from "@azure-tools/test-recorder";
 import { isNode } from "../utils/isNode";
-import { createRegistryClient, recorderEnvSetup, serviceVersions } from "../utils/utils";
+import { createRecordedClient, recorderEnvSetup, serviceVersions } from "../utils/utils";
 
 if (isNode) {
   dotenv.config();
@@ -35,7 +35,7 @@ versionsToTest(serviceVersions, {}, (serviceVersion, onVersions): void => {
 
       // We'll be able to refer to the instantiated `client` in tests, since we
       // initialize it before each test
-      client = createRegistryClient(env.CONTAINER_REGISTRY_ENDPOINT, serviceVersion);
+      client = createRecordedClient(env.CONTAINER_REGISTRY_ENDPOINT, serviceVersion);
     });
 
     // After each test, we need to stop the recording.

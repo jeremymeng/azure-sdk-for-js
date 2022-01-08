@@ -8,9 +8,9 @@ import * as dotenv from "dotenv";
 import { ContainerRegistryClient } from "../../src";
 
 import { versionsToTest } from "@azure/test-utils";
-import { env, record, Recorder } from "@azure-tools/test-recorder";
+import { env, Recorder } from "@azure-tools/test-recorder-new";
 import { isNode } from "../utils/isNode";
-import { createRegistryClient, recorderEnvSetup, serviceVersions } from "../utils/utils";
+import { createRecordedClient, recorderOptions, serviceVersions } from "../utils/utils";
 
 if (isNode) {
   dotenv.config();
@@ -31,13 +31,20 @@ versionsToTest(serviceVersions, {}, (serviceVersion, onVersions) => {
       // The recorder has some convenience methods, and we need to store a
       // reference to it so that we can `stop()` the recorder later in the
       // `afterEach` hook.
-      recorder = record(this, recorderEnvSetup);
+      recorder = new Recorder(this.currentTest);
 
       // We'll be able to refer to the instantiated `client` in tests, since we
       // initialize it before each test
-      client = createRegistryClient(env.CONTAINER_REGISTRY_ANONYMOUS_ENDPOINT, serviceVersion, {
-        anonymous: true,
-      });
+      client = createRecordedClient(
+        recorder,
+        env.CONTAINER_REGISTRY_ANONYMOUS_ENDPOINT!,
+        serviceVersion,
+        {
+          anonymous: true,
+        }
+      );
+
+      await recorder.start(recorderOptions);
     });
 
     // After each test, we need to stop the recording.

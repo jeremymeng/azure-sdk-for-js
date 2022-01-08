@@ -9,7 +9,7 @@ import { versionsToTest } from "@azure/test-utils";
 import { env, record, Recorder } from "@azure-tools/test-recorder";
 import { RestError } from "@azure/core-rest-pipeline";
 import { isNode } from "../utils/isNode";
-import { createRegistryClient, recorderEnvSetup, serviceVersions } from "../utils/utils";
+import { createRecordedClient, recorderEnvSetup, serviceVersions } from "../utils/utils";
 
 if (isNode) {
   dotenv.config();
@@ -32,7 +32,7 @@ versionsToTest(serviceVersions, {}, (serviceVersion, onVersions) => {
       // `afterEach` hook.
       recorder = record(this, recorderEnvSetup);
 
-      registryClient = createRegistryClient(env.CONTAINER_REGISTRY_ENDPOINT, serviceVersion);
+      registryClient = createRecordedClient(env.CONTAINER_REGISTRY_ENDPOINT, serviceVersion);
       repository = registryClient.getRepository(repositoryName);
     });
 
