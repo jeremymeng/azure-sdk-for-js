@@ -8,7 +8,7 @@ import {
   InternalPipelineOptions,
   bearerTokenAuthenticationPolicy,
 } from "@azure/core-rest-pipeline";
-import { CommonClientOptions, OperationOptions } from "@azure/core-client";
+import type { CommonClientOptions, OperationOptions } from "@azure/core-client";
 
 import { SpanStatusCode } from "@azure/core-tracing";
 import "@azure/core-paging";
