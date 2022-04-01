@@ -8,6 +8,8 @@
 
 ### Bugs Fixed
 
+- Fixing an issue in React-Native environment by adding a `react-native` mapping to ESM entry point. Without it, the commonjs version is used, and some dependencies will failed to load due to synchronous `require()` when bundling, thus no chance for any runtime polyfills to be used.
+
 ### Other Changes
 
 ## 12.9.0 (2022-03-11)
