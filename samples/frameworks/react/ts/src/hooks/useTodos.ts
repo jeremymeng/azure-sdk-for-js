@@ -8,9 +8,11 @@
 */
 
 import { EventData } from "@azure/event-hubs";
+import { ServiceBusMessage } from "@azure/service-bus";
 import { useState } from "react";
 import { useBlobs } from "./useBlobs";
 import { useEventHubs } from "./useEventHubs";
+import { useServiceBus } from "./useServiceBus";
 
 export interface Todo {
   done: boolean;
@@ -56,6 +58,14 @@ export const useTodos: () => Hook = () => {
   };
   const publishToEventHubs = useEventHubs(onEventHubMessage);
 
+  // Similarly an example of using ServiceBus to process messages which will
+  // be delivered to one receiver
+  const onServiceBusMessage = async (message: ServiceBusMessage) => {
+    const todos = message.body as Array<Todo>;
+    console.log("[From Service Bus ] new todo list:", todos);
+  }
+  const sendToServiceBus = useServiceBus(onServiceBusMessage);
+
   /**
    * Adds a new todo to the collection.
    * @param todo The todo item to add.
@@ -97,6 +107,7 @@ export const useTodos: () => Hook = () => {
   const onChange = async (newTodos: Todo[]): Promise<void> => {
     setTodos(newTodos);
     publishToEventHubs({ body: newTodos });
+    sendToServiceBus({ body: newTodos });
   };
 
   return [todos, addTodo, updateTodo, getNote, uploadNote];
