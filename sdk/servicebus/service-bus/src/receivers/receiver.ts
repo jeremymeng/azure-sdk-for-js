@@ -38,6 +38,7 @@ import { Constants, RetryConfig, RetryOperationType, RetryOptions, retry } from 
 import { LockRenewer } from "../core/autoLockRenewer";
 import { receiverLogger as logger } from "../log";
 import { translateServiceBusError } from "../serviceBusError";
+import { azsdkGlobalOptions } from "@azure/core-util";
 
 /**
  * The default time to wait for messages _after_ the first message
@@ -444,6 +445,12 @@ export class ServiceBusReceiverImpl implements ServiceBusReceiver {
     maxMessageCount: number,
     options: PeekMessagesOptions = {}
   ): Promise<ServiceBusReceivedMessage[]> {
+    if (options.omitMessageBody !== undefined && !azsdkGlobalOptions.experimentalFeaturesEnabled) {
+      throw new Error(
+        `'omitMessageBody' option is only available when experimental features are enabled`
+      );
+    }
+
     this._throwIfReceiverOrConnectionClosed();
 
     const managementRequestOptions = {

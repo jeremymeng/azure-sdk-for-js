@@ -1,8 +1,10 @@
 # Release History
 
-## 1.0.1 (Unreleased)
+## 1.1.0 (Unreleased)
 
 ### Features Added
+
+- Add a boolean flag to control whether experimental feature is enabled.
 
 ### Breaking Changes
 

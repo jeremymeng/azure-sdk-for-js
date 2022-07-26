@@ -42,6 +42,7 @@ import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMess
 import { tracingClient } from "../diagnostics/tracing";
 import { receiverLogger as logger } from "../log";
 import { translateServiceBusError } from "../serviceBusError";
+import { azsdkGlobalOptions } from "@azure/core-util";
 
 /**
  *A receiver that handles sessions, including renewing the session lock.
@@ -292,6 +293,12 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
     maxMessageCount: number,
     options: PeekMessagesOptions = {}
   ): Promise<ServiceBusReceivedMessage[]> {
+    if (options.omitMessageBody !== undefined && !azsdkGlobalOptions.experimentalFeaturesEnabled) {
+      throw new Error(
+        `'omitMessageBody' option is only available when experimental features are enabled`
+      );
+    }
+
     this._throwIfReceiverOrConnectionClosed();
 
     const managementRequestOptions = {

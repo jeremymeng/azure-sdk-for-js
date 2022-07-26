@@ -4,6 +4,11 @@
 
 ```ts
 
+// @public (undocumented)
+export const azsdkGlobalOptions: {
+    experimentalFeaturesEnabled: boolean;
+};
+
 // @public
 export function computeSha256Hash(content: string, encoding: "base64" | "hex"): Promise<string>;
 
