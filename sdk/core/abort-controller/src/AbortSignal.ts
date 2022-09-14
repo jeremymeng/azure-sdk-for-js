@@ -18,6 +18,8 @@ export interface AbortSignalLike {
    * Indicates if the signal has already been aborted.
    */
   readonly aborted: boolean;
+  readonly reason?: any;
+  throwIfAborted(): void;
   /**
    * Add new "abort" event listener, only support "abort" event.
    */
