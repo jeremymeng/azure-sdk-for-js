@@ -45,7 +45,9 @@ export function createSasTokenProvider(
   if (isNamedKeyCredential(data) || isSASCredential(data)) {
     return new SasTokenProviderImpl(data);
   } else if (isObjectWithProperties(data, ["sharedAccessKeyName", "sharedAccessKey"])) {
-    return new SasTokenProviderImpl({ name: data.sharedAccessKeyName, key: data.sharedAccessKey });
+    const name = typeof data.sharedAccessKeyName === "string" ? data.sharedAccessKeyName : JSON.stringify(data.sharedAccessKeyName);
+    const key = typeof data.sharedAccessKey === "string"? data.sharedAccessKey : JSON.stringify(data.sharedAccessKey);
+    return new SasTokenProviderImpl({ name, key });
   } else {
     return new SasTokenProviderImpl({ signature: data.sharedAccessSignature });
   }
