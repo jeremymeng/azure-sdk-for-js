@@ -48,7 +48,7 @@ export class StorageClientContext extends coreHttp.ServiceClient {
     this.url = url;
 
     // Assigning values to Constant parameters
-    this.version = options.version || "2021-08-06";
+    this.version = options.version || "2021-12-02";
     this.fileRangeWriteFromUrl = options.fileRangeWriteFromUrl || "update";
   }
 }

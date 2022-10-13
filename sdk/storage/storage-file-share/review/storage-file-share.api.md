@@ -1169,7 +1169,10 @@ export interface HandleItem {
     lastReconnectTime?: Date;
     openTime: Date;
     parentId?: string;
-    path: string;
+    // Warning: (ae-forgotten-export) The symbol "StringEncoded" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    path: StringEncoded;
     sessionId: string;
 }
 
@@ -1234,6 +1237,8 @@ export interface ListFilesAndDirectoriesSegmentResponse {
     directoryId?: string;
     // (undocumented)
     directoryPath: string;
+    // (undocumented)
+    encoded?: boolean;
     // (undocumented)
     marker?: string;
     // (undocumented)

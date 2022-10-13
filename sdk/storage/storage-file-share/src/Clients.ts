@@ -2440,11 +2440,28 @@ export class ShareDirectoryClient extends StorageClient {
     }
 
     try {
-      return await this.context.listFilesAndDirectoriesSegment({
+      const response = await this.context.listFilesAndDirectoriesSegment({
         marker,
         ...options,
         ...convertTracingToRequestOptionsBase(updatedOptions),
       });
+
+      // for (const file of response.segment.fileItems) {
+      //   yield { kind: "file", ...file };
+      // }
+      // for (const directory of listFilesAndDirectoriesResponse.segment.directoryItems) {
+      //   yield { kind: "directory", ...directory };
+      // }
+
+      const listResponse = response as any;
+
+      console.log(response.segment.directoryItems);
+      console.log((response.segment as any).Directory);
+
+      return {
+        ...listResponse,
+        prefix: listResponse.prefix?.content,
+      };
     } catch (e: any) {
       span.setStatus({
         code: SpanStatusCode.ERROR,

@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 // explicitly exporting types that we need.
+import * as coreHttp from "@azure/core-http";
 
 export {
   CopyStatusType,
@@ -9,8 +10,6 @@ export {
   DirectoryCreateResponse,
   DirectoryDeleteResponse,
   DirectoryGetPropertiesResponse,
-  DirectoryItem,
-  DirectoryListFilesAndDirectoriesSegmentResponse,
   DirectoryListHandlesResponse,
   DirectorySetMetadataResponse,
   DirectorySetPropertiesResponse,
@@ -22,7 +21,6 @@ export {
   FileDownloadResponse as FileDownloadResponseModel,
   FileGetPropertiesResponse,
   FileGetRangeListHeaders,
-  FileItem,
   FileLastWrittenMode,
   FileListHandlesResponse,
   FileServiceProperties,
@@ -56,8 +54,6 @@ export {
   DirectoryCreateHeaders,
   DirectoryDeleteHeaders,
   DirectoryGetPropertiesHeaders,
-  FilesAndDirectoriesListSegment,
-  ListFilesAndDirectoriesSegmentResponse,
   DirectoryListFilesAndDirectoriesSegmentHeaders,
   ListHandlesResponse,
   DirectoryRenameHeaders,
@@ -115,7 +111,12 @@ export {
   ShareRootSquash,
 } from "./generated/src/models";
 
-import { ShareSetPropertiesResponse, ShareSetPropertiesHeaders } from "./generated/src/models";
+import {
+  ShareSetPropertiesResponse,
+  ShareSetPropertiesHeaders,
+  FileProperty,
+  DirectoryListFilesAndDirectoriesSegmentHeaders,
+} from "./generated/src/models";
 
 /**
  * Contains response data for the setQuota operation.
@@ -126,3 +127,61 @@ export type ShareSetQuotaResponse = ShareSetPropertiesResponse;
  * Defines headers for setQuota operation.
  */
 export type ShareSetQuotaHeaders = ShareSetPropertiesHeaders;
+
+/** A listed file item. */
+export interface FileItem {
+  name: string;
+  fileId?: string;
+  /** File properties. */
+  properties: FileProperty;
+  attributes?: string;
+  permissionKey?: string;
+}
+
+/** A listed directory item. */
+export interface DirectoryItem {
+  name: string;
+  fileId?: string;
+  /** File properties. */
+  properties?: FileProperty;
+  attributes?: string;
+  permissionKey?: string;
+}
+
+/** Abstract for entries that can be listed from Directory. */
+export interface FilesAndDirectoriesListSegment {
+  directoryItems: DirectoryItem[];
+  fileItems: FileItem[];
+}
+
+/** An enumeration of directories and files. */
+export interface ListFilesAndDirectoriesSegmentResponse {
+  serviceEndpoint: string;
+  shareName: string;
+  shareSnapshot?: string;
+  encoded?: boolean;
+  directoryPath: string;
+  prefix: string;
+  marker?: string;
+  maxResults?: number;
+  /** Abstract for entries that can be listed from Directory. */
+  segment: FilesAndDirectoriesListSegment;
+  continuationToken: string;
+  directoryId?: string;
+}
+
+/** Contains response data for the listFilesAndDirectoriesSegment operation. */
+export type DirectoryListFilesAndDirectoriesSegmentResponse =
+  DirectoryListFilesAndDirectoriesSegmentHeaders &
+    ListFilesAndDirectoriesSegmentResponse & {
+      /** The underlying HTTP response. */
+      _response: coreHttp.HttpResponse & {
+        /** The response body as text (string format) */
+        bodyAsText: string;
+
+        /** The response body as parsed JSON or XML */
+        parsedBody: ListFilesAndDirectoriesSegmentResponse;
+        /** The parsed HTTP response headers. */
+        parsedHeaders: DirectoryListFilesAndDirectoriesSegmentHeaders;
+      };
+    };
