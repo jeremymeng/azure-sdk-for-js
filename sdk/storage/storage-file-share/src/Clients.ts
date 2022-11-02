@@ -2455,8 +2455,9 @@ export class ShareDirectoryClient extends StorageClient {
 
       const listResponse = response as any;
 
-      console.log(response.segment.directoryItems);
-      console.log((response.segment as any).Directory);
+      console.log("### segment", response.segment);
+      console.log("### segment.directoryItems", response.segment.directoryItems);
+      console.log("### segment.Directory", (response.segment as any).Directory);
 
       return {
         ...listResponse,
