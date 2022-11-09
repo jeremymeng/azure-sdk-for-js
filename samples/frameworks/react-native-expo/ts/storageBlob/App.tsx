@@ -1,6 +1,14 @@
 import { BlobItem, ContainerClient } from "@azure/storage-blob";
 import React from "react";
-import { FlatList, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Button,
+  FlatList,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import "./shims";
 
@@ -18,11 +26,9 @@ export default function App() {
   const [blobItems, setBlobItems] = React.useState<BlobItem[]>([]);
   const [selectedId, setSelectedId] = React.useState<string | undefined>(undefined);
 
-  loadBlobItems(containerClient, setBlobItems);
-
   const renderItem = ({ item }) => {
     const backgroundColor = item.name === selectedId ? "#6e3b6e" : "#f9c2ff";
-    const color = item.name === selectedId ? "white" : "black";
+    const color = item.name === selectedId ? "white" : "blue";
 
     return (
       <Item
@@ -41,7 +47,7 @@ export default function App() {
     if (blob) {
       var reader = new FileReader();
       const dataUrl = await new Promise((res) => {
-        reader.onload = function() {
+        reader.onload = function () {
           res(reader.result);
         };
         reader.readAsDataURL(blob);
@@ -55,6 +61,10 @@ export default function App() {
       <Text style={styles.title}>Pick your favorite</Text>
       <View style={styles.container}>
         <ImageBackground source={image} resizeMode="stretch" style={styles.image}>
+          <Button
+            title="Fetch from Azure Blob"
+            onPress={() => loadBlobItems(containerClient, setBlobItems)}
+          />
           <FlatList
             data={blobItems}
             renderItem={renderItem}
@@ -70,20 +80,20 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10
+    padding: 10,
   },
   image: {
     flex: 1,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   item: {
     padding: 20,
     marginVertical: 8,
-    marginHorizontal: 16
+    marginHorizontal: 16,
   },
   title: {
-    fontSize: 32
-  }
+    fontSize: 32,
+  },
 });
 
 async function loadBlobItems(containerClient: ContainerClient, setter: (items: BlobItem[]) => {}) {
