@@ -18,8 +18,9 @@ optional-response-headers: true
 v3: true
 disable-async-iterators: true
 add-credentials: false
+use-core-v2: false
 use-extension:
-  "@autorest/typescript": "6.0.0-dev.20210218.1"
+  "@autorest/typescript": "6.0.0-rc.3"
 package-version: 12.12.1
 ```
 
@@ -1369,6 +1370,38 @@ directive:
   - from: swagger-document
     where: $.parameters.ApiVersionParameter
     transform: $.enum = [ "2021-10-04" ];
+```
+
+### Rename x-ms-paths with {containerName}/{blob} or {containerName} removed. Note this must be after all usages of {containerName}/{blob} or {containerName} in this file
+
+```yaml
+directive:
+  - from: swagger-document
+    where: $["x-ms-paths"]
+    transform: >
+      for (const property in $)
+      {
+          if (property.includes('/{containerName}/{blob}'))
+          {
+              let newName = property.replace('{containerName}/{blob}', '')
+              if (newName.includes('?') && newName.includes('restype=account'))
+              {
+                  newName = newName + '&isblob';
+              }
+              $[newName] = $[property];
+              delete $[property];
+          }
+          else if (property.includes('/{containerName}'))
+          {
+              let newName = property.replace('{containerName}', '')
+              if (newName.includes('?') && newName.includes('restype=account'))
+              {
+                  newName = newName + '&iscontainer';
+              }
+              $[newName] = $[property];
+              delete $[property];
+          }
+      }
 ```
 
 ![Impressions](https://azure-sdk-impressions.azurewebsites.net/api/impressions/azure-sdk-for-js%2Fsdk%2Fstorage%2Fstorage-blob%2Fswagger%2FREADME.png)
