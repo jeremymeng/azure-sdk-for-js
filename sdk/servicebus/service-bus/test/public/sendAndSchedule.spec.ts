@@ -179,7 +179,7 @@ describe("Sender Tests", () => {
     await testSimpleSendArray();
   });
 
-  it(
+  it.only(
     noSessionTestClientType + "should reject with proper error instead of OperationTimeoutError",
     async function (): Promise<void> {
       await beforeEachTest(noSessionTestClientType);

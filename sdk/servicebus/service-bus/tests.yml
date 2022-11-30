@@ -6,7 +6,7 @@ stages:
       PackageName: "@azure/service-bus"
       ServiceDirectory: servicebus
       TimeoutInMinutes: 90
-      Clouds: 'Public,Canary'
+      Clouds: 'Canary'
       SupportedClouds: 'Public,UsGov,China'
       EnvVars:
         AZURE_CLIENT_ID: $(SERVICEBUS_CLIENT_ID)
