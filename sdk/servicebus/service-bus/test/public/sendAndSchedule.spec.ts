@@ -183,7 +183,7 @@ describe("Sender Tests", () => {
     noSessionTestClientType + "should reject with proper error instead of OperationTimeoutError",
     async function (): Promise<void> {
       await beforeEachTest(noSessionTestClientType);
-      const content = new Array(256 * 1024).join("x"); // Generate a Large Message Content of 265KB
+      const content = new Array(256 * 1024 * 3).join("x"); // Generate a Large Message Content of over 265KB
       const largeMessage = {
         contentType: "application/json",
         subject: "Scientist",
@@ -194,6 +194,7 @@ describe("Sender Tests", () => {
       let actualErrorCode = "";
       let actualErr;
       try {
+        console.log("### scheduling a over-sized message");
         await sender.scheduleMessages(largeMessage, new Date(Date.now()));
         throw new Error("Test fail if reaching here.");
       } catch (err: any) {

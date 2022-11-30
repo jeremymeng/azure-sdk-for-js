@@ -6,7 +6,10 @@ stages:
       PackageName: "@azure/service-bus"
       ServiceDirectory: servicebus
       TimeoutInMinutes: 90
-      Clouds: 'Canary'
+      MatrixFilters:
+        - Pool=.*ubuntu.*
+        - DependencyVersion=^$
+      Clouds: 'Public,Canary'
       SupportedClouds: 'Public,UsGov,China'
       EnvVars:
         AZURE_CLIENT_ID: $(SERVICEBUS_CLIENT_ID)
