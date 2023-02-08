@@ -1,14 +1,33 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { createTracingClient } from "@azure/core-tracing";
+import { createTracingClient, TracingClient } from "@azure/core-tracing";
 
 /**
  * A tracing client that can be used to manage spans.
  * @internal
  */
-export const tracingClient = createTracingClient({
+export const tracingClient: TracingClient = createTracingClient({
   namespace: "Microsoft.Data.Tables",
   packageName: "@azure/data-tables",
   packageVersion: "13.2.2",
 });
+
+export function tracing(className: string) {
+
+  return function actualDecorator(originalMethod: any, context: ClassMethodDecoratorContext) {
+    const methodName = String(context.name);
+
+    function replacementMethod(this: any, ...args: any[]) {
+      console.log(`Entering method '${methodName}'.`)
+      console.log("args:", args);
+      const options = args[args.length - 1];
+      return tracingClient!.withSpan(`${className}.${methodName}`, options, (updatedOptions) => {
+        console.dir({ args: args.slice(0,-1), updatedOptions})
+        return originalMethod.call(this, ...args.slice(0, -1), updatedOptions);
+      });
+    }
+
+    return replacementMethod;
+  }
+}

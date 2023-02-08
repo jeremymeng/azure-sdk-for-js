@@ -45,7 +45,7 @@ import { logger } from "./logger";
 import { setTokenChallengeAuthenticationPolicy } from "./utils/challengeAuthenticationUtils";
 import { tablesNamedKeyCredentialPolicy } from "./tablesNamedCredentialPolicy";
 import { tablesSASTokenPolicy } from "./tablesSASTokenPolicy";
-import { tracingClient } from "./utils/tracing";
+import { tracing, tracingClient } from "./utils/tracing";
 
 /**
  * A TableServiceClient represents a Client to the Azure Tables service allowing you
@@ -205,10 +205,13 @@ export class TableServiceClient {
    * secondary location endpoint when read-access geo-redundant replication is enabled for the account.
    * @param options - The options parameters.
    */
+  @tracing("TableServiceClient")
   public async getStatistics(options: OperationOptions = {}): Promise<GetStatisticsResponse> {
-    return tracingClient.withSpan("TableServiceClient.getStatistics", options, (updatedOptions) =>
-      this.service.getStatistics(injectSecondaryEndpointHeader(updatedOptions))
-    );
+    return this.service.getStatistics(injectSecondaryEndpointHeader(options));
+
+    // return tracingClient.withSpan("TableServiceClient.getStatistics", options, (updatedOptions) =>
+    //   this.service.getStatistics(injectSecondaryEndpointHeader(updatedOptions))
+    // );
   }
 
   /**
@@ -216,10 +219,12 @@ export class TableServiceClient {
    * (Cross-Origin Resource Sharing) rules.
    * @param options - The options parameters.
    */
+  @tracing("TableServiceClient")
   public getProperties(options: OperationOptions = {}): Promise<GetPropertiesResponse> {
-    return tracingClient.withSpan("TableServiceClient.getProperties", options, (updatedOptions) =>
-      this.service.getProperties(updatedOptions)
-    );
+    return this.service.getProperties(options);
+    // return tracingClient.withSpan("TableServiceClient.getProperties", options, (updatedOptions) =>
+    //   this.service.getProperties(updatedOptions)
+    // );
   }
 
   /**
@@ -228,13 +233,16 @@ export class TableServiceClient {
    * @param properties - The Table Service properties.
    * @param options - The options parameters.
    */
+  @tracing("TableServiceClient")
   public setProperties(
     properties: ServiceProperties,
     options: SetPropertiesOptions = {}
   ): Promise<SetPropertiesResponse> {
-    return tracingClient.withSpan("TableServiceClient.setProperties", options, (updatedOptions) =>
-      this.service.setProperties(properties, updatedOptions)
-    );
+    return this.service.setProperties(properties, options);
+
+    // return tracingClient.withSpan("TableServiceClient.setProperties", options, (updatedOptions) =>
+    //   this.service.setProperties(properties, updatedOptions)
+    // );
   }
 
   /**
@@ -242,18 +250,25 @@ export class TableServiceClient {
    * @param name - The name of the table.
    * @param options - The options parameters.
    */
-  public createTable(name: string, options: OperationOptions = {}): Promise<void> {
-    return tracingClient.withSpan(
-      "TableServiceClient.createTable",
-      options,
-      async (updatedOptions) => {
-        try {
-          await this.table.create({ name }, updatedOptions);
-        } catch (e: any) {
-          handleTableAlreadyExists(e, { ...updatedOptions, logger, tableName: name });
-        }
-      }
-    );
+  @tracing("TableServiceClient")
+  public async createTable(name: string, options: OperationOptions = {}): Promise<void> {
+    try {
+      await this.table.create({ name }, options);
+    } catch (e: any) {
+      handleTableAlreadyExists(e, { ...options, logger, tableName: name });
+    }
+
+    // return tracingClient.withSpan(
+    //   "TableServiceClient.createTable",
+    //   options,
+    //   async (updatedOptions) => {
+    //     try {
+    //       await this.table.create({ name }, updatedOptions);
+    //     } catch (e: any) {
+    //       handleTableAlreadyExists(e, { ...updatedOptions, logger, tableName: name });
+    //     }
+    //   }
+    // );
   }
 
   /**
@@ -261,22 +276,32 @@ export class TableServiceClient {
    * @param name - The name of the table.
    * @param options - The options parameters.
    */
-  public deleteTable(name: string, options: OperationOptions = {}): Promise<void> {
-    return tracingClient.withSpan(
-      "TableServiceClient.deleteTable",
-      options,
-      async (updatedOptions) => {
-        try {
-          await this.table.delete(name, updatedOptions);
-        } catch (e: any) {
-          if (e.statusCode === 404) {
-            logger.info("TableServiceClient.deleteTable: Table doesn't exist");
-          } else {
-            throw e;
-          }
-        }
+  @tracing("TableServiceClient")
+  public async deleteTable(name: string, options: OperationOptions = {}): Promise<void> {
+    try {
+      await this.table.delete(name, options);
+    } catch (e: any) {
+      if (e.statusCode === 404) {
+        logger.info("TableServiceClient.deleteTable: Table doesn't exist");
+      } else {
+        throw e;
       }
-    );
+    }
+    // return tracingClient.withSpan(
+    //   "TableServiceClient.deleteTable",
+    //   options,
+    //   async (updatedOptions) => {
+    //     try {
+    //       await this.table.delete(name, updatedOptions);
+    //     } catch (e: any) {
+    //       if (e.statusCode === 404) {
+    //         logger.info("TableServiceClient.deleteTable: Table doesn't exist");
+    //       } else {
+    //         throw e;
+    //       }
+    //     }
+    //   }
+    // );
   }
 
   /**

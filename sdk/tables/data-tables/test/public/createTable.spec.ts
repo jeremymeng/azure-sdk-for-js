@@ -106,7 +106,7 @@ describe("TableServiceClient CreationHandling", () => {
     });
   });
 
-  it("should throw when 409 and not TableAlreadyExists", async function () {
+  it.only("should throw when 409 and not TableAlreadyExists", async function () {
     const tableName = `throwError`;
     // Mock core-client throwing on error to verify consistenty that we surface the error
     unrecordedClient.pipeline.addPolicy({
@@ -133,6 +133,7 @@ describe("TableServiceClient CreationHandling", () => {
       await unrecordedClient.createTable(tableName);
       assert.fail("Expected error");
     } catch (error: any) {
+      console.dir(error)
       assert.equal((error as RestError).statusCode, 409);
     }
   });
