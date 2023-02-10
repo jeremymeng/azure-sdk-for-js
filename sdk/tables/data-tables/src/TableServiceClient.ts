@@ -205,7 +205,7 @@ export class TableServiceClient {
    * secondary location endpoint when read-access geo-redundant replication is enabled for the account.
    * @param options - The options parameters.
    */
-  @tracing("TableServiceClient")
+  @tracing("TableServiceClient", 0)
   public async getStatistics(options: OperationOptions = {}): Promise<GetStatisticsResponse> {
     return this.service.getStatistics(injectSecondaryEndpointHeader(options));
 
@@ -219,7 +219,7 @@ export class TableServiceClient {
    * (Cross-Origin Resource Sharing) rules.
    * @param options - The options parameters.
    */
-  @tracing("TableServiceClient")
+  @tracing("TableServiceClient", 0)
   public getProperties(options: OperationOptions = {}): Promise<GetPropertiesResponse> {
     return this.service.getProperties(options);
     // return tracingClient.withSpan("TableServiceClient.getProperties", options, (updatedOptions) =>
@@ -233,7 +233,7 @@ export class TableServiceClient {
    * @param properties - The Table Service properties.
    * @param options - The options parameters.
    */
-  @tracing("TableServiceClient")
+  @tracing("TableServiceClient", 1)
   public setProperties(
     properties: ServiceProperties,
     options: SetPropertiesOptions = {}
@@ -250,7 +250,7 @@ export class TableServiceClient {
    * @param name - The name of the table.
    * @param options - The options parameters.
    */
-  @tracing("TableServiceClient")
+  @tracing("TableServiceClient", 1)
   public async createTable(name: string, options: OperationOptions = {}): Promise<void> {
     try {
       await this.table.create({ name }, options);
@@ -276,7 +276,7 @@ export class TableServiceClient {
    * @param name - The name of the table.
    * @param options - The options parameters.
    */
-  @tracing("TableServiceClient")
+  @tracing("TableServiceClient", 1)
   public async deleteTable(name: string, options: OperationOptions = {}): Promise<void> {
     try {
       await this.table.delete(name, options);

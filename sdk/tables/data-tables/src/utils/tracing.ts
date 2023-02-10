@@ -13,7 +13,7 @@ export const tracingClient: TracingClient = createTracingClient({
   packageVersion: "13.2.2",
 });
 
-export function tracing(className: string) {
+export function tracing(className: string, optArgPosition: number) {
 
   return function actualDecorator(originalMethod: any, context: ClassMethodDecoratorContext) {
     const methodName = String(context.name);
@@ -21,10 +21,10 @@ export function tracing(className: string) {
     function replacementMethod(this: any, ...args: any[]) {
       console.log(`Entering method '${methodName}'.`)
       console.log("args:", args);
-      const options = args[args.length - 1];
+      const options = args[optArgPosition];
       return tracingClient!.withSpan(`${className}.${methodName}`, options, (updatedOptions) => {
-        console.dir({ args: args.slice(0,-1), updatedOptions})
-        return originalMethod.call(this, ...args.slice(0, -1), updatedOptions);
+        console.dir({ args: args.slice(0, optArgPosition), updatedOptions})
+        return originalMethod.call(this, ...args.slice(0, optArgPosition), updatedOptions);
       });
     }
 

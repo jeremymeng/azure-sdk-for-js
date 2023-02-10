@@ -106,7 +106,7 @@ describe("TableServiceClient CreationHandling", () => {
     });
   });
 
-  it.only("should throw when 409 and not TableAlreadyExists", async function () {
+  it("should throw when 409 and not TableAlreadyExists", async function () {
     const tableName = `throwError`;
     // Mock core-client throwing on error to verify consistenty that we surface the error
     unrecordedClient.pipeline.addPolicy({
