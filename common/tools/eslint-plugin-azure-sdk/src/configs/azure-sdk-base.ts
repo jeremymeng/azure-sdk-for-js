@@ -47,7 +47,7 @@ export default {
             peerDependencies: false,
           },
         ],
-        "no-console": "off",
+        "no-console": ["error", { allow: ["warn", "error"] }],
         "no-dupe-class-members": "off",
         "no-invalid-this": "off",
         "no-empty": "error",

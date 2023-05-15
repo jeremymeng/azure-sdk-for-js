@@ -38,6 +38,7 @@ describe("AbortController", () => {
     controller.abort();
     try {
       const rs = await response;
+      // eslint-disable-next-line no-console
       console.log("got result", rs);
       assert.fail();
     } catch (err: any) {
@@ -52,6 +53,7 @@ describe("AbortController", () => {
     setTimeout(() => controller.abort(), 50);
     try {
       const r = await response;
+      // eslint-disable-next-line no-console
       console.log("got, r", r);
       assert.fail();
     } catch (err: any) {

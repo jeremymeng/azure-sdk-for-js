@@ -73,6 +73,7 @@ describe("FetchHttpClient", function () {
       await delay(timeoutLength);
       if (options.signal) {
         const signal: AbortSignalLike = options.signal;
+        // eslint-disable-next-line no-console
         console.log(`${signal.aborted}`);
 
         if (signal.aborted) {
@@ -408,6 +409,7 @@ describe("FetchHttpClient", function () {
 
       if (options.signal) {
         const signal: AbortSignalLike = options.signal;
+        // eslint-disable-next-line no-console
         console.log(`${signal.aborted}`);
 
         if (signal.aborted) {
