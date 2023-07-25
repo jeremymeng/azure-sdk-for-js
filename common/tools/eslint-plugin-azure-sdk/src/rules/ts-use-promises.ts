@@ -6,7 +6,7 @@
  * @author Arpan Laha
  */
 
-import { ParserServices } from "@typescript-eslint/experimental-utils";
+import { ParserServices } from "@typescript-eslint/utils";
 import { Rule } from "eslint";
 import { getRuleMetaData } from "../utils";
 import { isExternalModule } from "typescript";

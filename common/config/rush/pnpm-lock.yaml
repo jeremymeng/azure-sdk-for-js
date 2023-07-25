@@ -3209,29 +3209,31 @@ packages:
     dev: false
     optional: true
 
-  /@typescript-eslint/eslint-plugin/5.57.1_p3h2c2fjusw6yq7jtcr3msv72a:
-    resolution: {integrity: sha512-1MeobQkQ9tztuleT3v72XmY0XuKXVXusAhryoLuU5YZ+mXoYKZP9SQ7Flulh1NX4DTjpGTc2b/eMu4u7M7dhnQ==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+  /@typescript-eslint/eslint-plugin/6.3.0_7ypyz24px5cg2llisfsy3dmsaq:
+    resolution: {integrity: sha512-IZYjYZ0ifGSLZbwMqIip/nOamFiWJ9AH+T/GYNZBWkVcyNQOFGtSMoWV7RvY4poYCMZ/4lHzNl796WOSNxmk8A==}
+    engines: {node: ^16.0.0 || >=18.0.0}
     peerDependencies:
-      '@typescript-eslint/parser': ^5.0.0
-      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
+      '@typescript-eslint/parser': ^6.0.0 || ^6.0.0-alpha
+      eslint: ^7.0.0 || ^8.0.0
       typescript: '*'
     peerDependenciesMeta:
       typescript:
         optional: true
     dependencies:
       '@eslint-community/regexpp': 4.6.2
-      '@typescript-eslint/parser': 5.57.1_qjkw45b3tljvcusgfgkwdbduhu
-      '@typescript-eslint/scope-manager': 5.57.1
-      '@typescript-eslint/type-utils': 5.57.1_qjkw45b3tljvcusgfgkwdbduhu
-      '@typescript-eslint/utils': 5.57.1_qjkw45b3tljvcusgfgkwdbduhu
+      '@typescript-eslint/parser': 6.3.0_qjkw45b3tljvcusgfgkwdbduhu
+      '@typescript-eslint/scope-manager': 6.3.0
+      '@typescript-eslint/type-utils': 6.3.0_qjkw45b3tljvcusgfgkwdbduhu
+      '@typescript-eslint/utils': 6.3.0_qjkw45b3tljvcusgfgkwdbduhu
+      '@typescript-eslint/visitor-keys': 6.3.0
       debug: 4.3.4
       eslint: 8.46.0
-      grapheme-splitter: 1.0.4
+      graphemer: 1.4.0
       ignore: 5.2.4
+      natural-compare: 1.4.0
       natural-compare-lite: 1.4.0
       semver: 7.5.4
-      tsutils: 3.21.0_typescript@5.0.4
+      ts-api-utils: 1.0.1_typescript@5.0.4
       typescript: 5.0.4
     transitivePeerDependencies:
       - supports-color
@@ -3250,19 +3252,20 @@ packages:
       - typescript
     dev: false
 
-  /@typescript-eslint/parser/5.57.1_qjkw45b3tljvcusgfgkwdbduhu:
-    resolution: {integrity: sha512-hlA0BLeVSA/wBPKdPGxoVr9Pp6GutGoY380FEhbVi0Ph4WNe8kLvqIRx76RSQt1lynZKfrXKs0/XeEk4zZycuA==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+  /@typescript-eslint/parser/6.3.0_qjkw45b3tljvcusgfgkwdbduhu:
+    resolution: {integrity: sha512-ibP+y2Gr6p0qsUkhs7InMdXrwldjxZw66wpcQq9/PzAroM45wdwyu81T+7RibNCh8oc0AgrsyCwJByncY0Ongg==}
+    engines: {node: ^16.0.0 || >=18.0.0}
     peerDependencies:
-      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
+      eslint: ^7.0.0 || ^8.0.0
       typescript: '*'
     peerDependenciesMeta:
       typescript:
         optional: true
     dependencies:
-      '@typescript-eslint/scope-manager': 5.57.1
-      '@typescript-eslint/types': 5.57.1
-      '@typescript-eslint/typescript-estree': 5.57.1_typescript@5.0.4
+      '@typescript-eslint/scope-manager': 6.3.0
+      '@typescript-eslint/types': 6.3.0
+      '@typescript-eslint/typescript-estree': 6.3.0_typescript@5.0.4
+      '@typescript-eslint/visitor-keys': 6.3.0
       debug: 4.3.4
       eslint: 8.46.0
       typescript: 5.0.4
@@ -3278,21 +3281,29 @@ packages:
       '@typescript-eslint/visitor-keys': 5.57.1
     dev: false
 
-  /@typescript-eslint/type-utils/5.57.1_qjkw45b3tljvcusgfgkwdbduhu:
-    resolution: {integrity: sha512-/RIPQyx60Pt6ga86hKXesXkJ2WOS4UemFrmmq/7eOyiYjYv/MUSHPlkhU6k9T9W1ytnTJueqASW+wOmW4KrViw==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+  /@typescript-eslint/scope-manager/6.3.0:
+    resolution: {integrity: sha512-WlNFgBEuGu74ahrXzgefiz/QlVb+qg8KDTpknKwR7hMH+lQygWyx0CQFoUmMn1zDkQjTBBIn75IxtWss77iBIQ==}
+    engines: {node: ^16.0.0 || >=18.0.0}
+    dependencies:
+      '@typescript-eslint/types': 6.3.0
+      '@typescript-eslint/visitor-keys': 6.3.0
+    dev: false
+
+  /@typescript-eslint/type-utils/6.3.0_qjkw45b3tljvcusgfgkwdbduhu:
+    resolution: {integrity: sha512-7Oj+1ox1T2Yc8PKpBvOKWhoI/4rWFd1j7FA/rPE0lbBPXTKjdbtC+7Ev0SeBjEKkIhKWVeZSP+mR7y1Db1CdfQ==}
+    engines: {node: ^16.0.0 || >=18.0.0}
     peerDependencies:
-      eslint: '*'
+      eslint: ^7.0.0 || ^8.0.0
       typescript: '*'
     peerDependenciesMeta:
       typescript:
         optional: true
     dependencies:
-      '@typescript-eslint/typescript-estree': 5.57.1_typescript@5.0.4
-      '@typescript-eslint/utils': 5.57.1_qjkw45b3tljvcusgfgkwdbduhu
+      '@typescript-eslint/typescript-estree': 6.3.0_typescript@5.0.4
+      '@typescript-eslint/utils': 6.3.0_qjkw45b3tljvcusgfgkwdbduhu
       debug: 4.3.4
       eslint: 8.46.0
-      tsutils: 3.21.0_typescript@5.0.4
+      ts-api-utils: 1.0.1_typescript@5.0.4
       typescript: 5.0.4
     transitivePeerDependencies:
       - supports-color
@@ -3301,6 +3312,11 @@ packages:
   /@typescript-eslint/types/5.57.1:
     resolution: {integrity: sha512-bSs4LOgyV3bJ08F5RDqO2KXqg3WAdwHCu06zOqcQ6vqbTJizyBhuh1o1ImC69X4bV2g1OJxbH71PJqiO7Y1RuA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    dev: false
+
+  /@typescript-eslint/types/6.3.0:
+    resolution: {integrity: sha512-K6TZOvfVyc7MO9j60MkRNWyFSf86IbOatTKGrpTQnzarDZPYPVy0oe3myTMq7VjhfsUAbNUW8I5s+2lZvtx1gg==}
+    engines: {node: ^16.0.0 || >=18.0.0}
     dev: false
 
   /@typescript-eslint/typescript-estree/5.57.1_typescript@5.0.4:
@@ -3319,6 +3335,27 @@ packages:
       is-glob: 4.0.3
       semver: 7.5.4
       tsutils: 3.21.0_typescript@5.0.4
+      typescript: 5.0.4
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /@typescript-eslint/typescript-estree/6.3.0_typescript@5.0.4:
+    resolution: {integrity: sha512-Xh4NVDaC4eYKY4O3QGPuQNp5NxBAlEvNQYOqJquR2MePNxO11E5K3t5x4M4Mx53IZvtpW+mBxIT0s274fLUocg==}
+    engines: {node: ^16.0.0 || >=18.0.0}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@typescript-eslint/types': 6.3.0
+      '@typescript-eslint/visitor-keys': 6.3.0
+      debug: 4.3.4
+      globby: 11.1.0
+      is-glob: 4.0.3
+      semver: 7.5.4
+      ts-api-utils: 1.0.1_typescript@5.0.4
       typescript: 5.0.4
     transitivePeerDependencies:
       - supports-color
@@ -3344,11 +3381,38 @@ packages:
       - typescript
     dev: false
 
+  /@typescript-eslint/utils/6.3.0_qjkw45b3tljvcusgfgkwdbduhu:
+    resolution: {integrity: sha512-hLLg3BZE07XHnpzglNBG8P/IXq/ZVXraEbgY7FM0Cnc1ehM8RMdn9mat3LubJ3KBeYXXPxV1nugWbQPjGeJk6Q==}
+    engines: {node: ^16.0.0 || >=18.0.0}
+    peerDependencies:
+      eslint: ^7.0.0 || ^8.0.0
+    dependencies:
+      '@eslint-community/eslint-utils': 4.4.0_eslint@8.46.0
+      '@types/json-schema': 7.0.12
+      '@types/semver': 7.5.0
+      '@typescript-eslint/scope-manager': 6.3.0
+      '@typescript-eslint/types': 6.3.0
+      '@typescript-eslint/typescript-estree': 6.3.0_typescript@5.0.4
+      eslint: 8.46.0
+      semver: 7.5.4
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+    dev: false
+
   /@typescript-eslint/visitor-keys/5.57.1:
     resolution: {integrity: sha512-RjQrAniDU0CEk5r7iphkm731zKlFiUjvcBS2yHAg8WWqFMCaCrD0rKEVOMUyMMcbGPZ0bPp56srkGWrgfZqLRA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dependencies:
       '@typescript-eslint/types': 5.57.1
+      eslint-visitor-keys: 3.4.2
+    dev: false
+
+  /@typescript-eslint/visitor-keys/6.3.0:
+    resolution: {integrity: sha512-kEhRRj7HnvaSjux1J9+7dBen15CdWmDnwrpyiHsFX6Qx2iW5LOBUgNefOFeh2PjWPlNwN8TOn6+4eBU3J/gupw==}
+    engines: {node: ^16.0.0 || >=18.0.0}
+    dependencies:
+      '@typescript-eslint/types': 6.3.0
       eslint-visitor-keys: 3.4.2
     dev: false
 
@@ -5965,10 +6029,6 @@ packages:
 
   /graceful-fs/4.2.4:
     resolution: {integrity: sha512-WjKPNJF79dtJAVniUlGGWHYGz2jWxT6VhN/4m1NdkbZ2nOsEF+cI1Edgql5zCRhs/VsQYRvrXctxktVXZUkixw==}
-    dev: false
-
-  /grapheme-splitter/1.0.4:
-    resolution: {integrity: sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==}
     dev: false
 
   /graphemer/1.4.0:
@@ -10041,6 +10101,15 @@ packages:
 
   /true-case-path/2.2.1:
     resolution: {integrity: sha512-0z3j8R7MCjy10kc/g+qg7Ln3alJTodw9aDuVWZa3uiWqfuBMKeAeP2ocWcxoyM3D73yz3Jt/Pu4qPr4wHSdB/Q==}
+    dev: false
+
+  /ts-api-utils/1.0.1_typescript@5.0.4:
+    resolution: {integrity: sha512-lC/RGlPmwdrIBFTX59wwNzqh7aR2otPNPR/5brHZm/XKFYKsfqxihXUe9pU3JI+3vGkl+vyCoNNnPhJn3aLK1A==}
+    engines: {node: '>=16.13.0'}
+    peerDependencies:
+      typescript: '>=4.2.0'
+    dependencies:
+      typescript: 5.0.4
     dev: false
 
   /ts-morph/19.0.0:
@@ -18973,7 +19042,7 @@ packages:
     dev: false
 
   file:projects/eslint-plugin-azure-sdk.tgz:
-    resolution: {integrity: sha512-L3uloVI2ws3p86I91/55Vnc6GYIp7dNf+M9tMr6Q+4bMHYES34URLx3TBE0StUh18rIHRSkksiXcxhO7RMGKyA==, tarball: file:projects/eslint-plugin-azure-sdk.tgz}
+    resolution: {integrity: sha512-AmbKrbsYWGQIYdLWWVZEA9S5O2vC5icnL9534XSB6LQFQOHzWBzUMlOZJLYiFKPF6rdg1b7ekLyHGmGUbhFoOw==, tarball: file:projects/eslint-plugin-azure-sdk.tgz}
     name: '@rush-temp/eslint-plugin-azure-sdk'
     version: 0.0.0
     dependencies:
@@ -18983,10 +19052,11 @@ packages:
       '@types/json-schema': 7.0.12
       '@types/mocha': 7.0.2
       '@types/node': 14.18.54
-      '@typescript-eslint/eslint-plugin': 5.57.1_p3h2c2fjusw6yq7jtcr3msv72a
+      '@typescript-eslint/eslint-plugin': 6.3.0_7ypyz24px5cg2llisfsy3dmsaq
       '@typescript-eslint/experimental-utils': 5.57.1_qjkw45b3tljvcusgfgkwdbduhu
-      '@typescript-eslint/parser': 5.57.1_qjkw45b3tljvcusgfgkwdbduhu
-      '@typescript-eslint/typescript-estree': 5.57.1_typescript@5.0.4
+      '@typescript-eslint/parser': 6.3.0_qjkw45b3tljvcusgfgkwdbduhu
+      '@typescript-eslint/typescript-estree': 6.3.0_typescript@5.0.4
+      '@typescript-eslint/utils': 6.3.0_qjkw45b3tljvcusgfgkwdbduhu
       chai: 4.3.7
       eslint: 8.46.0
       eslint-config-prettier: 9.0.0_eslint@8.46.0
@@ -20368,7 +20438,7 @@ packages:
     dev: false
 
   file:projects/perf-ai-form-recognizer.tgz:
-    resolution: {integrity: sha512-+05JR31WLH5d8FD+GslDQxNHYPLOrvExWUugJJNalgNZpbtoqzQF0837G7tKGDg98VU4XjK6qZA7Gjo2n7O3yg==, tarball: file:projects/perf-ai-form-recognizer.tgz}
+    resolution: {integrity: sha512-W/M7XPCsmg8eZBzlsl8J6yyEH+1DoeC7F4keU6px84ohKSVn3vZHTYM2xj9e61MzYDWUjormNqquQD9oeB+qEA==, tarball: file:projects/perf-ai-form-recognizer.tgz}
     name: '@rush-temp/perf-ai-form-recognizer'
     version: 0.0.0
     dependencies:

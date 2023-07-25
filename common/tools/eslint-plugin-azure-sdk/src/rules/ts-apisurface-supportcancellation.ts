@@ -7,7 +7,7 @@
  */
 
 import { ClassDeclaration, Identifier, MethodDefinition } from "estree";
-import { ParserServices, TSESTree } from "@typescript-eslint/experimental-utils";
+import { ParserServices, TSESTree } from "@typescript-eslint/utils";
 import { Symbol as TSSymbol, Type, TypeChecker, TypeFlags } from "typescript";
 import { getPublicMethods, getRuleMetaData } from "../utils";
 import { ParserWeakMapESTreeToTSNode } from "@typescript-eslint/typescript-estree/dist/parser-options";
