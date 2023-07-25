@@ -7,7 +7,7 @@
  */
 
 import { ClassDeclaration, MethodDefinition } from "estree";
-import { ParserServices, TSESTree } from "@typescript-eslint/experimental-utils";
+import { ParserServices, TSESTree } from "@typescript-eslint/utils";
 import { SourceFile, Symbol as TSSymbol } from "typescript";
 import { Rule } from "eslint";
 

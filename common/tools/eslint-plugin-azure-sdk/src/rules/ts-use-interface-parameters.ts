@@ -29,7 +29,7 @@ import {
   MethodDefinition,
   Pattern,
 } from "estree";
-import { ParserServices, TSESTree } from "@typescript-eslint/experimental-utils";
+import { ParserServices, TSESTree } from "@typescript-eslint/utils";
 import {
   ParserWeakMap,
   ParserWeakMapESTreeToTSNode,
