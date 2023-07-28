@@ -191,7 +191,10 @@ async function readSystemEventRequest<T extends { context: ConnectionContext }>(
 export class CloudEventsDispatcher {
   private readonly _allowAll: boolean = true;
   private readonly _allowedOrigins: Array<string> = [];
-  constructor(private hub: string, private eventHandler?: WebPubSubEventHandlerOptions) {
+  constructor(
+    private hub: string,
+    private eventHandler?: WebPubSubEventHandlerOptions
+  ) {
     if (Array.isArray(eventHandler)) {
       throw new Error("Unexpected WebPubSubEventHandlerOptions");
     }

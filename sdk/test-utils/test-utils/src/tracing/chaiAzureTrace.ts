@@ -20,7 +20,7 @@ const instrumenter = new MockInstrumenter();
  */
 export async function supportsTracing<
   Options extends { tracingOptions?: OperationTracingOptions },
-  Callback extends (options: Options) => Promise<unknown>
+  Callback extends (options: Options) => Promise<unknown>,
 >(
   callback: Callback,
   expectedSpanNames: string[],

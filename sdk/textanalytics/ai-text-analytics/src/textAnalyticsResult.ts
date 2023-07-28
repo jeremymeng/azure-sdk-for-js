@@ -186,7 +186,7 @@ export function makeTextAnalyticsErrorResult(
 export function processAndCombineSuccessfulAndErroneousDocuments<
   TSuccessService extends TextAnalyticsSuccessResult,
   TSuccessSDK extends TextAnalyticsSuccessResult,
-  TError extends TextAnalyticsErrorResult
+  TError extends TextAnalyticsErrorResult,
 >(
   input: TextDocumentInput[],
   response: TextAnalyticsResponse<TSuccessService>,
@@ -213,7 +213,7 @@ export function processAndCombineSuccessfulAndErroneousDocuments<
 export function combineSuccessfulAndErroneousDocumentsWithStatisticsAndModelVersion<
   TSuccessService extends TextAnalyticsSuccessResult,
   TSuccessSDK extends TextAnalyticsSuccessResult,
-  TError extends TextAnalyticsErrorResult
+  TError extends TextAnalyticsErrorResult,
 >(
   input: TextDocumentInput[],
   response: TextAnalyticsResponse<TSuccessService>,

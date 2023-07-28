@@ -54,7 +54,11 @@ export function redirectPolicy(maximumRetries = 20): RequestPolicyFactory {
  * Resends the request to a new destination if a response arrives with a "location" header, and a status code between 300 and 307.
  */
 export class RedirectPolicy extends BaseRequestPolicy {
-  constructor(nextPolicy: RequestPolicy, options: RequestPolicyOptions, readonly maxRetries = 20) {
+  constructor(
+    nextPolicy: RequestPolicy,
+    options: RequestPolicyOptions,
+    readonly maxRetries = 20
+  ) {
     super(nextPolicy, options);
   }
 

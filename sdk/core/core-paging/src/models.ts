@@ -20,7 +20,7 @@ export interface PageSettings {
 export interface PagedAsyncIterableIterator<
   TElement,
   TPage = TElement[],
-  TPageSettings = PageSettings
+  TPageSettings = PageSettings,
 > {
   /**
    * The next method, part of the iteration protocol

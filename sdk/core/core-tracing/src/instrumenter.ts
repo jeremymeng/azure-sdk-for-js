@@ -41,7 +41,7 @@ export function createDefaultInstrumenter(): Instrumenter {
     },
     withContext<
       CallbackArgs extends unknown[],
-      Callback extends (...args: CallbackArgs) => ReturnType<Callback>
+      Callback extends (...args: CallbackArgs) => ReturnType<Callback>,
     >(
       _context: TracingContext,
       callback: Callback,

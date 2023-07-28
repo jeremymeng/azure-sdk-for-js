@@ -4252,7 +4252,10 @@ export class ShareFileClient extends StorageClient {
       options,
       async (updatedOptions) => {
         return assertResponse<FileStartCopyHeaders, FileStartCopyHeaders>(
-          await this.context.startCopy(copySource, { ...updatedOptions, ...this.shareClientConfig })
+          await this.context.startCopy(copySource, {
+            ...updatedOptions,
+            ...this.shareClientConfig,
+          })
         );
       }
     );

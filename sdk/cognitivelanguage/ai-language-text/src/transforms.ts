@@ -107,7 +107,7 @@ function makeTextAnalysisErrorResult(id: string, error: ErrorModel): TextAnalysi
 function transformDocumentResults<
   DocumentSuccess extends TextAnalysisSuccessResult,
   PublicDocumentSuccess extends TextAnalysisSuccessResult = DocumentSuccess,
-  TError extends TextAnalysisErrorResult = TextAnalysisErrorResult
+  TError extends TextAnalysisErrorResult = TextAnalysisErrorResult,
 >(
   ids: string[],
   response: {

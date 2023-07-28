@@ -77,7 +77,7 @@ export class MockInstrumenter implements Instrumenter {
 
   withContext<
     CallbackArgs extends unknown[],
-    Callback extends (...args: CallbackArgs) => ReturnType<Callback>
+    Callback extends (...args: CallbackArgs) => ReturnType<Callback>,
   >(
     context: TracingContext,
     callback: Callback,

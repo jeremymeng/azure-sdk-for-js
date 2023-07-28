@@ -483,7 +483,7 @@ export function generatedIndexToPublicIndex(generatedIndex: GeneratedSearchIndex
 
 export function generatedSearchResultToPublicSearchResult<
   TModel extends object,
-  TFields extends SelectFields<TModel>
+  TFields extends SelectFields<TModel>,
 >(results: GeneratedSearchResult[]): SearchResult<TModel, TFields>[] {
   const returnValues: SearchResult<TModel, TFields>[] = results.map<SearchResult<TModel, TFields>>(
     (result) => {
@@ -508,7 +508,7 @@ export function generatedSearchResultToPublicSearchResult<
 
 export function generatedSuggestDocumentsResultToPublicSuggestDocumentsResult<
   TModel extends object,
-  TFields extends SelectFields<TModel>
+  TFields extends SelectFields<TModel>,
 >(searchDocumentsResult: GeneratedSuggestDocumentsResult): SuggestDocumentsResult<TModel, TFields> {
   const results = searchDocumentsResult.results.map<SuggestResult<TModel, TFields>>((element) => {
     const { _text, ...restProps } = element;

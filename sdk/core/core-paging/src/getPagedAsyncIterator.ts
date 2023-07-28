@@ -15,7 +15,7 @@ export function getPagedAsyncIterator<
   TElement,
   TPage = TElement[],
   TPageSettings = PageSettings,
-  TLink = string
+  TLink = string,
 >(
   pagedResult: PagedResult<TPage, TPageSettings, TLink>
 ): PagedAsyncIterableIterator<TElement, TPage, TPageSettings> {

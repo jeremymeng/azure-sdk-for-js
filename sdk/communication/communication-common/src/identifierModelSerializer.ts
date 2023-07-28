@@ -108,7 +108,7 @@ export type SerializedCommunicationCloudEnvironment = "public" | "dod" | "gcch";
 const assertNotNullOrUndefined = <
   T extends Record<string, unknown>,
   P extends keyof T,
-  Q extends string & keyof T[P]
+  Q extends string & keyof T[P],
 >(
   obj: T,
   prop: Q

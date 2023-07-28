@@ -18,7 +18,10 @@ import { SpanGraph, SpanGraphNode } from "./spanGraphModel";
  * A mock tracer useful for testing
  */
 export class TestTracer implements Tracer {
-  constructor(public name?: string, public version?: string) {}
+  constructor(
+    public name?: string,
+    public version?: string
+  ) {}
   private traceIdCounter = 0;
   private getNextTraceId(): string {
     this.traceIdCounter++;

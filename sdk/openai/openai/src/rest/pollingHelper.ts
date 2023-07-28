@@ -36,7 +36,7 @@ import {
 export async function getLongRunningPoller<
   TResult extends
     | BeginAzureBatchImageGenerationLogicalResponse
-    | BeginAzureBatchImageGenerationDefaultResponse
+    | BeginAzureBatchImageGenerationDefaultResponse,
 >(
   client: Client,
   initialResponse:
@@ -47,7 +47,7 @@ export async function getLongRunningPoller<
 export async function getLongRunningPoller<
   TResult extends
     | GetAzureBatchImageGenerationOperationStatusLogicalResponse
-    | GetAzureBatchImageGenerationOperationStatusDefaultResponse
+    | GetAzureBatchImageGenerationOperationStatusDefaultResponse,
 >(
   client: Client,
   initialResponse:

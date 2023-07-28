@@ -10,7 +10,7 @@ export class TransformingPagedAsyncIterableIterator<
   TTransformed,
   TPage = TElement[],
   TTransformedPage = TTransformed[],
-  TPageSettings = PageSettings
+  TPageSettings = PageSettings,
 > {
   constructor(
     private internalIterator: PagedAsyncIterableIterator<TElement, TPage, TPageSettings>,

@@ -29,7 +29,10 @@ function defer<T>(): {
 
 class SimpleWebSocketFrame {
   public dataAsString: string | undefined;
-  constructor(public data: Buffer | ArrayBuffer | Buffer[], public isBinary: boolean) {
+  constructor(
+    public data: Buffer | ArrayBuffer | Buffer[],
+    public isBinary: boolean
+  ) {
     if (!isBinary) {
       this.dataAsString = data.toString();
     }

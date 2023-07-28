@@ -27,7 +27,10 @@ export class GroupByValueEndpointComponent implements ExecutionContext {
   private aggregateType: AggregateType;
   private completed: boolean = false;
 
-  constructor(private executionContext: ExecutionContext, private queryInfo: QueryInfo) {
+  constructor(
+    private executionContext: ExecutionContext,
+    private queryInfo: QueryInfo
+  ) {
     // VALUE queries will only every have a single grouping
     this.aggregateType = this.queryInfo.aggregates[0];
   }

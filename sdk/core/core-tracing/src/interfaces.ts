@@ -38,7 +38,7 @@ export interface TracingClient {
     Callback extends (
       updatedOptions: Options,
       span: Omit<TracingSpan, "end">
-    ) => ReturnType<Callback>
+    ) => ReturnType<Callback>,
   >(
     name: string,
     operationOptions: Options,
@@ -78,7 +78,7 @@ export interface TracingClient {
    */
   withContext<
     CallbackArgs extends unknown[],
-    Callback extends (...args: CallbackArgs) => ReturnType<Callback>
+    Callback extends (...args: CallbackArgs) => ReturnType<Callback>,
   >(
     context: TracingContext,
     callback: Callback,
@@ -160,7 +160,7 @@ export interface Instrumenter {
    */
   withContext<
     CallbackArgs extends unknown[],
-    Callback extends (...args: CallbackArgs) => ReturnType<Callback>
+    Callback extends (...args: CallbackArgs) => ReturnType<Callback>,
   >(
     context: TracingContext,
     callback: Callback,
@@ -287,7 +287,7 @@ export interface OperationTracingOptions {
  * as part of an operation's options.
  */
 export type OptionsWithTracingContext<
-  Options extends { tracingOptions?: OperationTracingOptions }
+  Options extends { tracingOptions?: OperationTracingOptions },
 > = Options & {
   tracingOptions: {
     tracingContext: TracingContext;

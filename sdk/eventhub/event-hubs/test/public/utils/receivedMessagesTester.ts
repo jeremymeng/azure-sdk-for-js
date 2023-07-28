@@ -32,7 +32,10 @@ export class ReceivedMessagesTester implements Required<SubscriptionEventHandler
    *                      about errors that occur and concentrate on making sure all expected
    *                      messages are received at least once.
    */
-  constructor(private expectedPartitions: string[], private multipleConsumers: boolean) {
+  constructor(
+    private expectedPartitions: string[],
+    private multipleConsumers: boolean
+  ) {
     this.data = new Map<string, ReceivedMessages>();
     this.expectedMessageBodies = new Set();
     this.done = false;

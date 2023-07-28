@@ -21,7 +21,10 @@ export class Users {
    * @hidden
    * @param database - The parent {@link Database}.
    */
-  constructor(public readonly database: Database, private readonly clientContext: ClientContext) {}
+  constructor(
+    public readonly database: Database,
+    private readonly clientContext: ClientContext
+  ) {}
 
   /**
    * Query all users.

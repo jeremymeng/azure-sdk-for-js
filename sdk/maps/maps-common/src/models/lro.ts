@@ -46,7 +46,7 @@ export async function getRawResponse<TOptions extends OperationOptions, TRespons
  */
 export function createSendPollRequest<
   TOptions extends OperationOptions,
-  TClient extends ServiceClient
+  TClient extends ServiceClient,
 >(settings: {
   client: TClient;
   options: TOptions;

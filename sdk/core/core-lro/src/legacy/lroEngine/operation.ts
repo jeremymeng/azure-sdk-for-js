@@ -13,7 +13,7 @@ const createStateProxy: <TResult, TState extends PollOperationState<TResult>>() 
   TState,
   TResult
 > = () => ({
-  initState: (config) => ({ config, isStarted: true } as any),
+  initState: (config) => ({ config, isStarted: true }) as any,
   setCanceled: (state) => (state.isCancelled = true),
   setError: (state, error) => (state.error = error),
   setResult: (state, result) => (state.result = result),

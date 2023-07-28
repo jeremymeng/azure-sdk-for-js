@@ -67,7 +67,7 @@ export function cleanState<TState extends KeyVaultAdminPollOperationState<TResul
  */
 export abstract class KeyVaultAdminPoller<
   TState extends KeyVaultAdminPollOperationState<TResult>,
-  TResult
+  TResult,
 > extends Poller<TState, TResult> {
   /**
    * Defines how much time the poller is going to wait before making a new request to the service.
@@ -101,12 +101,15 @@ export interface KeyVaultAdminPollOperationOptions {
  */
 export class KeyVaultAdminPollOperation<
   TState extends KeyVaultAdminPollOperationState<unknown>,
-  TResult
+  TResult,
 > implements PollOperation<TState, TResult>
 {
   private cancelMessage: string;
 
-  constructor(public state: TState, options: KeyVaultAdminPollOperationOptions) {
+  constructor(
+    public state: TState,
+    options: KeyVaultAdminPollOperationOptions
+  ) {
     this.cancelMessage = options.cancelMessage;
   }
 

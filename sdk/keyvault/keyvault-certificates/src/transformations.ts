@@ -350,7 +350,7 @@ export function getCertificateOperationFromCoreOperation(
 export function coreContactsToCertificateContacts(contacts: CoreContacts): CertificateContact[] {
   return contacts.contactList
     ? contacts.contactList.map(
-        (x) => ({ email: x.emailAddress, phone: x.phone, name: x.name } as CertificateContact)
+        (x) => ({ email: x.emailAddress, phone: x.phone, name: x.name }) as CertificateContact
       )
     : [];
 }

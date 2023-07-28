@@ -358,26 +358,29 @@ export class ServiceBusStressTester {
   public renewSessionLockUntil(receiver: ServiceBusSessionReceiver, duration: number) {
     // TODO: pass in max number of lock renewals? and close the receiver at the end of max??
     const startTime = new Date();
-    this.sessionLockRenewalInfo.lockRenewalTimers[receiver.sessionId] = setTimeout(async () => {
-      try {
-        await receiver.renewSessionLock();
-        this.sessionLockRenewalInfo.numberOfSuccesses++;
-        const currentRenewalCount = this.sessionLockRenewalInfo.renewalCount[receiver.sessionId];
-        this.sessionLockRenewalInfo.renewalCount[receiver.sessionId] =
-          currentRenewalCount === undefined ? 1 : currentRenewalCount + 1;
-        const elapsedTime = new Date().valueOf() - startTime.valueOf();
-        if (duration - elapsedTime > 0) {
-          this.renewSessionLockUntil(receiver, duration - elapsedTime);
-        } else {
-          // Code reaches here only after the duration given has passed by
-          // TODO: Close the receiver maybe?
+    this.sessionLockRenewalInfo.lockRenewalTimers[receiver.sessionId] = setTimeout(
+      async () => {
+        try {
+          await receiver.renewSessionLock();
+          this.sessionLockRenewalInfo.numberOfSuccesses++;
+          const currentRenewalCount = this.sessionLockRenewalInfo.renewalCount[receiver.sessionId];
+          this.sessionLockRenewalInfo.renewalCount[receiver.sessionId] =
+            currentRenewalCount === undefined ? 1 : currentRenewalCount + 1;
+          const elapsedTime = new Date().valueOf() - startTime.valueOf();
+          if (duration - elapsedTime > 0) {
+            this.renewSessionLockUntil(receiver, duration - elapsedTime);
+          } else {
+            // Code reaches here only after the duration given has passed by
+            // TODO: Close the receiver maybe?
+          }
+        } catch (error: any) {
+          this.sessionLockRenewalInfo.numberOfFailures++;
+          this.trackError("sessionlockrenewal", error);
+          console.error("Error in session lock renewal: ", error);
         }
-      } catch (error: any) {
-        this.sessionLockRenewalInfo.numberOfFailures++;
-        this.trackError("sessionlockrenewal", error);
-        console.error("Error in session lock renewal: ", error);
-      }
-    }, receiver.sessionLockedUntilUtc!.valueOf() - startTime.valueOf() - 10000);
+      },
+      receiver.sessionLockedUntilUtc!.valueOf() - startTime.valueOf() - 10000
+    );
   }
 
   public async callClose(

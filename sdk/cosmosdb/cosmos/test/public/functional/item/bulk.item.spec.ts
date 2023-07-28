@@ -42,7 +42,7 @@ describe("test bulk operations", async function () {
         () =>
           ({
             ...generateOperationOfSize(100, { partitionKey: "key_value" }, { key: "key_value" }),
-          } as any)
+          }) as any
       );
       const response = await container.items.bulk(operations);
       // Create
@@ -58,7 +58,7 @@ describe("test bulk operations", async function () {
               Math.floor(Constants.DefaultMaxBulkRequestBodySizeInBytes / 2)
             ),
             partitionKey: {},
-          } as any)
+          }) as any
       );
       const response = await container.items.bulk(operations);
       // Create
@@ -75,7 +75,7 @@ describe("test bulk operations", async function () {
               {},
               { key: "key_value" }
             ),
-          } as any)
+          }) as any
       );
       const response = await container.items.bulk(operations);
       // Create
@@ -169,7 +169,7 @@ describe("test bulk operations", async function () {
           () =>
             ({
               ...generateOperationOfSize(100, { partitionKey: "key_value" }, { key: "key_value" }),
-            } as any)
+            }) as any
         );
         const response = await container.items.bulk(operations);
         // Create
@@ -185,7 +185,7 @@ describe("test bulk operations", async function () {
                 Math.floor(Constants.DefaultMaxBulkRequestBodySizeInBytes / 2)
               ),
               partitionKey: {},
-            } as any)
+            }) as any
         );
         const response = await container.items.bulk(operations);
         // Create
@@ -202,7 +202,7 @@ describe("test bulk operations", async function () {
                 {},
                 { key: "key_value" }
               ),
-            } as any)
+            }) as any
         );
         const response = await container.items.bulk(operations);
         // Create

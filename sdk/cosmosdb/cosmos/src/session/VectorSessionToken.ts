@@ -99,7 +99,7 @@ export class VectorSessionToken {
 
     const [higherVersionSessionToken, lowerVersionSessionToken]: [
       VectorSessionToken,
-      VectorSessionToken
+      VectorSessionToken,
     ] = this.version < other.version ? [other, this] : [this, other];
 
     const highestLocalLsnByRegion = new Map<number, string>();

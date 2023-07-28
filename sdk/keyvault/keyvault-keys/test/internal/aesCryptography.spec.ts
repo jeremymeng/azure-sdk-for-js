@@ -162,7 +162,9 @@ describe("AesCryptographyProvider internal tests", function () {
           remoteProvider = new RemoteCryptographyProvider(
             keyVaultKey,
             credential,
-            recorder.configureClientOptions({ disableChallengeResourceVerification: !isLiveMode() })
+            recorder.configureClientOptions({
+              disableChallengeResourceVerification: !isLiveMode(),
+            })
           );
 
           const text = this.test!.title;
@@ -188,7 +190,9 @@ describe("AesCryptographyProvider internal tests", function () {
           remoteProvider = new RemoteCryptographyProvider(
             keyVaultKey,
             credential,
-            recorder.configureClientOptions({ disableChallengeResourceVerification: !isLiveMode() })
+            recorder.configureClientOptions({
+              disableChallengeResourceVerification: !isLiveMode(),
+            })
           );
 
           const text = this.test!.title;

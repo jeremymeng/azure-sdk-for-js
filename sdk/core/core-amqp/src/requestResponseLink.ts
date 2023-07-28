@@ -61,7 +61,11 @@ export class RequestResponseLink implements ReqResLink {
    * @param sender - The amqp sender link.
    * @param receiver - The amqp receiver link.
    */
-  constructor(public session: Session, public sender: Sender, public receiver: Receiver) {
+  constructor(
+    public session: Session,
+    public sender: Sender,
+    public receiver: Receiver
+  ) {
     this.session = session;
     this.sender = sender;
     this.receiver = receiver;

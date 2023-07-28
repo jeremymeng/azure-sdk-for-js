@@ -5,7 +5,10 @@ import { env } from "./env";
  * A custom error type for failed pipeline requests.
  */
 export class RecorderError extends Error {
-  constructor(message: string, public statusCode?: number) {
+  constructor(
+    message: string,
+    public statusCode?: number
+  ) {
     super(message);
     this.name = "RecorderError";
     this.statusCode = statusCode;

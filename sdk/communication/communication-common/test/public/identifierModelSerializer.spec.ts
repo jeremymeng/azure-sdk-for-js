@@ -26,7 +26,7 @@ const assertDeserialize = (
 
 const assertThrowsMissingProperty = <
   P extends keyof SerializedCommunicationIdentifier,
-  Q extends string & keyof Required<SerializedCommunicationIdentifier>[P]
+  Q extends string & keyof Required<SerializedCommunicationIdentifier>[P],
 >(
   serializedIdentifier: SerializedCommunicationIdentifier,
   identifierType: P,

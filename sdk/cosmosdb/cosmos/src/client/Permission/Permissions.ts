@@ -22,7 +22,10 @@ export class Permissions {
    * @hidden
    * @param user - The parent {@link User}.
    */
-  constructor(public readonly user: User, private readonly clientContext: ClientContext) {}
+  constructor(
+    public readonly user: User,
+    private readonly clientContext: ClientContext
+  ) {}
 
   /**
    * Query all permissions.

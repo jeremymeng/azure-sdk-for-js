@@ -17,7 +17,7 @@ import { Snapshot } from "./snapshot";
  * Defines the behavior of the PerfTest constructor, to use the class as a value.
  */
 export interface PerfTestConstructor<
-  TOptions extends Record<string, unknown> = Record<string, unknown>
+  TOptions extends Record<string, unknown> = Record<string, unknown>,
 > {
   new (): PerfTestBase<TOptions>;
 }

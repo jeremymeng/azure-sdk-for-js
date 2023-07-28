@@ -23,7 +23,10 @@ describe("ExponentialRetryPolicy", () => {
   // Return response with the given status code on first sendRequest()
   class FailFirstRequestPolicy {
     public count = 0;
-    constructor(private _response: HttpOperationResponse, private statusCode: number) {}
+    constructor(
+      private _response: HttpOperationResponse,
+      private statusCode: number
+    ) {}
     public sendRequest(request: WebResource): Promise<HttpOperationResponse> {
       this.count++;
       if (this.count === 1) {

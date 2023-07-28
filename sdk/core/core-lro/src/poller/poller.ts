@@ -24,7 +24,7 @@ const createStateProxy: <TResult, TState extends OperationState<TResult>>() => S
    * It will be updated later to be of type TState when the
    * customer-provided callback, `updateState`, is called during polling.
    */
-  initState: (config) => ({ status: "running", config } as any),
+  initState: (config) => ({ status: "running", config }) as any,
   setCanceled: (state) => (state.status = "canceled"),
   setError: (state, error) => (state.error = error),
   setResult: (state, result) => (state.result = result),

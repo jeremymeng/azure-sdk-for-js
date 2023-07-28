@@ -89,7 +89,7 @@ export type SearchIndexingBufferedSenderFlushDocumentsOptions = OperationOptions
  */
 export interface GetDocumentOptions<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > extends OperationOptions {
   /**
    * List of field names to retrieve for the document; Any field not retrieved will be missing from
@@ -156,14 +156,14 @@ export type AutocompleteOptions<TModel extends object> = OperationOptions &
  */
 export type SearchOptions<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > = OperationOptions & SearchRequestOptions<TModel, TFields>;
 /**
  * Options for retrieving suggestions based on the searchText.
  */
 export type SuggestOptions<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > = OperationOptions & SuggestRequest<TModel, TFields>;
 
 /**
@@ -173,7 +173,7 @@ export type SuggestOptions<
  */
 export type SearchIterator<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > = PagedAsyncIterableIterator<
   SearchResult<TModel, TFields>,
   SearchDocumentsPageResult<TModel, TFields>,
@@ -356,7 +356,7 @@ export interface SearchRequest<TModel extends object = never> {
  */
 export interface SearchRequestOptions<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > {
   /**
    * A value that specifies whether to fetch the total count of results. Default is false. Setting
@@ -517,7 +517,7 @@ export interface SearchRequestOptions<
  */
 export type SearchResult<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > = {
   /**
    * The relevance score of the document compared to other documents returned by the query.
@@ -597,7 +597,7 @@ export interface SearchDocumentsResultBase {
  */
 export interface SearchDocumentsResult<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > extends SearchDocumentsResultBase {
   /**
    * The sequence of results returned by the query.
@@ -611,7 +611,7 @@ export interface SearchDocumentsResult<
  */
 export interface SearchDocumentsPageResult<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > extends SearchDocumentsResultBase {
   /**
    * The sequence of results returned by the query.
@@ -630,7 +630,7 @@ export interface SearchDocumentsPageResult<
  */
 export interface SuggestRequest<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > {
   /**
    * An OData expression that filters the documents considered for suggestions.
@@ -693,7 +693,7 @@ export interface SuggestRequest<
  */
 export type SuggestResult<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > = {
   /**
    * The text of the suggestion result.
@@ -708,7 +708,7 @@ export type SuggestResult<
  */
 export interface SuggestDocumentsResult<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > {
   /**
    * The sequence of results returned by the query.
@@ -870,7 +870,7 @@ export type SelectFields<TModel extends object> =
  * paths.
  */
 export type SearchPick<TModel extends object, TFields extends SelectFields<TModel>> = (<
-  T
+  T,
 >() => T extends TModel ? true : false) extends <T>() => T extends object ? true : false
   ? // Picking from an untyped object should return `object`
     TModel
@@ -941,7 +941,7 @@ export type ExtractDocumentKey<TModel> = {
  */
 export type NarrowedModel<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > =
   // If the model isn't specified, the type is the same as the input type
   (<T>() => T extends TModel ? true : false) extends <T>() => T extends never ? true : false
@@ -964,7 +964,7 @@ export type NarrowedModel<
 
 export type SuggestNarrowedModel<
   TModel extends object,
-  TFields extends SelectFields<TModel> = SelectFields<TModel>
+  TFields extends SelectFields<TModel> = SelectFields<TModel>,
 > = (<T>() => T extends TModel ? true : false) extends <T>() => T extends never ? true : false
   ? TModel
   : (<T>() => T extends TModel ? true : false) extends <T>() => T extends object ? true : false

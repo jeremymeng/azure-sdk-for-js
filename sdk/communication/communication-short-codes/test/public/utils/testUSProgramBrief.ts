@@ -119,7 +119,7 @@ function assertDeepEqualKnownFields(
   comparisons: [
     propertyToCompareExtractor: (object: any) => any,
     mapper: CompositeMapper,
-    errorMessage: string
+    errorMessage: string,
   ][]
 ): void {
   for (const comparison of comparisons) {

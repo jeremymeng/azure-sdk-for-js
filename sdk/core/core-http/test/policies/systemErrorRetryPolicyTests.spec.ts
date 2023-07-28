@@ -24,7 +24,10 @@ describe("SystemErrorRetryPolicy", () => {
   // throw error on first sendRequest()
   class FailFirstRequestPolicy {
     count = 0;
-    constructor(private _response: HttpOperationResponse, private errorCode: string) {}
+    constructor(
+      private _response: HttpOperationResponse,
+      private errorCode: string
+    ) {}
     public sendRequest(request: WebResource): Promise<HttpOperationResponse> {
       if (this.count === 0) {
         this.count++;

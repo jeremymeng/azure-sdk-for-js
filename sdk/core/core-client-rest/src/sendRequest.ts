@@ -68,7 +68,7 @@ export async function sendRequest(
 export async function sendRequestAsStream<
   TResponse extends HttpResponse & {
     body: NodeJS.ReadableStream | ReadableStream<Uint8Array> | undefined;
-  }
+  },
 >(
   method: HttpMethods,
   url: string,

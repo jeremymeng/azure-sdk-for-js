@@ -10,7 +10,7 @@ import { isDefined } from "@azure/core-util";
  * - Typically, such APIs("subscribe" method) offered by the AMQP based SDKs - event-hubs/service-bus.
  */
 export abstract class EventPerfTest<
-  TOptions = Record<string, unknown>
+  TOptions = Record<string, unknown>,
 > extends PerfTestBase<TOptions> {
   startTime: bigint;
   private testDuration = 0;

@@ -466,12 +466,16 @@ testWithServiceTypes((serviceVersion) => {
             if (i === 0) {
               debug(">>>>> Sending a message to partition %d", i);
               promises.push(
-                await producerClient.sendBatch([{ body: `Hello World ${i}` }], { partitionId: "0" })
+                await producerClient.sendBatch([{ body: `Hello World ${i}` }], {
+                  partitionId: "0",
+                })
               );
             } else if (i === 1) {
               debug(">>>>> Sending a message to partition %d", i);
               promises.push(
-                await producerClient.sendBatch([{ body: `Hello World ${i}` }], { partitionId: "1" })
+                await producerClient.sendBatch([{ body: `Hello World ${i}` }], {
+                  partitionId: "1",
+                })
               );
             } else {
               debug(">>>>> Sending a message to the hub when i == %d", i);

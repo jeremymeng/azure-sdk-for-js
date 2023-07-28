@@ -57,5 +57,5 @@ export = {
           }
         });
       },
-    } as Rule.RuleListener),
+    }) as Rule.RuleListener,
 };

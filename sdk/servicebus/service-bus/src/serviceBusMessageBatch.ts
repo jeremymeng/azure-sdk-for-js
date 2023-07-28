@@ -119,7 +119,10 @@ export class ServiceBusMessageBatchImpl implements ServiceBusMessageBatch {
    * @internal
    * @hidden
    */
-  constructor(private _context: ConnectionContext, private _maxSizeInBytes: number) {
+  constructor(
+    private _context: ConnectionContext,
+    private _maxSizeInBytes: number
+  ) {
     this._sizeInBytes = 0;
     this._batchMessageProperties = {};
   }

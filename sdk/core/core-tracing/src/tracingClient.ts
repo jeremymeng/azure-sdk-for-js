@@ -58,7 +58,7 @@ export function createTracingClient(options: TracingClientOptions): TracingClien
     Callback extends (
       updatedOptions: Options,
       span: Omit<TracingSpan, "end">
-    ) => ReturnType<Callback>
+    ) => ReturnType<Callback>,
   >(
     name: string,
     operationOptions: Options,
@@ -82,7 +82,7 @@ export function createTracingClient(options: TracingClientOptions): TracingClien
 
   function withContext<
     CallbackArgs extends unknown[],
-    Callback extends (...args: CallbackArgs) => ReturnType<Callback>
+    Callback extends (...args: CallbackArgs) => ReturnType<Callback>,
   >(
     context: TracingContext,
     callback: Callback,

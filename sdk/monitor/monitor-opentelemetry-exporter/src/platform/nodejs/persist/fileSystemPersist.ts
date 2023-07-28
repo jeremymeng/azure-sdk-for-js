@@ -34,7 +34,10 @@ export class FileSystemPersist implements PersistentStorage {
   private _fileCleanupTimer: NodeJS.Timer | null = null;
   private _instrumentationKey: string;
 
-  constructor(instrumentationKey: string, private _options?: AzureMonitorExporterOptions) {
+  constructor(
+    instrumentationKey: string,
+    private _options?: AzureMonitorExporterOptions
+  ) {
     this._instrumentationKey = instrumentationKey;
     if (this._options?.disableOfflineStorage) {
       this._enabled = false;
