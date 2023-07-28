@@ -2,8 +2,23 @@
  * @summary Demonstrates the CRUD operations on the configuration settings.
  */
 import {AppConfigurationClient} from '@azure/app-configuration';
+import { setLogLevel } from '@azure/logger';
+import { ContainerClient } from '@azure/storage-blob';
+
+setLogLevel('verbose');
 
 export async function runAppConfigSample() {
+  console.log('storage blob sample first');
+  const containerClient = new ContainerClient(
+    process.env.BLOB_CONTAINER_SAS_URL || '<container sas url>'
+  );
+
+  for await (const blobItem of containerClient.listBlobsFlat()) {
+    if (blobItem.name.endsWith('.jpg') || blobItem.name.endsWith('.png')) {
+      console.log(blobItem.name);
+    }
+  }
+
   console.log('Running helloworld sample');
 
   // Set the following environment variable or edit the value on the following line.
