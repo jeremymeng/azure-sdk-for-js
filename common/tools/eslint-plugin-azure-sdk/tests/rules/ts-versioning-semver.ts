@@ -243,7 +243,10 @@ const ruleTester = new RuleTester({
   parser: require.resolve("@typescript-eslint/parser"),
   parserOptions: {
     createDefaultProgram: true,
-    project: "./tsconfig.json",
+    extraFileExtensions: [".json"],
+    project: [
+      "./tsconfig.test.json",
+    ],
   },
 });
 
@@ -310,7 +313,7 @@ ruleTester.run("ts-versioning-semver", rule, {
     {
       // incorrect format but in a file we don't care about
       code: '{"version": "1.0"}',
-      filename: "not_package.json",
+      filename: "tsconfig.json",
     },
   ],
   invalid: [
