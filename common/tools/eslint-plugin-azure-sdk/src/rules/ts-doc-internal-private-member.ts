@@ -8,7 +8,7 @@
 
 import { ParserServices, TSESTree } from "@typescript-eslint/utils";
 import { Node } from "estree";
-import { ParserWeakMapESTreeToTSNode } from "@typescript-eslint/typescript-estree/dist/parser-options";
+import { ParserWeakMapESTreeToTSNode } from "./stubs";
 import { Rule } from "eslint";
 import { SyntaxKind, canHaveModifiers } from "typescript";
 import { getRuleMetaData } from "../utils";

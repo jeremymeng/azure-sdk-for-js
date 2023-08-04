@@ -18,7 +18,7 @@ import { Rule } from "eslint";
  */
 const getExports = (context: Rule.RuleContext): TSSymbol[] | undefined => {
   const parserServices = context.parserServices as ParserServices;
-  if (parserServices.program === undefined) {
+  if (!parserServices.program) {
     return undefined;
   }
 

@@ -38,7 +38,7 @@ export = {
             const thrown = node.argument as Identifier;
             const parserServices = context.parserServices as ParserServices;
             if (
-              parserServices.program === undefined ||
+              !parserServices.program ||
               parserServices.esTreeNodeToTSNodeMap === undefined
             ) {
               return;

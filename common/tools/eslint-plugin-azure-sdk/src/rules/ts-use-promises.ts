@@ -20,7 +20,7 @@ export = {
   create: (context: Rule.RuleContext): Rule.RuleListener => {
     const parserServices: ParserServices = context.parserServices;
     if (
-      parserServices.program === undefined ||
+      !parserServices.program ||
       parserServices.esTreeNodeToTSNodeMap === undefined
     ) {
       return {};

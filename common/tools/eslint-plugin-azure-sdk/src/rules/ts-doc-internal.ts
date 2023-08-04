@@ -9,7 +9,7 @@
 import { ParserServices, TSESTree } from "@typescript-eslint/utils";
 import { getLocalExports, getRuleMetaData } from "../utils";
 import { Node } from "estree";
-import { ParserWeakMapESTreeToTSNode } from "@typescript-eslint/typescript-estree/dist/parser-options";
+import { ParserWeakMapESTreeToTSNode } from "./stubs";
 import { Rule } from "eslint";
 import { TypeChecker } from "typescript";
 import { globSync } from "glob";
@@ -113,7 +113,7 @@ export = {
 
     const parserServices = context.parserServices as ParserServices;
     if (
-      parserServices.program === undefined ||
+      !parserServices.program ||
       parserServices.esTreeNodeToTSNodeMap === undefined
     ) {
       return {};

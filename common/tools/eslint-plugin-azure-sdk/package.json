@@ -69,6 +69,7 @@
   },
   "dependencies": {
     "@typescript-eslint/typescript-estree": "~6.3.0",
+    "@typescript-eslint/utils": "~6.3.0",
     "@types/eslint": "~8.4.0",
     "@types/estree": "~1.0.0",
     "eslint-config-prettier": "^9.0.0",
@@ -83,7 +84,6 @@
     "@types/mocha": "^7.0.2",
     "@types/node": "^14.0.0",
     "@typescript-eslint/eslint-plugin": "~6.3.0",
-    "@typescript-eslint/utils": "~6.3.0",
     "@typescript-eslint/parser": "~6.3.0",
     "chai": "^4.2.0",
     "eslint": "^8.0.0",

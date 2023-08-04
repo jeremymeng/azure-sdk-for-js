@@ -33,7 +33,7 @@ import { ParserServices, TSESTree } from "@typescript-eslint/utils";
 import {
   ParserWeakMap,
   ParserWeakMapESTreeToTSNode,
-} from "@typescript-eslint/typescript-estree/dist/parser-options";
+} from "./stubs";
 import { Rule } from "eslint";
 import { getRuleMetaData } from "../utils";
 
@@ -246,7 +246,7 @@ export = {
   create: (context: Rule.RuleContext): Rule.RuleListener => {
     const parserServices = context.parserServices as ParserServices;
     if (
-      parserServices.program === undefined ||
+      !parserServices.program ||
       parserServices.esTreeNodeToTSNodeMap === undefined ||
       parserServices.tsNodeToESTreeNodeMap === undefined
     ) {

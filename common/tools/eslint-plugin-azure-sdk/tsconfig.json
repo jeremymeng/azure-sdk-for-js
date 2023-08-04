@@ -6,6 +6,7 @@
     "isolatedModules": true,
     "lib": ["es2017"],
     "module": "commonjs",
+    "moduleResolution": "NodeNext",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

@@ -10,7 +10,7 @@ import { ClassDeclaration, Identifier, MethodDefinition } from "estree";
 import { ParserServices, TSESTree } from "@typescript-eslint/utils";
 import { Symbol as TSSymbol, Type, TypeChecker, TypeFlags } from "typescript";
 import { getPublicMethods, getRuleMetaData } from "../utils";
-import { ParserWeakMapESTreeToTSNode } from "@typescript-eslint/typescript-estree/dist/parser-options";
+import { ParserWeakMapESTreeToTSNode } from "./stubs";
 import { Rule } from "eslint";
 
 //------------------------------------------------------------------------------
@@ -106,8 +106,8 @@ export = {
   create: (context: Rule.RuleContext): Rule.RuleListener => {
     const parserServices = context.parserServices as ParserServices;
     if (
-      parserServices.program === undefined ||
-      parserServices.esTreeNodeToTSNodeMap === undefined
+      !parserServices.program ||
+      !parserServices.esTreeNodeToTSNodeMap
     ) {
       return {};
     }
