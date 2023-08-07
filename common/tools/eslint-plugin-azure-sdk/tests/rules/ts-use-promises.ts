@@ -31,7 +31,7 @@ const ruleTester = new RuleTester({
       modules: true,
     },
     ecmaVersion: 6,
-    project: "./tsconfig.test.json",
+    project: "./tests/tsconfig.test.json",
     sourceType: "module",
   },
 });
@@ -40,7 +40,7 @@ ruleTester.run("ts-use-promises", rule, {
   valid: [
     {
       code: example,
-      filename: "test.ts"
+      filename: "./tests/test.ts"
     },
   ],
   invalid: [

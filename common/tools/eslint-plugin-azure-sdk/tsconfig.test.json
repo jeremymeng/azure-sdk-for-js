@@ -1,3 +1,0 @@
-{
-  "include": ["*.json", "*.ts", "test.ts"]
-}
