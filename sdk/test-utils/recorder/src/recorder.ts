@@ -289,6 +289,7 @@ export class Recorder {
           if (mismatchHeader) {
             throw new RecorderError(decodeBase64(mismatchHeader));
           } else {
+            console.dir(rsp);
             throw new RecorderError("Start request failed.");
           }
         }
