@@ -87,7 +87,8 @@
     "typescript": "~5.0.0",
     "prettier": "^2.5.1",
     "rimraf": "^3.0.0",
-    "ts-node": "^10.0.0"
+    "ts-node": "^10.0.0",
+    "esm": "^3.2.18"
   },
   "homepage": "https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/communication/communication-email/",
   "bugs": {
