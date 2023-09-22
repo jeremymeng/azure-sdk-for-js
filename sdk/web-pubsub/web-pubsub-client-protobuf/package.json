@@ -33,8 +33,9 @@
     "test:node": "npm run build:test && npm run unit-test:node && npm run integration-test:node",
     "test": "npm run build:test && npm run unit-test && npm run integration-test",
     "unit-test:browser": "echo skipped",
-    "u1": "cross-env TS_NODE_FILES=true TS_NODE_COMPILER_OPTIONS=\"{\\\"module\\\":\\\"commonjs\\\"}\" mocha --extension ts -r esm -r ts-node/register --reporter ../../../common/tools/mocha-multi-reporter.js  --timeout 50000  --full-trace  --exclude \"test/**/browser/*.spec.ts\" \"test/**/*.spec.ts\"",
-    "unit-test:node": "cross-env TS_NODE_FILES=true dev-tool run test:node-ts-input --no-test-proxy=true -- test/*.spec.ts",
+    "u2": "cross-env TS_NODE_COMPILER_OPTIONS=\"{\\\"module\\\":\\\"commonjs\\\", \\\"esModuleInterop\\\":true}\" mocha -r ts-node/register --reporter ../../../common/tools/mocha-multi-reporter.js  --timeout 50000  --full-trace  --exclude \"test/**/browser/*.spec.ts\" \"test/**/*.spec.ts\"",
+    "u1": "cross-env TS_NODE_COMPILER_OPTIONS=\"{\\\"module\\\":\\\"commonjs\\\"}\" mocha -r ts-node/register -r esm --reporter ../../../common/tools/mocha-multi-reporter.js --timeout 50000 --full-trace  --exclude \"test/**/browser/*.spec.ts\" \"test/**/*.spec.ts\"",
+    "unit-test:node": "dev-tool run test:node-ts-input --no-test-proxy=true -- --timeout 50000 test/**/*.spec.ts",
     "unit-test": "npm run unit-test:node && npm run unit-test:browser"
   },
   "files": [
