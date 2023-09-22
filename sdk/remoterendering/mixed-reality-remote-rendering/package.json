@@ -123,7 +123,8 @@
     "util": "^0.12.1",
     "@types/uuid": "^8.0.0",
     "uuid": "^8.3.0",
-    "ts-node": "^10.0.0"
+    "ts-node": "^10.0.0",
+    "esm": "^3.2.18"
   },
   "//sampleConfiguration": {
     "productName": "Azure Remote Rendering",
