@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { PluginContext, RollupWarning, WarningHandler } from "rollup";
+import { RollupWarning, WarningHandlerWithDefault } from "rollup";
 
 import nodeResolve from "@rollup/plugin-node-resolve";
 import cjs from "@rollup/plugin-commonjs";
-import sourcemaps from "rollup-plugin-sourcemaps";
 import multiEntry from "@rollup/plugin-multi-entry";
 import json from "@rollup/plugin-json";
 import * as path from "path";
@@ -20,44 +19,6 @@ interface PackageJson {
   module: string;
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
-}
-
-/**
- * The default sourcemaps plugin does not provide very much information in warnings, so this shim allows us to capture
- * the active sourcemaps loading context.
- *
- * This allows us to selectively disable warnings about missing source maps, for example in core-asynciterator-polyfill.
- */
-export function sourcemapsExtra() {
-  const _sourcemaps = sourcemaps();
-
-  const load = _sourcemaps.load;
-
-  if (!load) return _sourcemaps;
-
-  return Object.assign(_sourcemaps, {
-    load(this: PluginContext, id: string) {
-      const shim = new Proxy(this, {
-        get(context, p, ...rest) {
-          if (p === "warn") {
-            const warn = context.warn;
-            return (warning: unknown) => {
-              const warningObject = (
-                typeof warning === "string" ? { message: warning } : warning
-              ) as RollupWarning;
-
-              warningObject.id = id;
-
-              warn(warningObject);
-            };
-          }
-          return Reflect.get(context, p, ...rest);
-        },
-      });
-
-      return load instanceof Function ? load.call(shim, id) : load.handler.call(shim, id);
-    },
-  });
 }
 
 // #region Warning Handler
@@ -83,14 +44,14 @@ function ignoreNiseSinonEval(warning: RollupWarning): boolean {
 function ignoreChaiCircularDependency(warning: RollupWarning): boolean {
   return (
     warning.code === "CIRCULAR_DEPENDENCY" &&
-    matchesPathSegments(warning.importer, ["node_modules", "chai"])
+    matchesPathSegments(warning.message, ["node_modules", "chai"])
   );
 }
 
 function ignoreRheaPromiseCircularDependency(warning: RollupWarning): boolean {
   return (
     warning.code === "CIRCULAR_DEPENDENCY" &&
-    matchesPathSegments(warning.importer, ["node_modules", "rhea-promise"])
+    matchesPathSegments(warning.message, ["node_modules", "rhea-promise"])
   );
 }
 
@@ -125,7 +86,7 @@ const warningInhibitors: Array<(warning: RollupWarning) => boolean> = [
  * Construct a warning handler for the shared rollup configuration
  * that ignores certain warnings that are not relevant to testing.
  */
-export function makeOnWarnForTesting(): (warning: RollupWarning, warn: WarningHandler) => void {
+export function makeOnWarnForTesting(): WarningHandlerWithDefault {
   return (warning, warn) => {
     if (!warningInhibitors.some((inhibited) => inhibited(warning))) {
       debug("Warning:", warning.code, warning.id, warning.loc);
@@ -161,7 +122,6 @@ export function makeBrowserTestConfig(pkg: PackageJson): RollupOptions {
       }),
       cjs(),
       json(),
-      sourcemapsExtra(),
       //viz({ filename: "dist-test/browser-stats.html", sourcemap: true })
     ],
     onwarn: makeOnWarnForTesting(),
@@ -202,7 +162,7 @@ export function makeConfig(
     ],
     output: { file: "dist/index.js", format: "cjs", sourcemap: true },
     preserveSymlinks: false,
-    plugins: [sourcemaps(), nodeResolve(), cjs(), json()],
+    plugins: [nodeResolve(), cjs(), json()],
   };
 
   const config: RollupOptions[] = [baseConfig as RollupOptions];

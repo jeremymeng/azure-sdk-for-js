@@ -8,7 +8,6 @@ import nodeBuiltins from "builtin-modules";
 
 import nodeResolve from "@rollup/plugin-node-resolve";
 import cjs from "@rollup/plugin-commonjs";
-import sourcemaps from "rollup-plugin-sourcemaps";
 import nodePolyfills from "rollup-plugin-polyfill-node";
 import json from "@rollup/plugin-json";
 import multiEntry from "@rollup/plugin-multi-entry";
@@ -16,7 +15,7 @@ import multiEntry from "@rollup/plugin-multi-entry";
 import { leafCommand, makeCommandInfo } from "../../framework/command";
 import { resolveProject, resolveRoot } from "../../util/resolveProject";
 import { createPrinter } from "../../util/printer";
-import { makeOnWarnForTesting, sourcemapsExtra } from "../../config/rollup.base.config";
+import { makeOnWarnForTesting } from "../../config/rollup.base.config";
 
 const log = createPrinter("bundle");
 
@@ -65,7 +64,7 @@ export default leafCommand(commandInfo, async (options) => {
         ...Object.keys(info.packageJson.devDependencies),
       ],
       preserveSymlinks: false,
-      plugins: [nodeResolve(), sourcemaps()],
+      plugins: [nodeResolve()],
     };
 
     try {
@@ -120,7 +119,6 @@ export default leafCommand(commandInfo, async (options) => {
           dynamicRequireTargets: [globFromStore("chai")],
         }),
         json(),
-        sourcemapsExtra(),
       ],
       onwarn: makeOnWarnForTesting(),
       // Disable tree-shaking of test code.  In rollup-plugin-node-resolve@5.0.0,
