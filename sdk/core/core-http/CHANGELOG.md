@@ -25,7 +25,7 @@
 
 ### Other Changes
 
-- Update `engines` to `"node": ">=14.0.0"`
+- Update `engines` to `"node": ">=16.0.0"`
 - Remove cookie support [Issue #24654](https://github.com/Azure/azure-sdk-for-js/issues/24654)
 
 ## 2.2.7 (2022-09-01)

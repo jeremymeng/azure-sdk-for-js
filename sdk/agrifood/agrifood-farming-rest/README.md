@@ -21,7 +21,7 @@ Key links:
 
 ### Currently supported environments
 
-- Node.js version 14.x.x or higher
+- Node.js version 16.x.x or higher
 
 ### Prerequisites
 
