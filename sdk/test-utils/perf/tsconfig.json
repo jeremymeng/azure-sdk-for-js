@@ -3,7 +3,6 @@
   "compilerOptions": {
     "declarationDir": "./types",
     "outDir": "./dist-esm",
-    "module": "commonjs",
     "lib": ["dom", "es5", "es6", "es7", "esnext"]
   },
   "exclude": ["node_modules", "./samples/*"],

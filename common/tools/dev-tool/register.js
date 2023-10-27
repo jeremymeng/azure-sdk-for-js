@@ -90,6 +90,7 @@ require("ts-node").register({
     ...require("../../../tsconfig.json").compilerOptions,
     target: "es2019",
     module: "commonjs",
+    moduleResolution: "node",
     allowJs: true,
     esModuleInterop: true,
     paths: {

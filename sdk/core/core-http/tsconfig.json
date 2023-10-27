@@ -2,6 +2,7 @@
   "extends": "../../../tsconfig.package",
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "node",
     "outDir": "dist",
     "declarationDir": "./types/latest"
   },
