@@ -20048,7 +20048,7 @@ packages:
     dev: false
 
   file:projects/identity-broker.tgz:
-    resolution: {integrity: sha512-Td7ny0f5I13ifzov1ZRpLikjV1W1K+/dP3v0wLbPRNc+5PmO83YEggizdO557ZUAqgXig0lOgOjQNs8RU5Q2zw==, tarball: file:projects/identity-broker.tgz}
+    resolution: {integrity: sha512-bJeT5l52RzMz9AsOWdVh1c0a1FyZTR49uO1DqkoaMLfHDSxTnSotfk6PySH3xIlHCu6AziNVtLp6PTHB5nBdeA==, tarball: file:projects/identity-broker.tgz}
     name: '@rush-temp/identity-broker'
     version: 0.0.0
     dependencies:
@@ -22054,7 +22054,7 @@ packages:
     dev: false
 
   file:projects/schema-registry-avro.tgz:
-    resolution: {integrity: sha512-zdH0+OGtf1AvvuWCR+XjdcqIOmV3rx4zVt9gBv7ZNf14k2ALfmvwNC61J01dvC3mHqQDDdQhaaz9nJpOb4sLoQ==, tarball: file:projects/schema-registry-avro.tgz}
+    resolution: {integrity: sha512-BskUjIUuRNjxTOHGQA8YzfOmL9fBPJqgRqlkvWOOXMM6ayMXlB1hL5HU9haDquFdKM9nmi9t8Z7DnQN0HFpdMw==, tarball: file:projects/schema-registry-avro.tgz}
     name: '@rush-temp/schema-registry-avro'
     version: 0.0.0
     dependencies:
@@ -22089,7 +22089,7 @@ packages:
       karma-mocha-reporter: 2.2.5(karma@6.4.2)
       karma-source-map-support: 1.4.0
       karma-sourcemap-loader: 0.3.8
-      lru-cache: 7.18.3
+      lru-cache: 10.0.1
       mocha: 10.2.0
       mocha-junit-reporter: 2.2.1(mocha@10.2.0)
       nyc: 15.1.0
@@ -22114,7 +22114,7 @@ packages:
     dev: false
 
   file:projects/schema-registry-json.tgz:
-    resolution: {integrity: sha512-+uqkaig83puByrhAbAJ94neOsTv24zw9kimhrj9f4TiBbxzId1KxnIafhmkWGhUdyr7PZOwSFqupN8pvx1gdMw==, tarball: file:projects/schema-registry-json.tgz}
+    resolution: {integrity: sha512-cnNHi0g2SioaOtYIQU38o0Jw930bSVy92CGuP3ilfQuM8or4OdXFK3HGgV2/1TehggUdqA51iEr/EOqPPuuYiA==, tarball: file:projects/schema-registry-json.tgz}
     name: '@rush-temp/schema-registry-json'
     version: 0.0.0
     dependencies:
@@ -22142,7 +22142,7 @@ packages:
       karma-mocha-reporter: 2.2.5(karma@6.4.2)
       karma-source-map-support: 1.4.0
       karma-sourcemap-loader: 0.3.8
-      lru-cache: 7.18.3
+      lru-cache: 10.0.1
       mocha: 10.2.0
       mocha-junit-reporter: 2.2.1(mocha@10.2.0)
       nyc: 15.1.0
@@ -22206,7 +22206,7 @@ packages:
     dev: false
 
   file:projects/search-documents.tgz:
-    resolution: {integrity: sha512-v58t6pSQO2V8yONwW5KEjBcPCGQKo0leyK1/Xu3r9/VodjwUkhCra7MN5g8bZXMqe3wl+l5d2KNcrqaMXOmnDg==, tarball: file:projects/search-documents.tgz}
+    resolution: {integrity: sha512-TYRJDw9i9Sl87uFVhvAvvk5N1Bq/7axieJRvMiK2YkRVDXO0iO4/B9B83ews5FIsNQkGVqEO8xS7cB1FEX+8Og==, tarball: file:projects/search-documents.tgz}
     name: '@rush-temp/search-documents'
     version: 0.0.0
     dependencies:
@@ -22254,7 +22254,7 @@ packages:
     dev: false
 
   file:projects/service-bus.tgz:
-    resolution: {integrity: sha512-CgQZNEj4Cd1d9SHnlFuFoYEeuVB4yufSziSCh6E+25sOH5CDqb0UmcagHrw+fLBeIY53n3PnF0seP9hzvp+hAg==, tarball: file:projects/service-bus.tgz}
+    resolution: {integrity: sha512-gyGZU0bo+BvUmhNcsvo0xxwlBz5N0jKg1WA7wND5RV2QdkNnCFSc2dr4D5A7XaE44nHDsyil7qFh5ZC7QOt6pA==, tarball: file:projects/service-bus.tgz}
     name: '@rush-temp/service-bus'
     version: 0.0.0
     dependencies:
