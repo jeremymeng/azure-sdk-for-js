@@ -4,7 +4,7 @@
 import { getClient, ClientOptions } from "@azure-rest/core-client";
 import * as coreRestPipeline from "@azure/core-rest-pipeline";
 import { PipelineRequest, PipelineResponse, SendRequest } from "@azure/core-rest-pipeline";
-import { TextTranslationClient } from "./generated/clientDefinitions";
+import { TextTranslationClient } from "./clientDefinitions";
 import {
   TranslatorCredential,
   TranslatorAuthenticationPolicy,
