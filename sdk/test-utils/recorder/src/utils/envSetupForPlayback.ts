@@ -4,7 +4,7 @@
 import { HttpClient } from "@azure/core-rest-pipeline";
 import { logger } from "../log";
 import { addSanitizers } from "../sanitizer";
-import { env } from "./env";
+import { env } from "@azure/test-utils";
 import {
   isPlaybackMode,
   isRecordMode,

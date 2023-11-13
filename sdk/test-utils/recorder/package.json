@@ -8,7 +8,6 @@
   "types": "./types/src/index.d.ts",
   "browser": {
     "./dist-esm/src/utils/relativePathCalculator.js": "./dist-esm/src/utils/relativePathCalculator.browser.js",
-    "./dist-esm/src/utils/env.js": "./dist-esm/src/utils/env.browser.js",
     "./dist-esm/src/utils/encoding.js": "./dist-esm/src/utils/encoding.browser.js",
     "./dist-esm/test/utils/server.js": "./dist-esm/test/utils/server.browser.js"
   },
@@ -68,7 +67,8 @@
     "@azure/core-rest-pipeline": "^1.13.0",
     "@azure/core-auth": "^1.3.2",
     "@azure/core-util": "^1.0.0",
-    "@azure/logger": "^1.0.0"
+    "@azure/logger": "^1.0.0",
+    "@azure/test-utils": "^1.1.0"
   },
   "devDependencies": {
     "@azure/core-client": "^1.0.0",
@@ -83,7 +83,6 @@
     "chai": "^4.2.0",
     "concurrently": "^8.2.0",
     "cross-env": "7.0.3",
-    "dotenv": "^16.0.0",
     "eslint": "^8.0.0",
     "express": "^4.16.3",
     "karma": "^6.2.0",

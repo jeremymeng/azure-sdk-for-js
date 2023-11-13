@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { env, isLiveMode } from "@azure-tools/test-recorder";
+import { env } from "./env";
 import { getGlobalObject } from "./global";
+
+function isLiveMode(): boolean {
+  return env.TEST_MODE?.toLowerCase() === "live";
+}
 
 export interface TestFunctionWrapper {
   it:

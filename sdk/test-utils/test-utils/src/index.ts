@@ -13,6 +13,7 @@ export { chai, assert, expect, should } from "./chai";
 export { matrix } from "./matrix";
 export { isNode, isNode8 } from "./utils";
 export { getYieldedValue } from "./getYieldedValue";
+export { env } from "./env";
 
 export { TestSpan } from "./tracing/testSpan";
 export * from "./tracing/mockInstrumenter";

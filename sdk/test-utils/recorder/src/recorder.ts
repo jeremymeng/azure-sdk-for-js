@@ -32,7 +32,7 @@ import { createRecordingRequest } from "./utils/createRecordingRequest";
 import { logger } from "./log";
 import { setRecordingOptions } from "./options";
 import { isNode } from "@azure/core-util";
-import { env } from "./utils/env";
+import { env } from "@azure/test-utils";
 import { decodeBase64 } from "./utils/encoding";
 import { AdditionalPolicyConfig } from "@azure/core-client";
 

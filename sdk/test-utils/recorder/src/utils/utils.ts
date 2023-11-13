@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-import { env } from "./env";
+import { env } from "@azure/test-utils";
 /**
  * A custom error type for failed pipeline requests.
  */

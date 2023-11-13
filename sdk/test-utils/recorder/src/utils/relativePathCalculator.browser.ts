@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { env } from "./env";
+import { env } from "@azure/test-utils";
 import { RecorderError } from "./utils";
 
 export function relativeRecordingsPath(): string {
