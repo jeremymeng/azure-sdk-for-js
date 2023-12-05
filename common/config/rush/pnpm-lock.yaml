@@ -4515,7 +4515,7 @@ packages:
     dependencies:
       semver: 7.5.4
       shelljs: 0.8.5
-      typescript: 5.4.0-dev.20231204
+      typescript: 5.4.0-dev.20231205
     dev: false
 
   /downlevel-dts@0.11.0:
@@ -4524,7 +4524,7 @@ packages:
     dependencies:
       semver: 7.5.4
       shelljs: 0.8.5
-      typescript: 5.4.0-dev.20231204
+      typescript: 5.4.0-dev.20231205
     dev: false
 
   /eastasianwidth@0.2.0:
@@ -6935,9 +6935,9 @@ packages:
     hasBin: true
     dev: false
 
-  /mime@3.0.0:
-    resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
-    engines: {node: '>=10.0.0'}
+  /mime@4.0.0:
+    resolution: {integrity: sha512-pzhgdeqU5pJ9t5WK9m4RT4GgGWqYJylxUf62Yb9datXRwdcw5MjiD1BYI5evF8AgTXN9gtKX3CFLvCUL5fAhEA==}
+    engines: {node: '>=16'}
     hasBin: true
     dev: false
 
@@ -9254,8 +9254,8 @@ packages:
     hasBin: true
     dev: false
 
-  /typescript@5.4.0-dev.20231204:
-    resolution: {integrity: sha512-dU/o7cZDKWQcVda27Ht/d38BKIdswGgGI6S//+nmeFhU0LZ7gA5ldCORN0dtOFEwFR98d2TlonmMeNCcyVkqnQ==}
+  /typescript@5.4.0-dev.20231205:
+    resolution: {integrity: sha512-jeYaYMtVCDclulasTrZlhlF9k/Xu88FCpff6+BP3YVNbWefdRy/3nmmrAFVC/TqGSrLhhjSRHBn6bw49b9Jxdw==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
@@ -10454,7 +10454,7 @@ packages:
     dev: false
 
   file:projects/api-management-custom-widgets-tools.tgz:
-    resolution: {integrity: sha512-7VjrswAqYhPLYAUBR6aQ4CuTo1NuV6l0gOnj1ADMj2c8HE37f5FV4RoMh2PpJlhZ6sXuNmzh0He1tB4VpkfItQ==, tarball: file:projects/api-management-custom-widgets-tools.tgz}
+    resolution: {integrity: sha512-FYVANNVwfFjJjFUnT4C29DPfCAL3HphRBn365v+XX2zzp1K7GxbIn0/MDs0CdURmMMrSIfj0Cu9DAdDD6/tGmg==, tarball: file:projects/api-management-custom-widgets-tools.tgz}
     name: '@rush-temp/api-management-custom-widgets-tools'
     version: 0.0.0
     dependencies:
@@ -10484,7 +10484,7 @@ packages:
       karma-junit-reporter: 2.0.1(karma@6.4.2)
       karma-mocha: 2.0.1
       karma-mocha-reporter: 2.2.5(karma@6.4.2)
-      mime: 3.0.0
+      mime: 4.0.0
       mocha: 10.2.0
       mocha-junit-reporter: 2.2.1(mocha@10.2.0)
       mustache: 4.2.0
@@ -17327,7 +17327,7 @@ packages:
     dev: false
 
   file:projects/core-client.tgz:
-    resolution: {integrity: sha512-p7F5rH2a2HeeIj2+umoz3AECKV2EF6EHSlbjmHxx2KawhpSZ5dSkFCAeYxqUjGKkQQoHway7FHOrVYMFBu5rJw==, tarball: file:projects/core-client.tgz}
+    resolution: {integrity: sha512-l5JcGiBFE74jOM/m2lO89TAfw+HSMS95CrJ017gAcL47+zOzh5FPT782t+DW6X3g8VMen5us21X97L3kwCVP6g==, tarball: file:projects/core-client.tgz}
     name: '@rush-temp/core-client'
     version: 0.0.0
     dependencies:
