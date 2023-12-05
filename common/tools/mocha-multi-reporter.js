@@ -22,7 +22,9 @@ class MultiReporter {
     // Invoking the spec reporter with the runner
     new Mocha.reporters.Spec(runner);
     // Invoking mocha-junit-reporter to generate XML reports of test summaries for CI
-    new MochaJUnitReporter(runner);
+    // new MochaJUnitReporter(runner, {
+    //   mochaFile: "./test-results.[hash].xml",
+    // });
   }
 }
 

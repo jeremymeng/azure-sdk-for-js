@@ -17,6 +17,12 @@ export const commandInfo = makeCommandInfo(
       default: false,
       description: "whether to disable launching test-proxy",
     },
+    "no-parallel": {
+      shortName: "np",
+      kind: "boolean",
+      default: false,
+      description: "whether to disable Mocha parallel test execution",
+    },
   },
 );
 
@@ -24,7 +30,9 @@ export default leafCommand(commandInfo, async (options) => {
   const isModuleProj = await isModuleProject();
   const defaultMochaArgs = `${
     isModuleProj ? "" : "-r esm "
-  }-r ts-node/register --reporter ../../../common/tools/mocha-multi-reporter.js --full-trace`;
+  }-r ts-node/register --reporter ../../../common/tools/mocha-multi-reporter.js --full-trace ${
+    options["no-parallel"] ? "" : "--parallel"
+  }`;
   const updatedArgs = options["--"]?.map((opt) =>
     opt.includes("**") && !opt.startsWith("'") && !opt.startsWith('"') ? `"${opt}"` : opt,
   );
