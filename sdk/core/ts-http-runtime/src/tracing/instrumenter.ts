@@ -32,7 +32,7 @@ export function createDefaultInstrumenter(): Instrumenter {
     },
     startSpan: (
       _name: string,
-      spanOptions: InstrumenterSpanOptions,
+      spanOptions: InstrumenterSpanOptions
     ): { span: TracingSpan; tracingContext: TracingContext } => {
       return {
         span: createDefaultTracingSpan(),

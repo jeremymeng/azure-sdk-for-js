@@ -22,7 +22,7 @@ import { assert, matrix } from "@azure/test-utils";
 
 export function buildSseTests(
   rtName: string,
-  createStream: (cb: (write: (chunk: Uint8Array) => void) => void) => AsyncIterable<EventMessage>,
+  createStream: (cb: (write: (chunk: Uint8Array) => void) => void) => AsyncIterable<EventMessage>
 ): Mocha.Suite {
   return describe(`[${rtName}] Server-sent Events`, () => {
     matrix([[0, 1, 2, 10000]], async function (count: number) {

@@ -43,7 +43,7 @@ export class GenericPollOperation<TResult, TState extends PollOperationState<TRe
     private lroResourceLocationConfig?: LroResourceLocationConfig,
     private processResult?: (result: unknown, state: TState) => TResult,
     private updateState?: (state: TState, lastResponse: RawResponse) => void,
-    private isDone?: (lastResponse: TResult, state: TState) => boolean,
+    private isDone?: (lastResponse: TResult, state: TState) => boolean
   ) {}
 
   public setPollerConfig(pollerConfig: PollerConfig): void {

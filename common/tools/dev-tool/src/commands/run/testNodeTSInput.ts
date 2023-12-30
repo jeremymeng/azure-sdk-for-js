@@ -17,7 +17,7 @@ export const commandInfo = makeCommandInfo(
       default: false,
       description: "whether to disable launching test-proxy",
     },
-  },
+  }
 );
 
 export default leafCommand(commandInfo, async (options) => {
@@ -28,7 +28,7 @@ export default leafCommand(commandInfo, async (options) => {
     isModuleProj ? "" : "-r esm "
   }-r ts-node/register ${reporterArgs} --full-trace`;
   const updatedArgs = options["--"]?.map((opt) =>
-    opt.includes("**") && !opt.startsWith("'") && !opt.startsWith('"') ? `"${opt}"` : opt,
+    opt.includes("**") && !opt.startsWith("'") && !opt.startsWith('"') ? `"${opt}"` : opt
   );
   const mochaArgs = updatedArgs?.length
     ? updatedArgs.join(" ")

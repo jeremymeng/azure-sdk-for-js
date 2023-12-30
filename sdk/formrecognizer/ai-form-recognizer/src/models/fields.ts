@@ -245,7 +245,7 @@ export function toAnalyzedDocumentFieldsFromGenerated(fields: {
       transformedFields[name] = toDocumentField(value);
       return transformedFields;
     },
-    {} as { [k: string]: DocumentField },
+    {} as { [k: string]: DocumentField }
   );
 }
 

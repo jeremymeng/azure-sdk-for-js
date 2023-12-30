@@ -31,7 +31,7 @@ export async function main() {
       { role: "assistant", content: "Arrrr! Of course, me hearty! What can I do for ye?" },
       { role: "user", content: "What's the best way to train a parrot?" },
     ],
-    { maxTokens: 128 },
+    { maxTokens: 128 }
   );
 
   for await (const event of events) {

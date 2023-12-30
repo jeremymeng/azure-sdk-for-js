@@ -4,7 +4,7 @@
 import { EventMessage, createSseStream } from "../../../src/index.js";
 
 export function createStream(
-  cb: (write: (chunk: Uint8Array) => void) => void,
+  cb: (write: (chunk: Uint8Array) => void) => void
 ): AsyncIterable<EventMessage> {
   const stream = new ReadableStream({
     start(controller) {

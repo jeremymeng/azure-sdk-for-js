@@ -49,7 +49,7 @@ export interface PagedResult<TPage, TPageSettings = PageSettings, TLink = string
    */
   getPage: (
     pageLink: TLink,
-    maxPageSize?: number,
+    maxPageSize?: number
   ) => Promise<{ page: TPage; nextPageLink?: TLink } | undefined>;
   /**
    * a function to implement the `byPage` method on the paged async iterator. The default is

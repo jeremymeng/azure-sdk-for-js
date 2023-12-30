@@ -44,10 +44,10 @@ const createStateProxy: <TResult, TState extends OperationState<TResult>>() => S
  * Returns a poller factory.
  */
 export function buildCreatePoller<TResponse, TResult, TState extends OperationState<TResult>>(
-  inputs: BuildCreatePollerOptions<TResponse, TState>,
+  inputs: BuildCreatePollerOptions<TResponse, TState>
 ): (
   lro: Operation<TResponse, { abortSignal?: AbortSignalLike }>,
-  options?: CreatePollerOptions<TResponse, TResult, TState>,
+  options?: CreatePollerOptions<TResponse, TResult, TState>
 ) => Promise<SimplePollerLike<TState, TResult>> {
   const {
     getOperationLocation,
@@ -61,7 +61,7 @@ export function buildCreatePoller<TResponse, TResult, TState extends OperationSt
   } = inputs;
   return async (
     { init, poll }: Operation<TResponse, { abortSignal?: AbortSignalLike }>,
-    options?: CreatePollerOptions<TResponse, TResult, TState>,
+    options?: CreatePollerOptions<TResponse, TResult, TState>
   ) => {
     const {
       processResult,

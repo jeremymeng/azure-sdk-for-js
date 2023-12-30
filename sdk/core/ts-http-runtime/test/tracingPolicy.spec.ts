@@ -30,7 +30,7 @@ class MockSpan implements TracingSpan {
 
   constructor(
     public name: string,
-    spanOptions: TracingSpanOptions = {},
+    spanOptions: TracingSpanOptions = {}
   ) {
     this.spanAttributes = spanOptions.spanAttributes ?? {};
   }
@@ -81,7 +81,7 @@ class MockInstrumenter implements Instrumenter {
   }
   startSpan(
     name: string,
-    spanOptions: InstrumenterSpanOptions,
+    spanOptions: InstrumenterSpanOptions
   ): {
     span: TracingSpan;
     tracingContext: TracingContext;
