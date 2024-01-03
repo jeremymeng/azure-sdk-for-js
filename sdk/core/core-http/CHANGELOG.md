@@ -1,6 +1,6 @@
 # Release History
 
-## 3.0.5 (Unreleased)
+## 3.1.0 (Unreleased)
 
 ### Features Added
 
@@ -9,6 +9,8 @@
 ### Bugs Fixed
 
 ### Other Changes
+
+- Upgrade runtime dependency `@azure/abort-controller` version to `^2.0.0`
 
 ## 3.0.4 (2023-11-14)
 
