@@ -5,7 +5,6 @@ import { assert } from "chai";
 import { readFileSync, unlinkSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 
-import { AbortController } from "@azure/abort-controller";
 import { isNode, TokenCredential } from "@azure/core-http";
 import { delay, record, Recorder } from "@azure-tools/test-recorder";
 

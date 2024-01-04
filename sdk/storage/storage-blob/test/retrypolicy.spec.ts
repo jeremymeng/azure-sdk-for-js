@@ -4,7 +4,6 @@
 import { URLBuilder } from "@azure/core-http";
 import { assert } from "chai";
 
-import { AbortController } from "@azure/abort-controller";
 import { ContainerClient, RestError, BlobServiceClient } from "../src";
 import { newPipeline, Pipeline } from "../src";
 import { getBSU, recorderEnvSetup } from "./utils";
@@ -84,7 +83,7 @@ describe("RetryPolicy", () => {
       // Default exponential retry delay is 4000ms. Wait for 2000ms to abort which makes sure the aborter
       // happens between 2 requests
       await injectContainerClient.setMetadata(metadata, {
-        abortSignal: AbortController.timeout(2 * 1000),
+        abortSignal: AbortSignal.timeout(2 * 1000),
       });
     } catch (err: any) {
       hasError = true;

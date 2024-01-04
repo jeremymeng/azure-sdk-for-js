@@ -3,7 +3,7 @@
 
 import * as http from "http";
 import * as https from "https";
-import { AbortController, AbortError } from "@azure/abort-controller";
+import { AbortError } from "@azure/abort-controller";
 import { HttpHeaders, HttpHeadersLike } from "./httpHeaders";
 import { ProxyAgent, createProxyAgent, isUrlHttps } from "./proxyAgent";
 import { Readable, Transform } from "stream";

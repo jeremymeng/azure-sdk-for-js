@@ -3,7 +3,6 @@
 
 import { assert } from "chai";
 
-import { AbortController } from "@azure/abort-controller";
 import {
   arrayBufferEqual,
   blobToArrayBuffer,
@@ -62,7 +61,7 @@ describe("Highlevel", () => {
 
   it("uploadBrowserDataToBlockBlob should abort when blob >= BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES", async () => {
     recorder.skip("browser", "Temp file - recorder doesn't support saving the file");
-    const aborter = AbortController.timeout(1);
+    const aborter = AbortSignal.timeout(1);
 
     try {
       await blockBlobClient.uploadBrowserData(tempFile1, {
@@ -76,7 +75,7 @@ describe("Highlevel", () => {
 
   it("uploadBrowserDataToBlockBlob should abort when blob < BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES", async () => {
     recorder.skip("browser", "Temp file - recorder doesn't support saving the file");
-    const aborter = AbortController.timeout(1);
+    const aborter = AbortSignal.timeout(1);
 
     try {
       await blockBlobClient.uploadBrowserData(tempFile2, {
