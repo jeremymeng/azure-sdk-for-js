@@ -2752,13 +2752,13 @@ packages:
   /@types/fs-extra@8.1.2:
     resolution: {integrity: sha512-SvSrYXfWSc7R4eqnOzbQF4TZmfpNSM9FrSWLU3EUnWBuyZqNBOrv1B1JA3byUDPUl9z4Ab3jeZG2eDdySlgNMg==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.19.4
     dev: false
 
   /@types/fs-extra@9.0.13:
     resolution: {integrity: sha512-nEnwB++1u5lVDM2UI4c1+5R+FYaKfaAzS4OococimjVm3nQw3TuzH5UNsocrcTBbhnerblyHj4A49qXbIiZdpA==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.19.4
     dev: false
 
   /@types/glob@8.0.1:
@@ -2791,13 +2791,13 @@ packages:
   /@types/jsonwebtoken@9.0.1:
     resolution: {integrity: sha512-c5ltxazpWabia/4UzhIoaDcIza4KViOQhdbjRlfcIGVnsE3c3brkz9Z+F/EeJIECOQP7W7US2hNE930cWWkPiw==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.19.4
     dev: false
 
   /@types/jws@3.2.5:
     resolution: {integrity: sha512-xGTxZH34xOryaTN8CMsvhh9lfNqFuHiMoRvsLYWQdBJHqiECyfInXVl2eK8Jz2emxZWMIn5RBlmr3oDVPeWujw==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.19.4
     dev: false
 
   /@types/mdast@3.0.10:
@@ -2927,7 +2927,7 @@ packages:
   /@types/stoppable@1.1.1:
     resolution: {integrity: sha512-b8N+fCADRIYYrGZOcmOR8ZNBOqhktWTB/bMUl5LvGtT201QKJZOOH5UsFyI3qtteM6ZAJbJqZoBcLqqxKIwjhw==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.19.4
     dev: false
 
   /@types/through@0.0.30:
@@ -2996,7 +2996,7 @@ packages:
     resolution: {integrity: sha512-Cn6WYCm0tXv8p6k+A8PvbDG763EDpBoTzHdA+Q/MF6H3sapGjCm9NzoaJncJS9tUKSuCoDs9XHxYYsQDgxR6kw==}
     requiresBuild: true
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.19.4
     dev: false
     optional: true
 
@@ -8635,6 +8635,68 @@ packages:
       diff: 4.0.2
       make-error: 1.3.6
       typescript: 5.3.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    dev: false
+
+  /ts-node@10.9.1(@types/node@18.19.4)(typescript@4.6.4):
+    resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': '>=1.2.50'
+      '@swc/wasm': '>=1.2.50'
+      '@types/node': '*'
+      typescript: '>=2.7'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      '@swc/wasm':
+        optional: true
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.9
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.3
+      '@types/node': 18.19.4
+      acorn: 8.8.2
+      acorn-walk: 8.2.0
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 4.6.4
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    dev: false
+
+  /ts-node@10.9.1(@types/node@18.19.4)(typescript@4.8.4):
+    resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': '>=1.2.50'
+      '@swc/wasm': '>=1.2.50'
+      '@types/node': '*'
+      typescript: '>=2.7'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      '@swc/wasm':
+        optional: true
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.9
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.3
+      '@types/node': 18.19.4
+      acorn: 8.8.2
+      acorn-walk: 8.2.0
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 4.8.4
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     dev: false
@@ -17275,7 +17337,7 @@ packages:
     dev: false
 
   file:projects/identity.tgz:
-    resolution: {integrity: sha512-m/XKEWyjj9Q39T+UBZW1Ubux834mZluYFO7M/KqdkiIU6ne2Mb/Q2eukEEOdJs9kB4UbEIriPe7+5u0aMi8Zag==, tarball: file:projects/identity.tgz}
+    resolution: {integrity: sha512-BQNrNo7tCDe8hoQI1hdqbajWd61pwJPq1lJgkj3JKSG/GeynALB0qJ2LSukuZfLCp1/BLWHkaYaZuK93Oy85jw==, tarball: file:projects/identity.tgz}
     name: '@rush-temp/identity'
     version: 0.0.0
     dependencies:
@@ -17284,13 +17346,13 @@ packages:
       '@azure/msal-browser': 2.33.0
       '@azure/msal-common': 9.1.1
       '@azure/msal-node': 1.15.0
-      '@microsoft/api-extractor': 7.34.4(@types/node@14.18.36)
+      '@microsoft/api-extractor': 7.34.4(@types/node@18.19.4)
       '@types/chai': 4.3.4
       '@types/jsonwebtoken': 9.0.1
       '@types/jws': 3.2.5
       '@types/mocha': 7.0.2
       '@types/ms': 0.7.31
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       '@types/sinon': 9.0.11
       '@types/stoppable': 1.1.1
       '@types/uuid': 8.3.4
@@ -18704,12 +18766,12 @@ packages:
     dev: false
 
   file:projects/perf-storage-blob.tgz:
-    resolution: {integrity: sha512-jlbI5pAfUvbbxbMdLL8yeoDFCUGEEzhHun/BoInMGbik83VZQzk9y8gVCe3ETXlqQedxD16LLlq3kN/oXyQNbw==, tarball: file:projects/perf-storage-blob.tgz}
+    resolution: {integrity: sha512-nsys3bULYj1Q6BD4flbLgCEk0A9rccHOZeTedj1DsdK8aVia2RAQqJ7zE3/TpiliCKyPqGk0cK3bQ2B5Qr2duw==, tarball: file:projects/perf-storage-blob.tgz}
     name: '@rush-temp/perf-storage-blob'
     version: 0.0.0
     dependencies:
       '@azure/storage-blob': 12.12.0
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       '@types/node-fetch': 2.6.2
       '@types/uuid': 8.3.4
       dotenv: 8.6.0
@@ -18717,7 +18779,7 @@ packages:
       node-fetch: 2.6.9
       prettier: 2.8.4
       rimraf: 3.0.2
-      ts-node: 10.9.1(@types/node@14.18.36)(typescript@4.6.4)
+      ts-node: 10.9.1(@types/node@18.19.4)(typescript@4.6.4)
       tslib: 2.5.0
       typescript: 4.6.4
       uuid: 8.3.2
@@ -18729,18 +18791,18 @@ packages:
     dev: false
 
   file:projects/perf-storage-file-datalake.tgz:
-    resolution: {integrity: sha512-MBawFUJfIyLgJOGk3uJhtXin+cQtt/OBx1aIDa4aWy6IkzEV4bqDfAo74h3tQPfuNQX1HkzJE1/SgklSs6UEgA==, tarball: file:projects/perf-storage-file-datalake.tgz}
+    resolution: {integrity: sha512-hF5ryvcEgaq50p675un/uhxuC7oVsCwpAmGxoObu3u1Yf5WffyWA6oXtKp/YBlySu+38nqah1xbUm5RGIjuqPA==, tarball: file:projects/perf-storage-file-datalake.tgz}
     name: '@rush-temp/perf-storage-file-datalake'
     version: 0.0.0
     dependencies:
       '@azure/storage-file-datalake': 12.11.0
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       '@types/uuid': 8.3.4
       dotenv: 8.6.0
       eslint: 8.34.0
       prettier: 2.8.4
       rimraf: 3.0.2
-      ts-node: 10.9.1(@types/node@14.18.36)(typescript@4.6.4)
+      ts-node: 10.9.1(@types/node@18.19.4)(typescript@4.6.4)
       tslib: 2.5.0
       typescript: 4.6.4
       uuid: 8.3.2
@@ -18751,18 +18813,18 @@ packages:
     dev: false
 
   file:projects/perf-storage-file-share.tgz:
-    resolution: {integrity: sha512-o5s2UCAxy5sC+U4FdEGDOwgMAr4DKDDZql1UjguqLn254Qs3EETBqLPf4T4o3CuHPRYjavfpz1pMXYHXLfNQJw==, tarball: file:projects/perf-storage-file-share.tgz}
+    resolution: {integrity: sha512-EAHJpbHy+wt5etM1n92SiSEw26T9tNs2qWl/0jgWgVE4dAQFtu4d8b8YJ737+VXmlv0QHD1SHOS3JVGAJNFqsA==, tarball: file:projects/perf-storage-file-share.tgz}
     name: '@rush-temp/perf-storage-file-share'
     version: 0.0.0
     dependencies:
       '@azure/storage-file-share': 12.12.0
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       '@types/uuid': 8.3.4
       dotenv: 8.6.0
       eslint: 8.34.0
       prettier: 2.8.4
       rimraf: 3.0.2
-      ts-node: 10.9.1(@types/node@14.18.36)(typescript@4.6.4)
+      ts-node: 10.9.1(@types/node@18.19.4)(typescript@4.6.4)
       tslib: 2.5.0
       typescript: 4.6.4
       uuid: 8.3.2
@@ -19187,7 +19249,7 @@ packages:
     dev: false
 
   file:projects/storage-blob-changefeed.tgz:
-    resolution: {integrity: sha512-VP4RgK+q77Y+Vz7zYC4gPzBOon1q9KZX1YbjTqZu22IMDqtZnf3TocFTCJdwPmAKrOIuKVJGGkkSW3a4GDTImA==, tarball: file:projects/storage-blob-changefeed.tgz}
+    resolution: {integrity: sha512-u0NkT2OkTiWiQw9oAQK/RIE0Do+oChkn8B3RcRANQwkNChPqClwNIzQM1hN9OxeNZmwRPL27bNLUMJdIUxfEIQ==, tarball: file:projects/storage-blob-changefeed.tgz}
     name: '@rush-temp/storage-blob-changefeed'
     version: 0.0.0
     dependencies:
@@ -19195,10 +19257,10 @@ packages:
       '@azure/abort-controller': 1.1.0
       '@azure/core-tracing': 1.0.0-preview.13
       '@azure/storage-blob': 12.12.0
-      '@microsoft/api-extractor': 7.34.4(@types/node@14.18.36)
+      '@microsoft/api-extractor': 7.34.4(@types/node@18.19.4)
       '@types/chai': 4.3.4
       '@types/mocha': 7.0.2
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       '@types/sinon': 9.0.11
       chai: 4.3.7
       cross-env: 7.0.3
@@ -19230,7 +19292,7 @@ packages:
       rimraf: 3.0.2
       sinon: 9.2.4
       source-map-support: 0.5.21
-      ts-node: 10.9.1(@types/node@14.18.36)(typescript@4.8.4)
+      ts-node: 10.9.1(@types/node@18.19.4)(typescript@4.8.4)
       tslib: 2.5.0
       typescript: 4.8.4
       util: 0.12.5
@@ -19245,7 +19307,7 @@ packages:
     dev: false
 
   file:projects/storage-blob.tgz:
-    resolution: {integrity: sha512-h5EMU6RLa+O9z5h9zVkWUx27pfCFUbW3mP5SxzJf/rhrHUPS+vEQEQ9GlDEiHKOBxdmT5imJrLFMT7vvjRg0Cg==, tarball: file:projects/storage-blob.tgz}
+    resolution: {integrity: sha512-fsx6EU3TYMvVqQN7oca8EO71qXCYzNRHZrG0ZBKvDzUuHouHMy9zUVP79gKXDyutehuuqwvWzKrUQWzXI+b+/A==, tarball: file:projects/storage-blob.tgz}
     name: '@rush-temp/storage-blob'
     version: 0.0.0
     dependencies:
@@ -19253,10 +19315,10 @@ packages:
       '@azure/abort-controller': 1.1.0
       '@azure/core-tracing': 1.0.0-preview.13
       '@azure/identity': 2.1.0
-      '@microsoft/api-extractor': 7.34.4(@types/node@14.18.36)
+      '@microsoft/api-extractor': 7.34.4(@types/node@18.19.4)
       '@types/chai': 4.3.4
       '@types/mocha': 7.0.2
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       '@types/node-fetch': 2.6.2
       chai: 4.3.7
       cross-env: 7.0.3
@@ -19287,9 +19349,9 @@ packages:
       puppeteer: 19.6.3
       rimraf: 3.0.2
       source-map-support: 0.5.21
-      ts-node: 10.9.1(@types/node@14.18.36)(typescript@4.8.4)
+      ts-node: 10.9.1(@types/node@18.19.4)(typescript@5.3.3)
       tslib: 2.5.0
-      typescript: 4.8.4
+      typescript: 5.3.3
       util: 0.12.5
     transitivePeerDependencies:
       - '@swc/core'
@@ -19302,7 +19364,7 @@ packages:
     dev: false
 
   file:projects/storage-file-datalake.tgz:
-    resolution: {integrity: sha512-GpBfYyRXJOS+m0k2wYdaYprFSSbCyPUFMrpDfvK8/Vs1ZqF8CB5OVPUieS0n++70+jtNueYbsZ1vvbvNu+9kmA==, tarball: file:projects/storage-file-datalake.tgz}
+    resolution: {integrity: sha512-fC/+eI7jTYyeR+zNnopAmLk81v9IWS+mKbRZbv7l9srRr2xpkMGLo4Q8GNmWXk/jyFSXHhMXgWCt/7cRdUPaBA==, tarball: file:projects/storage-file-datalake.tgz}
     name: '@rush-temp/storage-file-datalake'
     version: 0.0.0
     dependencies:
@@ -19310,10 +19372,10 @@ packages:
       '@azure/abort-controller': 1.1.0
       '@azure/core-tracing': 1.0.0-preview.13
       '@azure/identity': 2.1.0
-      '@microsoft/api-extractor': 7.34.4(@types/node@14.18.36)
+      '@microsoft/api-extractor': 7.34.4(@types/node@18.19.4)
       '@types/chai': 4.3.4
       '@types/mocha': 7.0.2
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       chai: 4.3.7
       cross-env: 7.0.3
       dotenv: 8.6.0
@@ -19344,7 +19406,7 @@ packages:
       puppeteer: 19.6.3
       rimraf: 3.0.2
       source-map-support: 0.5.21
-      ts-node: 10.9.1(@types/node@14.18.36)(typescript@4.8.4)
+      ts-node: 10.9.1(@types/node@18.19.4)(typescript@4.8.4)
       tslib: 2.5.0
       typescript: 4.8.4
       util: 0.12.5
@@ -19359,7 +19421,7 @@ packages:
     dev: false
 
   file:projects/storage-file-share.tgz:
-    resolution: {integrity: sha512-jDhOVI+sclRaC4/4Vzabrva/M8bvT35HlTHDM629AOlF51KqYstIRvOc/wvXYDHd6spGq5aMKWMYzq/VGGYlfg==, tarball: file:projects/storage-file-share.tgz}
+    resolution: {integrity: sha512-6Pk5eE1z9t8O5gEtptI26mlP3sVz1HX4PoOkDYzjqHiS8ANOlWGdQPxO6eLq9LOsXrdipwvjlNMEXUz66rnI7g==, tarball: file:projects/storage-file-share.tgz}
     name: '@rush-temp/storage-file-share'
     version: 0.0.0
     dependencies:
@@ -19368,10 +19430,10 @@ packages:
       '@azure/core-tracing': 1.0.0-preview.13
       '@azure/identity': 2.1.0
       '@azure/storage-blob': 12.12.0
-      '@microsoft/api-extractor': 7.34.4(@types/node@14.18.36)
+      '@microsoft/api-extractor': 7.34.4(@types/node@18.19.4)
       '@types/chai': 4.3.4
       '@types/mocha': 7.0.2
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       chai: 4.3.7
       cross-env: 7.0.3
       dotenv: 8.6.0
@@ -19401,7 +19463,7 @@ packages:
       puppeteer: 19.6.3
       rimraf: 3.0.2
       source-map-support: 0.5.21
-      ts-node: 10.9.1(@types/node@14.18.36)(typescript@4.8.4)
+      ts-node: 10.9.1(@types/node@18.19.4)(typescript@4.8.4)
       tslib: 2.5.0
       typescript: 4.8.4
       util: 0.12.5
@@ -19416,15 +19478,15 @@ packages:
     dev: false
 
   file:projects/storage-internal-avro.tgz:
-    resolution: {integrity: sha512-wykSYX94WtigW4q8+eRFhAAsYtml3ziDLDswcdn9woYiAGpXAtwHAggEqibekKd55VWREMKrDQiHNupKsGbKrA==, tarball: file:projects/storage-internal-avro.tgz}
+    resolution: {integrity: sha512-S/QWVaTxbQ2W4/iliZyFIhnPo8UP1mFBNLB+8slHUA5+3VobHV1FJ/ZPjmCd90+d78ECfGf3Xkn6L6JOIZACLQ==, tarball: file:projects/storage-internal-avro.tgz}
     name: '@rush-temp/storage-internal-avro'
     version: 0.0.0
     dependencies:
       '@azure/abort-controller': 1.1.0
-      '@microsoft/api-extractor': 7.34.4(@types/node@14.18.36)
+      '@microsoft/api-extractor': 7.34.4(@types/node@18.19.4)
       '@types/chai': 4.3.4
       '@types/mocha': 7.0.2
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       chai: 4.3.7
       dotenv: 8.6.0
       downlevel-dts: 0.10.1
@@ -19450,7 +19512,7 @@ packages:
       puppeteer: 19.6.3
       rimraf: 3.0.2
       source-map-support: 0.5.21
-      ts-node: 10.9.1(@types/node@14.18.36)(typescript@4.8.4)
+      ts-node: 10.9.1(@types/node@18.19.4)(typescript@4.8.4)
       tslib: 2.5.0
       typescript: 4.8.4
       util: 0.12.5
@@ -19465,7 +19527,7 @@ packages:
     dev: false
 
   file:projects/storage-queue.tgz:
-    resolution: {integrity: sha512-P+AIPMALZYMSWT1z0kilVM1Jmr7M7Mf/hHoveAiS8PzCgeBMrVtryTQVG0Div2xeb+LHwoh+y0oBInsCVtJUTg==, tarball: file:projects/storage-queue.tgz}
+    resolution: {integrity: sha512-z0uKQCf+TLHcy8RORB9PGyJ4z8Cir2YeBQqQNw96PZTo/kj3krWypvQI8NnLdYiUxx2vS6epGbE/BH3Kpv98SA==, tarball: file:projects/storage-queue.tgz}
     name: '@rush-temp/storage-queue'
     version: 0.0.0
     dependencies:
@@ -19473,10 +19535,10 @@ packages:
       '@azure/abort-controller': 1.1.0
       '@azure/core-tracing': 1.0.0-preview.13
       '@azure/identity': 2.1.0
-      '@microsoft/api-extractor': 7.34.4(@types/node@14.18.36)
+      '@microsoft/api-extractor': 7.34.4(@types/node@18.19.4)
       '@types/chai': 4.3.4
       '@types/mocha': 7.0.2
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       chai: 4.3.7
       cross-env: 7.0.3
       dotenv: 8.6.0
@@ -19505,7 +19567,7 @@ packages:
       puppeteer: 19.6.3
       rimraf: 3.0.2
       source-map-support: 0.5.21
-      ts-node: 10.9.1(@types/node@14.18.36)(typescript@4.8.4)
+      ts-node: 10.9.1(@types/node@18.19.4)(typescript@4.8.4)
       tslib: 2.5.0
       typescript: 4.8.4
       util: 0.12.5
@@ -19921,17 +19983,17 @@ packages:
     dev: false
 
   file:projects/test-utils.tgz:
-    resolution: {integrity: sha512-ZFdfO9W2nUmW9pSajORLM66YakwJCF7Hx2BcUBHMf0Pz/Z8OlE/I2OP0q2wR2joxsghOfJLijMJc5wLjz0A9tg==, tarball: file:projects/test-utils.tgz}
+    resolution: {integrity: sha512-gnJE8B/QT1Rrxiin850S8tjdG55wyrrnO137U9dJ7/Pgkne2i16ki5EQuzY8pFk85393dNp6ri59m7RDGRiBvQ==, tarball: file:projects/test-utils.tgz}
     name: '@rush-temp/test-utils'
     version: 0.0.0
     dependencies:
       '@azure/abort-controller': 1.1.0
-      '@microsoft/api-extractor': 7.34.4(@types/node@14.18.36)
+      '@microsoft/api-extractor': 7.34.4(@types/node@18.19.4)
       '@opentelemetry/api': 1.4.0
       '@types/chai': 4.3.4
       '@types/chai-as-promised': 7.1.5
       '@types/mocha': 7.0.2
-      '@types/node': 14.18.36
+      '@types/node': 18.19.4
       '@types/sinon': 9.0.11
       chai: 4.3.7
       chai-as-promised: 7.1.1(chai@4.3.7)

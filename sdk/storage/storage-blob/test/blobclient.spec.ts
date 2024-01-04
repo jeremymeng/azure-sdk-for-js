@@ -3,7 +3,6 @@
 
 import { assert } from "chai";
 import * as fs from "fs";
-import { AbortController } from "@azure/abort-controller";
 import { isNode, URLBuilder, URLQuery } from "@azure/core-http";
 import { SpanGraph, setTracer } from "@azure/test-utils";
 import {
