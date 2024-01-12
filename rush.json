@@ -185,7 +185,9 @@
     /**
      * The list of shell commands to run after the Rush installation finishes
      */
-    "postRushInstall": [],
+    "postRushInstall": [
+      "pushd sdk/core/core-util && npx playwright install"
+    ],
     /**
      * The list of shell commands to run before the Rush build command starts
      */
