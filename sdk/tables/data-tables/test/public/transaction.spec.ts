@@ -91,10 +91,7 @@ describe(`batch operations`, function () {
 
   beforeEach(async function () {
     vi.mocked(randomUUID).mockReturnValue("fakeId");
-    recorder = new Recorder({
-      contextType: "vitest",
-      testTitle: expect.getState().currentTestName ?? "test",
-    });
+    recorder = new Recorder(expect.getState());
     client = await createTableClient(tableName, "SASConnectionString", recorder);
   });
 
@@ -315,10 +312,7 @@ describe("Handle suberror", function () {
 
   beforeEach(async function () {
     vi.mocked(randomUUID).mockReturnValue("fakeId");
-    recorder = new Recorder({
-      contextType: "vitest",
-      testTitle: expect.getState().currentTestName ?? "test",
-    });
+    recorder = new Recorder(expect.getState());
     client = await createTableClient(tableName, "SASConnectionString", recorder);
   });
 

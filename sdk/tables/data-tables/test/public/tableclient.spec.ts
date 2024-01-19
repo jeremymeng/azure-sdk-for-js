@@ -14,10 +14,7 @@ describe("special characters", function () {
   let recorder: Recorder;
   let client: TableClient;
   beforeEach(async function () {
-    recorder = new Recorder({
-      contextType: "vitest",
-      testTitle: expect.getState().currentTestName ?? "test",
-    });
+    recorder = new Recorder(expect.getState());
     client = await createTableClient(tableName, "SASConnectionString", recorder);
   });
 
@@ -58,10 +55,7 @@ describe(`TableClient`, function () {
   const listPartitionKey = "listEntitiesTest";
 
   beforeEach(async function () {
-    recorder = new Recorder({
-      contextType: "vitest",
-      testTitle: expect.getState().currentTestName ?? "test",
-    });
+    recorder = new Recorder(expect.getState());
     client = await createTableClient(tableName, "SASConnectionString", recorder);
   });
 

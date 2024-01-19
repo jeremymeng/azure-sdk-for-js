@@ -15,10 +15,7 @@ describe.skipIf(!isNode)(`Access Policy operations`, function () {
   const tableName = `AccessPolicy`;
 
   beforeEach(async function () {
-    recorder = new Recorder({
-      contextType: "vitest",
-      testTitle: expect.getState().currentTestName ?? "test",
-    });
+    recorder = new Recorder(expect.getState());
     client = await createTableClient(tableName, "AccountKey", recorder);
   });
 

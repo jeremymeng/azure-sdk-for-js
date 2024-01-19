@@ -15,10 +15,7 @@ describe(`TableServiceClient`, function () {
   const suffix = isNode ? `node` : `browser`;
 
   beforeEach(async function () {
-    recorder = new Recorder({
-      contextType: "vitest",
-      testTitle: expect.getState().currentTestName ?? "test",
-    });
+    recorder = new Recorder(expect.getState());
     client = await createTableServiceClient("SASConnectionString", recorder);
   });
 
