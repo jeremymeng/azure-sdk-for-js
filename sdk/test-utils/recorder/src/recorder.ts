@@ -36,6 +36,11 @@ import { env } from "./utils/env";
 import { decodeBase64 } from "./utils/encoding";
 import { AdditionalPolicyConfig } from "@azure/core-client";
 
+
+interface VitestContext {
+  currentTestName?: string;
+}
+
 /**
  * This client manages the recorder life cycle and interacts with the proxy-tool to do the recording,
  * eventually save them in record mode and playing them back in playback mode.
@@ -56,12 +61,15 @@ export class Recorder {
   constructor(
     private testContext?:
       | MochaTest
-      | {
-          contextType: "vitest";
-          testTitle: string;
-        }
+      | VitestContext
       | undefined,
   ) {
+    if (!this.testContext) {
+      throw new Error(
+        "Unable to determine the recording file path, testContext provided is not defined.",
+      );
+    }
+
     logger.info(`[Recorder#constructor] Creating a recorder instance in ${getTestMode()} mode`);
     if (isRecordMode() || isPlaybackMode()) {
       if (this.testContext) {
@@ -82,9 +90,15 @@ export class Recorder {
             testTitle: this.testContext.title,
           };
         } else {
+          if (!this.testContext.currentTestName) {
+            throw new RecorderError(`Unable to determine the recording file path. Unexpected empty Vitest context`);
+          }
           // vitest format:
           //   ""fileName.ts > suite title [> nested suite title ]* > test title""
-          const parts = this.testContext.testTitle.split(" > ");
+          const parts = this.testContext.currentTestName.split(" > ");
+          if (parts.length < 3) {
+            throw new RecorderError(`Unable to determine the recording file path. Unexpected Vitest currentTestname`);
+          }
           context = {
             suiteTitle: parts.slice(1, parts.length - 1).join("_").trim(),
             testTitle: parts[parts.length - 1].trim(),
@@ -96,10 +110,6 @@ export class Recorder {
 
         logger.info(`[Recorder#constructor] Using a session file located at ${this.sessionFile}`);
         this.httpClient = createDefaultHttpClient();
-      } else {
-        throw new Error(
-          "Unable to determine the recording file path, testContext provided is not defined.",
-        );
       }
     }
     this.variables = {};
