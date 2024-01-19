@@ -17,7 +17,7 @@ export default defineConfig({
       toFake: ["setTimeout", "Date"],
     },
     watch: false,
-    include: ["test/**/etags.spec.ts"],
+    include: ["test/**/*.spec.ts"],
     exclude: ["test/**/node/*.spec.ts"],
   },
 });
