@@ -3,7 +3,7 @@
 
 import { AzureNamedKeyCredential, generateTableSas } from "../../../src";
 
-import { assert } from "chai";
+import { assert, describe, it } from "vitest";
 
 // This file is empty as sas generation is not supported in browsers
 describe("generateSas Browser", function () {

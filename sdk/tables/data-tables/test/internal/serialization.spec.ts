@@ -8,8 +8,8 @@ import {
   serializeSignedIdentifiers,
 } from "../../src/serialization";
 
+import { assert, describe, it } from "vitest";
 import { Edm } from "../../src";
-import { assert } from "chai";
 import { isNode8 } from "@azure/test-utils";
 
 interface Entity {

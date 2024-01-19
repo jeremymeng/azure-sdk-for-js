@@ -8,9 +8,8 @@ import {
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";
+import { assert, afterEach, beforeEach, describe, it } from "vitest";
 import { AzureNamedKeyCredential } from "@azure/core-auth";
-import { Context } from "mocha";
-import { assert } from "chai";
 import { expectedSharedKeyLiteHeader } from "./fakeTestSecrets";
 import { isNode } from "@azure/test-utils";
 import { tablesNamedKeyCredentialPolicy } from "../../src/tablesNamedCredentialPolicy";
@@ -26,7 +25,7 @@ describe("TablesSharedKeyCredential", function () {
     Date.prototype.toUTCString = originalToUTCString;
   });
 
-  it("It should sign", async function (this: Context) {
+  it("It should sign", async function() {
     if (!isNode) {
       // AzureNamedKeyCredential auth is not supported in Browser
       this.skip();

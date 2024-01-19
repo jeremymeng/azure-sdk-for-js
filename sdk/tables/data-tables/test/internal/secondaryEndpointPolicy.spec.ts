@@ -1,8 +1,8 @@
+import { createHttpHeaders } from "@azure/core-rest-pipeline";
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { assert } from "chai";
-import { createHttpHeaders } from "@azure/core-rest-pipeline";
+import { assert, describe, it } from "vitest";
 import { tablesSecondaryEndpointPolicy } from "../../src/secondaryEndpointPolicy";
 
 describe("tablesSecondaryEndpointPolicy", function () {

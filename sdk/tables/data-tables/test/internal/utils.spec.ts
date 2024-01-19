@@ -3,16 +3,16 @@
 
 import { base64Decode, base64Encode } from "../../src/utils/bufferSerializer";
 
+import { assert, beforeEach, describe, it } from "vitest";
+
 import { ConnectionString } from "../../src/utils/internalModels";
-import { Context } from "mocha";
-import { assert } from "chai";
 import { extractConnectionStringParts } from "../../src/utils/connectionString";
 import { isNode } from "@azure/test-utils";
 
 describe("Utility Helpers", function () {
   describe("extractConnectionStringParts", function () {
     describe("Account Connection String", function () {
-      beforeEach(function (this: Context) {
+      beforeEach(function() {
         if (!isNode) {
           // Account connection string is not supported for Browsers
           this.skip();

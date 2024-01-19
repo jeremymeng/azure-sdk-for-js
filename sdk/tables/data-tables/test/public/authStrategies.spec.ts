@@ -3,11 +3,10 @@
 
 import { createTableClient, createTableServiceClient } from "./utils/recordedClient";
 
-import { Context } from "mocha";
+import { afterAll, assert, beforeEach, describe, it } from "vitest";
 import { CreateClientMode } from "./utils/recordedClient";
 import { TableClient } from "../../src/TableClient";
 import { TableServiceClient } from "../../src/TableServiceClient";
-import { assert } from "chai";
 import { isLiveMode } from "@azure-tools/test-recorder";
 import { isNode } from "@azure/test-utils";
 import { odata } from "../../src/odata";
@@ -24,12 +23,12 @@ if (isLiveMode()) {
       let tableClient: TableClient;
       const tableClientTableName = `Auth${authMethod}${platform}`;
 
-      after(async function () {
+      afterAll(async function () {
         await tableClient.deleteTable();
       });
 
       describe("TableServiceClient", function () {
-        beforeEach(async function (this: Context) {
+        beforeEach(async function() {
           serviceClient = await createTableServiceClient(authMethod);
         });
 
@@ -49,7 +48,7 @@ if (isLiveMode()) {
       });
 
       describe("TableClient", function () {
-        beforeEach(async function (this: Context) {
+        beforeEach(async function() {
           tableClient = await createTableClient(tableClientTableName, authMethod);
         });
 
@@ -84,5 +83,9 @@ if (isLiveMode()) {
         });
       });
     });
+  });
+} else {
+  describe("Skipping for non live testing", () => {
+    it("no-op");
   });
 }

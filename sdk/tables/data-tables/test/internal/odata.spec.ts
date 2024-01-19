@@ -1,8 +1,8 @@
+import { odata } from "../../src";
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { assert } from "chai";
-import { odata } from "../../src";
+import { assert, describe, it } from "vitest";
 
 describe("odata", function () {
   it("should handle empty string", function () {

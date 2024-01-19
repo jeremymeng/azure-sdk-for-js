@@ -1,16 +1,21 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as sinon from "sinon";
+import { assert, afterEach, beforeEach, describe, it, beforeAll, afterAll, vi, expect } from "vitest";
 
 import { Recorder, isPlaybackMode, isLiveMode } from "@azure-tools/test-recorder";
 import { TableClient, TableTransaction, TransactionAction, odata } from "../../src";
 
-import { Context } from "mocha";
-import { Uuid } from "../../src/utils/uuid";
-import { assert } from "chai";
 import { createTableClient } from "./utils/recordedClient";
 import { isNode } from "@azure/test-utils";
+
+vi.mock("@azure/core-util", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    randomUUID: vi.fn(),
+  };
+});
 
 const partitionKey = "batchTest";
 const testEntities = [
@@ -19,37 +24,39 @@ const testEntities = [
   { partitionKey, rowKey: "3", name: "third" },
 ];
 
+
+import { randomUUID } from "@azure/core-util";
+
+// import { Uuid } from "../../src/utils/uuid";
+
 const suffix = isNode ? "node" : "browser";
 
 describe("concurrent batch operations", function () {
   const concurrentTableName = `concurrentBatchTableTest${suffix}`;
   let unRecordedClient: TableClient;
-  before(async function () {
+  beforeAll(async function () {
     if (!isPlaybackMode()) {
       unRecordedClient = await createTableClient(concurrentTableName, "SASConnectionString");
       await unRecordedClient.createTable();
     }
   });
 
-  after(async function () {
+  afterAll(async function () {
     if (!isPlaybackMode()) {
       await unRecordedClient.deleteTable();
     }
   });
-  beforeEach(async function (this: Context) {
-    sinon.stub(Uuid, "generateUuid").returns("fakeId");
+  beforeEach(async function() {
+    vi.mocked(randomUUID).mockReturnValue("fakeId");
     unRecordedClient = await createTableClient(concurrentTableName, "SASConnectionString");
   });
 
   afterEach(async function () {
-    sinon.restore();
+    vi.resetAllMocks();
   });
 
-  it("should send concurrent transactions", async function () {
+  it.skipIf(!isLiveMode())("should send concurrent transactions", async function () {
     // Only run this in live mode. Enable playback when https://github.com/Azure/azure-sdk-for-js/issues/24189 is fixed
-    if (!isLiveMode()) {
-      this.skip();
-    }
     await Promise.all([
       unRecordedClient.submitTransaction([
         ["create", { partitionKey: "pk22", rowKey: "rk1", field: 1 }],
@@ -73,25 +80,28 @@ describe(`batch operations`, function () {
   let recorder: Recorder;
   const tableName = `batchTableTest${suffix}`;
 
-  beforeEach(async function (this: Context) {
-    sinon.stub(Uuid, "generateUuid").returns("fakeId");
-    recorder = new Recorder(this.currentTest);
+  beforeEach(async function() {
+    vi.mocked(randomUUID).mockReturnValue("fakeId");
+    recorder = new Recorder({
+      contextType: "vitest",
+      testTitle: expect.getState().currentTestName ?? "test",
+    });
     client = await createTableClient(tableName, "SASConnectionString", recorder);
   });
 
   afterEach(async function () {
-    sinon.restore();
+    vi.resetAllMocks();
     await recorder.stop();
   });
 
-  before(async function () {
+  beforeAll(async function () {
     if (!isPlaybackMode()) {
       unRecordedClient = await createTableClient(tableName, "SASConnectionString");
       await unRecordedClient.createTable();
     }
   });
 
-  after(async function () {
+  afterAll(async function () {
     if (!isPlaybackMode()) {
       await unRecordedClient.deleteTable();
     }
@@ -294,14 +304,17 @@ describe("Handle suberror", function () {
   let recorder: Recorder;
   const tableName = "noExistingTableError";
 
-  beforeEach(async function (this: Context) {
-    sinon.stub(Uuid, "generateUuid").returns("fakeId");
-    recorder = new Recorder(this.currentTest);
+  beforeEach(async function() {
+    vi.mocked(randomUUID).mockReturnValue("fakeId");
+    recorder = new Recorder({
+      contextType: "vitest",
+      testTitle: expect.getState().currentTestName ?? "test",
+    });
     client = await createTableClient(tableName, "SASConnectionString", recorder);
   });
 
   afterEach(async function () {
-    sinon.restore();
+    vi.resetAllMocks();
     await recorder.stop();
   });
 

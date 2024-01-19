@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as sinon from "sinon";
+import { assert, afterEach, beforeEach, describe, it, vi } from "vitest";
 import { AzureNamedKeyCredential, generateAccountSas, generateTableSas } from "../../../src";
 import {
   expectedSas1,
@@ -14,19 +14,18 @@ import {
   expectedSas8,
   expectedSas9,
 } from "../fakeTestSecrets";
-import { assert } from "chai";
 
 describe("SAS generation", function () {
   describe("generateTableSAS", function () {
-    let clock: sinon.SinonFakeTimers;
+    let clock: ReturnType<typeof vi.useFakeTimers>;
     beforeEach(function () {
-      clock = sinon.useFakeTimers(new Date("2021-12-12"));
+      clock = vi.useFakeTimers({
+        now: new Date("2021-12-12"),
+      });
     });
 
     afterEach(function () {
-      if (clock) {
-        clock.restore();
-      }
+      vi.resetAllMocks();
     });
 
     it("should generate a SAS token with default values", async function () {
@@ -106,15 +105,15 @@ describe("SAS generation", function () {
   });
 
   describe("generateAccountSAS", function () {
-    let clock: sinon.SinonFakeTimers;
+    let clock: ReturnType<typeof vi.useFakeTimers>;
     beforeEach(function () {
-      clock = sinon.useFakeTimers(new Date("2021-12-12"));
+      clock = vi.useFakeTimers({
+        now: new Date("2021-12-12"),
+      });
     });
 
     afterEach(function () {
-      if (clock) {
-        clock.restore();
-      }
+      vi.resetAllMocks();
     });
 
     it("should generate account SAS token with default values", async function () {

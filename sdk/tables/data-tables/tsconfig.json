@@ -8,5 +8,8 @@
       "@azure/data-tables": ["./src/index"],
     },
   },
-  "exclude": ["node_modules", "types", "temp", "browser", "dist", "dist-esm", "./samples/**/*.ts"],
+  "include": [
+    "./src/**/*.ts",
+    "./samples-dev/**/*.ts",
+  ],
 }

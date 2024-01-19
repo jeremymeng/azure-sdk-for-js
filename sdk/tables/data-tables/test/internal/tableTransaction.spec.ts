@@ -7,9 +7,9 @@ import {
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";
+import { assert, describe, it } from "vitest";
 import { TableTransaction, parseTransactionResponse } from "../../src/TableTransaction";
 import { TableClient } from "../../src/TableClient";
-import { assert } from "chai";
 
 describe("TableTransaction", function () {
   describe("parseTransactionResponse", function () {

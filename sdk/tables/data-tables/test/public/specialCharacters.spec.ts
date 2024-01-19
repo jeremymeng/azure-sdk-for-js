@@ -3,19 +3,12 @@
 
 import { TableClient, TableEntityResult, TransactionAction, odata } from "../../src";
 
-import { Context } from "mocha";
-import { assert } from "chai";
+import { afterAll, assert, beforeEach, describe, it } from "vitest";
 import { createTableClient } from "./utils/recordedClient";
 import { isLiveMode } from "@azure-tools/test-recorder";
 import { isNode } from "@azure/test-utils";
 
-describe("SpecialCharacters", function () {
-  before(function (this: Context) {
-    if (!isLiveMode()) {
-      // Only run in live tests to avoid unecessary extra time in CI
-      this.skip();
-    }
-  });
+describe.skipIf(!isLiveMode())("SpecialCharacters", function () {
   let client: TableClient;
   const suffix = isNode ? "Node" : "Browser";
   const tableName = `SpecialCharacterTest${suffix}`;
@@ -44,7 +37,7 @@ describe("SpecialCharacters", function () {
   ];
 
   describe("Single operations", function () {
-    beforeEach(async function (this: Context) {
+    beforeEach(async function() {
       client = await createTableClient(tableName, "TokenCredential");
     });
 
@@ -119,13 +112,13 @@ describe("SpecialCharacters", function () {
       });
     });
 
-    after(async function () {
+    afterAll(async function () {
       await client.deleteTable();
     });
   });
 
   describe("Batch", function () {
-    beforeEach(async function (this: Context) {
+    beforeEach(async function() {
       client = await createTableClient(`${tableName}Batch`, "TokenCredential");
     });
 
@@ -245,7 +238,7 @@ describe("SpecialCharacters", function () {
       const result = await client.submitTransaction(actions);
       assert.equal(result.status, 202);
     });
-    after(async function () {
+    afterAll(async function () {
       await client.deleteTable();
     });
   });

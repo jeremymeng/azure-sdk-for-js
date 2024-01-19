@@ -3,20 +3,22 @@
 
 import { Recorder, isPlaybackMode } from "@azure-tools/test-recorder";
 
-import { Context } from "mocha";
+import { assert, afterEach, beforeEach, describe, it, beforeAll, afterAll, expect } from "vitest";
 import { TableClient } from "../../src";
-import { assert } from "chai";
 import { createTableClient } from "./utils/recordedClient";
 import { isNode } from "@azure/test-utils";
 
-describe(`Access Policy operations`, function () {
+describe.skipIf(!isNode)(`Access Policy operations`, function () {
   let client: TableClient;
   let unrecordedClient: TableClient;
   let recorder: Recorder;
   const tableName = `AccessPolicy`;
 
-  beforeEach(async function (this: Context) {
-    recorder = new Recorder(this.currentTest);
+  beforeEach(async function() {
+    recorder = new Recorder({
+      contextType: "vitest",
+      testTitle: expect.getState().currentTestName ?? "test",
+    });
     client = await createTableClient(tableName, "AccountKey", recorder);
   });
 
@@ -24,18 +26,14 @@ describe(`Access Policy operations`, function () {
     await recorder.stop();
   });
 
-  before(async function (this: Context) {
-    if (!isNode) {
-      this.skip();
-    }
-
+  beforeAll(async function() {
     if (!isPlaybackMode()) {
       unrecordedClient = await createTableClient(tableName, "SASConnectionString");
       await unrecordedClient.createTable();
     }
   });
 
-  after(async function () {
+  afterAll(async function () {
     if (!isPlaybackMode() && isNode) {
       await unrecordedClient.deleteTable();
     }
