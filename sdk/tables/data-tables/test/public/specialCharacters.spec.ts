@@ -37,7 +37,7 @@ describe.skipIf(!isLiveMode())("SpecialCharacters", function () {
   ];
 
   describe("Single operations", function () {
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = await createTableClient(tableName, "TokenCredential");
     });
 
@@ -118,7 +118,7 @@ describe.skipIf(!isLiveMode())("SpecialCharacters", function () {
   });
 
   describe("Batch", function () {
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = await createTableClient(`${tableName}Batch`, "TokenCredential");
     });
 

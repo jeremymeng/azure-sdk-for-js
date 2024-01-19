@@ -13,7 +13,7 @@ describe("special characters", function () {
   const tableName = `SpecialChars`;
   let recorder: Recorder;
   let client: TableClient;
-  beforeEach(async function() {
+  beforeEach(async function () {
     recorder = new Recorder({
       contextType: "vitest",
       testTitle: expect.getState().currentTestName ?? "test",
@@ -25,7 +25,7 @@ describe("special characters", function () {
     await recorder.stop();
   });
 
-  it("should handle partition and row keys with special chars", async function() {
+  it("should handle partition and row keys with special chars", async function () {
     await client.createTable();
 
     try {
@@ -57,7 +57,7 @@ describe(`TableClient`, function () {
   const tableName = `tableClientTest${suffix}`;
   const listPartitionKey = "listEntitiesTest";
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     recorder = new Recorder({
       contextType: "vitest",
       testTitle: expect.getState().currentTestName ?? "test",
@@ -85,7 +85,7 @@ describe(`TableClient`, function () {
 
   describe("listEntities", function () {
     // Create required entities for testing list operations
-    beforeAll(async function() {
+    beforeAll(async function () {
       unRecordedClient = await createTableClient(tableName, "SASConnectionString");
       if (!isPlaybackMode()) {
         // this.timeout(10000);
@@ -665,7 +665,7 @@ describe(`TableClient`, function () {
   });
 
   describe("tracing", function () {
-    it.skipIf(true/*TODO*/)("should trace through the various operations", async function () {
+    it.skipIf(true /*TODO*/)("should trace through the various operations", async function () {
       await assert.supportsTracing(
         async (options: OperationOptions) => {
           await client.createTable(options);

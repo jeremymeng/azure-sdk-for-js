@@ -28,7 +28,7 @@ if (isLiveMode()) {
       });
 
       describe("TableServiceClient", function () {
-        beforeEach(async function() {
+        beforeEach(async function () {
           serviceClient = await createTableServiceClient(authMethod);
         });
 
@@ -48,7 +48,7 @@ if (isLiveMode()) {
       });
 
       describe("TableClient", function () {
-        beforeEach(async function() {
+        beforeEach(async function () {
           tableClient = await createTableClient(tableClientTableName, authMethod);
         });
 

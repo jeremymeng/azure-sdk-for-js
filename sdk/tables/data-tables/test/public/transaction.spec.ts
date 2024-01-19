@@ -1,7 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { assert, afterEach, beforeEach, describe, it, beforeAll, afterAll, vi, expect } from "vitest";
+import {
+  assert,
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+  beforeAll,
+  afterAll,
+  vi,
+  expect,
+} from "vitest";
 
 import { Recorder, isPlaybackMode, isLiveMode } from "@azure-tools/test-recorder";
 import { TableClient, TableTransaction, TransactionAction, odata } from "../../src";
@@ -24,7 +34,6 @@ const testEntities = [
   { partitionKey, rowKey: "3", name: "third" },
 ];
 
-
 import { randomUUID } from "@azure/core-util";
 
 // import { Uuid } from "../../src/utils/uuid";
@@ -46,7 +55,7 @@ describe("concurrent batch operations", function () {
       await unRecordedClient.deleteTable();
     }
   });
-  beforeEach(async function() {
+  beforeEach(async function () {
     vi.mocked(randomUUID).mockReturnValue("fakeId");
     unRecordedClient = await createTableClient(concurrentTableName, "SASConnectionString");
   });
@@ -80,7 +89,7 @@ describe(`batch operations`, function () {
   let recorder: Recorder;
   const tableName = `batchTableTest${suffix}`;
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     vi.mocked(randomUUID).mockReturnValue("fakeId");
     recorder = new Recorder({
       contextType: "vitest",
@@ -304,7 +313,7 @@ describe("Handle suberror", function () {
   let recorder: Recorder;
   const tableName = "noExistingTableError";
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     vi.mocked(randomUUID).mockReturnValue("fakeId");
     recorder = new Recorder({
       contextType: "vitest",

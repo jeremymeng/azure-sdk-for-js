@@ -14,7 +14,7 @@ describe.skipIf(!isNode)(`Access Policy operations`, function () {
   let recorder: Recorder;
   const tableName = `AccessPolicy`;
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     recorder = new Recorder({
       contextType: "vitest",
       testTitle: expect.getState().currentTestName ?? "test",
@@ -26,7 +26,7 @@ describe.skipIf(!isNode)(`Access Policy operations`, function () {
     await recorder.stop();
   });
 
-  beforeAll(async function() {
+  beforeAll(async function () {
     if (!isPlaybackMode()) {
       unrecordedClient = await createTableClient(tableName, "SASConnectionString");
       await unrecordedClient.createTable();

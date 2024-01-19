@@ -25,7 +25,7 @@ describe("TablesSharedKeyCredential", function () {
     Date.prototype.toUTCString = originalToUTCString;
   });
 
-  it("It should sign", async function() {
+  it("It should sign", async function () {
     if (!isNode) {
       // AzureNamedKeyCredential auth is not supported in Browser
       this.skip();

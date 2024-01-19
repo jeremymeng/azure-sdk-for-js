@@ -12,7 +12,7 @@ import { isNode } from "@azure/test-utils";
 describe("Utility Helpers", function () {
   describe("extractConnectionStringParts", function () {
     describe("Account Connection String", function () {
-      beforeEach(function() {
+      beforeEach(function () {
         if (!isNode) {
           // Account connection string is not supported for Browsers
           this.skip();

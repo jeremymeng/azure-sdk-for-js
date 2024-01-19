@@ -8,8 +8,5 @@
       "@azure/data-tables": ["./src/index"],
     },
   },
-  "include": [
-    "./src/**/*.ts",
-    "./samples-dev/**/*.ts",
-  ],
+  "include": ["./src/**/*.ts", "./samples-dev/**/*.ts"],
 }

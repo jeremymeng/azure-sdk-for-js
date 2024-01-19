@@ -14,7 +14,7 @@ describe(`TableServiceClient`, function () {
   let recorder: Recorder;
   const suffix = isNode ? `node` : `browser`;
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     recorder = new Recorder({
       contextType: "vitest",
       testTitle: expect.getState().currentTestName ?? "test",
@@ -53,7 +53,7 @@ describe(`TableServiceClient`, function () {
     const tableNames: string[] = [];
     const expectedTotalItems = 20;
     let unRecordedClient: TableServiceClient;
-    beforeAll(async function() {
+    beforeAll(async function () {
       // Create tables to be listed
       if (!isPlaybackMode()) {
         unRecordedClient = await createTableServiceClient("SASConnectionString");
@@ -66,7 +66,7 @@ describe(`TableServiceClient`, function () {
       }
     });
 
-    afterAll(async function() {
+    afterAll(async function () {
       // Cleanup tables
       if (!isPlaybackMode()) {
         this.timeout(10000);
@@ -177,7 +177,7 @@ describe(`TableServiceClient`, function () {
   });
 
   describe("tracing", function () {
-    it.skipIf(true/*TODO*/)("should trace through the various operations", async function () {
+    it.skipIf(true /*TODO*/)("should trace through the various operations", async function () {
       const tableName = `testTracing${suffix}`;
       await recorder.setMatcher("HeaderlessMatcher");
       await assert.supportsTracing(
