@@ -30,6 +30,7 @@ import { ServiceBusReceiverImpl } from "../../../src/receivers/receiver";
 import { OperationOptionsBase } from "../../../src/modelsToBeSharedWithEventHubs";
 import { ReceiveMode } from "../../../src/models";
 import { Constants, StandardAbortMessage } from "@azure/core-amqp";
+import { receiveDrainTimeoutInMs } from "../../../src/util/constants";
 
 describe("BatchingReceiver unit tests", () => {
   let closeables: { close(): Promise<void> }[];
@@ -94,6 +95,7 @@ describe("BatchingReceiver unit tests", () => {
           lockRenewer: undefined,
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
         },
       );
 
@@ -120,6 +122,7 @@ describe("BatchingReceiver unit tests", () => {
           lockRenewer: undefined,
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
         },
       );
       closeables.push(receiver);
@@ -212,6 +215,7 @@ describe("BatchingReceiver unit tests", () => {
             lockRenewer: undefined,
             skipParsingBodyAsJson: false,
             skipConvertingDate: false,
+            drainTimeoutInMs: receiveDrainTimeoutInMs,
           },
         );
         closeables.push(batchingReceiver);
@@ -247,6 +251,7 @@ describe("BatchingReceiver unit tests", () => {
             lockRenewer: undefined,
             skipParsingBodyAsJson: false,
             skipConvertingDate: false,
+            drainTimeoutInMs: receiveDrainTimeoutInMs,
           },
         );
         closeables.push(receiver);
@@ -282,6 +287,7 @@ describe("BatchingReceiver unit tests", () => {
               lockRenewer: undefined,
               skipParsingBodyAsJson: false,
               skipConvertingDate: false,
+              drainTimeoutInMs: receiveDrainTimeoutInMs,
             },
           );
           closeables.push(batchingReceiver);
@@ -333,6 +339,7 @@ describe("BatchingReceiver unit tests", () => {
             lockRenewer: undefined,
             skipParsingBodyAsJson: false,
             skipConvertingDate: false,
+            drainTimeoutInMs: receiveDrainTimeoutInMs,
           },
         );
         closeables.push(batchingReceiver);
@@ -390,6 +397,7 @@ describe("BatchingReceiver unit tests", () => {
               lockRenewer: undefined,
               skipParsingBodyAsJson: false,
               skipConvertingDate: false,
+              drainTimeoutInMs: receiveDrainTimeoutInMs,
             },
           );
           closeables.push(batchingReceiver);
@@ -563,6 +571,7 @@ describe("BatchingReceiver unit tests", () => {
         "peekLock",
         false,
         false,
+        receiveDrainTimeoutInMs
       );
 
       assert.isFalse(batchingReceiver.isReceivingMessages);
@@ -595,6 +604,7 @@ describe("BatchingReceiver unit tests", () => {
         "peekLock",
         false,
         false,
+        receiveDrainTimeoutInMs,
       );
 
       assert.notExists(batchingReceiver["_closeHandler"]);
@@ -632,6 +642,7 @@ describe("BatchingReceiver unit tests", () => {
         "peekLock",
         false,
         false,
+        receiveDrainTimeoutInMs,
       );
 
       batchingReceiver["_receiveMessagesImpl"](
@@ -689,6 +700,7 @@ describe("BatchingReceiver unit tests", () => {
         "peekLock",
         false,
         false,
+        receiveDrainTimeoutInMs,
       );
 
       assert.notExists(batchingReceiver["_closeHandler"]);
@@ -744,6 +756,7 @@ describe("BatchingReceiver unit tests", () => {
         "peekLock",
         false,
         false,
+        receiveDrainTimeoutInMs,
       );
 
       batchingReceiverLite["_receiveMessagesImpl"](
@@ -807,6 +820,7 @@ describe("BatchingReceiver unit tests", () => {
       "peekLock",
       false,
       false,
+      receiveDrainTimeoutInMs,
     );
 
     const receiveIsReady = getReceiveIsReadyPromise(batchingReceiverLite);

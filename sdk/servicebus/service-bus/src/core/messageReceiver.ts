@@ -65,6 +65,8 @@ export interface ReceiveOptions extends SubscribeOptions {
    * compatibility.
    */
   skipConvertingDate: boolean;
+
+  drainTimeoutInMs: number;
 }
 
 /**

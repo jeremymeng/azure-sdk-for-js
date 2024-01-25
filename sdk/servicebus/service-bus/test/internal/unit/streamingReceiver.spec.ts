@@ -11,6 +11,7 @@ import { EventContext } from "rhea-promise";
 import { Constants } from "@azure/core-amqp";
 import { AbortError } from "@azure/abort-controller";
 import { assertThrows } from "../../public/utils/testUtils";
+import { receiveDrainTimeoutInMs } from "../../../src/util/constants";
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -76,6 +77,7 @@ describe("StreamingReceiver unit tests", () => {
         receiveMode: "receiveAndDelete",
         skipParsingBodyAsJson: false,
         skipConvertingDate: false,
+        drainTimeoutInMs: receiveDrainTimeoutInMs,
       });
 
       try {
@@ -164,7 +166,7 @@ describe("StreamingReceiver unit tests", () => {
           postInitialize: async () => {
             // this functions as if the user called subscription.stop() immediately and it got
             // sequenced _after_ init() completed.
-            await streamingReceiver["_receiverHelper"].suspend();
+            await streamingReceiver["_receiverHelper"].suspend(receiveDrainTimeoutInMs);
           },
           processError: async (pae) => {
             errors.push({ message: pae.error.message, errorSource: pae.errorSource });
@@ -203,7 +205,7 @@ describe("StreamingReceiver unit tests", () => {
           preInitialize: async () => {
             // this functions as if the user called subscription.stop() immediately and it got
             // sequenced _after_ init() completed.
-            await streamingReceiver["_receiverHelper"].suspend();
+            await streamingReceiver["_receiverHelper"].suspend(receiveDrainTimeoutInMs);
           },
           processError: async (pae) => {
             errors.push({ message: pae.error.message, errorSource: pae.errorSource });
@@ -248,6 +250,7 @@ describe("StreamingReceiver unit tests", () => {
       receiveMode: "peekLock",
       skipParsingBodyAsJson: false,
       skipConvertingDate: false,
+      drainTimeoutInMs: receiveDrainTimeoutInMs
     });
 
     let processErrorMessages: string[] = [];

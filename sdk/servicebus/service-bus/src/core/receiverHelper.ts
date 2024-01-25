@@ -5,7 +5,6 @@ import { AbortError } from "@azure/abort-controller";
 import { Receiver, ReceiverEvents } from "rhea-promise";
 import { receiverLogger as logger } from "../log";
 import { ServiceBusError } from "../serviceBusError";
-import { receiveDrainTimeoutInMs } from "../util/constants";
 
 /**
  * Wraps the receiver with some higher level operations for managing state
@@ -75,7 +74,7 @@ export class ReceiverHelper {
    * Drains the credits for the receiver and prevents the `receiverHelper.addCredit()` method from adding credits.
    * Call `resume()` to enable the `addCredit()` method.
    */
-  async suspend(): Promise<void> {
+  async suspend(drainTimeoutInMs: number): Promise<void> {
     const { receiver, logPrefix } = this._getCurrentReceiver();
 
     this._isSuspended = true;
@@ -88,7 +87,7 @@ export class ReceiverHelper {
       `${logPrefix} User has requested to stop receiving new messages, attempting to drain.`,
     );
 
-    return this.drain();
+    return this.drain(drainTimeoutInMs);
   }
 
   /**
@@ -109,7 +108,7 @@ export class ReceiverHelper {
    * NOTE: This method returns immediately if the receiver is not valid or if there
    * are no pending credits on the receiver (ie: `receiver.credit === 0`).
    */
-  async drain(): Promise<void> {
+  async drain(drainTimeoutInMs: number): Promise<void> {
     const { receiver, logPrefix } = this._getCurrentReceiver();
 
     if (!this._isValidReceiver(receiver)) {
@@ -133,7 +132,7 @@ export class ReceiverHelper {
         // to prevent out-of-sync link state between local and remote
         await receiver?.close();
         resolve();
-      }, receiveDrainTimeoutInMs);
+      }, drainTimeoutInMs);
       receiver.once(ReceiverEvents.receiverDrained, () => {
         logger.verbose(`${logPrefix} Receiver has been drained.`);
         receiver.drain = false;

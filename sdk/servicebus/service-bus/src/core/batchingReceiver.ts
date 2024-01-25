@@ -17,7 +17,6 @@ import { ConnectionContext } from "../connectionContext";
 import { throwErrorIfConnectionClosed } from "../util/errors";
 import { AbortSignalLike } from "@azure/abort-controller";
 import { checkAndRegisterWithAbortSignal } from "../util/utils";
-import { receiveDrainTimeoutInMs } from "../util/constants";
 import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
 import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage";
 import { ReceiveMode } from "../models";
@@ -80,6 +79,7 @@ export class BatchingReceiver extends MessageReceiver {
       this.receiveMode,
       options.skipParsingBodyAsJson ?? false,
       options.skipConvertingDate ?? false,
+      options.drainTimeoutInMs,
     );
   }
 
@@ -243,7 +243,6 @@ interface ReceiveMessageArgs extends OperationOptionsBase {
  */
 export class BatchingReceiverLite {
   // testing hook
-  private _drainTimeoutInMs: number = receiveDrainTimeoutInMs;
   constructor(
     private _connectionContext: ConnectionContext,
     public entityPath: string,
@@ -253,6 +252,7 @@ export class BatchingReceiverLite {
     private _receiveMode: ReceiveMode,
     _skipParsingBodyAsJson: boolean,
     _skipConvertingDate: boolean,
+    private _drainTimeoutInMs: number,
   ) {
     this._createServiceBusMessage = (context: MessageAndDelivery) => {
       return new ServiceBusMessageImpl(

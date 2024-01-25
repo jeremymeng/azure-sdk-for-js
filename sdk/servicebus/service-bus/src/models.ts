@@ -177,6 +177,12 @@ export interface ServiceBusReceiverOptions {
    * If not specified or empty, a random unique one will be used.
    */
   identifier?: string;
+
+  /**
+   * The max time that receiver will wait when draining leftover credits.
+   * If not specified or empty, a random unique one will be used.
+   */
+  drainTimeoutInMs?: number;
 }
 
 /**
@@ -310,6 +316,12 @@ export interface ServiceBusSessionReceiverOptions extends OperationOptionsBase {
    * If not specified or empty, a random unique one will be used.
    */
   identifier?: string;
+
+  /**
+   * The max time that receiver will wait when draining leftover credits.
+   * If not specified or empty, a random unique one will be used.
+   */
+  drainTimeoutInMs?: number;
 }
 
 /**

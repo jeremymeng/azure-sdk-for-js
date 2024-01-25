@@ -25,6 +25,7 @@ import { ServiceBusReceiverImpl } from "../../../src/receivers/receiver";
 import { MessageSession } from "../../../src/session/messageSession";
 import { ProcessErrorArgs } from "../../../src";
 import { ReceiveMode } from "../../../src/models";
+import { receiveDrainTimeoutInMs } from "../../../src/util/constants";
 
 describe("AbortSignal", () => {
   const defaultOptions = {
@@ -32,6 +33,7 @@ describe("AbortSignal", () => {
     receiveMode: <ReceiveMode>"peekLock",
     skipParsingBodyAsJson: false,
     skipConvertingDate: false,
+    drainTimeoutInMs: receiveDrainTimeoutInMs
   };
 
   const testMessageThatDoesntMatter = {
@@ -393,6 +395,7 @@ describe("AbortSignal", () => {
           retryOptions: undefined,
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
         },
       );
 

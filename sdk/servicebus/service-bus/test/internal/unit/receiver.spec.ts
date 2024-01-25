@@ -23,6 +23,7 @@ import { MessageSession } from "../../../src/session/messageSession";
 import sinon from "sinon";
 import { assertThrows } from "../../public/utils/testUtils";
 import { Constants } from "@azure/core-amqp";
+import { receiveDrainTimeoutInMs } from "../../../src/util/constants";
 
 describe("Receiver unit tests", () => {
   it("Receiver should set target in created receiver options", () => {
@@ -35,6 +36,7 @@ describe("Receiver unit tests", () => {
         receiveMode: "peekLock",
         skipParsingBodyAsJson: false,
         skipConvertingDate: false,
+        drainTimeoutInMs: receiveDrainTimeoutInMs,
       },
     );
     const options = batchingReceiver["_createReceiverOptions"](false, {});
@@ -55,6 +57,7 @@ describe("Receiver unit tests", () => {
           receiveMode: "peekLock",
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
         },
       );
 
@@ -85,6 +88,7 @@ describe("Receiver unit tests", () => {
           receiveMode: "peekLock",
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
         },
       );
 
@@ -271,6 +275,7 @@ describe("Receiver unit tests", () => {
           retryOptions: undefined,
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
         },
       );
 

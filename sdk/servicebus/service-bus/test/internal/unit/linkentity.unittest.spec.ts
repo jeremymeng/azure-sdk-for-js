@@ -15,6 +15,7 @@ import { StreamingReceiver } from "../../../src/core/streamingReceiver";
 import { receiverLogger } from "../../../src/log";
 import { MessageSession } from "../../../src/session/messageSession";
 import { createConnectionContextForTests, createRheaReceiverForTests } from "./unittestUtils";
+import { receiveDrainTimeoutInMs } from "../../../src/util/constants";
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
@@ -354,6 +355,7 @@ describe("LinkEntity unit tests", () => {
           receiveMode: "receiveAndDelete",
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
           tracingOptions: {},
         },
       );
@@ -384,6 +386,7 @@ describe("LinkEntity unit tests", () => {
           receiveMode: "receiveAndDelete",
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
           tracingOptions: {},
         },
       );
@@ -432,6 +435,7 @@ describe("LinkEntity unit tests", () => {
           retryOptions: {},
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
         },
       );
 

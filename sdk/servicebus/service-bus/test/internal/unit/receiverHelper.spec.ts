@@ -7,6 +7,7 @@ import { Receiver, ReceiverEvents, delay } from "rhea-promise";
 import { ReceiverHelper } from "../../../src/core/receiverHelper";
 import { assertThrows } from "../../public/utils/testUtils";
 import { createRheaReceiverForTests } from "./unittestUtils";
+import { receiveDrainTimeoutInMs } from "../../../src/util/constants";
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
@@ -83,7 +84,7 @@ describe("ReceiverHelper unit tests", () => {
       logPrefix: "whatever",
     }));
 
-    await helper.suspend();
+    await helper.suspend(receiveDrainTimeoutInMs);
 
     await assertThrows(async () => helper.addCredit(101), {
       name: "AbortError",
@@ -106,7 +107,7 @@ describe("ReceiverHelper unit tests", () => {
     helper.resume();
     helper.addCredit(101);
 
-    await helper.drain();
+    await helper.drain(receiveDrainTimeoutInMs);
     assert.isTrue(drainWasCalled);
     assert.isFalse(receiver.drain);
 
@@ -116,7 +117,7 @@ describe("ReceiverHelper unit tests", () => {
     drainWasCalled = false;
     helper.addCredit(101);
 
-    await helper.suspend();
+    await helper.suspend(receiveDrainTimeoutInMs);
     assert.isTrue(helper["_isSuspended"]);
     assert.isTrue(drainWasCalled);
     assert.isFalse(receiver.drain);
@@ -147,7 +148,7 @@ describe("ReceiverHelper unit tests", () => {
     helper.addCredit(101);
 
     await Promise.race([
-      helper.drain(),
+      helper.drain(receiveDrainTimeoutInMs),
       delay(2000).then(() => {
         throw new Error("Test failed. helper.drain() should have already resolved.");
       }),

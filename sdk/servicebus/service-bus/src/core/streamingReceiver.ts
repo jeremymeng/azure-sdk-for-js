@@ -30,6 +30,7 @@ import {
 import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage";
 import { AbortError } from "@azure/abort-controller";
 import { tracingClient } from "../diagnostics/tracing";
+import { receiveDrainTimeoutInMs } from "../util/constants";
 
 /**
  * @internal
@@ -65,6 +66,8 @@ export class StreamingReceiver extends MessageReceiver {
    *Retry policy options that determine the mode, number of retries, retry interval etc.
    */
   private _retryOptions: RetryOptions;
+
+  private _drainTimeoutInMs: number;
 
   private _receiverHelper: ReceiverHelper;
 
@@ -146,6 +149,7 @@ export class StreamingReceiver extends MessageReceiver {
     }
 
     this._retryOptions = options?.retryOptions || {};
+    this._drainTimeoutInMs = options?.drainTimeoutInMs ?? receiveDrainTimeoutInMs;
 
     this._receiverHelper = new ReceiverHelper(() => ({
       receiver: this.link,
@@ -413,7 +417,7 @@ export class StreamingReceiver extends MessageReceiver {
   }
 
   async stopReceivingMessages(): Promise<void> {
-    await this._receiverHelper.suspend();
+    await this._receiverHelper.suspend(this._drainTimeoutInMs);
 
     if (this._subscribeCallPromise) {
       await this._subscribeCallPromise;
@@ -421,7 +425,7 @@ export class StreamingReceiver extends MessageReceiver {
   }
 
   async close(): Promise<void> {
-    await this._receiverHelper.suspend();
+    await this._receiverHelper.suspend(this._drainTimeoutInMs);
     return super.close();
   }
 
@@ -582,7 +586,7 @@ export class StreamingReceiver extends MessageReceiver {
       });
     } catch (err: any) {
       try {
-        await this._receiverHelper.suspend();
+        await this._receiverHelper.suspend(this._drainTimeoutInMs);
       } catch (error: any) {
         logger.logError(error, `${this.logPrefix} receiver.suspend threw an error`);
       }

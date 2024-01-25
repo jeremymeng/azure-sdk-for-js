@@ -19,6 +19,7 @@ import {
   ServiceBusSessionReceiver,
 } from "../../src/receivers/sessionReceiver";
 import { ServiceBusReceiver, ServiceBusReceiverImpl } from "../../src/receivers/receiver";
+import { receiveDrainTimeoutInMs } from "../../src/util/constants";
 
 describe("Retries - ManagementClient", () => {
   let sender: ServiceBusSender;
@@ -355,6 +356,7 @@ describe("Retries - Receive methods", () => {
           receiveMode: "peekLock",
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
         },
       );
       batchingReceiver.isOpen = () => true;

@@ -42,6 +42,7 @@ import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMess
 import { tracingClient } from "../diagnostics/tracing";
 import { receiverLogger as logger } from "../log";
 import { translateServiceBusError } from "../serviceBusError";
+import { receiveDrainTimeoutInMs } from "../util/constants";
 
 /**
  *A receiver that handles sessions, including renewing the session lock.
@@ -136,6 +137,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
     private _skipParsingBodyAsJson: boolean,
     private _skipConvertingDate: boolean,
     private _retryOptions: RetryOptions = {},
+    private _drainTimeoutInMs: number = receiveDrainTimeoutInMs,
   ) {
     throwErrorIfConnectionClosed(_context);
     this.sessionId = _messageSession.sessionId;
@@ -476,7 +478,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
 
     return {
       close: async (): Promise<void> => {
-        return this._messageSession?.receiverHelper.suspend();
+        return this._messageSession?.receiverHelper.suspend(this._drainTimeoutInMs);
       },
     };
   }

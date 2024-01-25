@@ -25,6 +25,7 @@ import { ProcessErrorArgs, ServiceBusError } from "../../../src";
 import { ReceiveMode } from "../../../src/models";
 import { Constants } from "@azure/core-amqp";
 import { AbortError } from "@azure/abort-controller";
+import { receiveDrainTimeoutInMs } from "../../../src/util/constants";
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -58,6 +59,7 @@ describe("Message session unit tests", () => {
               retryOptions: undefined,
               skipParsingBodyAsJson: false,
               skipConvertingDate: false,
+              drainTimeoutInMs: receiveDrainTimeoutInMs,
             },
           );
 
@@ -91,6 +93,7 @@ describe("Message session unit tests", () => {
               retryOptions: undefined,
               skipParsingBodyAsJson: false,
               skipConvertingDate: false,
+              drainTimeoutInMs: receiveDrainTimeoutInMs,
             },
           );
 
@@ -124,6 +127,7 @@ describe("Message session unit tests", () => {
                 retryOptions: undefined,
                 skipParsingBodyAsJson: false,
                 skipConvertingDate: false,
+                drainTimeoutInMs: receiveDrainTimeoutInMs,
               },
             );
 
@@ -173,6 +177,7 @@ describe("Message session unit tests", () => {
               retryOptions: undefined,
               skipParsingBodyAsJson: false,
               skipConvertingDate: false,
+              drainTimeoutInMs: receiveDrainTimeoutInMs,
             },
           );
 
@@ -228,6 +233,7 @@ describe("Message session unit tests", () => {
                 retryOptions: undefined,
                 skipParsingBodyAsJson: false,
                 skipConvertingDate: false,
+                drainTimeoutInMs: receiveDrainTimeoutInMs,
               },
             );
 
@@ -394,6 +400,7 @@ describe("Message session unit tests", () => {
           retryOptions: undefined,
           skipParsingBodyAsJson: false,
           skipConvertingDate: false,
+          drainTimeoutInMs: receiveDrainTimeoutInMs,
         },
       );
 

@@ -501,6 +501,7 @@ export interface ServiceBusReceiver {
 
 // @public
 export interface ServiceBusReceiverOptions {
+    drainTimeoutInMs?: number;
     identifier?: string;
     maxAutoLockRenewalDurationInMs?: number;
     receiveMode?: "peekLock" | "receiveAndDelete";
@@ -548,6 +549,7 @@ export interface ServiceBusSessionReceiver extends ServiceBusReceiver {
 
 // @public
 export interface ServiceBusSessionReceiverOptions extends OperationOptionsBase {
+    drainTimeoutInMs?: number;
     identifier?: string;
     maxAutoLockRenewalDurationInMs?: number;
     receiveMode?: "peekLock" | "receiveAndDelete";

@@ -64,6 +64,7 @@ export type MessageSessionOptions = Pick<
   retryOptions: RetryOptions | undefined;
   skipParsingBodyAsJson: boolean;
   skipConvertingDate: boolean;
+  drainTimeoutInMs: number;
 };
 
 /**
@@ -435,6 +436,7 @@ export class MessageSession extends LinkEntity<Receiver> {
       this.receiveMode,
       this.skipParsingBodyAsJson,
       this.skipConvertingDate,
+      options.drainTimeoutInMs,
     );
 
     // setting all the handlers

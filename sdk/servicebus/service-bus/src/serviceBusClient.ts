@@ -27,6 +27,7 @@ import { MessageSession } from "./session/messageSession";
 import { isDefined } from "@azure/core-util";
 import { isCredential } from "./util/typeGuards";
 import { ensureValidIdentifier } from "./util/utils";
+import { receiveDrainTimeoutInMs } from "./util/constants";
 
 /**
  * A client that can create Sender instances for sending messages to queues and
@@ -232,6 +233,7 @@ export class ServiceBusClient {
       options?.skipConvertingDate ?? false,
       this._clientOptions.retryOptions,
       options?.identifier,
+      options?.drainTimeoutInMs,
     );
   }
 
@@ -364,6 +366,7 @@ export class ServiceBusClient {
         retryOptions: this._clientOptions.retryOptions,
         skipParsingBodyAsJson: options?.skipParsingBodyAsJson ?? false,
         skipConvertingDate: options?.skipConvertingDate ?? false,
+        drainTimeoutInMs: options?.drainTimeoutInMs ?? receiveDrainTimeoutInMs,
       },
     );
 
@@ -375,6 +378,7 @@ export class ServiceBusClient {
       options?.skipParsingBodyAsJson ?? false,
       options?.skipConvertingDate ?? false,
       this._clientOptions.retryOptions,
+      options?.drainTimeoutInMs,
     );
 
     return sessionReceiver;
@@ -454,6 +458,7 @@ export class ServiceBusClient {
         retryOptions: this._clientOptions.retryOptions,
         skipParsingBodyAsJson: options?.skipParsingBodyAsJson ?? false,
         skipConvertingDate: options?.skipConvertingDate ?? false,
+        drainTimeoutInMs: options?.drainTimeoutInMs ?? receiveDrainTimeoutInMs,
       },
     );
 
@@ -465,6 +470,7 @@ export class ServiceBusClient {
       options?.skipParsingBodyAsJson ?? false,
       options?.skipConvertingDate ?? false,
       this._clientOptions.retryOptions,
+      options?.drainTimeoutInMs,
     );
 
     return sessionReceiver;

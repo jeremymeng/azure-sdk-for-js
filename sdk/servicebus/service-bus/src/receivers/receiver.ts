@@ -42,6 +42,7 @@ import { ensureValidIdentifier } from "../util/utils";
 import { toSpanOptions, tracingClient } from "../diagnostics/tracing";
 import { extractSpanContextFromServiceBusMessage } from "../diagnostics/instrumentServiceBusMessage";
 import { TracingSpanLink } from "@azure/core-tracing";
+import { receiveDrainTimeoutInMs } from "../util/constants";
 
 /**
  * The default time to wait for messages _after_ the first message
@@ -310,6 +311,7 @@ export class ServiceBusReceiverImpl implements ServiceBusReceiver {
     private skipConvertingDate: boolean = false,
     retryOptions: RetryOptions = {},
     identifier?: string,
+    private drainTimeoutInMs: number = receiveDrainTimeoutInMs,
   ) {
     throwErrorIfConnectionClosed(_context);
     this._retryOptions = retryOptions;
@@ -374,6 +376,7 @@ export class ServiceBusReceiverImpl implements ServiceBusReceiver {
           lockRenewer: this._lockRenewer,
           skipParsingBodyAsJson: this.skipParsingBodyAsJson,
           skipConvertingDate: this.skipConvertingDate,
+          drainTimeoutInMs: this.drainTimeoutInMs,
         };
         this._batchingReceiver = this._createBatchingReceiver(
           this._context,
@@ -533,6 +536,7 @@ export class ServiceBusReceiverImpl implements ServiceBusReceiver {
         lockRenewer: this._lockRenewer,
         skipParsingBodyAsJson: this.skipParsingBodyAsJson,
         skipConvertingDate: this.skipConvertingDate,
+        drainTimeoutInMs: this.drainTimeoutInMs,
       });
 
     // this ensures that if the outer service bus client is closed that  this receiver is cleaned up.
