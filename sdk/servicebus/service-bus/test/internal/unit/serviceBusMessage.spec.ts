@@ -31,7 +31,7 @@ describe("ServiceBusMessageImpl unit tests", () => {
       message_annotations,
     };
 
-    const fakeDeliveryTag = new Buffer(16);
+    const fakeDeliveryTag = Buffer.alloc(16);
     for (let i = 0; i < fakeDeliveryTag.length; i++) {
       fakeDeliveryTag[i] = Math.floor(Math.random() * 255);
     }
