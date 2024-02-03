@@ -26,7 +26,7 @@ export default leafCommand(commandInfo, async (options) => {
   const defaultMochaArgs = `${
     (await isModuleProject())
       ? "-r source-map-support/register.js"
-      : "-r ../../../common/tools/esm-workaround -r esm -r source-map-support/register"
+      : "--loader=common/tools/esm2cjs.mjs -r source-map-support/register"
   } ${reporterArgs} --full-trace`;
   const updatedArgs = options["--"]?.map((opt) =>
     opt.includes("**") && !opt.startsWith("'") && !opt.startsWith('"') ? `"${opt}"` : opt,
