@@ -5,16 +5,48 @@ import { readFile, stat, constants } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { Project } from "./dev-tool/node_modules/ts-morph/dist/ts-morph.js";
 
+function consoleLog(...args) {
+  if (process.env.DEBUG) {
+    console.log(args);
+  }
+}
+
+function consoleDir(...args) {
+  if (process.env.DEBUG) {
+    console.dir(args);
+  }
+}
+
 export async function resolve(specifier, context, defaultResolve) {
-  console.log("resolving...");
-  console.dir({specifier, context});
+  consoleLog("resolving...");
+  consoleDir({specifier, context});
   const resolved = await defaultResolve(specifier, context, defaultResolve);
-  console.dir({resolved});
-  // Let Node.js handle all other specifiers.
+  consoleDir({resolved});
   if (resolved.url.includes("dist-esm/")) {
     resolved.format = "module";
   }
   return resolved;
+}
+
+async function updateSpecifierValueIfRelative(declaration, base) {
+    const specifierValue = declaration.getModuleSpecifierValue();
+    consoleDir({base, specifierValue});
+    if (specifierValue?.startsWith(".")) {
+      const sourcePath = join(base, specifierValue);
+      try {
+        const s = await stat(sourcePath, constants.R_OK);
+        consoleDir({sourcePath});
+        if (s.isDirectory()) {
+          declaration.setModuleSpecifier(`${specifierValue}/index.js`);
+        } else {
+          declaration.setModuleSpecifier(`${specifierValue}.js`);
+        }
+      } catch (ex) {
+        consoleDir({error: ex});
+        declaration.setModuleSpecifier(`${specifierValue}.js`);
+      }
+      consoleLog(`  specifier updated to ${declaration.getModuleSpecifierValue()}`);
+    }  
 }
 
 async function addJsExtensionToRelativeModules(source, path) {
@@ -24,59 +56,31 @@ async function addJsExtensionToRelativeModules(source, path) {
   const f = project.createSourceFile("file.ts", text);
   const imports = f.getImportDeclarations();
   const exports = f.getExportDeclarations();
-  console.dir({l: "input", path, head: text.substring(0, 1200), imports, exports});
+  consoleDir({l: "input",
+               path,
+               head: text.substring(0, 1200),
+               imports: imports.map(i => i.getText()),
+               exports: exports.map(e => e.getText()),
+              });
   for (const i of imports) {
-    const specifierValue = i.getModuleSpecifierValue();
-    console.dir({base, specifierValue});
-    if (specifierValue.startsWith(".")) {
-      const sourcePath = join(base, specifierValue);
-      try {
-        const s = await stat(sourcePath, constants.R_OK);
-        // console.dir({sourcePath, stat: s});
-        if (s.isDirectory()) {
-          i.setModuleSpecifier?.(`${specifierValue}/index.js`);
-        } else {
-          i.setModuleSpecifier?.(`${specifierValue}.js`);
-        }
-      } catch (e) {
-        console.dir({error: e});
-        i.setModuleSpecifier?.(`${specifierValue}.js`);
-      }
-    }
+    await updateSpecifierValueIfRelative(i, base);
   }
   for (const e of exports) {
-    const specifierValue = e.getModuleSpecifierValue();
-    console.dir({base, specifierValue});
-    if (specifierValue.startsWith(".")) {
-      const sourcePath = join(base, specifierValue);
-      try {
-        const s = await stat(sourcePath, constants.R_OK);
-        // console.dir({sourcePath, stat: s});
-        if (s.isDirectory()) {
-          e.setModuleSpecifier?.(`${specifierValue}/index.js`);
-        } else {
-          e.setModuleSpecifier?.(`${specifierValue}.js`);
-        }
-      } catch (e) {
-        console.dir({error: e});
-        e.setModuleSpecifier?.(`${specifierValue}.js`);
-      }
-    }
+    await updateSpecifierValueIfRelative(e, base);
   }
 
-  console.dir({l:"output", head: f.getFullText().substring(0, 1200)});
+  consoleDir({l:"output", head: f.getFullText().substring(0, 1200)});
   return f.getFullText();
 }
 
 export async function load(url, context, defaultLoad) {
-  console.log("loading...");
-  console.dir({url, context});
+  consoleLog("loading...");
+  consoleDir({url, context});
 
   if (url.includes("dist-esm/")) {
     const path = url.replace("file://", "");
     const source = await readFile(path);
     const transformed = await addJsExtensionToRelativeModules(source, path);
-    // console.dir({path, head: transformed.substring(0,200)});
     return {
       format: context.format,
       source: transformed,
@@ -93,17 +97,16 @@ export async function load(url, context, defaultLoad) {
 }
 
 // export function getFormat(url, context, defaultGetFormat) {
-//   console.log("getting format...");
+//   consoleLog("getting format...");
 //     return {
 //       format: "module",
 //     };
 // }
 
-
 // export function transformSource(source, context, defaultTransformSource) {
 //   const { url } = context;
-//   console.log("transforming...");
-//   console.dir({context});
+//   consoleLog("transforming...");
+//   consoleDir({context});
 //   if (url.include("dist-esm/test")) {
 //     return {
 //       source: source.replaceAll("import", "require")
