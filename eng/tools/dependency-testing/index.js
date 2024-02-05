@@ -402,7 +402,7 @@ async function main(argv) {
   }
   await replaceSourceReferences(targetPackagePath, targetPackage.packageName, testFolder);
   await copyRepoFile(repoRoot, "common/tools", "mocha-multi-reporter.js", targetPackagePath, testFolder);
-  await copyRepoFile(repoRoot, "common/tools", "esm-workaround.js", targetPackagePath, testFolder);
+  await copyRepoFile(repoRoot, "common/tools", "esm-workaround.mjs", targetPackagePath, testFolder);
   await updateRushConfig(repoRoot, targetPackage, testFolder);
   outputTestPath(targetPackage.projectFolder, sourceDir, testFolder);
 }

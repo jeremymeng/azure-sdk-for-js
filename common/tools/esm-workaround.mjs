@@ -95,24 +95,3 @@ export async function load(url, context, defaultLoad) {
 
   return { format: context.format, source, shortCircuit: true };
 }
-
-// export function getFormat(url, context, defaultGetFormat) {
-//   consoleLog("getting format...");
-//     return {
-//       format: "module",
-//     };
-// }
-
-// export function transformSource(source, context, defaultTransformSource) {
-//   const { url } = context;
-//   consoleLog("transforming...");
-//   consoleDir({context});
-//   if (url.include("dist-esm/test")) {
-//     return {
-//       source: source.replaceAll("import", "require")
-//     };
-//   }
-
-//   // Let Node.js handle all other sources.
-//   return defaultTransformSource(source, context, defaultTransformSource);
-// }
