@@ -8,10 +8,9 @@
  * For details, see the PNPM documentation:
  * https://pnpm.js.org/docs/en/hooks.html
  *
- * IMPORTANT: SINCE THIS FILE CONTAINS EXECUTABLE CODE, MODIFYING IT IS LIKELY
- * TO INVALIDATE ANY CACHED DEPENDENCY ANALYSIS.  We recommend to run "rush update --full"
- * after any modification to pnpmfile.js.
- *
+ * IMPORTANT: SINCE THIS FILE CONTAINS EXECUTABLE CODE, MODIFYING IT IS LIKELY TO INVALIDATE
+ * ANY CACHED DEPENDENCY ANALYSIS.  After any modification to pnpmfile.js, it's recommended to run
+ * "rush update --full" so that PNPM will recalculate all version selections.
  */
 module.exports = {
   hooks: {
@@ -28,11 +27,12 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-  
-  // snap-shot-it takes a hard dependency on 10.2.0 but we want a fix in 10.2.1
-  if (packageJson.name === "snap-shot-it" && packageJson.dependencies['snap-shot-core'] === "10.2.0") {
-    packageJson.dependencies['snap-shot-core'] = "10.2.1"
-  }
+
+  // // The karma types have a missing dependency on typings from the log4js package.
+  // if (packageJson.name === '@types/karma') {
+  //  context.log('Fixed up dependencies for @types/karma');
+  //  packageJson.dependencies['log4js'] = '0.6.38';
+  // }
 
   return packageJson;
 }

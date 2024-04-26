@@ -4,6 +4,7 @@
  */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json",
+
   /**
    * If true, then `rush install` and `rush update` will use the PNPM workspaces feature
    * to perform the install, instead of the old model where Rush generated the symlinks
@@ -17,6 +18,50 @@
    * This option is strongly recommended. The default value is false.
    */
   "useWorkspaces": false,
+
+  /**
+   * This setting determines how PNPM chooses version numbers during `rush update`.
+   * For example, suppose `lib-x@3.0.0` depends on `"lib-y": "^1.2.3"` whose latest major
+   * releases are `1.8.9` and `2.3.4`.  The resolution mode `lowest-direct` might choose
+   * `lib-y@1.2.3`, wheres `highest` will choose 1.8.9, and `time-based` will pick the
+   * highest compatible version at the time when `lib-x@3.0.0` itself was published (ensuring
+   * that the version could have been tested by the maintainer of "lib-x").  For local workspace
+   * projects, `time-based` instead works like `lowest-direct`, avoiding upgrades unless
+   * they are explicitly requested. Although `time-based` is the most robust option, it may be
+   * slightly slower with registries such as npmjs.com that have not implemented an optimization.
+   *
+   * IMPORTANT: Be aware that PNPM 8.0.0 initially defaulted to `lowest-direct` instead of
+   * `highest`, but PNPM reverted this decision in 8.6.12 because it caused confusion for users.
+   * Rush version 5.106.0 and newer avoids this confusion by consistently defaulting to
+   * `highest` when `resolutionMode` is not explicitly set in pnpm-config.json or .npmrc,
+   * regardless of your PNPM version.
+   *
+   * PNPM documentation: https://pnpm.io/npmrc#resolution-mode
+   *
+   * Possible values are: `highest`, `time-based`, and `lowest-direct`.
+   * The default is `highest`.
+   */
+  // "resolutionMode": "time-based",
+
+  /**
+   * This setting determines whether PNPM will automatically install (non-optional)
+   * missing peer dependencies instead of reporting an error.  Doing so conveniently
+   * avoids the need to specify peer versions in package.json, but in a large monorepo
+   * this often creates worse problems.  The reason is that peer dependency behavior
+   * is inherently complicated, and it is easier to troubleshoot consequences of an explicit
+   * version than an invisible heuristic.  The original NPM RFC discussion pointed out
+   * some other problems with this feature: https://github.com/npm/rfcs/pull/43
+
+   * IMPORTANT: Without Rush, the setting defaults to true for PNPM 8 and newer; however,
+   * as of Rush version 5.109.0 the default is always false unless `autoInstallPeers`
+   * is specified in pnpm-config.json or .npmrc, regardless of your PNPM version.
+
+   * PNPM documentation: https://pnpm.io/npmrc#auto-install-peers
+
+   * The default value is false.
+   */
+  // "autoInstallPeers": false,
+
   /**
    * If true, then Rush will add the `--strict-peer-dependencies` command-line parameter when
    * invoking PNPM.  This causes `rush update` to fail if there are unsatisfied peer dependencies,
@@ -30,6 +75,7 @@
    * It is strongly recommended to set `strictPeerDependencies=true`.
    */
   "strictPeerDependencies": true,
+
   /**
    * Environment variables that will be provided to PNPM.
    */
@@ -39,6 +85,7 @@
   //     "override": false
   //   }
   // },
+
   /**
    * Specifies the location of the PNPM store.  There are two possible values:
    *
@@ -53,6 +100,7 @@
    * The default value is `local`.
    */
   // "pnpmStore": "global",
+
   /**
    * If true, then `rush install` will report an error if manual modifications
    * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
@@ -70,6 +118,7 @@
    * The default value is false.
    */
   // "preventManualShrinkwrapChanges": true,
+
   /**
    * The "globalOverrides" setting provides a simple mechanism for overriding version selections
    * for all dependencies of all projects in the monorepo workspace.  The settings are copied
@@ -86,6 +135,7 @@
     // "example1": "^1.0.0",
     // "example2": "npm:@company/example2@^1.0.0"
   },
+
   /**
    * The `globalPeerDependencyRules` setting provides various settings for suppressing validation errors
    * that are reported during installation with `strictPeerDependencies=true`.  The settings are copied
@@ -103,6 +153,7 @@
     // "allowedVersions": { "react": "17" },
     // "allowAny": ["@babel/*"]
   },
+
   /**
    * The `globalPackageExtension` setting provides a way to patch arbitrary package.json fields
    * for any PNPM dependency of the monorepo.  The settings are copied into the `pnpm.packageExtensions`
@@ -131,6 +182,7 @@
     //   }
     // }
   },
+
   /**
    * The `globalNeverBuiltDependencies` setting suppresses the `preinstall`, `install`, and `postinstall`
    * lifecycle events for the specified NPM dependencies.  This is useful for scripts with poor practices
@@ -145,6 +197,7 @@
   "globalNeverBuiltDependencies": [
     // "fsevents"
   ],
+
   /**
    * The `globalAllowedDeprecatedVersions` setting suppresses installation warnings for package
    * versions that the NPM registry reports as being deprecated.  This is useful if the
@@ -160,6 +213,8 @@
   "globalAllowedDeprecatedVersions": {
     // "request": "*"
   },
+
+
   /**
    * (THIS FIELD IS MACHINE GENERATED)  The "globalPatchedDependencies" field is updated automatically
    * by the `rush-pnpm patch-commit` command.  It is a dictionary, where the key is an NPM package name
@@ -167,7 +222,8 @@
    *
    * PNPM documentation: https://pnpm.io/package_json#pnpmpatcheddependencies
    */
-  "globalPatchedDependencies": {},
+  "globalPatchedDependencies": { },
+
   /**
    * (USE AT YOUR OWN RISK)  This is a free-form property bag that will be copied into
    * the `common/temp/package.json` file that is generated by Rush during installation.
