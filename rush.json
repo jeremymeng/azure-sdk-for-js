@@ -403,121 +403,252 @@
     {
       "packageName": "@azure/app-configuration",
       "projectFolder": "sdk/appconfiguration/app-configuration",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/agrifood-farming",
       "projectFolder": "sdk/agrifood/agrifood-farming-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/ai-document-intelligence",
       "projectFolder": "sdk/documentintelligence/ai-document-intelligence-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/purview-administration",
       "projectFolder": "sdk/purview/purview-administration-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/purview-catalog",
       "projectFolder": "sdk/purview/purview-catalog-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/purview-datamap",
       "projectFolder": "sdk/purview/purview-datamap-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/purview-scanning",
       "projectFolder": "sdk/purview/purview-scanning-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/purview-sharing",
       "projectFolder": "sdk/purview/purview-sharing-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/purview-workflow",
       "projectFolder": "sdk/purview/purview-workflow-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/ai-document-translator",
       "projectFolder": "sdk/documenttranslator/ai-document-translator-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/ai-translation-text",
       "projectFolder": "sdk/translation/ai-translation-text-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/defender-easm",
       "projectFolder": "sdk/easm/defender-easm-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/confidential-ledger",
       "projectFolder": "sdk/confidentialledger/confidential-ledger-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/ai-anomaly-detector",
       "projectFolder": "sdk/anomalydetector/ai-anomaly-detector-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/ai-content-safety",
       "projectFolder": "sdk/contentsafety/ai-content-safety-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/ai-form-recognizer",
       "projectFolder": "sdk/formrecognizer/ai-form-recognizer",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/ai-language-conversations",
       "projectFolder": "sdk/cognitivelanguage/ai-language-conversations",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/ai-text-analytics",
       "projectFolder": "sdk/textanalytics/ai-text-analytics",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/ai-language-text",
       "projectFolder": "sdk/cognitivelanguage/ai-language-text",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/ai-language-textauthoring",
       "projectFolder": "sdk/cognitivelanguage/ai-language-textauthoring",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/openai-assistants",
       "projectFolder": "sdk/openai/openai-assistants",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/openai",
       "projectFolder": "sdk/openai/openai",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/openai",
       "projectFolder": "sdk/openai/openai-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/ai-metrics-advisor",
       "projectFolder": "sdk/metricsadvisor/ai-metrics-advisor",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
@@ -528,91 +659,183 @@
     {
       "packageName": "@azure/attestation",
       "projectFolder": "sdk/attestation/attestation",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/quantum-jobs",
       "projectFolder": "sdk/quantum/quantum-jobs",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/storage-blob",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/communication-call-automation",
       "projectFolder": "sdk/communication/communication-call-automation",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/communication-phone-numbers",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/communication-chat",
       "projectFolder": "sdk/communication/communication-chat",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/communication-common",
       "projectFolder": "sdk/communication/communication-common",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/communication-email",
       "projectFolder": "sdk/communication/communication-email",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/communication-identity",
       "projectFolder": "sdk/communication/communication-identity",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/communication-phone-numbers",
       "projectFolder": "sdk/communication/communication-phone-numbers",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-tools/communication-short-codes",
       "projectFolder": "sdk/communication/communication-short-codes",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-tools/communication-recipient-verification",
       "projectFolder": "sdk/communication/communication-recipient-verification",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-tools/communication-tiering",
       "projectFolder": "sdk/communication/communication-tiering",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-tools/communication-alpha-ids",
       "projectFolder": "sdk/communication/communication-alpha-ids",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-tools/communication-toll-free-verification",
       "projectFolder": "sdk/communication/communication-toll-free-verification",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/communication-sms",
       "projectFolder": "sdk/communication/communication-sms",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/communication-job-router",
       "projectFolder": "sdk/communication/communication-job-router",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/communication-job-router",
       "projectFolder": "sdk/communication/communication-job-router-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/communication-messages",
       "projectFolder": "sdk/communication/communication-messages-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/container-registry",
       "projectFolder": "sdk/containerregistry/container-registry",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
@@ -678,26 +901,51 @@
     {
       "packageName": "@azure/cosmos",
       "projectFolder": "sdk/cosmosdb/cosmos",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/monitor-opentelemetry",
       "projectFolder": "sdk/monitor/monitor-opentelemetry",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/monitor-opentelemetry-exporter",
       "projectFolder": "sdk/monitor/monitor-opentelemetry-exporter",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/monitor-query",
       "projectFolder": "sdk/monitor/monitor-query",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/monitor-ingestion",
       "projectFolder": "sdk/monitor/monitor-ingestion",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
@@ -713,32 +961,59 @@
     {
       "packageName": "@azure/eventgrid-namespaces",
       "projectFolder": "sdk/eventgrid/eventgrid-namespaces",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/event-hubs",
       "projectFolder": "sdk/eventhub/event-hubs",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/eventhubs-checkpointstore-blob",
       "projectFolder": "sdk/eventhub/eventhubs-checkpointstore-blob",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/storage-blob",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/eventhubs-checkpointstore-table",
       "projectFolder": "sdk/eventhub/eventhubs-checkpointstore-table",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/mock-hub",
       "projectFolder": "sdk/eventhub/mock-hub",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "utility"
     },
     {
       "packageName": "@azure/identity",
       "projectFolder": "sdk/identity/identity",
       "decoupledLocalDependencies": [
+        "@azure/abort-controller",
         "@azure/keyvault-keys"
       ],
       "versionPolicyName": "client"
@@ -746,76 +1021,156 @@
     {
       "packageName": "@azure/identity-vscode",
       "projectFolder": "sdk/identity/identity-vscode",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/identity-cache-persistence",
       "projectFolder": "sdk/identity/identity-cache-persistence",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/identity-broker",
       "projectFolder": "sdk/identity/identity-broker",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/keyvault-common",
       "projectFolder": "sdk/keyvault/keyvault-common",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/keyvault-admin",
       "projectFolder": "sdk/keyvault/keyvault-admin",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/keyvault-certificates",
       "projectFolder": "sdk/keyvault/keyvault-certificates",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/keyvault-keys",
       "projectFolder": "sdk/keyvault/keyvault-keys",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/keyvault-secrets",
       "projectFolder": "sdk/keyvault/keyvault-secrets",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/logger",
       "projectFolder": "sdk/core/logger",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "core"
     },
     {
       "packageName": "@azure/maps-common",
       "projectFolder": "sdk/maps/maps-common",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/maps-route",
       "projectFolder": "sdk/maps/maps-route-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/maps-common",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/maps-render",
       "projectFolder": "sdk/maps/maps-render-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/maps-common",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/maps-geolocation",
       "projectFolder": "sdk/maps/maps-geolocation-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/maps-common",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/maps-search",
       "projectFolder": "sdk/maps/maps-search-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/maps-common",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/notification-hubs",
       "projectFolder": "sdk/notificationhubs/notification-hubs",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
@@ -826,51 +1181,103 @@
     {
       "packageName": "@azure/schema-registry",
       "projectFolder": "sdk/schemaregistry/schema-registry",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/schema-registry-avro",
       "projectFolder": "sdk/schemaregistry/schema-registry-avro",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/schema-registry",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/schema-registry-json",
       "projectFolder": "sdk/schemaregistry/schema-registry-json",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/schema-registry",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/service-bus",
       "projectFolder": "sdk/servicebus/service-bus",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/storage-internal-avro",
       "projectFolder": "sdk/storage/storage-internal-avro",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "utility"
     },
     {
       "packageName": "@azure/storage-blob",
       "projectFolder": "sdk/storage/storage-blob",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/storage-blob-changefeed",
       "projectFolder": "sdk/storage/storage-blob-changefeed",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/storage-file-share",
       "projectFolder": "sdk/storage/storage-file-share",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/storage-file-datalake",
       "projectFolder": "sdk/storage/storage-file-datalake",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/storage-queue",
       "projectFolder": "sdk/storage/storage-queue",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
@@ -881,51 +1288,101 @@
     {
       "packageName": "@azure-rest/synapse-access-control",
       "projectFolder": "sdk/synapse/synapse-access-control-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/iot-device-update",
       "projectFolder": "sdk/deviceupdate/iot-device-update-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/synapse-artifacts",
       "projectFolder": "sdk/synapse/synapse-artifacts",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/synapse-managed-private-endpoints",
       "projectFolder": "sdk/synapse/synapse-managed-private-endpoints",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/synapse-monitoring",
       "projectFolder": "sdk/synapse/synapse-monitoring",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/synapse-spark",
       "projectFolder": "sdk/synapse/synapse-spark",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/data-tables",
       "projectFolder": "sdk/tables/data-tables",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-tests/perf-data-tables",
       "projectFolder": "sdk/tables/perf-tests/data-tables",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure/template",
       "projectFolder": "sdk/template/template",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/template-dpg",
       "projectFolder": "sdk/template/template-dpg",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
@@ -951,6 +1408,9 @@
     {
       "packageName": "@azure-tools/test-credential",
       "projectFolder": "sdk/test-utils/test-credential",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "utility"
     },
     {
@@ -966,6 +1426,11 @@
     {
       "packageName": "@azure/digital-twins-core",
       "projectFolder": "sdk/digitaltwins/digital-twins-core",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
@@ -976,51 +1441,81 @@
     {
       "packageName": "@azure-tests/perf-ai-form-recognizer",
       "projectFolder": "sdk/formrecognizer/perf-tests/ai-form-recognizer",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-eventgrid",
       "projectFolder": "sdk/eventgrid/perf-tests/eventgrid",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-ai-text-analytics",
       "projectFolder": "sdk/textanalytics/perf-tests/ai-text-analytics",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-ai-language-text",
       "projectFolder": "sdk/cognitivelanguage/perf-tests/ai-language-text",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-storage-blob",
       "projectFolder": "sdk/storage/perf-tests/storage-blob",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-storage-file-share",
       "projectFolder": "sdk/storage/perf-tests/storage-file-share",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-storage-file-datalake",
       "projectFolder": "sdk/storage/perf-tests/storage-file-datalake",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-keyvault-keys",
       "projectFolder": "sdk/keyvault/perf-tests/keyvault-keys",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-keyvault-certificates",
       "projectFolder": "sdk/keyvault/perf-tests/keyvault-certificates",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-keyvault-secrets",
       "projectFolder": "sdk/keyvault/perf-tests/keyvault-secrets",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
@@ -1031,11 +1526,17 @@
     {
       "packageName": "@azure-tests/perf-service-bus",
       "projectFolder": "sdk/servicebus/perf-tests/service-bus",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-event-hubs",
       "projectFolder": "sdk/eventhub/perf-tests/event-hubs",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
@@ -1056,16 +1557,25 @@
     {
       "packageName": "@azure-tests/perf-search-documents",
       "projectFolder": "sdk/search/perf-tests/search-documents",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-ai-metrics-advisor",
       "projectFolder": "sdk/metricsadvisor/perf-tests/ai-metrics-advisor",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-container-registry",
       "projectFolder": "sdk/containerregistry/perf-tests/container-registry",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
@@ -1076,1181 +1586,2361 @@
     {
       "packageName": "@azure-tests/perf-app-configuration",
       "projectFolder": "sdk/appconfiguration/perf-tests/app-configuration",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-monitor-query",
       "projectFolder": "sdk/monitor/perf-tests/monitor-query",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-monitor-ingestion",
       "projectFolder": "sdk/monitor/perf-tests/monitor-ingestion",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-template",
       "projectFolder": "sdk/template/perf-tests/template",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure-tests/perf-schema-registry-avro",
       "projectFolder": "sdk/schemaregistry/perf-tests/schema-registry-avro",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "test"
     },
     {
       "packageName": "@azure/mixed-reality-remote-rendering",
       "projectFolder": "sdk/remoterendering/mixed-reality-remote-rendering",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-network",
       "projectFolder": "sdk/network/arm-network",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure-rest/arm-network",
       "projectFolder": "sdk/network/arm-network-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-compute",
       "projectFolder": "sdk/compute/arm-compute",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/arm-network",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure-rest/arm-compute",
       "projectFolder": "sdk/compute/arm-compute-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/arm-network"
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-storage",
       "projectFolder": "sdk/storage/arm-storage",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-resources",
       "projectFolder": "sdk/resources/arm-resources",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-links",
       "projectFolder": "sdk/links/arm-links",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-policy",
       "projectFolder": "sdk/policy/arm-policy",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-locks",
       "projectFolder": "sdk/locks/arm-locks",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-features",
       "projectFolder": "sdk/features/arm-features",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-managedapplications",
       "projectFolder": "sdk/managedapplications/arm-managedapplications",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-webpubsub",
       "projectFolder": "sdk/web-pubsub/arm-webpubsub",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-keyvault",
       "projectFolder": "sdk/keyvault/arm-keyvault",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-sql",
       "projectFolder": "sdk/sql/arm-sql",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-appservice",
       "projectFolder": "sdk/appservice/arm-appservice",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure-rest/arm-appservice",
       "projectFolder": "sdk/appservice/arm-appservice-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-resources-subscriptions",
       "projectFolder": "sdk/resources-subscriptions/arm-resources-subscriptions",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-templatespecs",
       "projectFolder": "sdk/templatespecs/arm-templatespecs",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-authorization",
       "projectFolder": "sdk/authorization/arm-authorization",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-eventhub",
       "projectFolder": "sdk/eventhub/arm-eventhub",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/arm-network",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-purview",
       "projectFolder": "sdk/purview/arm-purview",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-servicebus",
       "projectFolder": "sdk/servicebus/arm-servicebus",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-apimanagement",
       "projectFolder": "sdk/apimanagement/arm-apimanagement",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-rediscache",
       "projectFolder": "sdk/redis/arm-rediscache",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/arm-network",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-eventgrid",
       "projectFolder": "sdk/eventgrid/arm-eventgrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-quota",
       "projectFolder": "sdk/quota/arm-quota",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-extendedlocation",
       "projectFolder": "sdk/extendedlocation/arm-extendedlocation",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-security",
       "projectFolder": "sdk/security/arm-security",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-operationalinsights",
       "projectFolder": "sdk/operationalinsights/arm-operationalinsights",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-postgresql",
       "projectFolder": "sdk/postgresql/arm-postgresql",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-containerregistry",
       "projectFolder": "sdk/containerregistry/arm-containerregistry",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-logic",
       "projectFolder": "sdk/logic/arm-logic",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-recoveryservices",
       "projectFolder": "sdk/recoveryservices/arm-recoveryservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-appplatform",
       "projectFolder": "sdk/appplatform/arm-appplatform",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-containerservice",
       "projectFolder": "sdk/containerservice/arm-containerservice",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure-rest/arm-containerservice",
       "projectFolder": "sdk/containerservice/arm-containerservice-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-operations",
       "projectFolder": "sdk/operationsmanagement/arm-operations",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-mediaservices",
       "projectFolder": "sdk/mediaservices/arm-mediaservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-databricks",
       "projectFolder": "sdk/databricks/arm-databricks",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-notificationhubs",
       "projectFolder": "sdk/notificationhubs/arm-notificationhubs",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-streamanalytics",
       "projectFolder": "sdk/streamanalytics/arm-streamanalytics",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-servicefabric",
       "projectFolder": "sdk/servicefabric/arm-servicefabric",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure-rest/arm-servicefabric",
       "projectFolder": "sdk/servicefabric/arm-servicefabric-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-mysql",
       "projectFolder": "sdk/mysql/arm-mysql",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-desktopvirtualization",
       "projectFolder": "sdk/desktopvirtualization/arm-desktopvirtualization",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-datafactory",
       "projectFolder": "sdk/datafactory/arm-datafactory",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-cdn",
       "projectFolder": "sdk/cdn/arm-cdn",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-cosmosdb",
       "projectFolder": "sdk/cosmosdb/arm-cosmosdb",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-consumption",
       "projectFolder": "sdk/consumption/arm-consumption",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-datalake-analytics",
       "projectFolder": "sdk/datalake-analytics/arm-datalake-analytics",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-batch",
       "projectFolder": "sdk/batch/arm-batch",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-managementgroups",
       "projectFolder": "sdk/managementgroups/arm-managementgroups",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-orbital",
       "projectFolder": "sdk/orbital/arm-orbital",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-resourcehealth",
       "projectFolder": "sdk/resourcehealth/arm-resourcehealth",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-botservice",
       "projectFolder": "sdk/botservice/arm-botservice",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-search",
       "projectFolder": "sdk/search/arm-search",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-analysisservices",
       "projectFolder": "sdk/analysisservices/arm-analysisservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-portal",
       "projectFolder": "sdk/portal/arm-portal",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-sqlvirtualmachine",
       "projectFolder": "sdk/sqlvirtualmachine/arm-sqlvirtualmachine",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-devtestlabs",
       "projectFolder": "sdk/devtestlabs/arm-devtestlabs",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-cognitiveservices",
       "projectFolder": "sdk/cognitiveservices/arm-cognitiveservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-relay",
       "projectFolder": "sdk/relay/arm-relay",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-iothub",
       "projectFolder": "sdk/iothub/arm-iothub",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-msi",
       "projectFolder": "sdk/msi/arm-msi",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-monitor",
       "projectFolder": "sdk/monitor/arm-monitor",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-subscriptions",
       "projectFolder": "sdk/subscription/arm-subscriptions",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-advisor",
       "projectFolder": "sdk/advisor/arm-advisor",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-hdinsight",
       "projectFolder": "sdk/hdinsight/arm-hdinsight",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-attestation",
       "projectFolder": "sdk/attestation/arm-attestation",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-azurestack",
       "projectFolder": "sdk/azurestack/arm-azurestack",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-changeanalysis",
       "projectFolder": "sdk/changeanalysis/arm-changeanalysis",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-billing",
       "projectFolder": "sdk/billing/arm-billing",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-containerinstance",
       "projectFolder": "sdk/containerinstance/arm-containerinstance",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-confluent",
       "projectFolder": "sdk/confluent/arm-confluent",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-imagebuilder",
       "projectFolder": "sdk/imagebuilder/arm-imagebuilder",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-avs",
       "projectFolder": "sdk/avs/arm-avs",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-communication",
       "projectFolder": "sdk/communication/arm-communication",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-appconfiguration",
       "projectFolder": "sdk/appconfiguration/arm-appconfiguration",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-azurestackhci",
       "projectFolder": "sdk/azurestackhci/arm-azurestackhci",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-customerinsights",
       "projectFolder": "sdk/customer-insights/arm-customerinsights",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-databoxedge",
       "projectFolder": "sdk/databoxedge/arm-databoxedge",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-datadog",
       "projectFolder": "sdk/datadog/arm-datadog",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-deviceprovisioningservices",
       "projectFolder": "sdk/deviceprovisioningservices/arm-deviceprovisioningservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-synapse",
       "projectFolder": "sdk/synapse/arm-synapse",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-databox",
       "projectFolder": "sdk/databox/arm-databox",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-dns",
       "projectFolder": "sdk/dns/arm-dns",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-digitaltwins",
       "projectFolder": "sdk/digitaltwins/arm-digitaltwins",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-devspaces",
       "projectFolder": "sdk/devspaces/arm-devspaces",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-domainservices",
       "projectFolder": "sdk/domainservices/arm-domainservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-frontdoor",
       "projectFolder": "sdk/frontdoor/arm-frontdoor",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-healthbot",
       "projectFolder": "sdk/healthbot/arm-healthbot",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure-rest/health-insights-cancerprofiling",
       "projectFolder": "sdk/healthinsights/health-insights-cancerprofiling-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/health-insights-clinicalmatching",
       "projectFolder": "sdk/healthinsights/health-insights-clinicalmatching-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/health-insights-radiologyinsights",
       "projectFolder": "sdk/healthinsights/health-insights-radiologyinsights-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-deploymentmanager",
       "projectFolder": "sdk/deploymentmanager/arm-deploymentmanager",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-hanaonazure",
       "projectFolder": "sdk/hanaonazure/arm-hanaonazure",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-kubernetesconfiguration",
       "projectFolder": "sdk/kubernetesconfiguration/arm-kubernetesconfiguration",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-labservices",
       "projectFolder": "sdk/labservices/arm-labservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-machinelearningcompute",
       "projectFolder": "sdk/machinelearningcompute/arm-machinelearningcompute",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-machinelearningexperimentation",
       "projectFolder": "sdk/machinelearningexperimentation/arm-machinelearningexperimentation",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-commerce",
       "projectFolder": "sdk/commerce/arm-commerce",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-datamigration",
       "projectFolder": "sdk/datamigration/arm-datamigration",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-healthcareapis",
       "projectFolder": "sdk/healthcareapis/arm-healthcareapis",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-hybridcompute",
-      "projectFolder": "sdk/hybridcompute/arm-hybridcompute",
+      "projectFolder": "sdk/hybridcompute/arm-hybridcompute", 
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-hybridkubernetes",
       "projectFolder": "sdk/hybridkubernetes/arm-hybridkubernetes",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-oep",
       "projectFolder": "sdk/oep/arm-oep",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-securityinsight",
       "projectFolder": "sdk/securityinsight/arm-securityinsight",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-iotcentral",
       "projectFolder": "sdk/iotcentral/arm-iotcentral",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-commitmentplans",
       "projectFolder": "sdk/machinelearning/arm-commitmentplans",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-workspaces",
       "projectFolder": "sdk/machinelearning/arm-workspaces",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-webservices",
       "projectFolder": "sdk/machinelearning/arm-webservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-managementpartner",
       "projectFolder": "sdk/managementpartner/arm-managementpartner",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-maps",
       "projectFolder": "sdk/maps/arm-maps",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-mariadb",
       "projectFolder": "sdk/mariadb/arm-mariadb",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-marketplaceordering",
       "projectFolder": "sdk/marketplaceordering/arm-marketplaceordering",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-migrate",
       "projectFolder": "sdk/migrate/arm-migrate",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-mixedreality",
       "projectFolder": "sdk/mixedreality/arm-mixedreality",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-netapp",
       "projectFolder": "sdk/netapp/arm-netapp",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-peering",
       "projectFolder": "sdk/peering/arm-peering",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-postgresql-flexible",
       "projectFolder": "sdk/postgresql/arm-postgresql-flexible",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-powerbidedicated",
       "projectFolder": "sdk/powerbidedicated/arm-powerbidedicated",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-powerbiembedded",
       "projectFolder": "sdk/powerbiembedded/arm-powerbiembedded",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-recoveryservices-siterecovery",
       "projectFolder": "sdk/recoveryservicessiterecovery/arm-recoveryservices-siterecovery",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-recoveryservicesbackup",
       "projectFolder": "sdk/recoveryservicesbackup/arm-recoveryservicesbackup",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-redisenterprisecache",
       "projectFolder": "sdk/redisenterprise/arm-redisenterprisecache",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-reservations",
       "projectFolder": "sdk/reservations/arm-reservations",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-resourcemover",
       "projectFolder": "sdk/resourcemover/arm-resourcemover",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-serialconsole",
       "projectFolder": "sdk/serialconsole/arm-serialconsole",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-servicemap",
       "projectFolder": "sdk/service-map/arm-servicemap",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-signalr",
       "projectFolder": "sdk/signalr/arm-signalr",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-storagecache",
       "projectFolder": "sdk/storagecache/arm-storagecache",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-storagesync",
       "projectFolder": "sdk/storagesync/arm-storagesync",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-resourcegraph",
       "projectFolder": "sdk/resourcegraph/arm-resourcegraph",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-appinsights",
       "projectFolder": "sdk/applicationinsights/arm-appinsights",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-datacatalog",
       "projectFolder": "sdk/datacatalog/arm-datacatalog",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-storsimple1200series",
       "projectFolder": "sdk/storsimple1200series/arm-storsimple1200series",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-storsimple8000series",
       "projectFolder": "sdk/storsimple8000series/arm-storsimple8000series",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-support",
       "projectFolder": "sdk/support/arm-support",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-timeseriesinsights",
       "projectFolder": "sdk/timeseriesinsights/arm-timeseriesinsights",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-trafficmanager",
       "projectFolder": "sdk/trafficmanager/arm-trafficmanager",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-visualstudio",
       "projectFolder": "sdk/visualstudio/arm-visualstudio",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-vmwarecloudsimple",
       "projectFolder": "sdk/vmwarecloudsimple/arm-vmwarecloudsimple",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-servicefabricmesh",
       "projectFolder": "sdk/servicefabricmesh/arm-servicefabricmesh",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-storageimportexport",
       "projectFolder": "sdk/storageimportexport/arm-storageimportexport",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-privatedns",
       "projectFolder": "sdk/privatedns/arm-privatedns",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-policyinsights",
       "projectFolder": "sdk/policyinsights/arm-policyinsights",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-kusto",
       "projectFolder": "sdk/kusto/arm-kusto",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/core-http-compat",
       "projectFolder": "sdk/core/core-http-compat",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "core"
     },
     {
       "packageName": "@azure/arm-dnsresolver",
       "projectFolder": "sdk/dnsresolver/arm-dnsresolver",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-mobilenetwork",
       "projectFolder": "sdk/mobilenetwork/arm-mobilenetwork",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-resources-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/resources/arm-resources-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-dns-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/dns/arm-dns-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-locks-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/locks/arm-locks-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-policy-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/policy/arm-policy-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-subscriptions-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/subscription/arm-subscriptions-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-storage-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/storage/arm-storage-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-keyvault-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/keyvault/arm-keyvault-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-network-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/network/arm-network-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-commerce-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/commerce/arm-commerce-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-compute-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/compute/arm-compute-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-eventhub-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/eventhub/arm-eventhub-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-authorization-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/authorization/arm-authorization-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-monitor-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/monitor/arm-monitor-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-iothub-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/iothub/arm-iothub-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-databoxedge-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/databoxedge/arm-databoxedge-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-appservice-profile-2020-09-01-hybrid",
       "projectFolder": "sdk/appservice/arm-appservice-profile-2020-09-01-hybrid",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-mysql-flexible",
       "projectFolder": "sdk/mysql/arm-mysql-flexible",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-hardwaresecuritymodules",
       "projectFolder": "sdk/hardwaresecuritymodules/arm-hardwaresecuritymodules",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-dashboard",
       "projectFolder": "sdk/dashboard/arm-dashboard",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-azureadexternalidentities",
       "projectFolder": "sdk/azureadexternalidentities/arm-azureadexternalidentities",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-scvmm",
       "projectFolder": "sdk/scvmm/arm-scvmm",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-servicelinker",
       "projectFolder": "sdk/servicelinker/arm-servicelinker",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-changes",
       "projectFolder": "sdk/changes/arm-changes",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-workloads",
       "projectFolder": "sdk/workloads/arm-workloads",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-dynatrace",
       "projectFolder": "sdk/dynatrace/arm-dynatrace",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-education",
       "projectFolder": "sdk/education/arm-education",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-machinelearning",
       "projectFolder": "sdk/machinelearning/arm-machinelearning",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-appcontainers",
       "projectFolder": "sdk/appcontainers/arm-appcontainers",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-deviceupdate",
       "projectFolder": "sdk/deviceupdate/arm-deviceupdate",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-confidentialledger",
       "projectFolder": "sdk/confidentialledger/arm-confidentialledger",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-resourceconnector",
       "projectFolder": "sdk/resourceconnector/arm-resourceconnector",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/api-management-custom-widgets-scaffolder",
       "projectFolder": "sdk/apimanagement/api-management-custom-widgets-scaffolder",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/api-management-custom-widgets-tools",
       "projectFolder": "sdk/apimanagement/api-management-custom-widgets-tools",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/storage-blob",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-networkfunction",
       "projectFolder": "sdk/networkfunction/arm-networkfunction",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-fluidrelay",
       "projectFolder": "sdk/fluidrelay/arm-fluidrelay",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-automation",
       "projectFolder": "sdk/automation/arm-automation",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-automanage",
       "projectFolder": "sdk/automanage/arm-automanage",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-devcenter",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "projectFolder": "sdk/devcenter/arm-devcenter",
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/communication-rooms",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "projectFolder": "sdk/communication/communication-rooms",
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-connectedvmware",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "projectFolder": "sdk/connectedvmware/arm-connectedvmware",
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-nginx",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "projectFolder": "sdk/nginx/arm-nginx",
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-agrifood",
       "projectFolder": "sdk/agrifood/arm-agrifood",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-chaos",
       "projectFolder": "sdk/chaos/arm-chaos",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/arm-cosmosdb",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/functions-authentication-events",
       "projectFolder": "sdk/entra/functions-authentication-events",
+      "decoupledLocalDependencies": [
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure-rest/developer-devcenter",
       "projectFolder": "sdk/devcenter/developer-devcenter-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-securitydevops",
       "projectFolder": "sdk/securitydevops/arm-securitydevops",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-devhub",
       "projectFolder": "sdk/devhub/arm-devhub",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure-rest/load-testing",
       "projectFolder": "sdk/loadtesting/load-testing-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-elasticsan",
       "projectFolder": "sdk/elasticsans/arm-elasticsan",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-appcomplianceautomation",
       "projectFolder": "sdk/appcomplianceautomation/arm-appcomplianceautomation",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-elastic",
       "projectFolder": "sdk/elastic/arm-elastic",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-hybridcontainerservice",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "projectFolder": "sdk/hybridcontainerservice/arm-hybridcontainerservice",
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-loadtesting",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "projectFolder": "sdk/loadtesting/arm-loadtesting",
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/web-pubsub-client",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "projectFolder": "sdk/web-pubsub/web-pubsub-client",
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-billingbenefits",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "projectFolder": "sdk/billingbenefits/arm-billingbenefits",
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-servicenetworking",
       "projectFolder": "sdk/servicenetworking/arm-servicenetworking",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-dataprotection",
       "projectFolder": "sdk/dataprotection/arm-dataprotection",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-storagemover",
       "projectFolder": "sdk/storagemover/arm-storagemover",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-voiceservices",
       "projectFolder": "sdk/voiceservices/arm-voiceservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/web-pubsub-client-protobuf",
       "projectFolder": "sdk/web-pubsub/web-pubsub-client-protobuf",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+        "@azure/web-pubsub-client",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-graphservices",
       "projectFolder": "sdk/graphservices/arm-graphservices",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-newrelicobservability",
       "projectFolder": "sdk/newrelicobservability/arm-newrelicobservability",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-paloaltonetworksngfw",
       "projectFolder": "sdk/paloaltonetworksngfw/arm-paloaltonetworksngfw",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-selfhelp",
       "projectFolder": "sdk/selfhelp/arm-selfhelp",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-costmanagement",
       "projectFolder": "sdk/cost-management/arm-costmanagement",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-networkcloud",
       "projectFolder": "sdk/networkcloud/arm-networkcloud",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-baremetalinfrastructure",
       "projectFolder": "sdk/baremetalinfrastructure/arm-baremetalinfrastructure",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-qumulo",
       "projectFolder": "sdk/liftrqumulo/arm-qumulo",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-containerservicefleet",
       "projectFolder": "sdk/containerservice/arm-containerservicefleet",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-cosmosdbforpostgresql",
       "projectFolder": "sdk/cosmosforpostgresql/arm-cosmosdbforpostgresql",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-managednetworkfabric",
       "projectFolder": "sdk/managednetworkfabric/arm-managednetworkfabric",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-iotfirmwaredefense",
       "projectFolder": "sdk/iotfirmwaredefense/arm-iotfirmwaredefense",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-quantum",
       "projectFolder": "sdk/quantum/arm-quantum",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-sphere",
       "projectFolder": "sdk/sphere/arm-sphere",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-maintenance",
       "projectFolder": "sdk/maintenance/arm-maintenance",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-resourcesdeploymentstacks",
       "projectFolder": "sdk/resourcesdeploymentstacks/arm-resourcesdeploymentstacks",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-apicenter",
       "projectFolder": "sdk/apicenter/arm-apicenter",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-hdinsightcontainers",
       "projectFolder": "sdk/hdinsight/arm-hdinsightcontainers",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-defendereasm",
       "projectFolder": "sdk/defendereasm/arm-defendereasm",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-hybridconnectivity",
       "projectFolder": "sdk/hybridconnectivity/arm-hybridconnectivity",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
@@ -2261,66 +3951,131 @@
     {
       "packageName": "@azure/arm-recoveryservicesdatareplication",
       "projectFolder": "sdk/recoveryservicesdatareplication/arm-recoveryservicesdatareplication",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-playwrighttesting",
       "projectFolder": "sdk/playwrighttesting/arm-playwrighttesting",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure-rest/ai-vision-image-analysis",
       "projectFolder": "sdk/vision/ai-vision-image-analysis-rest",
+      "decoupledLocalDependencies": [
+        "@azure-rest/core-client",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "client"
     },
     {
       "packageName": "@azure/arm-hybridnetwork",
       "projectFolder": "sdk/hybridnetwork/arm-hybridnetwork",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-networkanalytics",
       "projectFolder": "sdk/networkanalytics/arm-networkanalytics",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-workloadssapvirtualinstance",
       "projectFolder": "sdk/workloads/arm-workloadssapvirtualinstance",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-astro",
       "projectFolder": "sdk/astro/arm-astro",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-largeinstance",
       "projectFolder": "sdk/largeinstance/arm-largeinstance",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-springappdiscovery",
       "projectFolder": "sdk/springappdiscovery/arm-springappdiscovery",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-migrationdiscoverysap",
       "projectFolder": "sdk/migrationdiscovery/arm-migrationdiscoverysap",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-storageactions",
       "projectFolder": "sdk/storageactions/arm-storageactions",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-deviceregistry",
       "projectFolder": "sdk/deviceregistry/arm-deviceregistry",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     },
     {
       "packageName": "@azure/arm-standbypool",
       "projectFolder": "sdk/standbypool/arm-standbypool",
+      "decoupledLocalDependencies": [
+        "@azure/abort-controller",
+        "@azure/core-lro",
+        "@azure/identity",
+      ],
       "versionPolicyName": "management"
     }
   ]

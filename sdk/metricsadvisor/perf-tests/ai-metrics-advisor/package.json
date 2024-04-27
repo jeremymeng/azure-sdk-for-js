@@ -8,8 +8,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@azure/ai-metrics-advisor": "^1.0.0",
-    "@azure-tools/test-perf": "^1.0.0",
+    "@azure/ai-metrics-advisor": "workspace:^1.0.0",
+    "@azure-tools/test-perf": "workspace:^1.0.0",
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
@@ -19,7 +19,7 @@
     "tslib": "^2.2.0",
     "ts-node": "^10.0.0",
     "typescript": "~5.4.5",
-    "@azure/dev-tool": "^1.0.0"
+    "@azure/dev-tool": "workspace:^1.0.0"
   },
   "private": true,
   "scripts": {

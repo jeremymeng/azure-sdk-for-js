@@ -76,8 +76,8 @@
     "fast-xml-parser": "^4.3.2"
   },
   "devDependencies": {
-    "@azure/dev-tool": "^1.0.0",
-    "@azure/eslint-plugin-azure-sdk": "^3.0.0",
+    "@azure/dev-tool": "workspace:^1.0.0",
+    "@azure/eslint-plugin-azure-sdk": "workspace:^3.0.0",
     "@microsoft/api-extractor": "^7.40.3",
     "@types/node": "^18.0.0",
     "@types/trusted-types": "^2.0.0",

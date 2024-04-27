@@ -21,8 +21,8 @@ The new recorder is version 3.x.y of the `@azure-tools/test-recorder` package. U
   // ...
   "devDependencies": {
     // ...
-    "@azure-tools/test-credential": "^1.0.0", // If you're using `@azure/identity` in your tests
-    "@azure-tools/test-recorder": "^3.0.0"
+    "@azure-tools/test-credential": "workspace:*", // If you're using `@azure/identity` in your tests
+    "@azure-tools/test-recorder": "workspace:*"
   }
 }
 ```

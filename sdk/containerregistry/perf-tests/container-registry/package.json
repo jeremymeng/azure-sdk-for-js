@@ -7,8 +7,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@azure/container-registry": "^1.1.0-beta.1",
-    "@azure-tools/test-perf": "^1.0.0",
+    "@azure/container-registry": "workspace:^1.1.0-beta.1",
+    "@azure-tools/test-perf": "workspace:^1.0.0",
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
@@ -18,7 +18,7 @@
     "tslib": "^2.2.0",
     "ts-node": "^10.0.0",
     "typescript": "~5.4.5",
-    "@azure/dev-tool": "^1.0.0"
+    "@azure/dev-tool": "workspace:^1.0.0"
   },
   "private": true,
   "scripts": {
