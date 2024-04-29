@@ -92,27 +92,28 @@ export async function getFileValidationPoller(
     }): Promise<TestGetFile200Response> {
       return (resultPromise ??= (async () => {
         const { abortSignal: inputAbortSignal } = pollOptions || {};
-          // In the future we can use AbortSignal.any() instead
-          function abortListener(): void {
-            abortController.abort();
-          }
+        // In the future we can use AbortSignal.any() instead
+        function abortListener(): void {
+          abortController.abort();
+        }
         const abortSignal = abortController.signal;
-          if (inputAbortSignal?.aborted) {
-            abortController.abort();
-          } else if (!abortSignal.aborted) {
-            inputAbortSignal?.addEventListener("abort", abortListener, { once: true });
-          }
+        if (inputAbortSignal?.aborted) {
+          abortController.abort();
+        } else if (!abortSignal.aborted) {
+          inputAbortSignal?.addEventListener("abort", abortListener, { once: true });
+        }
 
-try {
-        if (!poller.isDone()) {
-          await poller.poll({ abortSignal });
-          while (!poller.isDone()) {
-            const delay = sleep(currentPollIntervalInMs, abortSignal);
-            cancelJob = () => abortController.abort();
-            await delay;
+        try {
+          if (!poller.isDone()) {
             await poller.poll({ abortSignal });
+            while (!poller.isDone()) {
+              const delay = sleep(currentPollIntervalInMs, abortSignal);
+              cancelJob = () => abortController.abort();
+              await delay;
+              await poller.poll({ abortSignal });
+            }
           }
-        }} finally {
+        } finally {
           inputAbortSignal?.removeEventListener("abort", abortListener);
         }
         switch (state.status) {

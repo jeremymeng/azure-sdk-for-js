@@ -72,7 +72,7 @@
     "unit-test": "npm run unit-test:node && npm run unit-test:browser"
   },
   "dependencies": {
-    "@azure/abort-controller": "^2.1.3",
+    "@azure/abort-controller": "^2.1.2",
     "@azure/core-util": "^1.1.0",
     "tslib": "^2.6.2"
   },
