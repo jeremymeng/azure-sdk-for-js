@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AbortController, AbortError, AbortSignalLike } from "@azure/abort-controller";
+import { AbortError, AbortSignalLike } from "@azure/abort-controller";
 import { Checkpoint, PartitionProcessor } from "./partitionProcessor";
 import { EventPosition, isEventPosition, latestEventPosition } from "./eventPosition";
 import { PumpManager, PumpManagerImpl } from "./pumpManager";

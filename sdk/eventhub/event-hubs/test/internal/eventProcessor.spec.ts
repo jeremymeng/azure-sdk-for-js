@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AbortError, AbortSignal } from "@azure/abort-controller";
+import { AbortError } from "@azure/abort-controller";
 import {
   CheckpointStore,
   CloseReason,
@@ -21,7 +21,6 @@ import {
   SubscriptionHandlerForTests,
   sendOneMessagePerPartition,
 } from "../public/utils/subscriptionHandlerForTests";
-import { AbortController } from "@azure/abort-controller";
 import { BalancedLoadBalancingStrategy } from "../../src/loadBalancerStrategies/balancedStrategy";
 import { Checkpoint } from "../../src/partitionProcessor";
 import { FakeSubscriptionEventHandlers } from "../public/utils/fakeSubscriptionEventHandlers";

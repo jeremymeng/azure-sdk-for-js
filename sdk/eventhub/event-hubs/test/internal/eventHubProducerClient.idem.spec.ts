@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AbortController } from "@azure/abort-controller";
 import { EventData, EventHubProducerClient } from "../../src/index";
 import { delay } from "@azure/core-amqp";
 import chai from "chai";

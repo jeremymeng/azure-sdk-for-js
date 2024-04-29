@@ -4,7 +4,6 @@
 import { assert } from "chai";
 import { createClient, createRecorder } from "./utils/recordedClient";
 import { Context } from "mocha";
-import { AbortController } from "@azure/abort-controller";
 import { AzureLoadTestingClient, isUnexpected } from "../../src";
 import { env, isPlaybackMode, Recorder } from "@azure-tools/test-recorder";
 import * as fs from "fs";
@@ -77,7 +76,7 @@ describe("Test Creation", () => {
     const fileValidatePoller = await getLongRunningPoller(client, fileUploadResult);
     try {
       await fileValidatePoller.pollUntilDone({
-        abortSignal: AbortController.timeout(10), // timeout of 10 milliseconds
+        abortSignal: AbortSignal.timeout(10), // timeout of 10 milliseconds
       });
     } catch (ex: any) {
       assert.equal(ex.message, "The polling was aborted.");
@@ -101,7 +100,7 @@ describe("Test Creation", () => {
 
     const fileValidatePoller = await getLongRunningPoller(client, fileUploadResult);
     await fileValidatePoller.pollUntilDone({
-      abortSignal: AbortController.timeout(60000), // timeout of 60 seconds
+      abortSignal: AbortSignal.timeout(60000), // timeout of 60 seconds
     });
     assert.equal(fileValidatePoller.getOperationState().status, "succeeded");
   });

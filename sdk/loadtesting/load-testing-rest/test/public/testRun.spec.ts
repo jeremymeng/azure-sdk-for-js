@@ -4,7 +4,6 @@
 import { env, isPlaybackMode, Recorder } from "@azure-tools/test-recorder";
 import { assert } from "chai";
 import { createRecorder, createClient } from "./utils/recordedClient";
-import { AbortController } from "@azure/abort-controller";
 import { Context } from "mocha";
 import * as fs from "fs";
 import { AzureLoadTestingClient, isUnexpected } from "../../src";
@@ -60,7 +59,7 @@ describe("Test Run Creation", () => {
 
     const fileValidatePoller = await getLongRunningPoller(client, fileUploadResult);
     await fileValidatePoller.pollUntilDone({
-      abortSignal: AbortController.timeout(60000), // timeout of 60 seconds
+      abortSignal: AbortSignal.timeout(60000), // timeout of 60 seconds
     });
     assert.equal(fileValidatePoller.getOperationState().status, "succeeded");
   });
@@ -82,7 +81,7 @@ describe("Test Run Creation", () => {
     testRunCreationResult.body.testRunId = "adjwfjsdmf";
     const testRunPoller = await getLongRunningPoller(client, testRunCreationResult);
     await testRunPoller.pollUntilDone({
-      abortSignal: AbortController.timeout(60000), // timeout of 60 seconds
+      abortSignal: AbortSignal.timeout(60000), // timeout of 60 seconds
     });
 
     assert.equal(testRunPoller.getOperationState().status, "failed");
@@ -107,7 +106,7 @@ describe("Test Run Creation", () => {
     const testRunPoller = await getLongRunningPoller(client, testRunCreationResult);
     try {
       await testRunPoller.pollUntilDone({
-        abortSignal: AbortController.timeout(10), // timeout of 10 millieconds
+        abortSignal: AbortSignal.timeout(10), // timeout of 10 millieconds
       });
     } catch (ex: any) {
       assert.equal(ex.name, "AbortError");
@@ -133,7 +132,7 @@ describe("Test Run Creation", () => {
 
     const testRunPoller = await getLongRunningPoller(client, testRunCreationResult);
     await testRunPoller.pollUntilDone({
-      abortSignal: AbortController.timeout(60000), // timeout of 60 seconds
+      abortSignal: AbortSignal.timeout(60000), // timeout of 60 seconds
     });
 
     assert.equal(testRunPoller.getOperationState().status, "succeeded");

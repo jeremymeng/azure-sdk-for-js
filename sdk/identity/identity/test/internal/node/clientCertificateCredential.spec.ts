@@ -8,7 +8,6 @@ import * as path from "path";
 import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
 import { Recorder, delay, env, isPlaybackMode } from "@azure-tools/test-recorder";
 
-import { AbortController } from "@azure/abort-controller";
 import { ClientCertificateCredential } from "../../../src";
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import { Context } from "mocha";

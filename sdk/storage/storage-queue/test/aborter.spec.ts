@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import { assert } from "chai";
-import { AbortController } from "@azure/abort-controller";
 
 import { QueueClient } from "../src/QueueClient";
 import { getQSU } from "./utils";
@@ -56,7 +55,7 @@ describe("Aborter", () => {
 
   it("should abort after aborter timeout", async () => {
     try {
-      await queueClient.create({ abortSignal: AbortController.timeout(1) });
+      await queueClient.create({ abortSignal: AbortSignal.timeout(1) });
       assert.fail();
     } catch (err: any) {
       assert.equal(err.name, "AbortError");
@@ -68,7 +67,7 @@ describe("Aborter", () => {
       const aborter = new AbortController();
       const childAborter = new AbortController(
         aborter.signal,
-        AbortController.timeout(10 * 60 * 1000),
+        AbortSignal.timeout(10 * 60 * 1000),
       );
       const response = queueClient.create({ abortSignal: childAborter.signal });
       aborter.abort();

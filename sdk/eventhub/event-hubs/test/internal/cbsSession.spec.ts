@@ -8,7 +8,6 @@ import { createMockServer } from "../public/utils/mockService";
 import { ConnectionContext, createConnectionContext } from "../../src/connectionContext";
 import { openCbsSession } from "../../src/withAuth";
 import { CbsClient, StandardAbortMessage } from "@azure/core-amqp";
-import { AbortController } from "@azure/abort-controller";
 
 testWithServiceTypes((serviceVersion) => {
   const env = getEnvVars();

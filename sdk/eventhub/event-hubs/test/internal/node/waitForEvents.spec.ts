@@ -5,7 +5,7 @@ import { assert } from "@azure-tools/test-utils";
 import * as sinon from "sinon";
 import EventEmitter from "events";
 import { waitForEvents } from "../../../src/partitionReceiver";
-import { AbortSignalLike, AbortController } from "@azure/abort-controller";
+import { AbortSignalLike } from "@azure/abort-controller";
 
 function assertWaitForEvents(inputs: {
   maxEventCount: number;

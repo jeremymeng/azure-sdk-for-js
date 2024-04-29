@@ -3,7 +3,6 @@
 
 import * as fs from "fs";
 import { AvroReadableFromStream, AvroReader } from "../../src";
-import { AbortController } from "@azure/abort-controller";
 import { Readable } from "stream";
 import { arraysEqual } from "../../src/utils/utils.common";
 import { assert } from "chai";
@@ -70,7 +69,7 @@ describe("AvroReader", () => {
     const rfs = new AvroReadableFromStream(delayedReadable);
     const avroReader = new AvroReader(rfs);
 
-    const timeoutSignal = AbortController.timeout(1);
+    const timeoutSignal = AbortSignal.timeout(1);
     const manualAborter = new AbortController();
     const linkedAborter = new AbortController(timeoutSignal, manualAborter.signal);
 

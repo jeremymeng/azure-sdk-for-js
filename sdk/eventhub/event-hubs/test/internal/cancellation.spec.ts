@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import { EnvVarKeys, getEnvVars } from "../public/utils/testUtils";
-import { AbortController } from "@azure/abort-controller";
 import { createReceiver, PartitionReceiver } from "../../src/partitionReceiver";
 import { EventHubSender } from "../../src/eventHubSender";
 import chai, { assert } from "chai";

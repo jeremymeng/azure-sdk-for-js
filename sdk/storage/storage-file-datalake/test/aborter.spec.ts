@@ -3,7 +3,6 @@
 
 import { assert } from "chai";
 
-import { AbortController, AbortSignal } from "@azure/abort-controller";
 import { DataLakeFileSystemClient } from "../src";
 import { getDataLakeServiceClient, getUniqueName, recorderEnvSetup, uriSanitizers } from "./utils";
 import { Recorder } from "@azure-tools/test-recorder";
@@ -30,7 +29,7 @@ describe("Aborter", () => {
 
   it("Should abort after aborter timeout", async () => {
     try {
-      await fileSystemClient.create({ abortSignal: AbortController.timeout(1) });
+      await fileSystemClient.create({ abortSignal: AbortSignal.timeout(1) });
       assert.fail();
     } catch (err: any) {
       assert.equal(err.name, "AbortError");
@@ -64,7 +63,7 @@ describe("Aborter", () => {
       const aborter = new AbortController();
       const childAborter = new AbortController(
         aborter.signal,
-        AbortController.timeout(10 * 60 * 1000),
+        AbortSignal.timeout(10 * 60 * 1000),
       );
       const response = fileSystemClient.create({
         abortSignal: childAborter.signal,

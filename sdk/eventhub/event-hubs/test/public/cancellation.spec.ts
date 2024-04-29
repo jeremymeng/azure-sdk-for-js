@@ -3,7 +3,6 @@
 
 import { EnvVarKeys, getEnvVars } from "./utils/testUtils";
 import { EventHubConsumerClient, EventHubProducerClient } from "../../src";
-import { AbortController } from "@azure/abort-controller";
 import chai, { assert } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { createMockServer } from "./utils/mockService";
