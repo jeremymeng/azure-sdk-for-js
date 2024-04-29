@@ -77,9 +77,18 @@ export async function getTestRunCompletionPoller(
     pollUntilDone(pollOptions?: { abortSignal?: AbortSignalLike }): Promise<TestRunGet200Response> {
       return (resultPromise ??= (async () => {
         const { abortSignal: inputAbortSignal } = pollOptions || {};
-        const { signal: abortSignal } = inputAbortSignal
-          ? new AbortController([inputAbortSignal, abortController.signal])
-          : abortController;
+          // In the future we can use AbortSignal.any() instead
+          function abortListener(): void {
+            abortController.abort();
+          }
+          const abortSignal = abortController.signal;
+          if (inputAbortSignal?.aborted) {
+            abortController.abort();
+          } else if (!abortSignal.aborted) {
+            inputAbortSignal?.addEventListener("abort", abortListener, { once: true });
+          }
+
+        try {
         if (!poller.isDone()) {
           await poller.poll({ abortSignal });
           while (!poller.isDone()) {
@@ -88,6 +97,8 @@ export async function getTestRunCompletionPoller(
             await delay;
             await poller.poll({ abortSignal });
           }
+        }} finally {
+          inputAbortSignal?.removeEventListener("abort", abortListener);
         }
         switch (state.status) {
           case "succeeded":
