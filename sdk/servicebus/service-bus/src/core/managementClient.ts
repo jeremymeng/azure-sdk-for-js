@@ -265,23 +265,27 @@ export class ManagementClient extends LinkEntity<RequestResponseLink> {
             `${this.logPrefix} new replyTo address: ${this.replyTo} generated`,
           );
         }
-        const { abortSignal } = options ?? {};
+        const { abortSignal } = options;
         const aborter = new AbortController();
-        const { signal } = new AbortController([
-          aborter.signal,
-          ...(abortSignal ? [abortSignal] : []),
-        ]);
+
+        const abortListener = () => {
+          aborter.abort();
+        };
+        abortSignal?.addEventListener("abort", abortListener);
 
         if (!this.isOpen()) {
           await Promise.race([
-            this._init(signal),
+            this._init(aborter.signal),
             delay(retryTimeoutInMs, { abortSignal: aborter.signal }).then(() => {
               throw {
                 name: "OperationTimeoutError",
                 message: "The management request timed out. Please try again later.",
               };
             }),
-          ]).finally(() => aborter.abort());
+          ]).finally(() => {
+            aborter.abort();
+            abortSignal?.removeEventListener("abort", abortListener);
+          });
         }
 
         // time taken by the init operation
