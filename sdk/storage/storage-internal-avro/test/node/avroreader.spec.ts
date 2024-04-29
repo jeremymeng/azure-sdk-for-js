@@ -70,10 +70,8 @@ describe("AvroReader", () => {
     const avroReader = new AvroReader(rfs);
 
     const timeoutSignal = AbortSignal.timeout(1);
-    const manualAborter = new AbortController();
-    const linkedAborter = new AbortController(timeoutSignal, manualAborter.signal);
 
-    const iter = avroReader.parseObjects({ abortSignal: linkedAborter.signal });
+    const iter = avroReader.parseObjects({ abortSignal: timeoutSignal });
     let AbortErrorCaught = false;
     try {
       await iter.next();
@@ -83,7 +81,5 @@ describe("AvroReader", () => {
       }
     }
     assert.ok(AbortErrorCaught);
-
-    manualAborter.abort();
   });
 });

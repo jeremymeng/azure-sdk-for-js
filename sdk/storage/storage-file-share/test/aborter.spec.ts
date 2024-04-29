@@ -58,19 +58,4 @@ describe("Aborter", () => {
     await shareClient.create();
     aborter.abort();
   });
-
-  it("Should abort after parent aborter calls abort()", async () => {
-    try {
-      const aborter = new AbortController();
-      const childAborter = new AbortController(aborter.signal, AbortSignal.timeout(100));
-      const response = shareClient.create({
-        abortSignal: childAborter.signal,
-      });
-      aborter.abort();
-      await response;
-      assert.fail();
-    } catch (err: any) {
-      assert.equal(err.name, "AbortError");
-    }
-  });
 });

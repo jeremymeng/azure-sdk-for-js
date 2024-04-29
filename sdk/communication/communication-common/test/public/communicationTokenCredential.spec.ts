@@ -138,7 +138,7 @@ describe("CommunicationTokenCredential", function () {
     const tokenCredential = new AzureCommunicationTokenCredential({
       tokenRefresher,
     });
-    const options = { abortSignal: AbortSignal.none };
+    const options = { abortSignal: new AbortController().signal };
     tokenCredential.getToken(options);
     sinon.assert.calledOnceWithExactly(tokenRefresher, options.abortSignal);
   });

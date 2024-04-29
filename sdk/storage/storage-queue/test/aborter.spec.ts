@@ -61,20 +61,4 @@ describe("Aborter", () => {
       assert.equal(err.name, "AbortError");
     }
   });
-
-  it("should abort after parent aborter calls abort()", async () => {
-    try {
-      const aborter = new AbortController();
-      const childAborter = new AbortController(
-        aborter.signal,
-        AbortSignal.timeout(10 * 60 * 1000),
-      );
-      const response = queueClient.create({ abortSignal: childAborter.signal });
-      aborter.abort();
-      await response;
-      assert.fail();
-    } catch (err: any) {
-      assert.equal(err.name, "AbortError");
-    }
-  });
 });

@@ -37,7 +37,7 @@ describe("Aborter", () => {
   });
 
   it("Should not abort after calling abort()", async () => {
-    await fileSystemClient.create({ abortSignal: AbortSignal.none });
+    await fileSystemClient.create({ abortSignal: new AbortController().signal });
   });
 
   it("Should abort when calling abort() before request finishes", async () => {
@@ -56,23 +56,5 @@ describe("Aborter", () => {
     const aborter = new AbortController();
     await fileSystemClient.create({ abortSignal: aborter.signal });
     aborter.abort();
-  });
-
-  it("Should abort after father aborter calls abort()", async () => {
-    try {
-      const aborter = new AbortController();
-      const childAborter = new AbortController(
-        aborter.signal,
-        AbortSignal.timeout(10 * 60 * 1000),
-      );
-      const response = fileSystemClient.create({
-        abortSignal: childAborter.signal,
-      });
-      aborter.abort();
-      await response;
-      assert.fail();
-    } catch (err: any) {
-      assert.equal(err.name, "AbortError");
-    }
   });
 });

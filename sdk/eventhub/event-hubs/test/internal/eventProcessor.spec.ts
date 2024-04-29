@@ -1993,6 +1993,12 @@ testWithServiceTypes((serviceVersion) => {
         /* no-op */
       },
       dispatchEvent: () => true,
+      get reason(): string | undefined { return count >= maxCalls ? "AbortError" : undefined; },
+      throwIfAborted: () => {
+        if (count >= maxCalls) {
+          throw "AbortError";
+        }
+      }
     };
 
     return abortSignal;
