@@ -23,6 +23,12 @@ export default {
   overrides: [
     {
       files: ["*.ts", "*.cts", "*.mts", "*.tsx", "*.json"],
+      excludedFiles: [
+        "**/README*/*.ts",
+        "**/README*/*.json",
+        "**/src/**/*.json",
+        "**/test/**/*.json",
+      ],
       parserOptions: {
         project: [
           "./tsconfig.json",
@@ -140,7 +146,7 @@ export default {
       processor: "markdown/markdown",
     },
     {
-      files: ["**/*.md/*.{js,javascript}"],
+      files: ["**/*.md/*.js"],
       extends: ["plugin:markdown/recommended-legacy"],
       rules: {
         "no-restricted-imports": [
@@ -154,6 +160,18 @@ export default {
             ],
           },
         ],
+      },
+    },
+    {
+      files: ["*md/*.ts"],
+      parserOptions: {
+        project: null,
+      },
+      extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+      rules: {
+        "@typescript-eslint/no-unused-vars": "off",
+        "no-unused-vars": "off",
+        "no-undef": "off",
       },
     },
   ],
