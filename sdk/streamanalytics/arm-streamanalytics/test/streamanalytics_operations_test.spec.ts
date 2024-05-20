@@ -19,14 +19,14 @@ import { Context } from "mocha";
 import { StreamAnalyticsManagementClient } from "../src/streamAnalyticsManagementClient";
 
 const replaceableVariables: Record<string, string> = {
-  AZURE_CLIENT_ID: "azure_client_id",
-  AZURE_CLIENT_SECRET: "azure_client_secret",
-  AZURE_TENANT_ID: "88888888-8888-8888-8888-888888888888",
   SUBSCRIPTION_ID: "azure_subscription_id"
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -88,7 +88,7 @@ describe("StreamAnalytics test", () => {
 
   it("clusters delete test", async function () {
     const resArray = new Array();
-    const res = await client.clusters.beginDeleteAndWait(resourceGroup, resourcename
+    const res = await client.clusters.beginDeleteAndWait(resourceGroup, resourcename, testPollingOptions
     )
     for await (let item of client.clusters.listByResourceGroup(resourceGroup)) {
       resArray.push(item);

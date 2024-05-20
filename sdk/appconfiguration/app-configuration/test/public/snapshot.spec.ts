@@ -160,7 +160,7 @@ describe("AppConfigurationClient snapshot", () => {
 
   describe("recoverSnapshot", () => {
     it("recover a snapshot", async () => {
-      newSnapshot = await client.beginCreateSnapshotAndWait(snapshot1);
+      newSnapshot = await client.beginCreateSnapshotAndWait(snapshot1); // TODO:
       const archivedSnapshot = await client.archiveSnapshot(newSnapshot.name);
 
       const unarchivedSnapshot = await client.recoverSnapshot(archivedSnapshot.name);
