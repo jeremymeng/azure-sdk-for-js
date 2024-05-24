@@ -107,7 +107,7 @@ export interface BufferedCloseOptions extends OperationOptions {
 }
 
 /**
- * Options to configure the `enqueueEvents` method on the `EventHubBufferedProcuerClient`.
+ * Options to configure the `enqueueEvents` method on the `EventHubBufferedProducerClient`.
  */
 export interface EnqueueEventOptions extends SendBatchOptions {}
 
