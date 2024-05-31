@@ -6,6 +6,7 @@ import typescriptEslint from "typescript-eslint";
 import type { FlatConfig } from "@typescript-eslint/utils/ts-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
 import markdown from "eslint-plugin-markdown";
+import eslintPluginUnicorn from "eslint-plugin-unicorn";
 
 import eslintCustomized from "./eslint-customized";
 import markdownCustomized from "./markdown-customized";
@@ -13,6 +14,7 @@ import azureSdkCustomized from "./azure-sdk-customized";
 
 // to keep compat with old .eslintrc style usage
 import rootConfig from "./azure-sdk-base";
+import unicornCustomized from "./unicorn-customized";
 
 function recommended(plugin: FlatConfig.Plugin) {
   return typescriptEslint.config(
@@ -35,9 +37,11 @@ function recommended(plugin: FlatConfig.Plugin) {
     {
       plugins: {
         "@azure/azure-sdk": plugin,
+        unicorn: eslintPluginUnicorn,
         markdown,
       },
     },
+    unicornCustomized,
     // azure sdk customized
     eslintCustomized,
     ...markdownCustomized,
