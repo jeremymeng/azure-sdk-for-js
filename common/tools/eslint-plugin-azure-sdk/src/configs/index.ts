@@ -46,6 +46,9 @@ function recommended(plugin: FlatConfig.Plugin) {
     eslintCustomized,
     ...markdownCustomized,
     ...azureSdkCustomized(typescriptEslint.parser),
+    {
+      ignores: ["**/eslint.config.{js,cjs,mjs}"],
+    },
   );
 }
 
