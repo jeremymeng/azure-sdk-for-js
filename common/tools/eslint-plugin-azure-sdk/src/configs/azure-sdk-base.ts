@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import unicornCustomized from "./unicorn-customized";
+
 export default {
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -13,6 +15,7 @@ export default {
     "promise",
     "eslint-plugin-tsdoc",
     "import",
+    "unicorn",
     "markdown",
   ],
   env: {
@@ -36,6 +39,7 @@ export default {
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/eslint-recommended",
         "prettier",
+        "plugin:unicorn/recommended",
         "plugin:@azure/azure-sdk/recommended-legacy",
       ],
       rules: {
@@ -136,6 +140,7 @@ export default {
         // https://github.com/Azure/azure-sdk-for-js/issues/7610
         "@azure/azure-sdk/ts-doc-internal": "off",
         "tsdoc/syntax": "error",
+        ...unicornCustomized.rules,
       },
     },
     {
