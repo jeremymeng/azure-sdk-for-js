@@ -109,6 +109,7 @@ export default {
         "@typescript-eslint/no-var-requires": "off",
         "no-shadow": "off",
         "@typescript-eslint/no-shadow": ["error", { ignoreTypeValueShadow: true }],
+        "@typescript-eslint/consistent-type-imports": ["warn", { fixStyle: "inline-type-imports" }],
         // https://github.com/Azure/azure-sdk-for-js/issues/7608
         // "@typescript-eslint/member-ordering": [
         //   "error",
