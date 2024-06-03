@@ -2,24 +2,24 @@
 // Licensed under the MIT license.
 
 import type { INetworkModule, NetworkRequestOptions, NetworkResponse } from "@azure/msal-node";
-import { AccessToken, GetTokenOptions } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions } from "@azure/core-auth";
 import { ServiceClient } from "@azure/core-client";
 import { isNode } from "@azure/core-util";
 import {
-  PipelineRequest,
-  PipelineResponse,
+  type PipelineRequest,
+  type PipelineResponse,
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";
-import { AbortController, AbortSignalLike } from "@azure/abort-controller";
+import { AbortController, type AbortSignalLike } from "@azure/abort-controller";
 import { AuthenticationError, AuthenticationErrorName } from "../errors";
 import { getIdentityTokenEndpointSuffix } from "../util/identityTokenEndpoint";
 import { DefaultAuthorityHost, SDK_VERSION } from "../constants";
 import { tracingClient } from "../util/tracing";
 import { logger } from "../util/logging";
-import { TokenCredentialOptions } from "../tokenCredentialOptions";
+import { type TokenCredentialOptions } from "../tokenCredentialOptions";
 import {
-  TokenResponseParsedBody,
+  type TokenResponseParsedBody,
   parseExpirationTimestamp,
 } from "../credentials/managedIdentityCredential/utils";
 

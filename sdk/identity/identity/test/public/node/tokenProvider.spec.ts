@@ -2,9 +2,9 @@
 // Licensed under the MIT license.
 
 import { DefaultAzureCredential, getBearerTokenProvider } from "../../../src";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, delay, isPlaybackMode } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, delay, isPlaybackMode } from "@azure-tools/test-recorder";
+import { type Context } from "mocha";
 import { assert } from "@azure-tools/test-utils";
 
 describe("getBearerTokenProvider", function () {

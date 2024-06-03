@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "../../src";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "../../src";
 import {
-  CredentialLogger,
+  type CredentialLogger,
   credentialLogger,
   credentialLoggerInstance,
   formatError,

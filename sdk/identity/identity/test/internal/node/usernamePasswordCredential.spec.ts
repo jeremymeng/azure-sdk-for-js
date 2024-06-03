@@ -4,9 +4,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
 import { AzureLogger, setLogLevel } from "@azure/logger";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, isPlaybackMode } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, isPlaybackMode } from "@azure-tools/test-recorder";
+import { type Context } from "mocha";
 import { PublicClientApplication } from "@azure/msal-node";
 import Sinon from "sinon";
 import { UsernamePasswordCredential } from "../../../src";

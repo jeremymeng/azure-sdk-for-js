@@ -3,11 +3,11 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
-import { AbortController, AbortError } from "@azure/abort-controller";
-import { DeviceCodeCredential, DeviceCodePromptCallback } from "../../../src";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, delay, env, isLiveMode, isPlaybackMode } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import { AbortController, type AbortError } from "@azure/abort-controller";
+import { DeviceCodeCredential, type DeviceCodePromptCallback } from "../../../src";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, delay, env, isLiveMode, isPlaybackMode } from "@azure-tools/test-recorder";
+import { type Context } from "mocha";
 import { assert } from "@azure-tools/test-utils";
 
 // https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/Constants.cs#L9

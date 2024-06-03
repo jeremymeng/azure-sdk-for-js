@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
 import { AggregateAuthenticationError, CredentialUnavailableError } from "../errors";
 import { credentialLogger, formatError, formatSuccess } from "../util/logging";
 import { tracingClient } from "../util/tracing";

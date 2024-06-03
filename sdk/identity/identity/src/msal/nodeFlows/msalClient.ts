@@ -3,8 +3,8 @@
 
 import * as msal from "@azure/msal-node";
 
-import { AccessToken, GetTokenOptions } from "@azure/core-auth";
-import { PluginConfiguration, msalPlugins } from "./msalPlugins";
+import { type AccessToken, type GetTokenOptions } from "@azure/core-auth";
+import { type PluginConfiguration, msalPlugins } from "./msalPlugins";
 import { credentialLogger, formatSuccess } from "../../util/logging";
 import {
   defaultLoggerCallback,
@@ -18,13 +18,13 @@ import {
 } from "../utils";
 
 import { AuthenticationRequiredError } from "../../errors";
-import { AuthenticationRecord, CertificateParts } from "../types";
+import { type AuthenticationRecord, type CertificateParts } from "../types";
 import { IdentityClient } from "../../client/identityClient";
-import { MsalNodeOptions } from "./msalNodeCommon";
+import { type MsalNodeOptions } from "./msalNodeCommon";
 import { calculateRegionalAuthority } from "../../regionalAuthority";
 import { getLogLevel } from "@azure/logger";
 import { resolveTenantId } from "../../util/tenantIdUtils";
-import { DeviceCodePromptCallback } from "../../credentials/deviceCodeCredentialOptions";
+import { type DeviceCodePromptCallback } from "../../credentials/deviceCodeCredentialOptions";
 
 /**
  * The logger for all MsalClient instances.

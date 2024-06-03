@@ -3,13 +3,13 @@
 
 import {
   IdentityClient,
-  TokenResponse,
+  type TokenResponse,
   getIdentityClientAuthorityHost,
 } from "../../src/client/identityClient";
 import { IdentityTestContext, prepareMSALResponses } from "../httpRequests";
-import { IdentityTestContextInterface, createResponse } from "../httpRequestsCommon";
+import { type IdentityTestContextInterface, createResponse } from "../httpRequestsCommon";
 import { ClientSecretCredential } from "../../src";
-import { Context } from "mocha";
+import { type Context } from "mocha";
 import { PlaybackTenantId } from "../msalTestUtils";
 import { assert } from "chai";
 import { isExpectedError } from "../authTestUtils";

@@ -6,15 +6,15 @@
 
 import {
   InteractiveBrowserCredential,
-  InteractiveBrowserCredentialNodeOptions,
+  type InteractiveBrowserCredentialNodeOptions,
 } from "../../../src";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, env } from "@azure-tools/test-recorder";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, env } from "@azure-tools/test-recorder";
 
-import { Context } from "mocha";
-import Sinon from "sinon";
+import { type Context } from "mocha";
+import type Sinon from "sinon";
 import { assert } from "chai";
-import http from "http";
+import type http from "http";
 import { interactiveBrowserMockable } from "../../../src/msal/nodeFlows/msalOpenBrowser";
 
 declare global {

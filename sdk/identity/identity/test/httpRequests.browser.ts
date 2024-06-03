@@ -2,10 +2,10 @@
 // Licensed under the MIT license.
 
 import * as sinon from "sinon";
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
-import { AzureLogLevel, AzureLogger, getLogLevel, setLogLevel } from "@azure/logger";
-import { IdentityTestContextInterface, RawTestResponse, TestResponse } from "./httpRequestsCommon";
-import { RestError } from "@azure/core-rest-pipeline";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
+import { type AzureLogLevel, AzureLogger, getLogLevel, setLogLevel } from "@azure/logger";
+import { type IdentityTestContextInterface, type RawTestResponse, type TestResponse } from "./httpRequestsCommon";
+import { type RestError } from "@azure/core-rest-pipeline";
 import { getError } from "./authTestUtils";
 
 /**

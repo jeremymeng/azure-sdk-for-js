@@ -2,17 +2,17 @@
 // Licensed under the MIT license.
 
 import {
-  PipelineRequestOptions,
+  type PipelineRequestOptions,
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";
-import { GetTokenOptions } from "@azure/core-auth";
+import { type GetTokenOptions } from "@azure/core-auth";
 import { readFile } from "fs";
 import { AuthenticationError } from "../../errors";
 import { credentialLogger } from "../../util/logging";
-import { IdentityClient } from "../../client/identityClient";
+import { type IdentityClient } from "../../client/identityClient";
 import { mapScopesToResource } from "./utils";
-import { MSI, MSIConfiguration, MSIToken } from "./models";
+import { type MSI, type MSIConfiguration, type MSIToken } from "./models";
 import { azureArcAPIVersion } from "./constants";
 
 const msiName = "ManagedIdentityCredential - Azure Arc MSI";

@@ -5,15 +5,15 @@
 
 import * as path from "path";
 
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, delay, env, isPlaybackMode } from "@azure-tools/test-recorder";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, delay, env, isPlaybackMode } from "@azure-tools/test-recorder";
 
 import { AbortController } from "@azure/abort-controller";
 import { ClientCertificateCredential } from "../../../src";
 import { ConfidentialClientApplication } from "@azure/msal-node";
-import { Context } from "mocha";
+import { type Context } from "mocha";
 import { MsalNode } from "../../../src/msal/nodeFlows/msalNodeCommon";
-import Sinon from "sinon";
+import type Sinon from "sinon";
 import { assert } from "chai";
 import { parseCertificate } from "../../../src/msal/nodeFlows/msalClientCertificate";
 

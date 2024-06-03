@@ -5,9 +5,9 @@
 
 import path, { join } from "path";
 import { tmpdir } from "os";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, env } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, env } from "@azure-tools/test-recorder";
+import { type Context } from "mocha";
 import { assert } from "@azure-tools/test-utils";
 import { createJWTTokenFromCertificate } from "./utils/utils";
 import { mkdtempSync, rmdirSync, unlinkSync, writeFileSync } from "fs";
@@ -15,7 +15,7 @@ import {
   DefaultAzureCredential,
   ManagedIdentityCredential,
   WorkloadIdentityCredential,
-  WorkloadIdentityCredentialOptions,
+  type WorkloadIdentityCredentialOptions,
 } from "../../../src";
 
 describe.skip("WorkloadIdentityCredential", function () {

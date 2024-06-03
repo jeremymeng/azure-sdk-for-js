@@ -2,12 +2,12 @@
 // Licensed under the MIT license.
 
 import {
-  AccessToken,
-  AggregateAuthenticationError,
+  type AccessToken,
+  type AggregateAuthenticationError,
   AuthenticationRequiredError,
   ChainedTokenCredential,
   CredentialUnavailableError,
-  TokenCredential,
+  type TokenCredential,
 } from "../../src";
 import { assert } from "chai";
 import { getError } from "../authTestUtils";

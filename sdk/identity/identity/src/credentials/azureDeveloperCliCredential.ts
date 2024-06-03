@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
 import { credentialLogger, formatError, formatSuccess } from "../util/logging";
-import { AzureDeveloperCliCredentialOptions } from "./azureDeveloperCliCredentialOptions";
+import { type AzureDeveloperCliCredentialOptions } from "./azureDeveloperCliCredentialOptions";
 import { CredentialUnavailableError } from "../errors";
 import child_process from "child_process";
 import {

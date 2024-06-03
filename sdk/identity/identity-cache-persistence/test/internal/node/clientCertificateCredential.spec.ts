@@ -7,17 +7,17 @@
 import * as path from "path";
 import {
   ClientCertificateCredential,
-  TokenCachePersistenceOptions,
+  type TokenCachePersistenceOptions,
 } from "../../../../identity/src";
 import {
-  MsalTestCleanup,
+  type MsalTestCleanup,
   msalNodeTestSetup,
 } from "../../../../identity/test/node/msalNodeTestSetup";
-import { Recorder, env, isPlaybackMode } from "@azure-tools/test-recorder";
+import { type Recorder, env, isPlaybackMode } from "@azure-tools/test-recorder";
 import { MsalNode } from "../../../../identity/src/msal/nodeFlows/msalNodeCommon";
 import { createPersistence } from "./setup.spec";
 import { ConfidentialClientApplication } from "@azure/msal-node";
-import Sinon from "sinon";
+import type Sinon from "sinon";
 import assert from "assert";
 
 const ASSET_PATH = "assets";

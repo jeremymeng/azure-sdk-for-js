@@ -3,16 +3,16 @@
 
 import * as msalNode from "@azure/msal-node";
 
-import { AccessToken, GetTokenOptions } from "@azure/core-auth";
-import { AppType, AuthenticationRecord, MsalResult } from "../types";
+import { type AccessToken, type GetTokenOptions } from "@azure/core-auth";
+import { type AppType, type AuthenticationRecord, type MsalResult } from "../types";
 import {
   CACHE_CAE_SUFFIX,
   CACHE_NON_CAE_SUFFIX,
   DEFAULT_TOKEN_CACHE_NAME,
   DeveloperSignOnClientId,
 } from "../../constants";
-import { CredentialLogger, formatSuccess } from "../../util/logging";
-import { MsalFlow, MsalFlowOptions } from "../flows";
+import { type CredentialLogger, formatSuccess } from "../../util/logging";
+import { type MsalFlow, type MsalFlowOptions } from "../flows";
 import {
   defaultLoggerCallback,
   ensureValidMsalToken,
@@ -31,14 +31,14 @@ import {
   resolveTenantId,
 } from "../../util/tenantIdUtils";
 
-import { AbortSignalLike } from "@azure/abort-controller";
+import { type AbortSignalLike } from "@azure/abort-controller";
 import { AuthenticationRequiredError } from "../../errors";
-import { BrokerOptions } from "./brokerOptions";
-import { CredentialFlowGetTokenOptions } from "../credentials";
+import { type BrokerOptions } from "./brokerOptions";
+import { type CredentialFlowGetTokenOptions } from "../credentials";
 import { IdentityClient } from "../../client/identityClient";
-import { LogPolicyOptions } from "@azure/core-rest-pipeline";
-import { MultiTenantTokenCredentialOptions } from "../../credentials/multiTenantTokenCredentialOptions";
-import { TokenCachePersistenceOptions } from "./tokenCachePersistenceOptions";
+import { type LogPolicyOptions } from "@azure/core-rest-pipeline";
+import { type MultiTenantTokenCredentialOptions } from "../../credentials/multiTenantTokenCredentialOptions";
+import { type TokenCachePersistenceOptions } from "./tokenCachePersistenceOptions";
 import { calculateRegionalAuthority } from "../../regionalAuthority";
 import { getLogLevel } from "@azure/logger";
 

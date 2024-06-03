@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
 import {
   processMultiTenantRequest,
   resolveAdditionallyAllowedTenantIds,
 } from "../util/tenantIdUtils";
-import { UsernamePasswordCredentialOptions } from "./usernamePasswordCredentialOptions";
+import { type UsernamePasswordCredentialOptions } from "./usernamePasswordCredentialOptions";
 import { credentialLogger } from "../util/logging";
 import { ensureScopes } from "../util/scopeUtils";
 import { tracingClient } from "../util/tracing";
-import { MsalClient, createMsalClient } from "../msal/nodeFlows/msalClient";
+import { type MsalClient, createMsalClient } from "../msal/nodeFlows/msalClient";
 
 const logger = credentialLogger("UsernamePasswordCredential");
 

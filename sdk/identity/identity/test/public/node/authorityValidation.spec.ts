@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, env } from "@azure-tools/test-recorder";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, env } from "@azure-tools/test-recorder";
 import { ClientSecretCredential } from "../../../src";
-import { Context } from "mocha";
+import { type Context } from "mocha";
 import { assert } from "@azure-tools/test-utils";
 
 describe("AuthorityValidation", function () {

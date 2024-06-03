@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
 import {
-  InteractiveBrowserCredentialInBrowserOptions,
-  InteractiveBrowserCredentialNodeOptions,
+  type InteractiveBrowserCredentialInBrowserOptions,
+  type InteractiveBrowserCredentialNodeOptions,
 } from "./interactiveBrowserCredentialOptions";
 import { credentialLogger, formatError } from "../util/logging";
 import {
   processMultiTenantRequest,
   resolveAdditionallyAllowedTenantIds,
 } from "../util/tenantIdUtils";
-import { AuthenticationRecord } from "../msal/types";
+import { type AuthenticationRecord } from "../msal/types";
 import { MSALAuthCode } from "../msal/browserFlows/msalAuthCode";
-import { MsalBrowserFlowOptions } from "../msal/browserFlows/msalBrowserCommon";
-import { MsalFlow } from "../msal/flows";
+import { type MsalBrowserFlowOptions } from "../msal/browserFlows/msalBrowserCommon";
+import { type MsalFlow } from "../msal/flows";
 import { ensureScopes } from "../util/scopeUtils";
 import { tracingClient } from "../util/tracing";
 

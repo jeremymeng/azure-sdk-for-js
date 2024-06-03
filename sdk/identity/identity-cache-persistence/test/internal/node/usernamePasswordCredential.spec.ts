@@ -5,15 +5,15 @@
 /* eslint-disable sort-imports */
 
 import {
-  MsalTestCleanup,
+  type MsalTestCleanup,
   msalNodeTestSetup,
 } from "../../../../identity/test/node/msalNodeTestSetup";
-import { TokenCachePersistenceOptions, UsernamePasswordCredential } from "../../../../identity/src";
+import { type TokenCachePersistenceOptions, UsernamePasswordCredential } from "../../../../identity/src";
 import { MsalNode } from "../../../../identity/src/msal/nodeFlows/msalNodeCommon";
 import { PublicClientApplication } from "@azure/msal-node";
 import { createPersistence } from "./setup.spec";
-import { Recorder, env } from "@azure-tools/test-recorder";
-import Sinon from "sinon";
+import { type Recorder, env } from "@azure-tools/test-recorder";
+import type Sinon from "sinon";
 import assert from "assert";
 
 describe("UsernamePasswordCredential (internal)", function (this: Mocha.Suite) {

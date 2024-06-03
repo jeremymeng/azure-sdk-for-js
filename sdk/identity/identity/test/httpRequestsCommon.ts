@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as sinon from "sinon";
-import { AccessToken, GetTokenOptions, TokenCredential } from "../src";
-import { AzureLogLevel, AzureLogger } from "@azure/logger";
-import { RawHttpHeaders, RestError } from "@azure/core-rest-pipeline";
+import type * as sinon from "sinon";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "../src";
+import { type AzureLogLevel, type AzureLogger } from "@azure/logger";
+import { type RawHttpHeaders, type RestError } from "@azure/core-rest-pipeline";
 
 /**
  * A simple structure representing a response.

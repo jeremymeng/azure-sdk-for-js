@@ -1,22 +1,22 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
 import {
   processMultiTenantRequest,
   resolveAdditionallyAllowedTenantIds,
   resolveTenantId,
 } from "../util/tenantIdUtils";
 import {
-  DeviceCodeCredentialOptions,
-  DeviceCodeInfo,
-  DeviceCodePromptCallback,
+  type DeviceCodeCredentialOptions,
+  type DeviceCodeInfo,
+  type DeviceCodePromptCallback,
 } from "./deviceCodeCredentialOptions";
-import { AuthenticationRecord } from "../msal/types";
+import { type AuthenticationRecord } from "../msal/types";
 import { credentialLogger } from "../util/logging";
 import { ensureScopes } from "../util/scopeUtils";
 import { tracingClient } from "../util/tracing";
-import { MsalClient, createMsalClient } from "../msal/nodeFlows/msalClient";
+import { type MsalClient, createMsalClient } from "../msal/nodeFlows/msalClient";
 import { DeveloperSignOnClientId } from "../constants";
 
 const logger = credentialLogger("DeviceCodeCredential");

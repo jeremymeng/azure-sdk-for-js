@@ -3,18 +3,18 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
 import {
-  InteractiveBrowserCredentialInBrowserOptions,
-  InteractiveBrowserCredentialNodeOptions,
+  type InteractiveBrowserCredentialInBrowserOptions,
+  type InteractiveBrowserCredentialNodeOptions,
 } from "./interactiveBrowserCredentialOptions";
 import {
   processMultiTenantRequest,
   resolveAdditionallyAllowedTenantIds,
 } from "../util/tenantIdUtils";
 
-import { AuthenticationRecord } from "../msal/types";
-import { MsalFlow } from "../msal/flows";
+import { type AuthenticationRecord } from "../msal/types";
+import { type MsalFlow } from "../msal/flows";
 import { MsalOpenBrowser } from "../msal/nodeFlows/msalOpenBrowser";
 import { credentialLogger } from "../util/logging";
 import { ensureScopes } from "../util/scopeUtils";

@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import * as msalNode from "@azure/msal-node";
+import type * as msalNode from "@azure/msal-node";
 
-import { MsalNode, MsalNodeOptions } from "./msalNodeCommon";
+import { MsalNode, type MsalNodeOptions } from "./msalNodeCommon";
 
-import { AccessToken } from "@azure/core-auth";
-import { CredentialFlowGetTokenOptions } from "../credentials";
-import { DeviceCodePromptCallback } from "../../credentials/deviceCodeCredentialOptions";
+import { type AccessToken } from "@azure/core-auth";
+import { type CredentialFlowGetTokenOptions } from "../credentials";
+import { type DeviceCodePromptCallback } from "../../credentials/deviceCodeCredentialOptions";
 import { handleMsalError } from "../utils";
 
 /**

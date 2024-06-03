@@ -2,16 +2,16 @@
 // Licensed under the MIT license.
 
 import {
-  ClientCertificateCredentialPEMConfiguration,
-  ClientCertificatePEMCertificate,
-  ClientCertificatePEMCertificatePath,
+  type ClientCertificateCredentialPEMConfiguration,
+  type ClientCertificatePEMCertificate,
+  type ClientCertificatePEMCertificatePath,
 } from "../../credentials/clientCertificateCredential";
-import { MsalNode, MsalNodeOptions } from "./msalNodeCommon";
+import { MsalNode, type MsalNodeOptions } from "./msalNodeCommon";
 import { createHash, createPrivateKey } from "crypto";
 
-import { AccessToken } from "@azure/core-auth";
-import { ClientCredentialRequest } from "@azure/msal-node";
-import { CredentialFlowGetTokenOptions } from "../credentials";
+import { type AccessToken } from "@azure/core-auth";
+import { type ClientCredentialRequest } from "@azure/msal-node";
+import { type CredentialFlowGetTokenOptions } from "../credentials";
 import { formatError } from "../../util/logging";
 import { handleMsalError } from "../utils";
 import { promisify } from "util";

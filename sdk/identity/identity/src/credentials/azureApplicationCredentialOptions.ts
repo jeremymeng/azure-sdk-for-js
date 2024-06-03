@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { CredentialPersistenceOptions } from "./credentialPersistenceOptions";
-import { MultiTenantTokenCredentialOptions } from "./multiTenantTokenCredentialOptions";
+import { type CredentialPersistenceOptions } from "./credentialPersistenceOptions";
+import { type MultiTenantTokenCredentialOptions } from "./multiTenantTokenCredentialOptions";
 
 /**
  * Provides options to configure the {@link AzureApplicationCredential} class.

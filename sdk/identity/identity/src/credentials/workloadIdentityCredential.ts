@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
 import { ClientAssertionCredential } from "./clientAssertionCredential";
-import { WorkloadIdentityCredentialOptions } from "./workloadIdentityCredentialOptions";
+import { type WorkloadIdentityCredentialOptions } from "./workloadIdentityCredentialOptions";
 import { readFile } from "fs/promises";
 import { CredentialUnavailableError } from "../errors";
 import { credentialLogger, processEnvVars } from "../util/logging";

@@ -5,11 +5,11 @@
 
 import * as path from "path";
 
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
 
 import { ClientAssertionCredential } from "../../../src";
 import { ConfidentialClientApplication } from "@azure/msal-node";
-import { Context } from "mocha";
+import { type Context } from "mocha";
 import type Sinon from "sinon";
 import { assert } from "chai";
 import { createJWTTokenFromCertificate } from "../../public/node/utils/utils";

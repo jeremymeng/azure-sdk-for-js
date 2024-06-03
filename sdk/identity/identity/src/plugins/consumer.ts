@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AzurePluginContext, IdentityPlugin } from "./provider";
+import { type AzurePluginContext, type IdentityPlugin } from "./provider";
 import {
   msalNodeFlowCacheControl,
   msalNodeFlowNativeBrokerControl,

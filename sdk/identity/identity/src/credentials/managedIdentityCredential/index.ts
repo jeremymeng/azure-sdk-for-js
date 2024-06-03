@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
-import { AppTokenProviderParameters, ConfidentialClientApplication } from "@azure/msal-node";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
+import { type AppTokenProviderParameters, ConfidentialClientApplication } from "@azure/msal-node";
 import {
   AuthenticationError,
   AuthenticationRequiredError,
   CredentialUnavailableError,
 } from "../../errors";
-import { MSI, MSIConfiguration, MSIToken } from "./models";
-import { MsalResult, MsalToken, ValidMsalToken } from "../../msal/types";
+import { type MSI, type MSIConfiguration, type MSIToken } from "./models";
+import { type MsalResult, type MsalToken, type ValidMsalToken } from "../../msal/types";
 import { credentialLogger, formatError, formatSuccess } from "../../util/logging";
 
 import { DeveloperSignOnClientId } from "../../constants";
 import { IdentityClient } from "../../client/identityClient";
-import { TokenCredentialOptions } from "../../tokenCredentialOptions";
+import { type TokenCredentialOptions } from "../../tokenCredentialOptions";
 import { appServiceMsi2017 } from "./appServiceMsi2017";
 import { appServiceMsi2019 } from "./appServiceMsi2019";
 import { arcMsi } from "./arcMsi";

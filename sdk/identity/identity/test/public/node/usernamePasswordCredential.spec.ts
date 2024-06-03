@@ -3,11 +3,11 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, delay } from "@azure-tools/test-recorder";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, delay } from "@azure-tools/test-recorder";
 
 import { AbortController } from "@azure/abort-controller";
-import { Context } from "mocha";
+import { type Context } from "mocha";
 import { UsernamePasswordCredential } from "../../../src";
 import { assert } from "@azure-tools/test-utils";
 import { getUsernamePasswordStaticResources } from "../../msalTestUtils";

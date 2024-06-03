@@ -4,13 +4,13 @@
 import * as msalClient from "../../../src/msal/nodeFlows/msalClient";
 
 import {
-  AuthenticationResult,
+  type AuthenticationResult,
   ClientApplication,
   ConfidentialClientApplication,
   PublicClientApplication,
 } from "@azure/msal-node";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, env, isLiveMode } from "@azure-tools/test-recorder";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, env, isLiveMode } from "@azure-tools/test-recorder";
 
 import { AbortError } from "@azure/abort-controller";
 import { AuthenticationRequiredError } from "../../../src/errors";
@@ -20,7 +20,7 @@ import { credentialLogger } from "../../../src/util/logging";
 import { msalPlugins } from "../../../src/msal/nodeFlows/msalPlugins";
 import sinon from "sinon";
 import { DeveloperSignOnClientId } from "../../../src/constants";
-import { Context } from "mocha";
+import { type Context } from "mocha";
 import { getUsernamePasswordStaticResources } from "../../msalTestUtils";
 
 describe("MsalClient", function () {

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { MsalNode, MsalNodeOptions } from "./msalNodeCommon";
+import { MsalNode, type MsalNodeOptions } from "./msalNodeCommon";
 
-import { AccessToken } from "@azure/core-auth";
-import { CredentialFlowGetTokenOptions } from "../credentials";
+import { type AccessToken } from "@azure/core-auth";
+import { type CredentialFlowGetTokenOptions } from "../credentials";
 import { handleMsalError } from "../utils";
 import { isError } from "@azure/core-util";
 

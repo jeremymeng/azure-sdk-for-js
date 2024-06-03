@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { AzureLogger, setLogLevel } from "@azure/logger";
-import { IdentityTestContextInterface, createResponse } from "../../httpRequestsCommon";
+import { type IdentityTestContextInterface, createResponse } from "../../httpRequestsCommon";
 import {
   imdsApiVersion,
   imdsEndpointPath,
@@ -10,8 +10,8 @@ import {
 } from "../../../src/credentials/managedIdentityCredential/constants";
 import { imdsMsi } from "../../../src/credentials/managedIdentityCredential/imdsMsi";
 import { mkdtempSync, rmdirSync, unlinkSync, writeFileSync } from "fs";
-import { Context } from "mocha";
-import { GetTokenOptions } from "@azure/core-auth";
+import { type Context } from "mocha";
+import { type GetTokenOptions } from "@azure/core-auth";
 import { IdentityTestContext } from "../../httpRequests";
 import { ManagedIdentityCredential } from "../../../src";
 import { RestError } from "@azure/core-rest-pipeline";

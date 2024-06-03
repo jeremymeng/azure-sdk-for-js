@@ -4,20 +4,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
 import {
-  AccessToken,
+  type AccessToken,
   DeviceCodeCredential,
-  TokenCredential,
+  type TokenCredential,
   UsernamePasswordCredential,
 } from "../../../src";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
-import { Recorder, delay, env } from "@azure-tools/test-recorder";
+import { type MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import { type Recorder, delay, env } from "@azure-tools/test-recorder";
 import {
   bearerTokenAuthenticationPolicy,
   createDefaultHttpClient,
   createEmptyPipeline,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";
-import { Context } from "mocha";
+import { type Context } from "mocha";
 import { DeveloperSignOnClientId } from "../../../src/constants";
 import { IdentityClient } from "../../../src/client/identityClient";
 import { assert } from "chai";

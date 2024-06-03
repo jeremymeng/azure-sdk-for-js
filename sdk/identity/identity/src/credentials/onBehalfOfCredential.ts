@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
 import {
-  OnBehalfOfCredentialCertificateOptions,
-  OnBehalfOfCredentialOptions,
-  OnBehalfOfCredentialSecretOptions,
+  type OnBehalfOfCredentialCertificateOptions,
+  type OnBehalfOfCredentialOptions,
+  type OnBehalfOfCredentialSecretOptions,
 } from "./onBehalfOfCredentialOptions";
 import {
   processMultiTenantRequest,
   resolveAdditionallyAllowedTenantIds,
 } from "../util/tenantIdUtils";
-import { CredentialPersistenceOptions } from "./credentialPersistenceOptions";
-import { MsalFlow } from "../msal/flows";
+import { type CredentialPersistenceOptions } from "./credentialPersistenceOptions";
+import { type MsalFlow } from "../msal/flows";
 import { MsalOnBehalfOf } from "../msal/nodeFlows/msalOnBehalfOf";
-import { MultiTenantTokenCredentialOptions } from "./multiTenantTokenCredentialOptions";
+import { type MultiTenantTokenCredentialOptions } from "./multiTenantTokenCredentialOptions";
 import { credentialLogger } from "../util/logging";
 import { ensureScopes } from "../util/scopeUtils";
 import { tracingClient } from "../util/tracing";

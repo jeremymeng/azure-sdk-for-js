@@ -10,9 +10,9 @@ import {
   FilePersistenceWithDataProtection,
   KeychainPersistence,
   LibSecretPersistence,
-  IPersistence as Persistence,
+  type IPersistence as Persistence,
 } from "@azure/msal-node-extensions";
-import { TokenCachePersistenceOptions } from "@azure/identity";
+import { type TokenCachePersistenceOptions } from "@azure/identity";
 
 /**
  * Local application data folder

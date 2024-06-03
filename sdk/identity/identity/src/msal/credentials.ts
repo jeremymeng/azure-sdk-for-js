@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AccessToken, GetTokenOptions } from "@azure/core-auth";
-import { AuthenticationRecord } from "./types";
+import { type AccessToken, type GetTokenOptions } from "@azure/core-auth";
+import { type AuthenticationRecord } from "./types";
 
 /**
  * The MSAL clients `getToken` requests can receive a `correlationId` and `disableAutomaticAuthentication`.

@@ -4,16 +4,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable sort-imports */
 
-import { DeviceCodeCredential, TokenCachePersistenceOptions } from "../../../../identity/src";
+import { DeviceCodeCredential, type TokenCachePersistenceOptions } from "../../../../identity/src";
 import {
-  MsalTestCleanup,
+  type MsalTestCleanup,
   msalNodeTestSetup,
 } from "../../../../identity/test/node/msalNodeTestSetup";
-import { Recorder, isLiveMode } from "@azure-tools/test-recorder";
+import { type Recorder, isLiveMode } from "@azure-tools/test-recorder";
 import { createPersistence } from "./setup.spec";
 import { MsalNode } from "../../../../identity/src/msal/nodeFlows/msalNodeCommon";
 import { PublicClientApplication } from "@azure/msal-node";
-import Sinon from "sinon";
+import type Sinon from "sinon";
 import assert from "assert";
 
 describe("DeviceCodeCredential (internal)", function (this: Mocha.Suite) {
