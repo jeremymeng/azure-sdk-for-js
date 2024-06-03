@@ -2,22 +2,22 @@
 // Licensed under the MIT license.
 
 import {
-  HttpOperationMode,
-  RunningOperation,
-  ResourceLocationConfig,
-  OperationResponse,
-  RawResponse,
-  ResponseBody,
+  type HttpOperationMode,
+  type RunningOperation,
+  type ResourceLocationConfig,
+  type OperationResponse,
+  type RawResponse,
+  type ResponseBody,
 } from "./models.js";
 import {
-  LroError,
-  OperationConfig,
-  OperationState,
-  OperationStatus,
-  RestorableOperationState,
+  type LroError,
+  type OperationConfig,
+  type OperationState,
+  type OperationStatus,
+  type RestorableOperationState,
 } from "../poller/models.js";
 import { pollOperation } from "../poller/operation.js";
-import { AbortSignalLike } from "@azure/abort-controller";
+import { type AbortSignalLike } from "@azure/abort-controller";
 import { logger } from "../logger.js";
 
 function getOperationLocationPollingUrl(inputs: {

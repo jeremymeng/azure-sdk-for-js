@@ -4,11 +4,11 @@
 import { describe, it, assert } from "vitest";
 import * as MediaMappers from "./testMappers2.js";
 import {
-  CompositeMapper,
-  DictionaryMapper,
-  EnumMapper,
-  Mapper,
-  SequenceMapper,
+  type CompositeMapper,
+  type DictionaryMapper,
+  type EnumMapper,
+  type Mapper,
+  type SequenceMapper,
   createSerializer,
 } from "../src/index.js";
 import { Mappers } from "./testMappers1.js";

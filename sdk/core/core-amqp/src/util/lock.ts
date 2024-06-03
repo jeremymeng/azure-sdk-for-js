@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AbortError, AbortSignalLike } from "@azure/abort-controller";
+import { AbortError, type AbortSignalLike } from "@azure/abort-controller";
 import { OperationTimeoutError } from "rhea-promise";
 import { StandardAbortMessage } from "./constants.js";
 import { logger } from "../log.js";

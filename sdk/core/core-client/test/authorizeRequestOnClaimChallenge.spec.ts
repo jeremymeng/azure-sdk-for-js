@@ -2,10 +2,10 @@
 // Licensed under the MIT license.
 
 import { describe, it, assert } from "vitest";
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions, type TokenCredential } from "@azure/core-auth";
 import {
-  HttpClient,
-  PipelineResponse,
+  type HttpClient,
+  type PipelineResponse,
   bearerTokenAuthenticationPolicy,
   createEmptyPipeline,
   createHttpHeaders,

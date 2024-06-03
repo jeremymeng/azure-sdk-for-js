@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { describe, it, assert, expect, vi } from "vitest";
-import { SendRequest, createPipelineRequest, decompressResponsePolicy } from "../../src/index.js";
+import { type SendRequest, createPipelineRequest, decompressResponsePolicy } from "../../src/index.js";
 
 describe("decompressResponsePolicy (node)", function () {
   it("Sets the expected flag on the request", function () {

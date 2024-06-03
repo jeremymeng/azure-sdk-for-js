@@ -2,12 +2,12 @@
 // Licensed under the MIT license.
 
 import {
-  AuthorizeRequestOnChallengeOptions,
-  PipelineRequest,
-  PipelineResponse,
+  type AuthorizeRequestOnChallengeOptions,
+  type PipelineRequest,
+  type PipelineResponse,
 } from "@azure/core-rest-pipeline";
 
-import { GetTokenOptions } from "@azure/core-auth";
+import { type GetTokenOptions } from "@azure/core-auth";
 
 /**
  * A set of constants used internally when processing requests.

@@ -5,7 +5,7 @@ import { describe, it, assert } from "vitest";
 import {
   Constants,
   MessagingError,
-  RetryConfig,
+  type RetryConfig,
   RetryMode,
   RetryOperationType,
   delay,

@@ -3,27 +3,27 @@
 
 import { describe, it, assert } from "vitest";
 import {
-  CompositeMapper,
-  DictionaryMapper,
-  FullOperationResponse,
-  Mapper,
+  type CompositeMapper,
+  type DictionaryMapper,
+  type FullOperationResponse,
+  type Mapper,
   MapperTypeNames,
-  OperationArguments,
-  OperationQueryParameter,
-  OperationRequest,
-  OperationSpec,
-  ParameterPath,
-  QueryCollectionFormat,
+  type OperationArguments,
+  type OperationQueryParameter,
+  type OperationRequest,
+  type OperationSpec,
+  type ParameterPath,
+  type QueryCollectionFormat,
   ServiceClient,
   createSerializer,
   serializationPolicy,
 } from "../src/index.js";
 import {
-  HttpClient,
-  PipelinePolicy,
-  PipelineRequest,
-  RestError,
-  SendRequest,
+  type HttpClient,
+  type PipelinePolicy,
+  type PipelineRequest,
+  type RestError,
+  type SendRequest,
   createEmptyPipeline,
   createHttpHeaders,
   createPipelineRequest,
@@ -32,7 +32,7 @@ import {
   getOperationArgumentValueFromParameter,
   getOperationRequestInfo,
 } from "../src/operationHelpers.js";
-import { TokenCredential } from "@azure/core-auth";
+import { type TokenCredential } from "@azure/core-auth";
 import { assertServiceClientResponse } from "./utils/serviceClient.js";
 import { deserializationPolicy } from "../src/deserializationPolicy.js";
 import { getCachedDefaultHttpClient } from "../src/httpClientCache.js";

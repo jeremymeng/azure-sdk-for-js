@@ -3,17 +3,17 @@
 
 import * as base64 from "./base64.js";
 import {
-  BaseMapper,
-  CompositeMapper,
-  DictionaryMapper,
-  EnumMapper,
-  Mapper,
-  MapperConstraints,
-  PolymorphicDiscriminator,
-  RequiredSerializerOptions,
-  SequenceMapper,
-  Serializer,
-  SerializerOptions,
+  type BaseMapper,
+  type CompositeMapper,
+  type DictionaryMapper,
+  type EnumMapper,
+  type Mapper,
+  type MapperConstraints,
+  type PolymorphicDiscriminator,
+  type RequiredSerializerOptions,
+  type SequenceMapper,
+  type Serializer,
+  type SerializerOptions,
   XML_ATTRKEY,
   XML_CHARKEY,
 } from "./interfaces.js";

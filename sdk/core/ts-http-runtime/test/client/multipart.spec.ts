@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { describe, it, assert } from "vitest";
-import { PartDescriptor, buildBodyPart } from "../../src/client/multipart.js";
+import { type PartDescriptor, buildBodyPart } from "../../src/client/multipart.js";
 import { stringToUint8Array } from "../../src/util/bytesEncoding.js";
 
 describe("multipart buildBodyPart", () => {

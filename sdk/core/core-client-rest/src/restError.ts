@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { PipelineResponse, RestError, createHttpHeaders } from "@azure/core-rest-pipeline";
-import { PathUncheckedResponse } from "./common.js";
+import { type PipelineResponse, RestError, createHttpHeaders } from "@azure/core-rest-pipeline";
+import { type PathUncheckedResponse } from "./common.js";
 
 /**
  * Creates a rest error from a PathUnchecked response

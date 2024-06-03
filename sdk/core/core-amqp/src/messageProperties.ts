@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 /* eslint-disable eqeqeq */
 
-import { MessageProperties as RheaMessageProperties } from "rhea-promise";
+import { type MessageProperties as RheaMessageProperties } from "rhea-promise";
 import { logger } from "./log.js";
 
 /**

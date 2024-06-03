@@ -2,11 +2,11 @@
 // Licensed under the MIT license.
 
 import {
-  Pipeline,
-  PipelinePolicy,
-  PipelineRequest,
-  PipelineResponse,
-  SendRequest,
+  type Pipeline,
+  type PipelinePolicy,
+  type PipelineRequest,
+  type PipelineResponse,
+  type SendRequest,
 } from "@azure/core-rest-pipeline";
 
 export const disableKeepAlivePolicyName = "DisableKeepAlivePolicy";

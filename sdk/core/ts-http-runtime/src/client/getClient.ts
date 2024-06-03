@@ -1,23 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { TokenCredential, isTokenCredential } from "../auth/tokenCredential.js";
-import { KeyCredential, isKeyCredential } from "../auth/keyCredential.js";
-import { HttpClient, HttpMethods } from "../interfaces.js";
-import { Pipeline } from "../pipeline.js";
+import { type TokenCredential, isTokenCredential } from "../auth/tokenCredential.js";
+import { type KeyCredential, isKeyCredential } from "../auth/keyCredential.js";
+import { type HttpClient, type HttpMethods } from "../interfaces.js";
+import { type Pipeline } from "../pipeline.js";
 import { createDefaultPipeline } from "./clientHelpers.js";
 import {
-  Client,
-  ClientOptions,
-  HttpBrowserStreamResponse,
-  HttpNodeStreamResponse,
-  RequestParameters,
-  ResourceMethods,
-  StreamableMethod,
+  type Client,
+  type ClientOptions,
+  type HttpBrowserStreamResponse,
+  type HttpNodeStreamResponse,
+  type RequestParameters,
+  type ResourceMethods,
+  type StreamableMethod,
 } from "./common.js";
 import { sendRequest } from "./sendRequest.js";
 import { buildRequestUrl } from "./urlHelpers.js";
-import { PipelineOptions } from "../createPipelineFromOptions.js";
+import { type PipelineOptions } from "../createPipelineFromOptions.js";
 
 /**
  * Creates a client with a default pipeline

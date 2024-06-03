@@ -3,9 +3,9 @@
 
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
-  PipelineResponse,
+  type PipelineResponse,
   RestError,
-  SendRequest,
+  type SendRequest,
   createHttpHeaders,
   createPipelineRequest,
 } from "../src/index.js";

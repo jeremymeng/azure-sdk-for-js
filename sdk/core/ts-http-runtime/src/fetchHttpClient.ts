@@ -3,11 +3,11 @@
 
 import { AbortError } from "./abort-controller/AbortError.js";
 import {
-  HttpClient,
-  HttpHeaders as PipelineHeaders,
-  PipelineRequest,
-  PipelineResponse,
-  TransferProgressEvent,
+  type HttpClient,
+  type HttpHeaders as PipelineHeaders,
+  type PipelineRequest,
+  type PipelineResponse,
+  type TransferProgressEvent,
 } from "./interfaces.js";
 import { RestError } from "./restError.js";
 import { createHttpHeaders } from "./httpHeaders.js";

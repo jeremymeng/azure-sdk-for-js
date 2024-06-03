@@ -2,10 +2,10 @@
 // Licensed under the MIT license.
 
 import {
-  Instrumenter,
-  InstrumenterSpanOptions,
-  TracingContext,
-  TracingSpan,
+  type Instrumenter,
+  type InstrumenterSpanOptions,
+  type TracingContext,
+  type TracingSpan,
 } from "./interfaces.js";
 
 import { createTracingContext } from "./tracingContext.js";

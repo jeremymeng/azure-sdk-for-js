@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { FullOperationResponse } from "@azure/core-client";
-import { PipelineResponse, createHttpHeaders } from "@azure/core-rest-pipeline";
+import { type FullOperationResponse } from "@azure/core-client";
+import { type PipelineResponse, createHttpHeaders } from "@azure/core-rest-pipeline";
 import {
-  HttpHeadersLike,
-  WebResourceLike,
+  type HttpHeadersLike,
+  type WebResourceLike,
   toHttpHeadersLike,
   toPipelineRequest,
   toWebResourceLike,

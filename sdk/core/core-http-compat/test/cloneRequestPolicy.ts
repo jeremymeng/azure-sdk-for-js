@@ -2,11 +2,11 @@
 // Licensed under the MIT license.
 
 import {
-  CompatResponse,
-  RequestPolicy,
-  RequestPolicyFactory,
-  RequestPolicyOptionsLike,
-  WebResourceLike,
+  type CompatResponse,
+  type RequestPolicy,
+  type RequestPolicyFactory,
+  type RequestPolicyOptionsLike,
+  type WebResourceLike,
 } from "../src/index.js";
 
 export function cloneRequestPolicy(): RequestPolicyFactory {

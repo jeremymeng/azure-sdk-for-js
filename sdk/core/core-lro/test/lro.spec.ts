@@ -2,11 +2,11 @@
 // Licensed under the MIT license.
 
 import {
-  ImplementationName,
+  type ImplementationName,
   assertDivergentBehavior,
   assertError,
   createDoubleHeaders,
-  Result,
+  type Result,
 } from "./utils/utils.js";
 import { describe, it, assert, expect } from "vitest";
 import { createRunLroWith, createTestPoller } from "./utils/router.js";

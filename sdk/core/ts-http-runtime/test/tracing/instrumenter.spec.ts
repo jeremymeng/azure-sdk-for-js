@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { Instrumenter, TracingSpan } from "../../src/tracing/interfaces.js";
+import { type Instrumenter, type TracingSpan } from "../../src/tracing/interfaces.js";
 import {
   createDefaultInstrumenter,
   createDefaultTracingSpan,

@@ -2,13 +2,13 @@
 // Licensed under the MIT license.
 
 import {
-  CompositeMapper,
-  Mapper,
-  OperationArguments,
-  OperationParameter,
-  OperationRequest,
-  OperationRequestInfo,
-  ParameterPath,
+  type CompositeMapper,
+  type Mapper,
+  type OperationArguments,
+  type OperationParameter,
+  type OperationRequest,
+  type OperationRequestInfo,
+  type ParameterPath,
 } from "./interfaces.js";
 
 import { state } from "./state.js";

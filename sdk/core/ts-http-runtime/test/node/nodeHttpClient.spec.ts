@@ -3,7 +3,7 @@
 
 import { describe, it, assert, vi, beforeEach, afterEach } from "vitest";
 import { PassThrough, Writable } from "node:stream";
-import { ClientRequest, IncomingHttpHeaders, IncomingMessage } from "http";
+import { type ClientRequest, type IncomingHttpHeaders, type IncomingMessage } from "http";
 import { createDefaultHttpClient, createPipelineRequest } from "../../src/index.js";
 
 vi.mock("https", async () => {

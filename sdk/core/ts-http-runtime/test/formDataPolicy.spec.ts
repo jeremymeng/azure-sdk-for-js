@@ -3,8 +3,8 @@
 
 import { describe, it, assert, vi } from "vitest";
 import {
-  PipelineResponse,
-  SendRequest,
+  type PipelineResponse,
+  type SendRequest,
   createFile,
   createFileFromStream,
   createHttpHeaders,
@@ -14,7 +14,7 @@ import {
   isNodeLike,
   stringToUint8Array,
 } from "../src/index.js";
-import { BodyPart, FormDataMap, MultipartRequestBody } from "../src/interfaces.js";
+import { type BodyPart, type FormDataMap, type MultipartRequestBody } from "../src/interfaces.js";
 
 export async function performRequest(formData: FormDataMap): Promise<PipelineResponse> {
   const request = createPipelineRequest({

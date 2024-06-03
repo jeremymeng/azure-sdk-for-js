@@ -5,11 +5,11 @@ import { describe, it, assert, vi, afterEach } from "vitest";
 import { getCachedDefaultHttpsClient } from "../src/clientHelpers.js";
 import { getClient } from "../src/getClient.js";
 import {
-  HttpClient,
-  PipelinePolicy,
-  PipelineRequest,
-  PipelineResponse,
-  SendRequest,
+  type HttpClient,
+  type PipelinePolicy,
+  type PipelineRequest,
+  type PipelineResponse,
+  type SendRequest,
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";
 

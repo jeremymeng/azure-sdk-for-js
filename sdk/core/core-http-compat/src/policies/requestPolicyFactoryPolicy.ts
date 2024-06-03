@@ -2,13 +2,13 @@
 // Licensed under the MIT license.
 
 import {
-  PipelinePolicy,
-  PipelineRequest,
-  PipelineResponse,
-  SendRequest,
+  type PipelinePolicy,
+  type PipelineRequest,
+  type PipelineResponse,
+  type SendRequest,
 } from "@azure/core-rest-pipeline";
-import { WebResourceLike, toPipelineRequest, toWebResourceLike } from "../util.js";
-import { CompatResponse, toCompatResponse, toPipelineResponse } from "../response.js";
+import { type WebResourceLike, toPipelineRequest, toWebResourceLike } from "../util.js";
+import { type CompatResponse, toCompatResponse, toPipelineResponse } from "../response.js";
 
 /**
  * A compatible interface for core-http request policies

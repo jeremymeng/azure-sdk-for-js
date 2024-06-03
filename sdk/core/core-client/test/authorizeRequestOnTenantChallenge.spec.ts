@@ -2,9 +2,9 @@
 // Licensed under the MIT license.
 
 import { describe, it, assert, expect, vi, beforeEach, type Mock } from "vitest";
-import { AccessToken, GetTokenOptions } from "@azure/core-auth";
+import { type AccessToken, type GetTokenOptions } from "@azure/core-auth";
 import {
-  PipelineResponse,
+  type PipelineResponse,
   bearerTokenAuthenticationPolicy,
   createHttpHeaders,
   createPipelineRequest,

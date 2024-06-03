@@ -7,17 +7,17 @@ import * as zlib from "node:zlib";
 import { Transform } from "node:stream";
 import { AbortError } from "./abort-controller/AbortError.js";
 import {
-  HttpClient,
-  HttpHeaders,
-  PipelineRequest,
-  PipelineResponse,
-  RequestBodyType,
-  TlsSettings,
-  TransferProgressEvent,
+  type HttpClient,
+  type HttpHeaders,
+  type PipelineRequest,
+  type PipelineResponse,
+  type RequestBodyType,
+  type TlsSettings,
+  type TransferProgressEvent,
 } from "./interfaces.js";
 import { createHttpHeaders } from "./httpHeaders.js";
 import { RestError } from "./restError.js";
-import { IncomingMessage } from "node:http";
+import { type IncomingMessage } from "node:http";
 import { logger } from "./log.js";
 
 const DEFAULT_TLS_SETTINGS = {};

@@ -5,14 +5,14 @@ import { stringToUint8Array } from "../util/bytesEncoding.js";
 import { isNodeLike } from "../util/checkEnvironment.js";
 import { createHttpHeaders } from "../httpHeaders.js";
 import {
-  BodyPart,
-  FormDataMap,
-  FormDataValue,
-  PipelineRequest,
-  PipelineResponse,
-  SendRequest,
+  type BodyPart,
+  type FormDataMap,
+  type FormDataValue,
+  type PipelineRequest,
+  type PipelineResponse,
+  type SendRequest,
 } from "../interfaces.js";
-import { PipelinePolicy } from "../pipeline.js";
+import { type PipelinePolicy } from "../pipeline.js";
 
 /**
  * The programmatic identifier of the formDataPolicy.

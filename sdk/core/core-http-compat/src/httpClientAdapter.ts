@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { HttpClient, PipelineRequest, PipelineResponse } from "@azure/core-rest-pipeline";
-import { RequestPolicy } from "./policies/requestPolicyFactoryPolicy.js";
+import { type HttpClient, type PipelineRequest, type PipelineResponse } from "@azure/core-rest-pipeline";
+import { type RequestPolicy } from "./policies/requestPolicyFactoryPolicy.js";
 import { toPipelineResponse } from "./response.js";
 import { toWebResourceLike } from "./util.js";
 

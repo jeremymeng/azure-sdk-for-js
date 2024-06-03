@@ -2,19 +2,19 @@
 // Licensed under the MIT license.
 
 import { describe, it, assert, expect, vi, beforeEach, afterEach } from "vitest";
-import { AbortSignalLike } from "@azure/abort-controller";
-import { EventContext, Message as RheaMessage, generate_uuid } from "rhea-promise";
+import { type AbortSignalLike } from "@azure/abort-controller";
+import { type EventContext, type Message as RheaMessage, generate_uuid } from "rhea-promise";
 import {
   Constants,
   ErrorNameConditionMapper,
   RequestResponseLink,
-  RetryConfig,
+  type RetryConfig,
   RetryOperationType,
   StandardAbortMessage,
   retry,
 } from "../src/index.js";
 import {
-  DeferredPromiseWithCallback,
+  type DeferredPromiseWithCallback,
   getCodeDescriptionAndError,
   onMessageReceived,
 } from "../src/requestResponseLink.js";

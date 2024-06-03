@@ -2,19 +2,19 @@
 // Licensed under the MIT license.
 
 import {
-  CommonClientOptions,
-  OperationArguments,
-  OperationRequest,
-  OperationSpec,
+  type CommonClientOptions,
+  type OperationArguments,
+  type OperationRequest,
+  type OperationSpec,
 } from "./interfaces.js";
 import {
-  HttpClient,
-  Pipeline,
-  PipelineRequest,
-  PipelineResponse,
+  type HttpClient,
+  type Pipeline,
+  type PipelineRequest,
+  type PipelineResponse,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";
-import { TokenCredential } from "@azure/core-auth";
+import { type TokenCredential } from "@azure/core-auth";
 import { createClientPipeline } from "./pipeline.js";
 import { flattenResponse } from "./utils.js";
 import { getCachedDefaultHttpClient } from "./httpClientCache.js";

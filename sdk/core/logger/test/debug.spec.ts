@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import debug, { Debugger } from "../src/debug.js";
-import { describe, it, assert, expect, beforeEach, afterEach, vi, MockInstance } from "vitest";
+import debug, { type Debugger } from "../src/debug.js";
+import { describe, it, assert, expect, beforeEach, afterEach, vi, type MockInstance } from "vitest";
 
 describe("debug", function () {
   let logger: Debugger;

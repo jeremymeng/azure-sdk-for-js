@@ -3,9 +3,9 @@
 
 import { describe, it, assert } from "vitest";
 import {
-  OperationQueryParameter,
-  OperationSpec,
-  OperationURLParameter,
+  type OperationQueryParameter,
+  type OperationSpec,
+  type OperationURLParameter,
   createSerializer,
 } from "../src/index.js";
 import { appendQueryParams, getRequestUrl } from "../src/urlHelpers.js";

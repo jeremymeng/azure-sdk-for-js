@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { OperationArguments, OperationSpec, QueryCollectionFormat } from "./interfaces.js";
+import { type OperationArguments, type OperationSpec, type QueryCollectionFormat } from "./interfaces.js";
 import { getOperationArgumentValueFromParameter } from "./operationHelpers.js";
 import { getPathStringFromParameter } from "./interfaceHelpers.js";
 

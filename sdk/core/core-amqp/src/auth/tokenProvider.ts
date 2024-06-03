@@ -2,9 +2,9 @@
 // Licensed under the MIT license.
 
 import {
-  AccessToken,
-  NamedKeyCredential,
-  SASCredential,
+  type AccessToken,
+  type NamedKeyCredential,
+  type SASCredential,
   isNamedKeyCredential,
   isSASCredential,
 } from "@azure/core-auth";

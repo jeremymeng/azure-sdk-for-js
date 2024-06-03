@@ -2,14 +2,14 @@
 // Licensed under the MIT license.
 
 import {
-  OperationTracingOptions,
-  OptionsWithTracingContext,
-  Resolved,
-  TracingClient,
-  TracingClientOptions,
-  TracingContext,
-  TracingSpan,
-  TracingSpanOptions,
+  type OperationTracingOptions,
+  type OptionsWithTracingContext,
+  type Resolved,
+  type TracingClient,
+  type TracingClientOptions,
+  type TracingContext,
+  type TracingSpan,
+  type TracingSpanOptions,
 } from "./interfaces.js";
 import { getInstrumenter } from "./instrumenter.js";
 import { knownContextKeys } from "./tracingContext.js";

@@ -2,14 +2,14 @@
 // Licensed under the MIT license.
 
 import {
-  AwaitableSender,
+  type AwaitableSender,
   Connection,
   type ConnectionOptions,
   type CreateAwaitableSenderOptions,
   type CreateReceiverOptions,
   type CreateSenderOptions,
-  Receiver,
-  Sender,
+  type Receiver,
+  type Sender,
   generate_uuid,
 } from "rhea-promise";
 import { getFrameworkInfo, getPlatformInfo } from "./util/runtimeInfo.js";

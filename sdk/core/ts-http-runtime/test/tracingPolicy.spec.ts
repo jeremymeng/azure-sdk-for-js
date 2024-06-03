@@ -3,21 +3,21 @@
 
 import { describe, it, assert, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
 import {
-  PipelineRequest,
-  PipelineResponse,
+  type PipelineRequest,
+  type PipelineResponse,
   RestError,
-  SendRequest,
+  type SendRequest,
   createHttpHeaders,
   createPipelineRequest,
   tracingPolicy,
 } from "../src/index.js";
 import {
-  Instrumenter,
-  InstrumenterSpanOptions,
-  SpanStatus,
-  TracingContext,
-  TracingSpan,
-  TracingSpanOptions,
+  type Instrumenter,
+  type InstrumenterSpanOptions,
+  type SpanStatus,
+  type TracingContext,
+  type TracingSpan,
+  type TracingSpanOptions,
 } from "../src/tracing/interfaces.js";
 import { useInstrumenter } from "../src/tracing/instrumenter.js";
 

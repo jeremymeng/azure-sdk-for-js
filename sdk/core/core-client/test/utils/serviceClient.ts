@@ -3,18 +3,18 @@
 
 import { assert } from "vitest";
 import {
-  FullOperationResponse,
-  OperationRequest,
-  OperationResponseMap,
-  Serializer,
+  type FullOperationResponse,
+  type OperationRequest,
+  type OperationResponseMap,
+  type Serializer,
   ServiceClient,
   createSerializer,
   deserializationPolicy,
 } from "../../src/index.js";
 import {
-  HttpClient,
-  HttpHeaders,
-  HttpMethods,
+  type HttpClient,
+  type HttpHeaders,
+  type HttpMethods,
   createEmptyPipeline,
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";

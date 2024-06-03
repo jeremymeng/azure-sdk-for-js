@@ -2,13 +2,13 @@
 // Licensed under the MIT license.
 
 import {
-  HttpMethods,
-  PipelineRequest,
-  PipelineResponse,
+  type HttpMethods,
+  type PipelineRequest,
+  type PipelineResponse,
   createHttpHeaders,
   isRestError,
 } from "@azure/core-rest-pipeline";
-import { ResponseBody } from "../../src/http/models.js";
+import { type ResponseBody } from "../../src/http/models.js";
 import { assert } from "vitest";
 
 export interface RouteProcessor {

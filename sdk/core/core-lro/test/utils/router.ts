@@ -2,28 +2,28 @@
 // Licensed under the MIT license.
 
 import {
-  HttpClient,
-  HttpMethods,
-  PipelineRequest,
-  PipelineResponse,
+  type HttpClient,
+  type HttpMethods,
+  type PipelineRequest,
+  type PipelineResponse,
   RestError,
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";
 import {
-  ImplementationName,
-  LroResponseSpec,
-  Result,
-  RouteProcessor,
-  State,
+  type ImplementationName,
+  type LroResponseSpec,
+  type Result,
+  type RouteProcessor,
+  type State,
   createProcessor,
   generate,
 } from "./utils.js";
-import { PollerLike, createHttpPoller } from "../../src/index.js";
+import { type PollerLike, createHttpPoller } from "../../src/index.js";
 import {
-  OperationResponse,
-  RawResponse,
-  ResourceLocationConfig,
-  ResponseBody,
+  type OperationResponse,
+  type RawResponse,
+  type ResourceLocationConfig,
+  type ResponseBody,
 } from "../../src/http/models.js";
 import { AbortError } from "@azure/abort-controller";
 import { createCoreRestPipelineLro } from "./coreRestPipelineLro.js";

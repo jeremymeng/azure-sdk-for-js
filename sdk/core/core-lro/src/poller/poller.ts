@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AbortSignalLike } from "@azure/abort-controller";
+import { type AbortSignalLike } from "@azure/abort-controller";
 import {
-  BuildCreatePollerOptions,
-  CreatePollerOptions,
-  Operation,
-  OperationState,
-  RestorableOperationState,
-  PollerLike,
+  type BuildCreatePollerOptions,
+  type CreatePollerOptions,
+  type Operation,
+  type OperationState,
+  type RestorableOperationState,
+  type PollerLike,
 } from "./models.js";
 import { deserializeState, initOperation, pollOperation } from "./operation.js";
 import { POLL_INTERVAL_IN_MS } from "./constants.js";

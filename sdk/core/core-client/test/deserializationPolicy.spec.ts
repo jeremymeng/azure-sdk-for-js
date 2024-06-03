@@ -3,18 +3,18 @@
 
 import { describe, it, assert, vi } from "vitest";
 import {
-  CompositeMapper,
-  FullOperationResponse,
-  OperationRequest,
-  OperationSpec,
-  SerializerOptions,
+  type CompositeMapper,
+  type FullOperationResponse,
+  type OperationRequest,
+  type OperationSpec,
+  type SerializerOptions,
   createSerializer,
   deserializationPolicy,
 } from "../src/index.js";
 import {
-  PipelineResponse,
-  RawHttpHeaders,
-  SendRequest,
+  type PipelineResponse,
+  type RawHttpHeaders,
+  type SendRequest,
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";

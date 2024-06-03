@@ -2,9 +2,9 @@
 // Licensed under the MIT license.
 
 import {
-  BodyPart,
-  MultipartRequestBody,
-  RawHttpHeadersInput,
+  type BodyPart,
+  type MultipartRequestBody,
+  type RawHttpHeadersInput,
   RestError,
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";

@@ -2,17 +2,17 @@
 // Licensed under the MIT license.
 
 import {
-  DictionaryMapper,
-  OperationArguments,
-  OperationRequest,
-  OperationSpec,
-  RequiredSerializerOptions,
-  SerializerOptions,
+  type DictionaryMapper,
+  type OperationArguments,
+  type OperationRequest,
+  type OperationSpec,
+  type RequiredSerializerOptions,
+  type SerializerOptions,
   XML_ATTRKEY,
   XML_CHARKEY,
-  XmlOptions,
+  type XmlOptions,
 } from "./interfaces.js";
-import { PipelinePolicy, PipelineResponse, SendRequest } from "@azure/core-rest-pipeline";
+import { type PipelinePolicy, type PipelineResponse, type SendRequest } from "@azure/core-rest-pipeline";
 import {
   getOperationArgumentValueFromParameter,
   getOperationRequestInfo,

@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { KeyCredential, TokenCredential, isTokenCredential } from "@azure/core-auth";
-import { HttpClient, HttpMethods, Pipeline, PipelineOptions } from "@azure/core-rest-pipeline";
+import { type KeyCredential, type TokenCredential, isTokenCredential } from "@azure/core-auth";
+import { type HttpClient, type HttpMethods, type Pipeline, type PipelineOptions } from "@azure/core-rest-pipeline";
 import { createDefaultPipeline } from "./clientHelpers.js";
 import {
-  Client,
-  ClientOptions,
-  HttpBrowserStreamResponse,
-  HttpNodeStreamResponse,
-  RequestParameters,
-  StreamableMethod,
+  type Client,
+  type ClientOptions,
+  type HttpBrowserStreamResponse,
+  type HttpNodeStreamResponse,
+  type RequestParameters,
+  type StreamableMethod,
 } from "./common.js";
 import { sendRequest } from "./sendRequest.js";
 import { buildRequestUrl } from "./urlHelpers.js";

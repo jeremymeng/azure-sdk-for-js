@@ -9,9 +9,9 @@ import {
   Constants,
 } from "../src/index.js";
 import {
-  MessageHeader as RheaMessageHeader,
-  MessageProperties as RheaMessageProperties,
-  Message as RheaMessage,
+  type MessageHeader as RheaMessageHeader,
+  type MessageProperties as RheaMessageProperties,
+  type Message as RheaMessage,
 } from "rhea-promise";
 
 describe("message", function () {

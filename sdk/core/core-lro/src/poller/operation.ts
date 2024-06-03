@@ -2,12 +2,12 @@
 // Licensed under the MIT license.
 
 import {
-  LroError,
-  InnerError,
-  Operation,
-  OperationStatus,
-  RestorableOperationState,
-  OperationState,
+  type LroError,
+  type InnerError,
+  type Operation,
+  type OperationStatus,
+  type RestorableOperationState,
+  type OperationState,
 } from "./models.js";
 import { logger } from "../logger.js";
 import { terminalStates } from "./constants.js";

@@ -2,21 +2,21 @@
 // Licensed under the MIT license.
 
 import {
-  HttpClient,
-  HttpMethods,
-  MultipartRequestBody,
-  PipelineRequest,
-  PipelineResponse,
-  RequestBodyType,
+  type HttpClient,
+  type HttpMethods,
+  type MultipartRequestBody,
+  type PipelineRequest,
+  type PipelineResponse,
+  type RequestBodyType,
 } from "../interfaces.js";
 import { RestError } from "../restError.js";
-import { Pipeline } from "../pipeline.js";
+import { type Pipeline } from "../pipeline.js";
 import { createHttpHeaders } from "../httpHeaders.js";
 import { createPipelineRequest } from "../pipelineRequest.js";
 import { getCachedDefaultHttpsClient } from "./clientHelpers.js";
 import { isReadableStream } from "../util/typeGuards.js";
-import { HttpResponse, RequestParameters } from "./common.js";
-import { PartDescriptor, buildMultipartBody } from "./multipart.js";
+import { type HttpResponse, type RequestParameters } from "./common.js";
+import { type PartDescriptor, buildMultipartBody } from "./multipart.js";
 
 /**
  * Helper function to send request used by the client

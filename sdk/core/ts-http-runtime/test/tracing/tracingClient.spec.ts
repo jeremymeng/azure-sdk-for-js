@@ -3,10 +3,10 @@
 
 import { describe, it, assert, expect, vi, beforeEach, afterEach } from "vitest";
 import {
-  Instrumenter,
-  TracingClient,
-  TracingContext,
-  TracingSpan,
+  type Instrumenter,
+  type TracingClient,
+  type TracingContext,
+  type TracingSpan,
 } from "../../src/tracing/interfaces.js";
 import {
   createDefaultInstrumenter,

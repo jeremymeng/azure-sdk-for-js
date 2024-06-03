@@ -2,12 +2,12 @@
 // Licensed under the MIT license.
 
 import { describe, it, assert } from "vitest";
-import { PipelinePolicy, createEmptyPipeline, createHttpHeaders } from "@azure/core-rest-pipeline";
+import { type PipelinePolicy, createEmptyPipeline, createHttpHeaders } from "@azure/core-rest-pipeline";
 import {
-  DictionaryMapper,
-  OperationArguments,
-  OperationRequest,
-  OperationSpec,
+  type DictionaryMapper,
+  type OperationArguments,
+  type OperationRequest,
+  type OperationSpec,
   createSerializer,
   serializationPolicy,
 } from "@azure/core-client";
