@@ -33,5 +33,6 @@ const rules: Record<string, SharedConfig.RuleEntry> = {
 
 export default {
   name: "eslint-azsdk-customized",
+  ignores: ["**/generated/**"],
   rules,
 };

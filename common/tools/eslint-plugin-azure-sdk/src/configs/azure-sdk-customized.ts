@@ -107,9 +107,6 @@ const azsdkDefault: Record<string, SharedConfig.RuleEntry> = {
 
 const noOnlyTestsCustomization = {
   name: "no-only-tests-azsdk-customized",
-  plugins: {
-    "no-only-tests": fixupPluginRules(noOnlyTests),
-  },
   files: ["**/test/**/*.ts"],
   rules: {
     "no-only-tests/no-only-tests": "error",
@@ -118,9 +115,7 @@ const noOnlyTestsCustomization = {
 
 const tsdocCustomization = {
   name: "tsdoc-azsdk-customized",
-  plugins: {
-    tsdoc: fixupPluginRules(tsdoc),
-  },
+  ignores: ["**/generated/**"],
   rules: {
     "tsdoc/syntax": "error",
   },
@@ -128,9 +123,7 @@ const tsdocCustomization = {
 
 const importCustomization = {
   name: "import-azsdk-customized",
-  plugins: {
-    import: fixupPluginRules({ rules: importRules }),
-  },
+  ignores: ["**/generated/**"],
   rules: {
     "import/no-extraneous-dependencies": "error",
   },
@@ -143,9 +136,19 @@ const rules: Record<string, SharedConfig.RuleEntry> = {
 
 export default (parser: FlatConfig.Parser): FlatConfig.ConfigArray => [
   {
+    plugins: {
+      "no-only-tests": fixupPluginRules(noOnlyTests),
+      tsdoc: fixupPluginRules(tsdoc),
+      import: fixupPluginRules({ rules: importRules }),
+    },
+  } as FlatConfig.Config,
+  noOnlyTestsCustomization as FlatConfig.Config,
+  tsdocCustomization as FlatConfig.Config,
+  importCustomization as FlatConfig.Config,
+  {
     name: "@azure/azure-sdk/recommended-ts",
     files: ["**/*.ts", "**/*.cts", "**/*.mts", "**/*.tsx"],
-    ignores: ["**/*.md/*.ts"],
+    ignores: ["**/*.md/*.ts","**/generated/**"],
     languageOptions: {
       parser,
       parserOptions: {
@@ -176,7 +179,4 @@ export default (parser: FlatConfig.Parser): FlatConfig.ConfigArray => [
       main: "src/index.ts",
     },
   },
-  noOnlyTestsCustomization as FlatConfig.Config,
-  tsdocCustomization as FlatConfig.Config,
-  importCustomization as FlatConfig.Config,
 ];

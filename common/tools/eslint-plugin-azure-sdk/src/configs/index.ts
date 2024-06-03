@@ -20,7 +20,13 @@ function recommended(plugin: FlatConfig.Plugin) {
       name: "azsdk-skip-generated",
       ignores: ["**/generated/**"],
     },
+    eslint.configs.recommended,
     {
+      plugins: {
+        '@typescript-eslint': typescriptEslint.plugin,
+        "@azure/azure-sdk": plugin,
+        markdown,
+      },
       languageOptions: {
         parser: typescriptEslint.parser,
         parserOptions: {
@@ -28,16 +34,9 @@ function recommended(plugin: FlatConfig.Plugin) {
         },
       },
     },
-    eslint.configs.recommended,
     ...typescriptEslint.configs.recommended,
     typescriptEslint.configs.eslintRecommended,
     eslintConfigPrettier,
-    {
-      plugins: {
-        "@azure/azure-sdk": plugin,
-        markdown,
-      },
-    },
     // azure sdk customized
     eslintCustomized,
     ...markdownCustomized,
