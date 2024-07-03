@@ -8,8 +8,8 @@ import {
   TransferProgressEvent,
 } from "@azure/core-rest-pipeline";
 import { isTokenCredential, TokenCredential } from "@azure/core-auth";
-import { isNode } from "@azure/core-util";
-import { PollOperationState } from "@azure/core-lro";
+import { delay, isNode } from "@azure/core-util";
+import { CancelOnProgress, OperationState, PollerLike } from "@azure/core-lro";
 import { randomUUID } from "@azure/core-util";
 import { Readable } from "stream";
 
@@ -134,7 +134,6 @@ import {
   BlobQueryArrowField,
   BlobImmutabilityPolicy,
   HttpAuthorization,
-  PollerLikeWithCancellation,
 } from "./models";
 import {
   PageBlobGetPageRangesDiffResponse,
@@ -142,11 +141,7 @@ import {
   rangeResponseFromModel,
 } from "./PageBlobRangeResponse";
 import { newPipeline, PipelineLike, isPipelineLike, StoragePipelineOptions } from "./Pipeline";
-import {
-  BlobBeginCopyFromUrlPoller,
-  BlobBeginCopyFromUrlPollState,
-  CopyPollerBlobClient,
-} from "./pollers/BlobStartCopyFromUrlPoller";
+import { BlobBeginCopyFromUrlPollState } from "./pollers/BlobStartCopyFromUrlPoller";
 import { Range, rangeToString } from "./Range";
 import { CommonOptions, StorageClient } from "./StorageClient";
 import { Batch } from "./utils/Batch";
@@ -1689,32 +1684,160 @@ export class BlobClient extends StorageClient {
    * @param copySource - url to the source Azure Blob/File.
    * @param options - Optional options to the Blob Start Copy From URL operation.
    */
-  public async beginCopyFromURL(
+  public beginCopyFromURL(
     copySource: string,
     options: BlobBeginCopyFromURLOptions = {},
-  ): Promise<
-    PollerLikeWithCancellation<
-      PollOperationState<BlobBeginCopyFromURLResponse>,
-      BlobBeginCopyFromURLResponse
-    >
-  > {
-    const client: CopyPollerBlobClient = {
-      abortCopyFromURL: (...args) => this.abortCopyFromURL(...args),
-      getProperties: (...args) => this.getProperties(...args),
-      startCopyFromURL: (...args) => this.startCopyFromURL(...args),
+  ): PollerLike<OperationState<BlobBeginCopyFromURLResponse>, BlobBeginCopyFromURLResponse> {
+    const state: OperationState<BlobBeginCopyFromURLResponse> = {
+      status: "notStarted",
     };
-    const poller = new BlobBeginCopyFromUrlPoller({
-      blobClient: client,
-      copySource,
-      intervalInMs: options.intervalInMs,
-      onProgress: options.onProgress,
-      resumeFrom: options.resumeFrom,
-      startCopyFromURLOptions: options,
-    });
+    type Handler = (state: OperationState<BlobBeginCopyFromURLResponse>) => void;
+    const progressCallbacks = new Map<symbol, Handler>();
+    const processProgressCallbacks = async (): Promise<void> =>
+      progressCallbacks.forEach((h) => h(state));
+    let resultPromise: Promise<BlobBeginCopyFromURLResponse> | undefined;
+    const abortController = new AbortController();
+    const currentPollIntervalInMs = options.intervalInMs ?? 15000;
+    let submittedJob: any;
 
-    // Trigger the startCopyFromURL call by calling poll.
-    // Any errors from this method should be surfaced to the user.
-    await poller.poll();
+    const poller: PollerLike<
+      OperationState<BlobBeginCopyFromURLResponse>,
+      BlobBeginCopyFromURLResponse
+    > = {
+      poll: async (opts?: { abortSignal?: AbortSignalLike }) => {
+        if (state.status === "notStarted") {
+          submittedJob = await this.startCopyFromURL(copySource, options);
+          state.status = "running";
+        } else {
+          if (opts?.abortSignal?.aborted) {
+            state.status = "canceled";
+          }
+          const properties = await this.getProperties({ abortSignal: opts?.abortSignal });
+          if (properties.copyStatus === "pending") {
+            state.status = "running";
+          }
+
+          if (properties.copyStatus === "success") {
+            state.status = "succeeded";
+            state.result = properties;
+          }
+
+          if (properties.copyStatus === "failed") {
+            state.status = "failed";
+            state.error = new Error(
+              `Blob copy failed with reason: "${properties.copyStatusDescription || "unknown"}"`,
+            );
+          }
+
+          if (properties.copyStatus === "aborted") {
+            state.status = "canceled";
+          }
+        }
+
+        await processProgressCallbacks();
+
+        if (state.status === "canceled") {
+          throw new Error("Operation was canceled");
+        }
+        if (state.status === "failed") {
+          throw state.error;
+        }
+
+        poller.poll();
+        return state;
+      },
+
+      pollUntilDone(pollOptions?: {
+        abortSignal?: AbortSignalLike;
+      }): Promise<BlobBeginCopyFromURLResponse> {
+        return (resultPromise ??= (async () => {
+          const { abortSignal: inputAbortSignal } = pollOptions || {};
+          // In the future we can use AbortSignal.any() instead
+          function abortListener(): void {
+            abortController.abort();
+          }
+          const abortSignal = abortController.signal;
+          if (inputAbortSignal?.aborted) {
+            abortController.abort();
+          } else if (!abortSignal.aborted) {
+            inputAbortSignal?.addEventListener("abort", abortListener, { once: true });
+          }
+
+          try {
+            if (!poller.isDone) {
+              await poller.poll({ abortSignal });
+              while (!poller.isDone) {
+                await delay(currentPollIntervalInMs, { abortSignal });
+                await poller.poll({ abortSignal });
+              }
+            }
+          } finally {
+            inputAbortSignal?.removeEventListener("abort", abortListener);
+          }
+          switch (state.status) {
+            case "succeeded":
+              return poller.result as BlobBeginCopyFromURLResponse;
+            case "canceled":
+              throw new Error("Operation was canceled");
+            case "failed":
+              throw state.error;
+            case "notStarted":
+            case "running":
+              throw new Error(`Polling completed without succeeding or failing`);
+          }
+        })().finally(() => {
+          resultPromise = undefined;
+        }));
+      },
+
+      onProgress(
+        callback: (state: OperationState<BlobBeginCopyFromURLResponse>) => void,
+      ): CancelOnProgress {
+        const s = Symbol();
+        progressCallbacks.set(s, callback);
+
+        return () => progressCallbacks.delete(s);
+      },
+
+      get isDone(): boolean {
+        return ["succeeded", "failed", "canceled"].includes(state.status);
+      },
+
+      get operationState(): OperationState<BlobBeginCopyFromURLResponse> | undefined {
+        return state;
+      },
+
+      get result(): BlobBeginCopyFromURLResponse | undefined {
+        return state.result;
+      },
+
+      async serialize(): Promise<string> {
+        return JSON.stringify({ state });
+      },
+
+      async submitted(): Promise<void> {
+        return submittedJob;
+      },
+
+      then<TResult1 = BlobBeginCopyFromURLResponse, TResult2 = never>(
+        onfulfilled?:
+          | ((value: BlobBeginCopyFromURLResponse) => TResult1 | PromiseLike<TResult1>)
+          | undefined
+          | null,
+        onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null,
+      ): Promise<TResult1 | TResult2> {
+        return poller.pollUntilDone().then(onfulfilled, onrejected);
+      },
+      catch<TResult2 = never>(
+        onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null,
+      ): Promise<BlobBeginCopyFromURLResponse | TResult2> {
+        return poller.pollUntilDone().catch(onrejected);
+      },
+      finally(onfinally?: (() => void) | undefined | null): Promise<BlobBeginCopyFromURLResponse> {
+        return poller.pollUntilDone().finally(onfinally);
+      },
+      [Symbol.toStringTag]: "Poller",
+    };
 
     return poller;
   }
