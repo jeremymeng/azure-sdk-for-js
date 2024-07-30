@@ -159,7 +159,9 @@ export default (parser: FlatConfig.Parser): FlatConfig.ConfigArray => [
   },
   {
     name: "@azure/azure-sdk/recommended-json",
-    files: ["*.json"],
+    // file paths are relative to eslint.config.mjs, i.e.,
+    // either current folder, or the default one under sdk/
+    files: ["*.json", "*/*/*.json"],
     ignores: ["**/*.md/*.json", "**/src/**/*.json", "**/test/**/*.json"],
     languageOptions: {
       parser,
