@@ -56,30 +56,89 @@ require("dotenv").config();
  */
 const makeTransformers = () => ({
   before: [
-    (transformationContext) => (sourceFile) =>
-      ts.visitEachChild(
-        sourceFile,
-        (node) => {
-          // If the sample or test program is trying to import the host
-          // package, we'll rewrite it on the fly to make the import work.
-          if (ts.isImportDeclaration(node) && node.moduleSpecifier.text === packageNameToPatch) {
+    (transformationContext) => (sourceFile) => {
+      const visitor = (node) => {
+        // If the sample or test program is trying to import the host
+        // package, we'll rewrite it on the fly to make the import work.
+        if (ts.isImportDeclaration(node)) {
+          if (node.moduleSpecifier.text === packageNameToPatch) {
             // rewrite the import to use a relative path
             const oldName = node.moduleSpecifier.text;
             const base = sourceFile.path.includes("dist-esm") ? path.join(cwd, "dist-esm") : cwd;
-            node.moduleSpecifier.text = path.relative(
+            const newSpecifierText = path.relative(
               // This is marked internal in the TS API, need to make sure there's not a better way
               // to get the path from the sourceFile node
               path.dirname(sourceFile.path),
               path.join(base, "src", "index"),
             );
             console.log(
-              `[dev-tool/register] Rewrote import of "${oldName}" to "${node.moduleSpecifier.text}".`,
+              `[dev-tool/register] Rewrote import of "${oldName}" to "${newSpecifierText}".`,
             );
+            const factory = ts.factory;
+            const newNode = factory.createImportDeclaration(
+              undefined,
+              node.importClause,
+              factory.createStringLiteral(newSpecifierText),
+              undefined,
+            );
+            return newNode;
+          } else if (node.moduleSpecifier.text === "@azure/identity") {
+            if (
+              node.importClause?.namedBindings?.elements?.length === 1 &&
+              ts.isIdentifier(node.importClause.namedBindings.elements[0].name) &&
+              node.importClause.namedBindings.elements[0].name.escapedText ===
+                "DefaultAzureCredential"
+            ) {
+              const old = node.getFullText();
+              const factory = ts.factory;
+              const newNode = factory.createImportDeclaration(
+                undefined,
+                factory.createImportClause(
+                  false,
+                  undefined,
+                  factory.createNamedImports([
+                    factory.createImportSpecifier(
+                      false,
+                      undefined,
+                      factory.createIdentifier("createTestCredential"),
+                    ),
+                  ]),
+                ),
+                factory.createStringLiteral("@azure-tools/test-credential"),
+                undefined,
+              );
+
+              console.log(`[dev-tool/register] Rewrote DAC import to createTestCredential import`);
+              return newNode;
+            }
           }
           return node;
-        },
-        transformationContext,
-      ),
+        } else if (ts.isNewExpression(node)) {
+          if (
+            ts.isIdentifier(node.expression) &&
+            node.expression.escapedText === "DefaultAzureCredential"
+          ) {
+            const old = node.getFullText();
+            const newNode = ts.factory.createCallExpression(
+              ts.factory.createIdentifier("createTestCredential"),
+              undefined,
+              [],
+            );
+
+            console.log(
+              `[dev-tool/register] Rewrote "new DefaultCredential()" to "createTestCredential()"`,
+            );
+            return newNode;
+          }
+
+          return node;
+        }
+
+        return ts.visitEachChild(node, visitor, transformationContext);
+      };
+
+      return ts.visitNode(sourceFile, visitor);
+    },
   ],
 });
 
