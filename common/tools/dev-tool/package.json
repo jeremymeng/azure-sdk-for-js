@@ -69,7 +69,8 @@
     "ts-node": "^10.9.1",
     "tslib": "^2.2.0",
     "typescript": "~5.5.3",
-    "yaml": "^2.3.4"
+    "yaml": "^2.3.4",
+    "tsx": "~4.17.0"
   },
   "devDependencies": {
     "@eslint/js": "~9.2.0",

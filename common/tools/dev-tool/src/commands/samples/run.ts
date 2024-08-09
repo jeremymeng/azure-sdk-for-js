@@ -8,6 +8,7 @@ import { createPrinter } from "../../util/printer";
 import { leafCommand, makeCommandInfo } from "../../framework/command";
 import { resolveProject } from "../../util/resolveProject";
 import { getSampleConfiguration } from "../../util/samples/configuration";
+import { makeCommandExecutor } from "../run/vendored";
 
 const log = createPrinter("run-samples");
 
@@ -17,6 +18,9 @@ export const commandInfo = makeCommandInfo(
   "run",
   "execute a sample or all samples within a directory",
 );
+
+
+const tsxExecutor = makeCommandExecutor("tsx");
 
 /**
  * Run a single sample file, accumulating any thrown errors into `accumulatedErrors`
@@ -29,7 +33,9 @@ async function runSingle(name: string, accumulatedErrors: Array<[string, string]
   try {
     if (/.*[\\/]samples(-dev)?[\\/].*/.exec(name)) {
       // This is an un-prepared sample, so just require it and it will run.
-      await import(name);
+      // await import(name);
+      const result = await tsxExecutor(name);
+      console.dir({result});
     } else if (!/.*[\\/]dist-samples[\\/].*/.exec(name)) {
       // This is not an unprepared or a prepared sample
       log.error("Skipped. This file is not in any samples folder.");

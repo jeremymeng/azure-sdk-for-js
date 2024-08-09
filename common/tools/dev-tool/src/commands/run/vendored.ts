@@ -24,7 +24,7 @@ const DOT_BIN_PATH = path.resolve(__dirname, "..", "..", "..", "node_modules", "
  * @param commandName - name of the command to run from DOT_BIN_PATH
  * @returns a function that executes the command and returns a boolean status
  */
-function makeCommandExecutor(commandName: string): (...args: string[]) => Promise<boolean> {
+export function makeCommandExecutor(commandName: string): (...args: string[]) => Promise<boolean> {
   const commandPath =
     process.platform !== "win32"
       ? path.join(DOT_BIN_PATH, commandName)
@@ -32,7 +32,7 @@ function makeCommandExecutor(commandName: string): (...args: string[]) => Promis
 
   return (...args: string[]) =>
     new Promise<boolean>((resolve, reject) => {
-      log.debug("Running vendored command:", commandPath);
+      log.debug("Running vendored command:", commandPath, args);
       const command = spawn(commandPath, args, { stdio: "inherit" });
 
       // If the command exited 0, then we treat that as a success
