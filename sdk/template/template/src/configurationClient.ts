@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { GeneratedClient, ConfigurationSetting } from "./generated/index.js";
+import { GeneratedClient, type ConfigurationSetting } from "./generated/index.js";
 import {
   CommonClientOptions,
   OperationOptions,
@@ -15,7 +15,7 @@ import { logger } from "./logger.js";
 import { quoteETag } from "./util.js";
 
 // re-export generated types that are used as public interfaces.
-export { ConfigurationSetting };
+export { type ConfigurationSetting };
 
 /**
  * Options for the `getConfigurationSetting` method of `ConfigurationClient`.

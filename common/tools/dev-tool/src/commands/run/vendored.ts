@@ -32,7 +32,7 @@ export function makeCommandExecutor(commandName: string): (...args: string[]) =>
 
   return (...args: string[]) =>
     new Promise<boolean>((resolve, reject) => {
-      log.debug("Running vendored command:", commandPath, args);
+      log.debug("Running vendored command:", commandPath, args.join(" "));
       const command = spawn(commandPath, args, { stdio: "inherit" });
 
       // If the command exited 0, then we treat that as a success

@@ -8,7 +8,7 @@ import { createPrinter } from "../../util/printer";
 import { leafCommand, makeCommandInfo } from "../../framework/command";
 import { resolveProject } from "../../util/resolveProject";
 import { getSampleConfiguration } from "../../util/samples/configuration";
-import { makeCommandExecutor } from "../run/vendored";
+import { spawn } from "node:child_process";
 
 const log = createPrinter("run-samples");
 
@@ -19,8 +19,22 @@ export const commandInfo = makeCommandInfo(
   "execute a sample or all samples within a directory",
 );
 
+const nodeExecutor = (...args: string[]) =>
+  new Promise<boolean>((resolve, reject) => {
 
-const tsxExecutor = makeCommandExecutor("tsx");
+    log(`Running node ${args.join(" ")}`);
+    
+    const command = spawn("node", args, { stdio: "inherit" });
+
+    // If the command exited 0, then we treat that as a success
+    command.on("exit", (code) => {
+      log(`node command exited with code ${code}`);;
+      resolve(code === 0);
+    });
+    command.on("error", reject);
+  });
+
+const TSX_LOADER_PATH = path.resolve(__dirname, "..", "..", "..", "node_modules", "tsx", "dist", "esm", "index.mjs");
 
 /**
  * Run a single sample file, accumulating any thrown errors into `accumulatedErrors`
@@ -34,8 +48,9 @@ async function runSingle(name: string, accumulatedErrors: Array<[string, string]
     if (/.*[\\/]samples(-dev)?[\\/].*/.exec(name)) {
       // This is an un-prepared sample, so just require it and it will run.
       // await import(name);
-      const result = await tsxExecutor(name);
-      console.dir({result});
+      const args = ["--import", TSX_LOADER_PATH, name];
+      const result = await nodeExecutor(...args);
+      console.dir({ result });
     } else if (!/.*[\\/]dist-samples[\\/].*/.exec(name)) {
       // This is not an unprepared or a prepared sample
       log.error("Skipped. This file is not in any samples folder.");
