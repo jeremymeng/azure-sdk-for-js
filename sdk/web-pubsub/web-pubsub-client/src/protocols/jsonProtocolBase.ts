@@ -11,6 +11,8 @@ import {
   WebPubSubMessage,
 } from "../models/messages";
 import { JSONTypes } from "../webPubSubClient";
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+import { Buffer } from "buffer";
 
 export function parseMessages(input: string): WebPubSubMessage | null {
   // The interface does allow "ArrayBuffer" to be passed in, but this implementation does not. So let's throw a useful error.
