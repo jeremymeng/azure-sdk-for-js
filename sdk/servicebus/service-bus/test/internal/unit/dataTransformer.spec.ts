@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { Buffer } from "buffer";
 import chai, { assert } from "chai";
 const should = chai.should();
 import isBuffer from "is-buffer";

@@ -3,7 +3,6 @@
 
 import { message } from "rhea-promise";
 import isBuffer from "is-buffer";
-import { Buffer } from "buffer";
 import { logErrorStackTrace, logger } from "./log";
 
 /** @internal */

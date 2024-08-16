@@ -6,7 +6,6 @@
 
 import { AbortSignalLike } from '@azure/abort-controller';
 import { AmqpAnnotatedMessage } from '@azure/core-amqp';
-import { Buffer as Buffer_2 } from 'buffer';
 import { CommonClientOptions } from '@azure/core-client';
 import { delay } from '@azure/core-amqp';
 import { Delivery } from 'rhea-promise';
@@ -441,8 +440,8 @@ export interface ServiceBusMessage {
     };
     body: any;
     contentType?: string;
-    correlationId?: string | number | Buffer_2;
-    messageId?: string | number | Buffer_2;
+    correlationId?: string | number | Buffer;
+    messageId?: string | number | Buffer;
     partitionKey?: string;
     replyTo?: string;
     replyToSessionId?: string;

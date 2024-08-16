@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import { AmqpAnnotatedMessage, Constants } from "@azure/core-amqp";
-import { Buffer } from "buffer";
 import Long from "long";
 import {
   Delivery,
