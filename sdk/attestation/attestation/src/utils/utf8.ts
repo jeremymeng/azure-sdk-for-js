@@ -1,11 +1,29 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-const decoder = new TextDecoder("ascii");
-const encoder = new TextEncoder();
+// TextDecoder and TextEncoder are in the global namespace for Node version 11 and
+// higher, but before that, they were in the "util" namespace. If we're running
+// under node ("Buffer" is defined), then check to see if the global namespace version
+// of the decoders are present, if not, import them from the util namespace.
+const decoder =
+  typeof Buffer === "undefined"
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      new (TextDecoder ?? require("util").TextDecoder)("ascii")
+    : undefined;
 
-const decode: (buffer: ArrayBuffer) => string = (buffer) => decoder.decode(buffer);
-const encode: (str: string) => Uint8Array = (str) => encoder.encode(str);
+const encoder =
+  typeof Buffer === "undefined"
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      new (TextEncoder ?? require("util").TextEncoder)("ascii")
+    : undefined;
+
+const decode: (buffer: ArrayBuffer) => string = decoder
+  ? (buffer) => decoder.decode(buffer)
+  : (buffer) => (buffer as Buffer).toString("ascii");
+
+const encode: (str: string) => Uint8Array = encoder
+  ? (str) => encoder.encode(str)
+  : (str) => Buffer.from(str, "utf8");
 
 /**
  * Converts a string into a utf8 encoded byte array.
