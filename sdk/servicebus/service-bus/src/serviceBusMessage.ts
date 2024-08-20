@@ -2,6 +2,8 @@
 // Licensed under the MIT license.
 
 import { AmqpAnnotatedMessage, Constants } from "@azure/core-amqp";
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+import { Buffer } from "buffer";
 import Long from "long";
 import {
   Delivery,
