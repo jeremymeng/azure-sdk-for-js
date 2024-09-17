@@ -32,6 +32,12 @@ export const commandInfo = makeCommandInfo(
       description:
         "When true, generates api.json docModel files for each subpath export. Otherwise only generates for the main entry point. Markdown files are always generated for each subpath export.",
     },
+    "generate-apiview": {
+      shortName: "ga",
+      kind: "boolean",
+      default: true,
+      description: "When true, generate apiview data used by https://apiview.dev",
+    },
   },
 );
 
