@@ -1,22 +1,24 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { InternalPipelineOptions } from "@azure/core-rest-pipeline";
-import { OperationOptions } from "@azure/core-client";
+import type { InternalPipelineOptions } from "@azure/core-rest-pipeline";
+import type { OperationOptions } from "@azure/core-client";
 
-import {
+import type {
   AccessToken,
+  TokenCredential} from "@azure/core-auth";
+import {
   AzureKeyCredential,
-  TokenCredential,
   isTokenCredential,
 } from "@azure/core-auth";
 
 import { RemoteRenderingRestClient } from "./generated";
-import {
-  AssetConversionSettings,
+import type {
   RemoteRenderingCreateConversionResponse,
   RemoteRenderingCreateSessionResponse,
-  RemoteRenderingRestClientOptionalParams,
+  RemoteRenderingRestClientOptionalParams} from "./generated/models/index";
+import {
+  AssetConversionSettings,
   RenderingSessionSettings,
   UpdateSessionSettings,
 } from "./generated/models/index";
@@ -32,8 +34,8 @@ import { SDK_VERSION } from "./constants";
 import { logger } from "./logger";
 import { tracingClient } from "./generated/tracing";
 
-import { PollerLike } from "@azure/core-lro";
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import type { PollerLike } from "@azure/core-lro";
+import type { PagedAsyncIterableIterator } from "@azure/core-paging";
 
 import { RemoteRenderingImpl } from "./generated/operations";
 import {

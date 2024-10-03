@@ -3,17 +3,19 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
-import {
+import type {
   AccessToken,
+  WorkloadIdentityCredentialOptions} from "../../../src";
+import {
   DefaultAzureCredential,
   ManagedIdentityCredential,
-  WorkloadIdentityCredential,
-  WorkloadIdentityCredentialOptions,
+  WorkloadIdentityCredential
 } from "../../../src";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../node/msalNodeTestSetup";
+import type { MsalTestCleanup} from "../../node/msalNodeTestSetup";
+import { msalNodeTestSetup } from "../../node/msalNodeTestSetup";
 
-import { AuthenticationResult } from "@azure/msal-node";
-import { Context } from "mocha";
+import type { AuthenticationResult } from "@azure/msal-node";
+import type { Context } from "mocha";
 import { assert } from "@azure-tools/test-utils";
 import { env } from "@azure-tools/test-recorder";
 import path from "path";

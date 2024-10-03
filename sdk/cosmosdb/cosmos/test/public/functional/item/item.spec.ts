@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import assert from "assert";
-import { Suite } from "mocha";
-import {
+import type { Suite } from "mocha";
+import type {
   Container,
   ContainerDefinition,
   ContainerRequest,
-  CosmosClient,
   PatchOperation,
-  RequestOptions,
+  RequestOptions} from "../../../../src";
+import {
+  CosmosClient
 } from "../../../../src";
-import { ItemDefinition } from "../../../../src";
+import type { ItemDefinition } from "../../../../src";
 import {
   bulkDeleteItems,
   bulkInsertItems,
@@ -27,9 +28,10 @@ import {
 } from "../../common/TestHelpers";
 import { endpoint } from "../../common/_testConfig";
 import { masterKey } from "../../common/_fakeTestSecrets";
-import {
+import type {
   PartitionKey,
-  PartitionKeyDefinition,
+  PartitionKeyDefinition} from "../../../../src/documents";
+import {
   PartitionKeyDefinitionVersion,
   PartitionKeyKind,
 } from "../../../../src/documents";

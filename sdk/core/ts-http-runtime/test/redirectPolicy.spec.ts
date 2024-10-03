@@ -3,9 +3,10 @@
 
 import { describe, it, assert, expect, vi } from "vitest";
 import { redirectPolicy } from "../src/policies/redirectPolicy.js";
-import {
+import type {
   PipelineResponse,
-  SendRequest,
+  SendRequest} from "../src/index.js";
+import {
   createHttpHeaders,
   createPipelineRequest,
 } from "../src/index.js";

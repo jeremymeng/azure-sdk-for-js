@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import Long from "long";
+import type Long from "long";
 import { MessageSender } from "./core/messageSender";
-import { ServiceBusMessage } from "./serviceBusMessage";
-import { ConnectionContext } from "./connectionContext";
+import type { ServiceBusMessage } from "./serviceBusMessage";
+import type { ConnectionContext } from "./connectionContext";
 import {
   errorInvalidMessageTypeSingleOrArray,
   getSenderClosedErrorMsg,
@@ -14,17 +14,18 @@ import {
   throwTypeErrorIfParameterMissing,
   throwTypeErrorIfParameterNotLong,
 } from "./util/errors";
-import { ServiceBusMessageBatch } from "./serviceBusMessageBatch";
-import { CreateMessageBatchOptions } from "./models";
-import {
+import type { ServiceBusMessageBatch } from "./serviceBusMessageBatch";
+import type { CreateMessageBatchOptions } from "./models";
+import type {
   RetryConfig,
-  RetryOperationType,
   RetryOptions,
-  retry,
-  AmqpAnnotatedMessage,
+  AmqpAnnotatedMessage} from "@azure/core-amqp";
+import {
+  RetryOperationType,
+  retry
 } from "@azure/core-amqp";
-import { OperationOptionsBase } from "./modelsToBeSharedWithEventHubs";
-import { TracingSpanLink } from "@azure/core-tracing";
+import type { OperationOptionsBase } from "./modelsToBeSharedWithEventHubs";
+import type { TracingSpanLink } from "@azure/core-tracing";
 import { senderLogger as logger } from "./log";
 import { toSpanOptions, tracingClient } from "./diagnostics/tracing";
 import { ensureValidIdentifier } from "./util/utils";

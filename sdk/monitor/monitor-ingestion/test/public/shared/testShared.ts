@@ -1,17 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import { createTestCredential } from "@azure-tools/test-credential";
-import {
+import type {
   Recorder,
-  RecorderStartOptions,
+  RecorderStartOptions} from "@azure-tools/test-recorder";
+import {
   assertEnvironmentVariable,
   env,
 } from "@azure-tools/test-recorder";
 
 import { createClientLogger } from "@azure/logger";
 import { LogsIngestionClient } from "../../../src";
-import { ExponentialRetryPolicyOptions } from "@azure/core-rest-pipeline";
-import { AdditionalPolicyConfig } from "@azure/core-client";
+import type { ExponentialRetryPolicyOptions } from "@azure/core-rest-pipeline";
+import type { AdditionalPolicyConfig } from "@azure/core-client";
 export const loggerForTest = createClientLogger("test");
 const envSetupForPlayback: Record<string, string> = {
   LOGS_INGESTION_ENDPOINT:

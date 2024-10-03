@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { assert, use as chaiUse, expect } from "chai";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import chaiAsPromised from "chai-as-promised";
 chaiUse(chaiAsPromised);
 /* eslint-disable @typescript-eslint/no-invalid-this */

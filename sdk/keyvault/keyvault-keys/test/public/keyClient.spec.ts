@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { Recorder, env, isPlaybackMode, isRecordMode } from "@azure-tools/test-recorder";
 import { createDefaultHttpClient, createPipelineRequest } from "@azure/core-rest-pipeline";
 
-import {
+import type {
   CreateEcKeyOptions,
   GetKeyOptions,
   KeyClient,
@@ -15,7 +15,7 @@ import {
 import { getServiceVersion, isPublicCloud, onVersions } from "./utils/common";
 import { testPollerProperties } from "./utils/recorderUtils";
 import { authenticate, envSetupForPlayback } from "./utils/testAuthentication";
-import TestClient from "./utils/testClient";
+import type TestClient from "./utils/testClient";
 import { stringToUint8Array, uint8ArrayToString } from "./utils/crypto";
 
 describe("Keys client - create, read, update and delete operations", () => {

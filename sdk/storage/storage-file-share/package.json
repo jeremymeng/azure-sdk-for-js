@@ -4,7 +4,7 @@
   "version": "12.25.1",
   "description": "Microsoft Azure Storage SDK for JavaScript - File",
   "main": "./dist/index.js",
-  "module": "./dist-esm/storage-file-share/src/index.js",
+  "module": "dist-esm/src/index.js",
   "browser": {
     "./dist-esm/storage-file-share/src/index.js": "./dist-esm/storage-file-share/src/index.browser.js",
     "./dist-esm/storage-blob/src/credentials/StorageSharedKeyCredential.js": "./dist-esm/storage-blob/src/credentials/StorageSharedKeyCredential.browser.js",

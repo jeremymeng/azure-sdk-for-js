@@ -4,19 +4,22 @@
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 const expect = chai.expect;
-import {
+import type {
   ServiceBusReceivedMessage,
-  delay,
   ProcessErrorArgs,
   ServiceBusReceiver,
-  ServiceBusSender,
+  ServiceBusSender} from "../../src";
+import {
+  delay
 } from "../../src";
 import { getAlreadyReceivingErrorMsg, MessageAlreadySettled } from "../../src/util/errors";
 import { TestMessage, checkWithTimeout, TestClientType } from "../public/utils/testUtils";
-import { DispositionType, ServiceBusMessageImpl } from "../../src/serviceBusMessage";
-import {
+import type { ServiceBusMessageImpl } from "../../src/serviceBusMessage";
+import { DispositionType } from "../../src/serviceBusMessage";
+import type {
   EntityName,
-  ServiceBusClientForTests,
+  ServiceBusClientForTests} from "../public/utils/testutils2";
+import {
   createServiceBusClientForTests,
   drainReceiveAndDeleteReceiver,
   testPeekMsgsLength,

@@ -3,16 +3,17 @@
 
 import { describe, it, assert } from "vitest";
 import { sendRequest } from "../src/sendRequest.js";
-import {
+import type {
   MultipartRequestBody,
   Pipeline,
-  PipelineResponse,
+  PipelineResponse} from "@azure/core-rest-pipeline";
+import {
   RestError,
   createEmptyPipeline,
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";
 import { stringToUint8Array } from "@azure/core-util";
-import { PartDescriptor } from "../src/multipart.js";
+import type { PartDescriptor } from "../src/multipart.js";
 
 describe("sendRequest", () => {
   const foo = new Uint8Array([0x66, 0x6f, 0x6f]);

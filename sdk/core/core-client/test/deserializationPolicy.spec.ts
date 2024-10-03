@@ -2,19 +2,21 @@
 // Licensed under the MIT License.
 
 import { describe, it, assert, vi } from "vitest";
-import {
+import type {
   CompositeMapper,
   FullOperationResponse,
   OperationRequest,
   OperationSpec,
-  SerializerOptions,
+  SerializerOptions} from "../src/index.js";
+import {
   createSerializer,
   deserializationPolicy,
 } from "../src/index.js";
-import {
+import type {
   PipelineResponse,
   RawHttpHeaders,
-  SendRequest,
+  SendRequest} from "@azure/core-rest-pipeline";
+import {
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";

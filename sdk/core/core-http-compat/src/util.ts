@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   HttpMethods,
-  ProxySettings,
+  ProxySettings} from "@azure/core-rest-pipeline";
+import {
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";
-import { AbortSignalLike } from "@azure/abort-controller";
-import { HttpHeaders as HttpHeadersV2, PipelineRequest } from "@azure/core-rest-pipeline";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { HttpHeaders as HttpHeadersV2, PipelineRequest } from "@azure/core-rest-pipeline";
 
 // We use a custom symbol to cache a reference to the original request without
 // exposing it on the public interface.

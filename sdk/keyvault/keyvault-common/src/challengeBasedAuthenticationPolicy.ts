@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   AuthorizeRequestOnChallengeOptions,
   AuthorizeRequestOptions,
   ChallengeCallbacks,
   PipelineRequest,
   RequestBodyType,
 } from "@azure/core-rest-pipeline";
-import { WWWAuthenticate, parseWWWAuthenticateHeader } from "./parseWWWAuthenticate.js";
+import type { WWWAuthenticate} from "./parseWWWAuthenticate.js";
+import { parseWWWAuthenticateHeader } from "./parseWWWAuthenticate.js";
 
-import { GetTokenOptions } from "@azure/core-auth";
+import type { GetTokenOptions } from "@azure/core-auth";
 
 /**
  * @internal

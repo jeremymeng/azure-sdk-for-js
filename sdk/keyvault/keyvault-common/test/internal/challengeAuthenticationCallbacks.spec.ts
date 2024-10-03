@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   AuthorizeRequestOptions,
   ChallengeCallbacks,
-  PipelineRequest,
+  PipelineRequest} from "@azure/core-rest-pipeline";
+import {
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";

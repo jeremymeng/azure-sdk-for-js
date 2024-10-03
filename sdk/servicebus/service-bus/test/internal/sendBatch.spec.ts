@@ -6,21 +6,23 @@ const should = chai.should();
 const assert: typeof chai.assert = chai.assert;
 import chaiAsPromised from "chai-as-promised";
 chai.use(chaiAsPromised);
-import {
+import type {
   OperationOptions,
+  ServiceBusMessage} from "../../src";
+import {
   ServiceBusAdministrationClient,
-  ServiceBusClient,
-  ServiceBusMessage,
+  ServiceBusClient
 } from "../../src";
 import { TestClientType } from "../public/utils/testUtils";
-import {
+import type {
   EntityName,
-  ServiceBusClientForTests,
+  ServiceBusClientForTests} from "../public/utils/testutils2";
+import {
   createServiceBusClientForTests,
   getRandomTestClientTypeWithSessions,
   getRandomTestClientTypeWithNoSessions,
 } from "../public/utils/testutils2";
-import { ServiceBusSender, ServiceBusSenderImpl } from "../../src/sender";
+import type { ServiceBusSender, ServiceBusSenderImpl } from "../../src/sender";
 import { getEnvVarValue } from "../public/utils/envVarUtils";
 import { delay } from "@azure/core-util";
 import { createTestCredential } from "@azure-tools/test-credential";

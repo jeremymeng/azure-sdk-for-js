@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   MessageAdapter as EHMessageAdapter,
   EventData,
-  EventDataAdapterParameters,
+  EventDataAdapterParameters} from "@azure/event-hubs";
+import {
   createEventDataAdapter,
 } from "@azure/event-hubs";
-import { AssertEqualKeys } from "../utils/utils";
-import { MessageAdapter } from "../../src/models";
+import type { AssertEqualKeys } from "../utils/utils";
+import type { MessageAdapter } from "../../src/models";
 import { assert } from "chai";
 import { matrix } from "@azure-tools/test-utils";
 

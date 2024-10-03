@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ConnectionContext } from "../connectionContext";
+import type { ConnectionContext } from "../connectionContext";
 import { receiverLogger as logger } from "../log";
-import { ServiceBusMessageImpl } from "../serviceBusMessage";
+import type { ServiceBusMessageImpl } from "../serviceBusMessage";
 import { calculateRenewAfterDuration } from "../util/utils";
-import { LinkEntity } from "./linkEntity";
-import { OnErrorNoContext } from "./messageReceiver";
+import type { LinkEntity } from "./linkEntity";
+import type { OnErrorNoContext } from "./messageReceiver";
 
 /**
  * @internal

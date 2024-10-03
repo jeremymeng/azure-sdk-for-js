@@ -4,12 +4,13 @@
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import chaiExclude from "chai-exclude";
-import {
+import type {
   CorrelationRuleFilter,
   ServiceBusReceivedMessage,
-  ServiceBusClient,
   ServiceBusMessage,
-  SqlRuleFilter,
+  SqlRuleFilter} from "../../src";
+import {
+  ServiceBusClient,
   ServiceBusAdministrationClient,
 } from "../../src";
 import { DEFAULT_RULE_NAME } from "../../src/util/constants";

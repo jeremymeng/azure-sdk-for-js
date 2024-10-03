@@ -3,13 +3,15 @@
 
 import sinon from "sinon";
 import { assert, expect } from "chai";
-import { ChatClient, ChatClientOptions, CreateChatThreadRequest } from "../../src";
-import * as RestModel from "../../src/generated/src/models";
+import type { ChatClientOptions, CreateChatThreadRequest } from "../../src";
+import { ChatClient } from "../../src";
+import type * as RestModel from "../../src/generated/src/models";
 import { apiVersion } from "../../src/generated/src/models/parameters";
 import { baseUri, generateToken } from "../public/utils/connectionUtils";
+import type {
+  CommunicationUserIdentifier} from "@azure/communication-common";
 import {
-  AzureCommunicationTokenCredential,
-  CommunicationUserIdentifier,
+  AzureCommunicationTokenCredential
 } from "@azure/communication-common";
 import {
   createChatClient,

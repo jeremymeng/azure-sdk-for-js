@@ -4,7 +4,7 @@
 import { RSA_PKCS1_OAEP_PADDING, RSA_PKCS1_PADDING } from "constants";
 import { publicEncrypt } from "crypto";
 import { createVerify } from "./crypto";
-import {
+import type {
   DecryptOptions,
   DecryptParameters,
   DecryptResult,
@@ -24,9 +24,10 @@ import {
   WrapResult,
 } from "..";
 import { convertJWKtoPEM } from "./conversions";
-import {
+import type {
   CryptographyProvider,
-  CryptographyProviderOperation,
+  CryptographyProviderOperation} from "./models";
+import {
   LocalCryptographyUnsupportedError,
 } from "./models";
 

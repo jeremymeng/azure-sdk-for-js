@@ -8,16 +8,17 @@ import {
   startRecorder,
 } from "../../public/utils/testHelpers";
 import { AppConfigurationClient } from "../../../src";
-import { Context } from "mocha";
-import { InternalAppConfigurationClientOptions } from "../../../src/appConfigurationClient";
-import { Recorder } from "@azure-tools/test-recorder";
+import type { Context } from "mocha";
+import type { InternalAppConfigurationClientOptions } from "../../../src/appConfigurationClient";
+import type { Recorder } from "@azure-tools/test-recorder";
 import { assert } from "chai";
 import { NoOpCredential } from "@azure-tools/test-credential";
-import {
-  createHttpHeaders,
+import type {
   HttpClient,
   PipelineRequest,
-  SendRequest,
+  SendRequest} from "@azure/core-rest-pipeline";
+import {
+  createHttpHeaders
 } from "@azure/core-rest-pipeline";
 
 describe("http request related tests", function () {

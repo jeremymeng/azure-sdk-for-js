@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import prompts, { PromptObject } from "prompts";
+import type { PromptObject } from "prompts";
+import prompts from "prompts";
 import fs from "fs";
 import { Extensions, Languages, Messages } from "./constants";
-import { OverridePromptResponse, PackageManager, PlaywrightServiceInitConfig } from "./types";
+import type { OverridePromptResponse, PackageManager, PlaywrightServiceInitConfig } from "./types";
 import { executeCommand, getFileReferenceForImport } from "./utils";
 import { getPackageManager } from "./packageManager";
 

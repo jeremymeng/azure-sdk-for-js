@@ -1,25 +1,28 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import * as os from "os";
+import type {
+  MeterProviderOptions,
+  PeriodicExportingMetricReaderOptions} from "@opentelemetry/sdk-metrics";
 import {
   MeterProvider,
-  MeterProviderOptions,
-  PeriodicExportingMetricReader,
-  PeriodicExportingMetricReaderOptions,
+  PeriodicExportingMetricReader
 } from "@opentelemetry/sdk-metrics";
-import { InternalConfig } from "../../shared/config";
-import {
+import type { InternalConfig } from "../../shared/config";
+import type {
   Meter,
   ObservableGauge,
-  ObservableResult,
+  ObservableResult} from "@opentelemetry/api";
+import {
   SpanKind,
   SpanStatusCode,
   ValueType,
   context,
 } from "@opentelemetry/api";
-import { RandomIdGenerator, ReadableSpan, TimedEvent } from "@opentelemetry/sdk-trace-base";
-import { LogRecord } from "@opentelemetry/sdk-logs";
-import {
+import type { ReadableSpan, TimedEvent } from "@opentelemetry/sdk-trace-base";
+import { RandomIdGenerator } from "@opentelemetry/sdk-trace-base";
+import type { LogRecord } from "@opentelemetry/sdk-logs";
+import type {
   DocumentIngress,
   Exception,
   MonitoringDataPoint,
@@ -30,9 +33,10 @@ import {
   /* eslint-disable-next-line @typescript-eslint/no-redeclare */
   Request,
   Trace,
-  KnownCollectionConfigurationErrorType,
   KeyValuePairString,
-  DerivedMetricInfo,
+  DerivedMetricInfo} from "../../generated";
+import {
+  KnownCollectionConfigurationErrorType,
   KnownTelemetryType,
 } from "../../generated";
 import {
@@ -52,18 +56,19 @@ import { QuickpulseMetricExporter } from "./export/exporter";
 import { QuickpulseSender } from "./export/sender";
 import { ConnectionStringParser } from "../../utils/connectionStringParser";
 import { DEFAULT_LIVEMETRICS_ENDPOINT } from "../../types";
-import {
-  QuickPulseOpenTelemetryMetricNames,
+import type {
   QuickpulseExporterOptions,
   RequestData,
   DependencyData,
   TraceData,
   ExceptionData,
-  TelemetryData,
+  TelemetryData} from "./types";
+import {
+  QuickPulseOpenTelemetryMetricNames
 } from "./types";
 import { hrTimeToMilliseconds, suppressTracing } from "@opentelemetry/core";
 import { getInstance } from "../../utils/statsbeat";
-import { CollectionConfigurationError } from "../../generated";
+import type { CollectionConfigurationError } from "../../generated";
 import { Filter } from "./filtering/filter";
 import { Validator } from "./filtering/validator";
 import { CollectionConfigurationErrorTracker } from "./filtering/collectionConfigurationErrorTracker";

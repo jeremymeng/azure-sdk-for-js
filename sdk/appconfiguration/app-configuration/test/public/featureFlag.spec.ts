@@ -1,17 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   AddConfigurationSettingResponse,
   AppConfigurationClient,
-  ConfigurationSetting,
+  ConfigurationSetting} from "../../src";
+import {
   featureFlagContentType,
   featureFlagPrefix,
 } from "../../src";
-import { FeatureFlagValue, isFeatureFlag, parseFeatureFlag } from "../../src/featureFlag";
-import { Recorder } from "@azure-tools/test-recorder";
+import type { FeatureFlagValue} from "../../src/featureFlag";
+import { isFeatureFlag, parseFeatureFlag } from "../../src/featureFlag";
+import type { Recorder } from "@azure-tools/test-recorder";
 import { createAppConfigurationClientForTests, startRecorder } from "./utils/testHelpers";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { assert } from "chai";
 
 describe("AppConfigurationClient - FeatureFlag", () => {

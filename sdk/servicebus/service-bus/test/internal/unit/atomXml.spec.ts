@@ -6,8 +6,9 @@ import chaiAsPromised from "chai-as-promised";
 chai.use(chaiAsPromised);
 const assert: typeof chai.assert = chai.assert;
 
+import type {
+  AtomXmlSerializer} from "../../../src/util/atomXmlHelper";
 import {
-  AtomXmlSerializer,
   deserializeAtomXmlResponse,
   executeAtomXmlOperation,
   sanitizeSerializableObject,
@@ -30,7 +31,7 @@ import {
 import { RuleResourceSerializer } from "../../../src/serializers/ruleResourceSerializer";
 import { getXMLNSPrefix, isJSONLikeObject } from "../../../src/util/utils";
 import { TestConstants } from "../../public/fakeTestSecrets";
-import { FullOperationResponse } from "@azure/core-client";
+import type { FullOperationResponse } from "@azure/core-client";
 
 const queueProperties = [
   Constants.LOCK_DURATION,

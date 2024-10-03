@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
-  KnownRenderingSessionStatus,
+import type {
   RenderingServerSize,
-  SessionProperties,
-} from "../generated/index";
+  SessionProperties} from "../generated/index";
 import {
-  RemoteRenderingServiceError,
+  KnownRenderingSessionStatus
+} from "../generated/index";
+import type {
+  RemoteRenderingServiceError} from "../remoteRenderingServiceError";
+import {
   createRemoteRenderingServiceError,
 } from "../remoteRenderingServiceError";
 

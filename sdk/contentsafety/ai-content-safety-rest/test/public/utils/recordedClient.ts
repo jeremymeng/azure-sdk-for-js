@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Context } from "mocha";
+import type { Context } from "mocha";
+import type {
+  RecorderStartOptions} from "@azure-tools/test-recorder";
 import {
   Recorder,
-  RecorderStartOptions,
   assertEnvironmentVariable,
 } from "@azure-tools/test-recorder";
 import "./env";
-import ContentSafety, { ContentSafetyClient } from "../../../src";
+import type { ContentSafetyClient } from "../../../src";
+import ContentSafety from "../../../src";
 import { AzureKeyCredential } from "@azure/core-auth";
 // import { ClientOptions } from "@azure-rest/core-client";
 

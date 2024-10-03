@@ -1,17 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   TextAnalysisAuthoringDeployProjectParameters,
   TextAnalysisAuthoringTrainBodyParam,
-  getLongRunningPoller,
   CreateProjectOptions,
   TextAuthoringClient,
   ExportedCustomSingleLabelClassificationProjectAssets,
   ExportedCustomMultiLabelClassificationProjectAssets,
-  ExportedCustomEntityRecognitionProjectAssets,
+  ExportedCustomEntityRecognitionProjectAssets} from "@azure/ai-language-textauthoring";
+import {
+  getLongRunningPoller
 } from "@azure/ai-language-textauthoring";
-import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
+import type { ContainerClient } from "@azure/storage-blob";
+import { BlobServiceClient } from "@azure/storage-blob";
 import { DefaultAzureCredential } from "@azure/identity";
 import path from "path";
 import decompress from "decompress";

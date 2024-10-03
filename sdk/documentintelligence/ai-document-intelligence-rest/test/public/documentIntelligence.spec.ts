@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Recorder, assertEnvironmentVariable } from "@azure-tools/test-recorder";
+import type { Recorder} from "@azure-tools/test-recorder";
+import { assertEnvironmentVariable } from "@azure-tools/test-recorder";
 import { createTestCredential } from "@azure-tools/test-credential";
 import { createRecorder } from "./utils/recorderUtils.js";
 import DocumentIntelligence from "../../src/documentIntelligence.js";
 import { assert, describe, beforeEach, afterEach, it } from "vitest";
 import { getRandomNumber, containerSasUrl } from "./utils/utils.js";
-import { DocumentIntelligenceClient } from "../../src/clientDefinitions.js";
+import type { DocumentIntelligenceClient } from "../../src/clientDefinitions.js";
+import type {
+  DocumentClassifierBuildOperationDetailsOutput} from "../../src/index.js";
 import {
-  DocumentClassifierBuildOperationDetailsOutput,
   getLongRunningPoller,
   isUnexpected,
 } from "../../src/index.js";

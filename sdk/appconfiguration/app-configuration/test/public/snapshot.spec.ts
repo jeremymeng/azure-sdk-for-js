@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { Recorder, isPlaybackMode, testPollingOptions } from "@azure-tools/test-recorder";
+import type { Recorder} from "@azure-tools/test-recorder";
+import { isPlaybackMode, testPollingOptions } from "@azure-tools/test-recorder";
 import { assert } from "chai";
-import { Context } from "mocha";
-import { AppConfigurationClient } from "../../src/appConfigurationClient";
-import {
+import type { Context } from "mocha";
+import type { AppConfigurationClient } from "../../src/appConfigurationClient";
+import type {
   ConfigurationSnapshot,
   ConfigurationSettingsFilter,
   CreateSnapshotResponse,

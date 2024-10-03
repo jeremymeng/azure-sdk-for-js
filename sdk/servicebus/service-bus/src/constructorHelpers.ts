@@ -1,25 +1,28 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
-  ConnectionConfig,
-  createSasTokenProvider,
+import type {
   RetryOptions,
   SasTokenProvider,
-  WebSocketOptions,
-} from "@azure/core-amqp";
+  WebSocketOptions} from "@azure/core-amqp";
 import {
-  isNamedKeyCredential,
-  isSASCredential,
+  ConnectionConfig,
+  createSasTokenProvider
+} from "@azure/core-amqp";
+import type {
   NamedKeyCredential,
   SASCredential,
-  TokenCredential,
+  TokenCredential} from "@azure/core-auth";
+import {
+  isNamedKeyCredential,
+  isSASCredential
 } from "@azure/core-auth";
 import { ConnectionContext } from "./connectionContext";
-import { UserAgentPolicyOptions } from "@azure/core-rest-pipeline";
+import type { UserAgentPolicyOptions } from "@azure/core-rest-pipeline";
+import type {
+  ServiceBusConnectionStringProperties} from "./util/connectionStringUtils";
 import {
-  parseServiceBusConnectionString,
-  ServiceBusConnectionStringProperties,
+  parseServiceBusConnectionString
 } from "./util/connectionStringUtils";
 
 /**

@@ -21,6 +21,7 @@ if (!process.versions.node.startsWith("16")) {
 
 // This shim is required to defer loading of @azure/msal-node-extensions in environments where
 // it will crash CI with an invalid Node API version.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 export const createPersistence: typeof import("../../../src/provider").createPersistence = (
   ...args
 ) => {

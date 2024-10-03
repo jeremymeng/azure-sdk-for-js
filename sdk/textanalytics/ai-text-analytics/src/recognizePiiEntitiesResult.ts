@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   TextAnalyticsErrorResult,
-  TextAnalyticsSuccessResult,
+  TextAnalyticsSuccessResult} from "./textAnalyticsResult";
+import {
   makeTextAnalyticsErrorResult,
   makeTextAnalyticsSuccessResult,
 } from "./textAnalyticsResult";
-import { Entity, PiiDocumentEntities, TextAnalyticsError } from "./generated/models";
+import type { Entity, PiiDocumentEntities, TextAnalyticsError } from "./generated/models";
 
 /**
  * An entity from PII recognition with information about the kind of PII

@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   HttpClient,
   HttpMethods,
   MultipartRequestBody,
   Pipeline,
   PipelineRequest,
   PipelineResponse,
-  RequestBodyType,
+  RequestBodyType} from "@azure/core-rest-pipeline";
+import {
   RestError,
   createHttpHeaders,
   createPipelineRequest,
@@ -16,8 +17,9 @@ import {
 } from "@azure/core-rest-pipeline";
 import { getCachedDefaultHttpsClient } from "./clientHelpers.js";
 import { isReadableStream } from "./helpers/isReadableStream.js";
-import { HttpResponse, RequestParameters } from "./common.js";
-import { PartDescriptor, buildMultipartBody } from "./multipart.js";
+import type { HttpResponse, RequestParameters } from "./common.js";
+import type { PartDescriptor} from "./multipart.js";
+import { buildMultipartBody } from "./multipart.js";
 
 /**
  * Helper function to send request used by the client

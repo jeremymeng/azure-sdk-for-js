@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   CommunicationIdentifier,
   CommunicationIdentifierKind,
-  SerializedCommunicationIdentifier,
+  SerializedCommunicationIdentifier} from "../../src";
+import {
   deserializeCommunicationIdentifier,
   serializeCommunicationIdentifier,
 } from "../../src";

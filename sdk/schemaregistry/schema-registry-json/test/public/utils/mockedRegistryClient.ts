@@ -1,19 +1,21 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   GetSchemaOptions,
   GetSchemaPropertiesOptions,
   RegisterSchemaOptions,
   Schema,
   SchemaDescription,
   SchemaProperties,
-  SchemaRegistry,
+  SchemaRegistry} from "@azure/schema-registry";
+import {
   SchemaRegistryClient,
 } from "@azure/schema-registry";
 import { createTestCredential } from "@azure-tools/test-credential";
 import { testSchemaIds } from "./dummies";
-import { Recorder, env, isLiveMode } from "@azure-tools/test-recorder";
+import type { Recorder} from "@azure-tools/test-recorder";
+import { env, isLiveMode } from "@azure-tools/test-recorder";
 import { randomUUID } from "@azure/core-util";
 
 type UpdatedSchemaDescription = Required<Omit<SchemaDescription, "version">>;

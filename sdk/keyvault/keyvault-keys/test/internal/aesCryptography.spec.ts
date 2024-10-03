@@ -2,13 +2,14 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
-import {
+import type { Context } from "mocha";
+import type {
   AesCbcEncryptionAlgorithm,
-  CryptographyClient,
   JsonWebKey,
   KeyClient,
-  KeyVaultKey,
+  KeyVaultKey} from "../../src";
+import {
+  CryptographyClient
 } from "../../src";
 import { getKey, stringToUint8Array, uint8ArrayToString } from "../public/utils/crypto";
 import { isNode } from "@azure/core-util";
@@ -17,7 +18,7 @@ import TestClient from "../public/utils/testClient";
 import { authenticate, envSetupForPlayback } from "../public/utils/testAuthentication";
 import { Recorder, env, isLiveMode } from "@azure-tools/test-recorder";
 import { RemoteCryptographyProvider } from "../../src/cryptography/remoteCryptographyProvider";
-import { ClientSecretCredential } from "@azure/identity";
+import type { ClientSecretCredential } from "@azure/identity";
 import { getServiceVersion } from "../public/utils/common";
 
 describe("AesCryptographyProvider browser tests", function () {

@@ -6,14 +6,14 @@
 import * as jsrsasign from "jsrsasign";
 
 import { assert, use as chaiUse } from "chai";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import chaiPromises from "chai-as-promised";
 chaiUse(chaiPromises);
 
 import { Recorder } from "@azure-tools/test-recorder";
 
 import { createRecordedClient, getAttestationUri, recorderOptions } from "../utils/recordedClient";
-import { AttestationClient } from "../../src";
+import type { AttestationClient } from "../../src";
 describe("TokenCertTests", function () {
   let recorder: Recorder;
 

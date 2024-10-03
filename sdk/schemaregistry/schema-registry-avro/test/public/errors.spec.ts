@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { assert, use as chaiUse } from "chai";
-import { AvroSerializer } from "../../src";
-import { Context } from "mocha";
-import { SchemaRegistry } from "@azure/schema-registry";
+import type { AvroSerializer } from "../../src";
+import type { Context } from "mocha";
+import type { SchemaRegistry } from "@azure/schema-registry";
 import { assertError } from "./utils/assertError";
 import chaiPromises from "chai-as-promised";
 import {
@@ -16,7 +16,8 @@ import { createTestSerializer } from "./utils/mockedSerializer";
 import { testGroup, testSchemaName } from "./utils/dummies";
 import { v4 as uuid } from "uuid";
 import { isLiveMode, Recorder } from "@azure-tools/test-recorder";
-import { HttpClient, Pipeline, createDefaultHttpClient } from "@azure/core-rest-pipeline";
+import type { HttpClient, Pipeline} from "@azure/core-rest-pipeline";
+import { createDefaultHttpClient } from "@azure/core-rest-pipeline";
 
 chaiUse(chaiPromises);
 

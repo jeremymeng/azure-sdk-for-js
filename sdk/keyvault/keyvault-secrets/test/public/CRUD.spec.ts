@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { assert } from "@azure-tools/test-utils";
-import { Recorder, env } from "@azure-tools/test-recorder";
+import type { Recorder} from "@azure-tools/test-recorder";
+import { env } from "@azure-tools/test-recorder";
 
-import { SecretClient } from "../../src";
+import type { SecretClient } from "../../src";
 import { assertThrowsAbortError, getServiceVersion } from "./utils/common";
 import { testPollerProperties } from "./utils/recorderUtils";
 import { authenticate } from "./utils/testAuthentication";
-import TestClient from "./utils/testClient";
+import type TestClient from "./utils/testClient";
 
 describe("Secret client - create, read, update and delete operations", () => {
   const secretValue = "SECRET_VALUE";

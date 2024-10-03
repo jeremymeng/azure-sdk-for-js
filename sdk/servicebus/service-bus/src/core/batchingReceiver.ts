@@ -2,25 +2,27 @@
 // Licensed under the MIT License.
 
 import { receiverLogger as logger } from "../log";
-import {
+import type {
   AmqpError,
   EventContext,
   OnAmqpEvent,
-  ReceiverEvents,
-  SessionEvents,
   Receiver as RheaPromiseReceiver,
-  Session,
+  Session} from "rhea-promise";
+import {
+  ReceiverEvents,
+  SessionEvents
 } from "rhea-promise";
 import { ServiceBusMessageImpl } from "../serviceBusMessage";
-import { MessageReceiver, OnAmqpEventAsPromise, ReceiveOptions } from "./messageReceiver";
-import { ConnectionContext } from "../connectionContext";
+import type { OnAmqpEventAsPromise, ReceiveOptions } from "./messageReceiver";
+import { MessageReceiver } from "./messageReceiver";
+import type { ConnectionContext } from "../connectionContext";
 import { throwErrorIfConnectionClosed } from "../util/errors";
-import { AbortSignalLike } from "@azure/abort-controller";
+import type { AbortSignalLike } from "@azure/abort-controller";
 import { checkAndRegisterWithAbortSignal } from "../util/utils";
 import { receiveDrainTimeoutInMs } from "../util/constants";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
 import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage";
-import { ReceiveMode } from "../models";
+import type { ReceiveMode } from "../models";
 import { ServiceBusError, translateServiceBusError } from "../serviceBusError";
 import { tracingClient } from "../diagnostics/tracing";
 

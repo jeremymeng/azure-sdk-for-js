@@ -2,13 +2,14 @@
 // Licensed under the MIT License.
 /* eslint-disable no-unused-expressions */
 import assert from "assert";
-import {
-  CosmosClient,
-  Constants,
+import type {
   Container,
   PluginConfig,
   CosmosClientOptions,
-  OperationInput,
+  OperationInput} from "../../../src";
+import {
+  CosmosClient,
+  Constants,
   PatchOperationType,
 } from "../../../src";
 import { getTestContainer, removeAllDatabases } from "../common/TestHelpers";

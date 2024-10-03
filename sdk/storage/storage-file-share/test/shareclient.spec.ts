@@ -10,9 +10,10 @@ import {
   recorderEnvSetup,
   uriSanitizers,
 } from "./utils";
-import { ShareClient, ShareServiceClient } from "../src";
+import type { ShareServiceClient } from "../src";
+import { ShareClient } from "../src";
 import { Recorder } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { configureStorageClient } from "./utils";
 
 describe("ShareClient", () => {

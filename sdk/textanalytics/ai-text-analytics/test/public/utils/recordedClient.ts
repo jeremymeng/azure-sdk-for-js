@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Test } from "mocha";
+import type { Test } from "mocha";
 
+import type {
+  RecorderStartOptions} from "@azure-tools/test-recorder";
 import {
   Recorder,
-  RecorderStartOptions,
   assertEnvironmentVariable,
   env,
 } from "@azure-tools/test-recorder";
 
-import { AzureKeyCredential, TextAnalyticsClient, TextAnalyticsClientOptions } from "../../../src/";
+import type { TextAnalyticsClientOptions } from "../../../src/";
+import { AzureKeyCredential, TextAnalyticsClient } from "../../../src/";
 import { createTestCredential } from "@azure-tools/test-credential";
 
 const envSetupForPlayback: { [k: string]: string } = {

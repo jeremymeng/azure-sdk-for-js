@@ -1,27 +1,29 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 // External module imports
-import { Context } from "mocha";
+import type { Context } from "mocha";
 
 // Internal module imports
-import { Recorder } from "@azure-tools/test-recorder";
-import {
+import type { Recorder } from "@azure-tools/test-recorder";
+import type {
   CommunicationIdentifier,
   CommunicationUserIdentifier,
-  PhoneNumberIdentifier,
+  PhoneNumberIdentifier} from "@azure/communication-common";
+import {
   serializeCommunicationIdentifier,
 } from "@azure/communication-common";
 
 // Parent directory imports
 import { CallMedia } from "../src/callMedia";
-import {
+import type {
   FileSource,
   TextSource,
   SsmlSource,
-  RecognitionChoice,
+  RecognitionChoice} from "../src/models/models";
+import {
   DtmfTone,
 } from "../src/models/models";
-import {
+import type {
   CallMediaRecognizeDtmfOptions,
   CallMediaRecognizeChoiceOptions,
   CallMediaRecognizeSpeechOptions,
@@ -30,14 +32,15 @@ import {
   CallInvite,
   ContinuousDtmfRecognitionOptions,
   SendDtmfTonesOptions,
-  CallAutomationEventProcessor,
   CreateCallOptions,
   AnswerCallOptions,
   PlayOptions,
   StartTranscriptionOptions,
   StopTranscriptionOptions,
   HoldOptions,
-  UnholdOptions,
+  UnholdOptions} from "../src";
+import {
+  CallAutomationEventProcessor
 } from "../src";
 
 // Current directory imports

@@ -1,26 +1,28 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { MessageReceiver, OnAmqpEventAsPromise, ReceiveOptions } from "./messageReceiver";
-import { ConnectionContext } from "../connectionContext";
+import type { OnAmqpEventAsPromise, ReceiveOptions } from "./messageReceiver";
+import { MessageReceiver } from "./messageReceiver";
+import type { ConnectionContext } from "../connectionContext";
 
 import { ReceiverHelper } from "./receiverHelper";
 
 import { throwErrorIfConnectionClosed } from "../util/errors";
+import type {
+  MessagingError,
+  RetryOptions} from "@azure/core-amqp";
 import {
   RetryOperationType,
-  MessagingError,
-  RetryOptions,
   ConditionErrorNameMapper,
 } from "@azure/core-amqp";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
 import { receiverLogger as logger } from "../log";
-import { AmqpError, EventContext, OnAmqpEvent } from "rhea-promise";
+import type { AmqpError, EventContext, OnAmqpEvent } from "rhea-promise";
 import { ServiceBusMessageImpl } from "../serviceBusMessage";
 import { translateServiceBusError } from "../serviceBusError";
 import { abandonMessage, completeMessage, retryForever } from "../receivers/receiverCommon";
-import { ReceiverHandlers } from "./shared";
-import {
+import type { ReceiverHandlers } from "./shared";
+import type {
   InternalMessageHandlers,
   InternalProcessErrorArgs,
   MessageHandlers,

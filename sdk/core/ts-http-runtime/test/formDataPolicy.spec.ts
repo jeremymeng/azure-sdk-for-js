@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 import { describe, it, assert, vi } from "vitest";
-import {
+import type {
   PipelineResponse,
-  SendRequest,
+  SendRequest} from "../src/index.js";
+import {
   createFile,
   createFileFromStream,
   createHttpHeaders,
@@ -14,7 +15,7 @@ import {
   isNodeLike,
   stringToUint8Array,
 } from "../src/index.js";
-import { BodyPart, FormDataMap, MultipartRequestBody } from "../src/interfaces.js";
+import type { BodyPart, FormDataMap, MultipartRequestBody } from "../src/interfaces.js";
 
 export async function performRequest(formData: FormDataMap): Promise<PipelineResponse> {
   const request = createPipelineRequest({

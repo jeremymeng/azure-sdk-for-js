@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   AccessToken,
   NamedKeyCredential,
-  SASCredential,
+  SASCredential} from "@azure/core-auth";
+import {
   isNamedKeyCredential,
   isSASCredential,
 } from "@azure/core-auth";

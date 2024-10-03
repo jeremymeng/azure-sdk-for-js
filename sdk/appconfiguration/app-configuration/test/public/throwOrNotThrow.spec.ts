@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { AppConfigurationClient, ConfigurationSetting } from "../../src";
-import { Recorder } from "@azure-tools/test-recorder";
+import type { AppConfigurationClient, ConfigurationSetting } from "../../src";
+import type { Recorder } from "@azure-tools/test-recorder";
 import {
   assertThrowsRestError,
   createAppConfigurationClientForTests,
   deleteKeyCompletely,
   startRecorder,
 } from "./utils/testHelpers";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { assert } from "chai";
 
 // There's been discussion on other teams about what errors are thrown when. This

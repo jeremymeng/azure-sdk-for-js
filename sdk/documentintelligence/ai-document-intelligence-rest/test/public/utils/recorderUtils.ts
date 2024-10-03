@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  RecorderStartOptions,
+  TestInfo} from "@azure-tools/test-recorder";
 import {
   Recorder,
-  RecorderStartOptions,
-  TestInfo,
   env,
   isPlaybackMode,
 } from "@azure-tools/test-recorder";

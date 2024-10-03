@@ -2,19 +2,20 @@
 // Licensed under the MIT License.
 
 import { SecretClient } from "../../../src";
+import type {
+  RecorderStartOptions} from "@azure-tools/test-recorder";
 import {
   assertEnvironmentVariable,
   env,
   isRecordMode,
-  Recorder,
-  RecorderStartOptions,
+  Recorder
 } from "@azure-tools/test-recorder";
 import { uniqueString } from "./recorderUtils";
 import TestClient from "./testClient";
-import { Context } from "mocha";
-import { getServiceVersion } from "./common";
+import type { Context } from "mocha";
+import type { getServiceVersion } from "./common";
 import { createTestCredential } from "@azure-tools/test-credential";
-import { FindReplaceSanitizer } from "@azure-tools/test-recorder/types/src/utils/utils";
+import type { FindReplaceSanitizer } from "@azure-tools/test-recorder/types/src/utils/utils";
 
 export async function authenticate(
   that: Context,

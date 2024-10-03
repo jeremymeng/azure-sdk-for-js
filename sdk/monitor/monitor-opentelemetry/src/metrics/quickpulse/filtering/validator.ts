@@ -3,10 +3,11 @@
 
 import { TelemetryTypeError, UnexpectedFilterCreateError } from "./quickpulseErrors";
 import { KnownRequestColumns, KnownDependencyColumns } from "../types";
-import {
+import type {
   DerivedMetricInfo,
+  FilterInfo} from "../../../generated";
+import {
   KnownTelemetryType,
-  FilterInfo,
   KnownPredicateType,
 } from "../../../generated";
 import { getMsFromFilterTimestampString } from "../utils";

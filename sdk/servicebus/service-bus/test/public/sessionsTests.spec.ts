@@ -6,26 +6,28 @@ import Long from "long";
 const should = chai.should();
 import chaiAsPromised from "chai-as-promised";
 chai.use(chaiAsPromised);
-import {
+import type {
   ServiceBusReceivedMessage,
-  delay,
   ProcessErrorArgs,
-  isServiceBusError,
-  ServiceBusError,
+  ServiceBusError} from "../../src";
+import {
+  delay,
+  isServiceBusError
 } from "../../src";
 
 import { TestClientType, TestMessage, checkWithTimeout } from "./utils/testUtils";
-import { ServiceBusSender } from "../../src";
-import { ServiceBusSessionReceiver } from "../../src";
-import {
+import type { ServiceBusSender } from "../../src";
+import type { ServiceBusSessionReceiver } from "../../src";
+import type {
   EntityName,
-  ServiceBusClientForTests,
+  ServiceBusClientForTests} from "./utils/testutils2";
+import {
   createServiceBusClientForTests,
   testPeekMsgsLength,
   getRandomTestClientTypeWithSessions,
 } from "./utils/testutils2";
 import sinon from "sinon";
-import { ServiceBusSessionReceiverImpl } from "../../src/receivers/sessionReceiver";
+import type { ServiceBusSessionReceiverImpl } from "../../src/receivers/sessionReceiver";
 
 let unexpectedError: Error | undefined;
 

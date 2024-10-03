@@ -1,23 +1,26 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  ServiceBusMessage} from "../../../src/serviceBusMessage";
 import {
-  ServiceBusMessage,
   ServiceBusMessageImpl,
   toRheaMessage,
 } from "../../../src/serviceBusMessage";
-import {
+import type {
   Delivery,
-  uuid_to_string,
   MessageAnnotations,
   DeliveryAnnotations,
-  Message as RheaMessage,
+  Message as RheaMessage} from "rhea-promise";
+import {
+  uuid_to_string
 } from "rhea-promise";
 import chai from "chai";
-import { ConnectionConfig, Constants } from "@azure/core-amqp";
+import type { ConnectionConfig} from "@azure/core-amqp";
+import { Constants } from "@azure/core-amqp";
 import { defaultDataTransformer } from "../../../src/dataTransformer";
 import { ServiceBusMessageBatchImpl } from "../../../src/serviceBusMessageBatch";
-import { ConnectionContext } from "../../../src/connectionContext";
+import type { ConnectionContext } from "../../../src/connectionContext";
 const assert: typeof chai.assert = chai.assert;
 
 const fakeDelivery = {} as Delivery;

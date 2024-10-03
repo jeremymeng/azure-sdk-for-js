@@ -1,20 +1,22 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   ServiceBusReceivedMessage,
   ServiceBusReceiver,
   ServiceBusMessage,
-  delay,
   ProcessErrorArgs,
-  ServiceBusSender,
+  ServiceBusSender} from "../../src";
+import {
+  delay
 } from "../../src";
 import { TestClientType } from "../public/utils/testUtils";
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { getEntityNameFromConnectionString } from "../../src/constructorHelpers";
+import type {
+  ServiceBusClientForTests} from "../public/utils/testutils2";
 import {
-  ServiceBusClientForTests,
   createServiceBusClientForTests,
 } from "../public/utils/testutils2";
 chai.use(chaiAsPromised);

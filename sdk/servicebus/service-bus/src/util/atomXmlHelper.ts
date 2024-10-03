@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   PipelineResponse,
-  RestError,
   PipelineRequest,
-  TransferProgressEvent,
+  TransferProgressEvent} from "@azure/core-rest-pipeline";
+import {
+  RestError
 } from "@azure/core-rest-pipeline";
-import { ServiceClient, OperationOptions, FullOperationResponse } from "@azure/core-client";
+import type { ServiceClient, OperationOptions, FullOperationResponse } from "@azure/core-client";
 import { parseXML, stringifyXML } from "@azure/core-xml";
 
 import * as Constants from "./constants";
@@ -18,12 +19,12 @@ import { Buffer } from "buffer";
 import { parseURL } from "./parseUrl";
 import { isJSONLikeObject } from "./utils";
 import { isDefined } from "@azure/core-util";
-import { OperationTracingOptions } from "@azure/core-tracing";
-import { AbortSignalLike } from "@azure/abort-controller";
-import { InternalQueueOptions } from "../serializers/queueResourceSerializer";
-import { InternalTopicOptions } from "../serializers/topicResourceSerializer";
-import { InternalSubscriptionOptions } from "../serializers/subscriptionResourceSerializer";
-import { CreateRuleOptions } from "../serializers/ruleResourceSerializer";
+import type { OperationTracingOptions } from "@azure/core-tracing";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { InternalQueueOptions } from "../serializers/queueResourceSerializer";
+import type { InternalTopicOptions } from "../serializers/topicResourceSerializer";
+import type { InternalSubscriptionOptions } from "../serializers/subscriptionResourceSerializer";
+import type { CreateRuleOptions } from "../serializers/ruleResourceSerializer";
 
 /**
  * @internal

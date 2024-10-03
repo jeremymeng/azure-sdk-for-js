@@ -6,7 +6,7 @@
 import * as jsrsasign from "jsrsasign";
 
 import { assert, use as chaiUse, expect } from "chai";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import chaiAsPromised from "chai-as-promised";
 /* eslint-disable @typescript-eslint/no-invalid-this */
 
@@ -14,13 +14,15 @@ chaiUse(chaiAsPromised);
 
 import { Recorder, isLiveMode } from "@azure-tools/test-recorder";
 
+import type {
+  EndpointType} from "../utils/recordedClient";
 import {
-  EndpointType,
   createRecordedAdminClient,
   getIsolatedSigningKey,
   recorderOptions,
 } from "../utils/recordedClient";
-import { AttestationType, KnownAttestationType, createAttestationPolicyToken } from "../../src";
+import type { AttestationType} from "../../src";
+import { KnownAttestationType, createAttestationPolicyToken } from "../../src";
 import { createRSAKey, createX509Certificate, generateSha256Hash } from "../utils/cryptoUtils";
 import { KnownPolicyModification } from "../../src/generated";
 import { verifyAttestationSigningKey } from "../../src/utils/helpers";

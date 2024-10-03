@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   TextAnalyticsErrorResult,
-  TextAnalyticsSuccessResult,
+  TextAnalyticsSuccessResult} from "./textAnalyticsResult";
+import {
   makeTextAnalyticsErrorResult,
   makeTextAnalyticsSuccessResult,
 } from "./textAnalyticsResult";
-import {
+import type {
   DocumentSentiment,
   DocumentSentimentLabel,
   SentenceSentiment as GeneratedSentenceSentiment,
@@ -20,7 +21,8 @@ import {
   TargetRelation,
   TextAnalyticsError,
 } from "./generated/models";
-import { AssessmentIndex, parseAssessmentIndex } from "./util";
+import type { AssessmentIndex} from "./util";
+import { parseAssessmentIndex } from "./util";
 
 /**
  * The result of the analyze sentiment operation on a single document.

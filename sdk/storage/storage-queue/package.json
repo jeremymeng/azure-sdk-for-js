@@ -4,7 +4,7 @@
   "version": "12.24.1",
   "description": "Microsoft Azure Storage SDK for JavaScript - Queue",
   "main": "./dist/index.js",
-  "module": "./dist-esm/storage-queue/src/index.js",
+  "module": "dist-esm/src/index.js",
   "browser": {
     "./dist-esm/storage-queue/src/index.js": "./dist-esm/storage-queue/src/index.browser.js",
     "./dist-esm/storage-blob/src/credentials/StorageSharedKeyCredential.js": "./dist-esm/storage-blob/src/credentials/StorageSharedKeyCredential.browser.js",

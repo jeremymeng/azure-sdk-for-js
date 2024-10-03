@@ -4,27 +4,30 @@
 import chai from "chai";
 import Long from "long";
 import chaiAsPromised from "chai-as-promised";
-import { ServiceBusMessage, delay, ServiceBusSender, ServiceBusReceivedMessage } from "../../src";
+import type { ServiceBusMessage, ServiceBusSender, ServiceBusReceivedMessage } from "../../src";
+import { delay } from "../../src";
 import { InvalidOperationForPeekedMessage } from "../../src/util/errors";
 import { TestClientType, TestMessage } from "../public/utils/testUtils";
-import { ServiceBusReceiver, ServiceBusReceiverImpl } from "../../src/receivers/receiver";
-import {
+import type { ServiceBusReceiver, ServiceBusReceiverImpl } from "../../src/receivers/receiver";
+import type {
   ServiceBusClientForTests,
+  EntityName} from "../public/utils/testutils2";
+import {
   createServiceBusClientForTests,
   testPeekMsgsLength,
   getRandomTestClientTypeWithNoSessions,
-  EntityName,
   getRandomTestClientType,
   getRandomTestClientTypeWithSessions,
 } from "../public/utils/testutils2";
-import { Receiver, ReceiverEvents } from "rhea-promise";
-import {
+import type { Receiver} from "rhea-promise";
+import { ReceiverEvents } from "rhea-promise";
+import type {
   ServiceBusSessionReceiver,
   ServiceBusSessionReceiverImpl,
 } from "../../src/receivers/sessionReceiver";
-import { LinkEntity } from "../../src/core/linkEntity";
+import type { LinkEntity } from "../../src/core/linkEntity";
 import { StandardAbortMessage } from "@azure/core-amqp";
-import { BatchingReceiver } from "../../src/core/batchingReceiver";
+import type { BatchingReceiver } from "../../src/core/batchingReceiver";
 import { testLogger } from "./utils/misc";
 
 const should = chai.should();

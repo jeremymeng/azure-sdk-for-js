@@ -3,8 +3,8 @@
 
 import chai from "chai";
 import { ServiceBusMessageBatchImpl } from "../../../src/serviceBusMessageBatch";
-import { ConnectionContext } from "../../../src/connectionContext";
-import { ServiceBusMessage } from "../../../src";
+import type { ConnectionContext } from "../../../src/connectionContext";
+import type { ServiceBusMessage } from "../../../src";
 import { isServiceBusMessageBatch, ServiceBusSenderImpl } from "../../../src/sender";
 import { createConnectionContextForTests } from "./unittestUtils";
 import {

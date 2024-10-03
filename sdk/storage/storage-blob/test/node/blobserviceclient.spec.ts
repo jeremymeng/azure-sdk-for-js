@@ -10,14 +10,15 @@ import {
   recorderEnvSetup,
   SimpleTokenCredential,
 } from "../utils";
+import type {
+  StorageSharedKeyCredential} from "../../src";
 import {
   BlobServiceClient,
   getBlobServiceAccountAudience,
-  newPipeline,
-  StorageSharedKeyCredential,
+  newPipeline
 } from "../../src";
 import { Recorder } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { createTestCredential } from "@azure-tools/test-credential";
 
 describe("BlobServiceClient Node.js only", () => {

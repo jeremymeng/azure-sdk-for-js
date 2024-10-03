@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   ConfigurationSetting,
   ConfigurationSettingParam,
   HttpOnlyIfChangedField,
@@ -16,21 +16,23 @@ import {
   EtagEntity,
   ListLabelsOptions,
 } from "../models";
-import { FeatureFlagHelper, FeatureFlagValue, featureFlagContentType } from "../featureFlag";
-import {
+import type { FeatureFlagValue} from "../featureFlag";
+import { FeatureFlagHelper, featureFlagContentType } from "../featureFlag";
+import type {
   GetKeyValuesOptionalParams,
   GetLabelsOptionalParams,
   GetSnapshotsOptionalParams,
   KeyValue,
 } from "../generated/src/models";
+import type {
+  SecretReferenceValue} from "../secretReference";
 import {
   SecretReferenceHelper,
-  SecretReferenceValue,
   secretReferenceContentType,
 } from "../secretReference";
 import { isDefined } from "@azure/core-util";
 import { logger } from "../logger";
-import { OperationOptions } from "@azure/core-client";
+import type { OperationOptions } from "@azure/core-client";
 
 /**
  * Options for listConfigurationSettings that allow for filtering based on keys, labels and other fields.

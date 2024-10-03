@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as base64 from "./base64.js";
-import {
+import type {
   BaseMapper,
   CompositeMapper,
   DictionaryMapper,
@@ -13,7 +13,8 @@ import {
   RequiredSerializerOptions,
   SequenceMapper,
   Serializer,
-  SerializerOptions,
+  SerializerOptions} from "./interfaces.js";
+import {
   XML_ATTRKEY,
   XML_CHARKEY,
 } from "./interfaces.js";

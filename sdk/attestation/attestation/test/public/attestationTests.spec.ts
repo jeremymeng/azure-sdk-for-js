@@ -2,14 +2,15 @@
 // Licensed under the MIT License.
 
 import { assert, use as chaiUse, expect } from "chai";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import chaiPromises from "chai-as-promised";
 chaiUse(chaiPromises);
 
 import { Recorder } from "@azure-tools/test-recorder";
 
+import type {
+  EndpointType} from "../utils/recordedClient";
 import {
-  EndpointType,
   createRecordedAdminClient,
   createRecordedClient,
   recorderOptions,

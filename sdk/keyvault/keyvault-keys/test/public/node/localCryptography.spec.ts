@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Context } from "mocha";
-import { CryptographyClient, KeyClient, KeyVaultKey, SignatureAlgorithm } from "../../../src";
+import type { Context } from "mocha";
+import type { KeyClient, KeyVaultKey, SignatureAlgorithm } from "../../../src";
+import { CryptographyClient } from "../../../src";
 import { createHash } from "crypto";
 import { authenticate, envSetupForPlayback } from "../utils/testAuthentication";
-import TestClient from "../utils/testClient";
+import type TestClient from "../utils/testClient";
 import { Recorder, env, isLiveMode } from "@azure-tools/test-recorder";
-import { ClientSecretCredential } from "@azure/identity";
+import type { ClientSecretCredential } from "@azure/identity";
 import { RsaCryptographyProvider } from "../../../src/cryptography/rsaCryptographyProvider";
 import { getServiceVersion } from "../utils/common";
 import { assert } from "@azure-tools/test-utils";

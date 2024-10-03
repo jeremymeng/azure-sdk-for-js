@@ -1,23 +1,26 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { OperationOptionsBase } from "./modelsToBeSharedWithEventHubs";
-import { ConnectionContext } from "./connectionContext";
-import { RetryConfig, RetryOperationType, RetryOptions, retry } from "@azure/core-amqp";
-import { CorrelationRuleFilter } from "./core/managementClient";
+import type { OperationOptionsBase } from "./modelsToBeSharedWithEventHubs";
+import type { ConnectionContext } from "./connectionContext";
+import type { RetryConfig, RetryOptions} from "@azure/core-amqp";
+import { RetryOperationType, retry } from "@azure/core-amqp";
+import type { CorrelationRuleFilter } from "./core/managementClient";
 import { ruleManagerLogger as logger } from "./log";
-import {
-  isSqlRuleAction,
+import type {
   RuleProperties,
-  SqlRuleAction,
+  SqlRuleAction} from "./serializers/ruleResourceSerializer";
+import {
+  isSqlRuleAction
 } from "./serializers/ruleResourceSerializer";
 import { getUniqueName } from "./util/utils";
 import { throwErrorIfConnectionClosed } from "./util/errors";
-import { SqlRuleFilter } from "./serializers/ruleResourceSerializer";
+import type { SqlRuleFilter } from "./serializers/ruleResourceSerializer";
 import { tracingClient } from "./diagnostics/tracing";
-import { getPagedAsyncIterator, PagedAsyncIterableIterator, PagedResult } from "@azure/core-paging";
-import { OperationOptions } from "@azure/core-client";
-import { ListRequestOptions } from "./serviceBusAtomManagementClient";
+import type { PagedAsyncIterableIterator, PagedResult } from "@azure/core-paging";
+import { getPagedAsyncIterator } from "@azure/core-paging";
+import type { OperationOptions } from "@azure/core-client";
+import type { ListRequestOptions } from "./serviceBusAtomManagementClient";
 
 /**
  * Allows rules for a subscription to be managed. This rule manager requires only Listen claims, whereas the

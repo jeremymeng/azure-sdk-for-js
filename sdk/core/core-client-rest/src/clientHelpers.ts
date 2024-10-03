@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   HttpClient,
-  Pipeline,
+  Pipeline} from "@azure/core-rest-pipeline";
+import {
   bearerTokenAuthenticationPolicy,
   createDefaultHttpClient,
   createPipelineFromOptions,
 } from "@azure/core-rest-pipeline";
-import { KeyCredential, TokenCredential, isTokenCredential } from "@azure/core-auth";
+import type { KeyCredential, TokenCredential} from "@azure/core-auth";
+import { isTokenCredential } from "@azure/core-auth";
 
-import { ClientOptions } from "./common.js";
+import type { ClientOptions } from "./common.js";
 import { apiVersionPolicy } from "./apiVersionPolicy.js";
 import { keyCredentialAuthenticationPolicy } from "./keyCredentialAuthenticationPolicy.js";
 

@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { SupportedVersions, TestFunctionWrapper, assert, supports } from "@azure-tools/test-utils";
+import type { SupportedVersions, TestFunctionWrapper} from "@azure-tools/test-utils";
+import { assert, supports } from "@azure-tools/test-utils";
 import { env } from "@azure-tools/test-recorder";
-import { SecretClientOptions } from "../../../src";
+import type { SecretClientOptions } from "../../../src";
 
 export async function assertThrowsAbortError(cb: () => Promise<any>): Promise<void> {
   let passed = false;

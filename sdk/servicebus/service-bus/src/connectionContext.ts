@@ -3,29 +3,31 @@
 
 import { connectionLogger as logger } from "./log";
 import { packageJsonInfo } from "./util/constants";
-import {
+import type {
   ConnectionConfig,
-  ConnectionContextBase,
   CreateConnectionContextBaseParameters,
-  SasTokenProvider,
-} from "@azure/core-amqp";
-import { TokenCredential } from "@azure/core-auth";
-import { ServiceBusClientOptions } from "./constructorHelpers";
+  SasTokenProvider} from "@azure/core-amqp";
 import {
+  ConnectionContextBase
+} from "@azure/core-amqp";
+import type { TokenCredential } from "@azure/core-auth";
+import type { ServiceBusClientOptions } from "./constructorHelpers";
+import type {
   AmqpError,
   Connection,
   ConnectionError,
-  ConnectionEvents,
   EventContext,
-  OnAmqpEvent,
+  OnAmqpEvent} from "rhea-promise";
+import {
+  ConnectionEvents
 } from "rhea-promise";
-import { MessageSender } from "./core/messageSender";
-import { MessageSession } from "./session/messageSession";
-import { MessageReceiver } from "./core/messageReceiver";
+import type { MessageSender } from "./core/messageSender";
+import type { MessageSession } from "./session/messageSession";
+import type { MessageReceiver } from "./core/messageReceiver";
 import { ManagementClient } from "./core/managementClient";
 import { formatUserAgentPrefix } from "./util/utils";
 import { getRuntimeInfo } from "./util/runtimeInfo";
-import { NonSessionReceiverType, ReceiverType } from "./core/linkEntity";
+import type { NonSessionReceiverType, ReceiverType } from "./core/linkEntity";
 import { ServiceBusError } from "./serviceBusError";
 
 /**

@@ -3,12 +3,13 @@
 
 import { describe, it, assert } from "vitest";
 import * as MediaMappers from "./testMappers2.js";
-import {
+import type {
   CompositeMapper,
   DictionaryMapper,
   EnumMapper,
   Mapper,
-  SequenceMapper,
+  SequenceMapper} from "../src/index.js";
+import {
   createSerializer,
 } from "../src/index.js";
 import { Mappers } from "./testMappers1.js";

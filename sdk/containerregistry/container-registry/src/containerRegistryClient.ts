@@ -3,27 +3,30 @@
 
 /// <reference lib="esnext.asynciterable" />
 
-import { isTokenCredential, TokenCredential } from "@azure/core-auth";
+import type { TokenCredential } from "@azure/core-auth";
+import { isTokenCredential } from "@azure/core-auth";
+import type {
+  InternalPipelineOptions} from "@azure/core-rest-pipeline";
 import {
-  InternalPipelineOptions,
   bearerTokenAuthenticationPolicy,
 } from "@azure/core-rest-pipeline";
-import { CommonClientOptions, OperationOptions } from "@azure/core-client";
+import type { CommonClientOptions, OperationOptions } from "@azure/core-client";
 
-import { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
+import type { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
 
 import { logger } from "./logger";
 import { GeneratedClient } from "./generated";
 import { tracingClient } from "./tracing";
-import { RepositoryPageResponse } from "./models";
+import type { RepositoryPageResponse } from "./models";
 import { extractNextLink } from "./utils/helpers";
 import { ChallengeHandler } from "./containerRegistryChallengeHandler";
-import {
+import type {
   ContainerRepository,
-  ContainerRepositoryImpl,
-  DeleteRepositoryOptions,
+  DeleteRepositoryOptions} from "./containerRepository";
+import {
+  ContainerRepositoryImpl
 } from "./containerRepository";
-import { RegistryArtifact } from "./registryArtifact";
+import type { RegistryArtifact } from "./registryArtifact";
 import { ContainerRegistryRefreshTokenCredential } from "./containerRegistryTokenCredential";
 
 const LATEST_API_VERSION = "2021-07-01";

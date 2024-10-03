@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { MSI, MSIConfiguration, MSIToken } from "./models";
-import {
+import type { MSI, MSIConfiguration, MSIToken } from "./models";
+import type {
   PipelineRequestOptions,
-  PipelineResponse,
+  PipelineResponse} from "@azure/core-rest-pipeline";
+import {
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";
@@ -12,7 +13,7 @@ import { delay, isError } from "@azure/core-util";
 import { imdsApiVersion, imdsEndpointPath, imdsHost } from "./constants";
 
 import { AuthenticationError } from "../../errors";
-import { GetTokenOptions } from "@azure/core-auth";
+import type { GetTokenOptions } from "@azure/core-auth";
 import { credentialLogger } from "../../util/logging";
 import { mapScopesToResource } from "./utils";
 import { tracingClient } from "../../util/tracing";

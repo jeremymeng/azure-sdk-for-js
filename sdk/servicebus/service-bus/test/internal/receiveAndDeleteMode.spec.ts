@@ -6,7 +6,7 @@ const should = chai.should();
 const expect = chai.expect;
 import chaiAsPromised from "chai-as-promised";
 chai.use(chaiAsPromised);
-import {
+import type {
   ServiceBusReceivedMessage,
   ServiceBusMessage,
   ServiceBusReceiver,
@@ -17,16 +17,17 @@ import {
 import { TestClientType, TestMessage, checkWithTimeout } from "../public/utils/testUtils";
 
 import { InvalidOperationInReceiveAndDeleteMode } from "../../src/util/errors";
-import {
+import type {
   EntityName,
-  ServiceBusClientForTests,
+  ServiceBusClientForTests} from "../public/utils/testutils2";
+import {
   createServiceBusClientForTests,
   testPeekMsgsLength,
   getRandomTestClientTypeWithSessions,
   getRandomTestClientTypeWithNoSessions,
 } from "../public/utils/testutils2";
 import { DispositionType } from "../../src/serviceBusMessage";
-import Long from "long";
+import type Long from "long";
 
 let errorWasThrown: boolean;
 const noSessionTestClientType = getRandomTestClientTypeWithNoSessions();

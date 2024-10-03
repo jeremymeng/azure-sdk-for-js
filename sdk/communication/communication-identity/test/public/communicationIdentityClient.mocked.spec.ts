@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  CommunicationUserIdentifier} from "@azure/communication-common";
 import {
-  CommunicationUserIdentifier,
   isCommunicationUserIdentifier,
 } from "@azure/communication-common";
 import { getTokenForTeamsUserHttpClient, getTokenHttpClient } from "./utils/mockHttpClients";

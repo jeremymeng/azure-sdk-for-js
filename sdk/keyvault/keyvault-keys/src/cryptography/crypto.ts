@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  Verify} from "crypto";
 import {
-  Verify,
   createHash as cryptoCreateHash,
   createVerify as cryptoCreateVerify,
   randomBytes as cryptoRandomBytes,

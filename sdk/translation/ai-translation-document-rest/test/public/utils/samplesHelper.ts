@@ -1,12 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ContainerClient, ContainerSASPermissions, BlobServiceClient } from "@azure/storage-blob";
-import { TestDocument, createTestDocument } from "../utils/TestDocument";
-import {
+import type { ContainerClient} from "@azure/storage-blob";
+import { ContainerSASPermissions, BlobServiceClient } from "@azure/storage-blob";
+import type { TestDocument} from "../utils/TestDocument";
+import { createTestDocument } from "../utils/TestDocument";
+import type {
   BatchRequest,
   DocumentTranslationClient,
-  StartTranslationDefaultResponse,
+  StartTranslationDefaultResponse} from "../../../src";
+import {
   getLongRunningPoller,
 } from "../../../src";
 

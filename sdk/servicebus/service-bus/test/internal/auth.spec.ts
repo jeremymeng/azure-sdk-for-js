@@ -4,13 +4,15 @@
 import { createSasTokenProvider } from "@azure/core-amqp";
 import { AzureNamedKeyCredential, AzureSASCredential } from "@azure/core-auth";
 import chai from "chai";
-import { ServiceBusClient, ServiceBusReceiver, parseServiceBusConnectionString } from "../../src";
+import type { ServiceBusReceiver} from "../../src";
+import { ServiceBusClient, parseServiceBusConnectionString } from "../../src";
 import { getEnvVars } from "../public/utils/envVarUtils";
 import { TestClientType } from "../public/utils/testUtils";
-import {
-  createServiceBusClientForTests,
+import type {
   ServiceBusClientForTests,
-  ServiceBusTestHelpers,
+  ServiceBusTestHelpers} from "../public/utils/testutils2";
+import {
+  createServiceBusClientForTests
 } from "../public/utils/testutils2";
 const assert: typeof chai.assert = chai.assert;
 

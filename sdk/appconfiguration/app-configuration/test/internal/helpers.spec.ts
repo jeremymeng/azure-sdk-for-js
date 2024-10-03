@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   ConfigurationSetting,
   ConfigurationSettingParam,
   HttpResponseField,
   HttpResponseFields,
+  ConfigurationSettingId} from "../../src";
+import {
   featureFlagContentType,
-  secretReferenceContentType,
-  ConfigurationSettingId,
+  secretReferenceContentType
 } from "../../src";
 import {
   checkAndFormatIfAndIfNoneMatch,
@@ -23,9 +24,9 @@ import {
   transformKeyValueResponse,
   transformKeyValueResponseWithStatusCode,
 } from "../../src/internal/helpers";
-import { FeatureFlagValue } from "../../src/featureFlag";
-import { WebResourceLike } from "@azure/core-http-compat";
-import { SecretReferenceValue } from "../../src/secretReference";
+import type { FeatureFlagValue } from "../../src/featureFlag";
+import type { WebResourceLike } from "@azure/core-http-compat";
+import type { SecretReferenceValue } from "../../src/secretReference";
 import { assert } from "chai";
 
 describe("helper methods", () => {
@@ -186,9 +187,9 @@ describe("helper methods", () => {
         url: "unused",
         abortSignal: {
           aborted: true,
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
+           
           addEventListener: () => {},
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
+           
           removeEventListener: () => {},
         },
         method: "GET",

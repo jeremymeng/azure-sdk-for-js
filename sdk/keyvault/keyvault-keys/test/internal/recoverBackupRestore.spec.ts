@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { isNodeLike } from "@azure/core-util";
-import { KeyClient } from "../../src";
+import type { KeyClient } from "../../src";
 import { getServiceVersion } from "../public/utils/common";
 import { testPollerProperties } from "../public/utils/recorderUtils";
 import { Recorder, env, isPlaybackMode, isRecordMode } from "@azure-tools/test-recorder";
 import { authenticate, envSetupForPlayback } from "../public/utils/testAuthentication";
-import TestClient from "../public/utils/testClient";
+import type TestClient from "../public/utils/testClient";
 import { RestoreKeyBackupPoller } from "../public/utils/lro/restore/poller";
 
 describe("Keys client - restore keys and recover backups", () => {

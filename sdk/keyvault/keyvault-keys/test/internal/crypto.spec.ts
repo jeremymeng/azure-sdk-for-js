@@ -1,26 +1,28 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { OperationOptions } from "@azure/core-client";
+import type { OperationOptions } from "@azure/core-client";
 import { isNode } from "@azure/core-util";
-import { TokenCredential } from "@azure/core-auth";
-import { Context } from "mocha";
+import type { TokenCredential } from "@azure/core-auth";
+import type { Context } from "mocha";
 import { assert } from "@azure-tools/test-utils";
 import sinon from "sinon";
-import {
-  CryptographyClient,
+import type {
   DecryptParameters,
   EncryptParameters,
-  KeyClient,
-  KeyVaultKey,
+  KeyVaultKey} from "../../src";
+import {
+  CryptographyClient,
+  KeyClient
 } from "../../src";
 import { RsaCryptographyProvider } from "../../src/cryptography/rsaCryptographyProvider";
-import { JsonWebKey } from "../../src";
+import type { JsonWebKey } from "../../src";
 import { stringToUint8Array } from "../public/utils/crypto";
-import { CryptographyProvider } from "../../src/cryptography/models";
+import type { CryptographyProvider } from "../../src/cryptography/models";
 import { RemoteCryptographyProvider } from "../../src/cryptography/remoteCryptographyProvider";
 import { NoOpCredential } from "@azure-tools/test-credential";
-import { RestError, SendRequest, createHttpHeaders } from "@azure/core-rest-pipeline";
+import type { SendRequest} from "@azure/core-rest-pipeline";
+import { RestError, createHttpHeaders } from "@azure/core-rest-pipeline";
 
 describe("internal crypto tests", () => {
   const tokenCredential: TokenCredential = {

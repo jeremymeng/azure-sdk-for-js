@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 import { createTestCredential } from "@azure-tools/test-credential";
-import {
-  assertEnvironmentVariable,
-  env,
+import type {
   Recorder,
   RecorderStartOptions,
-  SanitizerOptions,
+  SanitizerOptions} from "@azure-tools/test-recorder";
+import {
+  assertEnvironmentVariable,
+  env
 } from "@azure-tools/test-recorder";
 import { isDefined } from "@azure/core-util";
 import { OpenAIClient } from "@azure/openai";

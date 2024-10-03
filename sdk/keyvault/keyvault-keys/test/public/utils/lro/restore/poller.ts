@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { OperationOptions } from "@azure/core-client";
+import type { OperationOptions } from "@azure/core-client";
 import { delay } from "@azure/core-util";
 import { Poller } from "@azure/core-lro";
-import {
+import type {
   RestoreKeyBackupPollOperationState,
-  TestKeyClientInterface,
+  TestKeyClientInterface} from "./operation";
+import {
   makeRestoreKeyBackupPollOperation,
 } from "./operation";
-import { KeyVaultKey } from "../../../../../src";
+import type { KeyVaultKey } from "../../../../../src";
 
 export interface RestoreKeyBackupPollerOptions {
   client: TestKeyClientInterface;

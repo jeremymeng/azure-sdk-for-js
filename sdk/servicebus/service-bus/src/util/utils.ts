@@ -2,14 +2,18 @@
 // Licensed under the MIT License.
 
 import Long from "long";
-import { logger, receiverLogger, messageLogger, ServiceBusLogger } from "../log";
-import { AmqpError, OperationTimeoutError, generate_uuid } from "rhea-promise";
+import type { ServiceBusLogger } from "../log";
+import { logger, receiverLogger, messageLogger } from "../log";
+import type { AmqpError} from "rhea-promise";
+import { OperationTimeoutError, generate_uuid } from "rhea-promise";
 import isBuffer from "is-buffer";
 import * as Constants from "../util/constants";
-import { AbortError, AbortSignalLike } from "@azure/abort-controller";
-import { PipelineResponse } from "@azure/core-rest-pipeline";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import { AbortError } from "@azure/abort-controller";
+import type { PipelineResponse } from "@azure/core-rest-pipeline";
 import { isDefined } from "@azure/core-util";
-import { HttpResponse, toHttpResponse } from "./compat";
+import type { HttpResponse} from "./compat";
+import { toHttpResponse } from "./compat";
 import { ErrorNameConditionMapper, StandardAbortMessage, delay } from "@azure/core-amqp";
 import { translateServiceBusError } from "../serviceBusError";
 

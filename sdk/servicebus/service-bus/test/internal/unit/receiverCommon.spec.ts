@@ -9,19 +9,21 @@ import {
   wrapProcessErrorHandler,
 } from "../../../src/receivers/receiverCommon";
 import chai from "chai";
-import { ServiceBusReceiver } from "../../../src/receivers/receiver";
-import { createServiceBusLogger, ServiceBusLogger } from "../../../src/log";
-import { ProcessErrorArgs } from "../../../src/models";
+import type { ServiceBusReceiver } from "../../../src/receivers/receiver";
+import type { ServiceBusLogger } from "../../../src/log";
+import { createServiceBusLogger } from "../../../src/log";
+import type { ProcessErrorArgs } from "../../../src/models";
 import { ServiceBusError, translateServiceBusError } from "../../../src/serviceBusError";
 import { MessagingError, RetryOperationType } from "@azure/core-amqp";
-import {
-  DispositionType,
+import type {
   ServiceBusMessageImpl,
-  ServiceBusReceivedMessage,
+  ServiceBusReceivedMessage} from "../../../src/serviceBusMessage";
+import {
+  DispositionType
 } from "../../../src/serviceBusMessage";
-import { ConnectionContext } from "../../../src/connectionContext";
-import { DispositionStatusOptions } from "../../../src/core/managementClient";
-import { Delivery } from "rhea-promise";
+import type { ConnectionContext } from "../../../src/connectionContext";
+import type { DispositionStatusOptions } from "../../../src/core/managementClient";
+import type { Delivery } from "rhea-promise";
 import { MessageAlreadySettled } from "../../../src/util/errors";
 import { assertThrows } from "../../public/utils/testUtils";
 import { AbortError } from "@azure/abort-controller";

@@ -10,19 +10,21 @@ import {
   createConnectionContextForTestsWithSessionId,
   defer,
 } from "./unittestUtils";
-import sinon, { SinonSpy } from "sinon";
+import type { SinonSpy } from "sinon";
+import sinon from "sinon";
 import { EventEmitter } from "events";
-import {
-  ReceiverEvents,
+import type {
   EventContext,
   Message as RheaMessage,
-  SessionEvents,
-  Receiver as RheaPromiseReceiver,
+  Receiver as RheaPromiseReceiver} from "rhea-promise";
+import {
+  ReceiverEvents,
+  SessionEvents
 } from "rhea-promise";
-import { OnAmqpEventAsPromise } from "../../../src/core/messageReceiver";
-import { ServiceBusMessageImpl } from "../../../src/serviceBusMessage";
-import { ProcessErrorArgs, ServiceBusError } from "../../../src";
-import { ReceiveMode } from "../../../src/models";
+import type { OnAmqpEventAsPromise } from "../../../src/core/messageReceiver";
+import type { ServiceBusMessageImpl } from "../../../src/serviceBusMessage";
+import type { ProcessErrorArgs, ServiceBusError } from "../../../src";
+import type { ReceiveMode } from "../../../src/models";
 import { Constants } from "@azure/core-amqp";
 import { AbortError } from "@azure/abort-controller";
 

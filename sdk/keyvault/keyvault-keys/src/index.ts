@@ -4,16 +4,17 @@
 
 import { bearerTokenAuthenticationPolicy } from "@azure/core-rest-pipeline";
 
-import { TokenCredential } from "@azure/core-auth";
+import type { TokenCredential } from "@azure/core-auth";
 
 import { logger } from "./log";
 
 import { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
 import { PollOperationState, PollerLike } from "@azure/core-lro";
 
+import type {
+  GetKeysOptionalParams} from "./generated/models";
 import {
   DeletionRecoveryLevel,
-  GetKeysOptionalParams,
   KnownDeletionRecoveryLevel,
   KnownJsonWebKeyType,
 } from "./generated/models";

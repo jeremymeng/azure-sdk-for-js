@@ -1,27 +1,30 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ProxyTracerProvider, metrics, trace } from "@opentelemetry/api";
+import type { ProxyTracerProvider} from "@opentelemetry/api";
+import { metrics, trace } from "@opentelemetry/api";
 import { logs } from "@opentelemetry/api-logs";
-import { NodeSDK, NodeSDKConfiguration } from "@opentelemetry/sdk-node";
+import type { NodeSDKConfiguration } from "@opentelemetry/sdk-node";
+import { NodeSDK } from "@opentelemetry/sdk-node";
 import { InternalConfig } from "./shared/config";
 import { MetricHandler } from "./metrics";
 import { TraceHandler } from "./traces/handler";
 import { Logger as InternalLogger } from "./shared/logging";
 import { LogHandler } from "./logs";
+import type {
+  StatsbeatFeatures,
+  StatsbeatInstrumentations} from "./types";
 import {
   AZURE_MONITOR_OPENTELEMETRY_VERSION,
   AzureMonitorOpenTelemetryOptions,
   InstrumentationOptions,
-  BrowserSdkLoaderOptions,
-  StatsbeatFeatures,
-  StatsbeatInstrumentations,
+  BrowserSdkLoaderOptions
 } from "./types";
 import { BrowserSdkLoader } from "./browserSdkLoader/browserSdkLoader";
 import { setSdkPrefix } from "./metrics/quickpulse/utils";
-import { SpanProcessor } from "@opentelemetry/sdk-trace-base";
-import { LogRecordProcessor, LoggerProvider } from "@opentelemetry/sdk-logs";
-import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import type { SpanProcessor } from "@opentelemetry/sdk-trace-base";
+import type { LogRecordProcessor, LoggerProvider } from "@opentelemetry/sdk-logs";
+import type { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { getInstance } from "./utils/statsbeat";
 import { patchOpenTelemetryInstrumentationEnable } from "./utils/opentelemetryInstrumentationPatcher";
 import { parseResourceDetectorsFromEnvVar } from "./utils/common";

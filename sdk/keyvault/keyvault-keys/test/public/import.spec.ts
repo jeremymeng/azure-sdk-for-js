@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { Recorder, env } from "@azure-tools/test-recorder";
 
-import { KeyClient } from "../../src";
+import type { KeyClient } from "../../src";
 import { authenticate, envSetupForPlayback } from "./utils/testAuthentication";
-import TestClient from "./utils/testClient";
+import type TestClient from "./utils/testClient";
 import { getServiceVersion } from "./utils/common";
 import { createRsaKey } from "./utils/crypto";
 

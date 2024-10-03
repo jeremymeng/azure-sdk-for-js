@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+import type {
+  MockTracingSpan} from "@azure-tools/test-utils";
 import {
   MockInstrumenter,
-  MockTracingSpan,
   assert,
   createMockTracingContext,
 } from "@azure-tools/test-utils";
@@ -14,9 +15,9 @@ import {
 import { toSpanOptions, tracingClient } from "../../../src/diagnostics/tracing";
 
 import Sinon from "sinon";
-import { TracingContext } from "@azure/core-tracing";
+import type { TracingContext } from "@azure/core-tracing";
 import Long from "long";
-import { ServiceBusReceivedMessage } from "../../../src/serviceBusMessage";
+import type { ServiceBusReceivedMessage } from "../../../src/serviceBusMessage";
 
 describe("tracing", () => {
   describe("#getAdditionalSpanOptions", () => {

@@ -64,7 +64,7 @@ describe("AvroReader", () => {
   });
 
   it("aborter", async () => {
-    // eslint-disable-next-line 	@typescript-eslint/no-empty-function
+     
     const delayedReadable = new Readable({ read() {} });
     const rfs = new AvroReadableFromStream(delayedReadable);
     const avroReader = new AvroReader(rfs);

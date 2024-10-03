@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   Recorder,
-  RecorderStartOptions,
+  RecorderStartOptions} from "@azure-tools/test-recorder";
+import {
   assertEnvironmentVariable,
 } from "@azure-tools/test-recorder";
 import { KnownSchemaFormats, SchemaRegistryClient } from "../../../src";

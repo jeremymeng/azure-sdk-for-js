@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { isLiveMode, Recorder } from "@azure-tools/test-recorder";
-import { ClientSecretCredential } from "@azure/identity";
-import { NoOpCredential } from "@azure-tools/test-credential";
+import type { ClientSecretCredential } from "@azure/identity";
+import type { NoOpCredential } from "@azure-tools/test-credential";
 
-import { CryptographyClient, KeyClient, KeyVaultKey } from "../../src";
+import type { KeyClient, KeyVaultKey } from "../../src";
+import { CryptographyClient } from "../../src";
 import { authenticate, envSetupForPlayback } from "./utils/testAuthentication";
 import { stringToUint8Array, uint8ArrayToString } from "./utils/crypto";
 import TestClient from "./utils/testClient";

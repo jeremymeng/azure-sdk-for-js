@@ -6,19 +6,21 @@ import chaiAsPromised from "chai-as-promised";
 chai.use(chaiAsPromised);
 const should = chai.should();
 import { TestClientType, TestMessage } from "../public/utils/testUtils";
+import type {
+  ServiceBusClientForTests} from "../public/utils/testutils2";
 import {
-  ServiceBusClientForTests,
   createServiceBusClientForTests,
 } from "../public/utils/testutils2";
-import { ServiceBusSender, ServiceBusSenderImpl } from "../../src/sender";
+import type { ServiceBusSender, ServiceBusSenderImpl } from "../../src/sender";
 import { MessagingError } from "@azure/core-amqp";
 import Long from "long";
 import { BatchingReceiver } from "../../src/core/batchingReceiver";
+import type {
+  ServiceBusSessionReceiver} from "../../src/receivers/sessionReceiver";
 import {
-  ServiceBusSessionReceiverImpl,
-  ServiceBusSessionReceiver,
+  ServiceBusSessionReceiverImpl
 } from "../../src/receivers/sessionReceiver";
-import { ServiceBusReceiver, ServiceBusReceiverImpl } from "../../src/receivers/receiver";
+import type { ServiceBusReceiver, ServiceBusReceiverImpl } from "../../src/receivers/receiver";
 
 describe("Retries - ManagementClient", () => {
   let sender: ServiceBusSender;

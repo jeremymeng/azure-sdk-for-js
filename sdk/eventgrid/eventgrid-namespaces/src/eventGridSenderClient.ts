@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { AzureKeyCredential, TokenCredential } from "@azure/core-auth";
-import { CloudEvent as CloudEventWireModel } from "./cadl-generated/models";
+import type { AzureKeyCredential, TokenCredential } from "@azure/core-auth";
+import type { CloudEvent as CloudEventWireModel } from "./cadl-generated/models";
 import { randomUUID } from "@azure/core-util";
 import { EventGridClient as EventGridClientGenerated } from "./cadl-generated/EventGridClient";
-import {
+import type {
   SendEventsOptions,
   CloudEvent,
-  cloudEventReservedPropertyNames,
-  EventGridSenderClientOptions,
+  EventGridSenderClientOptions} from "./models";
+import {
+  cloudEventReservedPropertyNames
 } from "./models";
 import { cloudEventDistributedTracingEnricherPolicy } from "./cloudEventDistrubtedTracingEnricherPolicy";
 import { tracingPolicyName } from "@azure/core-rest-pipeline";

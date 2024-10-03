@@ -3,11 +3,12 @@
 
 import { assert } from "chai";
 import { cloudEventDistributedTracingEnricherPolicy } from "../../src/cloudEventDistrubtedTracingEnricherPolicy";
-import {
+import type {
   PipelineRequest,
   PipelineResponse,
-  createPipelineRequest,
-  SendRequest,
+  SendRequest} from "@azure/core-rest-pipeline";
+import {
+  createPipelineRequest
 } from "@azure/core-rest-pipeline";
 
 const CloudEventBatchContentType = "application/cloudevents-batch+json; charset=utf-8";

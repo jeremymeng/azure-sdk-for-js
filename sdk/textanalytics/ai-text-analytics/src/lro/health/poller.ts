@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { AbortSignalLike } from "@azure/abort-controller";
-import { CancelOnProgress, PollOperationState } from "@azure/core-lro";
-import { PagedAnalyzeHealthcareEntitiesResult } from "../../analyzeHealthcareEntitiesResult";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { CancelOnProgress, PollOperationState } from "@azure/core-lro";
+import type { PagedAnalyzeHealthcareEntitiesResult } from "../../analyzeHealthcareEntitiesResult";
 import { delay } from "../../util";
 
-import { AnalysisPoller, AnalysisPollerOptions } from "../poller";
-import {
+import type { AnalysisPollerOptions } from "../poller";
+import { AnalysisPoller } from "../poller";
+import type {
   AnalyzeHealthcareOperationState,
-  BeginAnalyzeHealthcareEntitiesOptions,
+  BeginAnalyzeHealthcareEntitiesOptions} from "./operation";
+import {
   BeginAnalyzeHealthcarePollerOperation,
 } from "./operation";
 

@@ -2,13 +2,14 @@
 // Licensed under the MIT License.
 
 import Long from "long";
-import { ConnectionContext } from "../connectionContext";
+import type { ConnectionContext } from "../connectionContext";
 import { logger, receiverLogger } from "../log";
-import { ReceiveMode } from "../models";
+import type { ReceiveMode } from "../models";
+import type {
+  ServiceBusReceivedMessage} from "../serviceBusMessage";
 import {
   isAmqpAnnotatedMessage,
-  isServiceBusMessage,
-  ServiceBusReceivedMessage,
+  isServiceBusMessage
 } from "../serviceBusMessage";
 import { isDefined } from "@azure/core-util";
 

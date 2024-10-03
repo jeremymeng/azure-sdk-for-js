@@ -2,14 +2,15 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
-import { Recorder, env, isRecordMode, isLiveMode } from "@azure-tools/test-recorder";
+import type { Context } from "mocha";
+import type { Recorder} from "@azure-tools/test-recorder";
+import { env, isRecordMode, isLiveMode } from "@azure-tools/test-recorder";
 
-import { SecretClient } from "../../src";
+import type { SecretClient } from "../../src";
 import { getServiceVersion } from "./utils/common";
 import { testPollerProperties } from "./utils/recorderUtils";
 import { authenticate } from "./utils/testAuthentication";
-import TestClient from "./utils/testClient";
+import type TestClient from "./utils/testClient";
 
 describe("Secret client - list secrets in various ways", () => {
   const secretValue = "SECRET_VALUE";

@@ -1,17 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { AbortSignalLike } from "@azure/abort-controller";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type {
+  RequestBodyType as HttpRequestBody} from "@azure/core-rest-pipeline";
 import {
-  getDefaultProxySettings,
-  RequestBodyType as HttpRequestBody,
+  getDefaultProxySettings
 } from "@azure/core-rest-pipeline";
 import { isNode } from "@azure/core-util";
-import { TokenCredential, isTokenCredential } from "@azure/core-auth";
-import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import type { TokenCredential} from "@azure/core-auth";
+import { isTokenCredential } from "@azure/core-auth";
+import type { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
 import { AnonymousCredential } from "./credentials/AnonymousCredential";
 import { StorageSharedKeyCredential } from "./credentials/StorageSharedKeyCredential";
-import { Container } from "./generated/src/operationsInterfaces";
-import {
+import type { Container } from "./generated/src/operationsInterfaces";
+import type {
   BlobDeleteResponse,
   BlobPrefix,
   BlobProperties,
@@ -38,16 +40,20 @@ import {
   PublicAccessType,
   SignedIdentifierModel,
 } from "./generatedModels";
-import {
+import type {
   Metadata,
   ObjectReplicationPolicy,
   Tags,
   ContainerRequestConditions,
   ModifiedAccessConditions,
 } from "./models";
-import { newPipeline, PipelineLike, isPipelineLike, StoragePipelineOptions } from "./Pipeline";
-import { CommonOptions, StorageClient } from "./StorageClient";
+import type { PipelineLike, StoragePipelineOptions } from "./Pipeline";
+import { newPipeline, isPipelineLike } from "./Pipeline";
+import type { CommonOptions} from "./StorageClient";
+import { StorageClient } from "./StorageClient";
 import { tracingClient } from "./utils/tracing";
+import type {
+  WithResponse} from "./utils/utils.common";
 import {
   appendToURLPath,
   appendToURLQuery,
@@ -60,26 +66,26 @@ import {
   isIpEndpointStyle,
   parseObjectReplicationRecord,
   toTags,
-  truncatedISO8061Date,
-  WithResponse,
+  truncatedISO8061Date
 } from "./utils/utils.common";
-import { ContainerSASPermissions } from "./sas/ContainerSASPermissions";
+import type { ContainerSASPermissions } from "./sas/ContainerSASPermissions";
 import {
   generateBlobSASQueryParameters,
   generateBlobSASQueryParametersInternal,
 } from "./sas/BlobSASSignatureValues";
 import { BlobLeaseClient } from "./BlobLeaseClient";
+import type {
+  BlobDeleteOptions,
+  BlockBlobUploadOptions,
+  CommonGenerateSasUrlOptions} from "./Clients";
 import {
   AppendBlobClient,
   BlobClient,
-  BlobDeleteOptions,
   BlockBlobClient,
-  BlockBlobUploadOptions,
-  CommonGenerateSasUrlOptions,
   PageBlobClient,
 } from "./Clients";
 import { BlobBatchClient } from "./BlobBatchClient";
-import {
+import type {
   ContainerCreateHeaders,
   ListBlobsIncludeItem,
   ContainerGetPropertiesHeaders,

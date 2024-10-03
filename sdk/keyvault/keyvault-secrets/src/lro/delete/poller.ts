@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DeleteSecretPollOperation, DeleteSecretPollOperationState } from "./operation";
-import { DeletedSecret } from "../../secretsModels";
-import { KeyVaultSecretPoller, KeyVaultSecretPollerOptions } from "../keyVaultSecretPoller";
+import type { DeleteSecretPollOperationState } from "./operation";
+import { DeleteSecretPollOperation } from "./operation";
+import type { DeletedSecret } from "../../secretsModels";
+import type { KeyVaultSecretPollerOptions } from "../keyVaultSecretPoller";
+import { KeyVaultSecretPoller } from "../keyVaultSecretPoller";
 
 /**
  * Class that creates a poller that waits until a secret finishes being deleted.

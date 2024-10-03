@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { assert } from "chai";
 import { AppConfigurationClient } from "../../../src/appConfigurationClient";
-import { TokenCredential } from "@azure/core-auth";
+import type { TokenCredential } from "@azure/core-auth";
 import { packageVersion } from "../../../src/internal/constants";
 
 describe("packagejson related tests", () => {

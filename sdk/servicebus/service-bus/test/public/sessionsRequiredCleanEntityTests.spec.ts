@@ -2,15 +2,17 @@
 // Licensed under the MIT License.
 
 import chai from "chai";
+import type {
+  ServiceBusClientForTests} from "./utils/testutils2";
 import {
-  ServiceBusClientForTests,
   createServiceBusClientForTests,
   testPeekMsgsLength,
   getRandomTestClientTypeWithSessions,
 } from "./utils/testutils2";
-import { ServiceBusSender } from "../../src";
-import { ServiceBusMessage, ServiceBusSessionReceiver } from "../../src";
-import { TestClientType, TestMessage } from "./utils/testUtils";
+import type { ServiceBusSender } from "../../src";
+import type { ServiceBusMessage, ServiceBusSessionReceiver } from "../../src";
+import type { TestClientType} from "./utils/testUtils";
+import { TestMessage } from "./utils/testUtils";
 const should = chai.should();
 
 // NOTE: these tests should be reworked, if possible. Since they need to be deterministic

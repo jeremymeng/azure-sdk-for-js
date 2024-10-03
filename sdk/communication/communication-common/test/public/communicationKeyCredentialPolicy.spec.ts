@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   HttpClient,
-  PipelineResponse,
+  PipelineResponse} from "@azure/core-rest-pipeline";
+import {
   createEmptyPipeline,
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";
-import { KeyCredential } from "@azure/core-auth";
+import type { KeyCredential } from "@azure/core-auth";
 import { assert } from "chai";
 import { createCommunicationAccessKeyCredentialPolicy } from "../../src";
 import { isNode } from "@azure/core-util";

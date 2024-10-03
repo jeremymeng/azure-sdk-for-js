@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { OperationOptions } from "@azure/core-client";
+import type { OperationOptions } from "@azure/core-client";
 import * as crypto from "crypto";
-import {
+import type {
   AesCbcEncryptParameters,
   DecryptOptions,
   DecryptResult,
@@ -20,10 +20,11 @@ import {
   WrapKeyOptions,
   WrapResult,
 } from "..";
-import { AesCbcDecryptParameters } from "../cryptographyClientModels";
-import {
+import type { AesCbcDecryptParameters } from "../cryptographyClientModels";
+import type {
   CryptographyProvider,
-  CryptographyProviderOperation,
+  CryptographyProviderOperation} from "./models";
+import {
   LocalCryptographyUnsupportedError,
 } from "./models";
 

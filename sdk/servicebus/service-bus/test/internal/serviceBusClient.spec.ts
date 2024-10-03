@@ -7,30 +7,33 @@ import chaiAsPromised from "chai-as-promised";
 import { Constants as CoreAmqpConstants } from "@azure/core-amqp";
 import { isObjectWithProperties } from "@azure/core-util";
 import Long from "long";
-import {
-  isServiceBusError,
+import type {
   ProcessErrorArgs,
-  ServiceBusClient,
   ServiceBusError,
   ServiceBusSessionReceiver,
   ServiceBusSender,
-  ServiceBusReceiverOptions,
+  ServiceBusReceiverOptions} from "../../src";
+import {
+  isServiceBusError,
+  ServiceBusClient
 } from "../../src";
-import { DispositionType, ServiceBusReceivedMessage } from "../../src/serviceBusMessage";
+import type { ServiceBusReceivedMessage } from "../../src/serviceBusMessage";
+import { DispositionType } from "../../src/serviceBusMessage";
 import { getReceiverClosedErrorMsg, getSenderClosedErrorMsg } from "../../src/util/errors";
 import { getEnvVars } from "../public/utils/envVarUtils";
 import { isNode } from "@azure/core-util";
 import { checkWithTimeout, TestClientType, TestMessage } from "../public/utils/testUtils";
+import type {
+  EntityName,
+  ServiceBusClientForTests} from "../public/utils/testutils2";
 import {
   createServiceBusClientForTests,
-  EntityName,
-  ServiceBusClientForTests,
   testPeekMsgsLength,
   getRandomTestClientTypeWithSessions,
   getRandomTestClientTypeWithNoSessions,
   getFullyQualifiedNamespace,
 } from "../public/utils/testutils2";
-import { ServiceBusReceiver, ServiceBusReceiverImpl } from "../../src/receivers/receiver";
+import type { ServiceBusReceiver, ServiceBusReceiverImpl } from "../../src/receivers/receiver";
 
 const should = chai.should();
 chai.use(chaiAsPromised);

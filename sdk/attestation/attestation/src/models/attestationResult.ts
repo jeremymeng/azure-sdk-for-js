@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { AttestationSigner } from ".";
-import { GeneratedAttestationResult } from "../generated";
+import type { AttestationSigner } from ".";
+import type { GeneratedAttestationResult } from "../generated";
 import { _attestationSignerFromGenerated } from "./attestationSigner";
 
 /**

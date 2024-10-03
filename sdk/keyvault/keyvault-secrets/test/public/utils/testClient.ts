@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import { testPollerProperties } from "./recorderUtils";
-import { SecretClient, SecretProperties } from "../../../src";
-import { PollOperationState, PollerLike } from "@azure/core-lro";
+import type { SecretClient, SecretProperties } from "../../../src";
+import type { PollOperationState, PollerLike } from "@azure/core-lro";
 import { RestoreSecretBackupPoller } from "./lro/restore/poller";
-import { BeginRestoreSecretBackupOptions } from "./lro/restore/operation";
+import type { BeginRestoreSecretBackupOptions } from "./lro/restore/operation";
 
 export default class TestClient {
   public readonly client: SecretClient;

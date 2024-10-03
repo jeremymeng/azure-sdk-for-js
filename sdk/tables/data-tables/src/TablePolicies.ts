@@ -6,11 +6,12 @@ import {
   TRANSACTION_HTTP_LINE_ENDING,
   TRANSACTION_HTTP_VERSION_1_1,
 } from "./utils/constants";
-import {
+import type {
   PipelinePolicy,
   PipelineRequest,
   PipelineResponse,
-  SendRequest,
+  SendRequest} from "@azure/core-rest-pipeline";
+import {
   createHttpHeaders,
   createPipelineRequest,
 } from "@azure/core-rest-pipeline";

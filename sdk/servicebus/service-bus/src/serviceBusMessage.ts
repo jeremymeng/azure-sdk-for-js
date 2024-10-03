@@ -5,16 +5,17 @@ import { AmqpAnnotatedMessage, Constants } from "@azure/core-amqp";
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 import { Buffer } from "buffer";
 import Long from "long";
-import {
+import type {
   Delivery,
   DeliveryAnnotations,
   MessageAnnotations,
-  uuid_to_string,
-  Message as RheaMessage,
+  Message as RheaMessage} from "rhea-promise";
+import {
+  uuid_to_string
 } from "rhea-promise";
 import { defaultDataTransformer } from "./dataTransformer";
 import { messageLogger as logger } from "./log";
-import { ReceiveMode } from "./models";
+import type { ReceiveMode } from "./models";
 import { isDefined, isObjectWithProperties } from "@azure/core-util";
 import { reorderLockToken } from "./util/utils";
 

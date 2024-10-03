@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { existsSync } from "fs";
-import { PackageManager } from "./types";
+import type { PackageManager } from "./types";
 import { cwd } from "process";
 import { resolve } from "path";
 

@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ConnectionContext } from "../connectionContext";
-import { MessageHandlers, ReceiveMessagesOptions, ServiceBusReceivedMessage } from "..";
-import {
+import type { ConnectionContext } from "../connectionContext";
+import type { MessageHandlers, ReceiveMessagesOptions, ServiceBusReceivedMessage } from "..";
+import type {
   PeekMessagesOptions,
   GetMessageIteratorOptions,
   SubscribeOptions,
   DeleteMessagesOptions,
   PurgeMessagesOptions,
 } from "../models";
-import { MessageSession } from "../session/messageSession";
+import type { MessageSession } from "../session/messageSession";
 import {
   getAlreadyReceivingErrorMsg,
   getReceiverClosedErrorMsg,
@@ -21,7 +21,7 @@ import {
   throwErrorIfInvalidOperationOnMessage,
   throwTypeErrorIfParameterTypeMismatch,
 } from "../util/errors";
-import { OnError, OnMessage } from "../core/messageReceiver";
+import type { OnError, OnMessage } from "../core/messageReceiver";
 import {
   abandonMessage,
   assertValidMessageHandlers,
@@ -31,23 +31,25 @@ import {
   getMessageIterator,
   wrapProcessErrorHandler,
 } from "./receiverCommon";
+import type {
+  ServiceBusReceiver} from "./receiver";
 import {
   defaultMaxTimeAfterFirstMessageForBatchingMs,
-  MaxDeleteMessageCount,
-  ServiceBusReceiver,
+  MaxDeleteMessageCount
 } from "./receiver";
-import Long from "long";
-import { ServiceBusMessageImpl, DeadLetterOptions } from "../serviceBusMessage";
+import type Long from "long";
+import type { ServiceBusMessageImpl, DeadLetterOptions } from "../serviceBusMessage";
+import type {
+  RetryConfig,
+  RetryOptions} from "@azure/core-amqp";
 import {
   Constants,
-  RetryConfig,
   RetryOperationType,
-  RetryOptions,
   retry,
   ErrorNameConditionMapper,
 } from "@azure/core-amqp";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
-import { AmqpError } from "rhea-promise";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
+import type { AmqpError } from "rhea-promise";
 import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage";
 import { tracingClient } from "../diagnostics/tracing";
 import { receiverLogger as logger } from "../log";

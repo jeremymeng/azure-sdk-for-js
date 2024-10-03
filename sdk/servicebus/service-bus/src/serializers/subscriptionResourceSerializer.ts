@@ -1,17 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { FullOperationResponse, OperationOptions } from "@azure/core-client";
-import { CorrelationRuleFilter } from "..";
+import type { FullOperationResponse, OperationOptions } from "@azure/core-client";
+import type { CorrelationRuleFilter } from "..";
+import type {
+  AtomXmlSerializer} from "../util/atomXmlHelper";
 import {
-  AtomXmlSerializer,
   deserializeAtomXmlResponse,
   serializeToAtomXmlRequest,
 } from "../util/atomXmlHelper";
 import * as Constants from "../util/constants";
-import {
+import type {
   EntityStatus,
-  EntityAvailabilityStatus,
+  EntityAvailabilityStatus} from "../util/utils";
+import {
   getBoolean,
   getMessageCountDetails,
   getInteger,
@@ -19,11 +21,12 @@ import {
   getStringOrUndefined,
   getDate,
 } from "../util/utils";
-import {
-  buildInternalRuleResource,
+import type {
   InternalRuleOptions,
   SqlRuleAction,
-  SqlRuleFilter,
+  SqlRuleFilter} from "./ruleResourceSerializer";
+import {
+  buildInternalRuleResource
 } from "./ruleResourceSerializer";
 
 /**

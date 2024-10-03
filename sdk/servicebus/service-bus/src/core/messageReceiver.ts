@@ -1,28 +1,32 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  MessagingError,
+  RetryOptions} from "@azure/core-amqp";
 import {
   Constants,
-  ErrorNameConditionMapper,
-  MessagingError,
-  RetryOptions,
+  ErrorNameConditionMapper
 } from "@azure/core-amqp";
-import { AmqpError, EventContext, OnAmqpEvent, Receiver, ReceiverOptions } from "rhea-promise";
+import type { AmqpError, EventContext, OnAmqpEvent, Receiver, ReceiverOptions } from "rhea-promise";
 import { receiverLogger as logger } from "../log";
-import { LinkEntity, ReceiverType } from "./linkEntity";
-import { ConnectionContext } from "../connectionContext";
-import { DispositionType, ServiceBusMessageImpl } from "../serviceBusMessage";
+import type { ReceiverType } from "./linkEntity";
+import { LinkEntity } from "./linkEntity";
+import type { ConnectionContext } from "../connectionContext";
+import type { ServiceBusMessageImpl } from "../serviceBusMessage";
+import { DispositionType } from "../serviceBusMessage";
 import { getUniqueName } from "../util/utils";
-import { ProcessErrorArgs, ReceiveMode, SubscribeOptions } from "../models";
-import { DispositionStatusOptions } from "./managementClient";
-import { AbortSignalLike } from "@azure/abort-controller";
+import type { ProcessErrorArgs, ReceiveMode, SubscribeOptions } from "../models";
+import type { DispositionStatusOptions } from "./managementClient";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type {
+  DeferredPromiseAndTimer,
+  ReceiverHandlers} from "./shared";
 import {
   onMessageSettled,
-  DeferredPromiseAndTimer,
-  ReceiverHandlers,
   createReceiverOptions,
 } from "./shared";
-import { LockRenewer } from "./autoLockRenewer";
+import type { LockRenewer } from "./autoLockRenewer";
 import { translateServiceBusError } from "../serviceBusError";
 
 /**

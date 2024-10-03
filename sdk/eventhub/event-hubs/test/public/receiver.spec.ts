@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   EventData,
   EventHubConsumerClient,
   EventHubProducerClient,
   ReceivedEventData,
-  Subscription,
+  Subscription} from "../../src/index.js";
+import {
   earliestEventPosition,
   latestEventPosition,
 } from "../../src/index.js";

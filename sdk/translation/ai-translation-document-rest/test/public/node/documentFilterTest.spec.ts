@@ -1,17 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Recorder, isPlaybackMode } from "@azure-tools/test-recorder";
+import type { Recorder} from "@azure-tools/test-recorder";
+import { isPlaybackMode } from "@azure-tools/test-recorder";
 import { assert } from "chai";
-import {
+import type {
   DocumentTranslationClient,
+  StartTranslation202Response} from "../../../src";
+import {
   isUnexpected,
-  getLongRunningPoller,
-  StartTranslation202Response,
+  getLongRunningPoller
 } from "../../../src";
 import { createDocumentTranslationClient, startRecorder } from "../utils/recordedClient";
 import { createSourceContainer, createTargetContainer } from "./containerHelper";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import {
   createBatchRequest,
   createDummyTestDocuments,

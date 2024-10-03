@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Recorder } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
 import { assert } from "chai";
-import {
+import type {
   DocumentTranslateDefaultResponse,
   DocumentTranslateParameters,
-  DocumentTranslationClient,
+  DocumentTranslationClient} from "../../src";
+import {
   isUnexpected,
 } from "../../src";
 import { createDocumentTranslationClient, startRecorder } from "./utils/recordedClient";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 
 describe("SingleDocumentTranslate tests", () => {
   let recorder: Recorder;

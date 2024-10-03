@@ -2,33 +2,37 @@
 // Licensed under the MIT License.
 
 import { senderLogger as logger } from "../log";
-import {
+import type {
   AmqpError,
   AwaitableSender,
   AwaitableSenderOptions,
   EventContext,
-  OnAmqpEvent,
+  OnAmqpEvent} from "rhea-promise";
+import {
   message as RheaMessageUtil,
 } from "rhea-promise";
+import type {
+  MessagingError,
+  RetryConfig,
+  RetryOptions,
+  AmqpAnnotatedMessage} from "@azure/core-amqp";
 import {
   Constants,
   ErrorNameConditionMapper,
-  MessagingError,
-  RetryConfig,
   RetryOperationType,
-  RetryOptions,
-  retry,
-  AmqpAnnotatedMessage,
+  retry
 } from "@azure/core-amqp";
-import { ServiceBusMessage, toRheaMessage } from "../serviceBusMessage";
-import { ConnectionContext } from "../connectionContext";
+import type { ServiceBusMessage} from "../serviceBusMessage";
+import { toRheaMessage } from "../serviceBusMessage";
+import type { ConnectionContext } from "../connectionContext";
 import { LinkEntity } from "./linkEntity";
 import { getUniqueName, waitForSendable, waitForTimeoutOrAbortOrResolve } from "../util/utils";
 import { throwErrorIfConnectionClosed } from "../util/errors";
-import { ServiceBusMessageBatch, ServiceBusMessageBatchImpl } from "../serviceBusMessageBatch";
-import { CreateMessageBatchOptions } from "../models";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
-import { AbortSignalLike } from "@azure/abort-controller";
+import type { ServiceBusMessageBatch} from "../serviceBusMessageBatch";
+import { ServiceBusMessageBatchImpl } from "../serviceBusMessageBatch";
+import type { CreateMessageBatchOptions } from "../models";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
+import type { AbortSignalLike } from "@azure/abort-controller";
 import { ServiceBusError, translateServiceBusError } from "../serviceBusError";
 import { isDefined } from "@azure/core-util";
 import { defaultDataTransformer } from "../dataTransformer";

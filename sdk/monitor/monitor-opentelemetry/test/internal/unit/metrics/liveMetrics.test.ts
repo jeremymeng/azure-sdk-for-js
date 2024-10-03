@@ -9,8 +9,8 @@ import { LiveMetrics } from "../../../../src/metrics/quickpulse/liveMetrics";
 import { InternalConfig } from "../../../../src/shared";
 import { QuickPulseOpenTelemetryMetricNames } from "../../../../src/metrics/quickpulse/types";
 /* eslint-disable-next-line @typescript-eslint/no-redeclare */
-import { Exception, RemoteDependency, Request } from "../../../../src/generated";
-import { AccessToken, TokenCredential } from "@azure/core-auth";
+import type { Exception, RemoteDependency, Request } from "../../../../src/generated";
+import type { AccessToken, TokenCredential } from "@azure/core-auth";
 
 describe("#LiveMetrics", () => {
   let exportStub: sinon.SinonStub;

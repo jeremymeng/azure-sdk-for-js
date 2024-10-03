@@ -16,18 +16,19 @@ import {
 } from "../../../src/core/batchingReceiver";
 import { defer, createConnectionContextForTests } from "./unittestUtils";
 import { createAbortSignalForTest } from "../../public/utils/abortSignalTestUtils";
-import { ServiceBusMessageImpl } from "../../../src/serviceBusMessage";
-import {
+import type { ServiceBusMessageImpl } from "../../../src/serviceBusMessage";
+import type {
   Receiver as RheaPromiseReceiver,
-  ReceiverEvents,
-  SessionEvents,
   EventContext,
-  Message as RheaMessage,
+  Message as RheaMessage} from "rhea-promise";
+import {
+  ReceiverEvents,
+  SessionEvents
 } from "rhea-promise";
-import { ConnectionContext } from "../../../src/connectionContext";
+import type { ConnectionContext } from "../../../src/connectionContext";
 import { ServiceBusReceiverImpl } from "../../../src/receivers/receiver";
-import { OperationOptionsBase } from "../../../src/modelsToBeSharedWithEventHubs";
-import { ReceiveMode } from "../../../src/models";
+import type { OperationOptionsBase } from "../../../src/modelsToBeSharedWithEventHubs";
+import type { ReceiveMode } from "../../../src/models";
 import { Constants, StandardAbortMessage } from "@azure/core-amqp";
 
 describe("BatchingReceiver unit tests", () => {

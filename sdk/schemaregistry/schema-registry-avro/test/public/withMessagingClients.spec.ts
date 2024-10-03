@@ -14,9 +14,10 @@
  *    to read from corresponding event hubs
  */
 
-import { AvroSerializer, MessageAdapter } from "../../src";
-import { EventData, createEventDataAdapter } from "@azure/event-hubs";
-import { MessagingTestClient } from "./clients/models";
+import type { AvroSerializer, MessageAdapter } from "../../src";
+import type { EventData} from "@azure/event-hubs";
+import { createEventDataAdapter } from "@azure/event-hubs";
+import type { MessagingTestClient } from "./clients/models";
 import { assert } from "chai";
 import { assertError } from "./utils/assertError";
 import { createEventHubsClient } from "./clients/eventHubs";
@@ -26,7 +27,8 @@ import { matrix } from "@azure-tools/test-utils";
 import { testGroup } from "./utils/dummies";
 import { Recorder, env } from "@azure-tools/test-recorder";
 import { createPipelineWithCredential, removeSchemas } from "./utils/mockedRegistryClient";
-import { HttpClient, Pipeline, createDefaultHttpClient } from "@azure/core-rest-pipeline";
+import type { HttpClient, Pipeline} from "@azure/core-rest-pipeline";
+import { createDefaultHttpClient } from "@azure/core-rest-pipeline";
 
 /**
  * An interface to group different bits needed by the tests for each messaging service

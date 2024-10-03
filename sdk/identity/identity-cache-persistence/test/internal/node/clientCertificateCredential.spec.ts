@@ -6,18 +6,21 @@
 
 import * as path from "path";
 
+import type {
+  TokenCachePersistenceOptions} from "../../../../identity/src";
 import {
-  ClientCertificateCredential,
-  TokenCachePersistenceOptions,
+  ClientCertificateCredential
 } from "../../../../identity/src";
+import type {
+  MsalTestCleanup} from "../../../../identity/test/node/msalNodeTestSetup";
 import {
-  MsalTestCleanup,
   msalNodeTestSetup,
 } from "../../../../identity/test/node/msalNodeTestSetup";
-import { Recorder, env, isPlaybackMode } from "@azure-tools/test-recorder";
+import type { Recorder} from "@azure-tools/test-recorder";
+import { env, isPlaybackMode } from "@azure-tools/test-recorder";
 
 import { ConfidentialClientApplication } from "@azure/msal-node";
-import Sinon from "sinon";
+import type Sinon from "sinon";
 import assert from "assert";
 import { createPersistence } from "./setup.spec";
 

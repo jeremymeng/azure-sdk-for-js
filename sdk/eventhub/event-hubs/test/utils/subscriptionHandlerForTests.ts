@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
-  CloseReason,
+import type {
   EventHubConsumerClient,
   EventHubProducerClient,
   EventPosition,
   PartitionContext,
   ReceivedEventData,
-  SubscriptionEventHandlers,
+  SubscriptionEventHandlers} from "../../src/index.js";
+import {
+  CloseReason
 } from "../../src/index.js";
 import { delay } from "@azure/core-amqp";
 import { loggerForTest } from "./logHelpers.js";

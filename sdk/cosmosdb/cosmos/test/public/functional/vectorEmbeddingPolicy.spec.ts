@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import assert from "assert";
-import {
+import type {
   IndexingPolicy,
+  VectorEmbeddingPolicy} from "../../../src/documents";
+import {
   VectorEmbeddingDataType,
   VectorEmbeddingDistanceFunction,
-  VectorEmbeddingPolicy,
   VectorIndexType,
 } from "../../../src/documents";
 import { getTestDatabase } from "../common/TestHelpers";
-import { Database } from "../../../src/client/Database/Database";
-import { Container } from "../../../src/client";
+import type { Database } from "../../../src/client/Database/Database";
+import type { Container } from "../../../src/client";
 
 // Skipping these tests as they are not supported by public emulator
 describe("Vector search feature", async () => {

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { CompatResponse } from "@azure/core-http-compat";
-import { FeatureFlagValue } from "./featureFlag";
-import { CommonClientOptions, OperationOptions } from "@azure/core-client";
-import { SecretReferenceValue } from "./secretReference";
-import {
+import type { CompatResponse } from "@azure/core-http-compat";
+import type { FeatureFlagValue } from "./featureFlag";
+import type { CommonClientOptions, OperationOptions } from "@azure/core-client";
+import type { SecretReferenceValue } from "./secretReference";
+import type {
   SnapshotComposition,
   ConfigurationSettingsFilter,
   ConfigurationSnapshot,

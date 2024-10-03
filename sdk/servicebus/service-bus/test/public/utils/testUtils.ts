@@ -3,7 +3,8 @@
 
 import chai from "chai";
 const assert: typeof chai.assert = chai.assert;
-import { ServiceBusReceivedMessage, ServiceBusMessage, delay } from "../../../src";
+import type { ServiceBusReceivedMessage, ServiceBusMessage} from "../../../src";
+import { delay } from "../../../src";
 
 export class TestMessage {
   static sessionId: string = "my-session";

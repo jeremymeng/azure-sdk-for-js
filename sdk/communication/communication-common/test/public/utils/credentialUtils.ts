@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { AzureKeyCredential } from "@azure/core-auth";
+import type { AzureKeyCredential } from "@azure/core-auth";
 import { assert } from "chai";
 
 export const assertPropertyNames = <T>(

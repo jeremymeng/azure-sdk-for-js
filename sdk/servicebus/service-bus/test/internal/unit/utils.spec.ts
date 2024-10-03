@@ -6,7 +6,7 @@ import {
   waitForTimeoutOrAbortOrResolve,
 } from "../../../src/util/utils";
 import { StandardAbortMessage } from "@azure/core-amqp";
-import { AbortError, AbortSignalLike } from "@azure/abort-controller";
+import type { AbortError, AbortSignalLike } from "@azure/abort-controller";
 import { delay } from "rhea-promise";
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
@@ -14,7 +14,7 @@ import {
   extractSpanContextFromServiceBusMessage,
   TRACEPARENT_PROPERTY,
 } from "../../../src/diagnostics/instrumentServiceBusMessage";
-import { ServiceBusReceivedMessage } from "../../../src";
+import type { ServiceBusReceivedMessage } from "../../../src";
 import Sinon from "sinon";
 import { tracingClient } from "../../../src/diagnostics/tracing";
 

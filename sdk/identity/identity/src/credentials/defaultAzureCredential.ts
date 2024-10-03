@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   DefaultAzureCredentialClientIdOptions,
   DefaultAzureCredentialOptions,
   DefaultAzureCredentialResourceIdOptions,
 } from "./defaultAzureCredentialOptions";
-import {
-  ManagedIdentityCredential,
+import type {
   ManagedIdentityCredentialClientIdOptions,
-  ManagedIdentityCredentialResourceIdOptions,
+  ManagedIdentityCredentialResourceIdOptions} from "./managedIdentityCredential";
+import {
+  ManagedIdentityCredential
 } from "./managedIdentityCredential";
 
 import { AzureCliCredential } from "./azureCliCredential";
@@ -17,9 +18,9 @@ import { AzureDeveloperCliCredential } from "./azureDeveloperCliCredential";
 import { AzurePowerShellCredential } from "./azurePowerShellCredential";
 import { ChainedTokenCredential } from "./chainedTokenCredential";
 import { EnvironmentCredential } from "./environmentCredential";
-import { TokenCredential } from "@azure/core-auth";
+import type { TokenCredential } from "@azure/core-auth";
 import { WorkloadIdentityCredential } from "./workloadIdentityCredential";
-import { WorkloadIdentityCredentialOptions } from "./workloadIdentityCredentialOptions";
+import type { WorkloadIdentityCredentialOptions } from "./workloadIdentityCredentialOptions";
 import { credentialLogger } from "../util/logging";
 
 const logger = credentialLogger("DefaultAzureCredential");

@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Client, HttpResponse } from "@azure-rest/core-client";
-import {
+import type { Client, HttpResponse } from "@azure-rest/core-client";
+import type {
   CreateHttpPollerOptions,
   LongRunningOperation,
   LroResponse,
   OperationState,
-  SimplePollerLike,
+  SimplePollerLike} from "@azure/core-lro";
+import {
   createHttpPoller,
 } from "@azure/core-lro";
-import {
+import type {
   CreateJob200Response,
   CreateJob201Response,
   CreateJobDefaultResponse,

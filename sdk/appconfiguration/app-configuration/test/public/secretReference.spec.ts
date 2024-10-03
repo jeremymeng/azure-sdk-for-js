@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   AddConfigurationSettingResponse,
   AppConfigurationClient,
   ConfigurationSetting,
-  SecretReferenceValue,
+  SecretReferenceValue} from "../../src";
+import {
   isSecretReference,
   parseSecretReference,
   secretReferenceContentType,
 } from "../../src";
-import { Recorder } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
 import { createAppConfigurationClientForTests, startRecorder } from "./utils/testHelpers";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { assert } from "chai";
 
 describe("AppConfigurationClient - SecretReference", () => {

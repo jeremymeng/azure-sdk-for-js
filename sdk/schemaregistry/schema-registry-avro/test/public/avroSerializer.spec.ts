@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  CreateTestSerializerOptions} from "./utils/mockedSerializer";
 import {
-  CreateTestSerializerOptions,
   createTestSerializer,
   registerTestSchema,
 } from "./utils/mockedSerializer";
 import { assert, use as chaiUse } from "chai";
 import { testAvroType, testGroup, testSchema, testValue, testSchemaName } from "./utils/dummies";
-import { Context } from "mocha";
-import { AvroSerializer, MessageContent } from "../../src/";
+import type { Context } from "mocha";
+import type { MessageContent } from "../../src/";
+import { AvroSerializer } from "../../src/";
 import chaiPromises from "chai-as-promised";
 import {
   createPipelineWithCredential,
@@ -18,8 +20,9 @@ import {
 } from "./utils/mockedRegistryClient";
 import { v4 as uuid } from "uuid";
 import { Recorder, isLiveMode } from "@azure-tools/test-recorder";
-import { SchemaRegistry } from "@azure/schema-registry";
-import { HttpClient, Pipeline, createDefaultHttpClient } from "@azure/core-rest-pipeline";
+import type { SchemaRegistry } from "@azure/schema-registry";
+import type { HttpClient, Pipeline} from "@azure/core-rest-pipeline";
+import { createDefaultHttpClient } from "@azure/core-rest-pipeline";
 chaiUse(chaiPromises);
 
 describe("AvroSerializer", async function () {

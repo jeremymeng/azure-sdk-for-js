@@ -2,15 +2,16 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { isNode } from "@azure/core-util";
-import { Recorder, env, isPlaybackMode, isRecordMode } from "@azure-tools/test-recorder";
+import type { Recorder} from "@azure-tools/test-recorder";
+import { env, isPlaybackMode, isRecordMode } from "@azure-tools/test-recorder";
 
-import { SecretClient } from "../../src";
+import type { SecretClient } from "../../src";
 import { getServiceVersion } from "./utils/common";
 import { testPollerProperties } from "./utils/recorderUtils";
 import { authenticate } from "./utils/testAuthentication";
-import TestClient from "./utils/testClient";
+import type TestClient from "./utils/testClient";
 
 describe("Secret client - restore secrets and recover backups", () => {
   const secretPrefix = `backupRestore${env.SECRET_NAME || "SecretName"}`;

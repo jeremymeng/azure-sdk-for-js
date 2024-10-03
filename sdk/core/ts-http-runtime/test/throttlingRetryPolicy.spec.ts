@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 import { describe, it, assert, expect, vi, afterEach } from "vitest";
-import {
+import type {
   PipelineResponse,
-  SendRequest,
+  SendRequest} from "../src/index.js";
+import {
   createHttpHeaders,
   createPipelineRequest,
 } from "../src/index.js";

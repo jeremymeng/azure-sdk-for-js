@@ -1,31 +1,34 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { MessageHandlers, ProcessErrorArgs } from "../models";
-import { ServiceBusReceiver } from "./receiver";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
-import { createServiceBusLogger, logger, receiverLogger, ServiceBusLogger } from "../log";
+import type { MessageHandlers, ProcessErrorArgs } from "../models";
+import type { ServiceBusReceiver } from "./receiver";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
+import type { createServiceBusLogger, ServiceBusLogger } from "../log";
+import { logger, receiverLogger } from "../log";
 import { translateServiceBusError } from "../serviceBusError";
-import {
+import type {
   DeadLetterOptions,
-  DispositionType,
   ServiceBusMessageImpl,
-  ServiceBusReceivedMessage,
+  ServiceBusReceivedMessage} from "../serviceBusMessage";
+import {
+  DispositionType
 } from "../serviceBusMessage";
-import { DispositionStatusOptions } from "../core/managementClient";
-import { ConnectionContext } from "../connectionContext";
+import type { DispositionStatusOptions } from "../core/managementClient";
+import type { ConnectionContext } from "../connectionContext";
+import type {
+  RetryConfig,
+  RetryOptions} from "@azure/core-amqp";
 import {
   Constants,
   ErrorNameConditionMapper,
   retry,
-  RetryConfig,
   RetryMode,
-  RetryOperationType,
-  RetryOptions,
+  RetryOperationType
 } from "@azure/core-amqp";
 import { MessageAlreadySettled } from "../util/errors";
 import { delay, isDefined } from "@azure/core-util";
-import { TracingSpanLink } from "@azure/core-tracing";
+import type { TracingSpanLink } from "@azure/core-tracing";
 import { toSpanOptions, tracingClient } from "../diagnostics/tracing";
 import { extractSpanContextFromServiceBusMessage } from "../diagnostics/instrumentServiceBusMessage";
 

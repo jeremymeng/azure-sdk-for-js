@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { BatchingReceiver } from "../../../src/core/batchingReceiver";
+import type { BatchingReceiver } from "../../../src/core/batchingReceiver";
 import { ServiceBusReceiverImpl } from "../../../src/receivers/receiver";
 import { assertThrows } from "../../public/utils/testUtils";
 import { createConnectionContextForTests, getPromiseResolverForTest } from "./unittestUtils";
 import chai from "chai";
-import { InternalMessageHandlers } from "../../../src/models";
+import type { InternalMessageHandlers } from "../../../src/models";
 const assert: typeof chai.assert = chai.assert;
 
 describe("ServiceBusReceiver unit tests", () => {

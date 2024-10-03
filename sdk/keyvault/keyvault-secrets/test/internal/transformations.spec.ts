@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { DeletedSecret, KeyVaultSecret } from "../../src";
-import { DeletedSecretBundle, SecretBundle } from "../../src/generated";
+import type { DeletedSecret, KeyVaultSecret } from "../../src";
+import type { DeletedSecretBundle, SecretBundle } from "../../src/generated";
 import { getSecretFromSecretBundle } from "../../src/transformations";
 
 describe("Transformations", () => {

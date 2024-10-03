@@ -7,13 +7,14 @@ import {
   isPlaybackMode,
   isLiveMode,
 } from "@azure-tools/test-recorder";
-import {
+import type {
   ContainerRegistryContentClient,
-  KnownManifestMediaType,
-  OciImageManifest,
+  OciImageManifest} from "../../src";
+import {
+  KnownManifestMediaType
 } from "../../src";
 import { assert, versionsToTest } from "@azure-tools/test-utils";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { createBlobClient, recorderStartOptions, serviceVersions } from "../utils/utils";
 import fs from "fs";
 import { Readable } from "stream";

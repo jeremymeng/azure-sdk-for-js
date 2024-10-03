@@ -1,40 +1,45 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  MessagingError,
+  RetryOptions} from "@azure/core-amqp";
 import {
   Constants,
   ErrorNameConditionMapper,
-  MessagingError,
-  RetryOptions,
   StandardAbortMessage,
 } from "@azure/core-amqp";
-import {
+import type {
   AmqpError,
   EventContext,
   OnAmqpEvent,
   Receiver,
-  ReceiverEvents,
-  ReceiverOptions,
+  ReceiverOptions} from "rhea-promise";
+import {
+  ReceiverEvents
 } from "rhea-promise";
-import { ConnectionContext } from "../connectionContext";
+import type { ConnectionContext } from "../connectionContext";
 import { LinkEntity } from "../core/linkEntity";
-import { DispositionStatusOptions } from "../core/managementClient";
-import { OnAmqpEventAsPromise, OnError, OnMessage } from "../core/messageReceiver";
+import type { DispositionStatusOptions } from "../core/managementClient";
+import type { OnAmqpEventAsPromise, OnError, OnMessage } from "../core/messageReceiver";
 import { receiverLogger as logger } from "../log";
 import { DispositionType, ServiceBusMessageImpl } from "../serviceBusMessage";
 import { throwErrorIfConnectionClosed } from "../util/errors";
 import { calculateRenewAfterDuration, convertTicksToDate } from "../util/utils";
-import { BatchingReceiverLite, MinimalReceiver } from "../core/batchingReceiver";
-import { onMessageSettled, DeferredPromiseAndTimer, createReceiverOptions } from "../core/shared";
-import { AbortError, AbortSignalLike } from "@azure/abort-controller";
+import type { MinimalReceiver } from "../core/batchingReceiver";
+import { BatchingReceiverLite } from "../core/batchingReceiver";
+import type { DeferredPromiseAndTimer} from "../core/shared";
+import { onMessageSettled, createReceiverOptions } from "../core/shared";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import { AbortError } from "@azure/abort-controller";
 import { ReceiverHelper } from "../core/receiverHelper";
-import {
+import type {
   ServiceBusSessionReceiverOptions,
   ProcessErrorArgs,
   ReceiveMode,
   SubscribeOptions,
 } from "../models";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
 import { ServiceBusError, translateServiceBusError } from "../serviceBusError";
 import { abandonMessage, completeMessage } from "../receivers/receiverCommon";
 import { delay, isDefined } from "@azure/core-util";

@@ -12,15 +12,16 @@ import {
   recorderEnvSetup,
   uriSanitizers,
 } from "./utils";
-import {
+import type {
   ContainerClient,
   BlobClient,
+  BlobServiceClient} from "../src";
+import {
   PageBlobClient,
-  PremiumPageBlobTier,
-  BlobServiceClient,
+  PremiumPageBlobTier
 } from "../src";
 import { Recorder } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { getYieldedValue } from "@azure-tools/test-utils";
 
 describe("PageBlobClient", () => {

@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 import { AppConfigurationClient } from "../../../src";
-import {
-  createHttpHeaders,
+import type {
   HttpClient,
   PipelineRequest,
   RestError,
-  SendRequest,
+  SendRequest} from "@azure/core-rest-pipeline";
+import {
+  createHttpHeaders
 } from "@azure/core-rest-pipeline";
 import chai from "chai";
 import { randomUUID } from "@azure/core-util";

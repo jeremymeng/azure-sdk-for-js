@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   TextAnalyticsErrorResult,
-  TextAnalyticsSuccessResult,
+  TextAnalyticsSuccessResult} from "./textAnalyticsResult";
+import {
   makeTextAnalyticsErrorResult,
   makeTextAnalyticsSuccessResult,
 } from "./textAnalyticsResult";
-import { DocumentKeyPhrases, TextAnalyticsError } from "./generated/models";
+import type { DocumentKeyPhrases, TextAnalyticsError } from "./generated/models";
 
 /**
  * The result of the extract key phrases operation on a single document.

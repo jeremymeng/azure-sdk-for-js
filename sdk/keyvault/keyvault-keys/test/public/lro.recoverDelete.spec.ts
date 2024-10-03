@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { Recorder, env } from "@azure-tools/test-recorder";
 
-import { DeletedKey, KeyClient } from "../../src";
+import type { DeletedKey, KeyClient } from "../../src";
 import { getServiceVersion } from "./utils/common";
 import { testPollerProperties } from "./utils/recorderUtils";
 import { authenticate, envSetupForPlayback } from "./utils/testAuthentication";
-import TestClient from "./utils/testClient";
+import type TestClient from "./utils/testClient";
 
 describe("Keys client - Long Running Operations - recoverDelete", () => {
   const keyPrefix = `lroRecoverDelete${env.CERTIFICATE_NAME || "KeyName"}`;

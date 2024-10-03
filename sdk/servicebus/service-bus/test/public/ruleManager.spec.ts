@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   CorrelationRuleFilter,
   RuleProperties,
   ServiceBusMessage,
@@ -12,8 +12,9 @@ import {
 import { TestClientType } from "../public/utils/testUtils";
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
+import type {
+  ServiceBusClientForTests} from "../public/utils/testutils2";
 import {
-  ServiceBusClientForTests,
   createServiceBusClientForTests,
 } from "../public/utils/testutils2";
 import { recreateSubscription } from "./utils/managementUtils";

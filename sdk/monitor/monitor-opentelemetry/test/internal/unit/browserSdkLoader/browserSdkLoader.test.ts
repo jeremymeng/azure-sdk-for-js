@@ -4,12 +4,13 @@
 /* eslint-disable no-underscore-dangle*/
 
 import * as assert from "assert";
-import * as http from "http";
+import type * as http from "http";
 import * as sinon from "sinon";
 import { BrowserSdkLoader } from "../../../../src/browserSdkLoader/browserSdkLoader";
 import * as BrowserSdkLoaderHelper from "../../../../src/browserSdkLoader/browserSdkLoaderHelper";
+import type {
+  AzureMonitorOpenTelemetryOptions} from "../../../../src/index";
 import {
-  AzureMonitorOpenTelemetryOptions,
   shutdownAzureMonitor,
   useAzureMonitor,
 } from "../../../../src/index";

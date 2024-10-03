@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   HttpClient,
   PipelineRequest,
-  PipelineResponse,
+  PipelineResponse} from "@azure/core-rest-pipeline";
+import {
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";
-import * as RestModel from "../../../src/generated/src/models";
+import type * as RestModel from "../../../src/generated/src/models";
 import { RoomsClient } from "../../../src";
 
 export const mockCreateRoomsResult: RestModel.RoomsCreateResponse = {

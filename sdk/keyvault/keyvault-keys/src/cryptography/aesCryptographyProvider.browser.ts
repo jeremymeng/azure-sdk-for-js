@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { CryptographyProvider, LocalCryptographyUnsupportedError } from "./models";
+import type { CryptographyProvider} from "./models";
+import { LocalCryptographyUnsupportedError } from "./models";
 
 /**
  * The browser replacement of the AesCryptographyProvider. Since we do not

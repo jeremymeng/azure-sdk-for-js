@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { DeleteKeyPollOperation, DeleteKeyPollOperationState } from "./operation";
-import { DeletedKey } from "../../keysModels";
-import { KeyVaultKeyPoller, KeyVaultKeyPollerOptions } from "../keyVaultKeyPoller";
+import type { DeleteKeyPollOperationState } from "./operation";
+import { DeleteKeyPollOperation } from "./operation";
+import type { DeletedKey } from "../../keysModels";
+import type { KeyVaultKeyPollerOptions } from "../keyVaultKeyPoller";
+import { KeyVaultKeyPoller } from "../keyVaultKeyPoller";
 
 /**
  * Class that creates a poller that waits until a key finishes being deleted.

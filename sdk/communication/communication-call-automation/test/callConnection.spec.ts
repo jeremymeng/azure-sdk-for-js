@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Recorder } from "@azure-tools/test-recorder";
-import { CommunicationUserIdentifier } from "@azure/communication-common";
+import type { Recorder } from "@azure-tools/test-recorder";
+import type { CommunicationUserIdentifier } from "@azure/communication-common";
 import { assert } from "chai";
-import { Context } from "mocha";
-import {
+import type { Context } from "mocha";
+import type {
   CallAutomationClient,
   CallInvite,
-  CallConnection,
   CallConnectionProperties,
   CallParticipant,
   ListParticipantsResult,
@@ -26,9 +25,12 @@ import {
   AnswerCallOptions,
   AddParticipantOptions,
   RemoveParticipantsOption,
-  CancelAddParticipantOperationOptions,
+  CancelAddParticipantOperationOptions} from "../src";
+import {
+  CallConnection
 } from "../src";
-import Sinon, { SinonStubbedInstance } from "sinon";
+import type { SinonStubbedInstance } from "sinon";
+import Sinon from "sinon";
 import { CALL_TARGET_ID, CALL_TARGET_ID_2 } from "./utils/connectionUtils";
 import {
   createRecorder,

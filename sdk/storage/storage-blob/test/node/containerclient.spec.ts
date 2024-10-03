@@ -11,18 +11,20 @@ import {
   getUniqueName,
   recorderEnvSetup,
 } from "../utils";
-import { PublicAccessType, getBlobServiceAccountAudience } from "../../src";
+import type { PublicAccessType} from "../../src";
+import { getBlobServiceAccountAudience } from "../../src";
+import type {
+  StorageSharedKeyCredential,
+  BlobServiceClient} from "../../src";
 import {
   ContainerClient,
   newPipeline,
-  StorageSharedKeyCredential,
-  ContainerSASPermissions,
-  BlobServiceClient,
+  ContainerSASPermissions
 } from "../../src";
-import { TokenCredential } from "@azure/core-auth";
+import type { TokenCredential } from "@azure/core-auth";
 import { assertClientUsesTokenCredential } from "../utils/assert";
 import { Recorder } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { createTestCredential } from "@azure-tools/test-credential";
 
 describe("ContainerClient Node.js only", () => {

@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 /* eslint-disable no-unused-expressions */
 
-import { Recorder, VitestTestContext, isPlaybackMode } from "@azure-tools/test-recorder";
+import type { Recorder, VitestTestContext} from "@azure-tools/test-recorder";
+import { isPlaybackMode } from "@azure-tools/test-recorder";
 import { createBatchClient, createRecorder } from "./utils/recordedClient.js";
-import {
+import type {
   BatchClient,
   BatchPoolResizeContent,
   BatchPoolUpdateContent,
@@ -12,7 +13,8 @@ import {
   GetPoolParameters,
   ListPoolsParameters,
   ReplacePoolPropertiesParameters,
-  ResizePoolParameters,
+  ResizePoolParameters} from "../src/index.js";
+import {
   isUnexpected,
   paginate,
 } from "../src/index.js";

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ActionType } from "./generated";
-import {
+import type { ActionType } from "./generated";
+import type {
   DeletedKeyBundle,
   DeletedKeyItem,
   KeyRotationPolicy as GeneratedPolicy,
@@ -12,7 +12,7 @@ import {
   LifetimeActions,
 } from "./generated/models";
 import { parseKeyVaultKeyIdentifier } from "./identifier";
-import {
+import type {
   DeletedKey,
   KeyProperties,
   KeyRotationPolicy,

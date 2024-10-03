@@ -6,7 +6,7 @@
 import * as jsrsasign from "jsrsasign";
 
 import { assert, use as chaiUse, expect } from "chai";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import chaiPromises from "chai-as-promised";
 chaiUse(chaiPromises);
 

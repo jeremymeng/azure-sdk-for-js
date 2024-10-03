@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { FullOperationResponse } from "@azure/core-client";
+import type { FullOperationResponse } from "@azure/core-client";
+import type {
+  AtomXmlSerializer} from "../util/atomXmlHelper";
 import {
-  AtomXmlSerializer,
   deserializeAtomXmlResponse,
   serializeToAtomXmlRequest,
 } from "../util/atomXmlHelper";

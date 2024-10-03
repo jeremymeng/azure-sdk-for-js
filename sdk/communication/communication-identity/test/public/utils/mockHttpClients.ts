@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   HttpClient,
   PipelineRequest,
-  PipelineResponse,
+  PipelineResponse} from "@azure/core-rest-pipeline";
+import {
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";
-import { CommunicationAccessToken } from "../../../src";
+import type { CommunicationAccessToken } from "../../../src";
 
 export const createMockHttpClient = <T = Record<string, unknown>>(
   status: number = 200,

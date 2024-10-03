@@ -3,20 +3,23 @@
 
 /// <reference lib="esnext.asynciterable" />
 
+import type {
+  InternalPipelineOptions} from "@azure/core-rest-pipeline";
 import {
-  InternalPipelineOptions,
   bearerTokenAuthenticationPolicy,
 } from "@azure/core-rest-pipeline";
-import { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
-import { TokenCredential, isTokenCredential } from "@azure/core-auth";
-import { OperationOptions } from "@azure/core-client";
-import { ExtendedCommonClientOptions } from "@azure/core-http-compat";
+import type { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
+import type { TokenCredential} from "@azure/core-auth";
+import { isTokenCredential } from "@azure/core-auth";
+import type { OperationOptions } from "@azure/core-client";
+import type { ExtendedCommonClientOptions } from "@azure/core-http-compat";
 import { GeneratedClient } from "./generated/generatedClient";
+import type {
+  MetricsAdvisorKeyCredential} from "./metricsAdvisorKeyCredentialPolicy";
 import {
-  MetricsAdvisorKeyCredential,
   createMetricsAdvisorKeyCredentialPolicy,
 } from "./metricsAdvisorKeyCredentialPolicy";
-import {
+import type {
   AlertQueryTimeMode,
   AlertsPageResponse,
   AnomaliesPageResponse,
@@ -36,7 +39,7 @@ import {
   MetricSeriesDefinition,
   MetricSeriesPageResponse,
 } from "./models";
-import { FeedbackQueryTimeMode, FeedbackType, SeverityFilterCondition } from "./generated/models";
+import type { FeedbackQueryTimeMode, FeedbackType, SeverityFilterCondition } from "./generated/models";
 import { fromServiceMetricFeedbackUnion, toServiceMetricFeedbackUnion } from "./transforms";
 import {
   DEFAULT_COGNITIVE_SCOPE,

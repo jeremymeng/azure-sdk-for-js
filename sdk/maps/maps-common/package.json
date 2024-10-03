@@ -4,7 +4,7 @@
   "description": "An internal shared package for Azure Maps TypeScript SDK",
   "sdk-type": "client",
   "main": "dist/index.js",
-  "module": "dist-esm/index.js",
+  "module": "dist-esm/src/index.js",
   "types": "types/latest/maps-common.d.ts",
   "browser": {},
   "scripts": {

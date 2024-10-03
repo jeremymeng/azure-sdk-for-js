@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   PeekMessagesOptions,
   GetMessageIteratorOptions,
   MessageHandlers,
@@ -10,9 +10,9 @@ import {
   DeleteMessagesOptions,
   PurgeMessagesOptions,
 } from "../models";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
-import { ServiceBusReceivedMessage } from "../serviceBusMessage";
-import { ConnectionContext } from "../connectionContext";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
+import type { ServiceBusReceivedMessage } from "../serviceBusMessage";
+import type { ConnectionContext } from "../connectionContext";
 import {
   getAlreadyReceivingErrorMsg,
   getReceiverClosedErrorMsg,
@@ -23,7 +23,7 @@ import {
   throwErrorIfInvalidOperationOnMessage,
   throwTypeErrorIfParameterTypeMismatch,
 } from "../util/errors";
-import { ReceiveOptions } from "../core/messageReceiver";
+import type { ReceiveOptions } from "../core/messageReceiver";
 import { StreamingReceiver } from "../core/streamingReceiver";
 import { BatchingReceiver } from "../core/batchingReceiver";
 import {
@@ -34,16 +34,17 @@ import {
   deferMessage,
   getMessageIterator,
 } from "./receiverCommon";
-import Long from "long";
-import { ServiceBusMessageImpl, DeadLetterOptions } from "../serviceBusMessage";
-import { Constants, RetryConfig, RetryOperationType, RetryOptions, retry } from "@azure/core-amqp";
+import type Long from "long";
+import type { ServiceBusMessageImpl, DeadLetterOptions } from "../serviceBusMessage";
+import type { RetryConfig, RetryOptions} from "@azure/core-amqp";
+import { Constants, RetryOperationType, retry } from "@azure/core-amqp";
 import { LockRenewer } from "../core/autoLockRenewer";
 import { receiverLogger as logger } from "../log";
 import { translateServiceBusError } from "../serviceBusError";
 import { ensureValidIdentifier } from "../util/utils";
 import { toSpanOptions, tracingClient } from "../diagnostics/tracing";
 import { extractSpanContextFromServiceBusMessage } from "../diagnostics/instrumentServiceBusMessage";
-import { TracingSpanLink } from "@azure/core-tracing";
+import type { TracingSpanLink } from "@azure/core-tracing";
 
 /**
  * The default time to wait for messages _after_ the first message

@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   BodyPart,
   MultipartRequestBody,
-  RawHttpHeadersInput,
+  RawHttpHeadersInput} from "@azure/core-rest-pipeline";
+import {
   RestError,
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";

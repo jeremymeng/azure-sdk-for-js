@@ -1,12 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  HttpMethods} from "@azure/core-rest-pipeline";
 import {
   createDefaultHttpClient,
-  createPipelineRequest,
-  HttpMethods,
+  createPipelineRequest
 } from "@azure/core-rest-pipeline";
 import { diag } from "@opentelemetry/api";
+import type {
+  VirtualMachineInfo} from "./types";
 import {
   AIMS_API_VERSION,
   AIMS_FORMAT,
@@ -14,8 +17,7 @@ import {
   EU_CONNECTION_STRING,
   EU_ENDPOINTS,
   NON_EU_CONNECTION_STRING,
-  StatsbeatResourceProvider,
-  VirtualMachineInfo,
+  StatsbeatResourceProvider
 } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports

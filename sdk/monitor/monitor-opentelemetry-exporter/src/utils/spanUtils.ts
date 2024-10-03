@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ReadableSpan, TimedEvent } from "@opentelemetry/sdk-trace-base";
+import type { ReadableSpan, TimedEvent } from "@opentelemetry/sdk-trace-base";
 import { hrTimeToMilliseconds } from "@opentelemetry/core";
-import { diag, SpanKind, SpanStatusCode, Link, Attributes } from "@opentelemetry/api";
+import type { Link, Attributes } from "@opentelemetry/api";
+import { diag, SpanKind, SpanStatusCode } from "@opentelemetry/api";
 import {
   DBSYSTEMVALUES_MONGODB,
   DBSYSTEMVALUES_MYSQL,
@@ -40,18 +41,20 @@ import {
   isSqlDB,
   serializeAttribute,
 } from "./common";
-import { Tags, Properties, MSLink, Measurements, MaxPropertyLengths } from "../types";
+import type { Tags, Properties, MSLink, Measurements} from "../types";
+import { MaxPropertyLengths } from "../types";
 import { parseEventHubSpan } from "./eventhub";
 import { AzureMonitorSampleRate, DependencyTypes, MS_LINKS } from "./constants/applicationinsights";
 import { AzNamespace, MicrosoftEventHub } from "./constants/span/azAttributes";
-import {
+import type {
   TelemetryExceptionData,
   MessageData,
   RemoteDependencyData,
   RequestData,
   TelemetryItem as Envelope,
-  KnownContextTagKeys,
-  TelemetryExceptionDetails,
+  TelemetryExceptionDetails} from "../generated";
+import {
+  KnownContextTagKeys
 } from "../generated";
 import { msToTimeSpan } from "./breezeUtils";
 

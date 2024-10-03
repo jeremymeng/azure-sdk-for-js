@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   ImplementationName,
+  Result} from "./utils/utils.js";
+import {
   assertDivergentBehavior,
   assertError,
-  createDoubleHeaders,
-  Result,
+  createDoubleHeaders
 } from "./utils/utils.js";
 import { describe, it, assert, expect } from "vitest";
 import { createRunLroWith, createTestPoller } from "./utils/router.js";

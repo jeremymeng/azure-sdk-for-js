@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import {
+import type {
   DeletedKeyBundle,
   DeletedKeyItem,
   KeyRotationPolicy as GeneratedKeyRotationPolicy,
   KeyBundle,
 } from "../../src/generated";
-import {
+import type {
   DeletedKey,
   KeyProperties,
   KeyRotationPolicy,

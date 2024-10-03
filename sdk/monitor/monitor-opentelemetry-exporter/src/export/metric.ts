@@ -1,17 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import { context, diag } from "@opentelemetry/api";
+import type {
+  PushMetricExporter,
+  ResourceMetrics} from "@opentelemetry/sdk-metrics";
 import {
   AggregationTemporality,
-  InstrumentType,
-  PushMetricExporter,
-  ResourceMetrics,
+  InstrumentType
 } from "@opentelemetry/sdk-metrics";
-import { ExportResult, ExportResultCode, suppressTracing } from "@opentelemetry/core";
+import type { ExportResult} from "@opentelemetry/core";
+import { ExportResultCode, suppressTracing } from "@opentelemetry/core";
 import { AzureMonitorBaseExporter } from "./base";
-import { TelemetryItem as Envelope } from "../generated";
+import type { TelemetryItem as Envelope } from "../generated";
 import { resourceMetricsToEnvelope } from "../utils/metricUtils";
-import { AzureMonitorExporterOptions } from "../config";
+import type { AzureMonitorExporterOptions } from "../config";
 import { HttpSender } from "../platform";
 
 /**

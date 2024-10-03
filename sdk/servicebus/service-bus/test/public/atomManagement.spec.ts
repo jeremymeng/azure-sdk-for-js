@@ -2,27 +2,29 @@
 // Licensed under the MIT License.
 
 import { isNode } from "@azure/core-util";
-import { PageSettings } from "@azure/core-paging";
+import type { PageSettings } from "@azure/core-paging";
 import { DefaultAzureCredential } from "@azure/identity";
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import chaiExclude from "chai-exclude";
 import { parseServiceBusConnectionString } from "../../src";
-import { CreateQueueOptions } from "../../src";
-import { RuleProperties } from "../../src";
-import { CreateSubscriptionOptions, SubscriptionProperties } from "../../src";
-import { CreateTopicOptions } from "../../src";
-import { ServiceBusAdministrationClient, WithResponse } from "../../src";
-import { EntityStatus, EntityAvailabilityStatus } from "../../src";
+import type { CreateQueueOptions } from "../../src";
+import type { RuleProperties } from "../../src";
+import type { CreateSubscriptionOptions, SubscriptionProperties } from "../../src";
+import type { CreateTopicOptions } from "../../src";
+import type { WithResponse } from "../../src";
+import { ServiceBusAdministrationClient } from "../../src";
+import type { EntityStatus, EntityAvailabilityStatus } from "../../src";
 import { EnvVarNames, getEnvVars, getEnvVarValue } from "./utils/envVarUtils";
 import { recreateQueue, recreateSubscription, recreateTopic } from "./utils/managementUtils";
 import { EntityNames, TestClientType } from "./utils/testUtils";
 import { TestConstants } from "./fakeTestSecrets";
 import { AzureNamedKeyCredential } from "@azure/core-auth";
+import type {
+  ServiceBusClientForTests} from "./utils/testutils2";
 import {
   createServiceBusClientForTests,
-  getFullyQualifiedNamespace,
-  ServiceBusClientForTests,
+  getFullyQualifiedNamespace
 } from "./utils/testutils2";
 import { versionsToTest } from "@azure-tools/test-utils";
 import { createTestCredential } from "@azure-tools/test-credential";

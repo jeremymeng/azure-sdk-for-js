@@ -2,13 +2,15 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { SinonSandbox, SinonSpy, createSandbox } from "sinon";
+import type { SinonSandbox, SinonSpy} from "sinon";
+import { createSandbox } from "sinon";
 import { KeyClient } from "../../src";
 import { LATEST_API_VERSION } from "../../src/keysModels";
-import {
+import type {
   HttpClient,
   PipelineRequest,
-  PipelineResponse,
+  PipelineResponse} from "@azure/core-rest-pipeline";
+import {
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";
 import { ClientSecretCredential } from "@azure/identity";

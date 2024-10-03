@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   BatchRequest,
-  RouteGetRouteDirectionsQueryParamProperties,
+  RouteGetRouteDirectionsQueryParamProperties} from "../../src";
+import {
   createRouteDirectionsBatchRequest,
   toColonDelimitedLatLonString,
 } from "../../src";
 import { assert } from "chai";
-import { LatLon } from "@azure/maps-common";
+import type { LatLon } from "@azure/maps-common";
 
 describe("toColonDelimitedLatLonString", function () {
   it("should compose the string correctly", function () {

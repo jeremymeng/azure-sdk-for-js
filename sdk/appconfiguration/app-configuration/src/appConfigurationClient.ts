@@ -4,7 +4,7 @@
 // https://azure.github.io/azure-sdk/typescript_design.html#ts-config-lib
 /// <reference lib="esnext.asynciterable" />
 
-import {
+import type {
   AddConfigurationSettingOptions,
   AddConfigurationSettingParam,
   AddConfigurationSettingResponse,
@@ -40,7 +40,7 @@ import {
   UpdateSnapshotOptions,
   UpdateSnapshotResponse,
 } from "./models";
-import {
+import type {
   AppConfigurationGetKeyValuesHeaders,
   AppConfigurationGetRevisionsHeaders,
   AppConfigurationGetSnapshotsHeaders,
@@ -51,18 +51,22 @@ import {
   GetLabelsResponse,
   AppConfigurationGetLabelsHeaders,
 } from "./generated/src/models";
-import { InternalClientPipelineOptions } from "@azure/core-client";
-import { PagedAsyncIterableIterator, PagedResult, getPagedAsyncIterator } from "@azure/core-paging";
-import {
+import type { InternalClientPipelineOptions } from "@azure/core-client";
+import type { PagedAsyncIterableIterator, PagedResult} from "@azure/core-paging";
+import { getPagedAsyncIterator } from "@azure/core-paging";
+import type {
   PipelinePolicy,
-  bearerTokenAuthenticationPolicy,
-  RestError,
+  RestError} from "@azure/core-rest-pipeline";
+import {
+  bearerTokenAuthenticationPolicy
 } from "@azure/core-rest-pipeline";
 import { SyncTokens, syncTokenPolicy } from "./internal/synctokenpolicy";
-import { TokenCredential, isTokenCredential } from "@azure/core-auth";
-import {
+import type { TokenCredential} from "@azure/core-auth";
+import { isTokenCredential } from "@azure/core-auth";
+import type {
   SendConfigurationSettingsOptions,
-  SendLabelsRequestOptions,
+  SendLabelsRequestOptions} from "./internal/helpers";
+import {
   assertResponse,
   checkAndFormatIfAndIfNoneMatch,
   extractAfterTokenFromLinkHeader,
@@ -81,12 +85,12 @@ import {
   transformSnapshotResponse,
 } from "./internal/helpers";
 import { AppConfiguration } from "./generated/src/appConfiguration";
-import { FeatureFlagValue } from "./featureFlag";
-import { SecretReferenceValue } from "./secretReference";
+import type { FeatureFlagValue } from "./featureFlag";
+import type { SecretReferenceValue } from "./secretReference";
 import { appConfigKeyCredentialPolicy } from "./appConfigCredential";
 import { tracingClient } from "./internal/tracing";
 import { logger } from "./logger";
-import { OperationState, SimplePollerLike } from "@azure/core-lro";
+import type { OperationState, SimplePollerLike } from "@azure/core-lro";
 import { appConfigurationApiVersion } from "./internal/constants";
 
 const ConnectionStringRegex = /Endpoint=(.*);Id=(.*);Secret=(.*)/;

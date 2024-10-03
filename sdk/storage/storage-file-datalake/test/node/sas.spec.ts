@@ -2,8 +2,14 @@
 // Licensed under the MIT License.
 import { Recorder, delay } from "@azure-tools/test-recorder";
 import { assert } from "chai";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 
+import type {
+  PathAccessControlItem,
+  PathPermissions,
+  StorageSharedKeyCredential,
+  UserDelegationKey,
+  FileSystemListPathsResponse} from "../../src";
 import {
   AccountSASPermissions,
   AccountSASResourceTypes,
@@ -17,12 +23,7 @@ import {
   generateAccountSASQueryParameters,
   generateDataLakeSASQueryParameters,
   newPipeline,
-  PathAccessControlItem,
-  PathPermissions,
-  StorageSharedKeyCredential,
-  UserDelegationKey,
-  SASQueryParameters,
-  FileSystemListPathsResponse,
+  SASQueryParameters
 } from "../../src";
 import { DataLakeFileClient } from "../../src/";
 import { DirectorySASPermissions } from "../../src/sas/DirectorySASPermissions";

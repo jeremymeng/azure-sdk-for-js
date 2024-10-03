@@ -2,19 +2,21 @@
 // Licensed under the MIT License.
 
 import { assert } from "vitest";
-import {
+import type {
   FullOperationResponse,
   OperationRequest,
   OperationResponseMap,
-  Serializer,
+  Serializer} from "../../src/index.js";
+import {
   ServiceClient,
   createSerializer,
   deserializationPolicy,
 } from "../../src/index.js";
-import {
+import type {
   HttpClient,
   HttpHeaders,
-  HttpMethods,
+  HttpMethods} from "@azure/core-rest-pipeline";
+import {
   createEmptyPipeline,
   createHttpHeaders,
 } from "@azure/core-rest-pipeline";

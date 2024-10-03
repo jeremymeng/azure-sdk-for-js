@@ -3,21 +3,25 @@
 
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
-import { delay, ServiceBusMessage, ServiceBusSender } from "../../src";
-import { TestClientType, TestMessage } from "../public/utils/testUtils";
-import { ServiceBusReceiver, ServiceBusReceiverImpl } from "../../src/receivers/receiver";
-import {
+import type { ServiceBusMessage, ServiceBusSender } from "../../src";
+import { delay } from "../../src";
+import type { TestClientType} from "../public/utils/testUtils";
+import { TestMessage } from "../public/utils/testUtils";
+import type { ServiceBusReceiver, ServiceBusReceiverImpl } from "../../src/receivers/receiver";
+import type {
   EntityName,
-  ServiceBusClientForTests,
+  ServiceBusClientForTests} from "../public/utils/testutils2";
+import {
   createServiceBusClientForTests,
   testPeekMsgsLength,
   //   getRandomTestClientTypeWithSessions,
   getRandomTestClientTypeWithNoSessions,
 } from "../public/utils/testutils2";
-import {
-  DispositionType,
+import type {
   ServiceBusMessageImpl,
-  ServiceBusReceivedMessage,
+  ServiceBusReceivedMessage} from "../../src/serviceBusMessage";
+import {
+  DispositionType
 } from "../../src/serviceBusMessage";
 import { testLogger } from "./utils/misc";
 

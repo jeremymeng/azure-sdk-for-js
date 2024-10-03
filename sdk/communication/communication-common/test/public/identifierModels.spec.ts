@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   CommunicationIdentifier,
   CommunicationIdentifierKind,
-  PhoneNumberIdentifier,
+  PhoneNumberIdentifier} from "../../src";
+import {
   createIdentifierFromRawId,
   getIdentifierKind,
   getIdentifierRawId,

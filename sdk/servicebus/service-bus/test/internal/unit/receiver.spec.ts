@@ -3,7 +3,7 @@
 
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
-import { ReceiverOptions } from "rhea-promise";
+import type { ReceiverOptions } from "rhea-promise";
 chai.use(chaiAsPromised);
 const assert: typeof chai.assert = chai.assert;
 
@@ -15,9 +15,9 @@ import {
   createConnectionContextForTests,
   createConnectionContextForTestsWithSessionId,
 } from "./unittestUtils";
-import { InternalMessageHandlers } from "../../../src/models";
+import type { InternalMessageHandlers } from "../../../src/models";
 import { createAbortSignalForTest } from "../../public/utils/abortSignalTestUtils";
-import { AbortSignalLike } from "@azure/abort-controller";
+import type { AbortSignalLike } from "@azure/abort-controller";
 import { ServiceBusSessionReceiverImpl } from "../../../src/receivers/sessionReceiver";
 import { MessageSession } from "../../../src/session/messageSession";
 import sinon from "sinon";

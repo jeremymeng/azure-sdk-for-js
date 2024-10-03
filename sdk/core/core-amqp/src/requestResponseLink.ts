@@ -1,20 +1,22 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { AbortError, AbortSignalLike } from "@azure/abort-controller";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import { AbortError } from "@azure/abort-controller";
 import { ConditionStatusMapper, translate } from "./errors.js";
-import {
+import type {
   Connection,
   EventContext,
   Receiver,
-  ReceiverEvents,
   ReceiverOptions,
   ReqResLink,
   Message as RheaMessage,
   Sender,
-  SenderEvents,
   SenderOptions,
-  Session,
+  Session} from "rhea-promise";
+import {
+  ReceiverEvents,
+  SenderEvents,
   generate_uuid,
 } from "rhea-promise";
 import { Constants, StandardAbortMessage } from "./util/constants.js";

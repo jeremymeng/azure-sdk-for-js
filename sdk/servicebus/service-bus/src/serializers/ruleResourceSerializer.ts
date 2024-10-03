@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { FullOperationResponse } from "@azure/core-client";
-import { CorrelationRuleFilter } from "../core/managementClient";
+import type { FullOperationResponse } from "@azure/core-client";
+import type { CorrelationRuleFilter } from "../core/managementClient";
+import type {
+  AtomXmlSerializer} from "../util/atomXmlHelper";
 import {
-  AtomXmlSerializer,
   deserializeAtomXmlResponse,
   serializeToAtomXmlRequest,
 } from "../util/atomXmlHelper";

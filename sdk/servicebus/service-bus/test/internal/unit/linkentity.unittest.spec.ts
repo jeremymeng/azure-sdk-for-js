@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { AbortSignalLike } from "@azure/abort-controller";
+import type { AbortSignalLike } from "@azure/abort-controller";
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
-import { Receiver, ReceiverOptions } from "rhea-promise";
+import type { Receiver, ReceiverOptions } from "rhea-promise";
 import sinon from "sinon";
-import { ConnectionContext } from "../../../src/connectionContext";
+import type { ConnectionContext } from "../../../src/connectionContext";
 import { BatchingReceiver } from "../../../src/core/batchingReceiver";
 import { LinkEntity } from "../../../src/core/linkEntity";
 import { ManagementClient } from "../../../src/core/managementClient";

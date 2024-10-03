@@ -3,12 +3,13 @@
 
 // Anything we expect to be available to users should come from this import
 // as a simple sanity check that we've exported things properly.
-import {
-  ServiceBusClient,
+import type {
   ServiceBusReceiver,
   ServiceBusSessionReceiver,
   ServiceBusClientOptions,
-  ServiceBusSender,
+  ServiceBusSender} from "../../../src";
+import {
+  ServiceBusClient
 } from "../../../src";
 
 import { TestClientType, TestMessage } from "./testUtils";
@@ -20,8 +21,8 @@ import {
   verifyMessageCount,
 } from "./managementUtils";
 import chai from "chai";
-import { ServiceBusReceivedMessage, ServiceBusMessage } from "../../../src";
-import { ServiceBusReceiverOptions, ServiceBusSessionReceiverOptions } from "../../../src";
+import type { ServiceBusReceivedMessage, ServiceBusMessage } from "../../../src";
+import type { ServiceBusReceiverOptions, ServiceBusSessionReceiverOptions } from "../../../src";
 import { createTestCredential } from "@azure-tools/test-credential";
 
 const env = getEnvVars();

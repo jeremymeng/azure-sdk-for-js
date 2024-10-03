@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   EventData,
-  ReceivedEventData,
+  ReceivedEventData} from "../../src/eventData.js";
+import {
   fromRheaMessage,
   toRheaMessage,
 } from "../../src/eventData.js";
@@ -13,8 +14,8 @@ import {
   sequenceSectionTypeCode,
   valueSectionTypeCode,
 } from "../../src/dataTransformer.js";
-import { AmqpAnnotatedMessage } from "@azure/core-amqp";
-import { Message } from "rhea-promise";
+import type { AmqpAnnotatedMessage } from "@azure/core-amqp";
+import type { Message } from "rhea-promise";
 import { describe, it } from "vitest";
 
 const testAnnotations = {

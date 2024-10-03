@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 import type { Instrumentation } from "@opentelemetry/instrumentation/build/src/types";
+import type {
+  StatsbeatEnvironmentConfig} from "../types";
 import {
   AZURE_MONITOR_STATSBEAT_FEATURES,
-  StatsbeatEnvironmentConfig,
   StatsbeatInstrumentationMap,
 } from "../types";
 import { Logger } from "../shared/logging";

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { TokenCredential } from "@azure/core-auth";
+import type { TokenCredential } from "@azure/core-auth";
 import { bearerTokenAuthenticationPolicy } from "@azure/core-rest-pipeline";
 
-import {
+import type {
   DecryptOptions,
   DecryptParameters,
   DecryptResult,
@@ -21,18 +21,19 @@ import {
   WrapResult,
 } from "../cryptographyClientModels";
 import { SDK_VERSION } from "../constants";
-import { UnwrapResult } from "../cryptographyClientModels";
+import type { UnwrapResult } from "../cryptographyClientModels";
 import { KeyVaultClient } from "../generated";
 import { parseKeyVaultKeyIdentifier } from "../identifier";
-import {
+import type {
   CryptographyClientOptions,
   GetKeyOptions,
-  KeyVaultKey,
+  KeyVaultKey} from "../keysModels";
+import {
   LATEST_API_VERSION,
 } from "../keysModels";
 import { getKeyFromKeyBundle } from "../transformations";
 import { createHash } from "./crypto";
-import { CryptographyProvider, CryptographyProviderOperation } from "./models";
+import type { CryptographyProvider, CryptographyProviderOperation } from "./models";
 import { logger } from "../log";
 import { createKeyVaultChallengeCallbacks } from "@azure/keyvault-common";
 import { tracingClient } from "../tracing";

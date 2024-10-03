@@ -2,17 +2,18 @@
 // Licensed under the MIT License.
 
 import { AzureLogAnalytics } from "./generated/logquery/src/azureLogAnalytics";
-import { TokenCredential } from "@azure/core-auth";
+import type { TokenCredential } from "@azure/core-auth";
 
-import {
+import type {
   LogsQueryBatchOptions,
   LogsQueryBatchResult,
   LogsQueryOptions,
   LogsQueryPartialResult,
   LogsQueryResult,
-  LogsQueryResultStatus,
   LogsQuerySuccessfulResult,
-  QueryBatch,
+  QueryBatch} from "./models/publicLogsModels";
+import {
+  LogsQueryResultStatus
 } from "./models/publicLogsModels";
 
 import {
@@ -22,8 +23,8 @@ import {
   mapError,
 } from "./internal/modelConverters";
 import { formatPreferHeader } from "./internal/util";
-import { CommonClientOptions, FullOperationResponse, OperationOptions } from "@azure/core-client";
-import { QueryTimeInterval } from "./models/timeInterval";
+import type { CommonClientOptions, FullOperationResponse, OperationOptions } from "@azure/core-client";
+import type { QueryTimeInterval } from "./models/timeInterval";
 import { convertTimespanToInterval } from "./timespanConversion";
 import { KnownMonitorLogsQueryAudience, SDK_VERSION } from "./constants";
 import { tracingClient } from "./tracing";

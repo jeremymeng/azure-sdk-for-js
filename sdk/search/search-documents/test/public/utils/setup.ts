@@ -3,11 +3,9 @@
 
 import { assertEnvironmentVariable, isLiveMode, isPlaybackMode } from "@azure-tools/test-recorder";
 import { computeSha256Hash, delay, isDefined } from "@azure/core-util";
-import { OpenAIClient } from "@azure/openai";
+import type { OpenAIClient } from "@azure/openai";
 import { assert } from "chai";
-import {
-  GeographyPoint,
-  KnownAnalyzerNames,
+import type {
   SearchClient,
   SearchField,
   SearchIndex,
@@ -16,9 +14,12 @@ import {
   VectorSearchAlgorithmConfiguration,
   VectorSearchCompression,
   VectorSearchProfile,
-  VectorSearchVectorizer,
+  VectorSearchVectorizer} from "../../../src";
+import {
+  GeographyPoint,
+  KnownAnalyzerNames
 } from "../../../src";
-import { Hotel } from "./interfaces";
+import type { Hotel } from "./interfaces";
 
 export const WAIT_TIME = isPlaybackMode() ? 0 : 4000;
 

@@ -1,22 +1,24 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ServiceBusMessage, toRheaMessage } from "./serviceBusMessage";
+import type { ServiceBusMessage} from "./serviceBusMessage";
+import { toRheaMessage } from "./serviceBusMessage";
 import {
   errorInvalidMessageTypeSingle,
   throwIfNotValidServiceBusMessage,
   throwTypeErrorIfParameterMissing,
 } from "./util/errors";
-import { ConnectionContext } from "./connectionContext";
-import {
+import type { ConnectionContext } from "./connectionContext";
+import type {
   MessageAnnotations,
+  Message as RheaMessage} from "rhea-promise";
+import {
   messageProperties as RheaMessagePropertiesList,
-  message as RheaMessageUtil,
-  Message as RheaMessage,
+  message as RheaMessageUtil
 } from "rhea-promise";
-import { TracingContext } from "@azure/core-tracing";
-import { TryAddOptions } from "./modelsToBeSharedWithEventHubs";
-import { AmqpAnnotatedMessage } from "@azure/core-amqp";
+import type { TracingContext } from "@azure/core-tracing";
+import type { TryAddOptions } from "./modelsToBeSharedWithEventHubs";
+import type { AmqpAnnotatedMessage } from "@azure/core-amqp";
 import { defaultDataTransformer } from "./dataTransformer";
 import { instrumentMessage } from "./diagnostics/instrumentServiceBusMessage";
 

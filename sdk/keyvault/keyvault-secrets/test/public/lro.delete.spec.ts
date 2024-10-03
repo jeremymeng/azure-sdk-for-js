@@ -2,15 +2,16 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
-import { Recorder, env } from "@azure-tools/test-recorder";
+import type { Context } from "mocha";
+import type { Recorder} from "@azure-tools/test-recorder";
+import { env } from "@azure-tools/test-recorder";
 import { PollerStoppedError } from "@azure/core-lro";
 
-import { DeletedSecret, SecretClient } from "../../src";
+import type { DeletedSecret, SecretClient } from "../../src";
 import { getServiceVersion } from "./utils/common";
 import { testPollerProperties } from "./utils/recorderUtils";
 import { authenticate } from "./utils/testAuthentication";
-import TestClient from "./utils/testClient";
+import type TestClient from "./utils/testClient";
 
 describe("Secrets client - Long Running Operations - delete", () => {
   const secretPrefix = `lroDelete${env.CERTIFICATE_NAME || "SecretName"}`;

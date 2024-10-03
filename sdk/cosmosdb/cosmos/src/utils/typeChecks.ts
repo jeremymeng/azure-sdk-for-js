@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  NonePartitionKeyType,
+  NullPartitionKeyType,
+  PrimitivePartitionKeyValue} from "../documents";
 import {
   NonePartitionKeyLiteral,
-  NonePartitionKeyType,
-  NullPartitionKeyLiteral,
-  NullPartitionKeyType,
-  PrimitivePartitionKeyValue,
+  NullPartitionKeyLiteral
 } from "../documents";
 
 /**

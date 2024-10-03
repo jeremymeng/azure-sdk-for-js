@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Client, HttpResponse } from "@azure-rest/core-client";
-import {
+import type { Client, HttpResponse } from "@azure-rest/core-client";
+import type {
   LongRunningOperation,
-  LroEngine,
   LroEngineOptions,
   LroResponse,
   PollOperationState,
-  PollerLike,
+  PollerLike} from "@azure/core-lro";
+import {
+  LroEngine
 } from "@azure/core-lro";
 
 /**

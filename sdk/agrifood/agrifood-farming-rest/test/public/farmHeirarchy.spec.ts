@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import {
+import type {
   FarmBeatsClient,
-  getLongRunningPoller,
   SatelliteDataIngestionJobOutput,
-  SceneListResponseOutput,
+  SceneListResponseOutput} from "../../src";
+import {
+  getLongRunningPoller,
   isUnexpected,
 } from "../../src";
 import { createClient, createRecorder } from "./utils/recordedClient";
 
-import { Context } from "mocha";
-import { Recorder } from "@azure-tools/test-recorder";
+import type { Context } from "mocha";
+import type { Recorder } from "@azure-tools/test-recorder";
 import { assert } from "chai";
 import { isNode } from "@azure/core-util";
 

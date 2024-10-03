@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ServiceBusClient, TokenCredential } from "../../../src";
+import type { TokenCredential } from "../../../src";
+import { ServiceBusClient } from "../../../src";
 
 describe("ServiceBusClient unit tests", function (): void {
   describe("ServiceBusClient constructor", function (): void {

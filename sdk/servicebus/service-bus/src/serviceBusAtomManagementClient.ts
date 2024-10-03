@@ -2,89 +2,99 @@
 // Licensed under the MIT License.
 
 import { Constants as AMQPConstants, parseConnectionString } from "@azure/core-amqp";
-import {
+import type {
   TokenCredential,
+  NamedKeyCredential} from "@azure/core-auth";
+import {
   isTokenCredential,
-  NamedKeyCredential,
   isNamedKeyCredential,
 } from "@azure/core-auth";
-import {
-  ServiceClient,
+import type {
   OperationOptions,
   CommonClientOptions,
-  FullOperationResponse,
+  FullOperationResponse} from "@azure/core-client";
+import {
+  ServiceClient
 } from "@azure/core-client";
-import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import type { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import type {
+  PipelineResponse,
+  PipelineRequest,
+  PipelinePolicy,
+  SendRequest} from "@azure/core-rest-pipeline";
 import {
   bearerTokenAuthenticationPolicy,
   RestError,
-  PipelineResponse,
   createPipelineFromOptions,
-  PipelineRequest,
-  createPipelineRequest,
-  PipelinePolicy,
-  SendRequest,
+  createPipelineRequest
 } from "@azure/core-rest-pipeline";
-import { CorrelationRuleFilter } from "./core/managementClient";
+import type { CorrelationRuleFilter } from "./core/managementClient";
 import { administrationLogger as logger } from "./log";
+import type {
+  NamespaceProperties} from "./serializers/namespaceResourceSerializer";
 import {
   buildNamespace,
-  NamespaceProperties,
   NamespaceResourceSerializer,
 } from "./serializers/namespaceResourceSerializer";
+import type {
+  CreateQueueOptions,
+  InternalQueueOptions,
+  QueueProperties,
+  QueueRuntimeProperties} from "./serializers/queueResourceSerializer";
 import {
   buildQueue,
   buildQueueOptions,
   buildQueueRuntimeProperties,
-  CreateQueueOptions,
-  InternalQueueOptions,
-  QueueProperties,
-  QueueResourceSerializer,
-  QueueRuntimeProperties,
+  QueueResourceSerializer
 } from "./serializers/queueResourceSerializer";
+import type {
+  CreateRuleOptions,
+  RuleProperties,
+  SqlRuleAction,
+  SqlRuleFilter} from "./serializers/ruleResourceSerializer";
 import {
   buildRule,
-  CreateRuleOptions,
   isSqlRuleAction,
-  RuleProperties,
-  RuleResourceSerializer,
-  SqlRuleAction,
-  SqlRuleFilter,
+  RuleResourceSerializer
 } from "./serializers/ruleResourceSerializer";
+import type {
+  CreateSubscriptionOptions,
+  InternalSubscriptionOptions,
+  SubscriptionProperties,
+  SubscriptionRuntimeProperties} from "./serializers/subscriptionResourceSerializer";
 import {
   buildSubscription,
   buildSubscriptionOptions,
   buildSubscriptionRuntimeProperties,
-  CreateSubscriptionOptions,
-  InternalSubscriptionOptions,
-  SubscriptionProperties,
-  SubscriptionResourceSerializer,
-  SubscriptionRuntimeProperties,
+  SubscriptionResourceSerializer
 } from "./serializers/subscriptionResourceSerializer";
+import type {
+  CreateTopicOptions,
+  InternalTopicOptions,
+  TopicProperties,
+  TopicRuntimeProperties} from "./serializers/topicResourceSerializer";
 import {
   buildTopic,
   buildTopicOptions,
   buildTopicRuntimeProperties,
-  CreateTopicOptions,
-  InternalTopicOptions,
-  TopicProperties,
-  TopicResourceSerializer,
-  TopicRuntimeProperties,
+  TopicResourceSerializer
 } from "./serializers/topicResourceSerializer";
-import { AtomXmlSerializer, executeAtomXmlOperation } from "./util/atomXmlHelper";
+import type { AtomXmlSerializer} from "./util/atomXmlHelper";
+import { executeAtomXmlOperation } from "./util/atomXmlHelper";
 import * as Constants from "./util/constants";
 import { parseURL } from "./util/parseUrl";
 import { SasServiceClientCredentials } from "./util/sasServiceClientCredentials";
 import { tracingClient } from "./diagnostics/tracing";
 import { isDefined } from "@azure/core-util";
+import type {
+  ServiceBusAtomAPIVersion} from "./util/utils";
 import {
   formatUserAgentPrefix,
   getHttpResponseOnly,
   isAbsoluteUrl,
-  isJSONLikeObject,
-  ServiceBusAtomAPIVersion,
+  isJSONLikeObject
 } from "./util/utils";
-import { HttpResponse } from "./util/compat";
+import type { HttpResponse } from "./util/compat";
 
 /**
  * Request options for list<entity-type>() operations

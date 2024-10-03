@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 import { delay } from "../../../src";
-import { CreateTopicOptions } from "../../../src";
-import { CreateSubscriptionOptions } from "../../../src";
+import type { CreateTopicOptions } from "../../../src";
+import type { CreateSubscriptionOptions } from "../../../src";
 import { ServiceBusAdministrationClient } from "../../../src";
 
 import chai from "chai";
-import { CreateQueueOptions } from "../../../src";
+import type { CreateQueueOptions } from "../../../src";
 import { createTestCredential } from "@azure-tools/test-credential";
 import { EnvVarNames, getEnvVars } from "./envVarUtils";
 const should = chai.should();

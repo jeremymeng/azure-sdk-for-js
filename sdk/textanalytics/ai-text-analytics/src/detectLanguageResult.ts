@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
+import type {
   TextAnalyticsErrorResult,
-  TextAnalyticsSuccessResult,
+  TextAnalyticsSuccessResult} from "./textAnalyticsResult";
+import {
   makeTextAnalyticsErrorResult,
   makeTextAnalyticsSuccessResult,
 } from "./textAnalyticsResult";
-import { DetectedLanguage, DocumentLanguage, TextAnalyticsError } from "./generated/models";
+import type { DetectedLanguage, DocumentLanguage, TextAnalyticsError } from "./generated/models";
 
 /**
  * The result of the detect language operation on a single document.

@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type {
+  CommunicationTokenRefreshOptions} from "./autoRefreshTokenCredential";
 import {
-  AutoRefreshTokenCredential,
-  CommunicationTokenRefreshOptions,
+  AutoRefreshTokenCredential
 } from "./autoRefreshTokenCredential";
-import {
+import type {
   CommunicationGetTokenOptions,
   CommunicationTokenCredential,
   TokenCredential,
 } from "./communicationTokenCredential";
-import { AccessToken } from "@azure/core-auth";
+import type { AccessToken } from "@azure/core-auth";
 import { StaticTokenCredential } from "./staticTokenCredential";
 import { parseToken } from "./tokenParser";
 

@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 import { assert } from "@azure-tools/test-utils";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { Recorder, env, isPlaybackMode } from "@azure-tools/test-recorder";
-import { KeyClient } from "../../src";
+import type { KeyClient } from "../../src";
 import { authenticate, envSetupForPlayback } from "./utils/testAuthentication";
 import TestClient from "./utils/testClient";
-import { CreateOctKeyOptions, KnownKeyExportEncryptionAlgorithm } from "../../src/keysModels";
+import type { CreateOctKeyOptions} from "../../src/keysModels";
+import { KnownKeyExportEncryptionAlgorithm } from "../../src/keysModels";
 import { getServiceVersion, onVersions } from "./utils/common";
 import { createRsaKey, stringToUint8Array, uint8ArrayToString } from "./utils/crypto";
 import { createPipelineRequest, createDefaultHttpClient } from "@azure/core-rest-pipeline";

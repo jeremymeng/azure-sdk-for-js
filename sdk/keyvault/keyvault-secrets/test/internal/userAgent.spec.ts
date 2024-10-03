@@ -3,7 +3,7 @@
 
 import { SDK_VERSION } from "../../src/constants";
 import { SecretClient } from "../../src";
-import { TokenCredential } from "@azure/core-auth";
+import type { TokenCredential } from "@azure/core-auth";
 import { assert } from "@azure-tools/test-utils";
 
 describe("Secrets client's user agent (only in Node, because of fs)", () => {

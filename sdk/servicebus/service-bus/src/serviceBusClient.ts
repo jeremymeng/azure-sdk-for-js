@@ -1,27 +1,32 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ConnectionConfig } from "@azure/core-amqp";
-import { TokenCredential, NamedKeyCredential, SASCredential } from "@azure/core-auth";
+import type { ConnectionConfig } from "@azure/core-amqp";
+import type { TokenCredential, NamedKeyCredential, SASCredential } from "@azure/core-auth";
+import type {
+  ServiceBusClientOptions} from "./constructorHelpers";
 import {
-  ServiceBusClientOptions,
   createConnectionContextForConnectionString,
   createConnectionContextForCredential,
 } from "./constructorHelpers";
 import { ConnectionContext } from "./connectionContext";
-import {
+import type {
   ServiceBusReceiverOptions,
   ServiceBusSessionReceiverOptions,
   ReceiveMode,
   ServiceBusSenderOptions,
 } from "./models";
-import { ServiceBusReceiver, ServiceBusReceiverImpl } from "./receivers/receiver";
+import type { ServiceBusReceiver} from "./receivers/receiver";
+import { ServiceBusReceiverImpl } from "./receivers/receiver";
+import type {
+  ServiceBusSessionReceiver} from "./receivers/sessionReceiver";
 import {
-  ServiceBusSessionReceiver,
   ServiceBusSessionReceiverImpl,
 } from "./receivers/sessionReceiver";
-import { ServiceBusRuleManager, ServiceBusRuleManagerImpl } from "./serviceBusRuleManager";
-import { ServiceBusSender, ServiceBusSenderImpl } from "./sender";
+import type { ServiceBusRuleManager} from "./serviceBusRuleManager";
+import { ServiceBusRuleManagerImpl } from "./serviceBusRuleManager";
+import type { ServiceBusSender} from "./sender";
+import { ServiceBusSenderImpl } from "./sender";
 import { entityPathMisMatchError } from "./util/errors";
 import { MessageSession } from "./session/messageSession";
 import { isDefined } from "@azure/core-util";

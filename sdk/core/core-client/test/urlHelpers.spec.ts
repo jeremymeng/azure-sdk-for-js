@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 import { describe, it, assert } from "vitest";
-import {
+import type {
   OperationQueryParameter,
   OperationSpec,
-  OperationURLParameter,
+  OperationURLParameter} from "../src/index.js";
+import {
   createSerializer,
 } from "../src/index.js";
 import { appendQueryParams, getRequestUrl } from "../src/urlHelpers.js";

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { DefaultConnectOptionsConstants, ServiceEnvironmentVariable } from "./constants";
-import { PlaywrightServiceAdditionalOptions, OsType } from "./types";
+import type { PlaywrightServiceAdditionalOptions, OsType } from "./types";
 import { getDefaultRunId } from "../utils/utils";
 
 class PlaywrightServiceConfig {

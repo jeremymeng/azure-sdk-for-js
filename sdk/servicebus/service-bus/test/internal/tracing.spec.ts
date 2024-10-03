@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ServiceBusSender, ServiceBusMessage } from "../../src";
+import type { ServiceBusSender, ServiceBusMessage } from "../../src";
 import { TestClientType } from "../public/utils/testUtils";
-import {
+import type {
   ServiceBusClientForTests,
-  EntityName,
+  EntityName} from "../public/utils/testutils2";
+import {
   createServiceBusClientForTests,
 } from "../public/utils/testutils2";
 import { assert } from "@azure-tools/test-utils";
