@@ -13,25 +13,30 @@ export default async function updatePackage(
   root: string,
 ) {
   const { projectFolder, packageName } = project;
+  if (packageName === "@azure/dev-tool") {
+    return;
+  }
   const fullProjectPath = path.join(root, projectFolder);
   const { packageJson } = await resolveProject(fullProjectPath);
 
-  const toReplace = ["@microsoft/api-extractor"] as const;
+  const toReplace = [{name: "uglify-js", command: "uglifyjs"}] as const;
   // const toReplace = ["rimraf", "mkdirp"] as const;
 
   console.log(`updating ${packageName} ${fullProjectPath}`);
   let updated = false;
   for (const dep of toReplace) {
+    const depName = typeof dep === "string" ? dep : dep.name;
     for (const script of Object.keys(packageJson.scripts)) {
-      if (packageJson.scripts[script].includes(dep)) {
+      const depCommand = typeof dep === "string" ? dep: dep.command;
+      if (packageJson.scripts[script].includes(depCommand)) {
         console.log(`    updating "${script}"`);
-        packageJson.scripts[script] = packageJson.scripts[script].replaceAll(dep, `dev-tool run vendored ${dep}`);
+        packageJson.scripts[script] = packageJson.scripts[script].replaceAll(depCommand, `dev-tool run vendored ${depCommand}`);
         updated = true;
       }
     };
-    if (packageJson.devDependencies[dep]) {
-      console.log(`   removing "${dep}" dependency`);
-      delete packageJson.devDependencies[dep];
+    if (packageJson.devDependencies[depName]) {
+      console.log(`  removing "${depName}" dependency`);
+      delete packageJson.devDependencies[depName];
       updated = true;
     }
   }
