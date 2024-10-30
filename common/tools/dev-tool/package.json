@@ -60,7 +60,10 @@
     "express": "^4.19.2",
     "fs-extra": "^11.2.0",
     "minimist": "^1.2.8",
+    "mkdirp": "^3.0.1",
     "prettier": "^3.3.3",
+    "prettier-plugin-packagejson": "2.5.3",
+    "rimraf": "^5.0.5",
     "rollup": "^4.22.0",
     "rollup-plugin-polyfill-node": "^0.13.0",
     "rollup-plugin-visualizer": "^5.9.3",
@@ -89,8 +92,6 @@
     "builtin-modules": "^3.1.0",
     "cross-env": "^7.0.3",
     "eslint": "^9.9.0",
-    "mkdirp": "^3.0.1",
-    "rimraf": "^5.0.5",
     "typescript-eslint": "~8.2.0",
     "vitest": "^2.0.5"
   }

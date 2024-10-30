@@ -1,9 +1,47 @@
 {
+
   "arrowParens": "always",
   "bracketSpacing": true,
   "endOfLine": "lf",
   "printWidth": 100,
   "semi": true,
   "singleQuote": false,
-  "tabWidth": 2
+  "tabWidth": 2,
+
+  "overrides": [
+    {
+      "files": "package.json",
+      "options": {
+        "packageSortOrder": [
+          "name",
+          "version",
+          "description",
+          "author",
+          "keywords",
+          "license",
+          "homepage",
+          "repository",
+          "bugs",
+          "sdk-type",
+          "type",
+          "main",
+          "module",
+          "types",
+          "browser",
+          "react-native",
+          "exports",
+          "files",
+          "engine",
+          "sideEffects",
+          "scripts",
+          "dependencies",
+          "devDependencies",
+          "prettier",
+          "//metadata",
+          "//sampleConfiguration",
+          "tshy"
+        ]
+      }
+    }
+  ]
 }
