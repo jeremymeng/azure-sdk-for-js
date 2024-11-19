@@ -8,7 +8,7 @@ import {
   RequestPolicyOptions,
   WebResource,
 } from "../../src";
-import { Span, SpanOptions, Tracer, TracerProvider, trace } from "@opentelemetry/api";
+import { Link, Span, SpanOptions, Tracer, TracerProvider, trace } from "@opentelemetry/api";
 import {
   SpanAttributeValue,
   SpanAttributes,
@@ -48,6 +48,14 @@ class MockSpan implements Span {
 
   isRecording(): boolean {
     return true;
+  }
+
+  addLink(_link: Link): this {
+    throw new Error("Method not implemented.");
+  }
+
+  addLinks(_links: Link[]): this {
+    throw new Error("Method not implemented.");
   }
 
   recordException(): void {
