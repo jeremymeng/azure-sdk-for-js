@@ -57,19 +57,33 @@ function outputTestPath(projectFolderPath, sourceDir, testFolder) {
 /**
  * This function uses the package's timeout in it's package.json for
  * the integration-test:node command for the min-max tests.
- * This function basically does a string search for "timeout" in the package's package.json
+ * This function basically does a string search for "timeout" / "test-timeout" / "hook-timeout" in the package's package.json
  * and replaces the command for timeout in new package.json in the test or test/public folder.
  * @param testPackageJson - the package.json that will be created in the test folder
  * @param packageJsonContents - the package's package.json contents
  */
 async function usePackageTestTimeout(testPackageJson, packageJsonContents) {
   if (packageJsonContents.scripts["integration-test:node"]) {
+    // Replace any test-timeout
+    let timeoutPattern = /--(test-)?timeout\s+(\d+)/;
     let replaceWithTimeout =
-      packageJsonContents.scripts["integration-test:node"].match(/--timeout [0-9]+/);
+      packageJsonContents.scripts["integration-test:node"].match(timeoutPattern);
     if (replaceWithTimeout !== null) {
+      const timeoutArgument = `${replaceWithTimeout[1] || ""}timeout`;
+      const packageTimeout = replaceWithTimeout[2];
       testPackageJson.scripts["integration-test:node"] = testPackageJson.scripts[
         "integration-test:node"
-      ].replace(/--timeout [0-9]+/g, replaceWithTimeout);
+      ].replace(timeoutPattern, `--${timeoutArgument} ${packageTimeout}`);
+    }
+
+    // Replace any hook-timeout
+    timeoutPattern = /--hook-timeout\s+(\d+)/; // this is only a vitest concept, so there's just one pattern
+    replaceWithTimeout = packageJsonContents.scripts["integration-test:node"].match(timeoutPattern);
+    if (replaceWithTimeout !== null) {
+      const packageTimeout = replaceWithTimeout[1];
+      testPackageJson.scripts["integration-test:node"] = testPackageJson.scripts[
+        "integration-test:node"
+      ].replace(timeoutPattern, `--hook-timeout ${packageTimeout}`);
     }
   }
 }
@@ -95,15 +109,23 @@ async function insertPackageJson(
   testFolder,
 ) {
   const testPath = path.join(targetPackagePath, testFolder);
-  let templateJson = await packageUtils.readFileJson("./templates/package.json");
-  let testPackageJson = templateJson;
+  const testPackageJson = await packageUtils.readFileJson("./templates/package.json");
   if (packageJsonContents.name.startsWith("@azure/")) {
     testPackageJson.name = packageJsonContents.name.replace("@azure/", "azure-") + "-test";
   } else if (packageJsonContents.name.startsWith("@azure-rest/")) {
     testPackageJson.name =
       packageJsonContents.name.replace("@azure-rest/", "azure-rest-") + "-test";
   }
+  testPackageJson.type = packageJsonContents.type;
+  if (packageJsonContents.scripts["integration-test:node"].includes("vitest")) {
+    testPackageJson.scripts["integration-test:node"] =
+      "dev-tool run test:vitest -- -c vitest.dependency-test.config.ts --test-timeout 180000 --hook-timeout 180000";
+    testPackageJson.scripts["integration-test:browser"] =
+      "dev-tool run build-test && dev-tool run test:vitest --browser  -- -c vitest.dependency-test.browser.config.ts";
+    testPackageJson.scripts["build"] = "echo skipped.";
+  }
   await usePackageTestTimeout(testPackageJson, packageJsonContents);
+
   testPackageJson.devDependencies = {};
   depList = {};
   let allowedVersionList = {};
@@ -262,6 +284,14 @@ async function copyRepoFile(repoRoot, relativePath, fileName, targetPackagePath,
   fs.copyFileSync(sourcePath, destPath);
 }
 
+function copyVitestConfig(targetPackagePath, testFolder) {
+  const testPath = path.join(targetPackagePath, testFolder);
+  let vitestConfig = fs.readFileSync("./templates/vitest.dependency-test.config.ts");
+
+  const vitestConfigPath = path.join(testPath, "vitest.dependency-test.config.ts");
+  fs.writeFileSync(vitestConfigPath, vitestConfig);
+}
+
 async function insertTsConfigJson(targetPackagePath, testFolder) {
   const testPath = path.join(targetPackagePath, testFolder);
   let tsConfigJson = await packageUtils.readFileJson("./templates/tsconfig.json");
@@ -389,6 +419,9 @@ async function main(argv) {
     testFolder,
   );
   await insertTsConfigJson(targetPackagePath, testFolder);
+  if (packageJsonContents.scripts["integration-test:node"].includes("vitest")) {
+    copyVitestConfig(targetPackagePath, testFolder);
+  }
   if (dryRun) {
     console.log("Dry run only, no changes");
     return;
