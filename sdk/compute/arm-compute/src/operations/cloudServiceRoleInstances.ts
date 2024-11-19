@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ComputeManagementClient } from "../computeManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   RoleInstance,
   CloudServiceRoleInstancesListNextOptionalParams,
@@ -30,13 +34,14 @@ import {
   CloudServiceRoleInstancesRebuildOptionalParams,
   CloudServiceRoleInstancesGetRemoteDesktopFileOptionalParams,
   CloudServiceRoleInstancesGetRemoteDesktopFileResponse,
-  CloudServiceRoleInstancesListNextResponse
+  CloudServiceRoleInstancesListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing CloudServiceRoleInstances operations. */
 export class CloudServiceRoleInstancesImpl
-  implements CloudServiceRoleInstances {
+  implements CloudServiceRoleInstances
+{
   private readonly client: ComputeManagementClient;
 
   /**
@@ -57,12 +62,12 @@ export class CloudServiceRoleInstancesImpl
   public list(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesListOptionalParams
+    options?: CloudServiceRoleInstancesListOptionalParams,
   ): PagedAsyncIterableIterator<RoleInstance> {
     const iter = this.listPagingAll(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return {
       next() {
@@ -79,9 +84,9 @@ export class CloudServiceRoleInstancesImpl
           resourceGroupName,
           cloudServiceName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -89,7 +94,7 @@ export class CloudServiceRoleInstancesImpl
     resourceGroupName: string,
     cloudServiceName: string,
     options?: CloudServiceRoleInstancesListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<RoleInstance[]> {
     let result: CloudServiceRoleInstancesListResponse;
     let continuationToken = settings?.continuationToken;
@@ -105,7 +110,7 @@ export class CloudServiceRoleInstancesImpl
         resourceGroupName,
         cloudServiceName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -117,12 +122,12 @@ export class CloudServiceRoleInstancesImpl
   private async *listPagingAll(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesListOptionalParams
+    options?: CloudServiceRoleInstancesListOptionalParams,
   ): AsyncIterableIterator<RoleInstance> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -139,25 +144,24 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServiceRoleInstancesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -166,8 +170,8 @@ export class CloudServiceRoleInstancesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -175,19 +179,19 @@ export class CloudServiceRoleInstancesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { roleInstanceName, resourceGroupName, cloudServiceName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { roleInstanceName, resourceGroupName, cloudServiceName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -204,13 +208,13 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesDeleteOptionalParams
+    options?: CloudServiceRoleInstancesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       roleInstanceName,
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -226,11 +230,11 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesGetOptionalParams
+    options?: CloudServiceRoleInstancesGetOptionalParams,
   ): Promise<CloudServiceRoleInstancesGetResponse> {
     return this.client.sendOperationRequest(
       { roleInstanceName, resourceGroupName, cloudServiceName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -245,11 +249,11 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesGetInstanceViewOptionalParams
+    options?: CloudServiceRoleInstancesGetInstanceViewOptionalParams,
   ): Promise<CloudServiceRoleInstancesGetInstanceViewResponse> {
     return this.client.sendOperationRequest(
       { roleInstanceName, resourceGroupName, cloudServiceName, options },
-      getInstanceViewOperationSpec
+      getInstanceViewOperationSpec,
     );
   }
 
@@ -263,11 +267,11 @@ export class CloudServiceRoleInstancesImpl
   private _list(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesListOptionalParams
+    options?: CloudServiceRoleInstancesListOptionalParams,
   ): Promise<CloudServiceRoleInstancesListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, cloudServiceName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -283,25 +287,24 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesRestartOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServiceRoleInstancesRestartOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -310,8 +313,8 @@ export class CloudServiceRoleInstancesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -319,19 +322,19 @@ export class CloudServiceRoleInstancesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { roleInstanceName, resourceGroupName, cloudServiceName, options },
-      restartOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { roleInstanceName, resourceGroupName, cloudServiceName, options },
+      spec: restartOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -349,13 +352,13 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesRestartOptionalParams
+    options?: CloudServiceRoleInstancesRestartOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRestart(
       roleInstanceName,
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -372,25 +375,24 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesReimageOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServiceRoleInstancesReimageOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -399,8 +401,8 @@ export class CloudServiceRoleInstancesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -408,19 +410,19 @@ export class CloudServiceRoleInstancesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { roleInstanceName, resourceGroupName, cloudServiceName, options },
-      reimageOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { roleInstanceName, resourceGroupName, cloudServiceName, options },
+      spec: reimageOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -438,13 +440,13 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesReimageOptionalParams
+    options?: CloudServiceRoleInstancesReimageOptionalParams,
   ): Promise<void> {
     const poller = await this.beginReimage(
       roleInstanceName,
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -462,25 +464,24 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesRebuildOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServiceRoleInstancesRebuildOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -489,8 +490,8 @@ export class CloudServiceRoleInstancesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -498,19 +499,19 @@ export class CloudServiceRoleInstancesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { roleInstanceName, resourceGroupName, cloudServiceName, options },
-      rebuildOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { roleInstanceName, resourceGroupName, cloudServiceName, options },
+      spec: rebuildOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -529,13 +530,13 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesRebuildOptionalParams
+    options?: CloudServiceRoleInstancesRebuildOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRebuild(
       roleInstanceName,
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -551,11 +552,11 @@ export class CloudServiceRoleInstancesImpl
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesGetRemoteDesktopFileOptionalParams
+    options?: CloudServiceRoleInstancesGetRemoteDesktopFileOptionalParams,
   ): Promise<CloudServiceRoleInstancesGetRemoteDesktopFileResponse> {
     return this.client.sendOperationRequest(
       { roleInstanceName, resourceGroupName, cloudServiceName, options },
-      getRemoteDesktopFileOperationSpec
+      getRemoteDesktopFileOperationSpec,
     );
   }
 
@@ -570,11 +571,11 @@ export class CloudServiceRoleInstancesImpl
     resourceGroupName: string,
     cloudServiceName: string,
     nextLink: string,
-    options?: CloudServiceRoleInstancesListNextOptionalParams
+    options?: CloudServiceRoleInstancesListNextOptionalParams,
   ): Promise<CloudServiceRoleInstancesListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, cloudServiceName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -582,8 +583,7 @@ export class CloudServiceRoleInstancesImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -591,8 +591,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
@@ -600,22 +600,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.roleInstanceName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RoleInstance
+      bodyMapper: Mappers.RoleInstance,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.expand2, Parameters.apiVersion4],
   urlParameters: [
@@ -623,22 +622,21 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.roleInstanceName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getInstanceViewOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/instanceView",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/instanceView",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RoleInstanceView
+      bodyMapper: Mappers.RoleInstanceView,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
@@ -646,36 +644,34 @@ const getInstanceViewOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.roleInstanceName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RoleInstanceListResult
+      bodyMapper: Mappers.RoleInstanceListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.expand2, Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const restartOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/restart",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/restart",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -683,8 +679,8 @@ const restartOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
@@ -692,14 +688,13 @@ const restartOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.roleInstanceName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const reimageOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/reimage",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/reimage",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -707,8 +702,8 @@ const reimageOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
@@ -716,14 +711,13 @@ const reimageOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.roleInstanceName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const rebuildOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/rebuild",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/rebuild",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -731,8 +725,8 @@ const rebuildOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
@@ -740,20 +734,22 @@ const rebuildOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.roleInstanceName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getRemoteDesktopFileOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/remoteDesktopFile",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/roleInstances/{roleInstanceName}/remoteDesktopFile",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: { type: { name: "Stream" }, serializedName: "parsedResponse" }
+      bodyMapper: {
+        type: { name: "Stream" },
+        serializedName: "parsedResponse",
+      },
     },
-    default: {}
+    default: {},
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
@@ -761,29 +757,29 @@ const getRemoteDesktopFileOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.roleInstanceName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept2],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RoleInstanceListResult
+      bodyMapper: Mappers.RoleInstanceListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.nextLink,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

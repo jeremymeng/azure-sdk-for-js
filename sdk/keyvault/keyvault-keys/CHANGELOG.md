@@ -1,6 +1,6 @@
 # Release History
 
-## 4.7.0-beta.2 (Unreleased)
+## 4.9.1 (Unreleased)
 
 ### Features Added
 
@@ -9,6 +9,64 @@
 ### Bugs Fixed
 
 ### Other Changes
+
+## 4.9.0 (2024-10-16)
+
+### Features Added
+
+- Add support for Continuous Access Evaluation (CAE). [#31140](https://github.com/Azure/azure-sdk-for-js/pull/31140)
+
+### Other Changes
+
+- Native ESM support has been added, and this package will now emit both CommonJS and ESM. [#31332](https://github.com/Azure/azure-sdk-for-js/pull/31332)
+
+## 4.8.0 (2024-02-14)
+
+### Features Added
+
+Since 4.7.2:
+
+- Added `hsmPlatform` property to `KeyProperties`.
+
+### Other Changes
+
+- The default service version is now `7.5`.
+
+## 4.8.0-beta.1 (2023-11-08)
+
+### Features Added
+
+- Added `hsmPlatform` property to `KeyProperties`.
+
+### Other Changes
+
+- The default service version is now `7.5-preview.1`.
+
+## 4.7.2 (2023-08-10)
+
+### Bugs Fixed
+
+- Fixed a bug where `listPropertiesOfKeysVersions` failed to retrieve the second page of results. Issue [#26547](https://github.com/Azure/azure-sdk-for-js/issues/26547); PR [#26584](https://github.com/Azure/azure-sdk-for-js/pull/26584).
+- Bumped `@azure/core-rest-pipeline` dependency to version including the `isRestError` helper, which was used in PR [#26016](https://github.com/Azure/azure-sdk-for-js/issues/26016).
+
+## 4.7.1 (2023-06-06)
+
+### Bugs Fixed
+
+- Fixed an issue where cryptographic operations would fail if the client did not have the get permission on the key, even if it had permission for the underlying operation. Issue [#26001](https://github.com/Azure/azure-sdk-for-js/issues/26001); PR [#26016](https://github.com/Azure/azure-sdk-for-js/issues/26016)
+
+## 4.7.0 (2023-03-09)
+
+### Breaking Changes
+
+- Removed support for OKP key types as introduced in 4.7.0-beta.1. These changes are only breaking for customers consuming the 4.7.0-beta.1 API, and do not affect those consuming a stable release such as 4.6.0.
+  - Removed `OKP` and `OKP-HSM` from `KnownKeyTypes`.
+  - Removed `EdDSA` from `KnownSignatureAlgorithms`.
+  - Removed `Ed25519` from `KnownKeyCurveNames`.
+
+### Other Changes
+
+- `KeyClient` and `CryptographyClient` now support service version 7.4 by default.
 
 ## 4.7.0-beta.1 (2022-11-10)
 

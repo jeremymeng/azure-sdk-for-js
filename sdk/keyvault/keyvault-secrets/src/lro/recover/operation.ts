@@ -1,21 +1,19 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { AbortSignalLike } from "@azure/abort-controller";
-import {
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type {
   DeletedSecret,
   GetSecretOptions,
   KeyVaultSecret,
   SecretProperties,
-} from "../../secretsModels";
-import {
-  KeyVaultSecretPollOperation,
-  KeyVaultSecretPollOperationState,
-} from "../keyVaultSecretPoller";
-import { KeyVaultClient } from "../../generated/keyVaultClient";
-import { getSecretFromSecretBundle } from "../../transformations";
-import { OperationOptions } from "@azure/core-client";
-import { tracingClient } from "../../tracing";
+} from "../../secretsModels.js";
+import type { KeyVaultSecretPollOperationState } from "../keyVaultSecretPoller.js";
+import { KeyVaultSecretPollOperation } from "../keyVaultSecretPoller.js";
+import type { KeyVaultClient } from "../../generated/keyVaultClient.js";
+import { getSecretFromSecretBundle } from "../../transformations.js";
+import type { OperationOptions } from "@azure/core-client";
+import { tracingClient } from "../../tracing.js";
 
 /**
  * An interface representing the state of a delete secret's poll operation
@@ -34,7 +32,7 @@ export class RecoverDeletedSecretPollOperation extends KeyVaultSecretPollOperati
     public state: RecoverDeletedSecretPollOperationState,
     private vaultUrl: string,
     private client: KeyVaultClient,
-    private options: OperationOptions = {}
+    private options: OperationOptions = {},
   ) {
     super(state, { cancelMessage: "Canceling the recovery of a deleted secret is not supported." });
   }
@@ -52,10 +50,10 @@ export class RecoverDeletedSecretPollOperation extends KeyVaultSecretPollOperati
           this.vaultUrl,
           name,
           options && options.version ? options.version : "",
-          updatedOptions
+          updatedOptions,
         );
         return getSecretFromSecretBundle(response);
-      }
+      },
     );
   }
 
@@ -65,7 +63,7 @@ export class RecoverDeletedSecretPollOperation extends KeyVaultSecretPollOperati
    */
   private recoverDeletedSecret(
     name: string,
-    options: GetSecretOptions = {}
+    options: GetSecretOptions = {},
   ): Promise<DeletedSecret> {
     return tracingClient.withSpan(
       "RecoverDeletedSecretPoller.recoverDeletedSecret",
@@ -74,10 +72,10 @@ export class RecoverDeletedSecretPollOperation extends KeyVaultSecretPollOperati
         const response = await this.client.recoverDeletedSecret(
           this.vaultUrl,
           name,
-          updatedOptions
+          updatedOptions,
         );
         return getSecretFromSecretBundle(response);
-      }
+      },
     );
   }
 
@@ -89,7 +87,7 @@ export class RecoverDeletedSecretPollOperation extends KeyVaultSecretPollOperati
     options: {
       abortSignal?: AbortSignalLike;
       fireProgress?: (state: RecoverDeletedSecretPollOperationState) => void;
-    } = {}
+    } = {},
   ): Promise<RecoverDeletedSecretPollOperation> {
     const state = this.state;
     const { name } = state;

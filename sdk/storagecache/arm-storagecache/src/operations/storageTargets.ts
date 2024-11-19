@@ -6,26 +6,32 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { StorageTargets } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { StorageCacheManagementClient } from "../storageCacheManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   StorageTarget,
   StorageTargetsListByCacheNextOptionalParams,
   StorageTargetsListByCacheOptionalParams,
-  StorageTargetsDnsRefreshOptionalParams,
   StorageTargetsListByCacheResponse,
+  StorageTargetsDnsRefreshOptionalParams,
   StorageTargetsDeleteOptionalParams,
   StorageTargetsGetOptionalParams,
   StorageTargetsGetResponse,
   StorageTargetsCreateOrUpdateOptionalParams,
   StorageTargetsCreateOrUpdateResponse,
-  StorageTargetsListByCacheNextResponse
+  StorageTargetsRestoreDefaultsOptionalParams,
+  StorageTargetsListByCacheNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -42,21 +48,21 @@ export class StorageTargetsImpl implements StorageTargets {
   }
 
   /**
-   * Returns a list of Storage Targets for the specified Cache.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Returns a list of Storage Targets for the specified cache.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   public listByCache(
     resourceGroupName: string,
     cacheName: string,
-    options?: StorageTargetsListByCacheOptionalParams
+    options?: StorageTargetsListByCacheOptionalParams,
   ): PagedAsyncIterableIterator<StorageTarget> {
     const iter = this.listByCachePagingAll(
       resourceGroupName,
       cacheName,
-      options
+      options,
     );
     return {
       next() {
@@ -65,45 +71,58 @@ export class StorageTargetsImpl implements StorageTargets {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listByCachePagingPage(
           resourceGroupName,
           cacheName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listByCachePagingPage(
     resourceGroupName: string,
     cacheName: string,
-    options?: StorageTargetsListByCacheOptionalParams
+    options?: StorageTargetsListByCacheOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<StorageTarget[]> {
-    let result = await this._listByCache(resourceGroupName, cacheName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: StorageTargetsListByCacheResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByCache(resourceGroupName, cacheName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByCacheNext(
         resourceGroupName,
         cacheName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listByCachePagingAll(
     resourceGroupName: string,
     cacheName: string,
-    options?: StorageTargetsListByCacheOptionalParams
+    options?: StorageTargetsListByCacheOptionalParams,
   ): AsyncIterableIterator<StorageTarget> {
     for await (const page of this.listByCachePagingPage(
       resourceGroupName,
       cacheName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -111,8 +130,8 @@ export class StorageTargetsImpl implements StorageTargets {
 
   /**
    * Tells a storage target to refresh its DNS information.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -121,25 +140,24 @@ export class StorageTargetsImpl implements StorageTargets {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetsDnsRefreshOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: StorageTargetsDnsRefreshOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -148,8 +166,8 @@ export class StorageTargetsImpl implements StorageTargets {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -157,20 +175,20 @@ export class StorageTargetsImpl implements StorageTargets {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, storageTargetName, options },
-      dnsRefreshOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, storageTargetName, options },
+      spec: dnsRefreshOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -178,8 +196,8 @@ export class StorageTargetsImpl implements StorageTargets {
 
   /**
    * Tells a storage target to refresh its DNS information.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -188,42 +206,42 @@ export class StorageTargetsImpl implements StorageTargets {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetsDnsRefreshOptionalParams
+    options?: StorageTargetsDnsRefreshOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDnsRefresh(
       resourceGroupName,
       cacheName,
       storageTargetName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * Returns a list of Storage Targets for the specified Cache.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Returns a list of Storage Targets for the specified cache.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   private _listByCache(
     resourceGroupName: string,
     cacheName: string,
-    options?: StorageTargetsListByCacheOptionalParams
+    options?: StorageTargetsListByCacheOptionalParams,
   ): Promise<StorageTargetsListByCacheResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, cacheName, options },
-      listByCacheOperationSpec
+      listByCacheOperationSpec,
     );
   }
 
   /**
-   * Removes a Storage Target from a Cache. This operation is allowed at any time, but if the Cache is
-   * down or unhealthy, the actual removal of the Storage Target may be delayed until the Cache is
-   * healthy again. Note that if the Cache has data to flush to the Storage Target, the data will be
+   * Removes a Storage Target from a cache. This operation is allowed at any time, but if the cache is
+   * down or unhealthy, the actual removal of the Storage Target may be delayed until the cache is
+   * healthy again. Note that if the cache has data to flush to the Storage Target, the data will be
    * flushed before the Storage Target will be deleted.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -232,25 +250,24 @@ export class StorageTargetsImpl implements StorageTargets {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: StorageTargetsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -259,8 +276,8 @@ export class StorageTargetsImpl implements StorageTargets {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -268,31 +285,31 @@ export class StorageTargetsImpl implements StorageTargets {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, storageTargetName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, storageTargetName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Removes a Storage Target from a Cache. This operation is allowed at any time, but if the Cache is
-   * down or unhealthy, the actual removal of the Storage Target may be delayed until the Cache is
-   * healthy again. Note that if the Cache has data to flush to the Storage Target, the data will be
+   * Removes a Storage Target from a cache. This operation is allowed at any time, but if the cache is
+   * down or unhealthy, the actual removal of the Storage Target may be delayed until the cache is
+   * healthy again. Note that if the cache has data to flush to the Storage Target, the data will be
    * flushed before the Storage Target will be deleted.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -301,21 +318,21 @@ export class StorageTargetsImpl implements StorageTargets {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetsDeleteOptionalParams
+    options?: StorageTargetsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       cacheName,
       storageTargetName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * Returns a Storage Target from a Cache.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Returns a Storage Target from a cache.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -324,52 +341,53 @@ export class StorageTargetsImpl implements StorageTargets {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetsGetOptionalParams
+    options?: StorageTargetsGetOptionalParams,
   ): Promise<StorageTargetsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, cacheName, storageTargetName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
-   * Create or update a Storage Target. This operation is allowed at any time, but if the Cache is down
-   * or unhealthy, the actual creation/modification of the Storage Target may be delayed until the Cache
+   * Create or update a Storage Target. This operation is allowed at any time, but if the cache is down
+   * or unhealthy, the actual creation/modification of the Storage Target may be delayed until the cache
    * is healthy again.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
+   * @param storagetarget Object containing the definition of a Storage Target.
    * @param options The options parameters.
    */
   async beginCreateOrUpdate(
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetsCreateOrUpdateOptionalParams
+    storagetarget: StorageTarget,
+    options?: StorageTargetsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<StorageTargetsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<StorageTargetsCreateOrUpdateResponse>,
       StorageTargetsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<StorageTargetsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -378,8 +396,8 @@ export class StorageTargetsImpl implements StorageTargets {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -387,53 +405,154 @@ export class StorageTargetsImpl implements StorageTargets {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, storageTargetName, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        cacheName,
+        storageTargetName,
+        storagetarget,
+        options,
+      },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      StorageTargetsCreateOrUpdateResponse,
+      OperationState<StorageTargetsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Create or update a Storage Target. This operation is allowed at any time, but if the Cache is down
-   * or unhealthy, the actual creation/modification of the Storage Target may be delayed until the Cache
+   * Create or update a Storage Target. This operation is allowed at any time, but if the cache is down
+   * or unhealthy, the actual creation/modification of the Storage Target may be delayed until the cache
    * is healthy again.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
+   * @param storagetarget Object containing the definition of a Storage Target.
    * @param options The options parameters.
    */
   async beginCreateOrUpdateAndWait(
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetsCreateOrUpdateOptionalParams
+    storagetarget: StorageTarget,
+    options?: StorageTargetsCreateOrUpdateOptionalParams,
   ): Promise<StorageTargetsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       cacheName,
       storageTargetName,
-      options
+      storagetarget,
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Tells a storage target to restore its settings to their default values.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
+   *                  the [-0-9a-zA-Z_] char class.
+   * @param storageTargetName Name of Storage Target.
+   * @param options The options parameters.
+   */
+  async beginRestoreDefaults(
+    resourceGroupName: string,
+    cacheName: string,
+    storageTargetName: string,
+    options?: StorageTargetsRestoreDefaultsOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<void> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, storageTargetName, options },
+      spec: restoreDefaultsOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Tells a storage target to restore its settings to their default values.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
+   *                  the [-0-9a-zA-Z_] char class.
+   * @param storageTargetName Name of Storage Target.
+   * @param options The options parameters.
+   */
+  async beginRestoreDefaultsAndWait(
+    resourceGroupName: string,
+    cacheName: string,
+    storageTargetName: string,
+    options?: StorageTargetsRestoreDefaultsOptionalParams,
+  ): Promise<void> {
+    const poller = await this.beginRestoreDefaults(
+      resourceGroupName,
+      cacheName,
+      storageTargetName,
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * ListByCacheNext
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param nextLink The nextLink from the previous successful call to the ListByCache method.
    * @param options The options parameters.
@@ -442,11 +561,11 @@ export class StorageTargetsImpl implements StorageTargets {
     resourceGroupName: string,
     cacheName: string,
     nextLink: string,
-    options?: StorageTargetsListByCacheNextOptionalParams
+    options?: StorageTargetsListByCacheNextOptionalParams,
   ): Promise<StorageTargetsListByCacheNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, cacheName, nextLink, options },
-      listByCacheNextOperationSpec
+      listByCacheNextOperationSpec,
     );
   }
 }
@@ -454,8 +573,7 @@ export class StorageTargetsImpl implements StorageTargets {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const dnsRefreshOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets/{storageTargetName}/dnsRefresh",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets/{storageTargetName}/dnsRefresh",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -463,8 +581,8 @@ const dnsRefreshOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -472,36 +590,34 @@ const dnsRefreshOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.cacheName,
-    Parameters.storageTargetName
+    Parameters.storageTargetName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByCacheOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.StorageTargetsResult
+      bodyMapper: Mappers.StorageTargetsResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets/{storageTargetName}",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets/{storageTargetName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -509,8 +625,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.force],
   urlParameters: [
@@ -518,22 +634,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.cacheName,
-    Parameters.storageTargetName
+    Parameters.storageTargetName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets/{storageTargetName}",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets/{storageTargetName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.StorageTarget
+      bodyMapper: Mappers.StorageTarget,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -541,31 +656,30 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.cacheName,
-    Parameters.storageTargetName
+    Parameters.storageTargetName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets/{storageTargetName}",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets/{storageTargetName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.StorageTarget
+      bodyMapper: Mappers.StorageTarget,
     },
     201: {
-      bodyMapper: Mappers.StorageTarget
+      bodyMapper: Mappers.StorageTarget,
     },
     202: {
-      bodyMapper: Mappers.StorageTarget
+      bodyMapper: Mappers.StorageTarget,
     },
     204: {
-      bodyMapper: Mappers.StorageTarget
+      bodyMapper: Mappers.StorageTarget,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.storagetarget,
   queryParameters: [Parameters.apiVersion],
@@ -574,31 +688,53 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.cacheName,
-    Parameters.storageTargetName
+    Parameters.storageTargetName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
+};
+const restoreDefaultsOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/storageTargets/{storageTargetName}/restoreDefaults",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.CloudError,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.cacheName,
+    Parameters.storageTargetName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const listByCacheNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.StorageTargetsResult
+      bodyMapper: Mappers.StorageTargetsResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.nextLink,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.nextLink,
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

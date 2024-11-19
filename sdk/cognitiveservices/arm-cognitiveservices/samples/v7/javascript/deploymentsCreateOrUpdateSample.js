@@ -10,23 +10,22 @@
 // Licensed under the MIT License.
 const { CognitiveServicesManagementClient } = require("@azure/arm-cognitiveservices");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Update the state of specified deployments associated with the Cognitive Services account.
  *
  * @summary Update the state of specified deployments associated with the Cognitive Services account.
- * x-ms-original-file: specification/cognitiveservices/resource-manager/Microsoft.CognitiveServices/stable/2022-10-01/examples/PutDeployment.json
+ * x-ms-original-file: specification/cognitiveservices/resource-manager/Microsoft.CognitiveServices/stable/2023-05-01/examples/PutDeployment.json
  */
 async function putDeployment() {
-  const subscriptionId = "subscriptionId";
-  const resourceGroupName = "resourceGroupName";
+  const subscriptionId = process.env["COGNITIVESERVICES_SUBSCRIPTION_ID"] || "subscriptionId";
+  const resourceGroupName = process.env["COGNITIVESERVICES_RESOURCE_GROUP"] || "resourceGroupName";
   const accountName = "accountName";
   const deploymentName = "deploymentName";
   const deployment = {
-    properties: {
-      model: { name: "ada", format: "OpenAI", version: "1" },
-      scaleSettings: { capacity: 1, scaleType: "Manual" },
-    },
+    properties: { model: { name: "ada", format: "OpenAI", version: "1" } },
+    sku: { name: "Standard", capacity: 1 },
   };
   const credential = new DefaultAzureCredential();
   const client = new CognitiveServicesManagementClient(credential, subscriptionId);
@@ -34,9 +33,13 @@ async function putDeployment() {
     resourceGroupName,
     accountName,
     deploymentName,
-    deployment
+    deployment,
   );
   console.log(result);
 }
 
-putDeployment().catch(console.error);
+async function main() {
+  putDeployment();
+}
+
+main().catch(console.error);

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -44,7 +44,7 @@ async function virtualNetworkGatewayNatRulePut() {
       subscriptionId,
       resourceGroupName,
       virtualNetworkGatewayName,
-      natRuleName
+      natRuleName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);

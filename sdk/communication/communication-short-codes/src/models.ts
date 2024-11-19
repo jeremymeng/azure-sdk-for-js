@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { OperationOptions } from "@azure/core-client";
-import { ShortCodesGetShortCodesOptionalParams } from ".";
+import type { OperationOptions } from "@azure/core-client";
+import type {
+  ShortCodesGetShortCodesOptionalParams,
+  ShortCodesGetUSProgramBriefsOptionalParams,
+  ShortCodesGetCostsOptionalParams,
+} from "./index.js";
 
 /**
  * Additional options for the delete US Program Brief request.
@@ -25,9 +29,14 @@ export interface SubmitUSProgramBriefOptions extends OperationOptions {}
 export interface ListShortCodesOptions extends ShortCodesGetShortCodesOptionalParams {}
 
 /**
+ * Additional options for the List Short Code Costs request.
+ */
+export interface ListShortCodeCostsOptions extends ShortCodesGetCostsOptionalParams {}
+
+/**
  * Additional options for the List US Program Brief request.
  */
-export interface ListUSProgramBriefsOptions extends OperationOptions {}
+export interface ListUSProgramBriefsOptions extends ShortCodesGetUSProgramBriefsOptionalParams {}
 
 export {
   ShortCode,
@@ -40,6 +49,7 @@ export {
   MessageDetails,
   TrafficDetails,
   ShortCodesGetShortCodesOptionalParams,
+  ShortCodesGetCostsOptionalParams,
   ShortCodesUpsertUSProgramBriefOptionalParams,
   BillingFrequency,
   CallToActionType,
@@ -58,8 +68,9 @@ export {
   ShortCodesDeleteUSProgramBriefAttachmentOptionalParams,
   ShortCodesGetUSProgramBriefAttachmentsOptionalParams,
   ShortCodesGetUSProgramBriefAttachmentOptionalParams,
+  ShortCodesGetUSProgramBriefsOptionalParams,
   ProgramBriefAttachment,
   AttachmentType,
   FileType,
   ProgramBriefAttachmentSummary,
-} from "./generated/src/models/";
+} from "./generated/src/models/index.js";

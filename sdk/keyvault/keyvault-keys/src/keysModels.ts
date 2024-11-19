@@ -1,24 +1,24 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import * as coreClient from "@azure/core-client";
-import { ExtendedCommonClientOptions } from "@azure/core-http-compat";
+import type * as coreClient from "@azure/core-client";
+import type { ExtendedCommonClientOptions } from "@azure/core-http-compat";
 
+import type { DeletionRecoveryLevel } from "./generated/models/index.js";
 import {
-  DeletionRecoveryLevel,
   JsonWebKeyOperation as KeyOperation,
   JsonWebKeyType as KeyType,
   KnownJsonWebKeyType as KnownKeyTypes,
-} from "./generated/models";
+} from "./generated/models/index.js";
 
-import { KeyCurveName } from "./cryptographyClientModels";
+import type { KeyCurveName } from "./cryptographyClientModels.js";
 
 export { KeyType, KnownKeyTypes, KeyOperation };
 
 /**
  * The latest supported Key Vault service API version
  */
-export const LATEST_API_VERSION = "7.4-preview.1";
+export const LATEST_API_VERSION = "7.5";
 
 /**
  * The optional parameters accepted by the KeyVault's KeyClient
@@ -231,6 +231,12 @@ export interface KeyProperties {
    * A {@link KeyReleasePolicy} object specifying the rules under which the key can be exported.
    */
   releasePolicy?: KeyReleasePolicy;
+
+  /**
+   * The underlying HSM Platform.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly hsmPlatform?: string;
 }
 
 /**
@@ -384,12 +390,6 @@ export interface BeginDeleteKeyOptions extends KeyPollerOptions {}
  * passed to {@link beginRecoverDeletedKey}
  */
 export interface BeginRecoverDeletedKeyOptions extends KeyPollerOptions {}
-
-/**
- * An interface representing the optional parameters that can be
- * passed to {@link createOkpKey}
- */
-export interface CreateOkpKeyOptions extends CreateKeyOptions {}
 
 /**
  * An interface representing the optional parameters that can be

@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SqlManagementClient } from "../sqlManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   BackupShortTermRetentionPolicy,
   BackupShortTermRetentionPoliciesListByDatabaseNextOptionalParams,
@@ -27,13 +31,14 @@ import {
   BackupShortTermRetentionPoliciesCreateOrUpdateResponse,
   BackupShortTermRetentionPoliciesUpdateOptionalParams,
   BackupShortTermRetentionPoliciesUpdateResponse,
-  BackupShortTermRetentionPoliciesListByDatabaseNextResponse
+  BackupShortTermRetentionPoliciesListByDatabaseNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing BackupShortTermRetentionPolicies operations. */
 export class BackupShortTermRetentionPoliciesImpl
-  implements BackupShortTermRetentionPolicies {
+  implements BackupShortTermRetentionPolicies
+{
   private readonly client: SqlManagementClient;
 
   /**
@@ -56,13 +61,13 @@ export class BackupShortTermRetentionPoliciesImpl
     resourceGroupName: string,
     serverName: string,
     databaseName: string,
-    options?: BackupShortTermRetentionPoliciesListByDatabaseOptionalParams
+    options?: BackupShortTermRetentionPoliciesListByDatabaseOptionalParams,
   ): PagedAsyncIterableIterator<BackupShortTermRetentionPolicy> {
     const iter = this.listByDatabasePagingAll(
       resourceGroupName,
       serverName,
       databaseName,
-      options
+      options,
     );
     return {
       next() {
@@ -80,9 +85,9 @@ export class BackupShortTermRetentionPoliciesImpl
           serverName,
           databaseName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -91,7 +96,7 @@ export class BackupShortTermRetentionPoliciesImpl
     serverName: string,
     databaseName: string,
     options?: BackupShortTermRetentionPoliciesListByDatabaseOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<BackupShortTermRetentionPolicy[]> {
     let result: BackupShortTermRetentionPoliciesListByDatabaseResponse;
     let continuationToken = settings?.continuationToken;
@@ -100,7 +105,7 @@ export class BackupShortTermRetentionPoliciesImpl
         resourceGroupName,
         serverName,
         databaseName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -113,7 +118,7 @@ export class BackupShortTermRetentionPoliciesImpl
         serverName,
         databaseName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -126,13 +131,13 @@ export class BackupShortTermRetentionPoliciesImpl
     resourceGroupName: string,
     serverName: string,
     databaseName: string,
-    options?: BackupShortTermRetentionPoliciesListByDatabaseOptionalParams
+    options?: BackupShortTermRetentionPoliciesListByDatabaseOptionalParams,
   ): AsyncIterableIterator<BackupShortTermRetentionPolicy> {
     for await (const page of this.listByDatabasePagingPage(
       resourceGroupName,
       serverName,
       databaseName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -152,11 +157,11 @@ export class BackupShortTermRetentionPoliciesImpl
     serverName: string,
     databaseName: string,
     policyName: ShortTermRetentionPolicyName,
-    options?: BackupShortTermRetentionPoliciesGetOptionalParams
+    options?: BackupShortTermRetentionPoliciesGetOptionalParams,
   ): Promise<BackupShortTermRetentionPoliciesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, databaseName, policyName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -176,32 +181,29 @@ export class BackupShortTermRetentionPoliciesImpl
     databaseName: string,
     policyName: ShortTermRetentionPolicyName,
     parameters: BackupShortTermRetentionPolicy,
-    options?: BackupShortTermRetentionPoliciesCreateOrUpdateOptionalParams
+    options?: BackupShortTermRetentionPoliciesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        BackupShortTermRetentionPoliciesCreateOrUpdateResponse
-      >,
+    SimplePollerLike<
+      OperationState<BackupShortTermRetentionPoliciesCreateOrUpdateResponse>,
       BackupShortTermRetentionPoliciesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<BackupShortTermRetentionPoliciesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -210,8 +212,8 @@ export class BackupShortTermRetentionPoliciesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -219,26 +221,29 @@ export class BackupShortTermRetentionPoliciesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         serverName,
         databaseName,
         policyName,
         parameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      BackupShortTermRetentionPoliciesCreateOrUpdateResponse,
+      OperationState<BackupShortTermRetentionPoliciesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -260,7 +265,7 @@ export class BackupShortTermRetentionPoliciesImpl
     databaseName: string,
     policyName: ShortTermRetentionPolicyName,
     parameters: BackupShortTermRetentionPolicy,
-    options?: BackupShortTermRetentionPoliciesCreateOrUpdateOptionalParams
+    options?: BackupShortTermRetentionPoliciesCreateOrUpdateOptionalParams,
   ): Promise<BackupShortTermRetentionPoliciesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
@@ -268,7 +273,7 @@ export class BackupShortTermRetentionPoliciesImpl
       databaseName,
       policyName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -289,30 +294,29 @@ export class BackupShortTermRetentionPoliciesImpl
     databaseName: string,
     policyName: ShortTermRetentionPolicyName,
     parameters: BackupShortTermRetentionPolicy,
-    options?: BackupShortTermRetentionPoliciesUpdateOptionalParams
+    options?: BackupShortTermRetentionPoliciesUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<BackupShortTermRetentionPoliciesUpdateResponse>,
+    SimplePollerLike<
+      OperationState<BackupShortTermRetentionPoliciesUpdateResponse>,
       BackupShortTermRetentionPoliciesUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<BackupShortTermRetentionPoliciesUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -321,8 +325,8 @@ export class BackupShortTermRetentionPoliciesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -330,26 +334,29 @@ export class BackupShortTermRetentionPoliciesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         serverName,
         databaseName,
         policyName,
         parameters,
-        options
+        options,
       },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      BackupShortTermRetentionPoliciesUpdateResponse,
+      OperationState<BackupShortTermRetentionPoliciesUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -371,7 +378,7 @@ export class BackupShortTermRetentionPoliciesImpl
     databaseName: string,
     policyName: ShortTermRetentionPolicyName,
     parameters: BackupShortTermRetentionPolicy,
-    options?: BackupShortTermRetentionPoliciesUpdateOptionalParams
+    options?: BackupShortTermRetentionPoliciesUpdateOptionalParams,
   ): Promise<BackupShortTermRetentionPoliciesUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
@@ -379,7 +386,7 @@ export class BackupShortTermRetentionPoliciesImpl
       databaseName,
       policyName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -396,11 +403,11 @@ export class BackupShortTermRetentionPoliciesImpl
     resourceGroupName: string,
     serverName: string,
     databaseName: string,
-    options?: BackupShortTermRetentionPoliciesListByDatabaseOptionalParams
+    options?: BackupShortTermRetentionPoliciesListByDatabaseOptionalParams,
   ): Promise<BackupShortTermRetentionPoliciesListByDatabaseResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, databaseName, options },
-      listByDatabaseOperationSpec
+      listByDatabaseOperationSpec,
     );
   }
 
@@ -418,11 +425,11 @@ export class BackupShortTermRetentionPoliciesImpl
     serverName: string,
     databaseName: string,
     nextLink: string,
-    options?: BackupShortTermRetentionPoliciesListByDatabaseNextOptionalParams
+    options?: BackupShortTermRetentionPoliciesListByDatabaseNextOptionalParams,
   ): Promise<BackupShortTermRetentionPoliciesListByDatabaseNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, databaseName, nextLink, options },
-      listByDatabaseNextOperationSpec
+      listByDatabaseNextOperationSpec,
     );
   }
 }
@@ -430,122 +437,118 @@ export class BackupShortTermRetentionPoliciesImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicy
+      bodyMapper: Mappers.BackupShortTermRetentionPolicy,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion6],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
     Parameters.databaseName,
-    Parameters.policyName3
+    Parameters.policyName2,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicy
+      bodyMapper: Mappers.BackupShortTermRetentionPolicy,
     },
     201: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicy
+      bodyMapper: Mappers.BackupShortTermRetentionPolicy,
     },
     202: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicy
+      bodyMapper: Mappers.BackupShortTermRetentionPolicy,
     },
     204: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicy
+      bodyMapper: Mappers.BackupShortTermRetentionPolicy,
     },
-    default: {}
+    default: {},
   },
-  requestBody: Parameters.parameters76,
-  queryParameters: [Parameters.apiVersion3],
+  requestBody: Parameters.parameters58,
+  queryParameters: [Parameters.apiVersion6],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
     Parameters.databaseName,
-    Parameters.policyName3
+    Parameters.policyName2,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicy
+      bodyMapper: Mappers.BackupShortTermRetentionPolicy,
     },
     201: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicy
+      bodyMapper: Mappers.BackupShortTermRetentionPolicy,
     },
     202: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicy
+      bodyMapper: Mappers.BackupShortTermRetentionPolicy,
     },
     204: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicy
+      bodyMapper: Mappers.BackupShortTermRetentionPolicy,
     },
-    default: {}
+    default: {},
   },
-  requestBody: Parameters.parameters76,
-  queryParameters: [Parameters.apiVersion3],
+  requestBody: Parameters.parameters58,
+  queryParameters: [Parameters.apiVersion6],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
     Parameters.databaseName,
-    Parameters.policyName3
+    Parameters.policyName2,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listByDatabaseOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicyListResult
+      bodyMapper: Mappers.BackupShortTermRetentionPolicyListResult,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion6],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.databaseName
+    Parameters.databaseName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByDatabaseNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.BackupShortTermRetentionPolicyListResult
+      bodyMapper: Mappers.BackupShortTermRetentionPolicyListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
@@ -553,8 +556,8 @@ const listByDatabaseNextOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.serverName,
     Parameters.databaseName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

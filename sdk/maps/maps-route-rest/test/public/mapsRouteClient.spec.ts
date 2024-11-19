@@ -1,25 +1,21 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { Context, Suite } from "mocha";
-import {
-  RouteDirectionParameters,
-  RouteMatrixQuery,
-  createRouteDirectionsBatchRequest,
-  toColonDelimitedLatLonString,
-} from "../../src";
-import { Recorder, isPlaybackMode } from "@azure-tools/test-recorder";
+import type { Context, Suite } from "mocha";
+import type { RouteDirectionParameters, RouteMatrixQuery } from "../../src";
+import { createRouteDirectionsBatchRequest, toColonDelimitedLatLonString } from "../../src";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isPlaybackMode } from "@azure-tools/test-recorder";
 import { assert } from "chai";
 import { createClient, createRecorder, testLogger } from "./utils/recordedClient";
-import {
+import type {
   MapsRouteClient,
   RouteGetRouteDirectionsBatch200Response,
   RouteGetRouteDirectionsQueryParamProperties,
   RouteGetRouteMatrix200Response,
-  getLongRunningPoller,
-  isUnexpected,
-} from "../../src/generated";
-import { LatLon } from "@azure/maps-common";
+} from "../../generated";
+import { getLongRunningPoller, isUnexpected } from "../../generated";
+import type { LatLon } from "@azure/maps-common";
 
 describe("Endpoint can be overwritten", function (this: Suite) {
   let recorder: Recorder;
@@ -55,7 +51,7 @@ describe("Endpoint can be overwritten", function (this: Suite) {
 
   it("should be executed with different baseUrl", async function () {
     const client = createClient(
-      recorder.configureClientOptions({ baseUrl: "https://us.atlas.microsoft.com/" })
+      recorder.configureClientOptions({ baseUrl: "https://us.atlas.microsoft.com/" }),
     );
     const routeDirectionsResult = await client.path("/route/directions/{format}", "json").get({
       queryParameters: {
@@ -229,7 +225,7 @@ describe("LRO", function (this: Suite) {
       const initialResponse = await client.path("/route/directions/batch/{format}", "json").post({
         body: createRouteDirectionsBatchRequest(batchRequests),
       });
-      const poller = getLongRunningPoller(client, initialResponse, {
+      const poller = await getLongRunningPoller(client, initialResponse, {
         intervalInMs: pollingInterval,
       });
 
@@ -276,14 +272,14 @@ describe("LRO", function (this: Suite) {
       const initialResponse = await client.path("/route/directions/batch/{format}", "json").post({
         body: createRouteDirectionsBatchRequest(batchRequests),
       });
-      const originalPoller = getLongRunningPoller(client, initialResponse, {
+      const originalPoller = await getLongRunningPoller(client, initialResponse, {
         intervalInMs: pollingInterval,
       });
-      const serializedState = originalPoller.toString();
+      const serializedState = await originalPoller.serialize();
 
       // Use serialized state to retrieve the result
-      const rehydratedPoller = getLongRunningPoller(client, initialResponse, {
-        resumeFrom: serializedState,
+      const rehydratedPoller = await getLongRunningPoller(client, initialResponse, {
+        restoreFrom: serializedState,
         intervalInMs: pollingInterval,
       });
       const batchResult =
@@ -328,15 +324,16 @@ describe("LRO", function (this: Suite) {
       const initialResponse = await client.path("/route/directions/batch/{format}", "json").post({
         body: createRouteDirectionsBatchRequest(batchRequests),
       });
-      const originalPoller = getLongRunningPoller(client, initialResponse, {
+      const originalPoller = await getLongRunningPoller(client, initialResponse, {
         intervalInMs: pollingInterval,
       });
       const originalResult = await originalPoller.pollUntilDone();
 
       // Use serialized state to retrieve the result
-      const serializedState = originalPoller.toString();
-      const rehydratedPoller = getLongRunningPoller(client, initialResponse, {
-        resumeFrom: serializedState,
+      const serializedState = await originalPoller.serialize();
+
+      const rehydratedPoller = await getLongRunningPoller(client, initialResponse, {
+        restoreFrom: serializedState,
         intervalInMs: pollingInterval,
       });
       const rehydratedResult = await rehydratedPoller.pollUntilDone();
@@ -367,7 +364,7 @@ describe("LRO", function (this: Suite) {
       const initialResponse = await client
         .path("/route/matrix/{format}", "json")
         .post({ body: routeMatrixQuery });
-      const poller = getLongRunningPoller(client, initialResponse, {
+      const poller = await getLongRunningPoller(client, initialResponse, {
         intervalInMs: pollingInterval,
       });
       const routeMatrixResult = (await poller.pollUntilDone()) as RouteGetRouteMatrix200Response;
@@ -401,15 +398,15 @@ describe("LRO", function (this: Suite) {
       const initialResponse = await client.path("/route/matrix/{format}", "json").post({
         body: routeMatrixQuery,
       });
-      const originalPoller = getLongRunningPoller(client, initialResponse, {
+      const originalPoller = await getLongRunningPoller(client, initialResponse, {
         intervalInMs: pollingInterval,
       });
-      const serializedState = originalPoller.toString();
+      const serializedState = await originalPoller.serialize();
 
       // Use saved batchId to retrieve the result
-      const rehydratedPoller = getLongRunningPoller(client, initialResponse, {
+      const rehydratedPoller = await getLongRunningPoller(client, initialResponse, {
         intervalInMs: pollingInterval,
-        resumeFrom: serializedState,
+        restoreFrom: serializedState,
       });
       const routeMatrixResult =
         (await rehydratedPoller.pollUntilDone()) as RouteGetRouteMatrix200Response;
@@ -441,16 +438,17 @@ describe("LRO", function (this: Suite) {
       const initialResponse = await client.path("/route/matrix/{format}", "json").post({
         body: routeMatrixQuery,
       });
-      const originalPoller = getLongRunningPoller(client, initialResponse, {
+      const originalPoller = await getLongRunningPoller(client, initialResponse, {
         intervalInMs: pollingInterval,
       });
       const originalResult = await originalPoller.pollUntilDone();
 
       // Use serialized state to retrieve the result
-      const serializedState = originalPoller.toString();
-      const rehydratedPoller = getLongRunningPoller(client, initialResponse, {
+      const serializedState = await originalPoller.serialize();
+
+      const rehydratedPoller = await getLongRunningPoller(client, initialResponse, {
         intervalInMs: pollingInterval,
-        resumeFrom: serializedState,
+        restoreFrom: serializedState,
       });
       const rehydratedResult = await rehydratedPoller.pollUntilDone();
 

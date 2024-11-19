@@ -10,26 +10,36 @@
 // Licensed under the MIT License.
 import { AuthConfig, ContainerAppsAPIClient } from "@azure/arm-appcontainers";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Create or update the AuthConfig for a Container App.
  *
  * @summary Create or update the AuthConfig for a Container App.
- * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2022-06-01-preview/examples/AuthConfigs_CreateOrUpdate.json
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/AuthConfigs_CreateOrUpdate.json
  */
 async function createOrUpdateContainerAppAuthConfig() {
-  const subscriptionId = "651f8027-33e8-4ec4-97b4-f6e9f3dc8744";
-  const resourceGroupName = "workerapps-rg-xj";
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] ||
+    "651f8027-33e8-4ec4-97b4-f6e9f3dc8744";
+  const resourceGroupName =
+    process.env["APPCONTAINERS_RESOURCE_GROUP"] || "workerapps-rg-xj";
   const containerAppName = "testcanadacentral";
   const authConfigName = "current";
   const authConfigEnvelope: AuthConfig = {
+    encryptionSettings: {
+      containerAppAuthEncryptionSecretName: "testEncryptionSecretName",
+      containerAppAuthSigningSecretName: "testSigningSecretName",
+    },
     globalValidation: { unauthenticatedClientAction: "AllowAnonymous" },
     identityProviders: {
       facebook: {
-        registration: { appId: "123", appSecretSettingName: "facebook-secret" }
-      }
+        registration: { appId: "123", appSecretSettingName: "facebook-secret" },
+      },
     },
-    platform: { enabled: true }
+    platform: { enabled: true },
   };
   const credential = new DefaultAzureCredential();
   const client = new ContainerAppsAPIClient(credential, subscriptionId);
@@ -37,9 +47,13 @@ async function createOrUpdateContainerAppAuthConfig() {
     resourceGroupName,
     containerAppName,
     authConfigName,
-    authConfigEnvelope
+    authConfigEnvelope,
   );
   console.log(result);
 }
 
-createOrUpdateContainerAppAuthConfig().catch(console.error);
+async function main() {
+  createOrUpdateContainerAppAuthConfig();
+}
+
+main().catch(console.error);

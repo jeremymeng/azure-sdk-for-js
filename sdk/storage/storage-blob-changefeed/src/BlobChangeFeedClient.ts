@@ -1,20 +1,19 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
-  BlobServiceClient,
+import type {
   StoragePipelineOptions,
   StorageSharedKeyCredential,
   AnonymousCredential,
-  Pipeline,
 } from "@azure/storage-blob";
-import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
-import { BlobChangeFeedEvent } from "./models/BlobChangeFeedEvent";
+import { BlobServiceClient, Pipeline } from "@azure/storage-blob";
+import type { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import type { BlobChangeFeedEvent } from "./models/BlobChangeFeedEvent";
 import { ChangeFeedFactory } from "./ChangeFeedFactory";
-import { ChangeFeed } from "./ChangeFeed";
+import type { ChangeFeed } from "./ChangeFeed";
 import { CHANGE_FEED_MAX_PAGE_SIZE, SDK_VERSION } from "./utils/constants";
-import { BlobChangeFeedListChangesOptions } from "./models/models";
-import { TokenCredential } from "@azure/core-http";
+import type { BlobChangeFeedListChangesOptions } from "./models/models";
+import type { TokenCredential } from "@azure/core-auth";
 
 /**
  * Contains paged response data for the {@link BlobChangeFeedClient.listChanges} operation.
@@ -45,7 +44,7 @@ export class BlobChangeFeedEventPage {
  */
 export function newPipeline(
   credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential,
-  pipelineOptions: StoragePipelineOptions = {}
+  pipelineOptions: StoragePipelineOptions = {},
 ): Pipeline {
   return newPipeline(credential, appendUserAgentPrefix(pipelineOptions));
 }
@@ -108,14 +107,14 @@ export class BlobChangeFeedClient {
     options?: StoragePipelineOptions,
     // Static method to construct an object, the option is for the object not for the method.
     /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
-    changeFeedClientOptions?: BlobChangeFeedClientOptions
+    changeFeedClientOptions?: BlobChangeFeedClientOptions,
   ): BlobChangeFeedClient {
     const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString, options);
     return new BlobChangeFeedClient(
       blobServiceClient.url,
       blobServiceClient.credential,
       appendUserAgentPrefix(options),
-      changeFeedClientOptions
+      changeFeedClientOptions,
     );
   }
 
@@ -159,7 +158,7 @@ export class BlobChangeFeedClient {
     // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
     /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions,
-    changeFeedClientOptions?: BlobChangeFeedClientOptions
+    changeFeedClientOptions?: BlobChangeFeedClientOptions,
   );
 
   /**
@@ -182,11 +181,11 @@ export class BlobChangeFeedClient {
     // Legacy, no way to fix the eslint error without breaking. Disable the rule for this line.
     /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options */
     options?: StoragePipelineOptions,
-    changeFeedClientOptions?: BlobChangeFeedClientOptions
+    changeFeedClientOptions?: BlobChangeFeedClientOptions,
   ) {
     this.changeFeedClientOptions = changeFeedClientOptions || {};
     this.changeFeedFactory = new ChangeFeedFactory(
-      this.changeFeedClientOptions.maximumTransferSize
+      this.changeFeedClientOptions.maximumTransferSize,
     );
 
     if (credentialOrPipeline instanceof Pipeline) {
@@ -195,18 +194,18 @@ export class BlobChangeFeedClient {
       this.blobServiceClient = new BlobServiceClient(
         urlOrClient,
         credentialOrPipeline,
-        appendUserAgentPrefix(options)
+        appendUserAgentPrefix(options),
       );
     }
   }
 
   private async *getChange(
-    options: BlobChangeFeedListChangesOptions = {}
+    options: BlobChangeFeedListChangesOptions = {},
   ): AsyncIterableIterator<BlobChangeFeedEvent> {
     const changeFeed: ChangeFeed = await this.changeFeedFactory.create(
       this.blobServiceClient,
       undefined,
-      options
+      options,
     );
 
     while (changeFeed.hasNext()) {
@@ -226,12 +225,12 @@ export class BlobChangeFeedClient {
   private async *getPage(
     continuationToken?: string,
     maxPageSize?: number,
-    options: BlobChangeFeedListChangesOptions = {}
+    options: BlobChangeFeedListChangesOptions = {},
   ): AsyncIterableIterator<BlobChangeFeedEventPage> {
     const changeFeed: ChangeFeed = await this.changeFeedFactory.create(
       this.blobServiceClient,
       continuationToken,
-      options
+      options,
     );
 
     if (!maxPageSize || maxPageSize > CHANGE_FEED_MAX_PAGE_SIZE) {
@@ -332,7 +331,7 @@ export class BlobChangeFeedClient {
    * @returns An asyncIterableIterator that supports paging.
    */
   public listChanges(
-    options: BlobChangeFeedListChangesOptions = {}
+    options: BlobChangeFeedListChangesOptions = {},
   ): PagedAsyncIterableIterator<BlobChangeFeedEvent, BlobChangeFeedEventPage> {
     const iter = this.getChange(options);
     return {

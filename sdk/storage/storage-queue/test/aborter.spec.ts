@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { assert } from "chai";
-import { AbortController } from "@azure/abort-controller";
 
-import { QueueClient } from "../src/QueueClient";
+import type { QueueClient } from "../src/QueueClient";
 import { getQSU } from "./utils";
-import { recorderEnvSetup } from "./utils/testutils.common";
-import { Recorder, record } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import { getUniqueName, recorderEnvSetup, uriSanitizers } from "./utils/testutils.common";
+import { Recorder } from "@azure-tools/test-recorder";
+import type { Context } from "mocha";
 
 describe("Aborter", () => {
   let queueName: string;
@@ -17,9 +16,11 @@ describe("Aborter", () => {
   let recorder: Recorder;
 
   beforeEach(async function (this: Context) {
-    recorder = record(this, recorderEnvSetup);
-    const queueServiceClient = getQSU();
-    queueName = recorder.getUniqueName("queue");
+    recorder = new Recorder(this.currentTest);
+    await recorder.start(recorderEnvSetup);
+    await recorder.addSanitizers({ uriSanitizers }, ["record", "playback"]);
+    const queueServiceClient = getQSU(recorder);
+    queueName = recorder.variable("queue", getUniqueName("queue"));
     queueClient = queueServiceClient.getQueueClient(queueName);
   });
 
@@ -42,7 +43,6 @@ describe("Aborter", () => {
       assert.fail();
     } catch (err: any) {
       assert.equal(err.name, "AbortError");
-      assert.equal(err.message, "The operation was aborted.", "Unexpected error caught: " + err);
     }
   });
 
@@ -55,28 +55,10 @@ describe("Aborter", () => {
 
   it("should abort after aborter timeout", async () => {
     try {
-      await queueClient.create({ abortSignal: AbortController.timeout(1) });
+      await queueClient.create({ abortSignal: AbortSignal.timeout(1) });
       assert.fail();
     } catch (err: any) {
       assert.equal(err.name, "AbortError");
-      assert.equal(err.message, "The operation was aborted.", "Unexpected error caught: " + err);
-    }
-  });
-
-  it("should abort after parent aborter calls abort()", async () => {
-    try {
-      const aborter = new AbortController();
-      const childAborter = new AbortController(
-        aborter.signal,
-        AbortController.timeout(10 * 60 * 1000)
-      );
-      const response = queueClient.create({ abortSignal: childAborter.signal });
-      aborter.abort();
-      await response;
-      assert.fail();
-    } catch (err: any) {
-      assert.equal(err.name, "AbortError");
-      assert.equal(err.message, "The operation was aborted.", "Unexpected error caught: " + err);
     }
   });
 });

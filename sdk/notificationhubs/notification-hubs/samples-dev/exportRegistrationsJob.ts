@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 /**
@@ -13,7 +13,7 @@
  * @azsdk-weight 100
  */
 
-import * as dotenv from "dotenv";
+import "dotenv/config";
 import {
   createClientContext,
   getNotificationHubJob,
@@ -22,9 +22,6 @@ import {
 import { NotificationHubJob } from "@azure/notification-hubs/models";
 import { delay } from "@azure/core-util";
 
-// Load the .env file if it exists
-dotenv.config();
-
 // Define connection string and hub name
 const connectionString = process.env.NOTIFICATIONHUBS_CONNECTION_STRING || "<connection string>";
 const hubName = process.env.NOTIFICATION_HUB_NAME || "<hub name>";
@@ -32,7 +29,7 @@ const hubName = process.env.NOTIFICATION_HUB_NAME || "<hub name>";
 // Define export job parameters
 const outputContainerUrl = process.env.OUTPUT_CONTAINER_URL || "<output container URL>";
 
-async function main() {
+async function main(): Promise<void> {
   const context = createClientContext(connectionString, hubName);
 
   let exportJob: NotificationHubJob = {

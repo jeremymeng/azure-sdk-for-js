@@ -1,20 +1,19 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { URLBuilder } from "@azure/core-http";
-import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
-import {
+// Licensed under the MIT License.
+
+import type { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import type {
   ContainerItem,
   CpkInfo as BlobCpkInfo,
   PublicAccessType as ContainerPublicAccessType,
 } from "@azure/storage-blob";
 
-import { AclFailedEntry, CpkInfo, PathGetPropertiesResponse } from "./generated/src/models";
-import {
+import type { AclFailedEntry, CpkInfo } from "./generated/src/models";
+import type {
   AccessControlChangeError,
   FileSystemItem,
   Metadata,
   PathAccessControlItem,
-  PathGetAccessControlResponse,
   PathPermissions,
   PublicAccessType,
   RemovePathAccessControlItem,
@@ -40,22 +39,7 @@ import { base64encode } from "./utils/utils.common";
  * @param url -
  */
 export function toBlobEndpointUrl(url: string): string {
-  const urlParsed = URLBuilder.parse(url);
-
-  let host = urlParsed.getHost();
-  if (host === undefined) {
-    throw RangeError(`toBlobEndpointUrl() parameter url ${url} doesn't include valid host.`);
-  }
-
-  for (const mapping of ToBlobEndpointHostMappings) {
-    if (host.includes(mapping[0])) {
-      host = host.replace(mapping[0], mapping[1]);
-      break;
-    }
-  }
-
-  urlParsed.setHost(host);
-  return urlParsed.toString();
+  return mapHostUrl(url, ToBlobEndpointHostMappings, "toBlobEndpointUrl");
 }
 
 /**
@@ -73,26 +57,41 @@ export function toBlobEndpointUrl(url: string): string {
  * @param url -
  */
 export function toDfsEndpointUrl(url: string): string {
-  const urlParsed = URLBuilder.parse(url);
+  return mapHostUrl(url, ToDfsEndpointHostMappings, "toDfsEndpointUrl");
+}
 
-  let host = urlParsed.getHost();
-  if (host === undefined) {
-    throw RangeError(`toDfsEndpointUrl() parameter url ${url} doesn't include valid host.`);
+function mapHostUrl(url: string, hostMappings: string[][], callerMethodName: string): string {
+  let urlParsed: URL;
+  try {
+    urlParsed = new URL(url);
+  } catch (e) {
+    // invalid urls are returned unmodified
+    return url;
   }
 
-  for (const mapping of ToDfsEndpointHostMappings) {
+  let host = urlParsed.hostname;
+  if (host === undefined) {
+    throw RangeError(`${callerMethodName}() parameter url ${url} doesn't include valid host.`);
+  }
+
+  for (const mapping of hostMappings) {
     if (host.includes(mapping[0])) {
       host = host.replace(mapping[0], mapping[1]);
       break;
     }
   }
-
-  urlParsed.setHost(host);
-  return urlParsed.toString();
+  urlParsed.hostname = host;
+  const result = urlParsed.toString();
+  // don't add a trailing slash if one wasn't already present
+  if (!url.endsWith("/") && result.endsWith("/")) {
+    return result.slice(0, -1);
+  } else {
+    return result;
+  }
 }
 
 function toFileSystemAsyncIterableIterator(
-  iter: AsyncIterableIterator<ServiceListContainersSegmentResponse>
+  iter: AsyncIterableIterator<ServiceListContainersSegmentResponse>,
 ): AsyncIterableIterator<ServiceListFileSystemsSegmentResponse> {
   return {
     async next() {
@@ -108,7 +107,7 @@ function toFileSystemAsyncIterableIterator(
                 publicAccess: toPublicAccessType(val.properties.publicAccess),
               },
             };
-          }
+          },
         );
       }
       return rawResult as any;
@@ -120,7 +119,7 @@ function toFileSystemAsyncIterableIterator(
 }
 
 export function toFileSystemPagedAsyncIterableIterator(
-  iter: PagedAsyncIterableIterator<ContainerItem, ServiceListContainersSegmentResponse>
+  iter: PagedAsyncIterableIterator<ContainerItem, ServiceListContainersSegmentResponse>,
 ): PagedAsyncIterableIterator<FileSystemItem, ServiceListFileSystemsSegmentResponse> {
   return {
     async next(): Promise<IteratorResult<FileSystemItem>> {
@@ -128,7 +127,7 @@ export function toFileSystemPagedAsyncIterableIterator(
       const result = rawResult as IteratorResult<FileSystemItem>;
       if (!result.done && !rawResult.done) {
         result.value.properties.publicAccess = toPublicAccessType(
-          rawResult.value.properties.publicAccess
+          rawResult.value.properties.publicAccess,
         );
         result.value.versionId = rawResult.value.version;
       }
@@ -141,7 +140,7 @@ export function toFileSystemPagedAsyncIterableIterator(
       return this;
     },
     byPage(
-      settings: PageSettings = {}
+      settings: PageSettings = {},
     ): AsyncIterableIterator<ServiceListFileSystemsSegmentResponse> {
       return toFileSystemAsyncIterableIterator(iter.byPage(settings));
     },
@@ -149,7 +148,7 @@ export function toFileSystemPagedAsyncIterableIterator(
 }
 
 export function toContainerPublicAccessType(
-  publicAccessType?: PublicAccessType
+  publicAccessType?: PublicAccessType,
 ): ContainerPublicAccessType | undefined {
   if (!publicAccessType) {
     return undefined;
@@ -162,13 +161,13 @@ export function toContainerPublicAccessType(
       return "blob";
     default:
       throw TypeError(
-        `toContainerPublicAccessType() parameter ${publicAccessType} is not recognized.`
+        `toContainerPublicAccessType() parameter ${publicAccessType} is not recognized.`,
       );
   }
 }
 
 export function toPublicAccessType(
-  containerPublicAccessType?: ContainerPublicAccessType
+  containerPublicAccessType?: ContainerPublicAccessType,
 ): PublicAccessType | undefined {
   if (!containerPublicAccessType) {
     return undefined;
@@ -181,7 +180,7 @@ export function toPublicAccessType(
       return "file";
     default:
       throw TypeError(
-        `toPublicAccessType() parameter ${containerPublicAccessType} is not recognized.`
+        `toPublicAccessType() parameter ${containerPublicAccessType} is not recognized.`,
       );
   }
 }
@@ -202,20 +201,9 @@ export function toProperties(metadata?: Metadata): string | undefined {
   return properties.join(",");
 }
 
-export function toPathGetAccessControlResponse(
-  response: PathGetPropertiesResponse
-): PathGetAccessControlResponse {
-  return {
-    ...response,
-    _response: response._response,
-    permissions: toPermissions(response.permissions),
-    acl: toAcl(response.acl),
-  };
-}
-
 export function toRolePermissions(permissionsString: string): RolePermissions {
   const error = new RangeError(
-    `toRolePermissions() Invalid role permissions string ${permissionsString}`
+    `toRolePermissions() Invalid role permissions string ${permissionsString}`,
   );
   if (permissionsString.length !== 3) {
     throw error;
@@ -278,7 +266,7 @@ export function toPermissions(permissionsString?: string): PathPermissions | und
       extendedAcls = true;
     } else {
       throw RangeError(
-        `toPermissions() Invalid extendedAcls bit ${permissionsString[9]} in permissions string ${permissionsString}`
+        `toPermissions() Invalid extendedAcls bit ${permissionsString[9]} in permissions string ${permissionsString}`,
       );
     }
   }
@@ -298,7 +286,7 @@ export function toPermissions(permissionsString?: string): PathPermissions | und
 
 export function toAccessControlItem(aclItemString: string): PathAccessControlItem {
   const error = new RangeError(
-    `toAccessControlItem() Parameter access control item string ${aclItemString} is not valid.`
+    `toAccessControlItem() Parameter access control item string ${aclItemString} is not valid.`,
   );
   if (aclItemString === "") {
     throw error;
@@ -344,7 +332,7 @@ export function toAccessControlItem(aclItemString: string): PathAccessControlIte
 
 export function toRemoveAccessControlItem(aclItemString: string): RemovePathAccessControlItem {
   const error = new RangeError(
-    `toAccessControlItem() Parameter access control item string "${aclItemString}" is not valid.`
+    `toAccessControlItem() Parameter access control item string "${aclItemString}" is not valid.`,
   );
   if (aclItemString === "") {
     throw error;
@@ -438,14 +426,14 @@ export function toRolePermissionsString(p: RolePermissions, stickyBit: boolean =
 
 export function toPermissionsString(permissions: PathPermissions): string {
   return `${toRolePermissionsString(permissions.owner)}${toRolePermissionsString(
-    permissions.group
+    permissions.group,
   )}${toRolePermissionsString(permissions.other, permissions.stickyBit)}${
     permissions.extendedAcls ? "+" : ""
   }`;
 }
 
 export function toAccessControlChangeFailureArray(
-  aclFailedEntries: AclFailedEntry[] = []
+  aclFailedEntries: AclFailedEntry[] = [],
 ): AccessControlChangeError[] {
   return aclFailedEntries.map((aclFailedEntry: AclFailedEntry) => {
     return {

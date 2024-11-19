@@ -1,16 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { assert, expect } from "chai";
 import sinon from "sinon";
-import {
+import type {
   JoinGroupMessage,
   JoinGroupOptions,
   LeaveGroupMessage,
   SendEventMessage,
-  SendEventOptions,
   SendToGroupMessage,
-  SendToGroupOptions,
+  ServerDataMessage,
   WebPubSubClientOptions,
   WebPubSubResult,
   WebPubSubRetryOptions,
@@ -20,7 +19,6 @@ import { delay } from "@azure/core-util";
 import { TestWebSocketClient } from "./testWebSocketClient";
 import { WebPubSubJsonProtocol } from "../src/protocols";
 import { getConnectedPayload } from "./utils";
-import { AbortController } from "@azure/abort-controller";
 import { SendMessageError } from "../src/errors";
 
 describe("WebPubSubClient", function () {
@@ -61,7 +59,7 @@ describe("WebPubSubClient", function () {
           noEcho: false,
         } as SendToGroupMessage,
         actualMethod: async (client: WebPubSubClient) =>
-          await client.sendToGroup("groupName", "xyz", "text", { ackId: 2 } as SendToGroupOptions),
+          await client.sendToGroup("groupName", "xyz", "text", { ackId: 2 }),
       },
       {
         testName: "send event",
@@ -73,7 +71,7 @@ describe("WebPubSubClient", function () {
           data: "xyz",
         } as SendEventMessage,
         actualMethod: async (client: WebPubSubClient) =>
-          await client.sendEvent("sendEvent", "xyz", "text", { ackId: 2 } as SendEventOptions),
+          await client.sendEvent("sendEvent", "xyz", "text", { ackId: 2 }),
       },
     ];
 
@@ -311,6 +309,155 @@ describe("WebPubSubClient", function () {
       await spinCheck(() => testWs.openTime === 2);
       testWs.invokemessage(JSON.stringify(getConnectedPayload("conn2")));
       await spinCheck(() => assert.equal("conn2", conn));
+    });
+
+    it("rejoin group after reconnection", async () => {
+      const client = new WebPubSubClient("wss://service.com", {
+        protocol: WebPubSubJsonProtocol(),
+        reconnectRetryOptions: { retryDelayInMs: 10 } as WebPubSubRetryOptions,
+      } as WebPubSubClientOptions);
+      const mock = sinon.mock(client);
+      mock
+        .expects("_joinGroupCore")
+        .exactly(4)
+        .callsFake((_) => Promise.resolve());
+
+      const testWs = new TestWebSocketClient(client);
+      makeStartable(testWs);
+
+      let conn: string;
+      client.on("connected", (connected) => {
+        conn = connected.connectionId;
+      });
+
+      await client.start();
+      testWs.invokemessage(JSON.stringify(getConnectedPayload("conn")));
+
+      await spinCheck(() => assert.equal("conn", conn));
+
+      // join 2 groups first
+      await client.joinGroup("a");
+      await client.joinGroup("b");
+
+      // drop connection
+      testWs.invokeclose(1006);
+      await spinCheck(() => testWs.openTime === 2);
+      testWs.invokemessage(JSON.stringify(getConnectedPayload("conn2")));
+      await spinCheck(() => assert.equal("conn2", conn));
+
+      mock.verify();
+    });
+
+    it("rejoin group after reconnection can be disabled", async () => {
+      const client = new WebPubSubClient("wss://service.com", {
+        protocol: WebPubSubJsonProtocol(),
+        reconnectRetryOptions: { retryDelayInMs: 10 } as WebPubSubRetryOptions,
+        autoRejoinGroups: false,
+      } as WebPubSubClientOptions);
+      const mock = sinon.mock(client);
+      mock
+        .expects("_joinGroupCore")
+        .exactly(2)
+        .callsFake((_) => Promise.resolve());
+
+      const testWs = new TestWebSocketClient(client);
+      makeStartable(testWs);
+
+      let conn: string;
+      client.on("connected", (connected) => {
+        conn = connected.connectionId;
+      });
+
+      await client.start();
+      testWs.invokemessage(JSON.stringify(getConnectedPayload("conn")));
+
+      await spinCheck(() => assert.equal("conn", conn));
+
+      // join 2 groups first
+      await client.joinGroup("a");
+      await client.joinGroup("b");
+
+      // drop connection
+      testWs.invokeclose(1006);
+      await spinCheck(() => testWs.openTime === 2);
+      testWs.invokemessage(JSON.stringify(getConnectedPayload("conn2")));
+      await spinCheck(() => assert.equal("conn2", conn));
+
+      mock.verify();
+    });
+  });
+
+  describe("WebPubSubClient handle messages", () => {
+    it("Handle a list of messages", async () => {
+      const client = new WebPubSubClient("wss://service.com");
+      const testWs = new TestWebSocketClient(client);
+      makeStartable(testWs);
+
+      const mock = sinon.mock(client["_protocol"]);
+      mock
+        .expects("parseMessages")
+        .returns([
+          { kind: "serverData", data: "a", dataType: "text" } as ServerDataMessage,
+          { kind: "serverData", data: "b", dataType: "text" } as ServerDataMessage,
+        ]);
+
+      const callback = sinon.spy();
+      client.on("server-message", callback);
+      await client.start();
+
+      // invoke any data as we mocked parseMessages
+      testWs.invokemessage("a");
+
+      assert.equal(2, callback.callCount);
+      client.stop();
+    });
+
+    it("Quick sequence ack if diff more than limit", async () => {
+      const client = new WebPubSubClient("wss://service.com");
+      const testWs = new TestWebSocketClient(client);
+      makeStartable(testWs);
+
+      const mock = sinon.mock(client["_protocol"]);
+      mock.expects("parseMessages").returns([
+        { kind: "serverData", data: "a", dataType: "text", sequenceId: 1 } as ServerDataMessage,
+        { kind: "serverData", data: "a", dataType: "text", sequenceId: 302 } as ServerDataMessage, // semilate we got 300 messages
+      ]);
+
+      const writeMessageSpy = sinon.spy(client["_protocol"], "writeMessage");
+
+      await client.start();
+      // invoke any data as we mocked parseMessages
+      testWs.invokemessage("a");
+
+      // expect quick sequenceAck message
+      sinon.assert.calledWith(
+        writeMessageSpy,
+        sinon.match.has("kind", "sequenceAck").and(sinon.match.has("sequenceId", 302)),
+      );
+      mock.verify();
+      client.stop();
+    });
+
+    it("SequenceAck as ping", async () => {
+      const client = new WebPubSubClient("wss://service.com");
+      const testWs = new TestWebSocketClient(client);
+      makeStartable(testWs);
+
+      const writeMessageSpy = sinon.spy(client["_protocol"], "writeMessage");
+      await client.start();
+
+      // simulate a update
+      client["_sequenceId"].tryUpdate(0);
+
+      // simulate a call
+      client["_trySendSequenceAck"]();
+
+      // expect quick sequenceAck message
+      sinon.assert.calledWith(
+        writeMessageSpy,
+        sinon.match.has("kind", "sequenceAck").and(sinon.match.has("sequenceId", 0)),
+      );
+      client.stop();
     });
   });
 

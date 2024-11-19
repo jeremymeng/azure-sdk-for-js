@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   VolumeGroup,
   VolumeGroupsListByNetAppAccountOptionalParams,
@@ -16,7 +16,7 @@ import {
   VolumeGroupDetails,
   VolumeGroupsCreateOptionalParams,
   VolumeGroupsCreateResponse,
-  VolumeGroupsDeleteOptionalParams
+  VolumeGroupsDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -24,18 +24,18 @@ import {
 export interface VolumeGroups {
   /**
    * List all volume groups for given account
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param options The options parameters.
    */
   listByNetAppAccount(
     resourceGroupName: string,
     accountName: string,
-    options?: VolumeGroupsListByNetAppAccountOptionalParams
+    options?: VolumeGroupsListByNetAppAccountOptionalParams,
   ): PagedAsyncIterableIterator<VolumeGroup>;
   /**
    * Get details of the specified volume group
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param volumeGroupName The name of the volumeGroup
    * @param options The options parameters.
@@ -44,11 +44,11 @@ export interface VolumeGroups {
     resourceGroupName: string,
     accountName: string,
     volumeGroupName: string,
-    options?: VolumeGroupsGetOptionalParams
+    options?: VolumeGroupsGetOptionalParams,
   ): Promise<VolumeGroupsGetResponse>;
   /**
    * Create a volume group along with specified volumes
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param volumeGroupName The name of the volumeGroup
    * @param body Volume Group object supplied in the body of the operation.
@@ -59,16 +59,16 @@ export interface VolumeGroups {
     accountName: string,
     volumeGroupName: string,
     body: VolumeGroupDetails,
-    options?: VolumeGroupsCreateOptionalParams
+    options?: VolumeGroupsCreateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VolumeGroupsCreateResponse>,
+    SimplePollerLike<
+      OperationState<VolumeGroupsCreateResponse>,
       VolumeGroupsCreateResponse
     >
   >;
   /**
    * Create a volume group along with specified volumes
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param volumeGroupName The name of the volumeGroup
    * @param body Volume Group object supplied in the body of the operation.
@@ -79,11 +79,11 @@ export interface VolumeGroups {
     accountName: string,
     volumeGroupName: string,
     body: VolumeGroupDetails,
-    options?: VolumeGroupsCreateOptionalParams
+    options?: VolumeGroupsCreateOptionalParams,
   ): Promise<VolumeGroupsCreateResponse>;
   /**
    * Delete the specified volume group only if there are no volumes under volume group.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param volumeGroupName The name of the volumeGroup
    * @param options The options parameters.
@@ -92,11 +92,11 @@ export interface VolumeGroups {
     resourceGroupName: string,
     accountName: string,
     volumeGroupName: string,
-    options?: VolumeGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: VolumeGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Delete the specified volume group only if there are no volumes under volume group.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param volumeGroupName The name of the volumeGroup
    * @param options The options parameters.
@@ -105,6 +105,6 @@ export interface VolumeGroups {
     resourceGroupName: string,
     accountName: string,
     volumeGroupName: string,
-    options?: VolumeGroupsDeleteOptionalParams
+    options?: VolumeGroupsDeleteOptionalParams,
   ): Promise<void>;
 }

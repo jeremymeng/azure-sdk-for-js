@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { assert } from "@azure/test-utils";
+import { assert } from "vitest";
 
 export async function assertError<T>(
   p: Promise<T>,
   expectations: {
     causeMessage?: RegExp;
     message?: RegExp;
-  } = {}
+  } = {},
 ): Promise<void> {
   const { causeMessage, message } = expectations;
   try {

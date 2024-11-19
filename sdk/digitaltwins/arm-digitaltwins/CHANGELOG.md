@@ -1,6 +1,6 @@
 # Release History
 
-## 3.2.1 (Unreleased)
+## 3.3.1 (Unreleased)
 
 ### Features Added
 
@@ -10,9 +10,23 @@
 
 ### Other Changes
 
+## 3.3.0 (2023-03-01)
+    
+### Features Added
+
+  - Added Type Alias CleanupConnectionArtifacts
+  - Added Type Alias RecordPropertyAndItemRemovals
+  - Interface AzureDataExplorerConnectionProperties has a new optional parameter adxRelationshipLifecycleEventsTableName
+  - Interface AzureDataExplorerConnectionProperties has a new optional parameter adxTwinLifecycleEventsTableName
+  - Interface AzureDataExplorerConnectionProperties has a new optional parameter recordPropertyAndItemRemovals
+  - Interface TimeSeriesDatabaseConnectionsDeleteOptionalParams has a new optional parameter cleanupConnectionArtifacts
+  - Added Enum KnownCleanupConnectionArtifacts
+  - Added Enum KnownRecordPropertyAndItemRemovals
+    
+    
 ## 3.2.0 (2022-11-30)
     
-**Features**
+### Features Added
 
   - Added Interface AzureDataExplorerConnectionProperties
   - Added Interface ConnectionPropertiesPrivateLinkServiceConnectionState
@@ -36,7 +50,7 @@
     
 ## 3.1.0 (2022-06-22)
     
-**Features**
+### Features Added
 
   - Added operation group TimeSeriesDatabaseConnections
   - Added Interface GroupIdInformationProperties
@@ -78,4 +92,4 @@ To understand the detail of the change, please refer to [Changelog](https://aka.
 
 To migrate the existing applications to the latest version, please refer to [Migration Guide](https://aka.ms/js-track2-migration-guide).
 
-To learn more, please refer to our documentation [Quick Start](https://aka.ms/js-track2-quickstart).
+To learn more, please refer to our documentation [Quick Start](https://aka.ms/azsdk/js/mgmt/quickstart ).

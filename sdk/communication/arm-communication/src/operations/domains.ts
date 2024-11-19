@@ -6,18 +6,24 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { Domains } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { CommunicationServiceManagementClient } from "../communicationServiceManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   DomainResource,
   DomainsListByEmailServiceResourceNextOptionalParams,
   DomainsListByEmailServiceResourceOptionalParams,
+  DomainsListByEmailServiceResourceResponse,
   DomainsGetOptionalParams,
   DomainsGetResponse,
   DomainsCreateOrUpdateOptionalParams,
@@ -26,13 +32,12 @@ import {
   UpdateDomainRequestParameters,
   DomainsUpdateOptionalParams,
   DomainsUpdateResponse,
-  DomainsListByEmailServiceResourceResponse,
   VerificationParameter,
   DomainsInitiateVerificationOptionalParams,
   DomainsInitiateVerificationResponse,
   DomainsCancelVerificationOptionalParams,
   DomainsCancelVerificationResponse,
-  DomainsListByEmailServiceResourceNextResponse
+  DomainsListByEmailServiceResourceNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -57,12 +62,12 @@ export class DomainsImpl implements Domains {
   public listByEmailServiceResource(
     resourceGroupName: string,
     emailServiceName: string,
-    options?: DomainsListByEmailServiceResourceOptionalParams
+    options?: DomainsListByEmailServiceResourceOptionalParams,
   ): PagedAsyncIterableIterator<DomainResource> {
     const iter = this.listByEmailServiceResourcePagingAll(
       resourceGroupName,
       emailServiceName,
-      options
+      options,
     );
     return {
       next() {
@@ -71,49 +76,62 @@ export class DomainsImpl implements Domains {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listByEmailServiceResourcePagingPage(
           resourceGroupName,
           emailServiceName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listByEmailServiceResourcePagingPage(
     resourceGroupName: string,
     emailServiceName: string,
-    options?: DomainsListByEmailServiceResourceOptionalParams
+    options?: DomainsListByEmailServiceResourceOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<DomainResource[]> {
-    let result = await this._listByEmailServiceResource(
-      resourceGroupName,
-      emailServiceName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: DomainsListByEmailServiceResourceResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByEmailServiceResource(
+        resourceGroupName,
+        emailServiceName,
+        options,
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByEmailServiceResourceNext(
         resourceGroupName,
         emailServiceName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listByEmailServiceResourcePagingAll(
     resourceGroupName: string,
     emailServiceName: string,
-    options?: DomainsListByEmailServiceResourceOptionalParams
+    options?: DomainsListByEmailServiceResourceOptionalParams,
   ): AsyncIterableIterator<DomainResource> {
     for await (const page of this.listByEmailServiceResourcePagingPage(
       resourceGroupName,
       emailServiceName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -130,11 +148,11 @@ export class DomainsImpl implements Domains {
     resourceGroupName: string,
     emailServiceName: string,
     domainName: string,
-    options?: DomainsGetOptionalParams
+    options?: DomainsGetOptionalParams,
   ): Promise<DomainsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, emailServiceName, domainName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -152,30 +170,29 @@ export class DomainsImpl implements Domains {
     emailServiceName: string,
     domainName: string,
     parameters: DomainResource,
-    options?: DomainsCreateOrUpdateOptionalParams
+    options?: DomainsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DomainsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<DomainsCreateOrUpdateResponse>,
       DomainsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<DomainsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -184,8 +201,8 @@ export class DomainsImpl implements Domains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -193,20 +210,29 @@ export class DomainsImpl implements Domains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, emailServiceName, domainName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        emailServiceName,
+        domainName,
+        parameters,
+        options,
+      },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      DomainsCreateOrUpdateResponse,
+      OperationState<DomainsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -226,14 +252,14 @@ export class DomainsImpl implements Domains {
     emailServiceName: string,
     domainName: string,
     parameters: DomainResource,
-    options?: DomainsCreateOrUpdateOptionalParams
+    options?: DomainsCreateOrUpdateOptionalParams,
   ): Promise<DomainsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       emailServiceName,
       domainName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -249,25 +275,24 @@ export class DomainsImpl implements Domains {
     resourceGroupName: string,
     emailServiceName: string,
     domainName: string,
-    options?: DomainsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: DomainsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -276,8 +301,8 @@ export class DomainsImpl implements Domains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -285,20 +310,20 @@ export class DomainsImpl implements Domains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, emailServiceName, domainName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, emailServiceName, domainName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -315,13 +340,13 @@ export class DomainsImpl implements Domains {
     resourceGroupName: string,
     emailServiceName: string,
     domainName: string,
-    options?: DomainsDeleteOptionalParams
+    options?: DomainsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       emailServiceName,
       domainName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -339,27 +364,29 @@ export class DomainsImpl implements Domains {
     emailServiceName: string,
     domainName: string,
     parameters: UpdateDomainRequestParameters,
-    options?: DomainsUpdateOptionalParams
+    options?: DomainsUpdateOptionalParams,
   ): Promise<
-    PollerLike<PollOperationState<DomainsUpdateResponse>, DomainsUpdateResponse>
+    SimplePollerLike<
+      OperationState<DomainsUpdateResponse>,
+      DomainsUpdateResponse
+    >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<DomainsUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -368,8 +395,8 @@ export class DomainsImpl implements Domains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -377,20 +404,29 @@ export class DomainsImpl implements Domains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, emailServiceName, domainName, parameters, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        emailServiceName,
+        domainName,
+        parameters,
+        options,
+      },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      DomainsUpdateResponse,
+      OperationState<DomainsUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -409,14 +445,14 @@ export class DomainsImpl implements Domains {
     emailServiceName: string,
     domainName: string,
     parameters: UpdateDomainRequestParameters,
-    options?: DomainsUpdateOptionalParams
+    options?: DomainsUpdateOptionalParams,
   ): Promise<DomainsUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       emailServiceName,
       domainName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -430,11 +466,11 @@ export class DomainsImpl implements Domains {
   private _listByEmailServiceResource(
     resourceGroupName: string,
     emailServiceName: string,
-    options?: DomainsListByEmailServiceResourceOptionalParams
+    options?: DomainsListByEmailServiceResourceOptionalParams,
   ): Promise<DomainsListByEmailServiceResourceResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, emailServiceName, options },
-      listByEmailServiceResourceOperationSpec
+      listByEmailServiceResourceOperationSpec,
     );
   }
 
@@ -451,30 +487,29 @@ export class DomainsImpl implements Domains {
     emailServiceName: string,
     domainName: string,
     parameters: VerificationParameter,
-    options?: DomainsInitiateVerificationOptionalParams
+    options?: DomainsInitiateVerificationOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DomainsInitiateVerificationResponse>,
+    SimplePollerLike<
+      OperationState<DomainsInitiateVerificationResponse>,
       DomainsInitiateVerificationResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<DomainsInitiateVerificationResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -483,8 +518,8 @@ export class DomainsImpl implements Domains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -492,20 +527,29 @@ export class DomainsImpl implements Domains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, emailServiceName, domainName, parameters, options },
-      initiateVerificationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        emailServiceName,
+        domainName,
+        parameters,
+        options,
+      },
+      spec: initiateVerificationOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      DomainsInitiateVerificationResponse,
+      OperationState<DomainsInitiateVerificationResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -524,14 +568,14 @@ export class DomainsImpl implements Domains {
     emailServiceName: string,
     domainName: string,
     parameters: VerificationParameter,
-    options?: DomainsInitiateVerificationOptionalParams
+    options?: DomainsInitiateVerificationOptionalParams,
   ): Promise<DomainsInitiateVerificationResponse> {
     const poller = await this.beginInitiateVerification(
       resourceGroupName,
       emailServiceName,
       domainName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -549,30 +593,29 @@ export class DomainsImpl implements Domains {
     emailServiceName: string,
     domainName: string,
     parameters: VerificationParameter,
-    options?: DomainsCancelVerificationOptionalParams
+    options?: DomainsCancelVerificationOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DomainsCancelVerificationResponse>,
+    SimplePollerLike<
+      OperationState<DomainsCancelVerificationResponse>,
       DomainsCancelVerificationResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<DomainsCancelVerificationResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -581,8 +624,8 @@ export class DomainsImpl implements Domains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -590,20 +633,29 @@ export class DomainsImpl implements Domains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, emailServiceName, domainName, parameters, options },
-      cancelVerificationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        emailServiceName,
+        domainName,
+        parameters,
+        options,
+      },
+      spec: cancelVerificationOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      DomainsCancelVerificationResponse,
+      OperationState<DomainsCancelVerificationResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -622,14 +674,14 @@ export class DomainsImpl implements Domains {
     emailServiceName: string,
     domainName: string,
     parameters: VerificationParameter,
-    options?: DomainsCancelVerificationOptionalParams
+    options?: DomainsCancelVerificationOptionalParams,
   ): Promise<DomainsCancelVerificationResponse> {
     const poller = await this.beginCancelVerification(
       resourceGroupName,
       emailServiceName,
       domainName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -646,11 +698,11 @@ export class DomainsImpl implements Domains {
     resourceGroupName: string,
     emailServiceName: string,
     nextLink: string,
-    options?: DomainsListByEmailServiceResourceNextOptionalParams
+    options?: DomainsListByEmailServiceResourceNextOptionalParams,
   ): Promise<DomainsListByEmailServiceResourceNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, emailServiceName, nextLink, options },
-      listByEmailServiceResourceNextOperationSpec
+      listByEmailServiceResourceNextOperationSpec,
     );
   }
 }
@@ -658,16 +710,15 @@ export class DomainsImpl implements Domains {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainResource
+      bodyMapper: Mappers.DomainResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -675,31 +726,30 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.emailServiceName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainResource
+      bodyMapper: Mappers.DomainResource,
     },
     201: {
-      bodyMapper: Mappers.DomainResource
+      bodyMapper: Mappers.DomainResource,
     },
     202: {
-      bodyMapper: Mappers.DomainResource
+      bodyMapper: Mappers.DomainResource,
     },
     204: {
-      bodyMapper: Mappers.DomainResource
+      bodyMapper: Mappers.DomainResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters3,
   queryParameters: [Parameters.apiVersion],
@@ -708,15 +758,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.emailServiceName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -724,8 +773,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -733,31 +782,30 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.emailServiceName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainResource
+      bodyMapper: Mappers.DomainResource,
     },
     201: {
-      bodyMapper: Mappers.DomainResource
+      bodyMapper: Mappers.DomainResource,
     },
     202: {
-      bodyMapper: Mappers.DomainResource
+      bodyMapper: Mappers.DomainResource,
     },
     204: {
-      bodyMapper: Mappers.DomainResource
+      bodyMapper: Mappers.DomainResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters4,
   queryParameters: [Parameters.apiVersion],
@@ -766,54 +814,52 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.emailServiceName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listByEmailServiceResourceOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainResourceList
+      bodyMapper: Mappers.DomainResourceList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.emailServiceName
+    Parameters.emailServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const initiateVerificationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}/initiateVerification",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}/initiateVerification",
   httpMethod: "POST",
   responses: {
     200: {
-      headersMapper: Mappers.DomainsInitiateVerificationHeaders
+      headersMapper: Mappers.DomainsInitiateVerificationHeaders,
     },
     201: {
-      headersMapper: Mappers.DomainsInitiateVerificationHeaders
+      headersMapper: Mappers.DomainsInitiateVerificationHeaders,
     },
     202: {
-      headersMapper: Mappers.DomainsInitiateVerificationHeaders
+      headersMapper: Mappers.DomainsInitiateVerificationHeaders,
     },
     204: {
-      headersMapper: Mappers.DomainsInitiateVerificationHeaders
+      headersMapper: Mappers.DomainsInitiateVerificationHeaders,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters5,
   queryParameters: [Parameters.apiVersion],
@@ -822,32 +868,31 @@ const initiateVerificationOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.emailServiceName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const cancelVerificationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}/cancelVerification",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/emailServices/{emailServiceName}/domains/{domainName}/cancelVerification",
   httpMethod: "POST",
   responses: {
     200: {
-      headersMapper: Mappers.DomainsCancelVerificationHeaders
+      headersMapper: Mappers.DomainsCancelVerificationHeaders,
     },
     201: {
-      headersMapper: Mappers.DomainsCancelVerificationHeaders
+      headersMapper: Mappers.DomainsCancelVerificationHeaders,
     },
     202: {
-      headersMapper: Mappers.DomainsCancelVerificationHeaders
+      headersMapper: Mappers.DomainsCancelVerificationHeaders,
     },
     204: {
-      headersMapper: Mappers.DomainsCancelVerificationHeaders
+      headersMapper: Mappers.DomainsCancelVerificationHeaders,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters5,
   queryParameters: [Parameters.apiVersion],
@@ -856,31 +901,30 @@ const cancelVerificationOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.emailServiceName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listByEmailServiceResourceNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainResourceList
+      bodyMapper: Mappers.DomainResourceList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.emailServiceName
+    Parameters.emailServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

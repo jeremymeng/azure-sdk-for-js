@@ -16,18 +16,18 @@ require("dotenv").config();
  * This sample demonstrates how to List Association resources by TrafficController
  *
  * @summary List Association resources by TrafficController
- * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/cadl/examples/AssociationsGet.json
+ * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/preview/2024-05-01-preview/examples/AssociationsGet.json
  */
 async function getAssociations() {
   const subscriptionId = process.env["SERVICENETWORKING_SUBSCRIPTION_ID"] || "subid";
   const resourceGroupName = process.env["SERVICENETWORKING_RESOURCE_GROUP"] || "rg1";
-  const trafficControllerName = "TC1";
+  const trafficControllerName = "tc1";
   const credential = new DefaultAzureCredential();
   const client = new ServiceNetworkingManagementClient(credential, subscriptionId);
   const resArray = new Array();
   for await (let item of client.associationsInterface.listByTrafficController(
     resourceGroupName,
-    trafficControllerName
+    trafficControllerName,
   )) {
     resArray.push(item);
   }

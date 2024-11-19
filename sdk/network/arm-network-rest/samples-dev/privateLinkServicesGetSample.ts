@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -31,7 +31,7 @@ async function getPrivateLinkService() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateLinkServices/{serviceName}",
       subscriptionId,
       resourceGroupName,
-      serviceName
+      serviceName,
     )
     .get(options);
   console.log(result);

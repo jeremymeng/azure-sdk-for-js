@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { KeyClient } from "../../../src";
-import { Recorder, env, assertEnvironmentVariable, isLiveMode } from "@azure-tools/test-recorder";
-import { uniqueString } from "./recorderUtils";
-import TestClient from "./testClient";
+import { KeyClient } from "../../../src/index.js";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { env, assertEnvironmentVariable, isLiveMode } from "@azure-tools/test-recorder";
+import { uniqueString } from "./recorderUtils.js";
+import TestClient from "./testClient.js";
 import { createTestCredential } from "@azure-tools/test-credential";
-import { isNode } from "@azure/core-util";
 
 export const replaceableVariables = {
   AZURE_CLIENT_ID: "azure_client_id",
@@ -24,28 +24,11 @@ export const envSetupForPlayback = {
   },
 };
 
-export async function authenticate(version: string, recorder: Recorder): Promise<any> {
+export async function authenticate(recorder: Recorder): Promise<any> {
   const keySuffix = uniqueString();
 
   const keyVaultUriName = assertEnvironmentVariable("KEYVAULT_URI").match("https://(.*.net)/")![1];
   const replacedKeyVaultUriName = replaceableVariables.KEYVAULT_URI.match("https://(.*.net)/")![1];
-
-  let attestationUri: string;
-  let replacedAttestationUri: string;
-
-  if (isNode) {
-    attestationUri = Buffer.from(
-      assertEnvironmentVariable("AZURE_KEYVAULT_ATTESTATION_URI"),
-      "base64"
-    ).toString();
-    replacedAttestationUri = Buffer.from(
-      replaceableVariables.AZURE_KEYVAULT_ATTESTATION_URI,
-      "base64"
-    ).toString();
-  } else {
-    attestationUri = btoa(assertEnvironmentVariable("AZURE_KEYVAULT_ATTESTATION_URI"));
-    replacedAttestationUri = btoa(replaceableVariables.AZURE_KEYVAULT_ATTESTATION_URI);
-  }
 
   await recorder.addSanitizers({
     generalSanitizers: [
@@ -54,12 +37,14 @@ export async function authenticate(version: string, recorder: Recorder): Promise
         value: "",
       },
       {
-        target: attestationUri,
-        value: replacedAttestationUri,
-      },
-      {
         target: keyVaultUriName,
         value: replacedKeyVaultUriName,
+      },
+    ],
+    bodyKeySanitizers: [
+      {
+        jsonPath: "$.release_policy.data",
+        value: "eyAic2FuaXRpemVkIjogInNhbml0aXplZCIgfQ==", // dummy base64-encoded JSON object
       },
     ],
   });
@@ -75,9 +60,8 @@ export async function authenticate(version: string, recorder: Recorder): Promise
     keyVaultUrl,
     credential,
     recorder.configureClientOptions({
-      serviceVersion: version,
       disableChallengeResourceVerification: !isLiveMode(),
-    })
+    }),
   );
   const testClient = new TestClient(client);
 
@@ -88,7 +72,7 @@ export async function authenticate(version: string, recorder: Recorder): Promise
       credential,
       recorder.configureClientOptions({
         disableChallengeResourceVerification: !isLiveMode(),
-      })
+      }),
     );
   }
 

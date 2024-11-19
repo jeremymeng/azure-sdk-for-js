@@ -16,97 +16,49 @@ export const CreateRoomRequest: coreClient.CompositeMapper = {
       validFrom: {
         serializedName: "validFrom",
         type: {
-          name: "DateTime"
-        }
+          name: "DateTime",
+        },
       },
       validUntil: {
         serializedName: "validUntil",
         type: {
-          name: "DateTime"
-        }
+          name: "DateTime",
+        },
       },
-      roomJoinPolicy: {
-        serializedName: "roomJoinPolicy",
+      pstnDialOutEnabled: {
+        serializedName: "pstnDialOutEnabled",
         type: {
-          name: "Enum",
-          allowedValues: ["InviteOnly", "CommunicationServiceUsers"]
-        }
+          name: "Boolean",
+        },
       },
       participants: {
         serializedName: "participants",
         type: {
-          name: "Sequence",
-          element: {
-            type: {
-              name: "Composite",
-              className: "RoomParticipant"
-            }
-          }
-        }
-      }
-    }
-  }
+          name: "Dictionary",
+          value: {
+            type: { name: "Composite", className: "ParticipantProperties" },
+          },
+        },
+      },
+    },
+  },
 };
 
-export const RoomParticipant: coreClient.CompositeMapper = {
+export const ParticipantProperties: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "RoomParticipant",
+    className: "ParticipantProperties",
     modelProperties: {
-      communicationIdentifier: {
-        serializedName: "communicationIdentifier",
-        type: {
-          name: "Composite",
-          className: "CommunicationIdentifierModel"
-        }
-      },
       role: {
         serializedName: "role",
-        type: {
-          name: "Enum",
-          allowedValues: ["Presenter", "Attendee", "Consumer"]
-        }
-      }
-    }
-  }
-};
-
-export const CommunicationIdentifierModel: coreClient.CompositeMapper = {
-  type: {
-    name: "Composite",
-    className: "CommunicationIdentifierModel",
-    modelProperties: {
-      rawId: {
-        serializedName: "rawId",
-        type: {
-          name: "String"
-        }
-      },
-      communicationUser: {
-        serializedName: "communicationUser",
-        type: {
-          name: "Composite",
-          className: "CommunicationUserIdentifierModel"
-        }
-      }
-    }
-  }
-};
-
-export const CommunicationUserIdentifierModel: coreClient.CompositeMapper = {
-  type: {
-    name: "Composite",
-    className: "CommunicationUserIdentifierModel",
-    modelProperties: {
-      id: {
-        serializedName: "id",
         required: true,
         type: {
-          name: "String"
-        }
-      }
-    }
-  }
+          name: "Enum",
+          allowedValues: ["Presenter", "Attendee", "Consumer"],
+        },
+      },
+    },
+  },
 };
 
 export const RoomModel: coreClient.CompositeMapper = {
@@ -118,53 +70,39 @@ export const RoomModel: coreClient.CompositeMapper = {
         serializedName: "id",
         required: true,
         type: {
-          name: "String"
-        }
+          name: "String",
+        },
       },
-      createdDateTime: {
-        serializedName: "createdDateTime",
+      createdAt: {
+        serializedName: "createdAt",
         required: true,
         type: {
-          name: "DateTime"
-        }
+          name: "DateTime",
+        },
       },
       validFrom: {
         serializedName: "validFrom",
         required: true,
         type: {
-          name: "DateTime"
-        }
+          name: "DateTime",
+        },
       },
       validUntil: {
         serializedName: "validUntil",
         required: true,
         type: {
-          name: "DateTime"
-        }
+          name: "DateTime",
+        },
       },
-      roomJoinPolicy: {
-        serializedName: "roomJoinPolicy",
+      pstnDialOutEnabled: {
+        serializedName: "pstnDialOutEnabled",
         required: true,
         type: {
-          name: "Enum",
-          allowedValues: ["InviteOnly", "CommunicationServiceUsers"]
-        }
+          name: "Boolean",
+        },
       },
-      participants: {
-        serializedName: "participants",
-        required: true,
-        type: {
-          name: "Sequence",
-          element: {
-            type: {
-              name: "Composite",
-              className: "RoomParticipant"
-            }
-          }
-        }
-      }
-    }
-  }
+    },
+  },
 };
 
 export const CommunicationErrorResponse: coreClient.CompositeMapper = {
@@ -176,11 +114,11 @@ export const CommunicationErrorResponse: coreClient.CompositeMapper = {
         serializedName: "error",
         type: {
           name: "Composite",
-          className: "CommunicationError"
-        }
-      }
-    }
-  }
+          className: "CommunicationError",
+        },
+      },
+    },
+  },
 };
 
 export const CommunicationError: coreClient.CompositeMapper = {
@@ -192,22 +130,22 @@ export const CommunicationError: coreClient.CompositeMapper = {
         serializedName: "code",
         required: true,
         type: {
-          name: "String"
-        }
+          name: "String",
+        },
       },
       message: {
         serializedName: "message",
         required: true,
         type: {
-          name: "String"
-        }
+          name: "String",
+        },
       },
       target: {
         serializedName: "target",
         readOnly: true,
         type: {
-          name: "String"
-        }
+          name: "String",
+        },
       },
       details: {
         serializedName: "details",
@@ -217,20 +155,48 @@ export const CommunicationError: coreClient.CompositeMapper = {
           element: {
             type: {
               name: "Composite",
-              className: "CommunicationError"
-            }
-          }
-        }
+              className: "CommunicationError",
+            },
+          },
+        },
       },
       innerError: {
         serializedName: "innererror",
         type: {
           name: "Composite",
-          className: "CommunicationError"
-        }
-      }
-    }
-  }
+          className: "CommunicationError",
+        },
+      },
+    },
+  },
+};
+
+export const RoomsCollection: coreClient.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "RoomsCollection",
+    modelProperties: {
+      value: {
+        serializedName: "value",
+        required: true,
+        type: {
+          name: "Sequence",
+          element: {
+            type: {
+              name: "Composite",
+              className: "RoomModel",
+            },
+          },
+        },
+      },
+      nextLink: {
+        serializedName: "nextLink",
+        type: {
+          name: "String",
+        },
+      },
+    },
+  },
 };
 
 export const UpdateRoomRequest: coreClient.CompositeMapper = {
@@ -241,36 +207,23 @@ export const UpdateRoomRequest: coreClient.CompositeMapper = {
       validFrom: {
         serializedName: "validFrom",
         type: {
-          name: "DateTime"
-        }
+          name: "DateTime",
+        },
       },
       validUntil: {
         serializedName: "validUntil",
         type: {
-          name: "DateTime"
-        }
+          name: "DateTime",
+        },
       },
-      roomJoinPolicy: {
-        serializedName: "roomJoinPolicy",
+      pstnDialOutEnabled: {
+        serializedName: "pstnDialOutEnabled",
         type: {
-          name: "Enum",
-          allowedValues: ["InviteOnly", "CommunicationServiceUsers"]
-        }
+          name: "Boolean",
+        },
       },
-      participants: {
-        serializedName: "participants",
-        type: {
-          name: "Sequence",
-          element: {
-            type: {
-              name: "Composite",
-              className: "RoomParticipant"
-            }
-          }
-        }
-      }
-    }
-  }
+    },
+  },
 };
 
 export const ParticipantsCollection: coreClient.CompositeMapper = {
@@ -278,43 +231,51 @@ export const ParticipantsCollection: coreClient.CompositeMapper = {
     name: "Composite",
     className: "ParticipantsCollection",
     modelProperties: {
-      participants: {
-        serializedName: "participants",
+      value: {
+        serializedName: "value",
         required: true,
         type: {
           name: "Sequence",
           element: {
             type: {
               name: "Composite",
-              className: "RoomParticipant"
-            }
-          }
-        }
-      }
-    }
-  }
+              className: "RoomParticipant",
+            },
+          },
+        },
+      },
+      nextLink: {
+        serializedName: "nextLink",
+        type: {
+          name: "String",
+        },
+      },
+    },
+  },
 };
 
-export const AddParticipantsRequest: coreClient.CompositeMapper = {
+export const RoomParticipant: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "AddParticipantsRequest",
+    className: "RoomParticipant",
     modelProperties: {
-      participants: {
-        serializedName: "participants",
+      rawId: {
+        serializedName: "rawId",
         required: true,
         type: {
-          name: "Sequence",
-          element: {
-            type: {
-              name: "Composite",
-              className: "RoomParticipant"
-            }
-          }
-        }
-      }
-    }
-  }
+          name: "String",
+        },
+      },
+      role: {
+        serializedName: "role",
+        required: true,
+        type: {
+          name: "Enum",
+          allowedValues: ["Presenter", "Attendee", "Consumer"],
+        },
+      },
+    },
+  },
 };
 
 export const UpdateParticipantsRequest: coreClient.CompositeMapper = {
@@ -324,159 +285,149 @@ export const UpdateParticipantsRequest: coreClient.CompositeMapper = {
     modelProperties: {
       participants: {
         serializedName: "participants",
-        required: true,
         type: {
-          name: "Sequence",
-          element: {
-            type: {
-              name: "Composite",
-              className: "RoomParticipant"
-            }
-          }
-        }
-      }
-    }
-  }
+          name: "Dictionary",
+          value: {
+            type: { name: "Composite", className: "ParticipantProperties" },
+          },
+        },
+      },
+    },
+  },
 };
 
-export const RemoveParticipantsRequest: coreClient.CompositeMapper = {
+export const RoomsCreateExceptionHeaders: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "RemoveParticipantsRequest",
-    modelProperties: {
-      participants: {
-        serializedName: "participants",
-        required: true,
-        type: {
-          name: "Sequence",
-          element: {
-            type: {
-              name: "Composite",
-              className: "RoomParticipant"
-            }
-          }
-        }
-      }
-    }
-  }
-};
-
-export const RoomsCreateRoomExceptionHeaders: coreClient.CompositeMapper = {
-  type: {
-    name: "Composite",
-    className: "RoomsCreateRoomExceptionHeaders",
+    className: "RoomsCreateExceptionHeaders",
     modelProperties: {
       errorCode: {
         serializedName: "x-ms-error-code",
         type: {
-          name: "String"
-        }
-      }
-    }
-  }
+          name: "String",
+        },
+      },
+    },
+  },
 };
 
-export const RoomsGetRoomExceptionHeaders: coreClient.CompositeMapper = {
+export const RoomsListExceptionHeaders: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "RoomsGetRoomExceptionHeaders",
+    className: "RoomsListExceptionHeaders",
     modelProperties: {
       errorCode: {
         serializedName: "x-ms-error-code",
         type: {
-          name: "String"
-        }
-      }
-    }
-  }
+          name: "String",
+        },
+      },
+    },
+  },
 };
 
-export const RoomsUpdateRoomExceptionHeaders: coreClient.CompositeMapper = {
+export const RoomsGetExceptionHeaders: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "RoomsUpdateRoomExceptionHeaders",
+    className: "RoomsGetExceptionHeaders",
     modelProperties: {
       errorCode: {
         serializedName: "x-ms-error-code",
         type: {
-          name: "String"
-        }
-      }
-    }
-  }
+          name: "String",
+        },
+      },
+    },
+  },
 };
 
-export const RoomsDeleteRoomExceptionHeaders: coreClient.CompositeMapper = {
+export const RoomsUpdateExceptionHeaders: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "RoomsDeleteRoomExceptionHeaders",
+    className: "RoomsUpdateExceptionHeaders",
     modelProperties: {
       errorCode: {
         serializedName: "x-ms-error-code",
         type: {
-          name: "String"
-        }
-      }
-    }
-  }
+          name: "String",
+        },
+      },
+    },
+  },
 };
 
-export const RoomsGetParticipantsExceptionHeaders: coreClient.CompositeMapper = {
+export const RoomsDeleteExceptionHeaders: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "RoomsGetParticipantsExceptionHeaders",
+    className: "RoomsDeleteExceptionHeaders",
     modelProperties: {
       errorCode: {
         serializedName: "x-ms-error-code",
         type: {
-          name: "String"
-        }
-      }
-    }
-  }
+          name: "String",
+        },
+      },
+    },
+  },
 };
 
-export const RoomsAddParticipantsExceptionHeaders: coreClient.CompositeMapper = {
+export const RoomsListNextExceptionHeaders: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "RoomsAddParticipantsExceptionHeaders",
+    className: "RoomsListNextExceptionHeaders",
     modelProperties: {
       errorCode: {
         serializedName: "x-ms-error-code",
         type: {
-          name: "String"
-        }
-      }
-    }
-  }
+          name: "String",
+        },
+      },
+    },
+  },
 };
 
-export const RoomsUpdateParticipantsExceptionHeaders: coreClient.CompositeMapper = {
+export const ParticipantsListExceptionHeaders: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "RoomsUpdateParticipantsExceptionHeaders",
+    className: "ParticipantsListExceptionHeaders",
     modelProperties: {
       errorCode: {
         serializedName: "x-ms-error-code",
         type: {
-          name: "String"
-        }
-      }
-    }
-  }
+          name: "String",
+        },
+      },
+    },
+  },
 };
 
-export const RoomsRemoveParticipantsExceptionHeaders: coreClient.CompositeMapper = {
+export const ParticipantsUpdateExceptionHeaders: coreClient.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "RoomsRemoveParticipantsExceptionHeaders",
+    className: "ParticipantsUpdateExceptionHeaders",
     modelProperties: {
       errorCode: {
         serializedName: "x-ms-error-code",
         type: {
-          name: "String"
-        }
-      }
-    }
-  }
+          name: "String",
+        },
+      },
+    },
+  },
 };
+
+export const ParticipantsListNextExceptionHeaders: coreClient.CompositeMapper =
+  {
+    type: {
+      name: "Composite",
+      className: "ParticipantsListNextExceptionHeaders",
+      modelProperties: {
+        errorCode: {
+          serializedName: "x-ms-error-code",
+          type: {
+            name: "String",
+          },
+        },
+      },
+    },
+  };

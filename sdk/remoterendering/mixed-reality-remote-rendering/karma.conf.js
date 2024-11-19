@@ -20,9 +20,7 @@ module.exports = function (config) {
       "karma-mocha",
       "karma-mocha-reporter",
       "karma-chrome-launcher",
-      "karma-edge-launcher",
       "karma-firefox-launcher",
-      "karma-ie-launcher",
       "karma-env-preprocessor",
       "karma-coverage",
       "karma-junit-reporter",
@@ -50,6 +48,8 @@ module.exports = function (config) {
 
     envPreprocessor: [
       "TEST_MODE",
+      "STORAGE_ACCOUNT_NO_ACCESS_NAME",
+      "BLOB_CONTAINER_NO_ACCESS_NAME",
       "REMOTERENDERING_ARR_STORAGE_ACCOUNT_NAME",
       "REMOTERENDERING_ARR_BLOB_CONTAINER_NAME",
       "REMOTERENDERING_ARR_ACCOUNT_KEY",

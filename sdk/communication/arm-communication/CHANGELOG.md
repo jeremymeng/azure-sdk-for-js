@@ -1,6 +1,6 @@
 # Release History
 
-## 4.0.0-beta.3 (Unreleased)
+## 4.1.1 (Unreleased)
 
 ### Features Added
 
@@ -9,13 +9,73 @@
 ### Bugs Fixed
 
 ### Other Changes
-## 4.0.0-beta.2 (2022-08-19)
+
+## 4.1.0 (2024-03-08)
     
-**Features**
+### Features Added
+
+  - Added Interface ManagedServiceIdentity
+  - Added Interface UserAssignedIdentity
+  - Added Type Alias ManagedServiceIdentityType
+  - Interface CommunicationServiceResource has a new optional parameter identity
+  - Interface CommunicationServiceResourceUpdate has a new optional parameter identity
+  - Added Enum KnownManagedServiceIdentityType
+    
+    
+## 4.1.0-beta.2 (2023-11-10)
+    
+### Features Added
+
+  - Added operation group SuppressionListAddresses
+  - Added operation group SuppressionLists
+  - Added Interface ManagedServiceIdentity
+  - Added Interface SuppressionListAddressesCreateOrUpdateOptionalParams
+  - Added Interface SuppressionListAddressesDeleteOptionalParams
+  - Added Interface SuppressionListAddressesGetOptionalParams
+  - Added Interface SuppressionListAddressesListNextOptionalParams
+  - Added Interface SuppressionListAddressesListOptionalParams
+  - Added Interface SuppressionListAddressResource
+  - Added Interface SuppressionListAddressResourceCollection
+  - Added Interface SuppressionListResource
+  - Added Interface SuppressionListResourceCollection
+  - Added Interface SuppressionListsCreateOrUpdateOptionalParams
+  - Added Interface SuppressionListsDeleteOptionalParams
+  - Added Interface SuppressionListsGetOptionalParams
+  - Added Interface SuppressionListsListByDomainNextOptionalParams
+  - Added Interface SuppressionListsListByDomainOptionalParams
+  - Added Interface UserAssignedIdentity
+  - Added Type Alias ManagedServiceIdentityType
+  - Added Type Alias SuppressionListAddressesCreateOrUpdateResponse
+  - Added Type Alias SuppressionListAddressesGetResponse
+  - Added Type Alias SuppressionListAddressesListNextResponse
+  - Added Type Alias SuppressionListAddressesListResponse
+  - Added Type Alias SuppressionListsCreateOrUpdateResponse
+  - Added Type Alias SuppressionListsGetResponse
+  - Added Type Alias SuppressionListsListByDomainNextResponse
+  - Added Type Alias SuppressionListsListByDomainResponse
+  - Interface CommunicationServiceResource has a new optional parameter identity
+  - Interface CommunicationServiceResourceUpdate has a new optional parameter identity
+  - Added Enum KnownManagedServiceIdentityType
+
+  
+## 4.1.0-beta.1 (2023-09-20)
+    
+### Features Added
+
+  - Added Interface ManagedServiceIdentity
+  - Added Interface UserAssignedIdentity
+  - Added Type Alias ManagedServiceIdentityType
+  - Interface CommunicationServiceResource has a new optional parameter identity
+  - Interface CommunicationServiceResourceUpdate has a new optional parameter identity
+  - Added Enum KnownManagedServiceIdentityType
+## 4.0.0 (2023-03-27)
+    
+### Features Added
 
   - Added operation group CommunicationServices
   - Added operation group Domains
   - Added operation group EmailServices
+  - Added operation group SenderUsernames
   - Added Interface CheckNameAvailabilityRequest
   - Added Interface CheckNameAvailabilityResponse
   - Added Interface CommunicationServiceResource
@@ -33,7 +93,6 @@
   - Added Interface CommunicationServicesListBySubscriptionOptionalParams
   - Added Interface CommunicationServicesListKeysOptionalParams
   - Added Interface CommunicationServicesRegenerateKeyOptionalParams
-  - Added Interface CommunicationServicesUpdateHeaders
   - Added Interface CommunicationServicesUpdateOptionalParams
   - Added Interface DnsRecord
   - Added Interface DomainPropertiesVerificationRecords
@@ -68,6 +127,14 @@
   - Added Interface EmailServicesListVerifiedExchangeOnlineDomainsOptionalParams
   - Added Interface EmailServicesUpdateHeaders
   - Added Interface EmailServicesUpdateOptionalParams
+  - Added Interface ProxyResource
+  - Added Interface SenderUsernameResource
+  - Added Interface SenderUsernameResourceCollection
+  - Added Interface SenderUsernamesCreateOrUpdateOptionalParams
+  - Added Interface SenderUsernamesDeleteOptionalParams
+  - Added Interface SenderUsernamesGetOptionalParams
+  - Added Interface SenderUsernamesListByDomainsNextOptionalParams
+  - Added Interface SenderUsernamesListByDomainsOptionalParams
   - Added Interface TrackedResource
   - Added Interface UpdateDomainRequestParameters
   - Added Interface VerificationParameter
@@ -103,13 +170,14 @@
   - Added Type Alias EmailServicesListVerifiedExchangeOnlineDomainsResponse
   - Added Type Alias EmailServicesProvisioningState
   - Added Type Alias EmailServicesUpdateResponse
+  - Added Type Alias SenderUsernamesCreateOrUpdateResponse
+  - Added Type Alias SenderUsernamesGetResponse
+  - Added Type Alias SenderUsernamesListByDomainsNextResponse
+  - Added Type Alias SenderUsernamesListByDomainsResponse
   - Added Type Alias UserEngagementTracking
   - Added Type Alias VerificationStatus
   - Added Type Alias VerificationType
   - Interface Resource has a new optional parameter systemData
-  - Class CommunicationServiceManagementClient has a new parameter communicationServices
-  - Class CommunicationServiceManagementClient has a new parameter domains
-  - Class CommunicationServiceManagementClient has a new parameter emailServices
   - Added Enum KnownCheckNameAvailabilityReason
   - Added Enum KnownCommunicationServicesProvisioningState
   - Added Enum KnownDomainManagement
@@ -118,18 +186,16 @@
   - Added Enum KnownUserEngagementTracking
   - Added Enum KnownVerificationStatus
   - Added Enum KnownVerificationType
+  - Added function getContinuationToken
 
-**Breaking Changes**
+### Breaking Changes
 
   - Removed operation group CommunicationService
-  - Interface NameAvailabilityParameters no longer has parameter name
-  - Interface NameAvailabilityParameters no longer has parameter type
   - Class CommunicationServiceManagementClient no longer has parameter communicationService
-  - Removed Enum KnownProvisioningState
     
 ## 3.0.1 (2022-04-11)
 
-**features**
+### Features Added
 
   - Bug fix
 
@@ -141,4 +207,4 @@ To understand the detail of the change, please refer to [Changelog](https://aka.
 
 To migrate the existing applications to the latest version, please refer to [Migration Guide](https://aka.ms/js-track2-migration-guide).
 
-To learn more, please refer to our documentation [Quick Start](https://aka.ms/js-track2-quickstart).
+To learn more, please refer to our documentation [Quick Start](https://aka.ms/azsdk/js/mgmt/quickstart).

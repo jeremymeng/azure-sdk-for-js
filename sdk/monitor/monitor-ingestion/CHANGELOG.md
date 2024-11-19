@@ -1,6 +1,6 @@
 # Release History
 
-## 1.0.0-beta.4 (Unreleased)
+## 1.1.1 (Unreleased)
 
 ### Features Added
 
@@ -10,6 +10,31 @@
 
 ### Other Changes
 
+## 1.1.0 (2024-06-11)
+
+### Features Added
+
+- Added `audience` support for the logs ingestion client to specify the audience for the authentication token. This feature is necessary to use a sovereign cloud. Refer to [#27280](https://github.com/Azure/azure-sdk-for-js/issues/27280) for further details.
+
+### Bugs Fixed
+
+- React-Native support for `zlib` via the `pako` package.
+
+## 1.0.0 (2023-02-15)
+
+### Features Added
+
+- Added an error callback functionality for inspecting individual log uploads via `LogsUploadOptions`.
+
+### Breaking Changes
+
+- The `upload` API throws an `AggregateLogsUploadError` in case of an error and returns `void` when operation succeeds.
+- Renamed `LogsUploadError` to `LogsUploadFailure`.
+
+### Other Changes
+
+- `LogsUploadOptions` supports the `OperationOptions` from @azure/core-client, allowing users to abort operations when needed.
+- Added samples for all error handling scenarios.
 ## 1.0.0-beta.3 (2022-10-13)
 
 ### Breaking Changes

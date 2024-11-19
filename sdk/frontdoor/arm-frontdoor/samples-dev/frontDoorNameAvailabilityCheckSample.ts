@@ -10,28 +10,34 @@
 // Licensed under the MIT License.
 import {
   CheckNameAvailabilityInput,
-  FrontDoorManagementClient
+  FrontDoorManagementClient,
 } from "@azure/arm-frontdoor";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Check the availability of a Front Door resource name.
  *
  * @summary Check the availability of a Front Door resource name.
- * x-ms-original-file: specification/frontdoor/resource-manager/Microsoft.Network/stable/2020-05-01/examples/CheckFrontdoorNameAvailability.json
+ * x-ms-original-file: specification/frontdoor/resource-manager/Microsoft.Network/stable/2021-06-01/examples/CheckFrontdoorNameAvailability.json
  */
 async function checkNameAvailability() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
   const checkFrontDoorNameAvailabilityInput: CheckNameAvailabilityInput = {
     name: "sampleName",
-    type: "Microsoft.Network/frontDoors"
+    type: "Microsoft.Network/frontDoors",
   };
   const credential = new DefaultAzureCredential();
-  const client = new FrontDoorManagementClient(credential, subscriptionId);
+  const client = new FrontDoorManagementClient(credential);
   const result = await client.frontDoorNameAvailability.check(
-    checkFrontDoorNameAvailabilityInput
+    checkFrontDoorNameAvailabilityInput,
   );
   console.log(result);
 }
 
-checkNameAvailability().catch(console.error);
+async function main() {
+  checkNameAvailability();
+}
+
+main().catch(console.error);

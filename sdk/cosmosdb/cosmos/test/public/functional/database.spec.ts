@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 import assert from "assert";
-import { Suite } from "mocha";
-import { CosmosClient, DatabaseDefinition, Database } from "../../../src";
+import type { Suite } from "mocha";
+import type { DatabaseDefinition, Database } from "../../../src";
+import { CosmosClient } from "../../../src";
 import { endpoint } from "../common/_testConfig";
 import { masterKey } from "../common/_fakeTestSecrets";
 import {
@@ -10,8 +11,9 @@ import {
   removeAllDatabases,
   getTestDatabase,
   assertThrowsAsync,
+  testForDiagnostics,
 } from "../common/TestHelpers";
-import { DatabaseRequest } from "../../../src";
+import type { DatabaseRequest } from "../../../src";
 
 const client = new CosmosClient({
   endpoint,
@@ -28,13 +30,34 @@ describe("NodeJS CRUD Tests", function (this: Suite) {
   describe("Validate Database CRUD", async function () {
     const databaseCRUDTest = async function (): Promise<void> {
       // read databases
-      const { resources: databases } = await client.databases.readAll().fetchAll();
+
+      const { resources: databases } = await testForDiagnostics(
+        async () => {
+          return client.databases.readAll().fetchAll();
+        },
+        {
+          locationEndpointsContacted: 1,
+          // metadataCallCount: 2,
+          retryCount: 0,
+        },
+      );
+
       assert.equal(databases.constructor, Array, "Value should be an array");
 
       // create a database
       const beforeCreateDatabasesCount = databases.length;
       const databaseDefinition = { id: "database test database", throughput: 400 };
-      const { resource: db } = await client.databases.create(databaseDefinition);
+      // const { resource: db } = await client.databases.create(databaseDefinition);
+      const { resource: db } = await testForDiagnostics(
+        async () => {
+          return client.databases.create(databaseDefinition);
+        },
+        {
+          locationEndpointsContacted: 1,
+          // metadataCallCount: 2,
+          retryCount: 0,
+        },
+      );
       assert.equal(db.id, databaseDefinition.id);
 
       // read databases after creation
@@ -42,7 +65,7 @@ describe("NodeJS CRUD Tests", function (this: Suite) {
       assert.equal(
         databases2.length,
         beforeCreateDatabasesCount + 1,
-        "create should increase the number of databases"
+        "create should increase the number of databases",
       );
       // query databases
       const querySpec = {
@@ -54,14 +77,44 @@ describe("NodeJS CRUD Tests", function (this: Suite) {
           },
         ],
       };
-      const { resources: results } = await client.databases.query(querySpec).fetchAll();
+      // const { resources: results } = await client.databases.query(querySpec).fetchAll();
+      const { resources: results } = await testForDiagnostics(
+        async () => {
+          return client.databases.query(querySpec).fetchAll();
+        },
+        {
+          locationEndpointsContacted: 1,
+          // metadataCallCount: 2,
+          retryCount: 0,
+        },
+      );
       assert(results.length > 0, "number of results for the query should be > 0");
 
       // delete database
-      await client.database(db.id).delete();
+      // await client.database(db.id).delete();
+      await testForDiagnostics(
+        async () => {
+          return client.database(db.id).delete();
+        },
+        {
+          locationEndpointsContacted: 1,
+          // metadataCallCount: 2,
+          retryCount: 0,
+        },
+      );
       try {
         // read database after deletion
-        await client.database(db.id).read();
+
+        await testForDiagnostics(
+          async () => {
+            return client.database(db.id).read();
+          },
+          {
+            locationEndpointsContacted: 1,
+            // metadataCallCount: 2,
+            retryCount: 0,
+          },
+        );
         assert.fail("Read database on non-existent database should fail");
       } catch (err: any) {
         const notFoundErrorCode = 404;

@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { PrivateDnsManagementClient } from "../privateDnsManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   VirtualNetworkLink,
   VirtualNetworkLinksListNextOptionalParams,
@@ -27,7 +31,7 @@ import {
   VirtualNetworkLinksDeleteOptionalParams,
   VirtualNetworkLinksGetOptionalParams,
   VirtualNetworkLinksGetResponse,
-  VirtualNetworkLinksListNextResponse
+  VirtualNetworkLinksListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -52,12 +56,12 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
   public list(
     resourceGroupName: string,
     privateZoneName: string,
-    options?: VirtualNetworkLinksListOptionalParams
+    options?: VirtualNetworkLinksListOptionalParams,
   ): PagedAsyncIterableIterator<VirtualNetworkLink> {
     const iter = this.listPagingAll(
       resourceGroupName,
       privateZoneName,
-      options
+      options,
     );
     return {
       next() {
@@ -74,9 +78,9 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
           resourceGroupName,
           privateZoneName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -84,7 +88,7 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     resourceGroupName: string,
     privateZoneName: string,
     options?: VirtualNetworkLinksListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<VirtualNetworkLink[]> {
     let result: VirtualNetworkLinksListResponse;
     let continuationToken = settings?.continuationToken;
@@ -100,7 +104,7 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         resourceGroupName,
         privateZoneName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -112,12 +116,12 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
   private async *listPagingAll(
     resourceGroupName: string,
     privateZoneName: string,
-    options?: VirtualNetworkLinksListOptionalParams
+    options?: VirtualNetworkLinksListOptionalParams,
   ): AsyncIterableIterator<VirtualNetworkLink> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       privateZoneName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -136,30 +140,29 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     privateZoneName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams
+    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualNetworkLinksCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualNetworkLinksCreateOrUpdateResponse>,
       VirtualNetworkLinksCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VirtualNetworkLinksCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -168,8 +171,8 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -177,25 +180,28 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         privateZoneName,
         virtualNetworkLinkName,
         parameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VirtualNetworkLinksCreateOrUpdateResponse,
+      OperationState<VirtualNetworkLinksCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -214,14 +220,14 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     privateZoneName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams
+    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams,
   ): Promise<VirtualNetworkLinksCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       privateZoneName,
       virtualNetworkLinkName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -239,30 +245,29 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     privateZoneName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksUpdateOptionalParams
+    options?: VirtualNetworkLinksUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualNetworkLinksUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualNetworkLinksUpdateResponse>,
       VirtualNetworkLinksUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VirtualNetworkLinksUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -271,8 +276,8 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -280,25 +285,28 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         privateZoneName,
         virtualNetworkLinkName,
         parameters,
-        options
+        options,
       },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VirtualNetworkLinksUpdateResponse,
+      OperationState<VirtualNetworkLinksUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -317,14 +325,14 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     privateZoneName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksUpdateOptionalParams
+    options?: VirtualNetworkLinksUpdateOptionalParams,
   ): Promise<VirtualNetworkLinksUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       privateZoneName,
       virtualNetworkLinkName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -342,25 +350,24 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     resourceGroupName: string,
     privateZoneName: string,
     virtualNetworkLinkName: string,
-    options?: VirtualNetworkLinksDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VirtualNetworkLinksDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -369,8 +376,8 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -378,19 +385,24 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, privateZoneName, virtualNetworkLinkName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        privateZoneName,
+        virtualNetworkLinkName,
+        options,
+      },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -409,13 +421,13 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     resourceGroupName: string,
     privateZoneName: string,
     virtualNetworkLinkName: string,
-    options?: VirtualNetworkLinksDeleteOptionalParams
+    options?: VirtualNetworkLinksDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       privateZoneName,
       virtualNetworkLinkName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -431,11 +443,11 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     resourceGroupName: string,
     privateZoneName: string,
     virtualNetworkLinkName: string,
-    options?: VirtualNetworkLinksGetOptionalParams
+    options?: VirtualNetworkLinksGetOptionalParams,
   ): Promise<VirtualNetworkLinksGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateZoneName, virtualNetworkLinkName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -448,11 +460,11 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
   private _list(
     resourceGroupName: string,
     privateZoneName: string,
-    options?: VirtualNetworkLinksListOptionalParams
+    options?: VirtualNetworkLinksListOptionalParams,
   ): Promise<VirtualNetworkLinksListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateZoneName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -467,11 +479,11 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     resourceGroupName: string,
     privateZoneName: string,
     nextLink: string,
-    options?: VirtualNetworkLinksListNextOptionalParams
+    options?: VirtualNetworkLinksListNextOptionalParams,
   ): Promise<VirtualNetworkLinksListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateZoneName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -479,25 +491,24 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks/{virtualNetworkLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks/{virtualNetworkLinkName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     201: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     202: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     204: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters1,
   queryParameters: [Parameters.apiVersion],
@@ -506,37 +517,36 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
     Parameters.subscriptionId,
-    Parameters.virtualNetworkLinkName
+    Parameters.virtualNetworkLinkName,
   ],
   headerParameters: [
     Parameters.contentType,
     Parameters.accept,
     Parameters.ifMatch,
-    Parameters.ifNoneMatch
+    Parameters.ifNoneMatch,
   ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks/{virtualNetworkLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks/{virtualNetworkLinkName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     201: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     202: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     204: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters1,
   queryParameters: [Parameters.apiVersion],
@@ -545,19 +555,18 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
     Parameters.subscriptionId,
-    Parameters.virtualNetworkLinkName
+    Parameters.virtualNetworkLinkName,
   ],
   headerParameters: [
     Parameters.contentType,
     Parameters.accept,
-    Parameters.ifMatch
+    Parameters.ifMatch,
   ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks/{virtualNetworkLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks/{virtualNetworkLinkName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -565,8 +574,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -574,22 +583,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
     Parameters.subscriptionId,
-    Parameters.virtualNetworkLinkName
+    Parameters.virtualNetworkLinkName,
   ],
   headerParameters: [Parameters.accept, Parameters.ifMatch],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks/{virtualNetworkLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks/{virtualNetworkLinkName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -597,52 +605,50 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
     Parameters.subscriptionId,
-    Parameters.virtualNetworkLinkName
+    Parameters.virtualNetworkLinkName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}/virtualNetworkLinks",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLinkListResult
+      bodyMapper: Mappers.VirtualNetworkLinkListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLinkListResult
+      bodyMapper: Mappers.VirtualNetworkLinkListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

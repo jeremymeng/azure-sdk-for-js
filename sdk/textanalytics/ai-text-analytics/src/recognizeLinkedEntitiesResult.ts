@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
+import type { TextAnalyticsErrorResult, TextAnalyticsSuccessResult } from "./textAnalyticsResult";
 import {
-  TextAnalyticsErrorResult,
-  TextAnalyticsSuccessResult,
   makeTextAnalyticsErrorResult,
   makeTextAnalyticsSuccessResult,
 } from "./textAnalyticsResult";
-import { DocumentLinkedEntities, LinkedEntity, TextAnalyticsError } from "./generated/models";
+import type { DocumentLinkedEntities, LinkedEntity, TextAnalyticsError } from "./generated/models";
 
 /**
  * The result of the recognize linked entities operation on a single document.
@@ -36,7 +35,7 @@ export type RecognizeLinkedEntitiesErrorResult = TextAnalyticsErrorResult;
  * @internal
  */
 export function makeRecognizeLinkedEntitiesResult(
-  result: DocumentLinkedEntities
+  result: DocumentLinkedEntities,
 ): RecognizeLinkedEntitiesSuccessResult {
   const { statistics, id, warnings, entities } = result;
   return {
@@ -50,7 +49,7 @@ export function makeRecognizeLinkedEntitiesResult(
  */
 export function makeRecognizeLinkedEntitiesErrorResult(
   id: string,
-  error: TextAnalyticsError
+  error: TextAnalyticsError,
 ): RecognizeLinkedEntitiesErrorResult {
   return makeTextAnalyticsErrorResult(id, error);
 }

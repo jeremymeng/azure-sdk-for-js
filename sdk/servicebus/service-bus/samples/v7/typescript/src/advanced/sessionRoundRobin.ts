@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT Licence.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 /**
  * This sample demonstrates how you can continually read through all the available
@@ -17,13 +17,12 @@ import {
   ServiceBusReceivedMessage,
   isServiceBusError,
 } from "@azure/service-bus";
-import * as dotenv from "dotenv";
-import { AbortController } from "@azure/abort-controller";
+import { DefaultAzureCredential } from "@azure/identity";
 
+import * as dotenv from "dotenv";
 dotenv.config();
 
-const serviceBusConnectionString =
-  process.env.SERVICEBUS_CONNECTION_STRING || "<connection string>";
+const fqdn = process.env.SERVICEBUS_FQDN || "<your-servicebus-namespace>.servicebus.windows.net";
 
 // NOTE: this sample uses a session enabled queue but would also work a session enabled subscription.
 const queueName = process.env.QUEUE_NAME_WITH_SESSIONS || "<queue name>";
@@ -35,6 +34,8 @@ const delayOnErrorMs = 5 * 1000;
 // This can be used control when the round-robin processing will terminate
 // by calling abortController.abort().
 const abortController = new AbortController();
+
+const credential = new DefaultAzureCredential();
 
 // Called just before we start processing the first message of a session.
 // NOTE: This function is used only in the sample and is not part of the Service Bus library.
@@ -120,7 +121,7 @@ async function receiveFromNextSession(serviceBusClient: ServiceBusClient): Promi
       },
       {
         abortSignal: abortController.signal,
-      }
+      },
     );
   });
 
@@ -136,7 +137,7 @@ async function receiveFromNextSession(serviceBusClient: ServiceBusClient): Promi
 }
 
 async function roundRobinThroughAvailableSessions(): Promise<void> {
-  const serviceBusClient = new ServiceBusClient(serviceBusConnectionString);
+  const serviceBusClient = new ServiceBusClient(fqdn, credential);
 
   const receiverPromises: Promise<void>[] = [];
 
@@ -146,7 +147,7 @@ async function roundRobinThroughAvailableSessions(): Promise<void> {
         while (!abortController.signal.aborted) {
           await receiveFromNextSession(serviceBusClient);
         }
-      })()
+      })(),
     );
   }
 
@@ -159,5 +160,5 @@ async function roundRobinThroughAvailableSessions(): Promise<void> {
 
 // To stop the round-robin processing you can just call abortController.abort()
 roundRobinThroughAvailableSessions().catch((err) =>
-  console.log(`Session RoundRobin - Fatal error: ${err}`)
+  console.log(`Session RoundRobin - Fatal error: ${err}`),
 );

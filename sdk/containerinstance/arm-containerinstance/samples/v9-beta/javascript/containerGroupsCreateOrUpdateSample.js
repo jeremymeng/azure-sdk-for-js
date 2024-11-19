@@ -16,10 +16,11 @@ require("dotenv").config();
  * This sample demonstrates how to Create or update container groups with specified configurations.
  *
  * @summary Create or update container groups with specified configurations.
- * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2022-10-01-preview/examples/ContainerGroupCreateConfidential.json
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/ContainerGroupCreateConfidential.json
  */
 async function confidentialContainerGroup() {
-  const subscriptionId = process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "subid";
+  const subscriptionId =
+    process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
   const resourceGroupName = process.env["CONTAINERINSTANCE_RESOURCE_GROUP"] || "demo";
   const containerGroupName = "demo1";
   const containerGroup = {
@@ -35,6 +36,10 @@ async function confidentialContainerGroup() {
         image: "confiimage",
         ports: [{ port: 8000 }],
         resources: { requests: { cpu: 1, memoryInGB: 1.5 } },
+        securityContext: {
+          capabilities: { add: ["CAP_NET_ADMIN"] },
+          privileged: false,
+        },
       },
     ],
     imageRegistryCredentials: [],
@@ -48,7 +53,7 @@ async function confidentialContainerGroup() {
   const result = await client.containerGroups.beginCreateOrUpdateAndWait(
     resourceGroupName,
     containerGroupName,
-    containerGroup
+    containerGroup,
   );
   console.log(result);
 }
@@ -57,10 +62,43 @@ async function confidentialContainerGroup() {
  * This sample demonstrates how to Create or update container groups with specified configurations.
  *
  * @summary Create or update container groups with specified configurations.
- * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2022-10-01-preview/examples/ContainerGroupExtensions.json
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/ContainerGroupCreateOrUpdateStandbyPool.json
+ */
+async function containerGroupCreateOrUpdateWithStandbyPool() {
+  const subscriptionId =
+    process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
+  const resourceGroupName = process.env["CONTAINERINSTANCE_RESOURCE_GROUP"] || "demo";
+  const containerGroupName = "demo1";
+  const containerGroup = {
+    containerGroupProfile: {
+      id: "/subscriptions/subid/resourceGroups/demo/providers/Microsoft.ContainerInstance/containerGroupProfiles/democgp",
+      revision: 1,
+    },
+    containers: [{ name: "demo1", configMap: { keyValuePairs: { newkey: "value" } } }],
+    location: "west us",
+    standbyPoolProfile: {
+      id: "/subscriptions/subid/resourceGroups/demo/providers/Microsoft.StandbyPool/standbyContainerGroupPools/demopool",
+    },
+  };
+  const credential = new DefaultAzureCredential();
+  const client = new ContainerInstanceManagementClient(credential, subscriptionId);
+  const result = await client.containerGroups.beginCreateOrUpdateAndWait(
+    resourceGroupName,
+    containerGroupName,
+    containerGroup,
+  );
+  console.log(result);
+}
+
+/**
+ * This sample demonstrates how to Create or update container groups with specified configurations.
+ *
+ * @summary Create or update container groups with specified configurations.
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/ContainerGroupExtensions.json
  */
 async function containerGroupCreateWithExtensions() {
-  const subscriptionId = process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "subid";
+  const subscriptionId =
+    process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
   const resourceGroupName = process.env["CONTAINERINSTANCE_RESOURCE_GROUP"] || "demo";
   const containerGroupName = "demo1";
   const containerGroup = {
@@ -103,7 +141,7 @@ async function containerGroupCreateWithExtensions() {
   const result = await client.containerGroups.beginCreateOrUpdateAndWait(
     resourceGroupName,
     containerGroupName,
-    containerGroup
+    containerGroup,
   );
   console.log(result);
 }
@@ -112,10 +150,11 @@ async function containerGroupCreateWithExtensions() {
  * This sample demonstrates how to Create or update container groups with specified configurations.
  *
  * @summary Create or update container groups with specified configurations.
- * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2022-10-01-preview/examples/ContainerGroupEncryptionProperties.json
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/ContainerGroupEncryptionProperties.json
  */
 async function containerGroupWithEncryptionProperties() {
-  const subscriptionId = process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "subid";
+  const subscriptionId =
+    process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
   const resourceGroupName = process.env["CONTAINERINSTANCE_RESOURCE_GROUP"] || "demo";
   const containerGroupName = "demo1";
   const containerGroup = {
@@ -153,7 +192,7 @@ async function containerGroupWithEncryptionProperties() {
   const result = await client.containerGroups.beginCreateOrUpdateAndWait(
     resourceGroupName,
     containerGroupName,
-    containerGroup
+    containerGroup,
   );
   console.log(result);
 }
@@ -162,10 +201,11 @@ async function containerGroupWithEncryptionProperties() {
  * This sample demonstrates how to Create or update container groups with specified configurations.
  *
  * @summary Create or update container groups with specified configurations.
- * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2022-10-01-preview/examples/ContainerGroupsCreateOrUpdate.json
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/ContainerGroupsCreateOrUpdate.json
  */
 async function containerGroupsCreateOrUpdate() {
-  const subscriptionId = process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "subid";
+  const subscriptionId =
+    process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
   const resourceGroupName = process.env["CONTAINERINSTANCE_RESOURCE_GROUP"] || "demo";
   const containerGroupName = "demo1";
   const containerGroup = {
@@ -246,7 +286,7 @@ async function containerGroupsCreateOrUpdate() {
   const result = await client.containerGroups.beginCreateOrUpdateAndWait(
     resourceGroupName,
     containerGroupName,
-    containerGroup
+    containerGroup,
   );
   console.log(result);
 }
@@ -255,10 +295,11 @@ async function containerGroupsCreateOrUpdate() {
  * This sample demonstrates how to Create or update container groups with specified configurations.
  *
  * @summary Create or update container groups with specified configurations.
- * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2022-10-01-preview/examples/ContainerGroupsCreatePriority.json
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/ContainerGroupsCreatePriority.json
  */
 async function containerGroupsCreateWithPriority() {
-  const subscriptionId = process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "subid";
+  const subscriptionId =
+    process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
   const resourceGroupName = process.env["CONTAINERINSTANCE_RESOURCE_GROUP"] || "demo";
   const containerGroupName = "demo1";
   const containerGroup = {
@@ -281,13 +322,14 @@ async function containerGroupsCreateWithPriority() {
   const result = await client.containerGroups.beginCreateOrUpdateAndWait(
     resourceGroupName,
     containerGroupName,
-    containerGroup
+    containerGroup,
   );
   console.log(result);
 }
 
 async function main() {
   confidentialContainerGroup();
+  containerGroupCreateOrUpdateWithStandbyPool();
   containerGroupCreateWithExtensions();
   containerGroupWithEncryptionProperties();
   containerGroupsCreateOrUpdate();

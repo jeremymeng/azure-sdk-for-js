@@ -10,16 +10,17 @@
 // Licensed under the MIT License.
 const { EventHubManagementClient } = require("@azure/arm-eventhub");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Gets an AuthorizationRule for a Namespace by rule name.
  *
  * @summary Gets an AuthorizationRule for a Namespace by rule name.
- * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2021-11-01/examples/disasterRecoveryConfigs/EHAliasAuthorizationRuleGet.json
+ * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2024-01-01/examples/disasterRecoveryConfigs/EHAliasAuthorizationRuleGet.json
  */
 async function nameSpaceAuthorizationRuleGet() {
-  const subscriptionId = "exampleSubscriptionId";
-  const resourceGroupName = "exampleResourceGroup";
+  const subscriptionId = process.env["EVENTHUB_SUBSCRIPTION_ID"] || "exampleSubscriptionId";
+  const resourceGroupName = process.env["EVENTHUB_RESOURCE_GROUP"] || "exampleResourceGroup";
   const namespaceName = "sdk-Namespace-9080";
   const alias = "sdk-DisasterRecovery-4879";
   const authorizationRuleName = "sdk-Authrules-4879";
@@ -29,9 +30,13 @@ async function nameSpaceAuthorizationRuleGet() {
     resourceGroupName,
     namespaceName,
     alias,
-    authorizationRuleName
+    authorizationRuleName,
   );
   console.log(result);
 }
 
-nameSpaceAuthorizationRuleGet().catch(console.error);
+async function main() {
+  nameSpaceAuthorizationRuleGet();
+}
+
+main().catch(console.error);

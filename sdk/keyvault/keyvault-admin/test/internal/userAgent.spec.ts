@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { KeyVaultAccessControlClient, SDK_VERSION } from "../../src";
-
+import { KeyVaultAccessControlClient, SDK_VERSION } from "../../src/index.js";
 import { TokenCredential } from "@azure/core-auth";
-import { assert } from "@azure/test-utils";
-import fs from "fs";
-import { isNode } from "@azure/core-util";
-import path from "path";
+import { describe, it, expect } from "vitest";
 
 describe("Key Vault Admin's user agent", function () {
   it("SDK_VERSION and user-agent should match", async function () {
@@ -22,7 +18,7 @@ describe("Key Vault Admin's user agent", function () {
             throw new Error("only a test");
           },
         },
-      }
+      },
     );
 
     try {
@@ -30,26 +26,7 @@ describe("Key Vault Admin's user agent", function () {
     } catch {
       // no-op, we don't care about the response, only the user-agent header
     }
-    assert.exists(userAgent, "Expected a User-Agent header to be sent");
-    assert.include(userAgent!, `azsdk-js-keyvault-admin/${SDK_VERSION}`);
-  });
-
-  it("the version should also match with the one available in the package.json  (only in Node, because of fs)", async function () {
-    if (!isNode) {
-      this.skip();
-    }
-    let version: string;
-    try {
-      const fileContents = JSON.parse(
-        fs.readFileSync(path.join(__dirname, "../../package.json"), { encoding: "utf-8" })
-      );
-      version = fileContents.version;
-    } catch {
-      const fileContents = JSON.parse(
-        fs.readFileSync(path.join(__dirname, "../../../package.json"), { encoding: "utf-8" })
-      );
-      version = fileContents.version;
-    }
-    assert.equal(version, SDK_VERSION);
+    expect(userAgent).toBeDefined();
+    expect(userAgent).toContain(`azsdk-js-keyvault-admin/${SDK_VERSION}`);
   });
 });

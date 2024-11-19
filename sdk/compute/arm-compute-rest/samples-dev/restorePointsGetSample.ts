@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -31,7 +31,7 @@ async function getARestorePoint() {
       subscriptionId,
       resourceGroupName,
       restorePointCollectionName,
-      restorePointName
+      restorePointName,
     )
     .get(options);
   console.log(result);
@@ -60,7 +60,7 @@ async function getRestorePointWithInstanceView() {
       subscriptionId,
       resourceGroupName,
       restorePointCollectionName,
-      restorePointName
+      restorePointName,
     )
     .get(options);
   console.log(result);

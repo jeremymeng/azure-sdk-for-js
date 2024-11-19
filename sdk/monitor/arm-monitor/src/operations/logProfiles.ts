@@ -6,7 +6,7 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
 import { LogProfiles } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -15,6 +15,7 @@ import { MonitorClient } from "../monitorClient";
 import {
   LogProfileResource,
   LogProfilesListOptionalParams,
+  LogProfilesListResponse,
   LogProfilesDeleteOptionalParams,
   LogProfilesGetOptionalParams,
   LogProfilesGetResponse,
@@ -23,7 +24,6 @@ import {
   LogProfileResourcePatch,
   LogProfilesUpdateOptionalParams,
   LogProfilesUpdateResponse,
-  LogProfilesListResponse
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -44,7 +44,7 @@ export class LogProfilesImpl implements LogProfiles {
    * @param options The options parameters.
    */
   public list(
-    options?: LogProfilesListOptionalParams
+    options?: LogProfilesListOptionalParams,
   ): PagedAsyncIterableIterator<LogProfileResource> {
     const iter = this.listPagingAll(options);
     return {
@@ -54,21 +54,26 @@ export class LogProfilesImpl implements LogProfiles {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(options, settings);
+      },
     };
   }
 
   private async *listPagingPage(
-    options?: LogProfilesListOptionalParams
+    options?: LogProfilesListOptionalParams,
+    _settings?: PageSettings,
   ): AsyncIterableIterator<LogProfileResource[]> {
-    let result = await this._list(options);
+    let result: LogProfilesListResponse;
+    result = await this._list(options);
     yield result.value || [];
   }
 
   private async *listPagingAll(
-    options?: LogProfilesListOptionalParams
+    options?: LogProfilesListOptionalParams,
   ): AsyncIterableIterator<LogProfileResource> {
     for await (const page of this.listPagingPage(options)) {
       yield* page;
@@ -82,11 +87,11 @@ export class LogProfilesImpl implements LogProfiles {
    */
   delete(
     logProfileName: string,
-    options?: LogProfilesDeleteOptionalParams
+    options?: LogProfilesDeleteOptionalParams,
   ): Promise<void> {
     return this.client.sendOperationRequest(
       { logProfileName, options },
-      deleteOperationSpec
+      deleteOperationSpec,
     );
   }
 
@@ -97,11 +102,11 @@ export class LogProfilesImpl implements LogProfiles {
    */
   get(
     logProfileName: string,
-    options?: LogProfilesGetOptionalParams
+    options?: LogProfilesGetOptionalParams,
   ): Promise<LogProfilesGetResponse> {
     return this.client.sendOperationRequest(
       { logProfileName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -114,11 +119,11 @@ export class LogProfilesImpl implements LogProfiles {
   createOrUpdate(
     logProfileName: string,
     parameters: LogProfileResource,
-    options?: LogProfilesCreateOrUpdateOptionalParams
+    options?: LogProfilesCreateOrUpdateOptionalParams,
   ): Promise<LogProfilesCreateOrUpdateResponse> {
     return this.client.sendOperationRequest(
       { logProfileName, parameters, options },
-      createOrUpdateOperationSpec
+      createOrUpdateOperationSpec,
     );
   }
 
@@ -131,11 +136,11 @@ export class LogProfilesImpl implements LogProfiles {
   update(
     logProfileName: string,
     logProfilesResource: LogProfileResourcePatch,
-    options?: LogProfilesUpdateOptionalParams
+    options?: LogProfilesUpdateOptionalParams,
   ): Promise<LogProfilesUpdateResponse> {
     return this.client.sendOperationRequest(
       { logProfileName, logProfilesResource, options },
-      updateOperationSpec
+      updateOperationSpec,
     );
   }
 
@@ -144,7 +149,7 @@ export class LogProfilesImpl implements LogProfiles {
    * @param options The options parameters.
    */
   private _list(
-    options?: LogProfilesListOptionalParams
+    options?: LogProfilesListOptionalParams,
   ): Promise<LogProfilesListResponse> {
     return this.client.sendOperationRequest({ options }, listOperationSpec);
   }
@@ -153,93 +158,88 @@ export class LogProfilesImpl implements LogProfiles {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles/{logProfileName}",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles/{logProfileName}",
   httpMethod: "DELETE",
   responses: { 200: {} },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.logProfileName
+    Parameters.logProfileName,
   ],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles/{logProfileName}",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles/{logProfileName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.LogProfileResource
+      bodyMapper: Mappers.LogProfileResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.logProfileName
+    Parameters.logProfileName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles/{logProfileName}",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles/{logProfileName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.LogProfileResource
-    }
+      bodyMapper: Mappers.LogProfileResource,
+    },
   },
   requestBody: Parameters.parameters2,
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.logProfileName
+    Parameters.logProfileName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles/{logProfileName}",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles/{logProfileName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.LogProfileResource
+      bodyMapper: Mappers.LogProfileResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.logProfilesResource,
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.logProfileName
+    Parameters.logProfileName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/logprofiles",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.LogProfileCollection
-    }
+      bodyMapper: Mappers.LogProfileCollection,
+    },
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

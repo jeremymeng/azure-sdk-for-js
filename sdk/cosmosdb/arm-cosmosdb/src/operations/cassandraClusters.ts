@@ -12,14 +12,21 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { CosmosDBManagementClient } from "../cosmosDBManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ClusterResource,
   CassandraClustersListBySubscriptionOptionalParams,
   CassandraClustersListBySubscriptionResponse,
   CassandraClustersListByResourceGroupOptionalParams,
   CassandraClustersListByResourceGroupResponse,
+  CommandPublicResource,
+  CassandraClustersListCommandOptionalParams,
+  CassandraClustersListCommandResponse,
   BackupResource,
   CassandraClustersListBackupsOptionalParams,
   CassandraClustersListBackupsResponse,
@@ -33,12 +40,16 @@ import {
   CommandPostBody,
   CassandraClustersInvokeCommandOptionalParams,
   CassandraClustersInvokeCommandResponse,
+  CassandraClustersInvokeCommandAsyncOptionalParams,
+  CassandraClustersInvokeCommandAsyncResponse,
+  CassandraClustersGetCommandAsyncOptionalParams,
+  CassandraClustersGetCommandAsyncResponse,
   CassandraClustersGetBackupOptionalParams,
   CassandraClustersGetBackupResponse,
   CassandraClustersDeallocateOptionalParams,
   CassandraClustersStartOptionalParams,
   CassandraClustersStatusOptionalParams,
-  CassandraClustersStatusResponse
+  CassandraClustersStatusResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -59,7 +70,7 @@ export class CassandraClustersImpl implements CassandraClusters {
    * @param options The options parameters.
    */
   public listBySubscription(
-    options?: CassandraClustersListBySubscriptionOptionalParams
+    options?: CassandraClustersListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<ClusterResource> {
     const iter = this.listBySubscriptionPagingAll(options);
     return {
@@ -74,13 +85,13 @@ export class CassandraClustersImpl implements CassandraClusters {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listBySubscriptionPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listBySubscriptionPagingPage(
     options?: CassandraClustersListBySubscriptionOptionalParams,
-    _settings?: PageSettings
+    _settings?: PageSettings,
   ): AsyncIterableIterator<ClusterResource[]> {
     let result: CassandraClustersListBySubscriptionResponse;
     result = await this._listBySubscription(options);
@@ -88,7 +99,7 @@ export class CassandraClustersImpl implements CassandraClusters {
   }
 
   private async *listBySubscriptionPagingAll(
-    options?: CassandraClustersListBySubscriptionOptionalParams
+    options?: CassandraClustersListBySubscriptionOptionalParams,
   ): AsyncIterableIterator<ClusterResource> {
     for await (const page of this.listBySubscriptionPagingPage(options)) {
       yield* page;
@@ -102,7 +113,7 @@ export class CassandraClustersImpl implements CassandraClusters {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: CassandraClustersListByResourceGroupOptionalParams
+    options?: CassandraClustersListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<ClusterResource> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -119,16 +130,16 @@ export class CassandraClustersImpl implements CassandraClusters {
         return this.listByResourceGroupPagingPage(
           resourceGroupName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
     options?: CassandraClustersListByResourceGroupOptionalParams,
-    _settings?: PageSettings
+    _settings?: PageSettings,
   ): AsyncIterableIterator<ClusterResource[]> {
     let result: CassandraClustersListByResourceGroupResponse;
     result = await this._listByResourceGroup(resourceGroupName, options);
@@ -137,11 +148,73 @@ export class CassandraClustersImpl implements CassandraClusters {
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: CassandraClustersListByResourceGroupOptionalParams
+    options?: CassandraClustersListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<ClusterResource> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
+    )) {
+      yield* page;
+    }
+  }
+
+  /**
+   * List all commands currently running on ring info
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param clusterName Managed Cassandra cluster name.
+   * @param options The options parameters.
+   */
+  public listCommand(
+    resourceGroupName: string,
+    clusterName: string,
+    options?: CassandraClustersListCommandOptionalParams,
+  ): PagedAsyncIterableIterator<CommandPublicResource> {
+    const iter = this.listCommandPagingAll(
+      resourceGroupName,
+      clusterName,
+      options,
+    );
+    return {
+      next() {
+        return iter.next();
+      },
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listCommandPagingPage(
+          resourceGroupName,
+          clusterName,
+          options,
+          settings,
+        );
+      },
+    };
+  }
+
+  private async *listCommandPagingPage(
+    resourceGroupName: string,
+    clusterName: string,
+    options?: CassandraClustersListCommandOptionalParams,
+    _settings?: PageSettings,
+  ): AsyncIterableIterator<CommandPublicResource[]> {
+    let result: CassandraClustersListCommandResponse;
+    result = await this._listCommand(resourceGroupName, clusterName, options);
+    yield result.value || [];
+  }
+
+  private async *listCommandPagingAll(
+    resourceGroupName: string,
+    clusterName: string,
+    options?: CassandraClustersListCommandOptionalParams,
+  ): AsyncIterableIterator<CommandPublicResource> {
+    for await (const page of this.listCommandPagingPage(
+      resourceGroupName,
+      clusterName,
+      options,
     )) {
       yield* page;
     }
@@ -156,12 +229,12 @@ export class CassandraClustersImpl implements CassandraClusters {
   public listBackups(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersListBackupsOptionalParams
+    options?: CassandraClustersListBackupsOptionalParams,
   ): PagedAsyncIterableIterator<BackupResource> {
     const iter = this.listBackupsPagingAll(
       resourceGroupName,
       clusterName,
-      options
+      options,
     );
     return {
       next() {
@@ -178,9 +251,9 @@ export class CassandraClustersImpl implements CassandraClusters {
           resourceGroupName,
           clusterName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -188,7 +261,7 @@ export class CassandraClustersImpl implements CassandraClusters {
     resourceGroupName: string,
     clusterName: string,
     options?: CassandraClustersListBackupsOptionalParams,
-    _settings?: PageSettings
+    _settings?: PageSettings,
   ): AsyncIterableIterator<BackupResource[]> {
     let result: CassandraClustersListBackupsResponse;
     result = await this._listBackups(resourceGroupName, clusterName, options);
@@ -198,12 +271,12 @@ export class CassandraClustersImpl implements CassandraClusters {
   private async *listBackupsPagingAll(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersListBackupsOptionalParams
+    options?: CassandraClustersListBackupsOptionalParams,
   ): AsyncIterableIterator<BackupResource> {
     for await (const page of this.listBackupsPagingPage(
       resourceGroupName,
       clusterName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -214,11 +287,11 @@ export class CassandraClustersImpl implements CassandraClusters {
    * @param options The options parameters.
    */
   private _listBySubscription(
-    options?: CassandraClustersListBySubscriptionOptionalParams
+    options?: CassandraClustersListBySubscriptionOptionalParams,
   ): Promise<CassandraClustersListBySubscriptionResponse> {
     return this.client.sendOperationRequest(
       { options },
-      listBySubscriptionOperationSpec
+      listBySubscriptionOperationSpec,
     );
   }
 
@@ -229,11 +302,11 @@ export class CassandraClustersImpl implements CassandraClusters {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: CassandraClustersListByResourceGroupOptionalParams
+    options?: CassandraClustersListByResourceGroupOptionalParams,
   ): Promise<CassandraClustersListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -246,11 +319,11 @@ export class CassandraClustersImpl implements CassandraClusters {
   get(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersGetOptionalParams
+    options?: CassandraClustersGetOptionalParams,
   ): Promise<CassandraClustersGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, clusterName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -263,25 +336,24 @@ export class CassandraClustersImpl implements CassandraClusters {
   async beginDelete(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CassandraClustersDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -290,8 +362,8 @@ export class CassandraClustersImpl implements CassandraClusters {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -299,19 +371,19 @@ export class CassandraClustersImpl implements CassandraClusters {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, clusterName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, clusterName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -326,12 +398,12 @@ export class CassandraClustersImpl implements CassandraClusters {
   async beginDeleteAndWait(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersDeleteOptionalParams
+    options?: CassandraClustersDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       clusterName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -348,30 +420,29 @@ export class CassandraClustersImpl implements CassandraClusters {
     resourceGroupName: string,
     clusterName: string,
     body: ClusterResource,
-    options?: CassandraClustersCreateUpdateOptionalParams
+    options?: CassandraClustersCreateUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CassandraClustersCreateUpdateResponse>,
+    SimplePollerLike<
+      OperationState<CassandraClustersCreateUpdateResponse>,
       CassandraClustersCreateUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CassandraClustersCreateUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -380,8 +451,8 @@ export class CassandraClustersImpl implements CassandraClusters {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -389,19 +460,22 @@ export class CassandraClustersImpl implements CassandraClusters {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, clusterName, body, options },
-      createUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, clusterName, body, options },
+      spec: createUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CassandraClustersCreateUpdateResponse,
+      OperationState<CassandraClustersCreateUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -419,13 +493,13 @@ export class CassandraClustersImpl implements CassandraClusters {
     resourceGroupName: string,
     clusterName: string,
     body: ClusterResource,
-    options?: CassandraClustersCreateUpdateOptionalParams
+    options?: CassandraClustersCreateUpdateOptionalParams,
   ): Promise<CassandraClustersCreateUpdateResponse> {
     const poller = await this.beginCreateUpdate(
       resourceGroupName,
       clusterName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -441,30 +515,29 @@ export class CassandraClustersImpl implements CassandraClusters {
     resourceGroupName: string,
     clusterName: string,
     body: ClusterResource,
-    options?: CassandraClustersUpdateOptionalParams
+    options?: CassandraClustersUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CassandraClustersUpdateResponse>,
+    SimplePollerLike<
+      OperationState<CassandraClustersUpdateResponse>,
       CassandraClustersUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CassandraClustersUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -473,8 +546,8 @@ export class CassandraClustersImpl implements CassandraClusters {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -482,19 +555,22 @@ export class CassandraClustersImpl implements CassandraClusters {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, clusterName, body, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, clusterName, body, options },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CassandraClustersUpdateResponse,
+      OperationState<CassandraClustersUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -511,13 +587,13 @@ export class CassandraClustersImpl implements CassandraClusters {
     resourceGroupName: string,
     clusterName: string,
     body: ClusterResource,
-    options?: CassandraClustersUpdateOptionalParams
+    options?: CassandraClustersUpdateOptionalParams,
   ): Promise<CassandraClustersUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       clusterName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -533,30 +609,29 @@ export class CassandraClustersImpl implements CassandraClusters {
     resourceGroupName: string,
     clusterName: string,
     body: CommandPostBody,
-    options?: CassandraClustersInvokeCommandOptionalParams
+    options?: CassandraClustersInvokeCommandOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CassandraClustersInvokeCommandResponse>,
+    SimplePollerLike<
+      OperationState<CassandraClustersInvokeCommandResponse>,
       CassandraClustersInvokeCommandResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CassandraClustersInvokeCommandResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -565,8 +640,8 @@ export class CassandraClustersImpl implements CassandraClusters {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -574,19 +649,22 @@ export class CassandraClustersImpl implements CassandraClusters {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, clusterName, body, options },
-      invokeCommandOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, clusterName, body, options },
+      spec: invokeCommandOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CassandraClustersInvokeCommandResponse,
+      OperationState<CassandraClustersInvokeCommandResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -603,15 +681,145 @@ export class CassandraClustersImpl implements CassandraClusters {
     resourceGroupName: string,
     clusterName: string,
     body: CommandPostBody,
-    options?: CassandraClustersInvokeCommandOptionalParams
+    options?: CassandraClustersInvokeCommandOptionalParams,
   ): Promise<CassandraClustersInvokeCommandResponse> {
     const poller = await this.beginInvokeCommand(
       resourceGroupName,
       clusterName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
+  }
+
+  /**
+   * Invoke a command like nodetool for cassandra maintenance asynchronously
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param clusterName Managed Cassandra cluster name.
+   * @param body Specification which command to run where
+   * @param options The options parameters.
+   */
+  async beginInvokeCommandAsync(
+    resourceGroupName: string,
+    clusterName: string,
+    body: CommandPostBody,
+    options?: CassandraClustersInvokeCommandAsyncOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<CassandraClustersInvokeCommandAsyncResponse>,
+      CassandraClustersInvokeCommandAsyncResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<CassandraClustersInvokeCommandAsyncResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, clusterName, body, options },
+      spec: invokeCommandAsyncOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CassandraClustersInvokeCommandAsyncResponse,
+      OperationState<CassandraClustersInvokeCommandAsyncResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Invoke a command like nodetool for cassandra maintenance asynchronously
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param clusterName Managed Cassandra cluster name.
+   * @param body Specification which command to run where
+   * @param options The options parameters.
+   */
+  async beginInvokeCommandAsyncAndWait(
+    resourceGroupName: string,
+    clusterName: string,
+    body: CommandPostBody,
+    options?: CassandraClustersInvokeCommandAsyncOptionalParams,
+  ): Promise<CassandraClustersInvokeCommandAsyncResponse> {
+    const poller = await this.beginInvokeCommandAsync(
+      resourceGroupName,
+      clusterName,
+      body,
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * List all commands currently running on ring info
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param clusterName Managed Cassandra cluster name.
+   * @param options The options parameters.
+   */
+  private _listCommand(
+    resourceGroupName: string,
+    clusterName: string,
+    options?: CassandraClustersListCommandOptionalParams,
+  ): Promise<CassandraClustersListCommandResponse> {
+    return this.client.sendOperationRequest(
+      { resourceGroupName, clusterName, options },
+      listCommandOperationSpec,
+    );
+  }
+
+  /**
+   * Get details about a specified command that was run asynchronously.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param clusterName Managed Cassandra cluster name.
+   * @param commandId Managed Cassandra cluster command id.
+   * @param options The options parameters.
+   */
+  getCommandAsync(
+    resourceGroupName: string,
+    clusterName: string,
+    commandId: string,
+    options?: CassandraClustersGetCommandAsyncOptionalParams,
+  ): Promise<CassandraClustersGetCommandAsyncResponse> {
+    return this.client.sendOperationRequest(
+      { resourceGroupName, clusterName, commandId, options },
+      getCommandAsyncOperationSpec,
+    );
   }
 
   /**
@@ -623,11 +831,11 @@ export class CassandraClustersImpl implements CassandraClusters {
   private _listBackups(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersListBackupsOptionalParams
+    options?: CassandraClustersListBackupsOptionalParams,
   ): Promise<CassandraClustersListBackupsResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, clusterName, options },
-      listBackupsOperationSpec
+      listBackupsOperationSpec,
     );
   }
 
@@ -642,11 +850,11 @@ export class CassandraClustersImpl implements CassandraClusters {
     resourceGroupName: string,
     clusterName: string,
     backupId: string,
-    options?: CassandraClustersGetBackupOptionalParams
+    options?: CassandraClustersGetBackupOptionalParams,
   ): Promise<CassandraClustersGetBackupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, clusterName, backupId, options },
-      getBackupOperationSpec
+      getBackupOperationSpec,
     );
   }
 
@@ -661,25 +869,24 @@ export class CassandraClustersImpl implements CassandraClusters {
   async beginDeallocate(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersDeallocateOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CassandraClustersDeallocateOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -688,8 +895,8 @@ export class CassandraClustersImpl implements CassandraClusters {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -697,19 +904,19 @@ export class CassandraClustersImpl implements CassandraClusters {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, clusterName, options },
-      deallocateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, clusterName, options },
+      spec: deallocateOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -726,12 +933,12 @@ export class CassandraClustersImpl implements CassandraClusters {
   async beginDeallocateAndWait(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersDeallocateOptionalParams
+    options?: CassandraClustersDeallocateOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDeallocate(
       resourceGroupName,
       clusterName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -747,25 +954,24 @@ export class CassandraClustersImpl implements CassandraClusters {
   async beginStart(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersStartOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CassandraClustersStartOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -774,8 +980,8 @@ export class CassandraClustersImpl implements CassandraClusters {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -783,19 +989,19 @@ export class CassandraClustersImpl implements CassandraClusters {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, clusterName, options },
-      startOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, clusterName, options },
+      spec: startOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -812,12 +1018,12 @@ export class CassandraClustersImpl implements CassandraClusters {
   async beginStartAndWait(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersStartOptionalParams
+    options?: CassandraClustersStartOptionalParams,
   ): Promise<void> {
     const poller = await this.beginStart(
       resourceGroupName,
       clusterName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -831,11 +1037,11 @@ export class CassandraClustersImpl implements CassandraClusters {
   status(
     resourceGroupName: string,
     clusterName: string,
-    options?: CassandraClustersStatusOptionalParams
+    options?: CassandraClustersStatusOptionalParams,
   ): Promise<CassandraClustersStatusResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, clusterName, options },
-      statusOperationSpec
+      statusOperationSpec,
     );
   }
 }
@@ -843,220 +1049,51 @@ export class CassandraClustersImpl implements CassandraClusters {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.DocumentDB/cassandraClusters",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.DocumentDB/cassandraClusters",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ListClusters
+      bodyMapper: Mappers.ListClusters,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ListClusters
+      bodyMapper: Mappers.ListClusters,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ClusterResource
+      bodyMapper: Mappers.ClusterResource,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.clusterName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}",
-  httpMethod: "DELETE",
-  responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.clusterName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const createUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}",
-  httpMethod: "PUT",
-  responses: {
-    200: {
-      bodyMapper: Mappers.ClusterResource
+      bodyMapper: Mappers.ErrorResponse,
     },
-    201: {
-      bodyMapper: Mappers.ClusterResource
-    },
-    202: {
-      bodyMapper: Mappers.ClusterResource
-    },
-    204: {
-      bodyMapper: Mappers.ClusterResource
-    },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  requestBody: Parameters.body,
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.clusterName
-  ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
-const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}",
-  httpMethod: "PATCH",
-  responses: {
-    200: {
-      bodyMapper: Mappers.ClusterResource
-    },
-    201: {
-      bodyMapper: Mappers.ClusterResource
-    },
-    202: {
-      bodyMapper: Mappers.ClusterResource
-    },
-    204: {
-      bodyMapper: Mappers.ClusterResource
-    },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  requestBody: Parameters.body,
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.clusterName
-  ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
-const invokeCommandOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/invokeCommand",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.CommandOutput
-    },
-    201: {
-      bodyMapper: Mappers.CommandOutput
-    },
-    202: {
-      bodyMapper: Mappers.CommandOutput
-    },
-    204: {
-      bodyMapper: Mappers.CommandOutput
-    },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  requestBody: Parameters.body1,
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.clusterName
-  ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
-const listBackupsOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/backups",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.ListBackups
-    },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.clusterName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getBackupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/backups/{backupId}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.BackupResource
-    },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -1064,76 +1101,308 @@ const getBackupOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.clusterName,
-    Parameters.backupId
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
-const deallocateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/deallocate",
-  httpMethod: "POST",
+const deleteOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}",
+  httpMethod: "DELETE",
   responses: {
     200: {},
     201: {},
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.clusterName
+    Parameters.clusterName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
-const startOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/start",
+const createUpdateOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}",
+  httpMethod: "PUT",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ClusterResource,
+    },
+    201: {
+      bodyMapper: Mappers.ClusterResource,
+    },
+    202: {
+      bodyMapper: Mappers.ClusterResource,
+    },
+    204: {
+      bodyMapper: Mappers.ClusterResource,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.body,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
+};
+const updateOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}",
+  httpMethod: "PATCH",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ClusterResource,
+    },
+    201: {
+      bodyMapper: Mappers.ClusterResource,
+    },
+    202: {
+      bodyMapper: Mappers.ClusterResource,
+    },
+    204: {
+      bodyMapper: Mappers.ClusterResource,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.body,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
+};
+const invokeCommandOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/invokeCommand",
   httpMethod: "POST",
   responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
+    200: {
+      bodyMapper: Mappers.CommandOutput,
+    },
+    201: {
+      bodyMapper: Mappers.CommandOutput,
+    },
+    202: {
+      bodyMapper: Mappers.CommandOutput,
+    },
+    204: {
+      bodyMapper: Mappers.CommandOutput,
+    },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
+  requestBody: Parameters.body1,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.clusterName
+    Parameters.clusterName,
   ],
-  headerParameters: [Parameters.accept],
-  serializer
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
 };
-const statusOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/status",
+const invokeCommandAsyncOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/invokeCommandAsync",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      bodyMapper: Mappers.CommandPublicResource,
+    },
+    201: {
+      bodyMapper: Mappers.CommandPublicResource,
+    },
+    202: {
+      bodyMapper: Mappers.CommandPublicResource,
+    },
+    204: {
+      bodyMapper: Mappers.CommandPublicResource,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.body1,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
+};
+const listCommandOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/commands",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CassandraClusterPublicStatus
+      bodyMapper: Mappers.ListCommands,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.clusterName
+    Parameters.clusterName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getCommandAsyncOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/commands/{commandId}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ListCommands,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+    Parameters.commandId,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const listBackupsOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/backups",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ListBackups,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const getBackupOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/backups/{backupId}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.BackupResource,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+    Parameters.backupId,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const deallocateOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/deallocate",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.xMsForceDeallocate],
+  serializer,
+};
+const startOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/start",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const statusOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/cassandraClusters/{clusterName}/status",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.CassandraClusterPublicStatus,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };

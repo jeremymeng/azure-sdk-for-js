@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -32,7 +32,7 @@ async function updateIPGroups() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ipGroups/{ipGroupsName}",
       subscriptionId,
       resourceGroupName,
-      ipGroupsName
+      ipGroupsName,
     )
     .patch(options);
   console.log(result);

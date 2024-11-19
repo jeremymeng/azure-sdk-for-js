@@ -6,14 +6,19 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { Datastores } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { AzureVMwareSolutionAPI } from "../azureVMwareSolutionAPI";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   Datastore,
   DatastoresListNextOptionalParams,
@@ -24,7 +29,7 @@ import {
   DatastoresCreateOrUpdateOptionalParams,
   DatastoresCreateOrUpdateResponse,
   DatastoresDeleteOptionalParams,
-  DatastoresListNextResponse
+  DatastoresListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -41,23 +46,23 @@ export class DatastoresImpl implements Datastores {
   }
 
   /**
-   * List datastores in a private cloud cluster
+   * List Datastore resources by Cluster
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
+   * @param clusterName Name of the cluster
    * @param options The options parameters.
    */
   public list(
     resourceGroupName: string,
     privateCloudName: string,
     clusterName: string,
-    options?: DatastoresListOptionalParams
+    options?: DatastoresListOptionalParams,
   ): PagedAsyncIterableIterator<Datastore> {
     const iter = this.listPagingAll(
       resourceGroupName,
       privateCloudName,
       clusterName,
-      options
+      options,
     );
     return {
       next() {
@@ -66,14 +71,18 @@ export class DatastoresImpl implements Datastores {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listPagingPage(
           resourceGroupName,
           privateCloudName,
           clusterName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -81,26 +90,35 @@ export class DatastoresImpl implements Datastores {
     resourceGroupName: string,
     privateCloudName: string,
     clusterName: string,
-    options?: DatastoresListOptionalParams
+    options?: DatastoresListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<Datastore[]> {
-    let result = await this._list(
-      resourceGroupName,
-      privateCloudName,
-      clusterName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: DatastoresListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(
+        resourceGroupName,
+        privateCloudName,
+        clusterName,
+        options,
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(
         resourceGroupName,
         privateCloudName,
         clusterName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -108,43 +126,43 @@ export class DatastoresImpl implements Datastores {
     resourceGroupName: string,
     privateCloudName: string,
     clusterName: string,
-    options?: DatastoresListOptionalParams
+    options?: DatastoresListOptionalParams,
   ): AsyncIterableIterator<Datastore> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       privateCloudName,
       clusterName,
-      options
+      options,
     )) {
       yield* page;
     }
   }
 
   /**
-   * List datastores in a private cloud cluster
+   * List Datastore resources by Cluster
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
+   * @param clusterName Name of the cluster
    * @param options The options parameters.
    */
   private _list(
     resourceGroupName: string,
     privateCloudName: string,
     clusterName: string,
-    options?: DatastoresListOptionalParams
+    options?: DatastoresListOptionalParams,
   ): Promise<DatastoresListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, clusterName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
   /**
-   * Get a datastore in a private cloud cluster
+   * Get a Datastore
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
-   * @param datastoreName Name of the datastore in the private cloud cluster
+   * @param clusterName Name of the cluster
+   * @param datastoreName Name of the datastore
    * @param options The options parameters.
    */
   get(
@@ -152,7 +170,7 @@ export class DatastoresImpl implements Datastores {
     privateCloudName: string,
     clusterName: string,
     datastoreName: string,
-    options?: DatastoresGetOptionalParams
+    options?: DatastoresGetOptionalParams,
   ): Promise<DatastoresGetResponse> {
     return this.client.sendOperationRequest(
       {
@@ -160,19 +178,19 @@ export class DatastoresImpl implements Datastores {
         privateCloudName,
         clusterName,
         datastoreName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
-   * Create or update a datastore in a private cloud cluster
+   * Create a Datastore
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
-   * @param datastoreName Name of the datastore in the private cloud cluster
-   * @param datastore A datastore in a private cloud cluster
+   * @param clusterName Name of the cluster
+   * @param datastoreName Name of the datastore
+   * @param datastore Resource create parameters.
    * @param options The options parameters.
    */
   async beginCreateOrUpdate(
@@ -181,30 +199,29 @@ export class DatastoresImpl implements Datastores {
     clusterName: string,
     datastoreName: string,
     datastore: Datastore,
-    options?: DatastoresCreateOrUpdateOptionalParams
+    options?: DatastoresCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DatastoresCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<DatastoresCreateOrUpdateResponse>,
       DatastoresCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<DatastoresCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -213,8 +230,8 @@ export class DatastoresImpl implements Datastores {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -222,38 +239,42 @@ export class DatastoresImpl implements Datastores {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         privateCloudName,
         clusterName,
         datastoreName,
         datastore,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      DatastoresCreateOrUpdateResponse,
+      OperationState<DatastoresCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Create or update a datastore in a private cloud cluster
+   * Create a Datastore
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
-   * @param datastoreName Name of the datastore in the private cloud cluster
-   * @param datastore A datastore in a private cloud cluster
+   * @param clusterName Name of the cluster
+   * @param datastoreName Name of the datastore
+   * @param datastore Resource create parameters.
    * @param options The options parameters.
    */
   async beginCreateOrUpdateAndWait(
@@ -262,7 +283,7 @@ export class DatastoresImpl implements Datastores {
     clusterName: string,
     datastoreName: string,
     datastore: Datastore,
-    options?: DatastoresCreateOrUpdateOptionalParams
+    options?: DatastoresCreateOrUpdateOptionalParams,
   ): Promise<DatastoresCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
@@ -270,17 +291,17 @@ export class DatastoresImpl implements Datastores {
       clusterName,
       datastoreName,
       datastore,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * Delete a datastore in a private cloud cluster
+   * Delete a Datastore
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
-   * @param datastoreName Name of the datastore in the private cloud cluster
+   * @param clusterName Name of the cluster
+   * @param datastoreName Name of the datastore
    * @param options The options parameters.
    */
   async beginDelete(
@@ -288,25 +309,24 @@ export class DatastoresImpl implements Datastores {
     privateCloudName: string,
     clusterName: string,
     datastoreName: string,
-    options?: DatastoresDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: DatastoresDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -315,8 +335,8 @@ export class DatastoresImpl implements Datastores {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -324,36 +344,37 @@ export class DatastoresImpl implements Datastores {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         privateCloudName,
         clusterName,
         datastoreName,
-        options
+        options,
       },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Delete a datastore in a private cloud cluster
+   * Delete a Datastore
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
-   * @param datastoreName Name of the datastore in the private cloud cluster
+   * @param clusterName Name of the cluster
+   * @param datastoreName Name of the datastore
    * @param options The options parameters.
    */
   async beginDeleteAndWait(
@@ -361,14 +382,14 @@ export class DatastoresImpl implements Datastores {
     privateCloudName: string,
     clusterName: string,
     datastoreName: string,
-    options?: DatastoresDeleteOptionalParams
+    options?: DatastoresDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       privateCloudName,
       clusterName,
       datastoreName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -377,7 +398,7 @@ export class DatastoresImpl implements Datastores {
    * ListNext
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
+   * @param clusterName Name of the cluster
    * @param nextLink The nextLink from the previous successful call to the List method.
    * @param options The options parameters.
    */
@@ -386,11 +407,11 @@ export class DatastoresImpl implements Datastores {
     privateCloudName: string,
     clusterName: string,
     nextLink: string,
-    options?: DatastoresListNextOptionalParams
+    options?: DatastoresListNextOptionalParams,
   ): Promise<DatastoresListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, clusterName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -398,39 +419,15 @@ export class DatastoresImpl implements Datastores {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/datastores",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/datastores",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DatastoreList
+      bodyMapper: Mappers.DatastoreList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.privateCloudName,
-    Parameters.clusterName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/datastores/{datastoreName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.Datastore
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -439,31 +436,52 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
     Parameters.clusterName,
-    Parameters.datastoreName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/datastores/{datastoreName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.Datastore,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.privateCloudName,
+    Parameters.clusterName,
+    Parameters.datastoreName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/datastores/{datastoreName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/datastores/{datastoreName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Datastore
+      bodyMapper: Mappers.Datastore,
     },
     201: {
-      bodyMapper: Mappers.Datastore
+      bodyMapper: Mappers.Datastore,
     },
     202: {
-      bodyMapper: Mappers.Datastore
+      bodyMapper: Mappers.Datastore,
     },
     204: {
-      bodyMapper: Mappers.Datastore
+      bodyMapper: Mappers.Datastore,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.datastore,
   queryParameters: [Parameters.apiVersion],
@@ -473,15 +491,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
     Parameters.clusterName,
-    Parameters.datastoreName
+    Parameters.datastoreName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/datastores/{datastoreName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/datastores/{datastoreName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -489,8 +506,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -499,31 +516,30 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
     Parameters.clusterName,
-    Parameters.datastoreName
+    Parameters.datastoreName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DatastoreList
+      bodyMapper: Mappers.DatastoreList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
-    Parameters.clusterName
+    Parameters.clusterName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -10,23 +10,26 @@
 // Licensed under the MIT License.
 const { ContainerAppsAPIClient } = require("@azure/arm-appcontainers");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Create or Update a Certificate.
  *
  * @summary Create or Update a Certificate.
- * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2022-06-01-preview/examples/Certificate_CreateOrUpdate.json
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/Certificate_CreateOrUpdate.json
  */
 async function createOrUpdateCertificate() {
-  const subscriptionId = "34adfa4f-cedf-4dc0-ba29-b6d1a69ab345";
-  const resourceGroupName = "examplerg";
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] || "34adfa4f-cedf-4dc0-ba29-b6d1a69ab345";
+  const resourceGroupName = process.env["APPCONTAINERS_RESOURCE_GROUP"] || "examplerg";
   const environmentName = "testcontainerenv";
   const certificateName = "certificate-firendly-name";
   const certificateEnvelope = {
     location: "East US",
     properties: {
+      certificateType: "ImagePullTrustedCA",
       password: "private key password",
-      value: Buffer.from("PFX-or-PEM-blob"),
+      value: Buffer.from("Y2VydA=="),
     },
   };
   const options = {
@@ -38,9 +41,51 @@ async function createOrUpdateCertificate() {
     resourceGroupName,
     environmentName,
     certificateName,
-    options
+    options,
   );
   console.log(result);
 }
 
-createOrUpdateCertificate().catch(console.error);
+/**
+ * This sample demonstrates how to Create or Update a Certificate.
+ *
+ * @summary Create or Update a Certificate.
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/Certificate_CreateOrUpdate_FromKeyVault.json
+ */
+async function createOrUpdateCertificateUsingManagedIdentity() {
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] || "34adfa4f-cedf-4dc0-ba29-b6d1a69ab345";
+  const resourceGroupName = process.env["APPCONTAINERS_RESOURCE_GROUP"] || "examplerg";
+  const environmentName = "testcontainerenv";
+  const certificateName = "certificate-firendly-name";
+  const certificateEnvelope = {
+    location: "East US",
+    properties: {
+      certificateKeyVaultProperties: {
+        identity:
+          "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-rg/providers/microsoft.managedidentity/userassignedidentities/test-user-mi",
+        keyVaultUrl: "https://xxxxxxxx.vault.azure.net/certificates/certName",
+      },
+      certificateType: "ServerSSLCertificate",
+    },
+  };
+  const options = {
+    certificateEnvelope,
+  };
+  const credential = new DefaultAzureCredential();
+  const client = new ContainerAppsAPIClient(credential, subscriptionId);
+  const result = await client.certificates.createOrUpdate(
+    resourceGroupName,
+    environmentName,
+    certificateName,
+    options,
+  );
+  console.log(result);
+}
+
+async function main() {
+  createOrUpdateCertificate();
+  createOrUpdateCertificateUsingManagedIdentity();
+}
+
+main().catch(console.error);

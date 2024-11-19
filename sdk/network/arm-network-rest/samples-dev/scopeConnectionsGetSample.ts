@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -33,7 +33,7 @@ async function getNetworkManagerScopeConnection() {
       subscriptionId,
       resourceGroupName,
       networkManagerName,
-      scopeConnectionName
+      scopeConnectionName,
     )
     .get(options);
   console.log(result);

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { StorageBlobDownloadWithSASTest } from "./dowloadWithSAS.spec";
 import {
@@ -8,7 +8,7 @@ import {
   createPipelineRequest,
   PipelineRequest,
 } from "@azure/core-rest-pipeline";
-import { drainStream } from "@azure/test-utils-perf";
+import { drainStream } from "@azure-tools/test-perf";
 
 export class CoreHTTPSDownloadWithSASTest extends StorageBlobDownloadWithSASTest {
   client: HttpClient;

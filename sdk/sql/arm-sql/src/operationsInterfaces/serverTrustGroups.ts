@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ServerTrustGroup,
   ServerTrustGroupsListByLocationOptionalParams,
@@ -16,7 +16,7 @@ import {
   ServerTrustGroupsGetResponse,
   ServerTrustGroupsCreateOrUpdateOptionalParams,
   ServerTrustGroupsCreateOrUpdateResponse,
-  ServerTrustGroupsDeleteOptionalParams
+  ServerTrustGroupsDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -32,7 +32,7 @@ export interface ServerTrustGroups {
   listByLocation(
     resourceGroupName: string,
     locationName: string,
-    options?: ServerTrustGroupsListByLocationOptionalParams
+    options?: ServerTrustGroupsListByLocationOptionalParams,
   ): PagedAsyncIterableIterator<ServerTrustGroup>;
   /**
    * Gets a server trust groups by instance name.
@@ -44,7 +44,7 @@ export interface ServerTrustGroups {
   listByInstance(
     resourceGroupName: string,
     managedInstanceName: string,
-    options?: ServerTrustGroupsListByInstanceOptionalParams
+    options?: ServerTrustGroupsListByInstanceOptionalParams,
   ): PagedAsyncIterableIterator<ServerTrustGroup>;
   /**
    * Gets a server trust group.
@@ -58,7 +58,7 @@ export interface ServerTrustGroups {
     resourceGroupName: string,
     locationName: string,
     serverTrustGroupName: string,
-    options?: ServerTrustGroupsGetOptionalParams
+    options?: ServerTrustGroupsGetOptionalParams,
   ): Promise<ServerTrustGroupsGetResponse>;
   /**
    * Creates or updates a server trust group.
@@ -74,10 +74,10 @@ export interface ServerTrustGroups {
     locationName: string,
     serverTrustGroupName: string,
     parameters: ServerTrustGroup,
-    options?: ServerTrustGroupsCreateOrUpdateOptionalParams
+    options?: ServerTrustGroupsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ServerTrustGroupsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ServerTrustGroupsCreateOrUpdateResponse>,
       ServerTrustGroupsCreateOrUpdateResponse
     >
   >;
@@ -95,7 +95,7 @@ export interface ServerTrustGroups {
     locationName: string,
     serverTrustGroupName: string,
     parameters: ServerTrustGroup,
-    options?: ServerTrustGroupsCreateOrUpdateOptionalParams
+    options?: ServerTrustGroupsCreateOrUpdateOptionalParams,
   ): Promise<ServerTrustGroupsCreateOrUpdateResponse>;
   /**
    * Deletes a server trust group.
@@ -109,8 +109,8 @@ export interface ServerTrustGroups {
     resourceGroupName: string,
     locationName: string,
     serverTrustGroupName: string,
-    options?: ServerTrustGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: ServerTrustGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a server trust group.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -123,6 +123,6 @@ export interface ServerTrustGroups {
     resourceGroupName: string,
     locationName: string,
     serverTrustGroupName: string,
-    options?: ServerTrustGroupsDeleteOptionalParams
+    options?: ServerTrustGroupsDeleteOptionalParams,
   ): Promise<void>;
 }

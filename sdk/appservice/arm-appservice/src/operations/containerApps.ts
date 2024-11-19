@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { WebSiteManagementClient } from "../webSiteManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ContainerApp,
   ContainerAppsListBySubscriptionNextOptionalParams,
@@ -31,7 +35,7 @@ import {
   ContainerAppsListSecretsOptionalParams,
   ContainerAppsListSecretsResponse,
   ContainerAppsListBySubscriptionNextResponse,
-  ContainerAppsListByResourceGroupNextResponse
+  ContainerAppsListByResourceGroupNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -52,7 +56,7 @@ export class ContainerAppsImpl implements ContainerApps {
    * @param options The options parameters.
    */
   public listBySubscription(
-    options?: ContainerAppsListBySubscriptionOptionalParams
+    options?: ContainerAppsListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<ContainerApp> {
     const iter = this.listBySubscriptionPagingAll(options);
     return {
@@ -67,13 +71,13 @@ export class ContainerAppsImpl implements ContainerApps {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listBySubscriptionPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listBySubscriptionPagingPage(
     options?: ContainerAppsListBySubscriptionOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ContainerApp[]> {
     let result: ContainerAppsListBySubscriptionResponse;
     let continuationToken = settings?.continuationToken;
@@ -94,7 +98,7 @@ export class ContainerAppsImpl implements ContainerApps {
   }
 
   private async *listBySubscriptionPagingAll(
-    options?: ContainerAppsListBySubscriptionOptionalParams
+    options?: ContainerAppsListBySubscriptionOptionalParams,
   ): AsyncIterableIterator<ContainerApp> {
     for await (const page of this.listBySubscriptionPagingPage(options)) {
       yield* page;
@@ -108,7 +112,7 @@ export class ContainerAppsImpl implements ContainerApps {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: ContainerAppsListByResourceGroupOptionalParams
+    options?: ContainerAppsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<ContainerApp> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -125,16 +129,16 @@ export class ContainerAppsImpl implements ContainerApps {
         return this.listByResourceGroupPagingPage(
           resourceGroupName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
     options?: ContainerAppsListByResourceGroupOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ContainerApp[]> {
     let result: ContainerAppsListByResourceGroupResponse;
     let continuationToken = settings?.continuationToken;
@@ -149,7 +153,7 @@ export class ContainerAppsImpl implements ContainerApps {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -160,11 +164,11 @@ export class ContainerAppsImpl implements ContainerApps {
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: ContainerAppsListByResourceGroupOptionalParams
+    options?: ContainerAppsListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<ContainerApp> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -175,11 +179,11 @@ export class ContainerAppsImpl implements ContainerApps {
    * @param options The options parameters.
    */
   private _listBySubscription(
-    options?: ContainerAppsListBySubscriptionOptionalParams
+    options?: ContainerAppsListBySubscriptionOptionalParams,
   ): Promise<ContainerAppsListBySubscriptionResponse> {
     return this.client.sendOperationRequest(
       { options },
-      listBySubscriptionOperationSpec
+      listBySubscriptionOperationSpec,
     );
   }
 
@@ -190,11 +194,11 @@ export class ContainerAppsImpl implements ContainerApps {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: ContainerAppsListByResourceGroupOptionalParams
+    options?: ContainerAppsListByResourceGroupOptionalParams,
   ): Promise<ContainerAppsListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -207,11 +211,11 @@ export class ContainerAppsImpl implements ContainerApps {
   get(
     resourceGroupName: string,
     name: string,
-    options?: ContainerAppsGetOptionalParams
+    options?: ContainerAppsGetOptionalParams,
   ): Promise<ContainerAppsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, name, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -226,30 +230,29 @@ export class ContainerAppsImpl implements ContainerApps {
     resourceGroupName: string,
     name: string,
     containerAppEnvelope: ContainerApp,
-    options?: ContainerAppsCreateOrUpdateOptionalParams
+    options?: ContainerAppsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ContainerAppsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ContainerAppsCreateOrUpdateResponse>,
       ContainerAppsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<ContainerAppsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -258,8 +261,8 @@ export class ContainerAppsImpl implements ContainerApps {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -267,19 +270,22 @@ export class ContainerAppsImpl implements ContainerApps {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, name, containerAppEnvelope, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, name, containerAppEnvelope, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      ContainerAppsCreateOrUpdateResponse,
+      OperationState<ContainerAppsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -296,13 +302,13 @@ export class ContainerAppsImpl implements ContainerApps {
     resourceGroupName: string,
     name: string,
     containerAppEnvelope: ContainerApp,
-    options?: ContainerAppsCreateOrUpdateOptionalParams
+    options?: ContainerAppsCreateOrUpdateOptionalParams,
   ): Promise<ContainerAppsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       name,
       containerAppEnvelope,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -316,25 +322,24 @@ export class ContainerAppsImpl implements ContainerApps {
   async beginDelete(
     resourceGroupName: string,
     name: string,
-    options?: ContainerAppsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: ContainerAppsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -343,8 +348,8 @@ export class ContainerAppsImpl implements ContainerApps {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -352,19 +357,19 @@ export class ContainerAppsImpl implements ContainerApps {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, name, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, name, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -379,7 +384,7 @@ export class ContainerAppsImpl implements ContainerApps {
   async beginDeleteAndWait(
     resourceGroupName: string,
     name: string,
-    options?: ContainerAppsDeleteOptionalParams
+    options?: ContainerAppsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(resourceGroupName, name, options);
     return poller.pollUntilDone();
@@ -392,11 +397,11 @@ export class ContainerAppsImpl implements ContainerApps {
    */
   listSecrets(
     name: string,
-    options?: ContainerAppsListSecretsOptionalParams
+    options?: ContainerAppsListSecretsOptionalParams,
   ): Promise<ContainerAppsListSecretsResponse> {
     return this.client.sendOperationRequest(
       { name, options },
-      listSecretsOperationSpec
+      listSecretsOperationSpec,
     );
   }
 
@@ -407,11 +412,11 @@ export class ContainerAppsImpl implements ContainerApps {
    */
   private _listBySubscriptionNext(
     nextLink: string,
-    options?: ContainerAppsListBySubscriptionNextOptionalParams
+    options?: ContainerAppsListBySubscriptionNextOptionalParams,
   ): Promise<ContainerAppsListBySubscriptionNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listBySubscriptionNextOperationSpec
+      listBySubscriptionNextOperationSpec,
     );
   }
 
@@ -424,11 +429,11 @@ export class ContainerAppsImpl implements ContainerApps {
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: ContainerAppsListByResourceGroupNextOptionalParams
+    options?: ContainerAppsListByResourceGroupNextOptionalParams,
   ): Promise<ContainerAppsListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 }
@@ -440,83 +445,80 @@ const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ContainerAppCollection
+      bodyMapper: Mappers.ContainerAppCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/containerApps",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/containerApps",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ContainerAppCollection
+      bodyMapper: Mappers.ContainerAppCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/containerApps/{name}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.ContainerApp
+      bodyMapper: Mappers.DefaultErrorResponse,
     },
-    404: {
-      isError: true
-    },
-    default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.name
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/containerApps/{name}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ContainerApp,
+    },
+    404: {
+      isError: true,
+    },
+    default: {
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.name,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/containerApps/{name}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/containerApps/{name}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ContainerApp
+      bodyMapper: Mappers.ContainerApp,
     },
     201: {
-      bodyMapper: Mappers.ContainerApp
+      bodyMapper: Mappers.ContainerApp,
     },
     202: {
-      bodyMapper: Mappers.ContainerApp
+      bodyMapper: Mappers.ContainerApp,
     },
     204: {
-      bodyMapper: Mappers.ContainerApp
+      bodyMapper: Mappers.ContainerApp,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
   requestBody: Parameters.containerAppEnvelope,
   queryParameters: [Parameters.apiVersion],
@@ -524,15 +526,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.name
+    Parameters.name,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/containerApps/{name}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/containerApps/{name}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -540,74 +541,71 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.name
+    Parameters.name,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listSecretsOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Web/containerApps/{name}/listSecrets",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/containerApps/{name}/listSecrets",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.SecretsCollection
+      bodyMapper: Mappers.SecretsCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId, Parameters.name],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listBySubscriptionNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ContainerAppCollection
+      bodyMapper: Mappers.ContainerAppCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ContainerAppCollection
+      bodyMapper: Mappers.ContainerAppCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ComputeManagementClient } from "../computeManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   GalleryImageVersion,
   GalleryImageVersionsListByGalleryImageNextOptionalParams,
@@ -28,7 +32,7 @@ import {
   GalleryImageVersionsGetOptionalParams,
   GalleryImageVersionsGetResponse,
   GalleryImageVersionsDeleteOptionalParams,
-  GalleryImageVersionsListByGalleryImageNextResponse
+  GalleryImageVersionsListByGalleryImageNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -56,13 +60,13 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     resourceGroupName: string,
     galleryName: string,
     galleryImageName: string,
-    options?: GalleryImageVersionsListByGalleryImageOptionalParams
+    options?: GalleryImageVersionsListByGalleryImageOptionalParams,
   ): PagedAsyncIterableIterator<GalleryImageVersion> {
     const iter = this.listByGalleryImagePagingAll(
       resourceGroupName,
       galleryName,
       galleryImageName,
-      options
+      options,
     );
     return {
       next() {
@@ -80,9 +84,9 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
           galleryName,
           galleryImageName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -91,7 +95,7 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     galleryName: string,
     galleryImageName: string,
     options?: GalleryImageVersionsListByGalleryImageOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<GalleryImageVersion[]> {
     let result: GalleryImageVersionsListByGalleryImageResponse;
     let continuationToken = settings?.continuationToken;
@@ -100,7 +104,7 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
         resourceGroupName,
         galleryName,
         galleryImageName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -113,7 +117,7 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
         galleryName,
         galleryImageName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -126,13 +130,13 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     resourceGroupName: string,
     galleryName: string,
     galleryImageName: string,
-    options?: GalleryImageVersionsListByGalleryImageOptionalParams
+    options?: GalleryImageVersionsListByGalleryImageOptionalParams,
   ): AsyncIterableIterator<GalleryImageVersion> {
     for await (const page of this.listByGalleryImagePagingPage(
       resourceGroupName,
       galleryName,
       galleryImageName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -157,30 +161,29 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     galleryImageName: string,
     galleryImageVersionName: string,
     galleryImageVersion: GalleryImageVersion,
-    options?: GalleryImageVersionsCreateOrUpdateOptionalParams
+    options?: GalleryImageVersionsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<GalleryImageVersionsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<GalleryImageVersionsCreateOrUpdateResponse>,
       GalleryImageVersionsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<GalleryImageVersionsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -189,8 +192,8 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -198,26 +201,29 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         galleryName,
         galleryImageName,
         galleryImageVersionName,
         galleryImageVersion,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      GalleryImageVersionsCreateOrUpdateResponse,
+      OperationState<GalleryImageVersionsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -242,7 +248,7 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     galleryImageName: string,
     galleryImageVersionName: string,
     galleryImageVersion: GalleryImageVersion,
-    options?: GalleryImageVersionsCreateOrUpdateOptionalParams
+    options?: GalleryImageVersionsCreateOrUpdateOptionalParams,
   ): Promise<GalleryImageVersionsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
@@ -250,7 +256,7 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
       galleryImageName,
       galleryImageVersionName,
       galleryImageVersion,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -273,30 +279,29 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     galleryImageName: string,
     galleryImageVersionName: string,
     galleryImageVersion: GalleryImageVersionUpdate,
-    options?: GalleryImageVersionsUpdateOptionalParams
+    options?: GalleryImageVersionsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<GalleryImageVersionsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<GalleryImageVersionsUpdateResponse>,
       GalleryImageVersionsUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<GalleryImageVersionsUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -305,8 +310,8 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -314,26 +319,29 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         galleryName,
         galleryImageName,
         galleryImageVersionName,
         galleryImageVersion,
-        options
+        options,
       },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      GalleryImageVersionsUpdateResponse,
+      OperationState<GalleryImageVersionsUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -357,7 +365,7 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     galleryImageName: string,
     galleryImageVersionName: string,
     galleryImageVersion: GalleryImageVersionUpdate,
-    options?: GalleryImageVersionsUpdateOptionalParams
+    options?: GalleryImageVersionsUpdateOptionalParams,
   ): Promise<GalleryImageVersionsUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
@@ -365,7 +373,7 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
       galleryImageName,
       galleryImageVersionName,
       galleryImageVersion,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -383,7 +391,7 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     galleryName: string,
     galleryImageName: string,
     galleryImageVersionName: string,
-    options?: GalleryImageVersionsGetOptionalParams
+    options?: GalleryImageVersionsGetOptionalParams,
   ): Promise<GalleryImageVersionsGetResponse> {
     return this.client.sendOperationRequest(
       {
@@ -391,9 +399,9 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
         galleryName,
         galleryImageName,
         galleryImageVersionName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -410,25 +418,24 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     galleryName: string,
     galleryImageName: string,
     galleryImageVersionName: string,
-    options?: GalleryImageVersionsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: GalleryImageVersionsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -437,8 +444,8 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -446,25 +453,25 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         galleryName,
         galleryImageName,
         galleryImageVersionName,
-        options
+        options,
       },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -483,14 +490,14 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     galleryName: string,
     galleryImageName: string,
     galleryImageVersionName: string,
-    options?: GalleryImageVersionsDeleteOptionalParams
+    options?: GalleryImageVersionsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       galleryName,
       galleryImageName,
       galleryImageVersionName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -507,11 +514,11 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     resourceGroupName: string,
     galleryName: string,
     galleryImageName: string,
-    options?: GalleryImageVersionsListByGalleryImageOptionalParams
+    options?: GalleryImageVersionsListByGalleryImageOptionalParams,
   ): Promise<GalleryImageVersionsListByGalleryImageResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, galleryName, galleryImageName, options },
-      listByGalleryImageOperationSpec
+      listByGalleryImageOperationSpec,
     );
   }
 
@@ -529,11 +536,11 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
     galleryName: string,
     galleryImageName: string,
     nextLink: string,
-    options?: GalleryImageVersionsListByGalleryImageNextOptionalParams
+    options?: GalleryImageVersionsListByGalleryImageNextOptionalParams,
   ): Promise<GalleryImageVersionsListByGalleryImageNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, galleryName, galleryImageName, nextLink, options },
-      listByGalleryImageNextOperationSpec
+      listByGalleryImageNextOperationSpec,
     );
   }
 }
@@ -541,25 +548,24 @@ export class GalleryImageVersionsImpl implements GalleryImageVersions {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.GalleryImageVersion
+      bodyMapper: Mappers.GalleryImageVersion,
     },
     201: {
-      bodyMapper: Mappers.GalleryImageVersion
+      bodyMapper: Mappers.GalleryImageVersion,
     },
     202: {
-      bodyMapper: Mappers.GalleryImageVersion
+      bodyMapper: Mappers.GalleryImageVersion,
     },
     204: {
-      bodyMapper: Mappers.GalleryImageVersion
+      bodyMapper: Mappers.GalleryImageVersion,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.galleryImageVersion,
   queryParameters: [Parameters.apiVersion3],
@@ -569,32 +575,31 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName,
-    Parameters.galleryImageVersionName
+    Parameters.galleryImageVersionName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.GalleryImageVersion
+      bodyMapper: Mappers.GalleryImageVersion,
     },
     201: {
-      bodyMapper: Mappers.GalleryImageVersion
+      bodyMapper: Mappers.GalleryImageVersion,
     },
     202: {
-      bodyMapper: Mappers.GalleryImageVersion
+      bodyMapper: Mappers.GalleryImageVersion,
     },
     204: {
-      bodyMapper: Mappers.GalleryImageVersion
+      bodyMapper: Mappers.GalleryImageVersion,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.galleryImageVersion1,
   queryParameters: [Parameters.apiVersion3],
@@ -604,39 +609,37 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName,
-    Parameters.galleryImageVersionName
+    Parameters.galleryImageVersionName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.GalleryImageVersion
+      bodyMapper: Mappers.GalleryImageVersion,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion3, Parameters.expand9],
+  queryParameters: [Parameters.apiVersion3, Parameters.expand11],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName,
-    Parameters.galleryImageVersionName
+    Parameters.galleryImageVersionName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -644,8 +647,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion3],
   urlParameters: [
@@ -654,22 +657,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.galleryName,
     Parameters.galleryImageName,
-    Parameters.galleryImageVersionName
+    Parameters.galleryImageVersionName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByGalleryImageOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.GalleryImageVersionList
+      bodyMapper: Mappers.GalleryImageVersionList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion3],
   urlParameters: [
@@ -677,21 +679,21 @@ const listByGalleryImageOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.galleryName,
-    Parameters.galleryImageName
+    Parameters.galleryImageName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByGalleryImageNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.GalleryImageVersionList
+      bodyMapper: Mappers.GalleryImageVersionList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [
     Parameters.$host,
@@ -699,8 +701,8 @@ const listByGalleryImageNextOperationSpec: coreClient.OperationSpec = {
     Parameters.nextLink,
     Parameters.resourceGroupName,
     Parameters.galleryName,
-    Parameters.galleryImageName
+    Parameters.galleryImageName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

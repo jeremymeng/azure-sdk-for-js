@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { LanguageDetectionInput, TextDocumentInput } from "./generated";
-import { TextAnalysisOperationOptions } from "./models";
+import type { ErrorModel, LanguageDetectionInput, TextDocumentInput } from "./generated";
+import type { TextAnalysisOperationOptions } from "./models";
 import { logger } from "./logger";
 
 /**
@@ -15,7 +15,7 @@ import { logger } from "./logger";
  */
 export function sortResponseIdObjects<U extends { id: string }>(
   sortedIds: string[],
-  unsortedArray: U[]
+  unsortedArray: U[],
 ): U[] {
   const unsortedMap = new Map<string, U>();
   for (const item of unsortedArray) {
@@ -25,7 +25,7 @@ export function sortResponseIdObjects<U extends { id: string }>(
   if (unsortedArray.length !== sortedIds.length) {
     const ordinal = unsortedArray.length > sortedIds.length ? "more" : "fewer";
     logger.warning(
-      `The service returned ${ordinal} responses than inputs. Some errors may be treated as fatal.`
+      `The service returned ${ordinal} responses than inputs. Some errors may be treated as fatal.`,
     );
   }
 
@@ -98,7 +98,7 @@ export function isStringArray(documents: unknown[]): documents is string[] {
  */
 export function convertToTextDocumentInput(
   inputs: string[],
-  language?: string
+  language?: string,
 ): TextDocumentInput[] {
   return inputs.map((text: string, index): TextDocumentInput => {
     return {
@@ -114,7 +114,7 @@ export function convertToTextDocumentInput(
  */
 export function convertToLanguageDetectionInput(
   inputs: string[],
-  countryHint?: string
+  countryHint?: string,
 ): LanguageDetectionInput[] {
   return inputs.map((text: string, index): LanguageDetectionInput => {
     return {
@@ -129,7 +129,7 @@ export function convertToLanguageDetectionInput(
  * @internal
  */
 export function getOperationOptions<OptionsT extends TextAnalysisOperationOptions>(
-  options: OptionsT
+  options: OptionsT,
 ): {
   options: TextAnalysisOperationOptions;
   rest: Omit<
@@ -162,4 +162,24 @@ export function getOperationOptions<OptionsT extends TextAnalysisOperationOption
     },
     rest,
   };
+}
+
+/**
+ *
+ * @param error - error with the target in the JSON error pointer format "#/items/0
+ * @returns number: the position of the task with error
+ */
+export function extractErrorPointerIndex(error: ErrorModel): number {
+  if (!error.target) {
+    throw new Error("Unexpected response from service - no target present");
+  }
+  const position = parseInt(error.target.split("/").pop() as string);
+
+  if (isNaN(position)) {
+    throw new Error(
+      `Unexpected response from service - action pointer "${error.target}" is not a valid action pointer.`,
+    );
+  }
+
+  return position;
 }

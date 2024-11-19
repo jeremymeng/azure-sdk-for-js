@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { LatLon } from "@azure/maps-common";
+import type { LatLon } from "@azure/maps-common";
 
 function clip(n: number, minValue: number, maxValue: number): number {
   return Math.min(Math.max(n, minValue), maxValue);
@@ -34,7 +34,7 @@ const MAX_LONGITUDE = 180;
 export function positionToTileXY(
   position: LatLon,
   zoom: number,
-  tileSize: "512" | "256"
+  tileSize: "512" | "256",
 ): { x: number; y: number } {
   const latitude = clip(position[0], MIN_LATITUDE, MAX_LATITUDE);
   const longitude = clip(position[1], MIN_LONGITUDE, MAX_LONGITUDE);

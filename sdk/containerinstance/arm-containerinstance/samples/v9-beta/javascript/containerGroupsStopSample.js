@@ -16,10 +16,11 @@ require("dotenv").config();
  * This sample demonstrates how to Stops all containers in a container group. Compute resources will be deallocated and billing will stop.
  *
  * @summary Stops all containers in a container group. Compute resources will be deallocated and billing will stop.
- * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2022-10-01-preview/examples/ContainerGroupsStop.json
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/ContainerGroupsStop.json
  */
 async function containerStop() {
-  const subscriptionId = process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "subid";
+  const subscriptionId =
+    process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
   const resourceGroupName = process.env["CONTAINERINSTANCE_RESOURCE_GROUP"] || "demo";
   const containerGroupName = "demo1";
   const credential = new DefaultAzureCredential();

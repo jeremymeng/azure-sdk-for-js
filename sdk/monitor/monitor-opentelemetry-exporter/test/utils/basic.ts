@@ -1,30 +1,32 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import * as opentelemetry from "@opentelemetry/api";
 import { BasicTracerProvider } from "@opentelemetry/sdk-trace-base";
-import {
-  MeterProvider,
-  PeriodicExportingMetricReader,
-  PeriodicExportingMetricReaderOptions,
-} from "@opentelemetry/sdk-metrics";
+import type { PeriodicExportingMetricReaderOptions } from "@opentelemetry/sdk-metrics";
+import { MeterProvider, PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 
-import { AzureMonitorTraceExporter, AzureMonitorMetricExporter } from "../../src";
-import { Expectation, Scenario } from "./types";
-import { msToTimeSpan } from "../../src/utils/breezeUtils";
+import { AzureMonitorTraceExporter, AzureMonitorMetricExporter } from "../../src/index.js";
+import type { Expectation, Scenario } from "./types.js";
 import { SpanStatusCode } from "@opentelemetry/api";
-import { TelemetryItem as Envelope } from "../../src/generated";
-import { FlushSpanProcessor } from "./flushSpanProcessor";
-import { StandardMetrics } from "../../src/utils/constants/applicationinsights";
+import type { TelemetryItem as Envelope } from "../../src/generated/index.js";
+import { FlushSpanProcessor } from "./flushSpanProcessor.js";
 import { Resource } from "@opentelemetry/resources";
-import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
+import {
+  SemanticResourceAttributes,
+  SemanticAttributes,
+} from "@opentelemetry/semantic-conventions";
+import { AzureMonitorLogExporter } from "../../src/export/log.js";
+import { LoggerProvider, SimpleLogRecordProcessor } from "@opentelemetry/sdk-logs";
+import { SeverityNumber } from "@opentelemetry/api-logs";
 
 function delay<T>(t: number, value?: T): Promise<T | void> {
   return new Promise((resolve) => setTimeout(() => resolve(value), t));
 }
 
 const COMMON_ENVELOPE_PARAMS: Partial<Envelope> = {
-  instrumentationKey: process.env.APPINSIGHTS_INSTRUMENTATIONKEY || "ikey",
+  instrumentationKey:
+    process.env.APPINSIGHTS_INSTRUMENTATIONKEY || "1aa11111-bbbb-1ccc-8ddd-eeeeffff3333",
   sampleRate: 100,
 };
 
@@ -36,11 +38,19 @@ export class TraceBasicScenario implements Scenario {
       connectionString: `instrumentationkey=${COMMON_ENVELOPE_PARAMS.instrumentationKey}`,
     });
     this._processor = new FlushSpanProcessor(exporter);
-    const provider = new BasicTracerProvider();
+    const resource = new Resource({
+      "service.name": "testServiceName",
+      "k8s.cluster.name": "testClusterName",
+      "k8s.node.name": "testNodeName",
+      "k8s.namespace.name": "testNamespaceName",
+      "k8s.pod.name": "testPodName",
+    });
+    const provider = new BasicTracerProvider({ resource: resource });
     provider.addSpanProcessor(this._processor);
     provider.register();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   async run(): Promise<void> {
     const tracer = opentelemetry.trace.getTracer("basic");
     const root = tracer.startSpan(`${this.constructor.name}.Root`, {
@@ -67,9 +77,9 @@ export class TraceBasicScenario implements Scenario {
           numbers: "123",
         },
       },
-      ctx
+      ctx,
     );
-    let eventAttributes: any = {};
+    const eventAttributes: any = {};
     eventAttributes["SomeAttribute"] = "Test";
     child1.addEvent("TestEvent", eventAttributes);
     child1.end(100);
@@ -83,10 +93,30 @@ export class TraceBasicScenario implements Scenario {
   }
 
   flush(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this._processor.forceFlush();
   }
 
   expectation: Expectation[] = [
+    {
+      ...COMMON_ENVELOPE_PARAMS,
+      name: "Microsoft.ApplicationInsights.Metric",
+      data: {
+        baseType: "MetricData",
+        baseData: {
+          version: 2,
+          metrics: [{ name: "_OTELRESOURCE_", value: 1 }],
+          properties: {
+            "service.name": "testServiceName",
+            "k8s.cluster.name": "testClusterName",
+            "k8s.namespace.name": "testNamespaceName",
+            "k8s.node.name": "testNodeName",
+            "k8s.pod.name": "testPodName",
+          },
+        } as any,
+      },
+      children: [],
+    },
     {
       ...COMMON_ENVELOPE_PARAMS,
       name: "Microsoft.ApplicationInsights.Request",
@@ -95,7 +125,6 @@ export class TraceBasicScenario implements Scenario {
         baseData: {
           version: 2,
           name: "TraceBasicScenario.Root",
-          duration: msToTimeSpan(600),
           responseCode: "0",
           success: true,
           properties: {
@@ -112,7 +141,79 @@ export class TraceBasicScenario implements Scenario {
             baseData: {
               version: 2,
               name: "TraceBasicScenario.Child.1",
-              duration: msToTimeSpan(100),
+              success: true,
+              resultCode: "0",
+              properties: {
+                numbers: "123",
+              },
+            } as any,
+          },
+          children: [
+            {
+              name: "Microsoft.ApplicationInsights.Message",
+              ...COMMON_ENVELOPE_PARAMS,
+              data: {
+                baseType: "MessageData",
+                baseData: {
+                  version: 2,
+                  message: "TestEvent",
+                  properties: {
+                    SomeAttribute: "Test",
+                  },
+                } as any,
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          name: "Microsoft.ApplicationInsights.Exception",
+          ...COMMON_ENVELOPE_PARAMS,
+          data: {
+            baseType: "ExceptionData",
+            baseData: {
+              version: 2,
+              exceptions: [
+                {
+                  typeName: "TestExceptionCode",
+                  message: "TestExceptionMessage",
+                  stack: "TestExceptionStack",
+                  hasFullStack: true,
+                },
+              ],
+            } as any,
+          },
+          children: [],
+        },
+      ],
+    },
+  ];
+
+  disabledExpectation: Expectation[] = [
+    {
+      ...COMMON_ENVELOPE_PARAMS,
+      name: "Microsoft.ApplicationInsights.Request",
+      data: {
+        baseType: "RequestData",
+        baseData: {
+          version: 2,
+          name: "TraceBasicScenario.Root",
+          responseCode: "0",
+          success: true,
+          properties: {
+            foo: "bar",
+          },
+        } as any,
+      },
+      children: [
+        {
+          name: "Microsoft.ApplicationInsights.RemoteDependency",
+          ...COMMON_ENVELOPE_PARAMS,
+          data: {
+            baseType: "RemoteDependencyData",
+            baseData: {
+              version: 2,
+              name: "TraceBasicScenario.Child.1",
               success: true,
               resultCode: "0",
               properties: {
@@ -189,12 +290,13 @@ export class MetricBasicScenario implements Scenario {
     this._provider.addMetricReader(metricReader);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   async run(): Promise<void> {
     const meter = this._provider.getMeter("basic");
-    let counter = meter.createCounter("testCounter");
-    let counter2 = meter.createCounter("testCounter2");
-    let histogram = meter.createHistogram("testHistogram");
-    let attributes = { testAttribute: "testValue" };
+    const counter = meter.createCounter("testCounter");
+    const counter2 = meter.createCounter("testCounter2");
+    const histogram = meter.createHistogram("testHistogram");
+    let attributes: any = { testAttribute: "testValue" };
     counter.add(1);
     counter.add(2);
     counter2.add(12, attributes);
@@ -202,19 +304,33 @@ export class MetricBasicScenario implements Scenario {
     histogram.record(2);
     histogram.record(3);
     histogram.record(4);
-    let dependencyDurationMetric = meter.createHistogram(StandardMetrics.HTTP_DEPENDENCY_DURATION);
-    dependencyDurationMetric.record(1234, {
-      "http.status_code": "400",
-      "net.peer.name": "http://www.test.com",
-    });
-    dependencyDurationMetric.record(4567, {
-      "http.status_code": "400",
-      "net.peer.name": "http://www.test.com",
-    });
-    let requestyDurationMetric = meter.createHistogram(StandardMetrics.HTTP_REQUEST_DURATION);
-    requestyDurationMetric.record(4567, {
-      "http.status_code": "200",
-    });
+    const dependencyDurationMetric = meter.createHistogram("TestDependencyDuration");
+
+    attributes = {
+      "Dependency.Success": "False",
+      "Dependency.Type": "http",
+      "_MS.IsAutocollected": "True",
+      "_MS.MetricId": "dependencies/duration",
+      "cloud/roleInstance": "my-instance",
+      "cloud/roleName": "my-namespace.my-helloworld-service",
+      "dependency/resultCode": "400",
+      "dependency/target": "http://www.test.com",
+    };
+
+    dependencyDurationMetric.record(1234, attributes);
+    dependencyDurationMetric.record(4567, attributes);
+
+    attributes = {
+      "Request.Success": "True",
+      "_MS.IsAutocollected": "True",
+      "_MS.MetricId": "requests/duration",
+      "cloud/roleInstance": "my-instance",
+      "cloud/roleName": "my-namespace.my-helloworld-service",
+      "request/resultCode": "200",
+    };
+
+    const requestyDurationMetric = meter.createHistogram("TestRequestDuration");
+    requestyDurationMetric.record(4567, attributes);
     await delay(0);
   }
 
@@ -296,7 +412,7 @@ export class MetricBasicScenario implements Scenario {
           version: 2,
           metrics: [
             {
-              name: "azureMonitor.http.dependencyDuration",
+              name: "TestDependencyDuration",
               value: 5801,
               count: 2,
               max: 4567,
@@ -327,7 +443,7 @@ export class MetricBasicScenario implements Scenario {
           version: 2,
           metrics: [
             {
-              name: "azureMonitor.http.requestDuration",
+              name: "TestRequestDuration",
               value: 4567,
               count: 1,
               max: 4567,
@@ -343,6 +459,91 @@ export class MetricBasicScenario implements Scenario {
             "cloud/roleName": "my-namespace.my-helloworld-service",
             "request/resultCode": "200",
           },
+        } as any,
+      },
+      children: [],
+    },
+  ];
+}
+
+export class LogBasicScenario implements Scenario {
+  private _processor: any;
+  private _provider: any;
+
+  prepare(): void {
+    const exporter = new AzureMonitorLogExporter({
+      connectionString: `instrumentationkey=${COMMON_ENVELOPE_PARAMS.instrumentationKey}`,
+    });
+    this._processor = new SimpleLogRecordProcessor(exporter);
+    this._provider = new LoggerProvider();
+    this._provider.addLogRecordProcessor(this._processor);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-misused-promises
+  async run(): Promise<void> {
+    const logger = this._provider.getLogger("basic");
+
+    // emit a message record
+    logger.emit({
+      severityNumber: SeverityNumber.INFO,
+      severityText: "INFO",
+      body: "test message",
+      attributes: { foo: "bar" },
+    });
+    // emit a exception record
+    const attributes: any = [];
+    attributes[SemanticAttributes.EXCEPTION_TYPE] = "test exception type";
+    attributes[SemanticAttributes.EXCEPTION_MESSAGE] = "test exception message";
+    attributes[SemanticAttributes.EXCEPTION_STACKTRACE] = "test exception stack";
+    logger.emit({
+      severityNumber: SeverityNumber.ERROR,
+      severityText: "ERROR",
+      attributes: attributes,
+    });
+  }
+
+  cleanup(): void {
+    opentelemetry.trace.disable();
+  }
+
+  flush(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this._processor.forceFlush();
+  }
+
+  expectation: Expectation[] = [
+    {
+      ...COMMON_ENVELOPE_PARAMS,
+      name: "Microsoft.ApplicationInsights.Message",
+      data: {
+        baseType: "MessageData",
+        baseData: {
+          version: 2,
+          message: "test message",
+          severityLevel: "Information",
+          properties: {
+            foo: "bar",
+          },
+        } as any,
+      },
+      children: [],
+    },
+    {
+      ...COMMON_ENVELOPE_PARAMS,
+      name: "Microsoft.ApplicationInsights.Exception",
+      data: {
+        baseType: "ExceptionData",
+        baseData: {
+          version: 2,
+          exceptions: [
+            {
+              typeName: "test exception type",
+              message: "test exception message",
+              hasFullStack: true,
+              stack: "test exception stack",
+            },
+          ],
+          severityLevel: "Error",
         } as any,
       },
       children: [],

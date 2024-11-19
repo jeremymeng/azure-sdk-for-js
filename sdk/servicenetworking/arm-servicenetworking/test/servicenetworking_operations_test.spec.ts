@@ -26,7 +26,11 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -48,7 +52,7 @@ describe("ServiceNetworking test", () => {
     // This is an example of how the environment variables are used
     const credential = createTestCredential();
     client = new ServiceNetworkingManagementClient(credential, subscriptionId, recorder.configureClientOptions({}));
-    location = "NorthCentralUS";
+    location = "centraluseuap";
     resourceGroup = "myjstest";
     trafficControllerName = "TC1"
   });
@@ -67,6 +71,7 @@ describe("ServiceNetworking test", () => {
       },
       testPollingOptions);
     assert.equal(res.name, trafficControllerName);
+    assert.equal(res.properties?.provisioningState, "Succeeded");
   });
 
   it("trafficControllerInterface get test", async function () {
@@ -84,7 +89,7 @@ describe("ServiceNetworking test", () => {
 
   it("trafficControllerInterface delete test", async function () {
     const resArray = new Array();
-    const res = await client.trafficControllerInterface.beginDeleteAndWait(resourceGroup, trafficControllerName)
+    const res = await client.trafficControllerInterface.beginDeleteAndWait(resourceGroup, trafficControllerName, testPollingOptions)
     for await (let item of client.trafficControllerInterface.listByResourceGroup(resourceGroup)) {
       resArray.push(item);
     }

@@ -1,21 +1,21 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { AbortSignalLike } from "@azure/abort-controller";
-import * as coreClient from "@azure/core-client";
-import { ExtendedCommonClientOptions } from "@azure/core-http-compat";
-import { CancelOnProgress, PollOperationState } from "@azure/core-lro";
-import {
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type * as coreClient from "@azure/core-client";
+import type { ExtendedCommonClientOptions } from "@azure/core-http-compat";
+import type { CancelOnProgress, PollOperationState } from "@azure/core-lro";
+import type {
   DeletionRecoveryLevel,
   KeyUsageType,
   JsonWebKeyType as CertificateKeyType,
   JsonWebKeyCurveName as CertificateKeyCurveName,
-} from "./generated/models";
+} from "./generated/models/index.js";
 
 /**
  * The latest supported KeyVault service API version
  */
-export const LATEST_API_VERSION = "7.4-preview.1";
+export const LATEST_API_VERSION = "7.5";
 
 /**
  * The optional parameters accepted by the KeyVault's CertificateClient
@@ -24,7 +24,7 @@ export interface CertificateClientOptions extends ExtendedCommonClientOptions {
   /**
    * The accepted versions of the KeyVault's service API.
    */
-  serviceVersion?: "7.0" | "7.1" | "7.2" | "7.3" | "7.4-preview.1";
+  serviceVersion?: "7.0" | "7.1" | "7.2" | "7.3" | "7.4" | "7.5";
 
   /**
    * Whether to disable verification that the authentication challenge resource matches the Key Vault domain.
@@ -455,6 +455,10 @@ export interface CertificateProperties {
    * Thumbprint of the certificate.
    */
   readonly x509Thumbprint?: Uint8Array;
+  /**
+   * Thumbprint of the certifiate encoded as a hex string.
+   */
+  readonly x509ThumbprintString?: string;
   /**
    * The retention dates of the softDelete data.
    * The value should be `>=7` and `<=90` when softDelete enabled.

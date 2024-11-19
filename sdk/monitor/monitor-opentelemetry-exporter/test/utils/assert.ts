@@ -1,27 +1,29 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import * as assert from "assert";
-import { Expectation } from "./types";
-import {
+import { assert } from "vitest";
+import type { Expectation } from "./types.js";
+import type {
   MetricsData,
   MonitorBase,
   RequestData,
   TelemetryItem as Envelope,
-  KnownContextTagKeys,
-} from "../../src/generated";
-import { TelemetryItem as EnvelopeMapper } from "../../src/generated/models/mappers";
+  MonitorDomain,
+} from "../../src/generated/index.js";
+import { KnownContextTagKeys } from "../../src/generated/index.js";
+import { TelemetryItem as EnvelopeMapper } from "../../src/generated/models/mappers.js";
 
 export const assertData = (actual: MonitorBase, expected: MonitorBase): void => {
   assert.strictEqual(actual.baseType, expected.baseType);
 
-  assert.ok(actual.baseData);
+  assert.isDefined(actual.baseData);
   for (const [key, value] of Object.entries(expected.baseData!)) {
     const serializedKey = EnvelopeMapper.type.modelProperties![key]?.serializedName ?? key;
+    assert.isDefined(actual.baseData);
     assert.deepStrictEqual(
-      actual.baseData[serializedKey],
+      actual.baseData![serializedKey],
       value,
-      `baseData.${serializedKey} should be equal\nActual: ${actual.baseData[serializedKey]}\nExpected: ${value}`
+      `baseData.${serializedKey} should be equal\nActual: ${actual.baseData![serializedKey]}\nExpected: ${value}`,
     );
   }
 };
@@ -67,7 +69,7 @@ export const assertTrace = (actual: Envelope[], expectation: Expectation): void 
     assert.strictEqual(
       childEnvelopes.length,
       1,
-      `Envelope ${(envelope[0].data!.baseData as RequestData).name} found ${childEnvelopes.length}`
+      `Envelope ${(envelope[0].data!.baseData as RequestData).name} found ${childEnvelopes.length}`,
     );
   }
 };
@@ -85,11 +87,12 @@ export const assertCount = (actual: Envelope[], expectations: Expectation[]): vo
 export const assertTraceExpectation = (actual: Envelope[], expectations: Expectation[]): void => {
   for (const expectation of expectations) {
     let envelope: any = null;
-    if (expectation.data!.baseData!.name) {
+
+    if (expectation.data?.baseData?.name) {
       envelope = actual.filter((e) => {
         return (
-          (e.data!.baseData as RequestData).name ===
-          (expectation.data!.baseData as RequestData).name
+          (e.data!.baseData as MonitorDomain).name ===
+          (expectation.data!.baseData as MonitorDomain).name
         );
       });
     } else {
@@ -101,8 +104,8 @@ export const assertTraceExpectation = (actual: Envelope[], expectations: Expecta
       assert.ok(
         false,
         `assertExpectation: could not find exported envelope: ${
-          (expectation.data?.baseData as RequestData).name
-        }`
+          (expectation.data?.baseData as MonitorDomain).name
+        }`,
       );
     }
 
@@ -110,8 +113,10 @@ export const assertTraceExpectation = (actual: Envelope[], expectations: Expecta
       const serializedKey = EnvelopeMapper.type.modelProperties![key]?.serializedName ?? undefined;
       switch (key) {
         case "children":
-          assertTrace(actual, expectation);
-          assertTraceExpectation(actual, expectation.children);
+          if (expectation.children.length > 0) {
+            assertTrace(actual, expectation);
+            assertTraceExpectation(actual, expectation.children);
+          }
           break;
         case "data":
           if (envelope[0].data) {
@@ -123,7 +128,7 @@ export const assertTraceExpectation = (actual: Envelope[], expectations: Expecta
           assert.strictEqual(
             envelope[0][serializedKey as keyof Envelope], // as keyof Serialized(Envelope)
             value,
-            `envelope.${serializedKey} should be equal\nActual: ${envelope[0][key]}\nExpected: ${value}`
+            `envelope.${serializedKey} should be equal\nActual: ${envelope[0][key]}\nExpected: ${value}`,
           );
       }
     }
@@ -150,7 +155,7 @@ export const assertMetricExpectation = (actual: Envelope[], expectations: Expect
         false,
         `assertExpectation: Envelope ${
           (expectation.data?.baseData as MetricsData).metrics[0].name
-        } found ${envelope.length} times.`
+        } found ${envelope.length} times.`,
       );
     }
 
@@ -163,14 +168,58 @@ export const assertMetricExpectation = (actual: Envelope[], expectations: Expect
           }
           break;
         case "children":
-          //Do not check for children
+          // Do not check for children
           break;
         default:
           assert.ok(serializedKey, `Serialized key for ${key}`);
           assert.strictEqual(
             envelope[0][serializedKey as keyof Envelope], // as keyof Serialized(Envelope)
             value,
-            `envelope.${serializedKey} should be equal\nActual: ${envelope[0][key]}\nExpected: ${value}`
+            `envelope.${serializedKey} should be equal\nActual: ${envelope[0][key]}\nExpected: ${value}`,
+          );
+      }
+    }
+  }
+};
+
+export const assertLogExpectation = (actual: Envelope[], expectations: Expectation[]): void => {
+  for (const expectation of expectations) {
+    let envelope: any = null;
+    if (expectation.data!.baseData!.name) {
+      envelope = actual.filter((e) => {
+        return (e.data!.baseData as any).name === (expectation.data!.baseData as any).name;
+      });
+    } else {
+      envelope = actual.filter((e) => {
+        return e.name === expectation.name;
+      });
+    }
+    if (envelope.length !== 1) {
+      assert.ok(
+        false,
+        `assertExpectation: could not find exported envelope: ${
+          (expectation.data?.baseData as any).name
+        }`,
+      );
+    }
+
+    for (const [key, value] of Object.entries(expectation) as [keyof Expectation, unknown][]) {
+      const serializedKey = EnvelopeMapper.type.modelProperties![key]?.serializedName ?? undefined;
+      switch (key) {
+        case "data":
+          if (envelope[0].data) {
+            assertData(envelope[0].data, value as MonitorBase);
+          }
+          break;
+        case "children":
+          // Do not check for children
+          break;
+        default:
+          assert.ok(serializedKey, `Serialized key for ${key}`);
+          assert.strictEqual(
+            envelope[0][serializedKey as keyof Envelope], // as keyof Serialized(Envelope)
+            value,
+            `envelope.${serializedKey} should be equal\nActual: ${envelope[0][key]}\nExpected: ${value}`,
           );
       }
     }

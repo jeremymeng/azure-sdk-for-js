@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ComputeManagementClient } from "../computeManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   RestorePointCollection,
   RestorePointCollectionsListNextOptionalParams,
@@ -32,7 +36,7 @@ import {
   RestorePointCollectionsGetOptionalParams,
   RestorePointCollectionsGetResponse,
   RestorePointCollectionsListNextResponse,
-  RestorePointCollectionsListAllNextResponse
+  RestorePointCollectionsListAllNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -55,7 +59,7 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
    */
   public list(
     resourceGroupName: string,
-    options?: RestorePointCollectionsListOptionalParams
+    options?: RestorePointCollectionsListOptionalParams,
   ): PagedAsyncIterableIterator<RestorePointCollection> {
     const iter = this.listPagingAll(resourceGroupName, options);
     return {
@@ -70,14 +74,14 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listPagingPage(resourceGroupName, options, settings);
-      }
+      },
     };
   }
 
   private async *listPagingPage(
     resourceGroupName: string,
     options?: RestorePointCollectionsListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<RestorePointCollection[]> {
     let result: RestorePointCollectionsListResponse;
     let continuationToken = settings?.continuationToken;
@@ -92,7 +96,7 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
       result = await this._listNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -103,7 +107,7 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
 
   private async *listPagingAll(
     resourceGroupName: string,
-    options?: RestorePointCollectionsListOptionalParams
+    options?: RestorePointCollectionsListOptionalParams,
   ): AsyncIterableIterator<RestorePointCollection> {
     for await (const page of this.listPagingPage(resourceGroupName, options)) {
       yield* page;
@@ -117,7 +121,7 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
    * @param options The options parameters.
    */
   public listAll(
-    options?: RestorePointCollectionsListAllOptionalParams
+    options?: RestorePointCollectionsListAllOptionalParams,
   ): PagedAsyncIterableIterator<RestorePointCollection> {
     const iter = this.listAllPagingAll(options);
     return {
@@ -132,13 +136,13 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listAllPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listAllPagingPage(
     options?: RestorePointCollectionsListAllOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<RestorePointCollection[]> {
     let result: RestorePointCollectionsListAllResponse;
     let continuationToken = settings?.continuationToken;
@@ -159,7 +163,7 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
   }
 
   private async *listAllPagingAll(
-    options?: RestorePointCollectionsListAllOptionalParams
+    options?: RestorePointCollectionsListAllOptionalParams,
   ): AsyncIterableIterator<RestorePointCollection> {
     for await (const page of this.listAllPagingPage(options)) {
       yield* page;
@@ -179,11 +183,11 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
     resourceGroupName: string,
     restorePointCollectionName: string,
     parameters: RestorePointCollection,
-    options?: RestorePointCollectionsCreateOrUpdateOptionalParams
+    options?: RestorePointCollectionsCreateOrUpdateOptionalParams,
   ): Promise<RestorePointCollectionsCreateOrUpdateResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, restorePointCollectionName, parameters, options },
-      createOrUpdateOperationSpec
+      createOrUpdateOperationSpec,
     );
   }
 
@@ -198,11 +202,11 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
     resourceGroupName: string,
     restorePointCollectionName: string,
     parameters: RestorePointCollectionUpdate,
-    options?: RestorePointCollectionsUpdateOptionalParams
+    options?: RestorePointCollectionsUpdateOptionalParams,
   ): Promise<RestorePointCollectionsUpdateResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, restorePointCollectionName, parameters, options },
-      updateOperationSpec
+      updateOperationSpec,
     );
   }
 
@@ -216,25 +220,24 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
   async beginDelete(
     resourceGroupName: string,
     restorePointCollectionName: string,
-    options?: RestorePointCollectionsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: RestorePointCollectionsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -243,8 +246,8 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -252,19 +255,19 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, restorePointCollectionName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, restorePointCollectionName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -280,12 +283,12 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
   async beginDeleteAndWait(
     resourceGroupName: string,
     restorePointCollectionName: string,
-    options?: RestorePointCollectionsDeleteOptionalParams
+    options?: RestorePointCollectionsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       restorePointCollectionName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -299,11 +302,11 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
   get(
     resourceGroupName: string,
     restorePointCollectionName: string,
-    options?: RestorePointCollectionsGetOptionalParams
+    options?: RestorePointCollectionsGetOptionalParams,
   ): Promise<RestorePointCollectionsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, restorePointCollectionName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -314,11 +317,11 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
    */
   private _list(
     resourceGroupName: string,
-    options?: RestorePointCollectionsListOptionalParams
+    options?: RestorePointCollectionsListOptionalParams,
   ): Promise<RestorePointCollectionsListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -329,7 +332,7 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
    * @param options The options parameters.
    */
   private _listAll(
-    options?: RestorePointCollectionsListAllOptionalParams
+    options?: RestorePointCollectionsListAllOptionalParams,
   ): Promise<RestorePointCollectionsListAllResponse> {
     return this.client.sendOperationRequest({ options }, listAllOperationSpec);
   }
@@ -343,11 +346,11 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
   private _listNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: RestorePointCollectionsListNextOptionalParams
+    options?: RestorePointCollectionsListNextOptionalParams,
   ): Promise<RestorePointCollectionsListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 
@@ -358,11 +361,11 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
    */
   private _listAllNext(
     nextLink: string,
-    options?: RestorePointCollectionsListAllNextOptionalParams
+    options?: RestorePointCollectionsListAllNextOptionalParams,
   ): Promise<RestorePointCollectionsListAllNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listAllNextOperationSpec
+      listAllNextOperationSpec,
     );
   }
 }
@@ -370,59 +373,56 @@ export class RestorePointCollectionsImpl implements RestorePointCollections {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.RestorePointCollection
+      bodyMapper: Mappers.RestorePointCollection,
     },
     201: {
-      bodyMapper: Mappers.RestorePointCollection
+      bodyMapper: Mappers.RestorePointCollection,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.parameters22,
+  requestBody: Parameters.parameters24,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.restorePointCollectionName
+    Parameters.restorePointCollectionName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.RestorePointCollection
+      bodyMapper: Mappers.RestorePointCollection,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.parameters23,
+  requestBody: Parameters.parameters25,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.restorePointCollectionName
+    Parameters.restorePointCollectionName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -430,115 +430,112 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.restorePointCollectionName
+    Parameters.restorePointCollectionName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RestorePointCollection
+      bodyMapper: Mappers.RestorePointCollection,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion, Parameters.expand3],
+  queryParameters: [Parameters.apiVersion, Parameters.expand5],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.restorePointCollectionName
+    Parameters.restorePointCollectionName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RestorePointCollectionListResult
+      bodyMapper: Mappers.RestorePointCollectionListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listAllOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/restorePointCollections",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/restorePointCollections",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RestorePointCollectionListResult
+      bodyMapper: Mappers.RestorePointCollectionListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RestorePointCollectionListResult
+      bodyMapper: Mappers.RestorePointCollectionListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listAllNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RestorePointCollectionListResult
+      bodyMapper: Mappers.RestorePointCollectionListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

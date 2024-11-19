@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -27,7 +27,7 @@ async function getAzureWebCategoryByName() {
     .path(
       "/subscriptions/{subscriptionId}/providers/Microsoft.Network/azureWebCategories/{name}",
       subscriptionId,
-      name
+      name,
     )
     .get(options);
   console.log(result);

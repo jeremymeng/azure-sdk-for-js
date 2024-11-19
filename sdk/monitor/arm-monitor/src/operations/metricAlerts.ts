@@ -6,7 +6,7 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
 import { MetricAlerts } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -15,8 +15,8 @@ import { MonitorClient } from "../monitorClient";
 import {
   MetricAlertResource,
   MetricAlertsListBySubscriptionOptionalParams,
-  MetricAlertsListByResourceGroupOptionalParams,
   MetricAlertsListBySubscriptionResponse,
+  MetricAlertsListByResourceGroupOptionalParams,
   MetricAlertsListByResourceGroupResponse,
   MetricAlertsGetOptionalParams,
   MetricAlertsGetResponse,
@@ -25,7 +25,7 @@ import {
   MetricAlertResourcePatch,
   MetricAlertsUpdateOptionalParams,
   MetricAlertsUpdateResponse,
-  MetricAlertsDeleteOptionalParams
+  MetricAlertsDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -46,7 +46,7 @@ export class MetricAlertsImpl implements MetricAlerts {
    * @param options The options parameters.
    */
   public listBySubscription(
-    options?: MetricAlertsListBySubscriptionOptionalParams
+    options?: MetricAlertsListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<MetricAlertResource> {
     const iter = this.listBySubscriptionPagingAll(options);
     return {
@@ -56,21 +56,26 @@ export class MetricAlertsImpl implements MetricAlerts {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listBySubscriptionPagingPage(options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listBySubscriptionPagingPage(options, settings);
+      },
     };
   }
 
   private async *listBySubscriptionPagingPage(
-    options?: MetricAlertsListBySubscriptionOptionalParams
+    options?: MetricAlertsListBySubscriptionOptionalParams,
+    _settings?: PageSettings,
   ): AsyncIterableIterator<MetricAlertResource[]> {
-    let result = await this._listBySubscription(options);
+    let result: MetricAlertsListBySubscriptionResponse;
+    result = await this._listBySubscription(options);
     yield result.value || [];
   }
 
   private async *listBySubscriptionPagingAll(
-    options?: MetricAlertsListBySubscriptionOptionalParams
+    options?: MetricAlertsListBySubscriptionOptionalParams,
   ): AsyncIterableIterator<MetricAlertResource> {
     for await (const page of this.listBySubscriptionPagingPage(options)) {
       yield* page;
@@ -84,7 +89,7 @@ export class MetricAlertsImpl implements MetricAlerts {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: MetricAlertsListByResourceGroupOptionalParams
+    options?: MetricAlertsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<MetricAlertResource> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -94,27 +99,36 @@ export class MetricAlertsImpl implements MetricAlerts {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listByResourceGroupPagingPage(resourceGroupName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listByResourceGroupPagingPage(
+          resourceGroupName,
+          options,
+          settings,
+        );
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
-    options?: MetricAlertsListByResourceGroupOptionalParams
+    options?: MetricAlertsListByResourceGroupOptionalParams,
+    _settings?: PageSettings,
   ): AsyncIterableIterator<MetricAlertResource[]> {
-    let result = await this._listByResourceGroup(resourceGroupName, options);
+    let result: MetricAlertsListByResourceGroupResponse;
+    result = await this._listByResourceGroup(resourceGroupName, options);
     yield result.value || [];
   }
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: MetricAlertsListByResourceGroupOptionalParams
+    options?: MetricAlertsListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<MetricAlertResource> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -125,11 +139,11 @@ export class MetricAlertsImpl implements MetricAlerts {
    * @param options The options parameters.
    */
   private _listBySubscription(
-    options?: MetricAlertsListBySubscriptionOptionalParams
+    options?: MetricAlertsListBySubscriptionOptionalParams,
   ): Promise<MetricAlertsListBySubscriptionResponse> {
     return this.client.sendOperationRequest(
       { options },
-      listBySubscriptionOperationSpec
+      listBySubscriptionOperationSpec,
     );
   }
 
@@ -140,11 +154,11 @@ export class MetricAlertsImpl implements MetricAlerts {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: MetricAlertsListByResourceGroupOptionalParams
+    options?: MetricAlertsListByResourceGroupOptionalParams,
   ): Promise<MetricAlertsListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -157,11 +171,11 @@ export class MetricAlertsImpl implements MetricAlerts {
   get(
     resourceGroupName: string,
     ruleName: string,
-    options?: MetricAlertsGetOptionalParams
+    options?: MetricAlertsGetOptionalParams,
   ): Promise<MetricAlertsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, ruleName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -176,11 +190,11 @@ export class MetricAlertsImpl implements MetricAlerts {
     resourceGroupName: string,
     ruleName: string,
     parameters: MetricAlertResource,
-    options?: MetricAlertsCreateOrUpdateOptionalParams
+    options?: MetricAlertsCreateOrUpdateOptionalParams,
   ): Promise<MetricAlertsCreateOrUpdateResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, ruleName, parameters, options },
-      createOrUpdateOperationSpec
+      createOrUpdateOperationSpec,
     );
   }
 
@@ -195,11 +209,11 @@ export class MetricAlertsImpl implements MetricAlerts {
     resourceGroupName: string,
     ruleName: string,
     parameters: MetricAlertResourcePatch,
-    options?: MetricAlertsUpdateOptionalParams
+    options?: MetricAlertsUpdateOptionalParams,
   ): Promise<MetricAlertsUpdateResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, ruleName, parameters, options },
-      updateOperationSpec
+      updateOperationSpec,
     );
   }
 
@@ -212,11 +226,11 @@ export class MetricAlertsImpl implements MetricAlerts {
   delete(
     resourceGroupName: string,
     ruleName: string,
-    options?: MetricAlertsDeleteOptionalParams
+    options?: MetricAlertsDeleteOptionalParams,
   ): Promise<void> {
     return this.client.sendOperationRequest(
       { resourceGroupName, ruleName, options },
-      deleteOperationSpec
+      deleteOperationSpec,
     );
   }
 }
@@ -224,131 +238,125 @@ export class MetricAlertsImpl implements MetricAlerts {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/metricAlerts",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/metricAlerts",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricAlertResourceCollection
+      bodyMapper: Mappers.MetricAlertResourceCollection,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion7],
+  queryParameters: [Parameters.apiVersion9],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricAlertResourceCollection
+      bodyMapper: Mappers.MetricAlertResourceCollection,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion7],
+  queryParameters: [Parameters.apiVersion9],
   urlParameters: [
     Parameters.$host,
+    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.subscriptionId
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricAlertResource
+      bodyMapper: Mappers.MetricAlertResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion7],
+  queryParameters: [Parameters.apiVersion9],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.ruleName
+    Parameters.resourceGroupName,
+    Parameters.ruleName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricAlertResource
+      bodyMapper: Mappers.MetricAlertResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters4,
-  queryParameters: [Parameters.apiVersion7],
+  queryParameters: [Parameters.apiVersion9],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.ruleName
+    Parameters.resourceGroupName,
+    Parameters.ruleName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricAlertResource
+      bodyMapper: Mappers.MetricAlertResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters5,
-  queryParameters: [Parameters.apiVersion7],
+  queryParameters: [Parameters.apiVersion9],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.ruleName
+    Parameters.resourceGroupName,
+    Parameters.ruleName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion7],
+  queryParameters: [Parameters.apiVersion9],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.ruleName
+    Parameters.resourceGroupName,
+    Parameters.ruleName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

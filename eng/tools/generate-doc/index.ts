@@ -1,7 +1,4 @@
-import { promises as fsPromises } from "fs";
-const readFile = fsPromises.readFile;
-const readDir = fsPromises.readdir;
-const statFile = fsPromises.stat;
+import { readFile, readdir as readDir, stat as statFile } from "fs/promises";
 import * as path from "path";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -11,22 +8,21 @@ import { loadTheme } from "./theme/theme.js";
 async function runTypeDoc({ outputFolder, cwd }: { outputFolder: string; cwd: string }) {
   const oldCwd = process.cwd();
   process.chdir(cwd);
-  const app = new TypeDocApplication();
-  app.options.addReader(new TSConfigReader());
-  app.options.addReader(new TypeDocReader());
 
-  loadTheme(app);
-
-  app.bootstrap({
+  const app = await TypeDocApplication.bootstrap({
     entryPoints: ["src/index.ts"],
     excludeInternal: true,
     excludePrivate: true,
     skipErrorChecking: true,
-    gaID: "UA-62780441-43",
     theme: "azureSdk",
-  });
+  }, [
+    new TSConfigReader(),
+    new TypeDocReader(),
+  ]);
 
-  const project = app.convert();
+  loadTheme(app);
+
+  const project = await app.convert();
 
   if (project) {
     await app.generateDocs(project, outputFolder);
@@ -95,6 +91,9 @@ async function executeTypedoc(serviceDir: string) {
 
     if (checks.isPrivate) {
       console.log("...SKIPPING Since package marked as private...");
+      continue;
+    } else if (!checks.packageName) {
+      console.error("...SKIPPING Since it is not a package...");
       continue;
     } else if (!checks.srcPresent) {
       console.log("...SKIPPING Since src folder could not be found.....");

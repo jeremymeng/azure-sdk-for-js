@@ -1,12 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { Container } from "../../../src";
+// Licensed under the MIT License.
+/* eslint-disable no-unused-expressions */
+import type { Container } from "../../../src";
 import { bulkInsertItems, getTestContainer, removeAllDatabases } from "../common/TestHelpers";
-import { Constants, CosmosClient, PluginOn, CosmosClientOptions, PluginConfig } from "../../../src";
+import type { CosmosClientOptions, PluginConfig } from "../../../src";
+import { Constants, CosmosClient, PluginOn } from "../../../src";
 import { endpoint } from "../common/_testConfig";
 import { masterKey } from "../common/_fakeTestSecrets";
 import { SubStatusCodes } from "../../../src/common";
 import assert from "assert";
+import { expect } from "chai";
 
 const splitError = new Error("Fake Partition Split") as any;
 splitError.code = 410;
@@ -38,7 +41,7 @@ describe("Partition Splits", () => {
           paths: ["/id"],
         },
       },
-      { offerThroughput: 25100 }
+      { offerThroughput: 25100 },
     );
     await bulkInsertItems(container, documentDefinitions);
   });
@@ -50,7 +53,8 @@ describe("Partition Splits", () => {
     const plugins: PluginConfig[] = [
       {
         on: PluginOn.request,
-        plugin: async (context, next) => {
+        plugin: async (context, diagNode, next) => {
+          expect(diagNode, "DiagnosticsNode should not be undefined or null").to.exist;
           // This plugin throws a single 410 on the *second* time we see the same partition key range ID
           const partitionKeyRangeId = context?.headers[Constants.HttpHeaders.PartitionKeyRangeID];
           if (partitionKeyRanges.has(partitionKeyRangeId) && hasSplit === false) {
@@ -75,7 +79,10 @@ describe("Partition Splits", () => {
     const { resources } = await client
       .database(container.database.id)
       .container(container.id)
-      .items.query("SELECT * FROM root r", { maxItemCount: 2, maxDegreeOfParallelism: 1 })
+      .items.query("SELECT * FROM root r", {
+        maxItemCount: 2,
+        maxDegreeOfParallelism: 1,
+      })
       .fetchAll();
 
     // TODO. These should be equal but right now they are not
@@ -89,7 +96,8 @@ describe("Partition Splits", () => {
     const plugins: PluginConfig[] = [
       {
         on: PluginOn.request,
-        plugin: async (context, next) => {
+        plugin: async (context, diagNode, next) => {
+          expect(diagNode, "DiagnosticsNode should not be undefined or null").to.exist;
           // This plugin throws a single 410 for partition key range ID 0 on every single request
           const partitionKeyRangeId = context?.headers[Constants.HttpHeaders.PartitionKeyRangeID];
           if (partitionKeyRangeId === "0") {
@@ -113,7 +121,10 @@ describe("Partition Splits", () => {
       await client
         .database(container.database.id)
         .container(container.id)
-        .items.query("SELECT * FROM root r", { maxItemCount: 2, maxDegreeOfParallelism: 1 })
+        .items.query("SELECT * FROM root r", {
+          maxItemCount: 2,
+          maxDegreeOfParallelism: 1,
+        })
         .fetchAll();
       assert.fail("Expected query to fail");
     } catch (e: any) {
@@ -125,7 +136,10 @@ describe("Partition Splits", () => {
       await client
         .database(container.database.id)
         .container(container.id)
-        .items.query("SELECT * FROM root r", { maxItemCount: 2, maxDegreeOfParallelism: 1 })
+        .items.query("SELECT * FROM root r", {
+          maxItemCount: 2,
+          maxDegreeOfParallelism: 1,
+        })
         .fetchNext();
       assert.fail("Expected query to fail");
     } catch (e: any) {
@@ -137,7 +151,10 @@ describe("Partition Splits", () => {
       const iterator = client
         .database(container.database.id)
         .container(container.id)
-        .items.query("SELECT * FROM root r", { maxItemCount: 2, maxDegreeOfParallelism: 1 })
+        .items.query("SELECT * FROM root r", {
+          maxItemCount: 2,
+          maxDegreeOfParallelism: 1,
+        })
         .getAsyncIterator();
       const results = [];
       for await (const result of iterator) {

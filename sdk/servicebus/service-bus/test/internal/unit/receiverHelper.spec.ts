@@ -1,14 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-
-import chai from "chai";
-import chaiAsPromised from "chai-as-promised";
-import { Receiver, ReceiverEvents } from "rhea-promise";
-import { ReceiverHelper } from "../../../src/core/receiverHelper";
-import { assertThrows } from "../../public/utils/testUtils";
-import { createRheaReceiverForTests } from "./unittestUtils";
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+// Licensed under the MIT License.
+import type { Receiver } from "rhea-promise";
+import { ReceiverEvents, delay } from "rhea-promise";
+import { ReceiverHelper } from "../../../src/core/receiverHelper.js";
+import { assertThrows } from "../../public/utils/testUtils.js";
+import { createRheaReceiverForTests } from "./unittestUtils.js";
+import { describe, it } from "vitest";
+import { assert } from "../../public/utils/chai.js";
 
 describe("ReceiverHelper unit tests", () => {
   const closedReceiver = {
@@ -126,5 +124,33 @@ describe("ReceiverHelper unit tests", () => {
     assert.isFalse(helper["_isSuspended"]);
     helper.addCredit(101);
     assert.equal(receiver.credit, 101);
+  });
+
+  it("resolves from suspend() when drain is blocking ", async () => {
+    const receiver = createRheaReceiverForTests();
+    const helper = new ReceiverHelper(() => ({ receiver, logPrefix: "hello" }));
+
+    (receiver as any)["_link"]["drain_credit"] = () => {
+      (receiver as any).credit = 0;
+      // not emitting the `receiverDrained` event
+    };
+    let drainWasCalled = false;
+
+    receiver.on(ReceiverEvents.receiverDrained, () => {
+      drainWasCalled = true;
+    });
+
+    // we can explicitly drain
+    helper.resume();
+    helper.addCredit(101);
+
+    await Promise.race([
+      helper.drain(),
+      delay(2000).then(() => {
+        throw new Error("Test failed. helper.drain() should have already resolved.");
+      }),
+    ]);
+
+    assert.isFalse(drainWasCalled);
   });
 });

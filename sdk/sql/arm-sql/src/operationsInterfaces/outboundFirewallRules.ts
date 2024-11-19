@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   OutboundFirewallRule,
   OutboundFirewallRulesListByServerOptionalParams,
@@ -15,7 +15,7 @@ import {
   OutboundFirewallRulesGetResponse,
   OutboundFirewallRulesCreateOrUpdateOptionalParams,
   OutboundFirewallRulesCreateOrUpdateResponse,
-  OutboundFirewallRulesDeleteOptionalParams
+  OutboundFirewallRulesDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -31,7 +31,7 @@ export interface OutboundFirewallRules {
   listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: OutboundFirewallRulesListByServerOptionalParams
+    options?: OutboundFirewallRulesListByServerOptionalParams,
   ): PagedAsyncIterableIterator<OutboundFirewallRule>;
   /**
    * Gets an outbound firewall rule.
@@ -45,7 +45,7 @@ export interface OutboundFirewallRules {
     resourceGroupName: string,
     serverName: string,
     outboundRuleFqdn: string,
-    options?: OutboundFirewallRulesGetOptionalParams
+    options?: OutboundFirewallRulesGetOptionalParams,
   ): Promise<OutboundFirewallRulesGetResponse>;
   /**
    * Create a outbound firewall rule with a given name.
@@ -61,10 +61,10 @@ export interface OutboundFirewallRules {
     serverName: string,
     outboundRuleFqdn: string,
     parameters: OutboundFirewallRule,
-    options?: OutboundFirewallRulesCreateOrUpdateOptionalParams
+    options?: OutboundFirewallRulesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<OutboundFirewallRulesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<OutboundFirewallRulesCreateOrUpdateResponse>,
       OutboundFirewallRulesCreateOrUpdateResponse
     >
   >;
@@ -82,7 +82,7 @@ export interface OutboundFirewallRules {
     serverName: string,
     outboundRuleFqdn: string,
     parameters: OutboundFirewallRule,
-    options?: OutboundFirewallRulesCreateOrUpdateOptionalParams
+    options?: OutboundFirewallRulesCreateOrUpdateOptionalParams,
   ): Promise<OutboundFirewallRulesCreateOrUpdateResponse>;
   /**
    * Deletes a outbound firewall rule with a given name.
@@ -96,8 +96,8 @@ export interface OutboundFirewallRules {
     resourceGroupName: string,
     serverName: string,
     outboundRuleFqdn: string,
-    options?: OutboundFirewallRulesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: OutboundFirewallRulesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a outbound firewall rule with a given name.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -110,6 +110,6 @@ export interface OutboundFirewallRules {
     resourceGroupName: string,
     serverName: string,
     outboundRuleFqdn: string,
-    options?: OutboundFirewallRulesDeleteOptionalParams
+    options?: OutboundFirewallRulesDeleteOptionalParams,
   ): Promise<void>;
 }

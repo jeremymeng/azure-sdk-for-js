@@ -8,9 +8,13 @@
 
 export * from "./operations";
 export * from "./monitors";
+export * from "./elasticVersions";
 export * from "./monitoredResources";
 export * from "./deploymentInfo";
 export * from "./externalUser";
+export * from "./billingInfo";
+export * from "./connectedPartnerResources";
+export * from "./openAI";
 export * from "./tagRules";
 export * from "./vMHost";
 export * from "./vMIngestion";
@@ -25,3 +29,4 @@ export * from "./associateTrafficFilter";
 export * from "./detachAndDeleteTrafficFilter";
 export * from "./detachTrafficFilter";
 export * from "./trafficFilters";
+export * from "./organizations";

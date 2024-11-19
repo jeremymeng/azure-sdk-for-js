@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT Licence.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 /**
  * This sample demonstrates usage of SessionState.
@@ -22,14 +22,16 @@
  */
 
 const { ServiceBusClient } = require("@azure/service-bus");
+const { DefaultAzureCredential } = require("@azure/identity");
 
 // Load the .env file if it exists
 require("dotenv").config();
 
 // Define connection string and related Service Bus entity names here
-const connectionString = process.env.SERVICEBUS_CONNECTION_STRING || "<connection string>";
+const fqdn = process.env.SERVICEBUS_FQDN || "<your-servicebus-namespace>.servicebus.windows.net";
 const userEventsQueueName = process.env.QUEUE_NAME_WITH_SESSIONS || "<queue name>";
-const sbClient = new ServiceBusClient(connectionString);
+const credential = new DefaultAzureCredential();
+const sbClient = new ServiceBusClient(fqdn, credential);
 
 async function main() {
   try {
@@ -135,7 +137,7 @@ async function processMessageFromSession(sessionId) {
     }
 
     console.log(
-      `Received message: Customer '${sessionReceiver.sessionId}': '${messages[0].body.event_name} ${messages[0].body.event_details}'`
+      `Received message: Customer '${sessionReceiver.sessionId}': '${messages[0].body.event_name} ${messages[0].body.event_details}'`,
     );
     await sessionReceiver.completeMessage(messages[0]);
   } else {

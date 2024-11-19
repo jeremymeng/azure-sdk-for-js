@@ -10,6 +10,9 @@
 // Licensed under the MIT License.
 import { MetricAlertResource, MonitorClient } from "@azure/arm-monitor";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Create or update an metric alert definition.
@@ -18,8 +21,10 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2018-03-01/examples/createOrUpdateDynamicMetricAlertMultipleResource.json
  */
 async function createOrUpdateADynamicAlertRuleForMultipleResources() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
-  const resourceGroupName = "gigtest";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] ||
+    "00000000-0000-0000-0000-000000000000";
+  const resourceGroupName = process.env["MONITOR_RESOURCE_GROUP"] || "gigtest";
   const ruleName = "MetricAlertOnMultipleResources";
   const parameters: MetricAlertResource = {
     description: "This is the description of the rule1",
@@ -27,8 +32,8 @@ async function createOrUpdateADynamicAlertRuleForMultipleResources() {
       {
         actionGroupId:
           "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/gigtest/providers/microsoft.insights/actiongroups/group2",
-        webHookProperties: { key11: "value11", key12: "value12" }
-      }
+        webHookProperties: { key11: "value11", key12: "value12" },
+      },
     ],
     autoMitigate: true,
     criteria: {
@@ -40,41 +45,39 @@ async function createOrUpdateADynamicAlertRuleForMultipleResources() {
           dimensions: [],
           failingPeriods: {
             minFailingPeriodsToAlert: 4,
-            numberOfEvaluationPeriods: 4
+            numberOfEvaluationPeriods: 4,
           },
           metricName: "Percentage CPU",
           metricNamespace: "microsoft.compute/virtualmachines",
           operator: "GreaterOrLessThan",
-          timeAggregation: "Average"
-        }
+          timeAggregation: "Average",
+        },
       ],
       odataType:
-        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
     },
     enabled: true,
     evaluationFrequency: "PT1M",
     location: "global",
     scopes: [
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme1",
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme2"
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme2",
     ],
     severity: 3,
     tags: {},
     targetResourceRegion: "southcentralus",
     targetResourceType: "Microsoft.Compute/virtualMachines",
-    windowSize: "PT15M"
+    windowSize: "PT15M",
   };
   const credential = new DefaultAzureCredential();
   const client = new MonitorClient(credential, subscriptionId);
   const result = await client.metricAlerts.createOrUpdate(
     resourceGroupName,
     ruleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-createOrUpdateADynamicAlertRuleForMultipleResources().catch(console.error);
 
 /**
  * This sample demonstrates how to Create or update an metric alert definition.
@@ -83,8 +86,10 @@ createOrUpdateADynamicAlertRuleForMultipleResources().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2018-03-01/examples/createOrUpdateDynamicMetricAlertSingleResource.json
  */
 async function createOrUpdateADynamicAlertRuleForSingleResource() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
-  const resourceGroupName = "gigtest";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] ||
+    "00000000-0000-0000-0000-000000000000";
+  const resourceGroupName = process.env["MONITOR_RESOURCE_GROUP"] || "gigtest";
   const ruleName = "chiricutin";
   const parameters: MetricAlertResource = {
     description: "This is the description of the rule1",
@@ -92,8 +97,8 @@ async function createOrUpdateADynamicAlertRuleForSingleResource() {
       {
         actionGroupId:
           "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/gigtest/providers/microsoft.insights/actiongroups/group2",
-        webHookProperties: { key11: "value11", key12: "value12" }
-      }
+        webHookProperties: { key11: "value11", key12: "value12" },
+      },
     ],
     autoMitigate: true,
     criteria: {
@@ -105,39 +110,37 @@ async function createOrUpdateADynamicAlertRuleForSingleResource() {
           dimensions: [],
           failingPeriods: {
             minFailingPeriodsToAlert: 4,
-            numberOfEvaluationPeriods: 4
+            numberOfEvaluationPeriods: 4,
           },
           ignoreDataBefore: new Date("2019-04-04T21:00:00.000Z"),
           metricName: "Percentage CPU",
           metricNamespace: "microsoft.compute/virtualmachines",
           operator: "GreaterOrLessThan",
-          timeAggregation: "Average"
-        }
+          timeAggregation: "Average",
+        },
       ],
       odataType:
-        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
     },
     enabled: true,
     evaluationFrequency: "PT1M",
     location: "global",
     scopes: [
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme"
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme",
     ],
     severity: 3,
     tags: {},
-    windowSize: "PT15M"
+    windowSize: "PT15M",
   };
   const credential = new DefaultAzureCredential();
   const client = new MonitorClient(credential, subscriptionId);
   const result = await client.metricAlerts.createOrUpdate(
     resourceGroupName,
     ruleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-createOrUpdateADynamicAlertRuleForSingleResource().catch(console.error);
 
 /**
  * This sample demonstrates how to Create or update an metric alert definition.
@@ -146,8 +149,11 @@ createOrUpdateADynamicAlertRuleForSingleResource().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2018-03-01/examples/createOrUpdateWebTestMetricAlert.json
  */
 async function createOrUpdateAWebTestAlertRule() {
-  const subscriptionId = "12345678-1234-1234-1234-123456789101";
-  const resourceGroupName = "rg-example";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] ||
+    "12345678-1234-1234-1234-123456789101";
+  const resourceGroupName =
+    process.env["MONITOR_RESOURCE_GROUP"] || "rg-example";
   const ruleName = "webtest-name-example";
   const parameters: MetricAlertResource = {
     description:
@@ -159,35 +165,33 @@ async function createOrUpdateAWebTestAlertRule() {
       failedLocationCount: 2,
       odataType: "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria",
       webTestId:
-        "/subscriptions/12345678-1234-1234-1234-123456789101/resourcegroups/rg-example/providers/microsoft.insights/webtests/component-example"
+        "/subscriptions/12345678-1234-1234-1234-123456789101/resourcegroups/rg-example/providers/microsoft.insights/webtests/component-example",
     },
     enabled: true,
     evaluationFrequency: "PT1M",
     location: "global",
     scopes: [
       "/subscriptions/12345678-1234-1234-1234-123456789101/resourcegroups/rg-example/providers/microsoft.insights/webtests/component-example",
-      "/subscriptions/12345678-1234-1234-1234-123456789101/resourcegroups/rg-example/providers/microsoft.insights/components/webtest-name-example"
+      "/subscriptions/12345678-1234-1234-1234-123456789101/resourcegroups/rg-example/providers/microsoft.insights/components/webtest-name-example",
     ],
     severity: 4,
     tags: {
       "hiddenLink:/subscriptions/12345678123412341234123456789101/resourcegroups/rgExample/providers/microsoftInsights/components/webtestNameExample":
         "Resource",
       "hiddenLink:/subscriptions/12345678123412341234123456789101/resourcegroups/rgExample/providers/microsoftInsights/webtests/componentExample":
-        "Resource"
+        "Resource",
     },
-    windowSize: "PT15M"
+    windowSize: "PT15M",
   };
   const credential = new DefaultAzureCredential();
   const client = new MonitorClient(credential, subscriptionId);
   const result = await client.metricAlerts.createOrUpdate(
     resourceGroupName,
     ruleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-createOrUpdateAWebTestAlertRule().catch(console.error);
 
 /**
  * This sample demonstrates how to Create or update an metric alert definition.
@@ -196,8 +200,10 @@ createOrUpdateAWebTestAlertRule().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2018-03-01/examples/createOrUpdateMetricAlertMultipleResource.json
  */
 async function createOrUpdateAnAlertRuleForMultipleResource() {
-  const subscriptionId = "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
-  const resourceGroupName = "gigtest";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] ||
+    "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
+  const resourceGroupName = process.env["MONITOR_RESOURCE_GROUP"] || "gigtest";
   const ruleName = "MetricAlertOnMultipleResources";
   const parameters: MetricAlertResource = {
     description: "This is the description of the rule1",
@@ -205,8 +211,8 @@ async function createOrUpdateAnAlertRuleForMultipleResource() {
       {
         actionGroupId:
           "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourcegroups/gigtest/providers/microsoft.insights/actiongroups/group2",
-        webHookProperties: { key11: "value11", key12: "value12" }
-      }
+        webHookProperties: { key11: "value11", key12: "value12" },
+      },
     ],
     autoMitigate: true,
     criteria: {
@@ -219,36 +225,34 @@ async function createOrUpdateAnAlertRuleForMultipleResource() {
           metricNamespace: "microsoft.compute/virtualmachines",
           operator: "GreaterThan",
           threshold: 80.5,
-          timeAggregation: "Average"
-        }
+          timeAggregation: "Average",
+        },
       ],
       odataType:
-        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
     },
     enabled: true,
     evaluationFrequency: "PT1M",
     location: "global",
     scopes: [
       "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme1",
-      "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme2"
+      "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme2",
     ],
     severity: 3,
     tags: {},
     targetResourceRegion: "southcentralus",
     targetResourceType: "Microsoft.Compute/virtualMachines",
-    windowSize: "PT15M"
+    windowSize: "PT15M",
   };
   const credential = new DefaultAzureCredential();
   const client = new MonitorClient(credential, subscriptionId);
   const result = await client.metricAlerts.createOrUpdate(
     resourceGroupName,
     ruleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-createOrUpdateAnAlertRuleForMultipleResource().catch(console.error);
 
 /**
  * This sample demonstrates how to Create or update an metric alert definition.
@@ -257,8 +261,10 @@ createOrUpdateAnAlertRuleForMultipleResource().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2018-03-01/examples/createOrUpdateMetricAlertSingleResource.json
  */
 async function createOrUpdateAnAlertRuleForSingleResource() {
-  const subscriptionId = "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
-  const resourceGroupName = "gigtest";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] ||
+    "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
+  const resourceGroupName = process.env["MONITOR_RESOURCE_GROUP"] || "gigtest";
   const ruleName = "chiricutin";
   const parameters: MetricAlertResource = {
     description: "This is the description of the rule1",
@@ -266,8 +272,8 @@ async function createOrUpdateAnAlertRuleForSingleResource() {
       {
         actionGroupId:
           "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourcegroups/gigtest/providers/microsoft.insights/actiongroups/group2",
-        webHookProperties: { key11: "value11", key12: "value12" }
-      }
+        webHookProperties: { key11: "value11", key12: "value12" },
+      },
     ],
     autoMitigate: true,
     criteria: {
@@ -276,35 +282,33 @@ async function createOrUpdateAnAlertRuleForSingleResource() {
           name: "High_CPU_80",
           criterionType: "StaticThresholdCriterion",
           dimensions: [],
-          metricName: "Processor(_Total)% Processor Time",
+          metricName: "\\Processor(_Total)\\% Processor Time",
           operator: "GreaterThan",
           threshold: 80.5,
-          timeAggregation: "Average"
-        }
+          timeAggregation: "Average",
+        },
       ],
-      odataType: "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+      odataType: "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
     },
     enabled: true,
     evaluationFrequency: "Pt1m",
     location: "global",
     scopes: [
-      "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme"
+      "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest/providers/Microsoft.Compute/virtualMachines/gigwadme",
     ],
     severity: 3,
     tags: {},
-    windowSize: "Pt15m"
+    windowSize: "Pt15m",
   };
   const credential = new DefaultAzureCredential();
   const client = new MonitorClient(credential, subscriptionId);
   const result = await client.metricAlerts.createOrUpdate(
     resourceGroupName,
     ruleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-createOrUpdateAnAlertRuleForSingleResource().catch(console.error);
 
 /**
  * This sample demonstrates how to Create or update an metric alert definition.
@@ -313,8 +317,10 @@ createOrUpdateAnAlertRuleForSingleResource().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2018-03-01/examples/createOrUpdateMetricAlertResourceGroup.json
  */
 async function createOrUpdateAnAlertRuleOnResourceGroupS() {
-  const subscriptionId = "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
-  const resourceGroupName = "gigtest1";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] ||
+    "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
+  const resourceGroupName = process.env["MONITOR_RESOURCE_GROUP"] || "gigtest1";
   const ruleName = "MetricAlertAtResourceGroupLevel";
   const parameters: MetricAlertResource = {
     description: "This is the description of the rule1",
@@ -322,8 +328,8 @@ async function createOrUpdateAnAlertRuleOnResourceGroupS() {
       {
         actionGroupId:
           "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourcegroups/gigtest/providers/microsoft.insights/actiongroups/group2",
-        webHookProperties: { key11: "value11", key12: "value12" }
-      }
+        webHookProperties: { key11: "value11", key12: "value12" },
+      },
     ],
     autoMitigate: true,
     criteria: {
@@ -336,36 +342,34 @@ async function createOrUpdateAnAlertRuleOnResourceGroupS() {
           metricNamespace: "microsoft.compute/virtualmachines",
           operator: "GreaterThan",
           threshold: 80.5,
-          timeAggregation: "Average"
-        }
+          timeAggregation: "Average",
+        },
       ],
       odataType:
-        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
     },
     enabled: true,
     evaluationFrequency: "PT1M",
     location: "global",
     scopes: [
       "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest1",
-      "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest2"
+      "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest2",
     ],
     severity: 3,
     tags: {},
     targetResourceRegion: "southcentralus",
     targetResourceType: "Microsoft.Compute/virtualMachines",
-    windowSize: "PT15M"
+    windowSize: "PT15M",
   };
   const credential = new DefaultAzureCredential();
   const client = new MonitorClient(credential, subscriptionId);
   const result = await client.metricAlerts.createOrUpdate(
     resourceGroupName,
     ruleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-createOrUpdateAnAlertRuleOnResourceGroupS().catch(console.error);
 
 /**
  * This sample demonstrates how to Create or update an metric alert definition.
@@ -374,8 +378,10 @@ createOrUpdateAnAlertRuleOnResourceGroupS().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2018-03-01/examples/createOrUpdateMetricAlertSubscription.json
  */
 async function createOrUpdateAnAlertRuleOnSubscription() {
-  const subscriptionId = "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
-  const resourceGroupName = "gigtest";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] ||
+    "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
+  const resourceGroupName = process.env["MONITOR_RESOURCE_GROUP"] || "gigtest";
   const ruleName = "MetricAlertAtSubscriptionLevel";
   const parameters: MetricAlertResource = {
     description: "This is the description of the rule1",
@@ -383,8 +389,8 @@ async function createOrUpdateAnAlertRuleOnSubscription() {
       {
         actionGroupId:
           "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourcegroups/gigtest/providers/microsoft.insights/actiongroups/group2",
-        webHookProperties: { key11: "value11", key12: "value12" }
-      }
+        webHookProperties: { key11: "value11", key12: "value12" },
+      },
     ],
     autoMitigate: true,
     criteria: {
@@ -397,11 +403,11 @@ async function createOrUpdateAnAlertRuleOnSubscription() {
           metricNamespace: "microsoft.compute/virtualmachines",
           operator: "GreaterThan",
           threshold: 80.5,
-          timeAggregation: "Average"
-        }
+          timeAggregation: "Average",
+        },
       ],
       odataType:
-        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
     },
     enabled: true,
     evaluationFrequency: "PT1M",
@@ -411,19 +417,17 @@ async function createOrUpdateAnAlertRuleOnSubscription() {
     tags: {},
     targetResourceRegion: "southcentralus",
     targetResourceType: "Microsoft.Compute/virtualMachines",
-    windowSize: "PT15M"
+    windowSize: "PT15M",
   };
   const credential = new DefaultAzureCredential();
   const client = new MonitorClient(credential, subscriptionId);
   const result = await client.metricAlerts.createOrUpdate(
     resourceGroupName,
     ruleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-createOrUpdateAnAlertRuleOnSubscription().catch(console.error);
 
 /**
  * This sample demonstrates how to Create or update an metric alert definition.
@@ -432,8 +436,10 @@ createOrUpdateAnAlertRuleOnSubscription().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2018-03-01/examples/createOrUpdateMetricAlertWithDimensions.json
  */
 async function createOrUpdateAnAlertRulesWithDimensions() {
-  const subscriptionId = "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
-  const resourceGroupName = "gigtest";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] ||
+    "14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7";
+  const resourceGroupName = process.env["MONITOR_RESOURCE_GROUP"] || "gigtest";
   const ruleName = "MetricAlertOnMultipleDimensions";
   const parameters: MetricAlertResource = {
     description: "This is the description of the rule1",
@@ -441,8 +447,8 @@ async function createOrUpdateAnAlertRulesWithDimensions() {
       {
         actionGroupId:
           "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/gigtest/providers/microsoft.insights/actiongroups/group2",
-        webHookProperties: { key11: "value11", key12: "value12" }
-      }
+        webHookProperties: { key11: "value11", key12: "value12" },
+      },
     ],
     autoMitigate: true,
     criteria: {
@@ -452,36 +458,47 @@ async function createOrUpdateAnAlertRulesWithDimensions() {
           criterionType: "StaticThresholdCriterion",
           dimensions: [
             { name: "ActivityName", operator: "Include", values: ["*"] },
-            { name: "StatusCode", operator: "Include", values: ["200"] }
+            { name: "StatusCode", operator: "Include", values: ["200"] },
           ],
           metricName: "Availability",
           metricNamespace: "Microsoft.KeyVault/vaults",
           operator: "GreaterThan",
           threshold: 55,
-          timeAggregation: "Average"
-        }
+          timeAggregation: "Average",
+        },
       ],
       odataType:
-        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+        "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
     },
     enabled: true,
     evaluationFrequency: "PT1H",
     location: "global",
     scopes: [
-      "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest/providers/Microsoft.KeyVault/vaults/keyVaultResource"
+      "/subscriptions/14ddf0c5-77c5-4b53-84f6-e1fa43ad68f7/resourceGroups/gigtest/providers/Microsoft.KeyVault/vaults/keyVaultResource",
     ],
     severity: 3,
     tags: {},
-    windowSize: "P1D"
+    windowSize: "P1D",
   };
   const credential = new DefaultAzureCredential();
   const client = new MonitorClient(credential, subscriptionId);
   const result = await client.metricAlerts.createOrUpdate(
     resourceGroupName,
     ruleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
 
-createOrUpdateAnAlertRulesWithDimensions().catch(console.error);
+async function main() {
+  createOrUpdateADynamicAlertRuleForMultipleResources();
+  createOrUpdateADynamicAlertRuleForSingleResource();
+  createOrUpdateAWebTestAlertRule();
+  createOrUpdateAnAlertRuleForMultipleResource();
+  createOrUpdateAnAlertRuleForSingleResource();
+  createOrUpdateAnAlertRuleOnResourceGroupS();
+  createOrUpdateAnAlertRuleOnSubscription();
+  createOrUpdateAnAlertRulesWithDimensions();
+}
+
+main().catch(console.error);

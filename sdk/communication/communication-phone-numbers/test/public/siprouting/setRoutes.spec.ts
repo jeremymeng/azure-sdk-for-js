@@ -1,47 +1,45 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
+import type { SipRoutingClient } from "../../../src/index.js";
 
-import { assert } from "chai";
-import { Context } from "mocha";
-
-import { SipRoutingClient } from "../../../src";
-
-import { isPlaybackMode, Recorder } from "@azure-tools/test-recorder";
-import { SipTrunk, SipTrunkRoute } from "../../../src/models";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isPlaybackMode } from "@azure-tools/test-recorder";
+import type { SipTrunk, SipTrunkRoute } from "../../../src/models.js";
 import {
   clearSipConfiguration,
   createRecordedClient,
   createRecordedClientWithToken,
   getUniqueFqdn,
+  listAllRoutes,
+  listAllTrunks,
   resetUniqueFqdns,
-} from "./utils/recordedClient";
-import { matrix } from "@azure/test-utils";
+} from "./utils/recordedClient.js";
+import { matrix } from "@azure-tools/test-utils-vitest";
+import { describe, it, assert, beforeEach, afterEach, beforeAll } from "vitest";
 
-matrix([[true, false]], async function (useAad) {
-  describe(`SipRoutingClient - set routes${useAad ? " [AAD]" : ""}`, function () {
+matrix([[true, false]], async (useAad) => {
+  describe(`SipRoutingClient - set routes${useAad ? " [AAD]" : ""}`, () => {
     let client: SipRoutingClient;
     let recorder: Recorder;
     let firstFqdn = "";
     let secondFqdn = "";
 
-    before(async function (this: Context) {
+    beforeAll(async () => {
       if (!isPlaybackMode()) {
         await clearSipConfiguration();
       }
     });
 
-    beforeEach(async function (this: Context) {
+    beforeEach(async (ctx) => {
       ({ client, recorder } = useAad
-        ? await createRecordedClientWithToken(this)
-        : await createRecordedClient(this));
+        ? await createRecordedClientWithToken(ctx)
+        : await createRecordedClient(ctx));
       firstFqdn = getUniqueFqdn(recorder);
       secondFqdn = getUniqueFqdn(recorder);
     });
 
-    afterEach(async function (this: Context) {
-      if (!this.currentTest?.isPending()) {
-        await recorder.stop();
-      }
+    afterEach(async () => {
+      await recorder.stop();
       resetUniqueFqdns();
     });
 
@@ -66,7 +64,7 @@ matrix([[true, false]], async function (useAad) {
       const setRoutes = await client.setRoutes(routes);
       assert.deepEqual(setRoutes, routes);
 
-      const storedRoutes = await client.getRoutes();
+      const storedRoutes = await listAllRoutes(client);
       assert.deepEqual(storedRoutes, routes);
     });
 
@@ -99,7 +97,7 @@ matrix([[true, false]], async function (useAad) {
       const setRoutes = await client.setRoutes(expectedRoutes);
       assert.deepEqual(setRoutes, expectedRoutes);
 
-      const storedRoutes = await client.getRoutes();
+      const storedRoutes = await listAllRoutes(client);
       assert.deepEqual(storedRoutes, expectedRoutes);
     });
 
@@ -117,7 +115,7 @@ matrix([[true, false]], async function (useAad) {
         trunks: [firstFqdn],
       };
       assert.deepEqual(await client.setRoutes([route]), [route]);
-      assert.deepEqual(await client.getRoutes(), [route]);
+      assert.deepEqual(await listAllRoutes(client), [route]);
     });
 
     it("can set empty routes when empty before", async () => {
@@ -125,7 +123,7 @@ matrix([[true, false]], async function (useAad) {
 
       await client.setRoutes([]);
 
-      const storedRoutes = await client.getRoutes();
+      const storedRoutes = await listAllRoutes(client);
       assert.isNotNull(storedRoutes);
       assert.isArray(storedRoutes);
       assert.isEmpty(storedRoutes);
@@ -150,7 +148,7 @@ matrix([[true, false]], async function (useAad) {
 
       await client.setRoutes([]);
 
-      const storedRoutes = await client.getRoutes();
+      const storedRoutes = await listAllRoutes(client);
       assert.isNotNull(storedRoutes);
       assert.isArray(storedRoutes);
       assert.isEmpty(storedRoutes);
@@ -167,7 +165,7 @@ matrix([[true, false]], async function (useAad) {
         await client.setRoutes([invalidRoute]);
       } catch (error: any) {
         assert.equal(error.code, "UnprocessableConfiguration");
-        const storedRoutes = await client.getRoutes();
+        const storedRoutes = await listAllRoutes(client);
         assert.isUndefined(storedRoutes.find((item) => item.name === ""));
         return;
       }
@@ -184,7 +182,7 @@ matrix([[true, false]], async function (useAad) {
         await client.setRoutes([invalidRoute]);
       } catch (error: any) {
         assert.equal(error.code, "UnprocessableConfiguration");
-        const storedRoutes = await client.getRoutes();
+        const storedRoutes = await listAllRoutes(client);
         assert.isUndefined(storedRoutes.find((item) => item.name === "invalidNumberPatternRoute"));
         return;
       }
@@ -207,7 +205,7 @@ matrix([[true, false]], async function (useAad) {
         await client.setRoutes(invalidRoutes);
       } catch (error: any) {
         assert.equal(error.code, "UnprocessableConfiguration");
-        const storedRoutes = await client.getRoutes();
+        const storedRoutes = await listAllRoutes(client);
         assert.isUndefined(storedRoutes.find((item) => item.name === "sameNameRoute"));
         return;
       }
@@ -231,9 +229,9 @@ matrix([[true, false]], async function (useAad) {
         await client.setRoutes([invalidRoute]);
       } catch (error: any) {
         assert.equal(error.code, "UnprocessableConfiguration");
-        const storedRoutes = await client.getRoutes();
+        const storedRoutes = await listAllRoutes(client);
         assert.isUndefined(
-          storedRoutes.find((item) => item.name === "invalidDuplicatedRoutingTrunksRoute")
+          storedRoutes.find((item) => item.name === "invalidDuplicatedRoutingTrunksRoute"),
         );
         return;
       }
@@ -251,7 +249,7 @@ matrix([[true, false]], async function (useAad) {
         await client.setRoutes([invalidRoute]);
       } catch (error: any) {
         assert.equal(error.code, "UnprocessableConfiguration");
-        const storedRoutes = await client.getRoutes();
+        const storedRoutes = await listAllRoutes(client);
         assert.isUndefined(storedRoutes.find((item) => item.name === "invalidRoutingTrunkRoute"));
         return;
       }
@@ -287,8 +285,8 @@ matrix([[true, false]], async function (useAad) {
       ];
       await client.setRoutes(routes);
 
-      assert.deepEqual(await client.getTrunks(), trunks);
-      assert.deepEqual(await client.getRoutes(), routes);
+      assert.deepEqual(await listAllTrunks(client), trunks);
+      assert.deepEqual(await listAllRoutes(client), routes);
     });
   });
 });

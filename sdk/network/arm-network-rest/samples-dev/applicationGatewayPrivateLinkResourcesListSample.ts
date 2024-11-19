@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -32,7 +32,7 @@ async function listsAllPrivateLinkResourcesOnApplicationGateway() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/privateLinkResources",
       subscriptionId,
       resourceGroupName,
-      applicationGatewayName
+      applicationGatewayName,
     )
     .get(options);
   const pageData = paginate(client, initialResponse);

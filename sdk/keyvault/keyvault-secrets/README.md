@@ -205,7 +205,7 @@ the following attributes:
 - `contentType`: Any string that can be used to help the receiver of the secret understand how to use the secret value.
 - `enabled`: A boolean value that determines whether the secret value can be read or not.
 - `notBefore`: A given date after which the secret value can be retrieved.
-- `expires`: A given date after which the secret value cannot be retrieved.
+- `expiresOn`: A given date after which the secret value cannot be retrieved.
 
 An object with these attributes can be sent as the third parameter of
 `setSecret`, right after the secret's name and value, as follows:
@@ -369,7 +369,7 @@ Another way to wait until the secret is fully deleted is to do individual calls,
 ```typescript
 const { DefaultAzureCredential } = require("@azure/identity");
 const { SecretClient } = require("@azure/keyvault-secrets");
-const { delay } = require("@azure/core-http");
+const { delay } = require("@azure/core-util");
 
 const credential = new DefaultAzureCredential();
 
@@ -502,8 +502,8 @@ If you'd like to contribute to this library, please read the [contributing guide
 [azure_keyvault]: https://docs.microsoft.com/azure/key-vault/general/overview
 [azure_keyvault_cli]: https://docs.microsoft.com/azure/key-vault/general/quick-create-cli
 [azure_keyvault_portal]: https://docs.microsoft.com/azure/key-vault/general/quick-create-portal
-[default_azure_credential]: https://docs.microsoft.com/java/api/overview/azure/identity-readme?view=azure-java-stable#defaultazurecredential
+[default_azure_credential]: https://learn.microsoft.com/javascript/api/@azure/identity/defaultazurecredential?view=azure-node-latest
 [managed_identity]: https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview
-[azure_identity]: https://docs.microsoft.com/java/api/overview/azure/identity-readme?view=azure-java-stable
+[azure_identity]: https://learn.microsoft.com/javascript/api/overview/azure/identity-readme?view=azure-node-latest
 
 ![Impressions](https://azure-sdk-impressions.azurewebsites.net/api/impressions/azure-sdk-for-js%2Fsdk%2Fkeyvault%2Fkeyvault-secrets%2FREADME.png)

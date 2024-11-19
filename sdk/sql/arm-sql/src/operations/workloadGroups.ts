@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SqlManagementClient } from "../sqlManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   WorkloadGroup,
   WorkloadGroupsListByDatabaseNextOptionalParams,
@@ -25,7 +29,7 @@ import {
   WorkloadGroupsCreateOrUpdateOptionalParams,
   WorkloadGroupsCreateOrUpdateResponse,
   WorkloadGroupsDeleteOptionalParams,
-  WorkloadGroupsListByDatabaseNextResponse
+  WorkloadGroupsListByDatabaseNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -53,13 +57,13 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     resourceGroupName: string,
     serverName: string,
     databaseName: string,
-    options?: WorkloadGroupsListByDatabaseOptionalParams
+    options?: WorkloadGroupsListByDatabaseOptionalParams,
   ): PagedAsyncIterableIterator<WorkloadGroup> {
     const iter = this.listByDatabasePagingAll(
       resourceGroupName,
       serverName,
       databaseName,
-      options
+      options,
     );
     return {
       next() {
@@ -77,9 +81,9 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
           serverName,
           databaseName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -88,7 +92,7 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     serverName: string,
     databaseName: string,
     options?: WorkloadGroupsListByDatabaseOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<WorkloadGroup[]> {
     let result: WorkloadGroupsListByDatabaseResponse;
     let continuationToken = settings?.continuationToken;
@@ -97,7 +101,7 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
         resourceGroupName,
         serverName,
         databaseName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -110,7 +114,7 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
         serverName,
         databaseName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -123,13 +127,13 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     resourceGroupName: string,
     serverName: string,
     databaseName: string,
-    options?: WorkloadGroupsListByDatabaseOptionalParams
+    options?: WorkloadGroupsListByDatabaseOptionalParams,
   ): AsyncIterableIterator<WorkloadGroup> {
     for await (const page of this.listByDatabasePagingPage(
       resourceGroupName,
       serverName,
       databaseName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -149,7 +153,7 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     serverName: string,
     databaseName: string,
     workloadGroupName: string,
-    options?: WorkloadGroupsGetOptionalParams
+    options?: WorkloadGroupsGetOptionalParams,
   ): Promise<WorkloadGroupsGetResponse> {
     return this.client.sendOperationRequest(
       {
@@ -157,9 +161,9 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
         serverName,
         databaseName,
         workloadGroupName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -179,30 +183,29 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     databaseName: string,
     workloadGroupName: string,
     parameters: WorkloadGroup,
-    options?: WorkloadGroupsCreateOrUpdateOptionalParams
+    options?: WorkloadGroupsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<WorkloadGroupsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<WorkloadGroupsCreateOrUpdateResponse>,
       WorkloadGroupsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<WorkloadGroupsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -211,8 +214,8 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -220,26 +223,29 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         serverName,
         databaseName,
         workloadGroupName,
         parameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      WorkloadGroupsCreateOrUpdateResponse,
+      OperationState<WorkloadGroupsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -261,7 +267,7 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     databaseName: string,
     workloadGroupName: string,
     parameters: WorkloadGroup,
-    options?: WorkloadGroupsCreateOrUpdateOptionalParams
+    options?: WorkloadGroupsCreateOrUpdateOptionalParams,
   ): Promise<WorkloadGroupsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
@@ -269,7 +275,7 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
       databaseName,
       workloadGroupName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -288,25 +294,24 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     serverName: string,
     databaseName: string,
     workloadGroupName: string,
-    options?: WorkloadGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: WorkloadGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -315,8 +320,8 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -324,25 +329,25 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         serverName,
         databaseName,
         workloadGroupName,
-        options
+        options,
       },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -362,14 +367,14 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     serverName: string,
     databaseName: string,
     workloadGroupName: string,
-    options?: WorkloadGroupsDeleteOptionalParams
+    options?: WorkloadGroupsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       serverName,
       databaseName,
       workloadGroupName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -386,11 +391,11 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     resourceGroupName: string,
     serverName: string,
     databaseName: string,
-    options?: WorkloadGroupsListByDatabaseOptionalParams
+    options?: WorkloadGroupsListByDatabaseOptionalParams,
   ): Promise<WorkloadGroupsListByDatabaseResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, databaseName, options },
-      listByDatabaseOperationSpec
+      listByDatabaseOperationSpec,
     );
   }
 
@@ -408,11 +413,11 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
     serverName: string,
     databaseName: string,
     nextLink: string,
-    options?: WorkloadGroupsListByDatabaseNextOptionalParams
+    options?: WorkloadGroupsListByDatabaseNextOptionalParams,
   ): Promise<WorkloadGroupsListByDatabaseNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, databaseName, nextLink, options },
-      listByDatabaseNextOperationSpec
+      listByDatabaseNextOperationSpec,
     );
   }
 }
@@ -420,105 +425,101 @@ export class WorkloadGroupsImpl implements WorkloadGroups {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/workloadGroups/{workloadGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/workloadGroups/{workloadGroupName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.WorkloadGroup
+      bodyMapper: Mappers.WorkloadGroup,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
     Parameters.databaseName,
-    Parameters.workloadGroupName
+    Parameters.workloadGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/workloadGroups/{workloadGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/workloadGroups/{workloadGroupName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.WorkloadGroup
+      bodyMapper: Mappers.WorkloadGroup,
     },
     201: {
-      bodyMapper: Mappers.WorkloadGroup
+      bodyMapper: Mappers.WorkloadGroup,
     },
     202: {
-      bodyMapper: Mappers.WorkloadGroup
+      bodyMapper: Mappers.WorkloadGroup,
     },
     204: {
-      bodyMapper: Mappers.WorkloadGroup
+      bodyMapper: Mappers.WorkloadGroup,
     },
-    default: {}
+    default: {},
   },
-  requestBody: Parameters.parameters74,
-  queryParameters: [Parameters.apiVersion2],
+  requestBody: Parameters.parameters57,
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
     Parameters.databaseName,
-    Parameters.workloadGroupName
+    Parameters.workloadGroupName,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/workloadGroups/{workloadGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/workloadGroups/{workloadGroupName}",
   httpMethod: "DELETE",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
     Parameters.databaseName,
-    Parameters.workloadGroupName
+    Parameters.workloadGroupName,
   ],
-  serializer
+  serializer,
 };
 const listByDatabaseOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/workloadGroups",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/workloadGroups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.WorkloadGroupListResult
+      bodyMapper: Mappers.WorkloadGroupListResult,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.databaseName
+    Parameters.databaseName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByDatabaseNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.WorkloadGroupListResult
+      bodyMapper: Mappers.WorkloadGroupListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
@@ -526,8 +527,8 @@ const listByDatabaseNextOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.serverName,
     Parameters.databaseName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

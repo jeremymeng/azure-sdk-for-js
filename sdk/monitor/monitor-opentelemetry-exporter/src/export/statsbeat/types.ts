@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 export class NetworkStatsbeat {
   public time: number | undefined;
 
@@ -12,6 +15,10 @@ export class NetworkStatsbeat {
   public lastRequestCount: number;
 
   public totalSuccesfulRequestCount: number;
+
+  public totalReadFailureCount: number;
+
+  public totalWriteFailureCount: number;
 
   public totalFailedRequestCount: { statusCode: number; count: number }[];
 
@@ -32,6 +39,8 @@ export class NetworkStatsbeat {
     this.host = host;
     this.totalRequestCount = 0;
     this.totalSuccesfulRequestCount = 0;
+    this.totalReadFailureCount = 0;
+    this.totalWriteFailureCount = 0;
     this.totalFailedRequestCount = [];
     this.retryCount = [];
     this.exceptionCount = [];
@@ -50,18 +59,23 @@ export const MAX_STATSBEAT_FAILURES = 3;
 
 export const StatsbeatResourceProvider = {
   appsvc: "appsvc",
+  aks: "aks",
   functions: "functions",
   vm: "vm",
   unknown: "unknown",
 };
 
 export enum StatsbeatCounter {
-  SUCCESS_COUNT = "Request Success Count",
-  FAILURE_COUNT = "Request Failure Count",
-  RETRY_COUNT = "Retry Count",
-  THROTTLE_COUNT = "Throttle Count",
-  EXCEPTION_COUNT = "Exception Count",
-  AVERAGE_DURATION = "Request Duration",
+  SUCCESS_COUNT = "Request_Success_Count",
+  FAILURE_COUNT = "Request_Failure_Count",
+  RETRY_COUNT = "Retry_Count",
+  THROTTLE_COUNT = "Throttle_Count",
+  EXCEPTION_COUNT = "Exception_Count",
+  AVERAGE_DURATION = "Request_Duration",
+  READ_FAILURE_COUNT = "Read_Failure_Count",
+  WRITE_FAILURE_COUNT = "Write_Failure_Count",
+  ATTACH = "Attach",
+  FEATURE = "Feature",
 }
 
 export const AIMS_URI = "http://169.254.169.254/metadata/instance/compute";
@@ -82,14 +96,9 @@ export const EU_ENDPOINTS = [
   "swedencentral",
   "switzerlandnorth",
   "switzerlandwest",
+  "uksouth",
+  "ukwest",
 ];
-
-export interface IVirtualMachineInfo {
-  isVM?: boolean;
-  id?: string;
-  subscriptionId?: string;
-  osType?: string;
-}
 
 export interface CommonStatsbeatProperties {
   os: string;
@@ -101,7 +110,43 @@ export interface CommonStatsbeatProperties {
   attach: string;
 }
 
+export interface AttachStatsbeatProperties {
+  rpId: string;
+}
+
 export interface NetworkStatsbeatProperties {
   endpoint: string;
   host: string;
+}
+
+export interface StatsbeatOptions {
+  instrumentationKey: string;
+  endpointUrl: string;
+  networkCollectionInterval?: number;
+  longCollectionInterval?: number;
+  disableOfflineStorage?: boolean;
+}
+
+export interface VirtualMachineInfo {
+  isVM?: boolean;
+  id?: string;
+  subscriptionId?: string;
+  osType?: string;
+}
+
+export enum StatsbeatFeatureType {
+  FEATURE = 0,
+  INSTRUMENTATION = 1,
+}
+
+/**
+ * Status codes indicating that we should shutdown statsbeat
+ * @internal
+ */
+export function isStatsbeatShutdownStatus(statusCode: number): boolean {
+  return (
+    statusCode === 401 || // Unauthorized
+    statusCode === 403 || // Forbidden
+    statusCode === 503 // Server Unavailable
+  );
 }

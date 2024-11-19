@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ApiManagementClient } from "../apiManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   SchemaContract,
   ApiSchemaListByApiNextOptionalParams,
@@ -45,7 +49,7 @@ export class ApiSchemaImpl implements ApiSchema {
 
   /**
    * Get the schema configuration at the API level.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param apiId API revision identifier. Must be unique in the current API Management service instance.
    *              Non-current revision has ;rev=n as a suffix where n is the revision number.
@@ -139,7 +143,7 @@ export class ApiSchemaImpl implements ApiSchema {
 
   /**
    * Get the schema configuration at the API level.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param apiId API revision identifier. Must be unique in the current API Management service instance.
    *              Non-current revision has ;rev=n as a suffix where n is the revision number.
@@ -159,12 +163,11 @@ export class ApiSchemaImpl implements ApiSchema {
 
   /**
    * Gets the entity state (Etag) version of the schema specified by its identifier.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param apiId API revision identifier. Must be unique in the current API Management service instance.
    *              Non-current revision has ;rev=n as a suffix where n is the revision number.
-   * @param schemaId Schema identifier within an API. Must be unique in the current API Management
-   *                 service instance.
+   * @param schemaId Schema id identifier. Must be unique in the current API Management service instance.
    * @param options The options parameters.
    */
   getEntityTag(
@@ -182,12 +185,11 @@ export class ApiSchemaImpl implements ApiSchema {
 
   /**
    * Get the schema configuration at the API level.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param apiId API revision identifier. Must be unique in the current API Management service instance.
    *              Non-current revision has ;rev=n as a suffix where n is the revision number.
-   * @param schemaId Schema identifier within an API. Must be unique in the current API Management
-   *                 service instance.
+   * @param schemaId Schema id identifier. Must be unique in the current API Management service instance.
    * @param options The options parameters.
    */
   get(
@@ -205,12 +207,11 @@ export class ApiSchemaImpl implements ApiSchema {
 
   /**
    * Creates or updates schema configuration for the API.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param apiId API revision identifier. Must be unique in the current API Management service instance.
    *              Non-current revision has ;rev=n as a suffix where n is the revision number.
-   * @param schemaId Schema identifier within an API. Must be unique in the current API Management
-   *                 service instance.
+   * @param schemaId Schema id identifier. Must be unique in the current API Management service instance.
    * @param parameters The schema contents to apply.
    * @param options The options parameters.
    */
@@ -222,8 +223,8 @@ export class ApiSchemaImpl implements ApiSchema {
     parameters: SchemaContract,
     options?: ApiSchemaCreateOrUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<ApiSchemaCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ApiSchemaCreateOrUpdateResponse>,
       ApiSchemaCreateOrUpdateResponse
     >
   > {
@@ -233,7 +234,7 @@ export class ApiSchemaImpl implements ApiSchema {
     ): Promise<ApiSchemaCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -266,15 +267,25 @@ export class ApiSchemaImpl implements ApiSchema {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, serviceName, apiId, schemaId, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        serviceName,
+        apiId,
+        schemaId,
+        parameters,
+        options
+      },
+      spec: createOrUpdateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      ApiSchemaCreateOrUpdateResponse,
+      OperationState<ApiSchemaCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location"
     });
     await poller.poll();
     return poller;
@@ -282,12 +293,11 @@ export class ApiSchemaImpl implements ApiSchema {
 
   /**
    * Creates or updates schema configuration for the API.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param apiId API revision identifier. Must be unique in the current API Management service instance.
    *              Non-current revision has ;rev=n as a suffix where n is the revision number.
-   * @param schemaId Schema identifier within an API. Must be unique in the current API Management
-   *                 service instance.
+   * @param schemaId Schema id identifier. Must be unique in the current API Management service instance.
    * @param parameters The schema contents to apply.
    * @param options The options parameters.
    */
@@ -312,12 +322,11 @@ export class ApiSchemaImpl implements ApiSchema {
 
   /**
    * Deletes the schema configuration at the Api.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param apiId API revision identifier. Must be unique in the current API Management service instance.
    *              Non-current revision has ;rev=n as a suffix where n is the revision number.
-   * @param schemaId Schema identifier within an API. Must be unique in the current API Management
-   *                 service instance.
+   * @param schemaId Schema id identifier. Must be unique in the current API Management service instance.
    * @param ifMatch ETag of the Entity. ETag should match the current entity state from the header
    *                response of the GET request or it should be * for unconditional update.
    * @param options The options parameters.
@@ -338,7 +347,7 @@ export class ApiSchemaImpl implements ApiSchema {
 
   /**
    * ListByApiNext
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param apiId API revision identifier. Must be unique in the current API Management service instance.
    *              Non-current revision has ;rev=n as a suffix where n is the revision number.
@@ -463,7 +472,7 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  requestBody: Parameters.parameters7,
+  requestBody: Parameters.parameters9,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
@@ -515,12 +524,6 @@ const listByApiNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [
-    Parameters.filter,
-    Parameters.top,
-    Parameters.skip,
-    Parameters.apiVersion
-  ],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,

@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   FrontDoor,
   FrontDoorsListOptionalParams,
@@ -19,7 +19,7 @@ import {
   FrontDoorsDeleteOptionalParams,
   ValidateCustomDomainInput,
   FrontDoorsValidateCustomDomainOptionalParams,
-  FrontDoorsValidateCustomDomainResponse
+  FrontDoorsValidateCustomDomainResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface FrontDoors {
    * @param options The options parameters.
    */
   list(
-    options?: FrontDoorsListOptionalParams
+    options?: FrontDoorsListOptionalParams,
   ): PagedAsyncIterableIterator<FrontDoor>;
   /**
    * Lists all of the Front Doors within a resource group under a subscription.
@@ -39,7 +39,7 @@ export interface FrontDoors {
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: FrontDoorsListByResourceGroupOptionalParams
+    options?: FrontDoorsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<FrontDoor>;
   /**
    * Gets a Front Door with the specified Front Door name under the specified subscription and resource
@@ -51,7 +51,7 @@ export interface FrontDoors {
   get(
     resourceGroupName: string,
     frontDoorName: string,
-    options?: FrontDoorsGetOptionalParams
+    options?: FrontDoorsGetOptionalParams,
   ): Promise<FrontDoorsGetResponse>;
   /**
    * Creates a new Front Door with a Front Door name under the specified subscription and resource group.
@@ -64,10 +64,10 @@ export interface FrontDoors {
     resourceGroupName: string,
     frontDoorName: string,
     frontDoorParameters: FrontDoor,
-    options?: FrontDoorsCreateOrUpdateOptionalParams
+    options?: FrontDoorsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<FrontDoorsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<FrontDoorsCreateOrUpdateResponse>,
       FrontDoorsCreateOrUpdateResponse
     >
   >;
@@ -82,7 +82,7 @@ export interface FrontDoors {
     resourceGroupName: string,
     frontDoorName: string,
     frontDoorParameters: FrontDoor,
-    options?: FrontDoorsCreateOrUpdateOptionalParams
+    options?: FrontDoorsCreateOrUpdateOptionalParams,
   ): Promise<FrontDoorsCreateOrUpdateResponse>;
   /**
    * Deletes an existing Front Door with the specified parameters.
@@ -93,8 +93,8 @@ export interface FrontDoors {
   beginDelete(
     resourceGroupName: string,
     frontDoorName: string,
-    options?: FrontDoorsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: FrontDoorsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes an existing Front Door with the specified parameters.
    * @param resourceGroupName Name of the Resource group within the Azure subscription.
@@ -104,7 +104,7 @@ export interface FrontDoors {
   beginDeleteAndWait(
     resourceGroupName: string,
     frontDoorName: string,
-    options?: FrontDoorsDeleteOptionalParams
+    options?: FrontDoorsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Validates the custom domain mapping to ensure it maps to the correct Front Door endpoint in DNS.
@@ -117,6 +117,6 @@ export interface FrontDoors {
     resourceGroupName: string,
     frontDoorName: string,
     customDomainProperties: ValidateCustomDomainInput,
-    options?: FrontDoorsValidateCustomDomainOptionalParams
+    options?: FrontDoorsValidateCustomDomainOptionalParams,
   ): Promise<FrontDoorsValidateCustomDomainResponse>;
 }

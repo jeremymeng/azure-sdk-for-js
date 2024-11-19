@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   NetworkGroup,
   NetworkGroupsListOptionalParams,
@@ -15,7 +15,7 @@ import {
   NetworkGroupsGetResponse,
   NetworkGroupsCreateOrUpdateOptionalParams,
   NetworkGroupsCreateOrUpdateResponse,
-  NetworkGroupsDeleteOptionalParams
+  NetworkGroupsDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface NetworkGroups {
   list(
     resourceGroupName: string,
     networkManagerName: string,
-    options?: NetworkGroupsListOptionalParams
+    options?: NetworkGroupsListOptionalParams,
   ): PagedAsyncIterableIterator<NetworkGroup>;
   /**
    * Gets the specified network group.
@@ -43,7 +43,7 @@ export interface NetworkGroups {
     resourceGroupName: string,
     networkManagerName: string,
     networkGroupName: string,
-    options?: NetworkGroupsGetOptionalParams
+    options?: NetworkGroupsGetOptionalParams,
   ): Promise<NetworkGroupsGetResponse>;
   /**
    * Creates or updates a network group.
@@ -58,7 +58,7 @@ export interface NetworkGroups {
     networkManagerName: string,
     networkGroupName: string,
     parameters: NetworkGroup,
-    options?: NetworkGroupsCreateOrUpdateOptionalParams
+    options?: NetworkGroupsCreateOrUpdateOptionalParams,
   ): Promise<NetworkGroupsCreateOrUpdateResponse>;
   /**
    * Deletes a network group.
@@ -71,8 +71,8 @@ export interface NetworkGroups {
     resourceGroupName: string,
     networkManagerName: string,
     networkGroupName: string,
-    options?: NetworkGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: NetworkGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a network group.
    * @param resourceGroupName The name of the resource group.
@@ -84,6 +84,6 @@ export interface NetworkGroups {
     resourceGroupName: string,
     networkManagerName: string,
     networkGroupName: string,
-    options?: NetworkGroupsDeleteOptionalParams
+    options?: NetworkGroupsDeleteOptionalParams,
   ): Promise<void>;
 }

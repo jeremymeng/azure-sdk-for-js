@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { RestError, TableClient, TableServiceClient } from "../../src";
 
-import { TableServiceErrorResponse } from "../../src/utils/errorHelpers";
+import type { TableServiceErrorResponse } from "../../src/utils/errorHelpers";
 import { assert } from "chai";
 import { createHttpHeaders } from "@azure/core-rest-pipeline";
 
-describe("TableClient CreationHandling", () => {
+describe("TableClient CreationHandling", function () {
   let unrecordedClient: TableClient;
   beforeEach(async function () {
     unrecordedClient = new TableClient("https://foo.table.core.windows.net", "testTable");
@@ -68,7 +68,7 @@ describe("TableClient CreationHandling", () => {
   });
 });
 
-describe("TableServiceClient CreationHandling", () => {
+describe("TableServiceClient CreationHandling", function () {
   let unrecordedClient: TableServiceClient;
 
   beforeEach(async function () {

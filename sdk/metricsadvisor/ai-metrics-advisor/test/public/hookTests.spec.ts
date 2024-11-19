@@ -1,24 +1,28 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { assert } from "chai";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 
-import {
+import type {
   EmailNotificationHook,
   EmailNotificationHookPatch,
   MetricsAdvisorAdministrationClient,
   WebNotificationHook,
   WebNotificationHookPatch,
 } from "../../src";
-import { createRecordedAdminClient, makeCredential } from "./util/recordedClients";
-import { Recorder } from "@azure-tools/test-recorder";
+import {
+  createRecordedAdminClient,
+  getRecorderUniqueVariable,
+  makeCredential,
+} from "./util/recordedClients";
+import type { Recorder } from "@azure-tools/test-recorder";
 import {
   fakeTestPassPlaceholder,
   fakeTestSecretPlaceholder,
   getYieldedValue,
   matrix,
-} from "@azure/test-utils";
+} from "@azure-tools/test-utils";
 
 matrix([[true, false]] as const, async (useAad) => {
   describe(`[${useAad ? "AAD" : "API Key"}]`, () => {
@@ -30,13 +34,13 @@ matrix([[true, false]] as const, async (useAad) => {
       let emailHookName: string;
       let webHookName: string;
 
-      beforeEach(function (this: Context) {
-        ({ recorder, client } = createRecordedAdminClient(this, makeCredential(useAad)));
+      beforeEach(async function (this: Context) {
+        ({ recorder, client } = await createRecordedAdminClient(this, makeCredential(useAad)));
         if (recorder && !emailHookName) {
-          emailHookName = recorder.getUniqueName("js-test-emailHook-");
+          emailHookName = getRecorderUniqueVariable(recorder, "js-test-emailHook-");
         }
         if (recorder && !webHookName) {
-          webHookName = recorder.getUniqueName("js-test-webHook-");
+          webHookName = getRecorderUniqueVariable(recorder, "js-test-webHook-");
         }
       });
 

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -38,7 +38,7 @@ async function createADefaultAdminRule() {
       networkManagerName,
       configurationName,
       ruleCollectionName,
-      ruleName
+      ruleName,
     )
     .put(options);
   console.log(result);
@@ -85,7 +85,7 @@ async function createAnAdminRule() {
       networkManagerName,
       configurationName,
       ruleCollectionName,
-      ruleName
+      ruleName,
     )
     .put(options);
   console.log(result);

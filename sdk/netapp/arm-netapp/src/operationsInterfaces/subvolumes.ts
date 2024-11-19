@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   SubvolumeInfo,
   SubvolumesListByVolumeOptionalParams,
@@ -20,7 +20,7 @@ import {
   SubvolumesUpdateResponse,
   SubvolumesDeleteOptionalParams,
   SubvolumesGetMetadataOptionalParams,
-  SubvolumesGetMetadataResponse
+  SubvolumesGetMetadataResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -28,7 +28,7 @@ import {
 export interface Subvolumes {
   /**
    * Returns a list of the subvolumes in the volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -39,11 +39,11 @@ export interface Subvolumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: SubvolumesListByVolumeOptionalParams
+    options?: SubvolumesListByVolumeOptionalParams,
   ): PagedAsyncIterableIterator<SubvolumeInfo>;
   /**
    * Returns the path associated with the subvolumeName provided
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -56,11 +56,11 @@ export interface Subvolumes {
     poolName: string,
     volumeName: string,
     subvolumeName: string,
-    options?: SubvolumesGetOptionalParams
+    options?: SubvolumesGetOptionalParams,
   ): Promise<SubvolumesGetResponse>;
   /**
    * Creates a subvolume in the path or clones the subvolume mentioned in the parentPath
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -75,16 +75,16 @@ export interface Subvolumes {
     volumeName: string,
     subvolumeName: string,
     body: SubvolumeInfo,
-    options?: SubvolumesCreateOptionalParams
+    options?: SubvolumesCreateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SubvolumesCreateResponse>,
+    SimplePollerLike<
+      OperationState<SubvolumesCreateResponse>,
       SubvolumesCreateResponse
     >
   >;
   /**
    * Creates a subvolume in the path or clones the subvolume mentioned in the parentPath
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -99,11 +99,11 @@ export interface Subvolumes {
     volumeName: string,
     subvolumeName: string,
     body: SubvolumeInfo,
-    options?: SubvolumesCreateOptionalParams
+    options?: SubvolumesCreateOptionalParams,
   ): Promise<SubvolumesCreateResponse>;
   /**
    * Patch a subvolume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -118,16 +118,16 @@ export interface Subvolumes {
     volumeName: string,
     subvolumeName: string,
     body: SubvolumePatchRequest,
-    options?: SubvolumesUpdateOptionalParams
+    options?: SubvolumesUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SubvolumesUpdateResponse>,
+    SimplePollerLike<
+      OperationState<SubvolumesUpdateResponse>,
       SubvolumesUpdateResponse
     >
   >;
   /**
    * Patch a subvolume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -142,11 +142,11 @@ export interface Subvolumes {
     volumeName: string,
     subvolumeName: string,
     body: SubvolumePatchRequest,
-    options?: SubvolumesUpdateOptionalParams
+    options?: SubvolumesUpdateOptionalParams,
   ): Promise<SubvolumesUpdateResponse>;
   /**
    * Delete subvolume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -159,11 +159,11 @@ export interface Subvolumes {
     poolName: string,
     volumeName: string,
     subvolumeName: string,
-    options?: SubvolumesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: SubvolumesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Delete subvolume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -176,11 +176,11 @@ export interface Subvolumes {
     poolName: string,
     volumeName: string,
     subvolumeName: string,
-    options?: SubvolumesDeleteOptionalParams
+    options?: SubvolumesDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Get details of the specified subvolume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -193,16 +193,16 @@ export interface Subvolumes {
     poolName: string,
     volumeName: string,
     subvolumeName: string,
-    options?: SubvolumesGetMetadataOptionalParams
+    options?: SubvolumesGetMetadataOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SubvolumesGetMetadataResponse>,
+    SimplePollerLike<
+      OperationState<SubvolumesGetMetadataResponse>,
       SubvolumesGetMetadataResponse
     >
   >;
   /**
    * Get details of the specified subvolume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -215,6 +215,6 @@ export interface Subvolumes {
     poolName: string,
     volumeName: string,
     subvolumeName: string,
-    options?: SubvolumesGetMetadataOptionalParams
+    options?: SubvolumesGetMetadataOptionalParams,
   ): Promise<SubvolumesGetMetadataResponse>;
 }

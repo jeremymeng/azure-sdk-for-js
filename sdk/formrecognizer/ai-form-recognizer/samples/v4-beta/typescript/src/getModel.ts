@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * This sample shows how to get the full information about a custom model by its model ID, including information about
@@ -23,10 +23,10 @@ async function main() {
   // the following sample uses `"prebuilt-idDocument"`, but you can change it to any model ID
   // you'd like to inspect.
   const modelId = "prebuilt-idDocument";
-  const model = await client.getModel(modelId);
+  const model = await client.getDocumentModel(modelId);
 
   console.log("ID", model.modelId);
-  console.log("Created:", model.createdDateTime);
+  console.log("Created:", model.createdOn);
   console.log("Description: ", model.description || "<none>");
 
   console.log("Document Types:");

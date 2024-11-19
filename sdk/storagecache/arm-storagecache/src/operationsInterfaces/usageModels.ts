@@ -13,10 +13,10 @@ import { UsageModel, UsageModelsListOptionalParams } from "../models";
 /** Interface representing a UsageModels. */
 export interface UsageModels {
   /**
-   * Get the list of Cache Usage Models available to this subscription.
+   * Get the list of cache usage models available to this subscription.
    * @param options The options parameters.
    */
   list(
-    options?: UsageModelsListOptionalParams
+    options?: UsageModelsListOptionalParams,
   ): PagedAsyncIterableIterator<UsageModel>;
 }

@@ -11,6 +11,7 @@ import * as coreRestPipeline from "@azure/core-rest-pipeline";
 import * as coreAuth from "@azure/core-auth";
 import {
   LinkConnectionOperationsImpl,
+  RunNotebookImpl,
   KqlScriptsImpl,
   KqlScriptOperationsImpl,
   MetastoreImpl,
@@ -32,10 +33,11 @@ import {
   SqlScriptOperationsImpl,
   TriggerOperationsImpl,
   TriggerRunOperationsImpl,
-  WorkspaceOperationsImpl
+  WorkspaceOperationsImpl,
 } from "./operations";
 import {
   LinkConnectionOperations,
+  RunNotebook,
   KqlScripts,
   KqlScriptOperations,
   Metastore,
@@ -57,7 +59,7 @@ import {
   SqlScriptOperations,
   TriggerOperations,
   TriggerRunOperations,
-  WorkspaceOperations
+  WorkspaceOperations,
 } from "./operationsInterfaces";
 import { ArtifactsClientOptionalParams } from "./models";
 
@@ -68,13 +70,13 @@ export class ArtifactsClient extends coreClient.ServiceClient {
    * Initializes a new instance of the ArtifactsClient class.
    * @param credentials Subscription credentials which uniquely identify client subscription.
    * @param endpoint The workspace development endpoint, for example
-   *                 https://myworkspace.dev.azuresynapse.net.
+   *                 `https://myworkspace.dev.azuresynapse.net`.
    * @param options The parameter options
    */
   constructor(
     credentials: coreAuth.TokenCredential,
     endpoint: string,
-    options?: ArtifactsClientOptionalParams
+    options?: ArtifactsClientOptionalParams,
   ) {
     if (credentials === undefined) {
       throw new Error("'credentials' cannot be null");
@@ -89,10 +91,10 @@ export class ArtifactsClient extends coreClient.ServiceClient {
     }
     const defaults: ArtifactsClientOptionalParams = {
       requestContentType: "application/json; charset=utf-8",
-      credential: credentials
+      credential: credentials,
     };
 
-    const packageDetails = `azsdk-js-synapse-artifacts/1.0.0-beta.13`;
+    const packageDetails = `azsdk-js-synapse-artifacts/1.0.0-beta.16`;
     const userAgentPrefix =
       options.userAgentOptions && options.userAgentOptions.userAgentPrefix
         ? `${options.userAgentOptions.userAgentPrefix} ${packageDetails}`
@@ -105,19 +107,20 @@ export class ArtifactsClient extends coreClient.ServiceClient {
       ...defaults,
       ...options,
       userAgentOptions: {
-        userAgentPrefix
+        userAgentPrefix,
       },
-      endpoint: options.endpoint ?? options.baseUri ?? "{endpoint}"
+      endpoint: options.endpoint ?? options.baseUri ?? "{endpoint}",
     };
     super(optionsWithDefaults);
 
     let bearerTokenAuthenticationPolicyFound: boolean = false;
     if (options?.pipeline && options.pipeline.getOrderedPolicies().length > 0) {
-      const pipelinePolicies: coreRestPipeline.PipelinePolicy[] = options.pipeline.getOrderedPolicies();
+      const pipelinePolicies: coreRestPipeline.PipelinePolicy[] =
+        options.pipeline.getOrderedPolicies();
       bearerTokenAuthenticationPolicyFound = pipelinePolicies.some(
         (pipelinePolicy) =>
           pipelinePolicy.name ===
-          coreRestPipeline.bearerTokenAuthenticationPolicyName
+          coreRestPipeline.bearerTokenAuthenticationPolicyName,
       );
     }
     if (
@@ -127,7 +130,7 @@ export class ArtifactsClient extends coreClient.ServiceClient {
       !bearerTokenAuthenticationPolicyFound
     ) {
       this.pipeline.removePolicy({
-        name: coreRestPipeline.bearerTokenAuthenticationPolicyName
+        name: coreRestPipeline.bearerTokenAuthenticationPolicyName,
       });
       this.pipeline.addPolicy(
         coreRestPipeline.bearerTokenAuthenticationPolicy({
@@ -137,19 +140,20 @@ export class ArtifactsClient extends coreClient.ServiceClient {
             `${optionsWithDefaults.endpoint}/.default`,
           challengeCallbacks: {
             authorizeRequestOnChallenge:
-              coreClient.authorizeRequestOnClaimChallenge
-          }
-        })
+              coreClient.authorizeRequestOnClaimChallenge,
+          },
+        }),
       );
     }
     // Parameter assignments
     this.endpoint = endpoint;
     this.linkConnectionOperations = new LinkConnectionOperationsImpl(this);
+    this.runNotebook = new RunNotebookImpl(this);
     this.kqlScripts = new KqlScriptsImpl(this);
     this.kqlScriptOperations = new KqlScriptOperationsImpl(this);
     this.metastore = new MetastoreImpl(this);
     this.sparkConfigurationOperations = new SparkConfigurationOperationsImpl(
-      this
+      this,
     );
     this.bigDataPools = new BigDataPoolsImpl(this);
     this.dataFlowOperations = new DataFlowOperationsImpl(this);
@@ -164,7 +168,7 @@ export class ArtifactsClient extends coreClient.ServiceClient {
     this.pipelineOperations = new PipelineOperationsImpl(this);
     this.pipelineRunOperations = new PipelineRunOperationsImpl(this);
     this.sparkJobDefinitionOperations = new SparkJobDefinitionOperationsImpl(
-      this
+      this,
     );
     this.sqlPools = new SqlPoolsImpl(this);
     this.sqlScriptOperations = new SqlScriptOperationsImpl(this);
@@ -174,6 +178,7 @@ export class ArtifactsClient extends coreClient.ServiceClient {
   }
 
   linkConnectionOperations: LinkConnectionOperations;
+  runNotebook: RunNotebook;
   kqlScripts: KqlScripts;
   kqlScriptOperations: KqlScriptOperations;
   metastore: Metastore;

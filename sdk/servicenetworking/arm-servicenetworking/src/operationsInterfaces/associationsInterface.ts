@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   Association,
   AssociationsInterfaceListByTrafficControllerOptionalParams,
@@ -18,7 +18,8 @@ import {
   AssociationUpdate,
   AssociationsInterfaceUpdateOptionalParams,
   AssociationsInterfaceUpdateResponse,
-  AssociationsInterfaceDeleteOptionalParams
+  AssociationsInterfaceDeleteOptionalParams,
+  AssociationsInterfaceDeleteResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -33,10 +34,10 @@ export interface AssociationsInterface {
   listByTrafficController(
     resourceGroupName: string,
     trafficControllerName: string,
-    options?: AssociationsInterfaceListByTrafficControllerOptionalParams
+    options?: AssociationsInterfaceListByTrafficControllerOptionalParams,
   ): PagedAsyncIterableIterator<Association>;
   /**
-   * Get a Traffic Controller Association
+   * Get a Association
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param associationName Name of Association
@@ -46,10 +47,10 @@ export interface AssociationsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     associationName: string,
-    options?: AssociationsInterfaceGetOptionalParams
+    options?: AssociationsInterfaceGetOptionalParams,
   ): Promise<AssociationsInterfaceGetResponse>;
   /**
-   * Create a Traffic Controller Association
+   * Create a Association
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param associationName Name of Association
@@ -61,15 +62,15 @@ export interface AssociationsInterface {
     trafficControllerName: string,
     associationName: string,
     resource: Association,
-    options?: AssociationsInterfaceCreateOrUpdateOptionalParams
+    options?: AssociationsInterfaceCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<AssociationsInterfaceCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<AssociationsInterfaceCreateOrUpdateResponse>,
       AssociationsInterfaceCreateOrUpdateResponse
     >
   >;
   /**
-   * Create a Traffic Controller Association
+   * Create a Association
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param associationName Name of Association
@@ -81,10 +82,10 @@ export interface AssociationsInterface {
     trafficControllerName: string,
     associationName: string,
     resource: Association,
-    options?: AssociationsInterfaceCreateOrUpdateOptionalParams
+    options?: AssociationsInterfaceCreateOrUpdateOptionalParams,
   ): Promise<AssociationsInterfaceCreateOrUpdateResponse>;
   /**
-   * Update a Traffic Controller Association
+   * Update a Association
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param associationName Name of Association
@@ -96,10 +97,10 @@ export interface AssociationsInterface {
     trafficControllerName: string,
     associationName: string,
     properties: AssociationUpdate,
-    options?: AssociationsInterfaceUpdateOptionalParams
+    options?: AssociationsInterfaceUpdateOptionalParams,
   ): Promise<AssociationsInterfaceUpdateResponse>;
   /**
-   * Delete a Traffic Controller Association
+   * Delete a Association
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param associationName Name of Association
@@ -109,10 +110,15 @@ export interface AssociationsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     associationName: string,
-    options?: AssociationsInterfaceDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: AssociationsInterfaceDeleteOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<AssociationsInterfaceDeleteResponse>,
+      AssociationsInterfaceDeleteResponse
+    >
+  >;
   /**
-   * Delete a Traffic Controller Association
+   * Delete a Association
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param associationName Name of Association
@@ -122,6 +128,6 @@ export interface AssociationsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     associationName: string,
-    options?: AssociationsInterfaceDeleteOptionalParams
-  ): Promise<void>;
+    options?: AssociationsInterfaceDeleteOptionalParams,
+  ): Promise<AssociationsInterfaceDeleteResponse>;
 }

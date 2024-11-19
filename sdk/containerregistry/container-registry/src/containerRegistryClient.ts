@@ -1,30 +1,25 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /// <reference lib="esnext.asynciterable" />
 
-import { isTokenCredential, TokenCredential } from "@azure/core-auth";
-import {
-  InternalPipelineOptions,
-  bearerTokenAuthenticationPolicy,
-} from "@azure/core-rest-pipeline";
-import { CommonClientOptions, OperationOptions } from "@azure/core-client";
+import type { TokenCredential } from "@azure/core-auth";
+import { isTokenCredential } from "@azure/core-auth";
+import type { InternalPipelineOptions } from "@azure/core-rest-pipeline";
+import { bearerTokenAuthenticationPolicy } from "@azure/core-rest-pipeline";
+import type { CommonClientOptions, OperationOptions } from "@azure/core-client";
 
-import "@azure/core-paging";
-import { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
+import type { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
 
 import { logger } from "./logger";
 import { GeneratedClient } from "./generated";
 import { tracingClient } from "./tracing";
-import { RepositoryPageResponse } from "./models";
+import type { RepositoryPageResponse } from "./models";
 import { extractNextLink } from "./utils/helpers";
 import { ChallengeHandler } from "./containerRegistryChallengeHandler";
-import {
-  ContainerRepository,
-  ContainerRepositoryImpl,
-  DeleteRepositoryOptions,
-} from "./containerRepository";
-import { RegistryArtifact } from "./registryArtifact";
+import type { ContainerRepository, DeleteRepositoryOptions } from "./containerRepository";
+import { ContainerRepositoryImpl } from "./containerRepository";
+import type { RegistryArtifact } from "./registryArtifact";
 import { ContainerRegistryRefreshTokenCredential } from "./containerRegistryTokenCredential";
 
 const LATEST_API_VERSION = "2021-07-01";
@@ -81,7 +76,7 @@ export class ContainerRegistryClient {
   constructor(
     endpoint: string,
     credential: TokenCredential,
-    options?: ContainerRegistryClientOptions
+    options?: ContainerRegistryClientOptions,
   );
 
   /**
@@ -106,7 +101,7 @@ export class ContainerRegistryClient {
   constructor(
     endpoint: string,
     credentialOrOptions?: TokenCredential | ContainerRegistryClientOptions,
-    clientOptions: ContainerRegistryClientOptions = {}
+    clientOptions: ContainerRegistryClientOptions = {},
   ) {
     if (!endpoint) {
       throw new Error("invalid endpoint");
@@ -132,14 +127,8 @@ export class ContainerRegistryClient {
         additionalAllowedQueryParameters: ["last", "n", "orderby", "digest"],
       },
     };
-    // Require audience now until we have a default ACR audience from the service.
-    if (!options.audience) {
-      throw new Error(
-        "ContainerRegistryClientOptions.audience must be set to initialize ContainerRegistryClient."
-      );
-    }
 
-    const defaultScope = `${options.audience}/.default`;
+    const defaultScope = `${options.audience ?? "https://containerregistry.azure.net"}/.default`;
     const serviceVersion = options.serviceVersion ?? LATEST_API_VERSION;
     const authClient = new GeneratedClient(endpoint, serviceVersion, internalPipelineOptions);
     this.client = new GeneratedClient(endpoint, serviceVersion, internalPipelineOptions);
@@ -148,9 +137,9 @@ export class ContainerRegistryClient {
         credential,
         scopes: [defaultScope],
         challengeCallbacks: new ChallengeHandler(
-          new ContainerRegistryRefreshTokenCredential(authClient, defaultScope, credential)
+          new ContainerRegistryRefreshTokenCredential(authClient, defaultScope, credential),
         ),
-      })
+      }),
     );
   }
 
@@ -162,7 +151,7 @@ export class ContainerRegistryClient {
    */
   public async deleteRepository(
     repositoryName: string,
-    options: DeleteRepositoryOptions = {}
+    options: DeleteRepositoryOptions = {},
   ): Promise<void> {
     if (!repositoryName) {
       throw new Error("invalid repositoryName");
@@ -173,7 +162,7 @@ export class ContainerRegistryClient {
       options,
       async (updatedOptions) => {
         await this.client.containerRegistry.deleteRepository(repositoryName, updatedOptions);
-      }
+      },
     );
   }
 
@@ -192,7 +181,7 @@ export class ContainerRegistryClient {
     }
 
     return new ContainerRepositoryImpl(this.endpoint, repositoryName, this.client).getArtifact(
-      tagOrDigest
+      tagOrDigest,
     );
   }
 
@@ -250,7 +239,8 @@ export class ContainerRegistryClient {
    * @param options -
    */
   public listRepositoryNames(
-    options: ListRepositoriesOptions = {}
+    // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
+    options: ListRepositoriesOptions = {},
   ): PagedAsyncIterableIterator<string, RepositoryPageResponse> {
     const iter = this.listRepositoryItems(options);
 
@@ -266,7 +256,7 @@ export class ContainerRegistryClient {
   }
 
   private async *listRepositoryItems(
-    options: ListRepositoriesOptions = {}
+    options: ListRepositoriesOptions = {},
   ): AsyncIterableIterator<string> {
     for await (const page of this.listRepositoriesPage({}, options)) {
       yield* page;
@@ -275,7 +265,7 @@ export class ContainerRegistryClient {
 
   private async *listRepositoriesPage(
     continuationState: PageSettings,
-    options: ListRepositoriesOptions = {}
+    options: ListRepositoriesOptions = {},
   ): AsyncIterableIterator<RepositoryPageResponse> {
     if (!continuationState.continuationToken) {
       const optionsComplete = {
@@ -295,7 +285,7 @@ export class ContainerRegistryClient {
     while (continuationState.continuationToken) {
       const currentPage = await this.client.containerRegistry.getRepositoriesNext(
         continuationState.continuationToken,
-        options
+        options,
       );
       continuationState.continuationToken = extractNextLink(currentPage.link);
       if (currentPage.repositories) {

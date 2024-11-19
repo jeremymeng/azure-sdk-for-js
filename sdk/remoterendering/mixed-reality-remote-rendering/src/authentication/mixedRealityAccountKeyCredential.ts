@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { AccessToken, GetTokenOptions, KeyCredential, TokenCredential } from "@azure/core-auth";
+import type {
+  AccessToken,
+  GetTokenOptions,
+  KeyCredential,
+  TokenCredential,
+} from "@azure/core-auth";
 
 const maxTimestampMs = 8640000000000000;
 
@@ -17,7 +22,10 @@ export class MixedRealityAccountKeyCredential implements TokenCredential {
    * @param accountId - The Mixed Reality service account identifier.
    * @param accountKey - The Mixed Reality service account primary or secondary key.
    */
-  constructor(public readonly accountId: string, accountKey: string | KeyCredential) {
+  constructor(
+    public readonly accountId: string,
+    accountKey: string | KeyCredential,
+  ) {
     if (typeof accountKey === "string") {
       this.accountKey = { key: accountKey };
     } else {

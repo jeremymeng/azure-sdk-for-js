@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Model:       prebuilt-read
 // Description: Extract text from documents.
-// API Version: 2022-06-30-preview
-// Created:     Thu Jul 14 2022
+// API Version: 2023-02-28-preview
+// Created:     Thu Apr 06 2023
 
 import * as fr from "@azure/ai-form-recognizer";
 
@@ -41,7 +41,7 @@ function modelInfo() {
   return {
     modelId: "prebuilt-read",
     description: "Extract text from documents.",
-    createdDateTime: "2022-06-30T00:00:00.000Z",
-    apiVersion: "2022-06-30-preview",
+    createdOn: "2023-02-28T00:00:00.000Z",
+    apiVersion: "2023-02-28-preview",
   } as const;
 }

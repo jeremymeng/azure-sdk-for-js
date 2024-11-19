@@ -1,14 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { AccessToken, AzureKeyCredential, TokenCredential } from "@azure/core-auth";
-import {
-  GetTokenOptionalParams,
-  MixedRealityStsRestClient,
-  MixedRealityStsRestClientOptionalParams,
-} from "./generated";
-import { GetTokenOptions, MixedRealityStsClientOptions } from "./models/options";
-import { InternalClientPipelineOptions } from "@azure/core-client";
+import type { AccessToken, TokenCredential } from "@azure/core-auth";
+import { AzureKeyCredential } from "@azure/core-auth";
+import type { GetTokenOptionalParams, MixedRealityStsRestClientOptionalParams } from "./generated";
+import { MixedRealityStsRestClient } from "./generated";
+import type { GetTokenOptions, MixedRealityStsClientOptions } from "./models/options";
+import type { InternalClientPipelineOptions } from "@azure/core-client";
 import { MixedRealityAccountKeyCredential } from "./models/auth";
 import { bearerTokenAuthenticationPolicy } from "@azure/core-rest-pipeline";
 import { constructAuthenticationEndpointFromDomain } from "./util/authenticationEndpoint";
@@ -44,7 +42,7 @@ export class MixedRealityStsClient {
     accountId: string,
     accountDomain: string,
     keyCredential: AzureKeyCredential,
-    options?: MixedRealityStsClientOptions
+    options?: MixedRealityStsClientOptions,
   );
 
   /**
@@ -58,7 +56,7 @@ export class MixedRealityStsClient {
     accountId: string,
     accountDomain: string,
     credential: TokenCredential,
-    options?: MixedRealityStsClientOptions
+    options?: MixedRealityStsClientOptions,
   );
 
   /**
@@ -72,7 +70,7 @@ export class MixedRealityStsClient {
     accountId: string,
     accountDomain: string,
     credential: TokenCredential | AzureKeyCredential,
-    options: MixedRealityStsClientOptions = {}
+    options: MixedRealityStsClientOptions = {},
   ) {
     if (!accountId) {
       throw new Error("Argument cannot be null or empty: 'accountId'.");
@@ -140,7 +138,7 @@ export class MixedRealityStsClient {
         const tokenResponse = await this.restClient.getToken(this.accountId, updatedOptions);
 
         return mapToAccessToken(tokenResponse);
-      }
+      },
     );
   }
 }

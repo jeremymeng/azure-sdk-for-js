@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { AvroSerializerTest } from "./avroSerializerTest.spec";
-import { PerfOptionDictionary } from "@azure/test-utils-perf";
+import { PerfOptionDictionary } from "@azure-tools/test-perf";
 import { MessageContent } from "@azure/schema-registry-avro";
 
 interface SerializePerfTestOptions {
@@ -32,7 +32,7 @@ export class DeserializeTest extends AvroSerializerTest<SerializePerfTestOptions
         name: "test",
         favoriteNumbers: [...Array(this.options["items-count"].value).keys()],
       },
-      AvroSerializerTest.schema
+      AvroSerializerTest.schema,
     );
   }
 

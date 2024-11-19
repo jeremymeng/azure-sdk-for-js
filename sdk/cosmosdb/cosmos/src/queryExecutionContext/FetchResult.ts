@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 /** @hidden */
 export enum FetchResultType {
   "Done" = 0,
@@ -22,7 +22,7 @@ export class FetchResult {
    */
   constructor(feedResponse: unknown, error: unknown) {
     // TODO: feedResponse/error
-    if (feedResponse) {
+    if (feedResponse !== undefined) {
       this.feedResponse = feedResponse;
       this.fetchResultType = FetchResultType.Result;
     } else {

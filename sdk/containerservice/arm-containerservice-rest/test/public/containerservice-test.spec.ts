@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { Recorder, env, isPlaybackMode } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { env, isPlaybackMode } from "@azure-tools/test-recorder";
 import { assert } from "chai";
 import { createRecorder } from "./utils/recordedClient";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { createTestCredential } from "@azure-tools/test-credential";
-import ContainerServiceManagementClient, {
+import type {
   ContainerServiceClient,
   ManagedClusterOutput,
   ManagedClusterUpgradeProfileOutput,
-  getLongRunningPoller,
-  paginate,
 } from "../../src";
+import ContainerServiceManagementClient, { getLongRunningPoller, paginate } from "../../src";
 
 export const testPollingOptions = {
   intervalInMs: isPlaybackMode() ? 0 : undefined,
@@ -55,7 +55,7 @@ describe("My test", () => {
         "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}",
         subscriptionId,
         resourceGroupName,
-        resourceName
+        resourceName,
       )
       .put({
         body: {
@@ -96,7 +96,7 @@ describe("My test", () => {
         "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}",
         subscriptionId,
         resourceGroupName,
-        resourceName
+        resourceName,
       )
       .get();
     assert.equal(res.status, "200");
@@ -109,7 +109,7 @@ describe("My test", () => {
         "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/upgradeProfiles/default",
         subscriptionId,
         resourceGroupName,
-        resourceName
+        resourceName,
       )
       .get();
     assert.equal(res.status, "200");
@@ -120,7 +120,7 @@ describe("My test", () => {
     const initialResponse = await client
       .path(
         "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerService/managedClusters",
-        subscriptionId
+        subscriptionId,
       )
       .get();
     const result = paginate(client, initialResponse);
@@ -137,7 +137,7 @@ describe("My test", () => {
         "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}",
         subscriptionId,
         resourceGroupName,
-        resourceName
+        resourceName,
       )
       .patch({
         body: {
@@ -149,7 +149,7 @@ describe("My test", () => {
     assert.equal(res.status, "200");
     assert.equal(
       (res.body as ManagedClusterOutput).type,
-      "Microsoft.ContainerService/ManagedClusters"
+      "Microsoft.ContainerService/ManagedClusters",
     );
   });
 
@@ -159,7 +159,7 @@ describe("My test", () => {
         "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}",
         subscriptionId,
         resourceGroupName,
-        resourceName
+        resourceName,
       )
       .delete();
     const poller = getLongRunningPoller(client, initialResponse, testPollingOptions);
@@ -168,7 +168,7 @@ describe("My test", () => {
     const listInitialResponse = await client
       .path(
         "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerService/managedClusters",
-        subscriptionId
+        subscriptionId,
       )
       .get();
     const result = paginate(client, listInitialResponse);

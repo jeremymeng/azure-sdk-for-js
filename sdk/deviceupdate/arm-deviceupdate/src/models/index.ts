@@ -142,6 +142,14 @@ export interface SystemData {
   lastModifiedAt?: Date;
 }
 
+/** The CMK encryption settings on the Device Update account. */
+export interface Encryption {
+  /** The URI of the key vault */
+  keyVaultKeyUri?: string;
+  /** The full resourceId of the user assigned identity to be used for key vault access. Identity has to be also assigned to the Account */
+  userAssignedIdentity?: string;
+}
+
 export interface Location {
   name?: string;
   /** Whether the location is primary or failover */
@@ -525,6 +533,8 @@ export interface Account extends TrackedResource {
   privateEndpointConnections?: PrivateEndpointConnection[];
   /** Device Update Sku */
   sku?: Sku;
+  /** CMK encryption at rest properties */
+  encryption?: Encryption;
   /**
    * Device Update account primary and failover location details
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -571,6 +581,30 @@ export interface GroupInformation extends ProxyResource {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly provisioningState?: GroupIdProvisioningState;
+}
+
+/** Defines headers for Accounts_delete operation. */
+export interface AccountsDeleteHeaders {
+  /** Operation Status Location URI */
+  location?: string;
+}
+
+/** Defines headers for Instances_delete operation. */
+export interface InstancesDeleteHeaders {
+  /** Operation Status Location URI */
+  location?: string;
+}
+
+/** Defines headers for PrivateEndpointConnections_delete operation. */
+export interface PrivateEndpointConnectionsDeleteHeaders {
+  /** Operation Status Location URI */
+  location?: string;
+}
+
+/** Defines headers for PrivateEndpointConnectionProxies_delete operation. */
+export interface PrivateEndpointConnectionProxiesDeleteHeaders {
+  /** Operation Status Location URI */
+  location?: string;
 }
 
 /** Known values of {@link CheckNameAvailabilityReason} that the service accepts. */

@@ -1,22 +1,22 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { delay, isError } from "@azure/core-util";
-import { AccessToken, GetTokenOptions } from "@azure/core-auth";
-import {
-  PipelineRequestOptions,
-  createHttpHeaders,
-  createPipelineRequest,
-} from "@azure/core-rest-pipeline";
-import { credentialLogger } from "../../util/logging";
-import { AuthenticationError } from "../../errors";
-import { tracingClient } from "../../util/tracing";
-import { imdsApiVersion, imdsEndpointPath, imdsHost } from "./constants";
-import { MSI, MSIConfiguration } from "./models";
-import { mapScopesToResource } from "./utils";
+import type { PipelineRequestOptions, PipelineResponse } from "@azure/core-rest-pipeline";
+import { createHttpHeaders, createPipelineRequest } from "@azure/core-rest-pipeline";
+import { isError } from "@azure/core-util";
+
+import type { GetTokenOptions } from "@azure/core-auth";
+import { credentialLogger } from "../../util/logging.js";
+import { mapScopesToResource } from "./utils.js";
+import { tracingClient } from "../../util/tracing.js";
+import { IdentityClient } from "../../client/identityClient.js";
 
 const msiName = "ManagedIdentityCredential - IMDS";
 const logger = credentialLogger(msiName);
+
+const imdsHost = "http://169.254.169.254";
+const imdsEndpointPath = "/metadata/identity/oauth2/token";
+const imdsApiVersion = "2018-02-01";
 
 /**
  * Generates the options used on the request for an access token.
@@ -28,7 +28,7 @@ function prepareRequestOptions(
   options?: {
     skipQuery?: boolean;
     skipMetadataHeader?: boolean;
-  }
+  },
 ): PipelineRequestOptions {
   const resource = mapScopesToResource(scopes);
   if (!resource) {
@@ -75,24 +75,21 @@ function prepareRequestOptions(
   };
 }
 
-// 800ms -> 1600ms -> 3200ms
-export const imdsMsiRetryConfig = {
-  maxRetries: 3,
-  startDelayInMs: 800,
-  intervalIncrement: 2,
-};
-
 /**
- * Defines how to determine whether the Azure IMDS MSI is available, and also how to retrieve a token from the Azure IMDS MSI.
+ * Defines how to determine whether the Azure IMDS MSI is available.
+ *
+ * Actually getting the token once we determine IMDS is available is handled by MSAL.
  */
-export const imdsMsi: MSI = {
-  async isAvailable({
-    scopes,
-    identityClient,
-    clientId,
-    resourceId,
-    getTokenOptions = {},
+export const imdsMsi = {
+  name: "imdsMsi",
+  async isAvailable(options: {
+    scopes: string | string[];
+    identityClient?: IdentityClient;
+    clientId?: string;
+    resourceId?: string;
+    getTokenOptions?: GetTokenOptions;
   }): Promise<boolean> {
+    const { scopes, identityClient, clientId, resourceId, getTokenOptions } = options;
     const resource = mapScopesToResource(scopes);
     if (!resource) {
       logger.info(`${msiName}: Unavailable. Multiple scopes are not supported.`);
@@ -115,78 +112,47 @@ export const imdsMsi: MSI = {
 
     return tracingClient.withSpan(
       "ManagedIdentityCredential-pingImdsEndpoint",
-      getTokenOptions,
-      async (options) => {
-        requestOptions.tracingOptions = options.tracingOptions;
+      getTokenOptions ?? {},
+      async (updatedOptions) => {
+        requestOptions.tracingOptions = updatedOptions.tracingOptions;
 
         // Create a request with a timeout since we expect that
         // not having a "Metadata" header should cause an error to be
         // returned quickly from the endpoint, proving its availability.
         const request = createPipelineRequest(requestOptions);
 
-        // Default to 300 if the default of 0 is used.
+        // Default to 1000 if the default of 0 is used.
         // Negative values can still be used to disable the timeout.
-        request.timeout = options.requestOptions?.timeout || 300;
+        request.timeout = updatedOptions.requestOptions?.timeout || 1000;
 
         // This MSI uses the imdsEndpoint to get the token, which only uses http://
         request.allowInsecureConnection = true;
-
+        let response: PipelineResponse;
         try {
           logger.info(`${msiName}: Pinging the Azure IMDS endpoint`);
-          await identityClient.sendRequest(request);
+          response = await identityClient.sendRequest(request);
         } catch (err: unknown) {
           // If the request failed, or Node.js was unable to establish a connection,
           // or the host was down, we'll assume the IMDS endpoint isn't available.
           if (isError(err)) {
             logger.verbose(`${msiName}: Caught error ${err.name}: ${err.message}`);
           }
+          // This is a special case for Docker Desktop which responds with a 403 with a message that contains "A socket operation was attempted to an unreachable network" or "A socket operation was attempted to an unreachable host"
+          // rather than just timing out, as expected.
           logger.info(`${msiName}: The Azure IMDS endpoint is unavailable`);
           return false;
         }
-
+        if (response.status === 403) {
+          if (response.bodyAsText?.includes("unreachable")) {
+            logger.info(`${msiName}: The Azure IMDS endpoint is unavailable`);
+            logger.info(`${msiName}: ${response.bodyAsText}`);
+            return false;
+          }
+        }
         // If we received any response, the endpoint is available
         logger.info(`${msiName}: The Azure IMDS endpoint is available`);
         return true;
-      }
-    );
-  },
-  async getToken(
-    configuration: MSIConfiguration,
-    getTokenOptions: GetTokenOptions = {}
-  ): Promise<AccessToken | null> {
-    const { identityClient, scopes, clientId, resourceId } = configuration;
-
-    if (process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST) {
-      logger.info(
-        `${msiName}: Using the Azure IMDS endpoint coming from the environment variable AZURE_POD_IDENTITY_AUTHORITY_HOST=${process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST}.`
-      );
-    } else {
-      logger.info(`${msiName}: Using the default Azure IMDS endpoint ${imdsHost}.`);
-    }
-
-    let nextDelayInMs = imdsMsiRetryConfig.startDelayInMs;
-    for (let retries = 0; retries < imdsMsiRetryConfig.maxRetries; retries++) {
-      try {
-        const request = createPipelineRequest({
-          abortSignal: getTokenOptions.abortSignal,
-          ...prepareRequestOptions(scopes, clientId, resourceId),
-          allowInsecureConnection: true,
-        });
-        const tokenResponse = await identityClient.sendTokenRequest(request);
-        return (tokenResponse && tokenResponse.accessToken) || null;
-      } catch (error: any) {
-        if (error.statusCode === 404) {
-          await delay(nextDelayInMs);
-          nextDelayInMs *= imdsMsiRetryConfig.intervalIncrement;
-          continue;
-        }
-        throw error;
-      }
-    }
-
-    throw new AuthenticationError(
-      404,
-      `${msiName}: Failed to retrieve IMDS token after ${imdsMsiRetryConfig.maxRetries} retries.`
+      },
     );
   },
 };

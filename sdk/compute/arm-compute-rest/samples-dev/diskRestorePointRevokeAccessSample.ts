@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -36,7 +36,7 @@ async function revokesAccessToADiskRestorePoint() {
       resourceGroupName,
       restorePointCollectionName,
       vmRestorePointName,
-      diskRestorePointName
+      diskRestorePointName,
     )
     .post(options);
   const poller = getLongRunningPoller(client, initialResponse);

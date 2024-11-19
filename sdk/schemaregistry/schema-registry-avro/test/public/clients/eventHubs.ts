@@ -1,45 +1,60 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   EventData,
-  EventHubBufferedProducerClient,
-  EventHubConsumerClient,
   MessagingError,
   OnSendEventsErrorContext,
   Subscription,
+  EventHubConsumerClientOptions,
+} from "@azure/event-hubs";
+import {
+  EventHubBufferedProducerClient,
+  EventHubConsumerClient,
   earliestEventPosition,
   latestEventPosition,
 } from "@azure/event-hubs";
-import { MessagingTestClient } from "./models";
+import type { MessagingTestClient } from "./models.js";
+import type { Recorder } from "@azure-tools/test-recorder";
 import { delay } from "@azure-tools/test-recorder";
+import { createTestCredential } from "@azure-tools/test-credential";
 
 export function createEventHubsClient(settings: {
-  eventHubsConnectionString: string;
+  eventHubAvroHostName: string;
   eventHubName: string;
   alreadyEnqueued: boolean;
+  recorder?: Recorder;
 }): MessagingTestClient<EventData> {
-  const { alreadyEnqueued, eventHubName, eventHubsConnectionString } = settings;
+  const { alreadyEnqueued, eventHubName, eventHubAvroHostName, recorder } = settings;
   let producer: EventHubBufferedProducerClient;
   let consumer: EventHubConsumerClient;
   let subscription: Subscription;
   let initialized = false;
   const eventsBuffer: EventData[] = [];
+  const credential = createTestCredential();
   return {
     isInitialized() {
       return initialized;
     },
     async initialize() {
-      producer = new EventHubBufferedProducerClient(eventHubsConnectionString, eventHubName, {
+      const clientOptions = {
         onSendEventsErrorHandler: (ctx: OnSendEventsErrorContext) => {
           this.cleanup();
           throw ctx.error;
         },
-      });
+      };
+      producer = new EventHubBufferedProducerClient(
+        eventHubAvroHostName,
+        eventHubName,
+        credential,
+        recorder?.configureClientOptions(clientOptions) ?? clientOptions,
+      );
       consumer = new EventHubConsumerClient(
         EventHubConsumerClient.defaultConsumerGroupName,
-        eventHubsConnectionString,
-        eventHubName
+        eventHubAvroHostName,
+        eventHubName,
+        credential,
+        recorder?.configureClientOptions<EventHubConsumerClientOptions>({}) ?? undefined,
       );
       subscription = consumer.subscribe(
         {
@@ -51,7 +66,7 @@ export function createEventHubsClient(settings: {
             throw err;
           },
         },
-        { startPosition: alreadyEnqueued ? earliestEventPosition : latestEventPosition }
+        { startPosition: alreadyEnqueued ? earliestEventPosition : latestEventPosition },
       );
       initialized = true;
     },

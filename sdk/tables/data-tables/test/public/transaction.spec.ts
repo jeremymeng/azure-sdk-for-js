@@ -1,16 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import * as sinon from "sinon";
-
 import { Recorder, isPlaybackMode, isLiveMode } from "@azure-tools/test-recorder";
-import { TableClient, TableTransaction, TransactionAction, odata } from "../../src";
-
-import { Context } from "mocha";
+import type { TableClient, TransactionAction } from "../../src";
+import { TableTransaction, odata } from "../../src";
+import type { Context } from "mocha";
 import { Uuid } from "../../src/utils/uuid";
 import { assert } from "chai";
 import { createTableClient } from "./utils/recordedClient";
-import { isNode } from "@azure/test-utils";
+import { isNodeLike } from "@azure/core-util";
 
 const partitionKey = "batchTest";
 const testEntities = [
@@ -19,19 +18,19 @@ const testEntities = [
   { partitionKey, rowKey: "3", name: "third" },
 ];
 
-const suffix = isNode ? "node" : "browser";
+const suffix = isNodeLike ? "node" : "browser";
 
-describe("concurrent batch operations", () => {
+describe("concurrent batch operations", function () {
   const concurrentTableName = `concurrentBatchTableTest${suffix}`;
   let unRecordedClient: TableClient;
-  before(async () => {
+  before(async function () {
     if (!isPlaybackMode()) {
       unRecordedClient = await createTableClient(concurrentTableName, "SASConnectionString");
       await unRecordedClient.createTable();
     }
   });
 
-  after(async () => {
+  after(async function () {
     if (!isPlaybackMode()) {
       await unRecordedClient.deleteTable();
     }
@@ -67,7 +66,7 @@ describe("concurrent batch operations", () => {
   });
 });
 
-describe(`batch operations`, () => {
+describe(`batch operations`, function () {
   let client: TableClient;
   let unRecordedClient: TableClient;
   let recorder: Recorder;
@@ -84,20 +83,20 @@ describe(`batch operations`, () => {
     await recorder.stop();
   });
 
-  before(async () => {
+  before(async function () {
     if (!isPlaybackMode()) {
       unRecordedClient = await createTableClient(tableName, "SASConnectionString");
       await unRecordedClient.createTable();
     }
   });
 
-  after(async () => {
+  after(async function () {
     if (!isPlaybackMode()) {
       await unRecordedClient.deleteTable();
     }
   });
 
-  it("should send a set of create actions when using TableTransaction Helper", async () => {
+  it("should send a set of create actions when using TableTransaction Helper", async function () {
     const transaction = new TableTransaction();
     transaction.createEntity({ partitionKey: "helper", rowKey: "1", value: "t1" });
     transaction.createEntity({ partitionKey: "helper", rowKey: "2", value: "t2" });
@@ -110,7 +109,7 @@ describe(`batch operations`, () => {
     assert.equal(result.getResponseForEntity("2")?.status, 204);
   });
 
-  it("should send a set of create batch operations", async () => {
+  it("should send a set of create batch operations", async function () {
     const actions: TransactionAction[] = [];
 
     for (const entity of testEntities) {
@@ -128,7 +127,7 @@ describe(`batch operations`, () => {
     });
   });
 
-  it("should send a set of update batch operations", async () => {
+  it("should send a set of update batch operations", async function () {
     const actions: TransactionAction[] = [];
 
     for (const entity of testEntities) {
@@ -152,7 +151,7 @@ describe(`batch operations`, () => {
     }
   });
 
-  it("should send a set of update batch operations with options", async () => {
+  it("should send a set of update batch operations with options", async function () {
     const actions: TransactionAction[] = [];
 
     for (const entity of testEntities) {
@@ -185,7 +184,7 @@ describe(`batch operations`, () => {
     }
   });
 
-  it("should send a set of upsert batch operations", async () => {
+  it("should send a set of upsert batch operations", async function () {
     const actions: TransactionAction[] = [];
 
     for (const entity of testEntities) {
@@ -218,7 +217,7 @@ describe(`batch operations`, () => {
     assert.equal(inserted?.rowKey, "4");
   });
 
-  it("should send a set of delete batch operations", async () => {
+  it("should send a set of delete batch operations", async function () {
     const actions: TransactionAction[] = [];
 
     for (const entity of testEntities) {
@@ -233,7 +232,7 @@ describe(`batch operations`, () => {
     });
   });
 
-  it("should send multiple transactions with the same partition key", async () => {
+  it("should send multiple transactions with the same partition key", async function () {
     const multiBatchPartitionKey = "multiBatch1";
     const actions1: TransactionAction[] = [
       ["create", { partitionKey: multiBatchPartitionKey, rowKey: "r1", value: "1" }],
@@ -259,7 +258,7 @@ describe(`batch operations`, () => {
     for await (const entity of entities) {
       if (entity.partitionKey !== multiBatchPartitionKey) {
         throw new Error(
-          `Expected all entities to have the same partition key: ${multiBatchPartitionKey} but found ${entity.partitionKey}`
+          `Expected all entities to have the same partition key: ${multiBatchPartitionKey} but found ${entity.partitionKey}`,
         );
       }
 
@@ -269,7 +268,7 @@ describe(`batch operations`, () => {
     assert.equal(entityCount, 6);
   });
 
-  it("should support empty partition and row keys", async () => {
+  it("should support empty partition and row keys", async function () {
     const actions1: TransactionAction[] = [["create", { partitionKey: "", rowKey: "", value: "" }]];
 
     await client.submitTransaction(actions1);
@@ -289,7 +288,7 @@ describe(`batch operations`, () => {
   });
 });
 
-describe("Handle suberror", () => {
+describe("Handle suberror", function () {
   let client: TableClient;
   let recorder: Recorder;
   const tableName = "noExistingTableError";

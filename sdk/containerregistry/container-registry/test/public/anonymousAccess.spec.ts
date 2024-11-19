@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { assert } from "chai";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 
-import { ContainerRegistryClient } from "../../src";
+import type { ContainerRegistryClient } from "../../src";
 
-import { versionsToTest } from "@azure/test-utils";
+import { versionsToTest } from "@azure-tools/test-utils";
 import { Recorder, assertEnvironmentVariable } from "@azure-tools/test-recorder";
 import { createRegistryClient, recorderStartOptions, serviceVersions } from "../utils/utils";
 
@@ -37,7 +37,7 @@ versionsToTest(serviceVersions, {}, (serviceVersion, onVersions) => {
         recorder,
         {
           anonymous: true,
-        }
+        },
       );
     });
 
@@ -54,7 +54,7 @@ versionsToTest(serviceVersions, {}, (serviceVersion, onVersions) => {
       }
       assert.isTrue(
         results.indexOf(repositoryName) !== -1,
-        `Expecting '${repositoryName}' in the list`
+        `Expecting '${repositoryName}' in the list`,
       );
     });
 

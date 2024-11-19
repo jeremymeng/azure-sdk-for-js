@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { HttpResponse } from "@azure/core-http";
-import {
+import type {
   PageBlobGetPageRangesHeaders,
   PageBlobGetPageRangesDiffHeaders,
   PageBlobGetPageRangesResponseModel,
   PageBlobGetPageRangesDiffResponseModel,
 } from "./generatedModels";
-import { Range } from "./Range";
+import type { Range } from "./Range";
+import type { ResponseWithBody } from "./utils/utils.common";
 
 /**
  * List of page ranges for a blob.
@@ -28,54 +28,18 @@ export interface PageList {
 /**
  * Contains response data for the {@link BlobClient.getPageRanges} operation.
  */
-export interface PageBlobGetPageRangesResponse extends PageList, PageBlobGetPageRangesHeaders {
-  /**
-   * The underlying HTTP response.
-   */
-  _response: HttpResponse & {
-    /**
-     * The parsed HTTP response headers.
-     */
-    parsedHeaders: PageBlobGetPageRangesHeaders;
-
-    /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: PageList;
-  };
-}
+export interface PageBlobGetPageRangesResponse
+  extends PageList,
+    PageBlobGetPageRangesHeaders,
+    ResponseWithBody<PageBlobGetPageRangesHeaders, PageList> {}
 
 /**
  * Contains response data for the {@link BlobClient.getPageRangesDiff} operation.
  */
 export interface PageBlobGetPageRangesDiffResponse
   extends PageList,
-    PageBlobGetPageRangesDiffHeaders {
-  /**
-   * The underlying HTTP response.
-   */
-  _response: HttpResponse & {
-    /**
-     * The parsed HTTP response headers.
-     */
-    parsedHeaders: PageBlobGetPageRangesDiffHeaders;
-
-    /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: PageList;
-  };
-}
+    PageBlobGetPageRangesDiffHeaders,
+    ResponseWithBody<PageBlobGetPageRangesDiffHeaders, PageList> {}
 
 /**
  * Function that converts PageRange and ClearRange to a common Range object.
@@ -84,7 +48,7 @@ export interface PageBlobGetPageRangesDiffResponse
  * @param response - Model PageBlob Range response
  */
 export function rangeResponseFromModel(
-  response: PageBlobGetPageRangesResponseModel | PageBlobGetPageRangesDiffResponseModel
+  response: PageBlobGetPageRangesResponseModel | PageBlobGetPageRangesDiffResponseModel,
 ): PageBlobGetPageRangesResponse | PageBlobGetPageRangesDiffResponse {
   const pageRange = (response._response.parsedBody.pageRange || []).map((x) => ({
     offset: x.start,

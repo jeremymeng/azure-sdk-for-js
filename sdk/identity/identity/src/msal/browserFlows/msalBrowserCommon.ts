@@ -1,21 +1,26 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import * as msalBrowser from "@azure/msal-browser";
-import { AuthenticationRequiredError, CredentialUnavailableError } from "../../errors";
-import { MsalBaseUtilities, getAuthority, getKnownAuthorities } from "../utils";
-import { MsalFlow, MsalFlowOptions } from "../flows";
+import type * as msalBrowser from "@azure/msal-browser";
+
+import type { AccessToken, GetTokenOptions } from "@azure/core-auth";
+import type { AuthenticationRecord, MsalResult } from "../types.js";
+import { AuthenticationRequiredError, CredentialUnavailableError } from "../../errors.js";
+import type { CredentialLogger } from "../../util/logging.js";
+import { formatSuccess } from "../../util/logging.js";
+import type { MsalFlow, MsalFlowOptions } from "./flows.js";
+import { ensureValidMsalToken, getAuthority, getKnownAuthorities, msalToPublic } from "../utils.js";
 import {
   processMultiTenantRequest,
-  resolveAddionallyAllowedTenantIds,
+  resolveAdditionallyAllowedTenantIds,
   resolveTenantId,
-} from "../../util/tenantIdUtils";
-import { AccessToken } from "@azure/core-auth";
-import { AuthenticationRecord } from "../types";
-import { BrowserLoginStyle } from "../../credentials/interactiveBrowserCredentialOptions";
-import { CredentialFlowGetTokenOptions } from "../credentials";
-import { DefaultTenantId } from "../../constants";
-import { MultiTenantTokenCredentialOptions } from "../../credentials/multiTenantTokenCredentialOptions";
+} from "../../util/tenantIdUtils.js";
+
+import type { BrowserLoginStyle } from "../../credentials/interactiveBrowserCredentialOptions.js";
+import type { CredentialFlowGetTokenOptions } from "../credentials.js";
+import { DefaultTenantId } from "../../constants.js";
+import type { LogPolicyOptions } from "@azure/core-rest-pipeline";
+import type { MultiTenantTokenCredentialOptions } from "../../credentials/multiTenantTokenCredentialOptions.js";
 
 /**
  * Union of the constructor parameters that all MSAL flow types take.
@@ -26,6 +31,19 @@ export interface MsalBrowserFlowOptions extends MsalFlowOptions {
   redirectUri?: string;
   loginStyle: BrowserLoginStyle;
   loginHint?: string;
+  /**
+   * Allows users to configure settings for logging policy options, allow logging account information and personally identifiable information for customer support.
+   */
+  loggingOptions?: LogPolicyOptions & {
+    /**
+     * Allows logging account information once the authentication flow succeeds.
+     */
+    allowLoggingAccountIdentifiers?: boolean;
+    /**
+     * Allows logging personally identifiable information for customer support.
+     */
+    enableUnsafeSupportLogging?: boolean;
+  };
 }
 
 /**
@@ -42,7 +60,7 @@ export interface MsalBrowserFlow extends MsalFlow {
  * @internal
  */
 export function defaultBrowserMsalConfig(
-  options: MsalBrowserFlowOptions
+  options: MsalBrowserFlowOptions,
 ): msalBrowser.Configuration {
   const tenantId = options.tenantId || DefaultTenantId;
   const authority = getAuthority(tenantId, options.authorityHost);
@@ -50,7 +68,7 @@ export function defaultBrowserMsalConfig(
     auth: {
       clientId: options.clientId!,
       authority,
-      knownAuthorities: getKnownAuthorities(tenantId, authority),
+      knownAuthorities: getKnownAuthorities(tenantId, authority, options.disableInstanceDiscovery),
       // If the users picked redirect as their login style,
       // but they didn't provide a redirectUri,
       // we can try to use the current page we're in as a default value.
@@ -68,7 +86,7 @@ export function defaultBrowserMsalConfig(
  *
  * @internal
  */
-export abstract class MsalBrowser extends MsalBaseUtilities implements MsalBrowserFlow {
+export abstract class MsalBrowser implements MsalBrowserFlow {
   protected loginStyle: BrowserLoginStyle;
   protected clientId: string;
   protected tenantId: string;
@@ -77,18 +95,18 @@ export abstract class MsalBrowser extends MsalBaseUtilities implements MsalBrows
   protected account: AuthenticationRecord | undefined;
   protected msalConfig: msalBrowser.Configuration;
   protected disableAutomaticAuthentication?: boolean;
-  protected app?: msalBrowser.PublicClientApplication;
+  protected app?: msalBrowser.IPublicClientApplication;
+  protected logger: CredentialLogger;
 
   constructor(options: MsalBrowserFlowOptions) {
-    super(options);
     this.logger = options.logger;
     this.loginStyle = options.loginStyle;
     if (!options.clientId) {
       throw new CredentialUnavailableError("A client ID is required in browsers");
     }
     this.clientId = options.clientId;
-    this.additionallyAllowedTenantIds = resolveAddionallyAllowedTenantIds(
-      options?.tokenCredentialOptions?.additionallyAllowedTenants
+    this.additionallyAllowedTenantIds = resolveAdditionallyAllowedTenantIds(
+      options?.tokenCredentialOptions?.additionallyAllowedTenants,
     );
     this.tenantId = resolveTenantId(this.logger, options.tenantId, options.clientId);
     this.authorityHost = options.authorityHost;
@@ -147,7 +165,7 @@ export abstract class MsalBrowser extends MsalBaseUtilities implements MsalBrows
    */
   public async getToken(
     scopes: string[],
-    options: CredentialFlowGetTokenOptions = {}
+    options: CredentialFlowGetTokenOptions = {},
   ): Promise<AccessToken> {
     const tenantId =
       processMultiTenantRequest(this.tenantId, options, this.additionallyAllowedTenantIds) ||
@@ -176,9 +194,32 @@ export abstract class MsalBrowser extends MsalBaseUtilities implements MsalBrows
         });
       }
       this.logger.info(
-        `Silent authentication failed, falling back to interactive method ${this.loginStyle}`
+        `Silent authentication failed, falling back to interactive method ${this.loginStyle}`,
       );
       return this.doGetToken(scopes);
     });
+  }
+
+  /**
+   * Handles the MSAL authentication result.
+   * If the result has an account, we update the local account reference.
+   * If the token received is invalid, an error will be thrown depending on what's missing.
+   */
+  protected handleResult(
+    scopes: string | string[],
+    result?: MsalResult,
+    getTokenOptions?: GetTokenOptions,
+  ): AccessToken {
+    if (result?.account) {
+      this.account = msalToPublic(this.clientId, result.account);
+    }
+    ensureValidMsalToken(scopes, result, getTokenOptions);
+    this.logger.getToken.info(formatSuccess(scopes));
+    return {
+      token: result.accessToken,
+      expiresOnTimestamp: result.expiresOn.getTime(),
+      refreshAfterTimestamp: result.refreshOn?.getTime(),
+      tokenType: "Bearer",
+    } as AccessToken;
   }
 }

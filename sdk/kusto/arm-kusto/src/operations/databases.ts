@@ -6,23 +6,30 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { Databases } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { KustoManagementClient } from "../kustoManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   DatabaseUnion,
+  DatabasesListByClusterNextOptionalParams,
   DatabasesListByClusterOptionalParams,
+  DatabasesListByClusterResponse,
   DatabasePrincipal,
   DatabasesListPrincipalsOptionalParams,
+  DatabasesListPrincipalsResponse,
   CheckNameRequest,
   DatabasesCheckNameAvailabilityOptionalParams,
   DatabasesCheckNameAvailabilityResponse,
-  DatabasesListByClusterResponse,
   DatabasesGetOptionalParams,
   DatabasesGetResponse,
   DatabasesCreateOrUpdateOptionalParams,
@@ -30,12 +37,12 @@ import {
   DatabasesUpdateOptionalParams,
   DatabasesUpdateResponse,
   DatabasesDeleteOptionalParams,
-  DatabasesListPrincipalsResponse,
   DatabasePrincipalListRequest,
   DatabasesAddPrincipalsOptionalParams,
   DatabasesAddPrincipalsResponse,
   DatabasesRemovePrincipalsOptionalParams,
-  DatabasesRemovePrincipalsResponse
+  DatabasesRemovePrincipalsResponse,
+  DatabasesListByClusterNextResponse
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -53,7 +60,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Returns the list of databases of the given Kusto cluster.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param options The options parameters.
    */
@@ -74,11 +81,15 @@ export class DatabasesImpl implements Databases {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listByClusterPagingPage(
           resourceGroupName,
           clusterName,
-          options
+          options,
+          settings
         );
       }
     };
@@ -87,14 +98,34 @@ export class DatabasesImpl implements Databases {
   private async *listByClusterPagingPage(
     resourceGroupName: string,
     clusterName: string,
-    options?: DatabasesListByClusterOptionalParams
+    options?: DatabasesListByClusterOptionalParams,
+    settings?: PageSettings
   ): AsyncIterableIterator<DatabaseUnion[]> {
-    let result = await this._listByCluster(
-      resourceGroupName,
-      clusterName,
-      options
-    );
-    yield result.value || [];
+    let result: DatabasesListByClusterResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByCluster(
+        resourceGroupName,
+        clusterName,
+        options
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
+    while (continuationToken) {
+      result = await this._listByClusterNext(
+        resourceGroupName,
+        clusterName,
+        continuationToken,
+        options
+      );
+      continuationToken = result.nextLink;
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
   }
 
   private async *listByClusterPagingAll(
@@ -113,7 +144,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Returns a list of database principals of the given Kusto cluster and database.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param options The options parameters.
@@ -137,12 +168,16 @@ export class DatabasesImpl implements Databases {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listPrincipalsPagingPage(
           resourceGroupName,
           clusterName,
           databaseName,
-          options
+          options,
+          settings
         );
       }
     };
@@ -152,9 +187,11 @@ export class DatabasesImpl implements Databases {
     resourceGroupName: string,
     clusterName: string,
     databaseName: string,
-    options?: DatabasesListPrincipalsOptionalParams
+    options?: DatabasesListPrincipalsOptionalParams,
+    _settings?: PageSettings
   ): AsyncIterableIterator<DatabasePrincipal[]> {
-    let result = await this._listPrincipals(
+    let result: DatabasesListPrincipalsResponse;
+    result = await this._listPrincipals(
       resourceGroupName,
       clusterName,
       databaseName,
@@ -181,7 +218,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Checks that the databases resource name is valid and is not already in use.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param resourceName The name of the resource.
    * @param options The options parameters.
@@ -200,7 +237,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Returns the list of databases of the given Kusto cluster.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param options The options parameters.
    */
@@ -217,7 +254,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Returns a database.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param options The options parameters.
@@ -236,7 +273,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Creates or updates a database.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param parameters The database parameters supplied to the CreateOrUpdate operation.
@@ -249,8 +286,8 @@ export class DatabasesImpl implements Databases {
     parameters: DatabaseUnion,
     options?: DatabasesCreateOrUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<DatabasesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<DatabasesCreateOrUpdateResponse>,
       DatabasesCreateOrUpdateResponse
     >
   > {
@@ -260,7 +297,7 @@ export class DatabasesImpl implements Databases {
     ): Promise<DatabasesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -293,13 +330,22 @@ export class DatabasesImpl implements Databases {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, clusterName, databaseName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        clusterName,
+        databaseName,
+        parameters,
+        options
+      },
+      spec: createOrUpdateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      DatabasesCreateOrUpdateResponse,
+      OperationState<DatabasesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -308,7 +354,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Creates or updates a database.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param parameters The database parameters supplied to the CreateOrUpdate operation.
@@ -333,7 +379,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Updates a database.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param parameters The database parameters supplied to the Update operation.
@@ -346,8 +392,8 @@ export class DatabasesImpl implements Databases {
     parameters: DatabaseUnion,
     options?: DatabasesUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<DatabasesUpdateResponse>,
+    SimplePollerLike<
+      OperationState<DatabasesUpdateResponse>,
       DatabasesUpdateResponse
     >
   > {
@@ -357,7 +403,7 @@ export class DatabasesImpl implements Databases {
     ): Promise<DatabasesUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -390,13 +436,22 @@ export class DatabasesImpl implements Databases {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, clusterName, databaseName, parameters, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        clusterName,
+        databaseName,
+        parameters,
+        options
+      },
+      spec: updateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      DatabasesUpdateResponse,
+      OperationState<DatabasesUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -405,7 +460,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Updates a database.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param parameters The database parameters supplied to the Update operation.
@@ -430,7 +485,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Deletes the database with the given name.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param options The options parameters.
@@ -440,14 +495,14 @@ export class DatabasesImpl implements Databases {
     clusterName: string,
     databaseName: string,
     options?: DatabasesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -480,13 +535,13 @@ export class DatabasesImpl implements Databases {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, clusterName, databaseName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, clusterName, databaseName, options },
+      spec: deleteOperationSpec
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -495,7 +550,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Deletes the database with the given name.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param options The options parameters.
@@ -517,7 +572,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Returns a list of database principals of the given Kusto cluster and database.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param options The options parameters.
@@ -536,7 +591,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Add Database principals permissions.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param databasePrincipalsToAdd List of database principals to add.
@@ -563,7 +618,7 @@ export class DatabasesImpl implements Databases {
 
   /**
    * Remove Database principals permissions.
-   * @param resourceGroupName The name of the resource group containing the Kusto cluster.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param clusterName The name of the Kusto cluster.
    * @param databaseName The name of the database in the Kusto cluster.
    * @param databasePrincipalsToRemove List of database principals to remove.
@@ -587,6 +642,25 @@ export class DatabasesImpl implements Databases {
       removePrincipalsOperationSpec
     );
   }
+
+  /**
+   * ListByClusterNext
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param clusterName The name of the Kusto cluster.
+   * @param nextLink The nextLink from the previous successful call to the ListByCluster method.
+   * @param options The options parameters.
+   */
+  private _listByClusterNext(
+    resourceGroupName: string,
+    clusterName: string,
+    nextLink: string,
+    options?: DatabasesListByClusterNextOptionalParams
+  ): Promise<DatabasesListByClusterNextResponse> {
+    return this.client.sendOperationRequest(
+      { resourceGroupName, clusterName, nextLink, options },
+      listByClusterNextOperationSpec
+    );
+  }
 }
 // Operation Specifications
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
@@ -600,7 +674,7 @@ const checkNameAvailabilityOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CheckNameResult
     },
     default: {
-      bodyMapper: Mappers.CloudError
+      bodyMapper: Mappers.ErrorResponse
     }
   },
   requestBody: Parameters.resourceName,
@@ -624,10 +698,14 @@ const listByClusterOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.DatabaseListResult
     },
     default: {
-      bodyMapper: Mappers.CloudError
+      bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [
+    Parameters.apiVersion,
+    Parameters.top,
+    Parameters.skiptoken
+  ],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
@@ -646,7 +724,7 @@ const getOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.Database
     },
     default: {
-      bodyMapper: Mappers.CloudError
+      bodyMapper: Mappers.ErrorResponse
     }
   },
   queryParameters: [Parameters.apiVersion],
@@ -678,7 +756,7 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.Database
     },
     default: {
-      bodyMapper: Mappers.CloudError
+      bodyMapper: Mappers.ErrorResponse
     }
   },
   requestBody: Parameters.parameters3,
@@ -712,7 +790,7 @@ const updateOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.Database
     },
     default: {
-      bodyMapper: Mappers.CloudError
+      bodyMapper: Mappers.ErrorResponse
     }
   },
   requestBody: Parameters.parameters3,
@@ -738,7 +816,7 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
+      bodyMapper: Mappers.ErrorResponse
     }
   },
   queryParameters: [Parameters.apiVersion],
@@ -761,7 +839,7 @@ const listPrincipalsOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.DatabasePrincipalListResult
     },
     default: {
-      bodyMapper: Mappers.CloudError
+      bodyMapper: Mappers.ErrorResponse
     }
   },
   queryParameters: [Parameters.apiVersion],
@@ -784,7 +862,7 @@ const addPrincipalsOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.DatabasePrincipalListResult
     },
     default: {
-      bodyMapper: Mappers.CloudError
+      bodyMapper: Mappers.ErrorResponse
     }
   },
   requestBody: Parameters.databasePrincipalsToAdd,
@@ -809,7 +887,7 @@ const removePrincipalsOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.DatabasePrincipalListResult
     },
     default: {
-      bodyMapper: Mappers.CloudError
+      bodyMapper: Mappers.ErrorResponse
     }
   },
   requestBody: Parameters.databasePrincipalsToRemove,
@@ -823,5 +901,26 @@ const removePrincipalsOperationSpec: coreClient.OperationSpec = {
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
+  serializer
+};
+const listByClusterNextOperationSpec: coreClient.OperationSpec = {
+  path: "{nextLink}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.DatabaseListResult
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse
+    }
+  },
+  urlParameters: [
+    Parameters.$host,
+    Parameters.resourceGroupName,
+    Parameters.clusterName,
+    Parameters.subscriptionId,
+    Parameters.nextLink
+  ],
+  headerParameters: [Parameters.accept],
   serializer
 };

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 /* eslint-disable no-invalid-this */
 import { Recorder, isLiveMode, assertEnvironmentVariable } from "@azure-tools/test-recorder";
 import { WebPubSubServiceClient, AzureKeyCredential } from "../src";
-import { assert } from "@azure/test-utils";
+import { assert } from "@azure-tools/test-utils";
 import recorderOptions from "./testEnv";
-import { FullOperationResponse } from "@azure/core-client";
+import type { FullOperationResponse } from "@azure/core-client";
 import { createTestCredential } from "@azure-tools/test-credential";
 /* eslint-disable @typescript-eslint/no-invalid-this */
 
@@ -28,7 +28,7 @@ describe("HubClient", function () {
           "test-hub",
           {
             retryOptions: { maxRetries: 2 },
-          }
+          },
         );
       });
     });
@@ -41,7 +41,7 @@ describe("HubClient", function () {
           "test-hub",
           {
             retryOptions: { maxRetries: 2 },
-          }
+          },
         );
       });
     });
@@ -52,7 +52,7 @@ describe("HubClient", function () {
     let client: WebPubSubServiceClient;
     let lastResponse: FullOperationResponse | undefined;
     const credential = createTestCredential();
-    function onResponse(response: FullOperationResponse) {
+    function onResponse(response: FullOperationResponse): void {
       lastResponse = response;
     }
     beforeEach(async function () {
@@ -62,7 +62,7 @@ describe("HubClient", function () {
       client = new WebPubSubServiceClient(
         assertEnvironmentVariable("WPS_CONNECTION_STRING"),
         "simplechat",
-        recorder.configureClientOptions({})
+        recorder.configureClientOptions({}),
       );
     });
 
@@ -86,6 +86,7 @@ describe("HubClient", function () {
       await client.sendToAll("hello", {
         contentType: "text/plain",
         filter: "userId ne 'user1'",
+        messageTtlSeconds: 60,
         onResponse,
       });
       assert.equal(lastResponse?.status, 202);
@@ -106,7 +107,7 @@ describe("HubClient", function () {
       assert.equal(error.statusCode, 400);
       assert.equal(
         JSON.parse(error.message).message,
-        "Invalid syntax for 'invalid filter': Syntax error at position 14 in 'invalid filter'. (Parameter 'filter')"
+        "Invalid syntax for 'invalid filter': Syntax error at position 14 in 'invalid filter'. (Parameter 'filter')",
       );
     });
 
@@ -115,7 +116,7 @@ describe("HubClient", function () {
         assertEnvironmentVariable("WPS_ENDPOINT"),
         credential,
         "simplechat",
-        recorder.configureClientOptions({})
+        recorder.configureClientOptions({}),
       );
 
       await dacClient.sendToAll("hello", { contentType: "text/plain", onResponse });
@@ -135,7 +136,7 @@ describe("HubClient", function () {
         "simplechat",
         recorder.configureClientOptions({
           reverseProxyEndpoint: assertEnvironmentVariable("WPS_REVERSE_PROXY_ENDPOINT"),
-        })
+        }),
       );
 
       await apimClient.sendToAll("hello", { contentType: "text/plain", onResponse });
@@ -188,7 +189,7 @@ describe("HubClient", function () {
       assert.equal(error.statusCode, 400);
       assert.equal(
         JSON.parse(error.message).message,
-        "Invalid syntax for 'invalid filter': Syntax error at position 14 in 'invalid filter'. (Parameter 'filter')"
+        "Invalid syntax for 'invalid filter': Syntax error at position 14 in 'invalid filter'. (Parameter 'filter')",
       );
     });
 
@@ -290,7 +291,7 @@ describe("HubClient", function () {
           "WebPubSubServiceClient.hasPermission",
           "WebPubSubServiceClient.revokePermission",
           "WebPubSubServiceClient.getClientAccessToken",
-        ]
+        ],
       );
     });
 
@@ -303,6 +304,42 @@ describe("HubClient", function () {
       assert.ok(url.searchParams.has("access_token"));
       assert.equal(url.host, new URL(client.endpoint).host);
       assert.equal(url.pathname, `/client/hubs/${client.hubName}`);
+    });
+
+    it("can generate default client tokens", async () => {
+      const res = await client.getClientAccessToken({
+        userId: "brian",
+        groups: ["group1"],
+        clientProtocol: "default",
+      });
+      const url = new URL(res.url);
+      assert.ok(url.searchParams.has("access_token"));
+      assert.equal(url.host, new URL(client.endpoint).host);
+      assert.equal(url.pathname, `/client/hubs/${client.hubName}`);
+    });
+
+    it("can generate client MQTT tokens", async () => {
+      const res = await client.getClientAccessToken({
+        userId: "brian",
+        groups: ["group1"],
+        clientProtocol: "mqtt",
+      });
+      const url = new URL(res.url);
+      assert.ok(url.searchParams.has("access_token"));
+      assert.equal(url.host, new URL(client.endpoint).host);
+      assert.equal(url.pathname, `/clients/mqtt/hubs/${client.hubName}`);
+    });
+
+    it("can generate socketIO client tokens", async () => {
+      const res = await client.getClientAccessToken({
+        userId: "brian",
+        groups: ["group1"],
+        clientProtocol: "socketio",
+      });
+      const url = new URL(res.url);
+      assert.ok(url.searchParams.has("access_token"));
+      assert.equal(url.host, new URL(client.endpoint).host);
+      assert.equal(url.pathname, `/clients/socketio/hubs/${client.hubName}`);
     });
   });
 });

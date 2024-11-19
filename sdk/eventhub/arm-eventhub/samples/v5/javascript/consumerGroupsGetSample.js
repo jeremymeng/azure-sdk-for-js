@@ -10,16 +10,18 @@
 // Licensed under the MIT License.
 const { EventHubManagementClient } = require("@azure/arm-eventhub");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Gets a description for the specified consumer group.
  *
  * @summary Gets a description for the specified consumer group.
- * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2021-11-01/examples/ConsumerGroup/EHConsumerGroupGet.json
+ * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2024-01-01/examples/ConsumerGroup/EHConsumerGroupGet.json
  */
 async function consumerGroupGet() {
-  const subscriptionId = "5f750a97-50d9-4e36-8081-c9ee4c0210d4";
-  const resourceGroupName = "ArunMonocle";
+  const subscriptionId =
+    process.env["EVENTHUB_SUBSCRIPTION_ID"] || "5f750a97-50d9-4e36-8081-c9ee4c0210d4";
+  const resourceGroupName = process.env["EVENTHUB_RESOURCE_GROUP"] || "ArunMonocle";
   const namespaceName = "sdk-Namespace-2661";
   const eventHubName = "sdk-EventHub-6681";
   const consumerGroupName = "sdk-ConsumerGroup-5563";
@@ -29,9 +31,13 @@ async function consumerGroupGet() {
     resourceGroupName,
     namespaceName,
     eventHubName,
-    consumerGroupName
+    consumerGroupName,
   );
   console.log(result);
 }
 
-consumerGroupGet().catch(console.error);
+async function main() {
+  consumerGroupGet();
+}
+
+main().catch(console.error);

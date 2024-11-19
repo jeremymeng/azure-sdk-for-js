@@ -10,6 +10,9 @@
 // Licensed under the MIT License.
 import { SecurityCenter } from "@azure/arm-security";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to User this method to get details of a specific IoT Security solution based on solution name
@@ -18,16 +21,22 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/stable/2019-08-01/examples/IoTSecuritySolutions/GetIoTSecuritySolution.json
  */
 async function getAIoTSecuritySolution() {
-  const subscriptionId = "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
-  const resourceGroupName = "MyGroup";
+  const subscriptionId =
+    process.env["SECURITY_SUBSCRIPTION_ID"] ||
+    "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
+  const resourceGroupName = process.env["SECURITY_RESOURCE_GROUP"] || "MyGroup";
   const solutionName = "default";
   const credential = new DefaultAzureCredential();
   const client = new SecurityCenter(credential, subscriptionId);
   const result = await client.iotSecuritySolution.get(
     resourceGroupName,
-    solutionName
+    solutionName,
   );
   console.log(result);
 }
 
-getAIoTSecuritySolution().catch(console.error);
+async function main() {
+  getAIoTSecuritySolution();
+}
+
+main().catch(console.error);

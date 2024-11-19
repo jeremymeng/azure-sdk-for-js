@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { Recorder, env } from "@azure-tools/test-recorder";
-import { isNode } from "@azure/test-utils";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { env } from "@azure-tools/test-recorder";
+import { isNodeLike } from "@azure/core-util";
 import { createTestCredential } from "@azure-tools/test-credential";
 import { assert } from "chai";
 import { createClient, createRecorder } from "./utils/recordedClient";
-import { Context } from "mocha";
-import MapsGeolocation, { isUnexpected, MapsGeolocationClient } from "../../src";
-import { AzureKeyCredential } from "@azure/core-auth";
+import type { Context } from "mocha";
+import type { MapsGeolocationClient } from "../../src";
+import MapsGeolocation, { isUnexpected } from "../../src";
 
 describe("Authentication", function () {
   let recorder: Recorder;
@@ -21,22 +22,12 @@ describe("Authentication", function () {
     await recorder.stop();
   });
 
-  it("should work with Shared Key authentication", async function () {
-    const credential = new AzureKeyCredential(env["MAPS_SUBSCRIPTION_KEY"] as string);
-    const client = MapsGeolocation(credential, recorder.configureClientOptions({}));
-
-    const response = await client
-      .path("/geolocation/ip/{format}", "json")
-      .get({ queryParameters: { ip: "2001:4898:80e8:b::189" } });
-    assert.isOk(!isUnexpected(response));
-  });
-
-  it("should work with AAD authentication", async function () {
+  it("should work with Microsoft Entra ID authentication", async function () {
     /**
      * Skip this test in browser because we have to use InteractiveBrowserCredential in the browser.
      * But it requires user's interaction, which is not testable in karma.
      * */
-    if (!isNode) this.skip();
+    if (!isNodeLike) this.skip();
     /**
      * Use createTestCredential() instead of new DefaultAzureCredential(), else the playback mode won't work
      * Reference: https://github.com/Azure/azure-sdk-for-js/blob/main/documentation/test-quickstart.md#azuread-oauth2-authentication
@@ -44,8 +35,8 @@ describe("Authentication", function () {
     const credential = createTestCredential();
     const client = MapsGeolocation(
       credential,
-      env["MAPS_CLIENT_ID"] as string,
-      recorder.configureClientOptions({})
+      env["MAPS_RESOURCE_CLIENT_ID"] as string,
+      recorder.configureClientOptions({}),
     );
 
     const response = await client
@@ -77,7 +68,7 @@ describe("Endpoint can be overwritten", function () {
 
   it("should be executed with different baseUrl", async function () {
     const client = createClient(
-      recorder.configureClientOptions({ baseUrl: "https://us.atlas.microsoft.com/" })
+      recorder.configureClientOptions({ baseUrl: "https://us.atlas.microsoft.com/" }),
     );
     const response = await client
       .path("/geolocation/ip/{format}", "json")

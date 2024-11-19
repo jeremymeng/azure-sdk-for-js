@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ContainerRegistryManagementClient } from "../containerRegistryManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   TaskRun,
   TaskRunsListNextOptionalParams,
@@ -156,8 +160,8 @@ export class TaskRunsImpl implements TaskRuns {
     taskRun: TaskRun,
     options?: TaskRunsCreateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<TaskRunsCreateResponse>,
+    SimplePollerLike<
+      OperationState<TaskRunsCreateResponse>,
       TaskRunsCreateResponse
     >
   > {
@@ -167,7 +171,7 @@ export class TaskRunsImpl implements TaskRuns {
     ): Promise<TaskRunsCreateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -200,13 +204,16 @@ export class TaskRunsImpl implements TaskRuns {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, registryName, taskRunName, taskRun, options },
-      createOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, registryName, taskRunName, taskRun, options },
+      spec: createOperationSpec
+    });
+    const poller = await createHttpPoller<
+      TaskRunsCreateResponse,
+      OperationState<TaskRunsCreateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -250,14 +257,14 @@ export class TaskRunsImpl implements TaskRuns {
     registryName: string,
     taskRunName: string,
     options?: TaskRunsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -290,13 +297,13 @@ export class TaskRunsImpl implements TaskRuns {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, registryName, taskRunName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, registryName, taskRunName, options },
+      spec: deleteOperationSpec
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -340,8 +347,8 @@ export class TaskRunsImpl implements TaskRuns {
     updateParameters: TaskRunUpdateParameters,
     options?: TaskRunsUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<TaskRunsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<TaskRunsUpdateResponse>,
       TaskRunsUpdateResponse
     >
   > {
@@ -351,7 +358,7 @@ export class TaskRunsImpl implements TaskRuns {
     ): Promise<TaskRunsUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -384,19 +391,22 @@ export class TaskRunsImpl implements TaskRuns {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         registryName,
         taskRunName,
         updateParameters,
         options
       },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: updateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      TaskRunsUpdateResponse,
+      OperationState<TaskRunsUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -495,15 +505,15 @@ const getOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.TaskRun
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
+      bodyMapper: Mappers.ErrorResponseForContainerRegistry
     }
   },
   queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName,
     Parameters.registryName,
+    Parameters.resourceGroupName1,
     Parameters.taskRunName
   ],
   headerParameters: [Parameters.accept],
@@ -527,7 +537,7 @@ const createOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.TaskRun
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
+      bodyMapper: Mappers.ErrorResponseForContainerRegistry
     }
   },
   requestBody: Parameters.taskRun,
@@ -535,8 +545,8 @@ const createOperationSpec: coreClient.OperationSpec = {
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName,
     Parameters.registryName,
+    Parameters.resourceGroupName1,
     Parameters.taskRunName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -553,15 +563,15 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
+      bodyMapper: Mappers.ErrorResponseForContainerRegistry
     }
   },
   queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName,
     Parameters.registryName,
+    Parameters.resourceGroupName1,
     Parameters.taskRunName
   ],
   headerParameters: [Parameters.accept],
@@ -585,7 +595,7 @@ const updateOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.TaskRun
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
+      bodyMapper: Mappers.ErrorResponseForContainerRegistry
     }
   },
   requestBody: Parameters.updateParameters1,
@@ -593,8 +603,8 @@ const updateOperationSpec: coreClient.OperationSpec = {
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName,
     Parameters.registryName,
+    Parameters.resourceGroupName1,
     Parameters.taskRunName
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
@@ -610,15 +620,15 @@ const getDetailsOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.TaskRun
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
+      bodyMapper: Mappers.ErrorResponseForContainerRegistry
     }
   },
   queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName,
     Parameters.registryName,
+    Parameters.resourceGroupName1,
     Parameters.taskRunName
   ],
   headerParameters: [Parameters.accept],
@@ -633,15 +643,15 @@ const listOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.TaskRunListResult
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
+      bodyMapper: Mappers.ErrorResponseForContainerRegistry
     }
   },
   queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.registryName
+    Parameters.registryName,
+    Parameters.resourceGroupName1
   ],
   headerParameters: [Parameters.accept],
   serializer
@@ -654,16 +664,15 @@ const listNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.TaskRunListResult
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
+      bodyMapper: Mappers.ErrorResponseForContainerRegistry
     }
   },
-  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName,
     Parameters.registryName,
-    Parameters.nextLink
+    Parameters.nextLink,
+    Parameters.resourceGroupName1
   ],
   headerParameters: [Parameters.accept],
   serializer

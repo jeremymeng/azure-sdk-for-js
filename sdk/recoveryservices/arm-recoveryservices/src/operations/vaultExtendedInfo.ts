@@ -18,7 +18,7 @@ import {
   VaultExtendedInfoCreateOrUpdateOptionalParams,
   VaultExtendedInfoCreateOrUpdateResponse,
   VaultExtendedInfoUpdateOptionalParams,
-  VaultExtendedInfoUpdateResponse
+  VaultExtendedInfoUpdateResponse,
 } from "../models";
 
 /** Class containing VaultExtendedInfo operations. */
@@ -35,26 +35,24 @@ export class VaultExtendedInfoImpl implements VaultExtendedInfo {
 
   /**
    * Get the vault extended info.
-   * @param resourceGroupName The name of the resource group where the recovery services vault is
-   *                          present.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param vaultName The name of the recovery services vault.
    * @param options The options parameters.
    */
   get(
     resourceGroupName: string,
     vaultName: string,
-    options?: VaultExtendedInfoGetOptionalParams
+    options?: VaultExtendedInfoGetOptionalParams,
   ): Promise<VaultExtendedInfoGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, vaultName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
    * Create vault extended info.
-   * @param resourceGroupName The name of the resource group where the recovery services vault is
-   *                          present.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param vaultName The name of the recovery services vault.
    * @param resourceExtendedInfoDetails Details of ResourceExtendedInfo
    * @param options The options parameters.
@@ -63,18 +61,17 @@ export class VaultExtendedInfoImpl implements VaultExtendedInfo {
     resourceGroupName: string,
     vaultName: string,
     resourceExtendedInfoDetails: VaultExtendedInfoResource,
-    options?: VaultExtendedInfoCreateOrUpdateOptionalParams
+    options?: VaultExtendedInfoCreateOrUpdateOptionalParams,
   ): Promise<VaultExtendedInfoCreateOrUpdateResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, vaultName, resourceExtendedInfoDetails, options },
-      createOrUpdateOperationSpec
+      createOrUpdateOperationSpec,
     );
   }
 
   /**
    * Update vault extended info.
-   * @param resourceGroupName The name of the resource group where the recovery services vault is
-   *                          present.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param vaultName The name of the recovery services vault.
    * @param resourceExtendedInfoDetails Details of ResourceExtendedInfo
    * @param options The options parameters.
@@ -83,11 +80,11 @@ export class VaultExtendedInfoImpl implements VaultExtendedInfo {
     resourceGroupName: string,
     vaultName: string,
     resourceExtendedInfoDetails: VaultExtendedInfoResource,
-    options?: VaultExtendedInfoUpdateOptionalParams
+    options?: VaultExtendedInfoUpdateOptionalParams,
   ): Promise<VaultExtendedInfoUpdateResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, vaultName, resourceExtendedInfoDetails, options },
-      updateOperationSpec
+      updateOperationSpec,
     );
   }
 }
@@ -95,38 +92,36 @@ export class VaultExtendedInfoImpl implements VaultExtendedInfo {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/extendedInformation/vaultExtendedInfo",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/extendedInformation/vaultExtendedInfo",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VaultExtendedInfoResource
+      bodyMapper: Mappers.VaultExtendedInfoResource,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.vaultName
+    Parameters.vaultName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/extendedInformation/vaultExtendedInfo",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/extendedInformation/vaultExtendedInfo",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.VaultExtendedInfoResource
+      bodyMapper: Mappers.VaultExtendedInfoResource,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.resourceExtendedInfoDetails,
   queryParameters: [Parameters.apiVersion],
@@ -134,23 +129,22 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.vaultName
+    Parameters.vaultName,
   ],
   headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/extendedInformation/vaultExtendedInfo",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/extendedInformation/vaultExtendedInfo",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.VaultExtendedInfoResource
+      bodyMapper: Mappers.VaultExtendedInfoResource,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.resourceExtendedInfoDetails,
   queryParameters: [Parameters.apiVersion],
@@ -158,9 +152,9 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.vaultName
+    Parameters.vaultName,
   ],
   headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };

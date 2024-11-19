@@ -1,8 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-export * from "./models/options";
-export * from "./models/models";
-export * from "./models/responses";
-export * from "./routerClient";
-export * from "./routerAdministrationClient";
+/**
+ * @packageDocumentation
+ * JavaScript SDK for the Azure Communication Services Job Router Service.
+ */
+
+export * from "./models.js";
+export * from "./options.js";
+export * from "./responses.js";
+export * from "./clientUtils.js";
+export * from "./jobRouterClient.js";
+export * from "./jobRouterAdministrationClient.js";

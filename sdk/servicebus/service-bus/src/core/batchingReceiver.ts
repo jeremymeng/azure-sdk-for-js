@@ -1,27 +1,28 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { receiverLogger as logger } from "../log";
-import {
+import { receiverLogger as logger } from "../log.js";
+import type {
   AmqpError,
   EventContext,
   OnAmqpEvent,
-  ReceiverEvents,
-  SessionEvents,
   Receiver as RheaPromiseReceiver,
   Session,
 } from "rhea-promise";
-import { ServiceBusMessageImpl } from "../serviceBusMessage";
-import { MessageReceiver, OnAmqpEventAsPromise, ReceiveOptions } from "./messageReceiver";
-import { ConnectionContext } from "../connectionContext";
-import { throwErrorIfConnectionClosed } from "../util/errors";
-import { AbortSignalLike } from "@azure/abort-controller";
-import { checkAndRegisterWithAbortSignal } from "../util/utils";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
-import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage";
-import { ReceiveMode } from "../models";
-import { ServiceBusError, translateServiceBusError } from "../serviceBusError";
-import { tracingClient } from "../diagnostics/tracing";
+import { ReceiverEvents, SessionEvents } from "rhea-promise";
+import { ServiceBusMessageImpl } from "../serviceBusMessage.js";
+import type { OnAmqpEventAsPromise, ReceiveOptions } from "./messageReceiver.js";
+import { MessageReceiver } from "./messageReceiver.js";
+import type { ConnectionContext } from "../connectionContext.js";
+import { throwErrorIfConnectionClosed } from "../util/errors.js";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import { checkAndRegisterWithAbortSignal } from "../util/utils.js";
+import { receiveDrainTimeoutInMs } from "../util/constants.js";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs.js";
+import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage.js";
+import type { ReceiveMode } from "../models.js";
+import { ServiceBusError, translateServiceBusError } from "../serviceBusError.js";
+import { tracingClient } from "../diagnostics/tracing.js";
 
 /**
  * Describes the batching receiver where the user can receive a specified number of messages for
@@ -40,7 +41,7 @@ export class BatchingReceiver extends MessageReceiver {
     identifier: string,
     connectionContext: ConnectionContext,
     entityPath: string,
-    options: ReceiveOptions
+    options: ReceiveOptions,
   ) {
     super(identifier, connectionContext, entityPath, "batching", options);
 
@@ -77,7 +78,8 @@ export class BatchingReceiver extends MessageReceiver {
         return this.link;
       },
       this.receiveMode,
-      options.skipParsingBodyAsJson ?? false
+      options.skipParsingBodyAsJson ?? false,
+      options.skipConvertingDate ?? false,
     );
   }
 
@@ -96,7 +98,7 @@ export class BatchingReceiver extends MessageReceiver {
 
     if (connectionError == null) {
       connectionError = new Error(
-        "Unknown error occurred on the AMQP connection while receiving messages."
+        "Unknown error occurred on the AMQP connection while receiving messages.",
       );
     }
 
@@ -117,7 +119,7 @@ export class BatchingReceiver extends MessageReceiver {
     maxMessageCount: number,
     maxWaitTimeInMs: number,
     maxTimeAfterFirstMessageInMs: number,
-    options: OperationOptionsBase
+    options: OperationOptionsBase,
   ): Promise<ServiceBusMessageImpl[]> {
     throwErrorIfConnectionClosed(this._context);
     try {
@@ -148,7 +150,7 @@ export class BatchingReceiver extends MessageReceiver {
     clientId: string,
     context: ConnectionContext,
     entityPath: string,
-    options: ReceiveOptions
+    options: ReceiveOptions,
   ): BatchingReceiver {
     throwErrorIfConnectionClosed(context);
     const bReceiver = new BatchingReceiver(clientId, context, entityPath, options);
@@ -173,7 +175,7 @@ export class BatchingReceiver extends MessageReceiver {
  */
 export function getRemainingWaitTimeInMsFn(
   maxWaitTimeInMs: number,
-  maxTimeAfterFirstMessageInMs: number
+  maxTimeAfterFirstMessageInMs: number,
 ): () => number {
   const startTimeMs = Date.now();
 
@@ -207,7 +209,7 @@ type EventEmitterLike<T extends RheaPromiseReceiver | Session> = Pick<
  */
 export type MinimalReceiver = Pick<
   RheaPromiseReceiver,
-  "name" | "isOpen" | "credit" | "addCredit" | "drain" | "drainCredit"
+  "name" | "isOpen" | "credit" | "addCredit" | "drain" | "drainCredit" | "close"
 > &
   EventEmitterLike<RheaPromiseReceiver> & {
     session: EventEmitterLike<Session>;
@@ -240,14 +242,17 @@ interface ReceiveMessageArgs extends OperationOptionsBase {
  * @internal
  */
 export class BatchingReceiverLite {
+  // testing hook
+  private _drainTimeoutInMs: number = receiveDrainTimeoutInMs;
   constructor(
     private _connectionContext: ConnectionContext,
     public entityPath: string,
     private _getCurrentReceiver: (
-      abortSignal?: AbortSignalLike
+      abortSignal?: AbortSignalLike,
     ) => Promise<MinimalReceiver | undefined>,
     private _receiveMode: ReceiveMode,
-    _skipParsingBodyAsJson: boolean
+    _skipParsingBodyAsJson: boolean,
+    _skipConvertingDate: boolean,
   ) {
     this._createServiceBusMessage = (context: MessageAndDelivery) => {
       return new ServiceBusMessageImpl(
@@ -255,20 +260,21 @@ export class BatchingReceiverLite {
         context.delivery!,
         true,
         this._receiveMode,
-        _skipParsingBodyAsJson
+        _skipParsingBodyAsJson,
+        _skipConvertingDate,
       );
     };
 
     this._getRemainingWaitTimeInMsFn = (
       maxWaitTimeInMs: number,
-      maxTimeAfterFirstMessageInMs: number
+      maxTimeAfterFirstMessageInMs: number,
     ) => getRemainingWaitTimeInMsFn(maxWaitTimeInMs, maxTimeAfterFirstMessageInMs);
 
     this.isReceivingMessages = false;
   }
 
   private _createServiceBusMessage: (
-    context: Pick<EventContext, "message" | "delivery">
+    context: Pick<EventContext, "message" | "delivery">,
   ) => ServiceBusMessageImpl;
 
   private _getRemainingWaitTimeInMsFn: typeof getRemainingWaitTimeInMsFn;
@@ -294,13 +300,13 @@ export class BatchingReceiverLite {
       }
 
       const messages = await new Promise<ServiceBusMessageImpl[]>((resolve, reject) =>
-        this._receiveMessagesImpl(receiver, args, resolve, reject)
+        this._receiveMessagesImpl(receiver, args, resolve, reject),
       );
       return tracingClient.withSpan(
         "BatchingReceiverLite.process",
         args,
         () => messages,
-        toProcessingSpanOptions(messages, this, this._connectionContext.config)
+        toProcessingSpanOptions(messages, this, this._connectionContext.config, "process"),
       );
     } finally {
       this._closeHandler = undefined;
@@ -320,26 +326,80 @@ export class BatchingReceiverLite {
     }
   }
 
+  private async tryDrainReceiver(
+    receiver: MinimalReceiver,
+    loggingPrefix: string,
+    remainingWaitTimeInMs: number,
+    abortSignal?: AbortSignalLike,
+  ): Promise<void> {
+    if (!receiver.isOpen() || receiver.credit <= 0) {
+      return;
+    }
+    let drainTimedout: boolean = false;
+    let drainTimer: ReturnType<typeof setTimeout>;
+    const timeToWaitInMs = Math.max(this._drainTimeoutInMs, remainingWaitTimeInMs);
+    const drainPromise = new Promise<void>((resolve) => {
+      function drainListener(): void {
+        logger.verbose(`${loggingPrefix} Receiver has been drained.`);
+        clearTimeout(drainTimer);
+        resolve();
+      }
+      function removeListeners(): void {
+        abortSignal?.removeEventListener("abort", onAbort);
+        receiver.removeListener(ReceiverEvents.receiverDrained, drainListener);
+      }
+      function onAbort(): void {
+        removeListeners();
+        clearTimeout(drainTimer);
+        resolve();
+      }
+
+      drainTimer = setTimeout(() => {
+        drainTimedout = true;
+        removeListeners();
+        resolve();
+      }, timeToWaitInMs);
+      receiver.once(ReceiverEvents.receiverDrained, drainListener);
+      abortSignal?.addEventListener("abort", onAbort);
+    });
+
+    receiver.drainCredit();
+    logger.verbose(
+      `${loggingPrefix} Draining leftover credits(${receiver.credit}), waiting for event_drained event, or timing out after ${timeToWaitInMs} milliseconds...`,
+    );
+    await drainPromise;
+    if (drainTimedout) {
+      logger.warning(
+        `${loggingPrefix} Time out after ${timeToWaitInMs} milliseconds when draining credits. Closing receiver...`,
+      );
+      // Close the receiver link since we have not received the receiver drain event
+      // to prevent out-of-sync state between local and remote
+      await receiver.close();
+    }
+
+    // Turn off draining.
+    receiver.drain = false;
+  }
+
   private _receiveMessagesImpl(
     receiver: MinimalReceiver,
     args: ReceiveMessageArgs,
     origResolve: (messages: ServiceBusMessageImpl[]) => void,
-    origReject: (err: Error | AmqpError) => void
+    origReject: (err: Error | AmqpError) => void,
   ): void {
     const getRemainingWaitTimeInMs = this._getRemainingWaitTimeInMsFn(
       args.maxWaitTimeInMs,
-      args.maxTimeAfterFirstMessageInMs
+      args.maxTimeAfterFirstMessageInMs,
     );
 
     const brokeredMessages: ServiceBusMessageImpl[] = [];
     const loggingPrefix = `[${receiver.connection.id}|r:${receiver.name}]`;
 
-    let totalWaitTimer: NodeJS.Timer | undefined;
-
+    let totalWaitTimer: NodeJS.Timeout | undefined;
     // eslint-disable-next-line prefer-const
     let cleanupBeforeResolveOrReject: () => void;
 
-    const reject = (err: Error | AmqpError): void => {
+    const rejectAfterCleanup = (err: Error | AmqpError): void => {
       cleanupBeforeResolveOrReject();
       origReject(err);
     };
@@ -372,7 +432,7 @@ export class BatchingReceiverLite {
       } else {
         error = new ServiceBusError("An error occurred while receiving messages.", "GeneralError");
       }
-      reject(error);
+      rejectAfterCleanup(error);
     };
 
     this._closeHandler = (error?: AmqpError | Error): void => {
@@ -383,13 +443,12 @@ export class BatchingReceiverLite {
         (this._receiveMode === "receiveAndDelete" && brokeredMessages.length)
       ) {
         logger.verbose(
-          `${loggingPrefix} Closing. Resolving with ${brokeredMessages.length} messages.`
+          `${loggingPrefix} Closing. Resolving with ${brokeredMessages.length} messages.`,
         );
-
         return resolveAfterPendingMessageCallbacks(brokeredMessages);
       }
 
-      reject(translateServiceBusError(error));
+      rejectAfterCleanup(translateServiceBusError(error));
     };
 
     let abortSignalCleanupFunction: (() => void) | undefined = undefined;
@@ -398,26 +457,20 @@ export class BatchingReceiverLite {
     // - maxMessageCount is reached or
     // - maxWaitTime is passed or
     // - newMessageWaitTimeoutInSeconds is passed since the last message was received
-    this._finalAction = (): void => {
+    this._finalAction = async (): Promise<void> => {
       if (receiver.drain) {
         // If a drain is already in process then we should let it complete. Some messages might still be in flight, but they will
         // arrive before the drain completes.
+        logger.verbose(`${loggingPrefix} Already draining.`);
         return;
       }
 
-      // Drain any pending credits.
-      if (receiver.isOpen() && receiver.credit > 0) {
-        logger.verbose(`${loggingPrefix} Draining leftover credits(${receiver.credit}).`);
-        receiver.drainCredit();
-      } else {
-        logger.verbose(
-          `${loggingPrefix} Resolving receiveMessages() with ${brokeredMessages.length} messages.`
-        );
-
-        // we can resolve immediately (ie, no setTimeout call) because we have no
-        // remaining messages (thus nothing to wait for)
-        resolveImmediately(brokeredMessages);
-      }
+      const remainingWaitTimeInMs = getRemainingWaitTimeInMs();
+      await this.tryDrainReceiver(receiver, loggingPrefix, remainingWaitTimeInMs, args.abortSignal);
+      logger.verbose(
+        `${loggingPrefix} Resolving receiveMessages() with ${brokeredMessages.length} messages.`,
+      );
+      resolveImmediately(brokeredMessages);
     };
 
     // Action to be performed on the "message" event.
@@ -437,7 +490,7 @@ export class BatchingReceiverLite {
           const remainingWaitTimeInMs = getRemainingWaitTimeInMs();
           totalWaitTimer = setTimeout(() => {
             logger.verbose(
-              `${loggingPrefix} Batching, waited for ${remainingWaitTimeInMs} milliseconds after receiving the first message.`
+              `${loggingPrefix} Batching, waited for ${remainingWaitTimeInMs} milliseconds after receiving the first message.`,
             );
             this._finalAction!();
           }, remainingWaitTimeInMs);
@@ -453,16 +506,16 @@ export class BatchingReceiverLite {
         // silently dropped on the floor.
         if (brokeredMessages.length > args.maxMessageCount) {
           logger.warning(
-            `More messages arrived than expected: ${args.maxMessageCount} vs ${brokeredMessages.length}`
+            `More messages arrived than expected: ${args.maxMessageCount} vs ${brokeredMessages.length}`,
           );
         }
       } catch (err: any) {
         const errObj = err instanceof Error ? err : new Error(JSON.stringify(err));
         logger.logError(
           err,
-          `${loggingPrefix} Received an error while converting AmqpMessage to ServiceBusMessage`
+          `${loggingPrefix} Received an error while converting AmqpMessage to ServiceBusMessage`,
         );
-        reject(errObj);
+        rejectAfterCleanup(errObj);
       }
       if (brokeredMessages.length >= args.maxMessageCount) {
         this._finalAction!();
@@ -478,18 +531,6 @@ export class BatchingReceiverLite {
       }
     };
 
-    // Action to be performed on the "receiver_drained" event.
-    const onReceiveDrain: OnAmqpEvent = () => {
-      receiver.removeListener(ReceiverEvents.receiverDrained, onReceiveDrain);
-      receiver.drain = false;
-
-      logger.verbose(
-        `${loggingPrefix} Drained, resolving receiveMessages() with ${brokeredMessages.length} messages.`
-      );
-
-      resolveAfterPendingMessageCallbacks(brokeredMessages);
-    };
-
     cleanupBeforeResolveOrReject = (): void => {
       if (receiver != null) {
         receiver.removeListener(ReceiverEvents.receiverError, onError);
@@ -497,7 +538,6 @@ export class BatchingReceiverLite {
         receiver.session.removeListener(SessionEvents.sessionError, onError);
         receiver.removeListener(ReceiverEvents.receiverClose, onClose);
         receiver.session.removeListener(SessionEvents.sessionClose, onClose);
-        receiver.removeListener(ReceiverEvents.receiverDrained, onReceiveDrain);
       }
 
       if (totalWaitTimer) {
@@ -511,26 +551,34 @@ export class BatchingReceiverLite {
     };
 
     abortSignalCleanupFunction = checkAndRegisterWithAbortSignal((err) => {
-      reject(err);
+      if (receiver.drain) {
+        // If a drain is already in process and we cancel, the link state may be out of sync
+        // with remote. Reset the link so that we will have fresh start.
+        receiver.close();
+      }
+      rejectAfterCleanup(err);
     }, args.abortSignal);
-
-    logger.verbose(
-      `${loggingPrefix} Adding credit for receiving ${args.maxMessageCount} messages.`
-    );
 
     // By adding credit here, we let the service know that at max we can handle `maxMessageCount`
     // number of messages concurrently. We will return the user an array of messages that can
     // be of size upto maxMessageCount. Then the user needs to accordingly dispose
     // (complete/abandon/defer/deadletter) the messages from the array.
-    receiver.addCredit(args.maxMessageCount);
+    const creditToAdd = args.maxMessageCount - receiver.credit;
+    logger.verbose(
+      `${loggingPrefix} Ensure enough credit for receiving ${args.maxMessageCount} messages. Current: ${receiver.credit}.  To add: ${creditToAdd}.`,
+    );
+
+    if (creditToAdd > 0) {
+      receiver.addCredit(creditToAdd);
+    }
 
     logger.verbose(
-      `${loggingPrefix} Setting the wait timer for ${args.maxWaitTimeInMs} milliseconds.`
+      `${loggingPrefix} Setting the wait timer for ${args.maxWaitTimeInMs} milliseconds.`,
     );
 
     totalWaitTimer = setTimeout(() => {
       logger.verbose(
-        `${loggingPrefix} Batching, waited for max wait time ${args.maxWaitTimeInMs} milliseconds.`
+        `${loggingPrefix} Batching, waited for max wait time ${args.maxWaitTimeInMs} milliseconds.`,
       );
       this._finalAction!();
     }, args.maxWaitTimeInMs);
@@ -538,7 +586,6 @@ export class BatchingReceiverLite {
     receiver.on(ReceiverEvents.message, onReceiveMessage);
     receiver.on(ReceiverEvents.receiverError, onError);
     receiver.on(ReceiverEvents.receiverClose, onClose);
-    receiver.on(ReceiverEvents.receiverDrained, onReceiveDrain);
 
     receiver.session.on(SessionEvents.sessionError, onError);
     receiver.session.on(SessionEvents.sessionClose, onClose);

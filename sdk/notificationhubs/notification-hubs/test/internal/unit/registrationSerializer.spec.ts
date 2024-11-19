@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import { describe, it, assert } from "vitest";
+import type {
   AdmRegistrationDescription,
   AdmTemplateRegistrationDescription,
   AppleRegistrationDescription,
@@ -10,12 +11,18 @@ import {
   BaiduTemplateRegistrationDescription,
   BrowserRegistrationDescription,
   BrowserTemplateRegistrationDescription,
+  FcmV1RegistrationDescription,
+  FcmV1TemplateRegistrationDescription,
   GcmRegistrationDescription,
   GcmTemplateRegistrationDescription,
   MpnsRegistrationDescription,
   MpnsTemplateRegistrationDescription,
+  XiaomiRegistrationDescription,
+  XiaomiTemplateRegistrationDescription,
   WindowsRegistrationDescription,
   WindowsTemplateRegistrationDescription,
+} from "../../../src/models/registration.js";
+import {
   createAdmRegistrationDescription,
   createAdmTemplateRegistrationDescription,
   createAppleRegistrationDescription,
@@ -26,6 +33,10 @@ import {
   createBrowserTemplateRegistrationDescription,
   createFcmLegacyRegistrationDescription,
   createFcmLegacyTemplateRegistrationDescription,
+  createFcmV1RegistrationDescription,
+  createFcmV1TemplateRegistrationDescription,
+  createXiaomiRegistrationDescription,
+  createXiaomiTemplateRegistrationDescription,
   createWindowsRegistrationDescription,
   createWindowsTemplateRegistrationDescription,
 } from "../../../src/models/registration.js";
@@ -33,9 +44,8 @@ import {
   registrationDescriptionParser,
   registrationDescriptionSerializer,
 } from "../../../src/serializers/registrationSerializer.js";
-import { assert } from "@azure/test-utils";
 
-const ADM_REGISTEATION = `<?xml version="1.0" encoding="utf-8"?>
+const ADM_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
 <entry xmlns="http://www.w3.org/2005/Atom">
     <content type="application/xml">
         <AdmRegistrationDescription xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/netservices/2010/10/servicebus/connect">
@@ -143,6 +153,29 @@ const BROWSER_TEMPLATE_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
     </content>
 </entry>`;
 
+const FCMV1_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
+<entry xmlns="http://www.w3.org/2005/Atom">
+    <content type="application/xml">
+        <FcmV1RegistrationDescription xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/netservices/2010/10/servicebus/connect">
+            <Tags>myTag,myOtherTag</Tags>
+            <RegistrationId>{Registration Id}</RegistrationId> 
+            <FcmV1RegistrationId>{FCM V1 Registration Id}</FcmV1RegistrationId> 
+        </FcmV1RegistrationDescription>
+    </content>
+</entry>`;
+
+const FCMV1_TEMPLATE_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
+<entry xmlns="http://www.w3.org/2005/Atom">
+    <content type="application/xml">
+        <FcmV1TemplateRegistrationDescription xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/netservices/2010/10/servicebus/connect">
+            <Tags>myTag,myOtherTag</Tags>
+            <RegistrationId>{Registration Id}</RegistrationId> 
+            <FcmV1RegistrationId>{FCM V1 Registration Id}</FcmV1RegistrationId> 
+            <BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>
+        </FcmV1TemplateRegistrationDescription>
+    </content>
+</entry>`;
+
 const GCM_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
 <entry xmlns="http://www.w3.org/2005/Atom">
     <content type="application/xml">
@@ -199,6 +232,29 @@ const MPNS_TEMPLATE_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
     </content>
 </entry>`;
 
+const XIAOMI_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
+<entry xmlns="http://www.w3.org/2005/Atom">
+    <content type="application/xml">
+        <XiaomiRegistrationDescription xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/netservices/2010/10/servicebus/connect">
+            <Tags>myTag,myOtherTag</Tags>
+            <RegistrationId>{Registration Id}</RegistrationId> 
+            <XiaomiRegistrationId>{Xiaomi Registration Id}</XiaomiRegistrationId>
+        </XiaomiRegistrationDescription>
+    </content>
+</entry>`;
+
+const XIAOMI_TEMPLATE_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
+<entry xmlns="http://www.w3.org/2005/Atom">
+    <content type="application/xml">
+        <XiaomiTemplateRegistrationDescription xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/netservices/2010/10/servicebus/connect">
+            <Tags>myTag,myOtherTag</Tags>
+            <XiaomiRegistrationId>{Xiaomi Registration Id}</XiaomiRegistrationId>
+            <RegistrationId>{Registration Id}</RegistrationId> 
+            <BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>
+        </XiaomiTemplateRegistrationDescription>
+    </content>
+</entry>`;
+
 const WNS_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
 <entry xmlns="http://www.w3.org/2005/Atom">
     <content type="application/xml">
@@ -235,7 +291,7 @@ const WINDOWS_TEMPLATE_REGISTRATION = `<?xml version="1.0" encoding="utf-8"?>
 describe("parseRegistrationEntry", () => {
   it("should parse an Amazon Device Messaging registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      ADM_REGISTEATION
+      ADM_REGISTRATION,
     )) as AdmRegistrationDescription;
 
     assert.equal(registration.kind, "Adm");
@@ -246,7 +302,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an Amazon Device Messaging template registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      ADM_TEMPLATE_REGISTRATION
+      ADM_TEMPLATE_REGISTRATION,
     )) as AdmTemplateRegistrationDescription;
 
     assert.equal(registration.kind, "AdmTemplate");
@@ -258,7 +314,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an apple registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      APPLE_REGISTRATION
+      APPLE_REGISTRATION,
     )) as AppleRegistrationDescription;
 
     assert.equal(registration.kind, "Apple");
@@ -269,7 +325,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an apple template registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      APPLE_TEMPLATE_REGISTRATION
+      APPLE_TEMPLATE_REGISTRATION,
     )) as AppleTemplateRegistrationDescription;
 
     assert.equal(registration.kind, "AppleTemplate");
@@ -283,7 +339,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an Baidu registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      BAIDU_REGISTRATION
+      BAIDU_REGISTRATION,
     )) as BaiduRegistrationDescription;
 
     assert.equal(registration.kind, "Baidu");
@@ -295,7 +351,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an Baidu template registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      BAIDU_TEMPLATE_REGISTRATION
+      BAIDU_TEMPLATE_REGISTRATION,
     )) as BaiduTemplateRegistrationDescription;
 
     assert.equal(registration.kind, "BaiduTemplate");
@@ -308,7 +364,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an Browser registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      BROWSER_REGISTRATION
+      BROWSER_REGISTRATION,
     )) as BrowserRegistrationDescription;
 
     assert.equal(registration.kind, "Browser");
@@ -321,7 +377,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an Browser template registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      BROWSER_TEMPLATE_REGISTRATION
+      BROWSER_TEMPLATE_REGISTRATION,
     )) as BrowserTemplateRegistrationDescription;
 
     assert.equal(registration.kind, "BrowserTemplate");
@@ -333,9 +389,32 @@ describe("parseRegistrationEntry", () => {
     assert.equal(registration.bodyTemplate, "{Template for the body}");
   });
 
+  it("should parse an FCM V1 registration description", async () => {
+    const registration = (await registrationDescriptionParser.parseRegistrationEntry(
+      FCMV1_REGISTRATION,
+    )) as FcmV1RegistrationDescription;
+
+    assert.equal(registration.kind, "FcmV1");
+    assert.equal(registration.registrationId, "{Registration Id}");
+    assert.equal(registration.fcmV1RegistrationId, "{FCM V1 Registration Id}");
+    assert.deepEqual(registration.tags, ["myTag", "myOtherTag"]);
+  });
+
+  it("should parse a FCM V1 template registration description", async () => {
+    const registration = (await registrationDescriptionParser.parseRegistrationEntry(
+      FCMV1_TEMPLATE_REGISTRATION,
+    )) as FcmV1TemplateRegistrationDescription;
+
+    assert.equal(registration.kind, "FcmV1Template");
+    assert.equal(registration.registrationId, "{Registration Id}");
+    assert.equal(registration.fcmV1RegistrationId, "{FCM V1 Registration Id}");
+    assert.deepEqual(registration.tags, ["myTag", "myOtherTag"]);
+    assert.equal(registration.bodyTemplate, "{Template for the body}");
+  });
+
   it("should parse a GCM registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      GCM_REGISTRATION
+      GCM_REGISTRATION,
     )) as GcmRegistrationDescription;
 
     assert.equal(registration.kind, "Gcm");
@@ -346,7 +425,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse a GCM template registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      GCM_TEMPLATE_REGISTRATION
+      GCM_TEMPLATE_REGISTRATION,
     )) as GcmTemplateRegistrationDescription;
 
     assert.equal(registration.kind, "GcmTemplate");
@@ -358,7 +437,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an MPNS registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      MPNS_REGISTRATION
+      MPNS_REGISTRATION,
     )) as MpnsRegistrationDescription;
 
     assert.equal(registration.kind, "Mpns");
@@ -369,7 +448,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an MPNS template registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      MPNS_TEMPLATE_REGISTRATION
+      MPNS_TEMPLATE_REGISTRATION,
     )) as MpnsTemplateRegistrationDescription;
 
     assert.equal(registration.kind, "MpnsTemplate");
@@ -381,9 +460,32 @@ describe("parseRegistrationEntry", () => {
     assert.equal(registration.mpnsHeaders!["X-NotificationClass"], "[batching interval]");
   });
 
+  it("should parse an Xiaomi registration description", async () => {
+    const registration = (await registrationDescriptionParser.parseRegistrationEntry(
+      XIAOMI_REGISTRATION,
+    )) as XiaomiRegistrationDescription;
+
+    assert.equal(registration.kind, "Xiaomi");
+    assert.equal(registration.registrationId, "{Registration Id}");
+    assert.equal(registration.xiaomiRegistrationId, "{Xiaomi Registration Id}");
+    assert.deepEqual(registration.tags, ["myTag", "myOtherTag"]);
+  });
+
+  it("should parse an Xiaomi template registration description", async () => {
+    const registration = (await registrationDescriptionParser.parseRegistrationEntry(
+      XIAOMI_TEMPLATE_REGISTRATION,
+    )) as XiaomiTemplateRegistrationDescription;
+
+    assert.equal(registration.kind, "XiaomiTemplate");
+    assert.equal(registration.registrationId, "{Registration Id}");
+    assert.equal(registration.xiaomiRegistrationId, "{Xiaomi Registration Id}");
+    assert.deepEqual(registration.tags, ["myTag", "myOtherTag"]);
+    assert.equal(registration.bodyTemplate, "{Template for the body}");
+  });
+
   it("should parse an Windows registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      WNS_REGISTRATION
+      WNS_REGISTRATION,
     )) as WindowsRegistrationDescription;
 
     assert.equal(registration.kind, "Windows");
@@ -394,7 +496,7 @@ describe("parseRegistrationEntry", () => {
 
   it("should parse an Windows template registration description", async () => {
     const registration = (await registrationDescriptionParser.parseRegistrationEntry(
-      WINDOWS_TEMPLATE_REGISTRATION
+      WINDOWS_TEMPLATE_REGISTRATION,
     )) as WindowsTemplateRegistrationDescription;
 
     assert.equal(registration.kind, "WindowsTemplate");
@@ -468,9 +570,8 @@ const SINGLE_REGISTRATION_FEED = `<?xml version="1.0" encoding="utf-8" ?>
 
 describe("parseRegistrationFeed", () => {
   it("should parse a registration feed", async () => {
-    const registrations = await registrationDescriptionParser.parseRegistrationFeed(
-      REGISTRATION_FEED
-    );
+    const registrations =
+      await registrationDescriptionParser.parseRegistrationFeed(REGISTRATION_FEED);
 
     const windowsRegistration = registrations[0] as WindowsRegistrationDescription;
     assert.equal(windowsRegistration.kind, "Windows");
@@ -486,9 +587,8 @@ describe("parseRegistrationFeed", () => {
   });
 
   it("should parse a feed with one item", async () => {
-    const registrations = await registrationDescriptionParser.parseRegistrationFeed(
-      SINGLE_REGISTRATION_FEED
-    );
+    const registrations =
+      await registrationDescriptionParser.parseRegistrationFeed(SINGLE_REGISTRATION_FEED);
 
     assert.equal(registrations.length, 1);
 
@@ -500,9 +600,8 @@ describe("parseRegistrationFeed", () => {
   });
 
   it("should parse an empty feed", async () => {
-    const registrations = await registrationDescriptionParser.parseRegistrationFeed(
-      EMPTY_REGISTRATION_FEED
-    );
+    const registrations =
+      await registrationDescriptionParser.parseRegistrationFeed(EMPTY_REGISTRATION_FEED);
 
     assert.equal(registrations.length, 0);
   });
@@ -519,7 +618,7 @@ describe("serializeRegistrationDescription", () => {
 
     assert.isTrue(xml.indexOf("<AdmRegistrationDescription") !== -1);
     assert.isTrue(
-      xml.indexOf("<AdmRegistrationId>{ADM Registration ID}</AdmRegistrationId>") !== -1
+      xml.indexOf("<AdmRegistrationId>{ADM Registration ID}</AdmRegistrationId>") !== -1,
     );
     assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
     assert.isTrue(xml.indexOf("</AdmRegistrationDescription>") !== -1);
@@ -536,11 +635,11 @@ describe("serializeRegistrationDescription", () => {
 
     assert.isTrue(xml.indexOf("<AdmTemplateRegistrationDescription") !== -1);
     assert.isTrue(
-      xml.indexOf("<AdmRegistrationId>{ADM Registration ID}</AdmRegistrationId>") !== -1
+      xml.indexOf("<AdmRegistrationId>{ADM Registration ID}</AdmRegistrationId>") !== -1,
     );
     assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
     assert.isTrue(
-      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1
+      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1,
     );
     assert.isTrue(xml.indexOf("</AdmTemplateRegistrationDescription>") !== -1);
   });
@@ -576,7 +675,7 @@ describe("serializeRegistrationDescription", () => {
     assert.isTrue(xml.indexOf("<DeviceToken>{DeviceToken}</DeviceToken>") !== -1);
     assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
     assert.isTrue(
-      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1
+      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1,
     );
     assert.isTrue(xml.indexOf("<ApnsHeaders>") !== -1);
     assert.isTrue(xml.indexOf("<Header>apns-topic</Header>") !== -1);
@@ -618,7 +717,7 @@ describe("serializeRegistrationDescription", () => {
     assert.isTrue(xml.indexOf("<BaiduUserId>{Baidu User ID}</BaiduUserId>") !== -1);
     assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
     assert.isTrue(
-      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1
+      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1,
     );
     assert.isTrue(xml.indexOf("</BaiduTemplateRegistrationDescription>") !== -1);
   });
@@ -633,6 +732,11 @@ describe("serializeRegistrationDescription", () => {
 
     const xml = registrationDescriptionSerializer.serializeRegistrationDescription(registration);
 
+    // Check for ordering of the fields
+    // Bug: https://github.com/Azure/azure-sdk-for-js/issues/29081
+    assert.isTrue(xml.indexOf("<P256DH>{P256DH}</P256DH><Auth>{Auth Secret}</Auth>") !== -1);
+
+    // Check the fields
     assert.isTrue(xml.indexOf("<BrowserRegistrationDescription") !== -1);
     assert.isTrue(xml.indexOf("<Endpoint>https://www.microsoft.com/</Endpoint>") !== -1);
     assert.isTrue(xml.indexOf("<P256DH>{P256DH}</P256DH>") !== -1);
@@ -658,9 +762,45 @@ describe("serializeRegistrationDescription", () => {
     assert.isTrue(xml.indexOf("<Auth>{Auth Secret}</Auth>") !== -1);
     assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
     assert.isTrue(
-      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1
+      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1,
     );
     assert.isTrue(xml.indexOf("</BrowserTemplateRegistrationDescription>") !== -1);
+  });
+
+  it("should serialize a FcmV1RegistrationDescription", () => {
+    const registration = createFcmV1RegistrationDescription({
+      fcmV1RegistrationId: "{FCM V1 Registration ID}",
+      tags: ["myTag", "myOtherTag"],
+    });
+
+    const xml = registrationDescriptionSerializer.serializeRegistrationDescription(registration);
+
+    assert.isTrue(xml.indexOf("<FcmV1RegistrationDescription") !== -1);
+    assert.isTrue(
+      xml.indexOf("<FcmV1RegistrationId>{FCM V1 Registration ID}</FcmV1RegistrationId>") !== -1,
+    );
+    assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
+    assert.isTrue(xml.indexOf("</FcmV1RegistrationDescription>") !== -1);
+  });
+
+  it("should serialize a FcmV1TemplateRegistrationDescription", () => {
+    const registration = createFcmV1TemplateRegistrationDescription({
+      fcmV1RegistrationId: "{FCM V1 Registration ID}",
+      tags: ["myTag", "myOtherTag"],
+      bodyTemplate: "{Template for the body}",
+    });
+
+    const xml = registrationDescriptionSerializer.serializeRegistrationDescription(registration);
+
+    assert.isTrue(xml.indexOf("<FcmV1TemplateRegistrationDescription") !== -1);
+    assert.isTrue(
+      xml.indexOf("<FcmV1RegistrationId>{FCM V1 Registration ID}</FcmV1RegistrationId>") !== -1,
+    );
+    assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
+    assert.isTrue(
+      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1,
+    );
+    assert.isTrue(xml.indexOf("</FcmV1TemplateRegistrationDescription>") !== -1);
   });
 
   it("should serialize a GcmRegistrationDescription", () => {
@@ -673,7 +813,7 @@ describe("serializeRegistrationDescription", () => {
 
     assert.isTrue(xml.indexOf("<GcmRegistrationDescription") !== -1);
     assert.isTrue(
-      xml.indexOf("<GcmRegistrationId>{GCM Registration ID}</GcmRegistrationId>") !== -1
+      xml.indexOf("<GcmRegistrationId>{GCM Registration ID}</GcmRegistrationId>") !== -1,
     );
     assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
     assert.isTrue(xml.indexOf("</GcmRegistrationDescription>") !== -1);
@@ -690,11 +830,11 @@ describe("serializeRegistrationDescription", () => {
 
     assert.isTrue(xml.indexOf("<GcmTemplateRegistrationDescription") !== -1);
     assert.isTrue(
-      xml.indexOf("<GcmRegistrationId>{GCM Registration ID}</GcmRegistrationId>") !== -1
+      xml.indexOf("<GcmRegistrationId>{GCM Registration ID}</GcmRegistrationId>") !== -1,
     );
     assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
     assert.isTrue(
-      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1
+      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1,
     );
     assert.isTrue(xml.indexOf("</GcmTemplateRegistrationDescription>") !== -1);
   });
@@ -731,13 +871,49 @@ describe("serializeRegistrationDescription", () => {
     assert.isTrue(xml.indexOf("<ChannelUri>https://www.microsoft.com/</ChannelUri>") !== -1);
     assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
     assert.isTrue(
-      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1
+      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1,
     );
     assert.isTrue(xml.indexOf("<MpnsHeaders>") !== -1);
     assert.isTrue(xml.indexOf("<Header>X-MPNS-TYPE</Header>") !== -1);
     assert.isTrue(xml.indexOf("<Value>mpns/tile</Value>") !== -1);
     assert.isTrue(xml.indexOf("</MpnsHeaders>") !== -1);
     assert.isTrue(xml.indexOf("</MpnsTemplateRegistrationDescription>") !== -1);
+  });
+
+  it("should serialize an XiaomiRegistrationDescription", () => {
+    const registration = createXiaomiRegistrationDescription({
+      xiaomiRegistrationId: "{Xiaomi Registration ID}",
+      tags: ["myTag", "myOtherTag"],
+    });
+
+    const xml = registrationDescriptionSerializer.serializeRegistrationDescription(registration);
+
+    assert.isTrue(xml.indexOf("<XiaomiRegistrationDescription") !== -1);
+    assert.isTrue(
+      xml.indexOf("<XiaomiRegistrationId>{Xiaomi Registration ID}</XiaomiRegistrationId>") !== -1,
+    );
+    assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
+    assert.isTrue(xml.indexOf("</XiaomiRegistrationDescription>") !== -1);
+  });
+
+  it("should serialize an XiaomiTemplateRegistrationDescription", () => {
+    const registration = createXiaomiTemplateRegistrationDescription({
+      xiaomiRegistrationId: "{Xiaomi Registration ID}",
+      tags: ["myTag", "myOtherTag"],
+      bodyTemplate: "{Template for the body}",
+    });
+
+    const xml = registrationDescriptionSerializer.serializeRegistrationDescription(registration);
+
+    assert.isTrue(xml.indexOf("<XiaomiTemplateRegistrationDescription") !== -1);
+    assert.isTrue(
+      xml.indexOf("<XiaomiRegistrationId>{Xiaomi Registration ID}</XiaomiRegistrationId>") !== -1,
+    );
+    assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
+    assert.isTrue(
+      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1,
+    );
+    assert.isTrue(xml.indexOf("</XiaomiTemplateRegistrationDescription>") !== -1);
   });
 
   it("should serialize an WindowsRegistrationDescription", () => {
@@ -770,7 +946,7 @@ describe("serializeRegistrationDescription", () => {
     assert.isTrue(xml.indexOf("<ChannelUri>https://www.microsoft.com/</ChannelUri>") !== -1);
     assert.isTrue(xml.indexOf("<Tags>myTag,myOtherTag</Tags>") !== -1);
     assert.isTrue(
-      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1
+      xml.indexOf("<BodyTemplate><![CDATA[{Template for the body}]]></BodyTemplate>") !== -1,
     );
     assert.isTrue(xml.indexOf("<WnsHeaders>") !== -1);
     assert.isTrue(xml.indexOf("<Header>X-WNS-TYPE</Header>") !== -1);

@@ -1,22 +1,21 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
+import { describe, it, assert } from "vitest";
 import fs from "fs-extra";
-import os from "os";
-import path from "path";
+import os from "node:os";
+import path from "node:path";
 import { makeSamplesFactory } from "../../src/util/samples/generation";
-
 import * as git from "../../src/util/git";
-
-import { assert } from "chai";
 import { findMatchingFiles } from "../../src/util/findMatchingFiles";
+import { METADATA_KEY } from "../../src/util/resolveProject";
 
 // Please read: ./files/README.md
 
 const INPUT_PATH = path.join(__dirname, "files", "inputs");
 const EXPECT_PATH = path.join(__dirname, "files", "expectations");
 
-describe("File content tests", async function () {
+describe("File content tests", { timeout: 50000 }, async function () {
   const shouldWriteExpectations = process.env.TEST_MODE === "record";
 
   if (shouldWriteExpectations) {
@@ -26,7 +25,7 @@ describe("File content tests", async function () {
         [
           "TEST_MODE=record, but the sample expectations folder is dirty.",
           "Commit or stash your changes before creating new expectation files",
-        ].join(" ")
+        ].join(" "),
       );
     }
   }
@@ -43,7 +42,7 @@ describe("File content tests", async function () {
   for (const dir of inputDirectories) {
     const name = path.basename(dir);
 
-    it(name, async function () {
+    it(name, { timeout: 50000 }, async function () {
       const tempOutputDir = await fs.mkdtemp(path.join(os.tmpdir(), "devToolTest"));
 
       const version = name.includes("@") ? name.split("@")[1] : "1.0.0";
@@ -57,19 +56,23 @@ describe("File content tests", async function () {
               ...ownPackageJson,
               // Required by the PackageJson definition type, but not required for this test
               main: "",
+              "sdk-type": "client",
               types: "",
               version,
               keywords: [name],
-              "//sampleConfiguration": {
-                ...(await import(path.join(dir, "config.json"))),
-                disableDocsMs: true,
-                overridePublicationLinkFragment:
-                  "common/tools/dev-tool/test/samples/files/expectations/" + name,
+              [METADATA_KEY]: {
+                constantPaths: [],
+                sampleConfiguration: {
+                  ...(await import(path.join(dir, "config.json"))),
+                  disableDocsMs: true,
+                  overridePublicationLinkFragment:
+                    "common/tools/dev-tool/test/samples/files/expectations/" + name,
+                },
               },
             },
             path: dir,
           },
-          dir
+          dir,
         );
 
         await writeSamples(tempOutputDir);
@@ -102,7 +105,7 @@ describe("File content tests", async function () {
 
             assert.ok(
               fs.statSync(path.join(expectationPath, relativePath)),
-              `Extra file ${relativePath} was generated, but no expectation exists for it.`
+              `Extra file ${relativePath} was generated, but no expectation exists for it.`,
             );
           }
         }
@@ -110,6 +113,6 @@ describe("File content tests", async function () {
         await fs.emptyDir(tempOutputDir);
         await fs.rmdir(tempOutputDir);
       }
-    }).timeout(50000);
+    });
   }
-}).timeout(50000);
+});

@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SqlManagementClient } from "../sqlManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ServerTrustGroup,
   ServerTrustGroupsListByLocationNextOptionalParams,
@@ -29,7 +33,7 @@ import {
   ServerTrustGroupsCreateOrUpdateResponse,
   ServerTrustGroupsDeleteOptionalParams,
   ServerTrustGroupsListByLocationNextResponse,
-  ServerTrustGroupsListByInstanceNextResponse
+  ServerTrustGroupsListByInstanceNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -55,12 +59,12 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
   public listByLocation(
     resourceGroupName: string,
     locationName: string,
-    options?: ServerTrustGroupsListByLocationOptionalParams
+    options?: ServerTrustGroupsListByLocationOptionalParams,
   ): PagedAsyncIterableIterator<ServerTrustGroup> {
     const iter = this.listByLocationPagingAll(
       resourceGroupName,
       locationName,
-      options
+      options,
     );
     return {
       next() {
@@ -77,9 +81,9 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
           resourceGroupName,
           locationName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -87,7 +91,7 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
     resourceGroupName: string,
     locationName: string,
     options?: ServerTrustGroupsListByLocationOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ServerTrustGroup[]> {
     let result: ServerTrustGroupsListByLocationResponse;
     let continuationToken = settings?.continuationToken;
@@ -95,7 +99,7 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
       result = await this._listByLocation(
         resourceGroupName,
         locationName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -107,7 +111,7 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
         resourceGroupName,
         locationName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -119,12 +123,12 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
   private async *listByLocationPagingAll(
     resourceGroupName: string,
     locationName: string,
-    options?: ServerTrustGroupsListByLocationOptionalParams
+    options?: ServerTrustGroupsListByLocationOptionalParams,
   ): AsyncIterableIterator<ServerTrustGroup> {
     for await (const page of this.listByLocationPagingPage(
       resourceGroupName,
       locationName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -140,12 +144,12 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
   public listByInstance(
     resourceGroupName: string,
     managedInstanceName: string,
-    options?: ServerTrustGroupsListByInstanceOptionalParams
+    options?: ServerTrustGroupsListByInstanceOptionalParams,
   ): PagedAsyncIterableIterator<ServerTrustGroup> {
     const iter = this.listByInstancePagingAll(
       resourceGroupName,
       managedInstanceName,
-      options
+      options,
     );
     return {
       next() {
@@ -162,9 +166,9 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
           resourceGroupName,
           managedInstanceName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -172,7 +176,7 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
     resourceGroupName: string,
     managedInstanceName: string,
     options?: ServerTrustGroupsListByInstanceOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ServerTrustGroup[]> {
     let result: ServerTrustGroupsListByInstanceResponse;
     let continuationToken = settings?.continuationToken;
@@ -180,7 +184,7 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
       result = await this._listByInstance(
         resourceGroupName,
         managedInstanceName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -192,7 +196,7 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
         resourceGroupName,
         managedInstanceName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -204,12 +208,12 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
   private async *listByInstancePagingAll(
     resourceGroupName: string,
     managedInstanceName: string,
-    options?: ServerTrustGroupsListByInstanceOptionalParams
+    options?: ServerTrustGroupsListByInstanceOptionalParams,
   ): AsyncIterableIterator<ServerTrustGroup> {
     for await (const page of this.listByInstancePagingPage(
       resourceGroupName,
       managedInstanceName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -227,11 +231,11 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
     resourceGroupName: string,
     locationName: string,
     serverTrustGroupName: string,
-    options?: ServerTrustGroupsGetOptionalParams
+    options?: ServerTrustGroupsGetOptionalParams,
   ): Promise<ServerTrustGroupsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, locationName, serverTrustGroupName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -249,30 +253,29 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
     locationName: string,
     serverTrustGroupName: string,
     parameters: ServerTrustGroup,
-    options?: ServerTrustGroupsCreateOrUpdateOptionalParams
+    options?: ServerTrustGroupsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ServerTrustGroupsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ServerTrustGroupsCreateOrUpdateResponse>,
       ServerTrustGroupsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<ServerTrustGroupsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -281,8 +284,8 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -290,25 +293,28 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         locationName,
         serverTrustGroupName,
         parameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      ServerTrustGroupsCreateOrUpdateResponse,
+      OperationState<ServerTrustGroupsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -328,14 +334,14 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
     locationName: string,
     serverTrustGroupName: string,
     parameters: ServerTrustGroup,
-    options?: ServerTrustGroupsCreateOrUpdateOptionalParams
+    options?: ServerTrustGroupsCreateOrUpdateOptionalParams,
   ): Promise<ServerTrustGroupsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       locationName,
       serverTrustGroupName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -352,25 +358,24 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
     resourceGroupName: string,
     locationName: string,
     serverTrustGroupName: string,
-    options?: ServerTrustGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: ServerTrustGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -379,8 +384,8 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -388,19 +393,19 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, locationName, serverTrustGroupName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, locationName, serverTrustGroupName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -418,13 +423,13 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
     resourceGroupName: string,
     locationName: string,
     serverTrustGroupName: string,
-    options?: ServerTrustGroupsDeleteOptionalParams
+    options?: ServerTrustGroupsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       locationName,
       serverTrustGroupName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -439,11 +444,11 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
   private _listByLocation(
     resourceGroupName: string,
     locationName: string,
-    options?: ServerTrustGroupsListByLocationOptionalParams
+    options?: ServerTrustGroupsListByLocationOptionalParams,
   ): Promise<ServerTrustGroupsListByLocationResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, locationName, options },
-      listByLocationOperationSpec
+      listByLocationOperationSpec,
     );
   }
 
@@ -457,11 +462,11 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
   private _listByInstance(
     resourceGroupName: string,
     managedInstanceName: string,
-    options?: ServerTrustGroupsListByInstanceOptionalParams
+    options?: ServerTrustGroupsListByInstanceOptionalParams,
   ): Promise<ServerTrustGroupsListByInstanceResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, managedInstanceName, options },
-      listByInstanceOperationSpec
+      listByInstanceOperationSpec,
     );
   }
 
@@ -477,11 +482,11 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
     resourceGroupName: string,
     locationName: string,
     nextLink: string,
-    options?: ServerTrustGroupsListByLocationNextOptionalParams
+    options?: ServerTrustGroupsListByLocationNextOptionalParams,
   ): Promise<ServerTrustGroupsListByLocationNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, locationName, nextLink, options },
-      listByLocationNextOperationSpec
+      listByLocationNextOperationSpec,
     );
   }
 
@@ -497,11 +502,11 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
     resourceGroupName: string,
     managedInstanceName: string,
     nextLink: string,
-    options?: ServerTrustGroupsListByInstanceNextOptionalParams
+    options?: ServerTrustGroupsListByInstanceNextOptionalParams,
   ): Promise<ServerTrustGroupsListByInstanceNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, managedInstanceName, nextLink, options },
-      listByInstanceNextOperationSpec
+      listByInstanceNextOperationSpec,
     );
   }
 }
@@ -509,148 +514,143 @@ export class ServerTrustGroupsImpl implements ServerTrustGroups {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/serverTrustGroups/{serverTrustGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/serverTrustGroups/{serverTrustGroupName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ServerTrustGroup
+      bodyMapper: Mappers.ServerTrustGroup,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.locationName,
-    Parameters.serverTrustGroupName
+    Parameters.serverTrustGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/serverTrustGroups/{serverTrustGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/serverTrustGroups/{serverTrustGroupName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ServerTrustGroup
+      bodyMapper: Mappers.ServerTrustGroup,
     },
     201: {
-      bodyMapper: Mappers.ServerTrustGroup
+      bodyMapper: Mappers.ServerTrustGroup,
     },
     202: {
-      bodyMapper: Mappers.ServerTrustGroup
+      bodyMapper: Mappers.ServerTrustGroup,
     },
     204: {
-      bodyMapper: Mappers.ServerTrustGroup
+      bodyMapper: Mappers.ServerTrustGroup,
     },
-    default: {}
+    default: {},
   },
-  requestBody: Parameters.parameters65,
-  queryParameters: [Parameters.apiVersion2],
+  requestBody: Parameters.parameters49,
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.locationName,
-    Parameters.serverTrustGroupName
+    Parameters.serverTrustGroupName,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/serverTrustGroups/{serverTrustGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/serverTrustGroups/{serverTrustGroupName}",
   httpMethod: "DELETE",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.locationName,
-    Parameters.serverTrustGroupName
+    Parameters.serverTrustGroupName,
   ],
-  serializer
+  serializer,
 };
 const listByLocationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/serverTrustGroups",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/serverTrustGroups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ServerTrustGroupListResult
+      bodyMapper: Mappers.ServerTrustGroupListResult,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.locationName
+    Parameters.locationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByInstanceOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/serverTrustGroups",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/serverTrustGroups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ServerTrustGroupListResult
+      bodyMapper: Mappers.ServerTrustGroupListResult,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByLocationNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ServerTrustGroupListResult
+      bodyMapper: Mappers.ServerTrustGroupListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.nextLink,
-    Parameters.locationName
+    Parameters.locationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByInstanceNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ServerTrustGroupListResult
+      bodyMapper: Mappers.ServerTrustGroupListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.nextLink,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

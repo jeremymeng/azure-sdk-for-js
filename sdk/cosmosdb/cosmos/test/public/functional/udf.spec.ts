@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 import assert from "assert";
-import { Suite } from "mocha";
-import { UserDefinedFunctionDefinition, Container } from "../../../src";
+import type { Suite } from "mocha";
+import type { UserDefinedFunctionDefinition, Container } from "../../../src";
 import { removeAllDatabases, getTestContainer } from "../common/TestHelpers";
 
 describe("User Defined Function", function (this: Suite) {
@@ -37,7 +37,7 @@ describe("User Defined Function", function (this: Suite) {
     assert.equal(
       udfsAfterCreate.length,
       beforeCreateUdfsCount + 1,
-      "create should increase the number of udfs"
+      "create should increase the number of udfs",
     );
 
     // query udfs

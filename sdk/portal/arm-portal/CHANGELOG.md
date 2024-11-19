@@ -1,6 +1,6 @@
 # Release History
 
-## 1.0.0-beta.5 (Unreleased)
+## 1.0.0-beta.6 (Unreleased)
 
 ### Features Added
 
@@ -10,9 +10,19 @@
 
 ### Other Changes
 
+## 1.0.0-beta.5 (2023-02-02)
+
+### Features Added
+
+  - Exposes `getContinuationToken` helper function to extract continuation token
+
+### Bugs Fixed
+
+  - A series of small bug fixs relevant to authentication and apiVersion policy
+
 ## 1.0.0-beta.4 (2022-07-08)
     
-**Features**
+### Features Added
 
   - Added Interface Configuration
   - Added Interface MarkdownPartMetadata
@@ -20,7 +30,7 @@
     
 ## 1.0.0-beta.3 (2022-04-28)
 
-**Features**
+### Features Added
 
   - Bug fix
 
@@ -32,4 +42,4 @@ To understand the detail of the change, please refer to [Changelog](https://aka.
 
 To migrate the existing applications to the latest version, please refer to [Migration Guide](https://aka.ms/js-track2-migration-guide).
 
-To learn more, please refer to our documentation [Quick Start](https://aka.ms/js-track2-quickstart).
+To learn more, please refer to our documentation [Quick Start](https://aka.ms/azsdk/js/mgmt/quickstart ).

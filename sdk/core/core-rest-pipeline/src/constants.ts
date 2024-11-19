@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-export const SDK_VERSION: string = "1.10.2";
+export const SDK_VERSION: string = "1.18.0";
 
 export const DEFAULT_RETRY_POLICY_COUNT = 3;

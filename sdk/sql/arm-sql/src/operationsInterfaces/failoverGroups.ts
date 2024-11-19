@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   FailoverGroup,
   FailoverGroupsListByServerOptionalParams,
@@ -22,7 +22,9 @@ import {
   FailoverGroupsFailoverOptionalParams,
   FailoverGroupsFailoverResponse,
   FailoverGroupsForceFailoverAllowDataLossOptionalParams,
-  FailoverGroupsForceFailoverAllowDataLossResponse
+  FailoverGroupsForceFailoverAllowDataLossResponse,
+  FailoverGroupsTryPlannedBeforeForcedFailoverOptionalParams,
+  FailoverGroupsTryPlannedBeforeForcedFailoverResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -38,7 +40,7 @@ export interface FailoverGroups {
   listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: FailoverGroupsListByServerOptionalParams
+    options?: FailoverGroupsListByServerOptionalParams,
   ): PagedAsyncIterableIterator<FailoverGroup>;
   /**
    * Gets a failover group.
@@ -52,7 +54,7 @@ export interface FailoverGroups {
     resourceGroupName: string,
     serverName: string,
     failoverGroupName: string,
-    options?: FailoverGroupsGetOptionalParams
+    options?: FailoverGroupsGetOptionalParams,
   ): Promise<FailoverGroupsGetResponse>;
   /**
    * Creates or updates a failover group.
@@ -68,10 +70,10 @@ export interface FailoverGroups {
     serverName: string,
     failoverGroupName: string,
     parameters: FailoverGroup,
-    options?: FailoverGroupsCreateOrUpdateOptionalParams
+    options?: FailoverGroupsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<FailoverGroupsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<FailoverGroupsCreateOrUpdateResponse>,
       FailoverGroupsCreateOrUpdateResponse
     >
   >;
@@ -89,7 +91,7 @@ export interface FailoverGroups {
     serverName: string,
     failoverGroupName: string,
     parameters: FailoverGroup,
-    options?: FailoverGroupsCreateOrUpdateOptionalParams
+    options?: FailoverGroupsCreateOrUpdateOptionalParams,
   ): Promise<FailoverGroupsCreateOrUpdateResponse>;
   /**
    * Deletes a failover group.
@@ -103,8 +105,8 @@ export interface FailoverGroups {
     resourceGroupName: string,
     serverName: string,
     failoverGroupName: string,
-    options?: FailoverGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: FailoverGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a failover group.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -117,7 +119,7 @@ export interface FailoverGroups {
     resourceGroupName: string,
     serverName: string,
     failoverGroupName: string,
-    options?: FailoverGroupsDeleteOptionalParams
+    options?: FailoverGroupsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Updates a failover group.
@@ -133,10 +135,10 @@ export interface FailoverGroups {
     serverName: string,
     failoverGroupName: string,
     parameters: FailoverGroupUpdate,
-    options?: FailoverGroupsUpdateOptionalParams
+    options?: FailoverGroupsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<FailoverGroupsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<FailoverGroupsUpdateResponse>,
       FailoverGroupsUpdateResponse
     >
   >;
@@ -154,7 +156,7 @@ export interface FailoverGroups {
     serverName: string,
     failoverGroupName: string,
     parameters: FailoverGroupUpdate,
-    options?: FailoverGroupsUpdateOptionalParams
+    options?: FailoverGroupsUpdateOptionalParams,
   ): Promise<FailoverGroupsUpdateResponse>;
   /**
    * Fails over from the current primary server to this server.
@@ -168,10 +170,10 @@ export interface FailoverGroups {
     resourceGroupName: string,
     serverName: string,
     failoverGroupName: string,
-    options?: FailoverGroupsFailoverOptionalParams
+    options?: FailoverGroupsFailoverOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<FailoverGroupsFailoverResponse>,
+    SimplePollerLike<
+      OperationState<FailoverGroupsFailoverResponse>,
       FailoverGroupsFailoverResponse
     >
   >;
@@ -187,7 +189,7 @@ export interface FailoverGroups {
     resourceGroupName: string,
     serverName: string,
     failoverGroupName: string,
-    options?: FailoverGroupsFailoverOptionalParams
+    options?: FailoverGroupsFailoverOptionalParams,
   ): Promise<FailoverGroupsFailoverResponse>;
   /**
    * Fails over from the current primary server to this server. This operation might result in data loss.
@@ -201,10 +203,10 @@ export interface FailoverGroups {
     resourceGroupName: string,
     serverName: string,
     failoverGroupName: string,
-    options?: FailoverGroupsForceFailoverAllowDataLossOptionalParams
+    options?: FailoverGroupsForceFailoverAllowDataLossOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<FailoverGroupsForceFailoverAllowDataLossResponse>,
+    SimplePollerLike<
+      OperationState<FailoverGroupsForceFailoverAllowDataLossResponse>,
       FailoverGroupsForceFailoverAllowDataLossResponse
     >
   >;
@@ -220,6 +222,41 @@ export interface FailoverGroups {
     resourceGroupName: string,
     serverName: string,
     failoverGroupName: string,
-    options?: FailoverGroupsForceFailoverAllowDataLossOptionalParams
+    options?: FailoverGroupsForceFailoverAllowDataLossOptionalParams,
   ): Promise<FailoverGroupsForceFailoverAllowDataLossResponse>;
+  /**
+   * Fails over from the current primary server to this server. This operation tries planned before
+   * forced failover but might still result in data loss.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serverName The name of the server.
+   * @param failoverGroupName The name of the failover group.
+   * @param options The options parameters.
+   */
+  beginTryPlannedBeforeForcedFailover(
+    resourceGroupName: string,
+    serverName: string,
+    failoverGroupName: string,
+    options?: FailoverGroupsTryPlannedBeforeForcedFailoverOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<FailoverGroupsTryPlannedBeforeForcedFailoverResponse>,
+      FailoverGroupsTryPlannedBeforeForcedFailoverResponse
+    >
+  >;
+  /**
+   * Fails over from the current primary server to this server. This operation tries planned before
+   * forced failover but might still result in data loss.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serverName The name of the server.
+   * @param failoverGroupName The name of the failover group.
+   * @param options The options parameters.
+   */
+  beginTryPlannedBeforeForcedFailoverAndWait(
+    resourceGroupName: string,
+    serverName: string,
+    failoverGroupName: string,
+    options?: FailoverGroupsTryPlannedBeforeForcedFailoverOptionalParams,
+  ): Promise<FailoverGroupsTryPlannedBeforeForcedFailoverResponse>;
 }

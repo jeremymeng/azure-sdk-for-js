@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ConfidentialLedger,
   LedgerListByResourceGroupOptionalParams,
@@ -18,7 +18,13 @@ import {
   LedgerCreateOptionalParams,
   LedgerCreateResponse,
   LedgerUpdateOptionalParams,
-  LedgerUpdateResponse
+  LedgerUpdateResponse,
+  ConfidentialLedgerBackup,
+  LedgerBackupOptionalParams,
+  LedgerBackupResponse,
+  ConfidentialLedgerRestore,
+  LedgerRestoreOptionalParams,
+  LedgerRestoreResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -26,56 +32,56 @@ import {
 export interface Ledger {
   /**
    * Retrieves the properties of all Confidential Ledgers.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param options The options parameters.
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: LedgerListByResourceGroupOptionalParams
+    options?: LedgerListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<ConfidentialLedger>;
   /**
    * Retrieves the properties of all Confidential Ledgers.
    * @param options The options parameters.
    */
   listBySubscription(
-    options?: LedgerListBySubscriptionOptionalParams
+    options?: LedgerListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<ConfidentialLedger>;
   /**
    * Retrieves the properties of a Confidential Ledger.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ledgerName Name of the Confidential Ledger
    * @param options The options parameters.
    */
   get(
     resourceGroupName: string,
     ledgerName: string,
-    options?: LedgerGetOptionalParams
+    options?: LedgerGetOptionalParams,
   ): Promise<LedgerGetResponse>;
   /**
    * Deletes an existing Confidential Ledger.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ledgerName Name of the Confidential Ledger
    * @param options The options parameters.
    */
   beginDelete(
     resourceGroupName: string,
     ledgerName: string,
-    options?: LedgerDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: LedgerDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes an existing Confidential Ledger.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ledgerName Name of the Confidential Ledger
    * @param options The options parameters.
    */
   beginDeleteAndWait(
     resourceGroupName: string,
     ledgerName: string,
-    options?: LedgerDeleteOptionalParams
+    options?: LedgerDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Creates a  Confidential Ledger with the specified ledger parameters.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ledgerName Name of the Confidential Ledger
    * @param confidentialLedger Confidential Ledger Create Request Body
    * @param options The options parameters.
@@ -84,13 +90,13 @@ export interface Ledger {
     resourceGroupName: string,
     ledgerName: string,
     confidentialLedger: ConfidentialLedger,
-    options?: LedgerCreateOptionalParams
+    options?: LedgerCreateOptionalParams,
   ): Promise<
-    PollerLike<PollOperationState<LedgerCreateResponse>, LedgerCreateResponse>
+    SimplePollerLike<OperationState<LedgerCreateResponse>, LedgerCreateResponse>
   >;
   /**
    * Creates a  Confidential Ledger with the specified ledger parameters.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ledgerName Name of the Confidential Ledger
    * @param confidentialLedger Confidential Ledger Create Request Body
    * @param options The options parameters.
@@ -99,11 +105,11 @@ export interface Ledger {
     resourceGroupName: string,
     ledgerName: string,
     confidentialLedger: ConfidentialLedger,
-    options?: LedgerCreateOptionalParams
+    options?: LedgerCreateOptionalParams,
   ): Promise<LedgerCreateResponse>;
   /**
    * Updates properties of Confidential Ledger
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ledgerName Name of the Confidential Ledger
    * @param confidentialLedger Confidential Ledger request body for Updating Ledger
    * @param options The options parameters.
@@ -112,13 +118,13 @@ export interface Ledger {
     resourceGroupName: string,
     ledgerName: string,
     confidentialLedger: ConfidentialLedger,
-    options?: LedgerUpdateOptionalParams
+    options?: LedgerUpdateOptionalParams,
   ): Promise<
-    PollerLike<PollOperationState<LedgerUpdateResponse>, LedgerUpdateResponse>
+    SimplePollerLike<OperationState<LedgerUpdateResponse>, LedgerUpdateResponse>
   >;
   /**
    * Updates properties of Confidential Ledger
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ledgerName Name of the Confidential Ledger
    * @param confidentialLedger Confidential Ledger request body for Updating Ledger
    * @param options The options parameters.
@@ -127,6 +133,65 @@ export interface Ledger {
     resourceGroupName: string,
     ledgerName: string,
     confidentialLedger: ConfidentialLedger,
-    options?: LedgerUpdateOptionalParams
+    options?: LedgerUpdateOptionalParams,
   ): Promise<LedgerUpdateResponse>;
+  /**
+   * Backs up a Confidential Ledger Resource.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param ledgerName Name of the Confidential Ledger
+   * @param confidentialLedger Confidential Ledger Backup Request Body
+   * @param options The options parameters.
+   */
+  beginBackup(
+    resourceGroupName: string,
+    ledgerName: string,
+    confidentialLedger: ConfidentialLedgerBackup,
+    options?: LedgerBackupOptionalParams,
+  ): Promise<
+    SimplePollerLike<OperationState<LedgerBackupResponse>, LedgerBackupResponse>
+  >;
+  /**
+   * Backs up a Confidential Ledger Resource.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param ledgerName Name of the Confidential Ledger
+   * @param confidentialLedger Confidential Ledger Backup Request Body
+   * @param options The options parameters.
+   */
+  beginBackupAndWait(
+    resourceGroupName: string,
+    ledgerName: string,
+    confidentialLedger: ConfidentialLedgerBackup,
+    options?: LedgerBackupOptionalParams,
+  ): Promise<LedgerBackupResponse>;
+  /**
+   * Restores a Confidential Ledger Resource.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param ledgerName Name of the Confidential Ledger
+   * @param confidentialLedger Confidential Ledger Restore Request Body
+   * @param options The options parameters.
+   */
+  beginRestore(
+    resourceGroupName: string,
+    ledgerName: string,
+    confidentialLedger: ConfidentialLedgerRestore,
+    options?: LedgerRestoreOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<LedgerRestoreResponse>,
+      LedgerRestoreResponse
+    >
+  >;
+  /**
+   * Restores a Confidential Ledger Resource.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param ledgerName Name of the Confidential Ledger
+   * @param confidentialLedger Confidential Ledger Restore Request Body
+   * @param options The options parameters.
+   */
+  beginRestoreAndWait(
+    resourceGroupName: string,
+    ledgerName: string,
+    confidentialLedger: ConfidentialLedgerRestore,
+    options?: LedgerRestoreOptionalParams,
+  ): Promise<LedgerRestoreResponse>;
 }

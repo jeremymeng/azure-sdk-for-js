@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { HeaderConstants, TRANSACTION_HTTP_LINE_ENDING } from "./constants";
 
@@ -40,7 +40,7 @@ export function getInitialTransactionBody(transactionId: string, changesetId: st
 export function getTransactionHttpRequestBody(
   bodyParts: string[],
   transactionId: string,
-  changesetId: string
+  changesetId: string,
 ): string {
   const transactionBoundary = getTransactionBoundary(transactionId);
   const changesetBoundary = getChangeSetBoundary(changesetId);

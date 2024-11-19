@@ -6,9 +6,19 @@
 
 import * as coreAuth from '@azure/core-auth';
 import * as coreClient from '@azure/core-client';
+import { OperationState } from '@azure/core-lro';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
+import { SimplePollerLike } from '@azure/core-lro';
+
+// @public
+export interface AbusePenalty {
+    action?: AbusePenaltyAction;
+    expiration?: Date;
+    rateLimitPercentage?: number;
+}
+
+// @public
+export type AbusePenaltyAction = string;
 
 // @public
 export interface Account extends AzureEntityResource {
@@ -36,7 +46,13 @@ export interface AccountModel extends DeploymentModel {
         [propertyName: string]: string;
     };
     deprecation?: ModelDeprecationInfo;
+    finetuneCapabilities?: {
+        [propertyName: string]: string;
+    };
+    isDefaultVersion?: boolean;
+    lifecycleStatus?: ModelLifecycleStatus;
     maxCapacity?: number;
+    skus?: ModelSku[];
     readonly systemData?: SystemData;
 }
 
@@ -48,11 +64,13 @@ export interface AccountModelListResult {
 
 // @public
 export interface AccountProperties {
+    readonly abusePenalty?: AbusePenalty;
     // (undocumented)
     allowedFqdnList?: string[];
     apiProperties?: ApiProperties;
     readonly callRateLimit?: CallRateLimit;
     readonly capabilities?: SkuCapability[];
+    readonly commitmentPlanAssociations?: CommitmentPlanAssociation[];
     customSubDomainName?: string;
     readonly dateCreated?: string;
     readonly deletionDate?: string;
@@ -66,6 +84,7 @@ export interface AccountProperties {
     };
     readonly internalId?: string;
     readonly isMigrated?: boolean;
+    locations?: MultiRegionSettings;
     migrationToken?: string;
     networkAcls?: NetworkRuleSet;
     readonly privateEndpointConnections?: PrivateEndpointConnection[];
@@ -83,11 +102,11 @@ export interface AccountProperties {
 
 // @public
 export interface Accounts {
-    beginCreate(resourceGroupName: string, accountName: string, account: Account, options?: AccountsCreateOptionalParams): Promise<PollerLike<PollOperationState<AccountsCreateResponse>, AccountsCreateResponse>>;
+    beginCreate(resourceGroupName: string, accountName: string, account: Account, options?: AccountsCreateOptionalParams): Promise<SimplePollerLike<OperationState<AccountsCreateResponse>, AccountsCreateResponse>>;
     beginCreateAndWait(resourceGroupName: string, accountName: string, account: Account, options?: AccountsCreateOptionalParams): Promise<AccountsCreateResponse>;
-    beginDelete(resourceGroupName: string, accountName: string, options?: AccountsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, accountName: string, options?: AccountsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, accountName: string, options?: AccountsDeleteOptionalParams): Promise<void>;
-    beginUpdate(resourceGroupName: string, accountName: string, account: Account, options?: AccountsUpdateOptionalParams): Promise<PollerLike<PollOperationState<AccountsUpdateResponse>, AccountsUpdateResponse>>;
+    beginUpdate(resourceGroupName: string, accountName: string, account: Account, options?: AccountsUpdateOptionalParams): Promise<SimplePollerLike<OperationState<AccountsUpdateResponse>, AccountsUpdateResponse>>;
     beginUpdateAndWait(resourceGroupName: string, accountName: string, account: Account, options?: AccountsUpdateOptionalParams): Promise<AccountsUpdateResponse>;
     get(resourceGroupName: string, accountName: string, options?: AccountsGetOptionalParams): Promise<AccountsGetResponse>;
     list(options?: AccountsListOptionalParams): PagedAsyncIterableIterator<Account>;
@@ -250,6 +269,14 @@ export interface CallRateLimit {
 }
 
 // @public
+export interface CapacityConfig {
+    default?: number;
+    maximum?: number;
+    minimum?: number;
+    step?: number;
+}
+
+// @public
 export interface CheckDomainAvailabilityOptionalParams extends coreClient.OperationOptions {
     kind?: string;
 }
@@ -298,6 +325,8 @@ export class CognitiveServicesManagementClient extends coreClient.ServiceClient 
     // (undocumented)
     deployments: Deployments;
     // (undocumented)
+    models: Models;
+    // (undocumented)
     operations: Operations;
     // (undocumented)
     privateEndpointConnections: PrivateEndpointConnections;
@@ -307,6 +336,8 @@ export class CognitiveServicesManagementClient extends coreClient.ServiceClient 
     resourceSkus: ResourceSkus;
     // (undocumented)
     subscriptionId: string;
+    // (undocumented)
+    usages: Usages;
 }
 
 // @public
@@ -334,8 +365,33 @@ export interface CommitmentPeriod {
 // @public
 export interface CommitmentPlan extends ProxyResource {
     readonly etag?: string;
+    kind?: string;
+    location?: string;
     properties?: CommitmentPlanProperties;
+    sku?: Sku;
     readonly systemData?: SystemData;
+    tags?: {
+        [propertyName: string]: string;
+    };
+}
+
+// @public
+export interface CommitmentPlanAccountAssociation extends ProxyResource {
+    accountId?: string;
+    readonly etag?: string;
+    readonly systemData?: SystemData;
+}
+
+// @public
+export interface CommitmentPlanAccountAssociationListResult {
+    nextLink?: string;
+    readonly value?: CommitmentPlanAccountAssociation[];
+}
+
+// @public
+export interface CommitmentPlanAssociation {
+    commitmentPlanId?: string;
+    commitmentPlanLocation?: string;
 }
 
 // @public
@@ -347,28 +403,79 @@ export interface CommitmentPlanListResult {
 // @public
 export interface CommitmentPlanProperties {
     autoRenew?: boolean;
+    commitmentPlanGuid?: string;
     current?: CommitmentPeriod;
     hostingModel?: HostingModel;
     readonly last?: CommitmentPeriod;
     next?: CommitmentPeriod;
     planType?: string;
+    readonly provisioningIssues?: string[];
+    readonly provisioningState?: CommitmentPlanProvisioningState;
 }
 
 // @public
+export type CommitmentPlanProvisioningState = string;
+
+// @public
 export interface CommitmentPlans {
-    beginDelete(resourceGroupName: string, accountName: string, commitmentPlanName: string, options?: CommitmentPlansDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginCreateOrUpdateAssociation(resourceGroupName: string, commitmentPlanName: string, commitmentPlanAssociationName: string, association: CommitmentPlanAccountAssociation, options?: CommitmentPlansCreateOrUpdateAssociationOptionalParams): Promise<SimplePollerLike<OperationState<CommitmentPlansCreateOrUpdateAssociationResponse>, CommitmentPlansCreateOrUpdateAssociationResponse>>;
+    beginCreateOrUpdateAssociationAndWait(resourceGroupName: string, commitmentPlanName: string, commitmentPlanAssociationName: string, association: CommitmentPlanAccountAssociation, options?: CommitmentPlansCreateOrUpdateAssociationOptionalParams): Promise<CommitmentPlansCreateOrUpdateAssociationResponse>;
+    beginCreateOrUpdatePlan(resourceGroupName: string, commitmentPlanName: string, commitmentPlan: CommitmentPlan, options?: CommitmentPlansCreateOrUpdatePlanOptionalParams): Promise<SimplePollerLike<OperationState<CommitmentPlansCreateOrUpdatePlanResponse>, CommitmentPlansCreateOrUpdatePlanResponse>>;
+    beginCreateOrUpdatePlanAndWait(resourceGroupName: string, commitmentPlanName: string, commitmentPlan: CommitmentPlan, options?: CommitmentPlansCreateOrUpdatePlanOptionalParams): Promise<CommitmentPlansCreateOrUpdatePlanResponse>;
+    beginDelete(resourceGroupName: string, accountName: string, commitmentPlanName: string, options?: CommitmentPlansDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, accountName: string, commitmentPlanName: string, options?: CommitmentPlansDeleteOptionalParams): Promise<void>;
+    beginDeleteAssociation(resourceGroupName: string, commitmentPlanName: string, commitmentPlanAssociationName: string, options?: CommitmentPlansDeleteAssociationOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
+    beginDeleteAssociationAndWait(resourceGroupName: string, commitmentPlanName: string, commitmentPlanAssociationName: string, options?: CommitmentPlansDeleteAssociationOptionalParams): Promise<void>;
+    beginDeletePlan(resourceGroupName: string, commitmentPlanName: string, options?: CommitmentPlansDeletePlanOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
+    beginDeletePlanAndWait(resourceGroupName: string, commitmentPlanName: string, options?: CommitmentPlansDeletePlanOptionalParams): Promise<void>;
+    beginUpdatePlan(resourceGroupName: string, commitmentPlanName: string, commitmentPlan: PatchResourceTagsAndSku, options?: CommitmentPlansUpdatePlanOptionalParams): Promise<SimplePollerLike<OperationState<CommitmentPlansUpdatePlanResponse>, CommitmentPlansUpdatePlanResponse>>;
+    beginUpdatePlanAndWait(resourceGroupName: string, commitmentPlanName: string, commitmentPlan: PatchResourceTagsAndSku, options?: CommitmentPlansUpdatePlanOptionalParams): Promise<CommitmentPlansUpdatePlanResponse>;
     createOrUpdate(resourceGroupName: string, accountName: string, commitmentPlanName: string, commitmentPlan: CommitmentPlan, options?: CommitmentPlansCreateOrUpdateOptionalParams): Promise<CommitmentPlansCreateOrUpdateResponse>;
     get(resourceGroupName: string, accountName: string, commitmentPlanName: string, options?: CommitmentPlansGetOptionalParams): Promise<CommitmentPlansGetResponse>;
+    getAssociation(resourceGroupName: string, commitmentPlanName: string, commitmentPlanAssociationName: string, options?: CommitmentPlansGetAssociationOptionalParams): Promise<CommitmentPlansGetAssociationResponse>;
+    getPlan(resourceGroupName: string, commitmentPlanName: string, options?: CommitmentPlansGetPlanOptionalParams): Promise<CommitmentPlansGetPlanResponse>;
     list(resourceGroupName: string, accountName: string, options?: CommitmentPlansListOptionalParams): PagedAsyncIterableIterator<CommitmentPlan>;
+    listAssociations(resourceGroupName: string, commitmentPlanName: string, options?: CommitmentPlansListAssociationsOptionalParams): PagedAsyncIterableIterator<CommitmentPlanAccountAssociation>;
+    listPlansByResourceGroup(resourceGroupName: string, options?: CommitmentPlansListPlansByResourceGroupOptionalParams): PagedAsyncIterableIterator<CommitmentPlan>;
+    listPlansBySubscription(options?: CommitmentPlansListPlansBySubscriptionOptionalParams): PagedAsyncIterableIterator<CommitmentPlan>;
 }
+
+// @public
+export interface CommitmentPlansCreateOrUpdateAssociationOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type CommitmentPlansCreateOrUpdateAssociationResponse = CommitmentPlanAccountAssociation;
 
 // @public
 export interface CommitmentPlansCreateOrUpdateOptionalParams extends coreClient.OperationOptions {
 }
 
 // @public
+export interface CommitmentPlansCreateOrUpdatePlanOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type CommitmentPlansCreateOrUpdatePlanResponse = CommitmentPlan;
+
+// @public
 export type CommitmentPlansCreateOrUpdateResponse = CommitmentPlan;
+
+// @public
+export interface CommitmentPlansDeleteAssociationHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface CommitmentPlansDeleteAssociationOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
 
 // @public
 export interface CommitmentPlansDeleteOptionalParams extends coreClient.OperationOptions {
@@ -377,11 +484,51 @@ export interface CommitmentPlansDeleteOptionalParams extends coreClient.Operatio
 }
 
 // @public
+export interface CommitmentPlansDeletePlanHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface CommitmentPlansDeletePlanOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export interface CommitmentPlansGetAssociationOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CommitmentPlansGetAssociationResponse = CommitmentPlanAccountAssociation;
+
+// @public
 export interface CommitmentPlansGetOptionalParams extends coreClient.OperationOptions {
 }
 
 // @public
+export interface CommitmentPlansGetPlanOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CommitmentPlansGetPlanResponse = CommitmentPlan;
+
+// @public
 export type CommitmentPlansGetResponse = CommitmentPlan;
+
+// @public
+export interface CommitmentPlansListAssociationsNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CommitmentPlansListAssociationsNextResponse = CommitmentPlanAccountAssociationListResult;
+
+// @public
+export interface CommitmentPlansListAssociationsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CommitmentPlansListAssociationsResponse = CommitmentPlanAccountAssociationListResult;
 
 // @public
 export interface CommitmentPlansListNextOptionalParams extends coreClient.OperationOptions {
@@ -395,7 +542,50 @@ export interface CommitmentPlansListOptionalParams extends coreClient.OperationO
 }
 
 // @public
+export interface CommitmentPlansListPlansByResourceGroupNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CommitmentPlansListPlansByResourceGroupNextResponse = CommitmentPlanListResult;
+
+// @public
+export interface CommitmentPlansListPlansByResourceGroupOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CommitmentPlansListPlansByResourceGroupResponse = CommitmentPlanListResult;
+
+// @public
+export interface CommitmentPlansListPlansBySubscriptionNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CommitmentPlansListPlansBySubscriptionNextResponse = CommitmentPlanListResult;
+
+// @public
+export interface CommitmentPlansListPlansBySubscriptionOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CommitmentPlansListPlansBySubscriptionResponse = CommitmentPlanListResult;
+
+// @public
 export type CommitmentPlansListResponse = CommitmentPlanListResult;
+
+// @public
+export interface CommitmentPlansUpdatePlanHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface CommitmentPlansUpdatePlanOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type CommitmentPlansUpdatePlanResponse = CommitmentPlan;
 
 // @public
 export interface CommitmentQuota {
@@ -445,7 +635,7 @@ export type CreatedByType = string;
 
 // @public
 export interface DeletedAccounts {
-    beginPurge(location: string, resourceGroupName: string, accountName: string, options?: DeletedAccountsPurgeOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginPurge(location: string, resourceGroupName: string, accountName: string, options?: DeletedAccountsPurgeOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginPurgeAndWait(location: string, resourceGroupName: string, accountName: string, options?: DeletedAccountsPurgeOptionalParams): Promise<void>;
     get(location: string, resourceGroupName: string, accountName: string, options?: DeletedAccountsGetOptionalParams): Promise<DeletedAccountsGetResponse>;
     list(options?: DeletedAccountsListOptionalParams): PagedAsyncIterableIterator<Account>;
@@ -482,6 +672,7 @@ export interface DeletedAccountsPurgeOptionalParams extends coreClient.Operation
 export interface Deployment extends ProxyResource {
     readonly etag?: string;
     properties?: DeploymentProperties;
+    sku?: Sku;
     readonly systemData?: SystemData;
 }
 
@@ -496,8 +687,12 @@ export interface DeploymentModel {
     readonly callRateLimit?: CallRateLimit;
     format?: string;
     name?: string;
+    source?: string;
     version?: string;
 }
+
+// @public
+export type DeploymentModelVersionUpgradeOption = string;
 
 // @public
 export interface DeploymentProperties {
@@ -508,7 +703,9 @@ export interface DeploymentProperties {
     model?: DeploymentModel;
     readonly provisioningState?: DeploymentProvisioningState;
     raiPolicyName?: string;
+    readonly rateLimits?: ThrottlingRule[];
     scaleSettings?: DeploymentScaleSettings;
+    versionUpgradeOption?: DeploymentModelVersionUpgradeOption;
 }
 
 // @public
@@ -516,9 +713,9 @@ export type DeploymentProvisioningState = string;
 
 // @public
 export interface Deployments {
-    beginCreateOrUpdate(resourceGroupName: string, accountName: string, deploymentName: string, deployment: Deployment, options?: DeploymentsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<DeploymentsCreateOrUpdateResponse>, DeploymentsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, accountName: string, deploymentName: string, deployment: Deployment, options?: DeploymentsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<DeploymentsCreateOrUpdateResponse>, DeploymentsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, accountName: string, deploymentName: string, deployment: Deployment, options?: DeploymentsCreateOrUpdateOptionalParams): Promise<DeploymentsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, accountName: string, deploymentName: string, options?: DeploymentsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, accountName: string, deploymentName: string, options?: DeploymentsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, accountName: string, deploymentName: string, options?: DeploymentsDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, accountName: string, deploymentName: string, options?: DeploymentsGetOptionalParams): Promise<DeploymentsGetResponse>;
     list(resourceGroupName: string, accountName: string, options?: DeploymentsListOptionalParams): PagedAsyncIterableIterator<Deployment>;
@@ -642,8 +839,25 @@ export interface KeyVaultProperties {
 }
 
 // @public
+export enum KnownAbusePenaltyAction {
+    Block = "Block",
+    Throttle = "Throttle"
+}
+
+// @public
 export enum KnownActionType {
     Internal = "Internal"
+}
+
+// @public
+export enum KnownCommitmentPlanProvisioningState {
+    Accepted = "Accepted",
+    Canceled = "Canceled",
+    Creating = "Creating",
+    Deleting = "Deleting",
+    Failed = "Failed",
+    Moving = "Moving",
+    Succeeded = "Succeeded"
 }
 
 // @public
@@ -655,10 +869,19 @@ export enum KnownCreatedByType {
 }
 
 // @public
+export enum KnownDeploymentModelVersionUpgradeOption {
+    NoAutoUpgrade = "NoAutoUpgrade",
+    OnceCurrentVersionExpired = "OnceCurrentVersionExpired",
+    OnceNewDefaultVersionAvailable = "OnceNewDefaultVersionAvailable"
+}
+
+// @public
 export enum KnownDeploymentProvisioningState {
     Accepted = "Accepted",
+    Canceled = "Canceled",
     Creating = "Creating",
     Deleting = "Deleting",
+    Disabled = "Disabled",
     Failed = "Failed",
     Moving = "Moving",
     Succeeded = "Succeeded"
@@ -674,6 +897,7 @@ export enum KnownDeploymentScaleType {
 export enum KnownHostingModel {
     ConnectedContainer = "ConnectedContainer",
     DisconnectedContainer = "DisconnectedContainer",
+    ProvisionedWeb = "ProvisionedWeb",
     Web = "Web"
 }
 
@@ -681,6 +905,12 @@ export enum KnownHostingModel {
 export enum KnownKeySource {
     MicrosoftCognitiveServices = "Microsoft.CognitiveServices",
     MicrosoftKeyVault = "Microsoft.KeyVault"
+}
+
+// @public
+export enum KnownModelLifecycleStatus {
+    GenerallyAvailable = "GenerallyAvailable",
+    Preview = "Preview"
 }
 
 // @public
@@ -743,6 +973,13 @@ export enum KnownResourceSkuRestrictionsReasonCode {
 }
 
 // @public
+export enum KnownRoutingMethods {
+    Performance = "Performance",
+    Priority = "Priority",
+    Weighted = "Weighted"
+}
+
+// @public
 export enum KnownSkuTier {
     Basic = "Basic",
     Enterprise = "Enterprise",
@@ -769,9 +1006,60 @@ export interface MetricName {
 }
 
 // @public
+export interface Model {
+    kind?: string;
+    model?: AccountModel;
+    skuName?: string;
+}
+
+// @public
 export interface ModelDeprecationInfo {
     fineTune?: string;
     inference?: string;
+}
+
+// @public
+export type ModelLifecycleStatus = string;
+
+// @public
+export interface ModelListResult {
+    nextLink?: string;
+    value?: Model[];
+}
+
+// @public
+export interface Models {
+    list(location: string, options?: ModelsListOptionalParams): PagedAsyncIterableIterator<Model>;
+}
+
+// @public
+export interface ModelSku {
+    capacity?: CapacityConfig;
+    deprecationDate?: Date;
+    name?: string;
+    rateLimits?: CallRateLimit[];
+    usageName?: string;
+}
+
+// @public
+export interface ModelsListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ModelsListNextResponse = ModelListResult;
+
+// @public
+export interface ModelsListOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ModelsListResponse = ModelListResult;
+
+// @public
+export interface MultiRegionSettings {
+    // (undocumented)
+    regions?: RegionSetting[];
+    routingMethod?: RoutingMethods;
 }
 
 // @public
@@ -830,6 +1118,18 @@ export type OperationsListResponse = OperationListResult;
 export type Origin = string;
 
 // @public
+export interface PatchResourceTags {
+    tags?: {
+        [propertyName: string]: string;
+    };
+}
+
+// @public
+export interface PatchResourceTagsAndSku extends PatchResourceTags {
+    sku?: Sku;
+}
+
+// @public
 export interface PrivateEndpoint {
     readonly id?: string;
 }
@@ -859,9 +1159,9 @@ export type PrivateEndpointConnectionProvisioningState = string;
 
 // @public
 export interface PrivateEndpointConnections {
-    beginCreateOrUpdate(resourceGroupName: string, accountName: string, privateEndpointConnectionName: string, properties: PrivateEndpointConnection, options?: PrivateEndpointConnectionsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<PrivateEndpointConnectionsCreateOrUpdateResponse>, PrivateEndpointConnectionsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, accountName: string, privateEndpointConnectionName: string, properties: PrivateEndpointConnection, options?: PrivateEndpointConnectionsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<PrivateEndpointConnectionsCreateOrUpdateResponse>, PrivateEndpointConnectionsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, accountName: string, privateEndpointConnectionName: string, properties: PrivateEndpointConnection, options?: PrivateEndpointConnectionsCreateOrUpdateOptionalParams): Promise<PrivateEndpointConnectionsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, accountName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, accountName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, accountName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, accountName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsGetOptionalParams): Promise<PrivateEndpointConnectionsGetResponse>;
     list(resourceGroupName: string, accountName: string, options?: PrivateEndpointConnectionsListOptionalParams): Promise<PrivateEndpointConnectionsListResponse>;
@@ -964,6 +1264,13 @@ export interface RegenerateKeyParameters {
     keyName: KeyName;
 }
 
+// @public
+export interface RegionSetting {
+    customsubdomain?: string;
+    name?: string;
+    value?: number;
+}
+
 // @public (undocumented)
 export interface RequestMatchPattern {
     // (undocumented)
@@ -1036,6 +1343,9 @@ export interface ResourceSkusListOptionalParams extends coreClient.OperationOpti
 
 // @public
 export type ResourceSkusListResponse = ResourceSkuListResult;
+
+// @public
+export type RoutingMethods = string;
 
 // @public
 export interface Sku {
@@ -1119,8 +1429,29 @@ export interface Usage {
 
 // @public
 export interface UsageListResult {
+    nextLink?: string;
     value?: Usage[];
 }
+
+// @public
+export interface Usages {
+    list(location: string, options?: UsagesListOptionalParams): PagedAsyncIterableIterator<Usage>;
+}
+
+// @public
+export interface UsagesListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type UsagesListNextResponse = UsageListResult;
+
+// @public
+export interface UsagesListOptionalParams extends coreClient.OperationOptions {
+    filter?: string;
+}
+
+// @public
+export type UsagesListResponse = UsageListResult;
 
 // @public
 export interface UserAssignedIdentity {

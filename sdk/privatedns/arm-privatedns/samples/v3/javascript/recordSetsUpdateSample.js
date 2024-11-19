@@ -10,16 +10,17 @@
 // Licensed under the MIT License.
 const { PrivateDnsManagementClient } = require("@azure/arm-privatedns");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Updates a record set within a Private DNS zone.
  *
  * @summary Updates a record set within a Private DNS zone.
- * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2020-06-01/examples/RecordSetAPatch.json
+ * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2024-06-01/examples/RecordSetAPatch.json
  */
 async function patchPrivateDnsZoneARecordSet() {
-  const subscriptionId = "subscriptionId";
-  const resourceGroupName = "resourceGroup1";
+  const subscriptionId = process.env["PRIVATEDNS_SUBSCRIPTION_ID"] || "subscriptionId";
+  const resourceGroupName = process.env["PRIVATEDNS_RESOURCE_GROUP"] || "resourceGroup1";
   const privateZoneName = "privatezone1.com";
   const recordType = "A";
   const relativeRecordSetName = "recordA";
@@ -31,22 +32,20 @@ async function patchPrivateDnsZoneARecordSet() {
     privateZoneName,
     recordType,
     relativeRecordSetName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-patchPrivateDnsZoneARecordSet().catch(console.error);
 
 /**
  * This sample demonstrates how to Updates a record set within a Private DNS zone.
  *
  * @summary Updates a record set within a Private DNS zone.
- * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2020-06-01/examples/RecordSetAAAAPatch.json
+ * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2024-06-01/examples/RecordSetAAAAPatch.json
  */
 async function patchPrivateDnsZoneAaaaRecordSet() {
-  const subscriptionId = "subscriptionId";
-  const resourceGroupName = "resourceGroup1";
+  const subscriptionId = process.env["PRIVATEDNS_SUBSCRIPTION_ID"] || "subscriptionId";
+  const resourceGroupName = process.env["PRIVATEDNS_RESOURCE_GROUP"] || "resourceGroup1";
   const privateZoneName = "privatezone1.com";
   const recordType = "AAAA";
   const relativeRecordSetName = "recordAAAA";
@@ -58,22 +57,20 @@ async function patchPrivateDnsZoneAaaaRecordSet() {
     privateZoneName,
     recordType,
     relativeRecordSetName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-patchPrivateDnsZoneAaaaRecordSet().catch(console.error);
 
 /**
  * This sample demonstrates how to Updates a record set within a Private DNS zone.
  *
  * @summary Updates a record set within a Private DNS zone.
- * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2020-06-01/examples/RecordSetCNAMEPatch.json
+ * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2024-06-01/examples/RecordSetCNAMEPatch.json
  */
 async function patchPrivateDnsZoneCnameRecordSet() {
-  const subscriptionId = "subscriptionId";
-  const resourceGroupName = "resourceGroup1";
+  const subscriptionId = process.env["PRIVATEDNS_SUBSCRIPTION_ID"] || "subscriptionId";
+  const resourceGroupName = process.env["PRIVATEDNS_RESOURCE_GROUP"] || "resourceGroup1";
   const privateZoneName = "privatezone1.com";
   const recordType = "CNAME";
   const relativeRecordSetName = "recordCNAME";
@@ -85,22 +82,20 @@ async function patchPrivateDnsZoneCnameRecordSet() {
     privateZoneName,
     recordType,
     relativeRecordSetName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-patchPrivateDnsZoneCnameRecordSet().catch(console.error);
 
 /**
  * This sample demonstrates how to Updates a record set within a Private DNS zone.
  *
  * @summary Updates a record set within a Private DNS zone.
- * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2020-06-01/examples/RecordSetMXPatch.json
+ * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2024-06-01/examples/RecordSetMXPatch.json
  */
 async function patchPrivateDnsZoneMxRecordSet() {
-  const subscriptionId = "subscriptionId";
-  const resourceGroupName = "resourceGroup1";
+  const subscriptionId = process.env["PRIVATEDNS_SUBSCRIPTION_ID"] || "subscriptionId";
+  const resourceGroupName = process.env["PRIVATEDNS_RESOURCE_GROUP"] || "resourceGroup1";
   const privateZoneName = "privatezone1.com";
   const recordType = "MX";
   const relativeRecordSetName = "recordMX";
@@ -112,22 +107,20 @@ async function patchPrivateDnsZoneMxRecordSet() {
     privateZoneName,
     recordType,
     relativeRecordSetName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-patchPrivateDnsZoneMxRecordSet().catch(console.error);
 
 /**
  * This sample demonstrates how to Updates a record set within a Private DNS zone.
  *
  * @summary Updates a record set within a Private DNS zone.
- * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2020-06-01/examples/RecordSetPTRPatch.json
+ * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2024-06-01/examples/RecordSetPTRPatch.json
  */
 async function patchPrivateDnsZonePtrRecordSet() {
-  const subscriptionId = "subscriptionId";
-  const resourceGroupName = "resourceGroup1";
+  const subscriptionId = process.env["PRIVATEDNS_SUBSCRIPTION_ID"] || "subscriptionId";
+  const resourceGroupName = process.env["PRIVATEDNS_RESOURCE_GROUP"] || "resourceGroup1";
   const privateZoneName = "0.0.127.in-addr.arpa";
   const recordType = "PTR";
   const relativeRecordSetName = "1";
@@ -139,22 +132,20 @@ async function patchPrivateDnsZonePtrRecordSet() {
     privateZoneName,
     recordType,
     relativeRecordSetName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-patchPrivateDnsZonePtrRecordSet().catch(console.error);
 
 /**
  * This sample demonstrates how to Updates a record set within a Private DNS zone.
  *
  * @summary Updates a record set within a Private DNS zone.
- * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2020-06-01/examples/RecordSetSOAPatch.json
+ * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2024-06-01/examples/RecordSetSOAPatch.json
  */
 async function patchPrivateDnsZoneSoaRecordSet() {
-  const subscriptionId = "subscriptionId";
-  const resourceGroupName = "resourceGroup1";
+  const subscriptionId = process.env["PRIVATEDNS_SUBSCRIPTION_ID"] || "subscriptionId";
+  const resourceGroupName = process.env["PRIVATEDNS_RESOURCE_GROUP"] || "resourceGroup1";
   const privateZoneName = "privatezone1.com";
   const recordType = "SOA";
   const relativeRecordSetName = "@";
@@ -166,22 +157,20 @@ async function patchPrivateDnsZoneSoaRecordSet() {
     privateZoneName,
     recordType,
     relativeRecordSetName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-patchPrivateDnsZoneSoaRecordSet().catch(console.error);
 
 /**
  * This sample demonstrates how to Updates a record set within a Private DNS zone.
  *
  * @summary Updates a record set within a Private DNS zone.
- * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2020-06-01/examples/RecordSetSRVPatch.json
+ * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2024-06-01/examples/RecordSetSRVPatch.json
  */
 async function patchPrivateDnsZoneSrvRecordSet() {
-  const subscriptionId = "subscriptionId";
-  const resourceGroupName = "resourceGroup1";
+  const subscriptionId = process.env["PRIVATEDNS_SUBSCRIPTION_ID"] || "subscriptionId";
+  const resourceGroupName = process.env["PRIVATEDNS_RESOURCE_GROUP"] || "resourceGroup1";
   const privateZoneName = "privatezone1.com";
   const recordType = "SRV";
   const relativeRecordSetName = "recordSRV";
@@ -193,22 +182,20 @@ async function patchPrivateDnsZoneSrvRecordSet() {
     privateZoneName,
     recordType,
     relativeRecordSetName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
-
-patchPrivateDnsZoneSrvRecordSet().catch(console.error);
 
 /**
  * This sample demonstrates how to Updates a record set within a Private DNS zone.
  *
  * @summary Updates a record set within a Private DNS zone.
- * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2020-06-01/examples/RecordSetTXTPatch.json
+ * x-ms-original-file: specification/privatedns/resource-manager/Microsoft.Network/stable/2024-06-01/examples/RecordSetTXTPatch.json
  */
 async function patchPrivateDnsZoneTxtRecordSet() {
-  const subscriptionId = "subscriptionId";
-  const resourceGroupName = "resourceGroup1";
+  const subscriptionId = process.env["PRIVATEDNS_SUBSCRIPTION_ID"] || "subscriptionId";
+  const resourceGroupName = process.env["PRIVATEDNS_RESOURCE_GROUP"] || "resourceGroup1";
   const privateZoneName = "privatezone1.com";
   const recordType = "TXT";
   const relativeRecordSetName = "recordTXT";
@@ -220,9 +207,20 @@ async function patchPrivateDnsZoneTxtRecordSet() {
     privateZoneName,
     recordType,
     relativeRecordSetName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
 
-patchPrivateDnsZoneTxtRecordSet().catch(console.error);
+async function main() {
+  patchPrivateDnsZoneARecordSet();
+  patchPrivateDnsZoneAaaaRecordSet();
+  patchPrivateDnsZoneCnameRecordSet();
+  patchPrivateDnsZoneMxRecordSet();
+  patchPrivateDnsZonePtrRecordSet();
+  patchPrivateDnsZoneSoaRecordSet();
+  patchPrivateDnsZoneSrvRecordSet();
+  patchPrivateDnsZoneTxtRecordSet();
+}
+
+main().catch(console.error);

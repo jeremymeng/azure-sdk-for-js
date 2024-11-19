@@ -14,8 +14,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ArtifactsClient } from "../artifactsClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   SqlScriptResource,
   SqlScriptGetSqlScriptsByWorkspaceNextOptionalParams,
@@ -28,7 +32,7 @@ import {
   SqlScriptDeleteSqlScriptOptionalParams,
   ArtifactRenameRequest,
   SqlScriptRenameSqlScriptOptionalParams,
-  SqlScriptGetSqlScriptsByWorkspaceNextResponse
+  SqlScriptGetSqlScriptsByWorkspaceNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -49,7 +53,7 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
    * @param options The options parameters.
    */
   public listSqlScriptsByWorkspace(
-    options?: SqlScriptGetSqlScriptsByWorkspaceOptionalParams
+    options?: SqlScriptGetSqlScriptsByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<SqlScriptResource> {
     const iter = this.getSqlScriptsByWorkspacePagingAll(options);
     return {
@@ -64,13 +68,13 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.getSqlScriptsByWorkspacePagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *getSqlScriptsByWorkspacePagingPage(
     options?: SqlScriptGetSqlScriptsByWorkspaceOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<SqlScriptResource[]> {
     let result: SqlScriptGetSqlScriptsByWorkspaceResponse;
     let continuationToken = settings?.continuationToken;
@@ -84,7 +88,7 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
     while (continuationToken) {
       result = await this._getSqlScriptsByWorkspaceNext(
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -94,7 +98,7 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
   }
 
   private async *getSqlScriptsByWorkspacePagingAll(
-    options?: SqlScriptGetSqlScriptsByWorkspaceOptionalParams
+    options?: SqlScriptGetSqlScriptsByWorkspaceOptionalParams,
   ): AsyncIterableIterator<SqlScriptResource> {
     for await (const page of this.getSqlScriptsByWorkspacePagingPage(options)) {
       yield* page;
@@ -106,7 +110,7 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
    * @param options The options parameters.
    */
   private async _getSqlScriptsByWorkspace(
-    options?: SqlScriptGetSqlScriptsByWorkspaceOptionalParams
+    options?: SqlScriptGetSqlScriptsByWorkspaceOptionalParams,
   ): Promise<SqlScriptGetSqlScriptsByWorkspaceResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient._getSqlScriptsByWorkspace",
@@ -114,9 +118,9 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { options },
-          getSqlScriptsByWorkspaceOperationSpec
+          getSqlScriptsByWorkspaceOperationSpec,
         ) as Promise<SqlScriptGetSqlScriptsByWorkspaceResponse>;
-      }
+      },
     );
   }
 
@@ -129,38 +133,38 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
   async beginCreateOrUpdateSqlScript(
     sqlScriptName: string,
     sqlScript: SqlScriptResource,
-    options?: SqlScriptCreateOrUpdateSqlScriptOptionalParams
+    options?: SqlScriptCreateOrUpdateSqlScriptOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SqlScriptCreateOrUpdateSqlScriptResponse>,
+    SimplePollerLike<
+      OperationState<SqlScriptCreateOrUpdateSqlScriptResponse>,
       SqlScriptCreateOrUpdateSqlScriptResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<SqlScriptCreateOrUpdateSqlScriptResponse> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginCreateOrUpdateSqlScript",
         options ?? {},
         async () => {
-          return this.client.sendOperationRequest(args, spec) as Promise<
-            SqlScriptCreateOrUpdateSqlScriptResponse
-          >;
-        }
+          return this.client.sendOperationRequest(
+            args,
+            spec,
+          ) as Promise<SqlScriptCreateOrUpdateSqlScriptResponse>;
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -169,8 +173,8 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -178,19 +182,22 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { sqlScriptName, sqlScript, options },
-      createOrUpdateSqlScriptOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { sqlScriptName, sqlScript, options },
+      spec: createOrUpdateSqlScriptOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      SqlScriptCreateOrUpdateSqlScriptResponse,
+      OperationState<SqlScriptCreateOrUpdateSqlScriptResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -205,12 +212,12 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
   async beginCreateOrUpdateSqlScriptAndWait(
     sqlScriptName: string,
     sqlScript: SqlScriptResource,
-    options?: SqlScriptCreateOrUpdateSqlScriptOptionalParams
+    options?: SqlScriptCreateOrUpdateSqlScriptOptionalParams,
   ): Promise<SqlScriptCreateOrUpdateSqlScriptResponse> {
     const poller = await this.beginCreateOrUpdateSqlScript(
       sqlScriptName,
       sqlScript,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -222,7 +229,7 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
    */
   async getSqlScript(
     sqlScriptName: string,
-    options?: SqlScriptGetSqlScriptOptionalParams
+    options?: SqlScriptGetSqlScriptOptionalParams,
   ): Promise<SqlScriptGetSqlScriptResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient.getSqlScript",
@@ -230,9 +237,9 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { sqlScriptName, options },
-          getSqlScriptOperationSpec
+          getSqlScriptOperationSpec,
         ) as Promise<SqlScriptGetSqlScriptResponse>;
-      }
+      },
     );
   }
 
@@ -243,31 +250,30 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
    */
   async beginDeleteSqlScript(
     sqlScriptName: string,
-    options?: SqlScriptDeleteSqlScriptOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: SqlScriptDeleteSqlScriptOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginDeleteSqlScript",
         options ?? {},
         async () => {
           return this.client.sendOperationRequest(args, spec) as Promise<void>;
-        }
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -276,8 +282,8 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -285,19 +291,19 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { sqlScriptName, options },
-      deleteSqlScriptOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { sqlScriptName, options },
+      spec: deleteSqlScriptOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -310,7 +316,7 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
    */
   async beginDeleteSqlScriptAndWait(
     sqlScriptName: string,
-    options?: SqlScriptDeleteSqlScriptOptionalParams
+    options?: SqlScriptDeleteSqlScriptOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDeleteSqlScript(sqlScriptName, options);
     return poller.pollUntilDone();
@@ -325,31 +331,30 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
   async beginRenameSqlScript(
     sqlScriptName: string,
     request: ArtifactRenameRequest,
-    options?: SqlScriptRenameSqlScriptOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: SqlScriptRenameSqlScriptOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginRenameSqlScript",
         options ?? {},
         async () => {
           return this.client.sendOperationRequest(args, spec) as Promise<void>;
-        }
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -358,8 +363,8 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -367,19 +372,19 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { sqlScriptName, request, options },
-      renameSqlScriptOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { sqlScriptName, request, options },
+      spec: renameSqlScriptOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -394,12 +399,12 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
   async beginRenameSqlScriptAndWait(
     sqlScriptName: string,
     request: ArtifactRenameRequest,
-    options?: SqlScriptRenameSqlScriptOptionalParams
+    options?: SqlScriptRenameSqlScriptOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRenameSqlScript(
       sqlScriptName,
       request,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -412,7 +417,7 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
    */
   private async _getSqlScriptsByWorkspaceNext(
     nextLink: string,
-    options?: SqlScriptGetSqlScriptsByWorkspaceNextOptionalParams
+    options?: SqlScriptGetSqlScriptsByWorkspaceNextOptionalParams,
   ): Promise<SqlScriptGetSqlScriptsByWorkspaceNextResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient._getSqlScriptsByWorkspaceNext",
@@ -420,9 +425,9 @@ export class SqlScriptOperationsImpl implements SqlScriptOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { nextLink, options },
-          getSqlScriptsByWorkspaceNextOperationSpec
+          getSqlScriptsByWorkspaceNextOperationSpec,
         ) as Promise<SqlScriptGetSqlScriptsByWorkspaceNextResponse>;
-      }
+      },
     );
   }
 }
@@ -434,64 +439,64 @@ const getSqlScriptsByWorkspaceOperationSpec: coreClient.OperationSpec = {
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SqlScriptsListResponse
+      bodyMapper: Mappers.SqlScriptsListResponse,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateSqlScriptOperationSpec: coreClient.OperationSpec = {
   path: "/sqlScripts/{sqlScriptName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.SqlScriptResource
+      bodyMapper: Mappers.SqlScriptResource,
     },
     201: {
-      bodyMapper: Mappers.SqlScriptResource
+      bodyMapper: Mappers.SqlScriptResource,
     },
     202: {
-      bodyMapper: Mappers.SqlScriptResource
+      bodyMapper: Mappers.SqlScriptResource,
     },
     204: {
-      bodyMapper: Mappers.SqlScriptResource
+      bodyMapper: Mappers.SqlScriptResource,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.sqlScript,
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.sqlScriptName],
   headerParameters: [
     Parameters.accept,
     Parameters.contentType,
-    Parameters.ifMatch
+    Parameters.ifMatch,
   ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getSqlScriptOperationSpec: coreClient.OperationSpec = {
   path: "/sqlScripts/{sqlScriptName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SqlScriptResource
+      bodyMapper: Mappers.SqlScriptResource,
     },
     304: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.sqlScriptName],
   headerParameters: [Parameters.accept, Parameters.ifNoneMatch],
-  serializer
+  serializer,
 };
 const deleteSqlScriptOperationSpec: coreClient.OperationSpec = {
   path: "/sqlScripts/{sqlScriptName}",
@@ -502,13 +507,13 @@ const deleteSqlScriptOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.sqlScriptName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const renameSqlScriptOperationSpec: coreClient.OperationSpec = {
   path: "/sqlScripts/{sqlScriptName}/rename",
@@ -519,28 +524,28 @@ const renameSqlScriptOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.request,
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.sqlScriptName],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getSqlScriptsByWorkspaceNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SqlScriptsListResponse
+      bodyMapper: Mappers.SqlScriptsListResponse,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

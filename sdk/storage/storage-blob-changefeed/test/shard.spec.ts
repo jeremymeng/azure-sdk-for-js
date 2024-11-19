@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { assert } from "chai";
 import * as sinon from "sinon";
 import { ShardFactory } from "../src/ShardFactory";
 import { ContainerClient } from "@azure/storage-blob";
 import { ChunkFactory } from "../src/ChunkFactory";
-import { ShardCursor } from "../src/models/ChangeFeedCursor";
+import type { ShardCursor } from "../src/models/ChangeFeedCursor";
 import { Chunk } from "../src/Chunk";
-import { BlobChangeFeedEvent } from "../src";
+import type { BlobChangeFeedEvent } from "../src";
 
 describe("Shard", async () => {
   let chunkFactoryStub: any;
@@ -48,13 +48,13 @@ describe("Shard", async () => {
     const shard = await shardFactory.create(
       containerClientSub as any,
       shardPathWithoutContainer,
-      shardCursor
+      shardCursor,
     );
     assert.ok(
       chunkFactoryStub.create.calledWith(
         containerClientSub,
-        `${shardPathWithoutContainer}0000${chunkIndex}.avro`
-      )
+        `${shardPathWithoutContainer}0000${chunkIndex}.avro`,
+      ),
     );
 
     // shift to next chunk when currentChunk is done
@@ -70,8 +70,8 @@ describe("Shard", async () => {
     assert.ok(
       chunkFactoryStub.create.calledWith(
         containerClientSub,
-        `${shardPathWithoutContainer}0000${chunkIndex + 1}.avro`
-      )
+        `${shardPathWithoutContainer}0000${chunkIndex + 1}.avro`,
+      ),
     );
     assert.deepStrictEqual(change, event as BlobChangeFeedEvent);
     const cursor2 = shard.getCursor();
@@ -89,8 +89,8 @@ describe("Shard", async () => {
     assert.ok(
       chunkFactoryStub.create.calledWith(
         containerClientSub,
-        `${shardPathWithoutContainer}0000${chunkIndex + 2}.avro`
-      )
+        `${shardPathWithoutContainer}0000${chunkIndex + 2}.avro`,
+      ),
     );
     assert.equal(change2, undefined);
     const cursor3 = shard.getCursor();

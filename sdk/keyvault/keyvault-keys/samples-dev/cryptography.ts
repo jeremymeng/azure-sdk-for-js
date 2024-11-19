@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary Uses an Azure Key Vault key to sign/verify, encrypt/decrypt, and wrap/unwrap data.
  */
 
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 
 import { CryptographyClient, KeyClient } from "@azure/keyvault-keys";
 import { DefaultAzureCredential } from "@azure/identity";
@@ -32,7 +32,7 @@ export async function main(): Promise<void> {
 
   const cryptoClient = new CryptographyClient(
     myWorkKey.id!, // You can use either the key or the key Id i.e. its url to create a CryptographyClient.
-    credential
+    credential,
   );
 
   // Sign and Verify

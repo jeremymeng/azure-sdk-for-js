@@ -1,19 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { Recorder, assertEnvironmentVariable } from "@azure-tools/test-recorder";
-import {
-  KnownSchemaFormats,
-  Schema,
-  SchemaDescription,
-  SchemaProperties,
-  SchemaRegistryClient,
-} from "../../src";
-import { assert, matrix } from "@azure/test-utils";
-import { createRecordedClient, Format, recorderOptions } from "./utils/recordedClient";
+import type { Schema, SchemaDescription, SchemaProperties } from "../../src";
+import { KnownSchemaFormats, SchemaRegistryClient } from "../../src";
+import { assert, matrix } from "@azure-tools/test-utils";
+import type { Format } from "./utils/recordedClient";
+import { createRecordedClient, recorderOptions } from "./utils/recordedClient";
 import { ClientSecretCredential } from "@azure/identity";
-import { Context } from "mocha";
-import { HttpHeaders } from "@azure/core-rest-pipeline";
+import type { Context } from "mocha";
+import type { HttpHeaders } from "@azure/core-rest-pipeline";
 
 const options = {
   onResponse: (rawResponse: { status: number; bodyAsText?: string | null }) => {
@@ -34,7 +30,7 @@ const errorOptions = {
 
 function assertIsValidSchemaProperties(
   schemaProperties: SchemaProperties,
-  expectedSerializationType: Format
+  expectedSerializationType: Format,
 ): asserts schemaProperties {
   assert.isNotEmpty(schemaProperties.id);
   assert.equal(schemaProperties.format, expectedSerializationType);
@@ -54,7 +50,7 @@ async function isRejected<T>(
     messagePattern?: RegExp;
     statusCode?: number;
     errorCode?: string;
-  }
+  },
 ): Promise<void> {
   try {
     await promise;
@@ -215,7 +211,7 @@ describe("SchemaRegistryClient", function () {
               statusCode: 415,
               messagePattern: /not-valid/,
               errorCode: "InvalidSchemaType",
-            }
+            },
           );
         });
 
@@ -231,7 +227,7 @@ describe("SchemaRegistryClient", function () {
               statusCode: 415,
               messagePattern: /not-valid/,
               errorCode: "InvalidSchemaType",
-            }
+            },
           );
         });
 
@@ -242,7 +238,7 @@ describe("SchemaRegistryClient", function () {
               statusCode: 404,
               messagePattern: /does not exist/,
               errorCode: "ItemNotFound",
-            }
+            },
           );
         });
 
@@ -287,7 +283,7 @@ describe("SchemaRegistryClient", function () {
               onResponse: (rawResponse: { status: number }) => {
                 assert.equal(rawResponse.status, 200);
               },
-            }
+            },
           );
           assertIsValidSchema(found, format);
           assert.equal(found.definition, schema.definition);
@@ -334,6 +330,6 @@ describe("SchemaRegistryClient", function () {
           assertIsValidSchemaProperties(schemaProperties, format);
         });
       });
-    }
+    },
   );
 });

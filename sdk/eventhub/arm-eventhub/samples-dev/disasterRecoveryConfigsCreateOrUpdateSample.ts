@@ -10,23 +10,28 @@
 // Licensed under the MIT License.
 import {
   ArmDisasterRecovery,
-  EventHubManagementClient
+  EventHubManagementClient,
 } from "@azure/arm-eventhub";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Creates or updates a new Alias(Disaster Recovery configuration)
  *
  * @summary Creates or updates a new Alias(Disaster Recovery configuration)
- * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2021-11-01/examples/disasterRecoveryConfigs/EHAliasCreate.json
+ * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2024-01-01/examples/disasterRecoveryConfigs/EHAliasCreate.json
  */
 async function ehAliasCreate() {
-  const subscriptionId = "exampleSubscriptionId";
-  const resourceGroupName = "exampleResourceGroup";
+  const subscriptionId =
+    process.env["EVENTHUB_SUBSCRIPTION_ID"] || "exampleSubscriptionId";
+  const resourceGroupName =
+    process.env["EVENTHUB_RESOURCE_GROUP"] || "exampleResourceGroup";
   const namespaceName = "sdk-Namespace-8859";
   const alias = "sdk-DisasterRecovery-3814";
   const parameters: ArmDisasterRecovery = {
-    partnerNamespace: "sdk-Namespace-37"
+    partnerNamespace: "sdk-Namespace-37",
   };
   const credential = new DefaultAzureCredential();
   const client = new EventHubManagementClient(credential, subscriptionId);
@@ -34,9 +39,13 @@ async function ehAliasCreate() {
     resourceGroupName,
     namespaceName,
     alias,
-    parameters
+    parameters,
   );
   console.log(result);
 }
 
-ehAliasCreate().catch(console.error);
+async function main() {
+  ehAliasCreate();
+}
+
+main().catch(console.error);

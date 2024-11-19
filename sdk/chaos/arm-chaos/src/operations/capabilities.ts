@@ -6,7 +6,8 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { Capabilities } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -22,7 +23,7 @@ import {
   CapabilitiesDeleteOptionalParams,
   CapabilitiesCreateOrUpdateOptionalParams,
   CapabilitiesCreateOrUpdateResponse,
-  CapabilitiesListNextResponse
+  CapabilitiesListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -53,7 +54,7 @@ export class CapabilitiesImpl implements Capabilities {
     parentResourceType: string,
     parentResourceName: string,
     targetName: string,
-    options?: CapabilitiesListOptionalParams
+    options?: CapabilitiesListOptionalParams,
   ): PagedAsyncIterableIterator<Capability> {
     const iter = this.listPagingAll(
       resourceGroupName,
@@ -61,7 +62,7 @@ export class CapabilitiesImpl implements Capabilities {
       parentResourceType,
       parentResourceName,
       targetName,
-      options
+      options,
     );
     return {
       next() {
@@ -70,16 +71,20 @@ export class CapabilitiesImpl implements Capabilities {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listPagingPage(
           resourceGroupName,
           parentProviderNamespace,
           parentResourceType,
           parentResourceName,
           targetName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -89,18 +94,25 @@ export class CapabilitiesImpl implements Capabilities {
     parentResourceType: string,
     parentResourceName: string,
     targetName: string,
-    options?: CapabilitiesListOptionalParams
+    options?: CapabilitiesListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<Capability[]> {
-    let result = await this._list(
-      resourceGroupName,
-      parentProviderNamespace,
-      parentResourceType,
-      parentResourceName,
-      targetName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: CapabilitiesListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(
+        resourceGroupName,
+        parentProviderNamespace,
+        parentResourceType,
+        parentResourceName,
+        targetName,
+        options,
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(
         resourceGroupName,
@@ -109,10 +121,12 @@ export class CapabilitiesImpl implements Capabilities {
         parentResourceName,
         targetName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -122,7 +136,7 @@ export class CapabilitiesImpl implements Capabilities {
     parentResourceType: string,
     parentResourceName: string,
     targetName: string,
-    options?: CapabilitiesListOptionalParams
+    options?: CapabilitiesListOptionalParams,
   ): AsyncIterableIterator<Capability> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
@@ -130,7 +144,7 @@ export class CapabilitiesImpl implements Capabilities {
       parentResourceType,
       parentResourceName,
       targetName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -151,7 +165,7 @@ export class CapabilitiesImpl implements Capabilities {
     parentResourceType: string,
     parentResourceName: string,
     targetName: string,
-    options?: CapabilitiesListOptionalParams
+    options?: CapabilitiesListOptionalParams,
   ): Promise<CapabilitiesListResponse> {
     return this.client.sendOperationRequest(
       {
@@ -160,9 +174,9 @@ export class CapabilitiesImpl implements Capabilities {
         parentResourceType,
         parentResourceName,
         targetName,
-        options
+        options,
       },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -183,7 +197,7 @@ export class CapabilitiesImpl implements Capabilities {
     parentResourceName: string,
     targetName: string,
     capabilityName: string,
-    options?: CapabilitiesGetOptionalParams
+    options?: CapabilitiesGetOptionalParams,
   ): Promise<CapabilitiesGetResponse> {
     return this.client.sendOperationRequest(
       {
@@ -193,9 +207,9 @@ export class CapabilitiesImpl implements Capabilities {
         parentResourceName,
         targetName,
         capabilityName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -216,7 +230,7 @@ export class CapabilitiesImpl implements Capabilities {
     parentResourceName: string,
     targetName: string,
     capabilityName: string,
-    options?: CapabilitiesDeleteOptionalParams
+    options?: CapabilitiesDeleteOptionalParams,
   ): Promise<void> {
     return this.client.sendOperationRequest(
       {
@@ -226,9 +240,9 @@ export class CapabilitiesImpl implements Capabilities {
         parentResourceName,
         targetName,
         capabilityName,
-        options
+        options,
       },
-      deleteOperationSpec
+      deleteOperationSpec,
     );
   }
 
@@ -251,7 +265,7 @@ export class CapabilitiesImpl implements Capabilities {
     targetName: string,
     capabilityName: string,
     capability: Capability,
-    options?: CapabilitiesCreateOrUpdateOptionalParams
+    options?: CapabilitiesCreateOrUpdateOptionalParams,
   ): Promise<CapabilitiesCreateOrUpdateResponse> {
     return this.client.sendOperationRequest(
       {
@@ -262,9 +276,9 @@ export class CapabilitiesImpl implements Capabilities {
         targetName,
         capabilityName,
         capability,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
+      createOrUpdateOperationSpec,
     );
   }
 
@@ -285,7 +299,7 @@ export class CapabilitiesImpl implements Capabilities {
     parentResourceName: string,
     targetName: string,
     nextLink: string,
-    options?: CapabilitiesListNextOptionalParams
+    options?: CapabilitiesListNextOptionalParams,
   ): Promise<CapabilitiesListNextResponse> {
     return this.client.sendOperationRequest(
       {
@@ -295,9 +309,9 @@ export class CapabilitiesImpl implements Capabilities {
         parentResourceName,
         targetName,
         nextLink,
-        options
+        options,
       },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -305,16 +319,15 @@ export class CapabilitiesImpl implements Capabilities {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{parentProviderNamespace}/{parentResourceType}/{parentResourceName}/providers/Microsoft.Chaos/targets/{targetName}/capabilities",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{parentProviderNamespace}/{parentResourceType}/{parentResourceName}/providers/Microsoft.Chaos/targets/{targetName}/capabilities",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CapabilityListResult
+      bodyMapper: Mappers.CapabilityListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.continuationToken],
   urlParameters: [
@@ -324,22 +337,21 @@ const listOperationSpec: coreClient.OperationSpec = {
     Parameters.parentProviderNamespace,
     Parameters.parentResourceType,
     Parameters.parentResourceName,
-    Parameters.targetName
+    Parameters.targetName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{parentProviderNamespace}/{parentResourceType}/{parentResourceName}/providers/Microsoft.Chaos/targets/{targetName}/capabilities/{capabilityName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{parentProviderNamespace}/{parentResourceType}/{parentResourceName}/providers/Microsoft.Chaos/targets/{targetName}/capabilities/{capabilityName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.Capability
+      bodyMapper: Mappers.Capability,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -350,21 +362,20 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.parentResourceType,
     Parameters.parentResourceName,
     Parameters.targetName,
-    Parameters.capabilityName
+    Parameters.capabilityName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{parentProviderNamespace}/{parentResourceType}/{parentResourceName}/providers/Microsoft.Chaos/targets/{targetName}/capabilities/{capabilityName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{parentProviderNamespace}/{parentResourceType}/{parentResourceName}/providers/Microsoft.Chaos/targets/{targetName}/capabilities/{capabilityName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -375,22 +386,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.parentResourceType,
     Parameters.parentResourceName,
     Parameters.targetName,
-    Parameters.capabilityName
+    Parameters.capabilityName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{parentProviderNamespace}/{parentResourceType}/{parentResourceName}/providers/Microsoft.Chaos/targets/{targetName}/capabilities/{capabilityName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{parentProviderNamespace}/{parentResourceType}/{parentResourceName}/providers/Microsoft.Chaos/targets/{targetName}/capabilities/{capabilityName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Capability
+      bodyMapper: Mappers.Capability,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.capability,
   queryParameters: [Parameters.apiVersion],
@@ -402,24 +412,23 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.parentResourceType,
     Parameters.parentResourceName,
     Parameters.targetName,
-    Parameters.capabilityName
+    Parameters.capabilityName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CapabilityListResult
+      bodyMapper: Mappers.CapabilityListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion, Parameters.continuationToken],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -428,8 +437,8 @@ const listNextOperationSpec: coreClient.OperationSpec = {
     Parameters.parentResourceType,
     Parameters.parentResourceName,
     Parameters.targetName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

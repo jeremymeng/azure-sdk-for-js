@@ -1,20 +1,21 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { ConfidentialLedgerClient, isUnexpected } from "../../src";
+// Licensed under the MIT License.
+import type { ConfidentialLedgerClient } from "../../src";
+import { isUnexpected } from "../../src";
 import { createClient, createRecorder } from "./utils/recordedClient";
 
-import { Context } from "mocha";
-import { Recorder } from "@azure-tools/test-recorder";
+import type { Context } from "mocha";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isLiveMode } from "@azure-tools/test-recorder";
 import { assert } from "chai";
-import { env } from "process";
 
-describe("Get ledger history", () => {
+describe("Get ledger history", function () {
   let recorder: Recorder;
   let client: ConfidentialLedgerClient;
 
   beforeEach(async function (this: Context) {
-    recorder = createRecorder(this);
-    client = await createClient();
+    recorder = await createRecorder(this);
+    client = await createClient(recorder);
   });
 
   afterEach(async function () {
@@ -43,7 +44,3 @@ describe("Get ledger history", () => {
     assert.typeOf(currentTransactionsResult.body.transactionId, "string");
   });
 });
-
-export function isLiveMode(): boolean {
-  return env.TEST_MODE?.toLowerCase() === "live";
-}

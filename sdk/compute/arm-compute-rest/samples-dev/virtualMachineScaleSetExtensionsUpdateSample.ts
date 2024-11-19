@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -48,7 +48,7 @@ async function virtualMachineScaleSetExtensionsUpdateMaximumSetGen() {
       subscriptionId,
       resourceGroupName,
       vmScaleSetName,
-      vmssExtensionName
+      vmssExtensionName,
     )
     .patch(options);
   const poller = getLongRunningPoller(client, initialResponse);
@@ -80,7 +80,7 @@ async function virtualMachineScaleSetExtensionsUpdateMinimumSetGen() {
       subscriptionId,
       resourceGroupName,
       vmScaleSetName,
-      vmssExtensionName
+      vmssExtensionName,
     )
     .patch(options);
   const poller = getLongRunningPoller(client, initialResponse);

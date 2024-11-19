@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   AzureMonitorPrivateLinkScope,
   PrivateLinkScopesListOptionalParams,
@@ -19,7 +19,7 @@ import {
   PrivateLinkScopesCreateOrUpdateResponse,
   TagsResource,
   PrivateLinkScopesUpdateTagsOptionalParams,
-  PrivateLinkScopesUpdateTagsResponse
+  PrivateLinkScopesUpdateTagsResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface PrivateLinkScopes {
    * @param options The options parameters.
    */
   list(
-    options?: PrivateLinkScopesListOptionalParams
+    options?: PrivateLinkScopesListOptionalParams,
   ): PagedAsyncIterableIterator<AzureMonitorPrivateLinkScope>;
   /**
    * Gets a list of Azure Monitor PrivateLinkScopes within a resource group.
@@ -39,7 +39,7 @@ export interface PrivateLinkScopes {
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: PrivateLinkScopesListByResourceGroupOptionalParams
+    options?: PrivateLinkScopesListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<AzureMonitorPrivateLinkScope>;
   /**
    * Deletes a Azure Monitor PrivateLinkScope.
@@ -50,8 +50,8 @@ export interface PrivateLinkScopes {
   beginDelete(
     resourceGroupName: string,
     scopeName: string,
-    options?: PrivateLinkScopesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: PrivateLinkScopesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a Azure Monitor PrivateLinkScope.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -61,7 +61,7 @@ export interface PrivateLinkScopes {
   beginDeleteAndWait(
     resourceGroupName: string,
     scopeName: string,
-    options?: PrivateLinkScopesDeleteOptionalParams
+    options?: PrivateLinkScopesDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Returns a Azure Monitor PrivateLinkScope.
@@ -72,7 +72,7 @@ export interface PrivateLinkScopes {
   get(
     resourceGroupName: string,
     scopeName: string,
-    options?: PrivateLinkScopesGetOptionalParams
+    options?: PrivateLinkScopesGetOptionalParams,
   ): Promise<PrivateLinkScopesGetResponse>;
   /**
    * Creates (or updates) a Azure Monitor PrivateLinkScope. Note: You cannot specify a different value
@@ -87,7 +87,7 @@ export interface PrivateLinkScopes {
     resourceGroupName: string,
     scopeName: string,
     azureMonitorPrivateLinkScopePayload: AzureMonitorPrivateLinkScope,
-    options?: PrivateLinkScopesCreateOrUpdateOptionalParams
+    options?: PrivateLinkScopesCreateOrUpdateOptionalParams,
   ): Promise<PrivateLinkScopesCreateOrUpdateResponse>;
   /**
    * Updates an existing PrivateLinkScope's tags. To update other fields use the CreateOrUpdate method.
@@ -100,6 +100,6 @@ export interface PrivateLinkScopes {
     resourceGroupName: string,
     scopeName: string,
     privateLinkScopeTags: TagsResource,
-    options?: PrivateLinkScopesUpdateTagsOptionalParams
+    options?: PrivateLinkScopesUpdateTagsOptionalParams,
   ): Promise<PrivateLinkScopesUpdateTagsResponse>;
 }

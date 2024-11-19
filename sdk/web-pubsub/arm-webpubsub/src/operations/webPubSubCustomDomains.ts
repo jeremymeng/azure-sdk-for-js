@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { WebPubSubManagementClient } from "../webPubSubManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   CustomDomain,
   WebPubSubCustomDomainsListNextOptionalParams,
@@ -25,7 +29,7 @@ import {
   WebPubSubCustomDomainsCreateOrUpdateOptionalParams,
   WebPubSubCustomDomainsCreateOrUpdateResponse,
   WebPubSubCustomDomainsDeleteOptionalParams,
-  WebPubSubCustomDomainsListNextResponse
+  WebPubSubCustomDomainsListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -43,15 +47,14 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
 
   /**
    * List all custom domains.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param options The options parameters.
    */
   public list(
     resourceGroupName: string,
     resourceName: string,
-    options?: WebPubSubCustomDomainsListOptionalParams
+    options?: WebPubSubCustomDomainsListOptionalParams,
   ): PagedAsyncIterableIterator<CustomDomain> {
     const iter = this.listPagingAll(resourceGroupName, resourceName, options);
     return {
@@ -69,9 +72,9 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
           resourceGroupName,
           resourceName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -79,7 +82,7 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
     resourceGroupName: string,
     resourceName: string,
     options?: WebPubSubCustomDomainsListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<CustomDomain[]> {
     let result: WebPubSubCustomDomainsListResponse;
     let continuationToken = settings?.continuationToken;
@@ -95,7 +98,7 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
         resourceGroupName,
         resourceName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -107,12 +110,12 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
   private async *listPagingAll(
     resourceGroupName: string,
     resourceName: string,
-    options?: WebPubSubCustomDomainsListOptionalParams
+    options?: WebPubSubCustomDomainsListOptionalParams,
   ): AsyncIterableIterator<CustomDomain> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       resourceName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -120,26 +123,24 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
 
   /**
    * List all custom domains.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param options The options parameters.
    */
   private _list(
     resourceGroupName: string,
     resourceName: string,
-    options?: WebPubSubCustomDomainsListOptionalParams
+    options?: WebPubSubCustomDomainsListOptionalParams,
   ): Promise<WebPubSubCustomDomainsListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, resourceName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
   /**
    * Get a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param options The options parameters.
@@ -148,18 +149,17 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
     resourceGroupName: string,
     resourceName: string,
     name: string,
-    options?: WebPubSubCustomDomainsGetOptionalParams
+    options?: WebPubSubCustomDomainsGetOptionalParams,
   ): Promise<WebPubSubCustomDomainsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, resourceName, name, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
    * Create or update a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param parameters A custom domain
@@ -170,30 +170,29 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
     resourceName: string,
     name: string,
     parameters: CustomDomain,
-    options?: WebPubSubCustomDomainsCreateOrUpdateOptionalParams
+    options?: WebPubSubCustomDomainsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<WebPubSubCustomDomainsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<WebPubSubCustomDomainsCreateOrUpdateResponse>,
       WebPubSubCustomDomainsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<WebPubSubCustomDomainsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -202,8 +201,8 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -211,19 +210,23 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, name, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, name, parameters, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      WebPubSubCustomDomainsCreateOrUpdateResponse,
+      OperationState<WebPubSubCustomDomainsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -231,8 +234,7 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
 
   /**
    * Create or update a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param parameters A custom domain
@@ -243,22 +245,21 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
     resourceName: string,
     name: string,
     parameters: CustomDomain,
-    options?: WebPubSubCustomDomainsCreateOrUpdateOptionalParams
+    options?: WebPubSubCustomDomainsCreateOrUpdateOptionalParams,
   ): Promise<WebPubSubCustomDomainsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       resourceName,
       name,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Delete a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param options The options parameters.
@@ -267,25 +268,24 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
     resourceGroupName: string,
     resourceName: string,
     name: string,
-    options?: WebPubSubCustomDomainsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: WebPubSubCustomDomainsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -294,8 +294,8 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -303,20 +303,20 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, name, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, name, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -324,8 +324,7 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
 
   /**
    * Delete a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param options The options parameters.
@@ -334,21 +333,20 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
     resourceGroupName: string,
     resourceName: string,
     name: string,
-    options?: WebPubSubCustomDomainsDeleteOptionalParams
+    options?: WebPubSubCustomDomainsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       resourceName,
       name,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * ListNext
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param nextLink The nextLink from the previous successful call to the List method.
    * @param options The options parameters.
@@ -357,11 +355,11 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
     resourceGroupName: string,
     resourceName: string,
     nextLink: string,
-    options?: WebPubSubCustomDomainsListNextOptionalParams
+    options?: WebPubSubCustomDomainsListNextOptionalParams,
   ): Promise<WebPubSubCustomDomainsListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, resourceName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -369,38 +367,15 @@ export class WebPubSubCustomDomainsImpl implements WebPubSubCustomDomains {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/webPubSub/{resourceName}/customDomains",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/webPubSub/{resourceName}/customDomains",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CustomDomainList
+      bodyMapper: Mappers.CustomDomainList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.resourceName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/webPubSub/{resourceName}/customDomains/{name}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.CustomDomain
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -408,31 +383,51 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.resourceName,
-    Parameters.name
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/webPubSub/{resourceName}/customDomains/{name}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.CustomDomain,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.resourceName,
+    Parameters.name,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/webPubSub/{resourceName}/customDomains/{name}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/webPubSub/{resourceName}/customDomains/{name}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.CustomDomain
+      bodyMapper: Mappers.CustomDomain,
     },
     201: {
-      bodyMapper: Mappers.CustomDomain
+      bodyMapper: Mappers.CustomDomain,
     },
     202: {
-      bodyMapper: Mappers.CustomDomain
+      bodyMapper: Mappers.CustomDomain,
     },
     204: {
-      bodyMapper: Mappers.CustomDomain
+      bodyMapper: Mappers.CustomDomain,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters4,
   queryParameters: [Parameters.apiVersion],
@@ -441,15 +436,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.resourceName,
-    Parameters.name
+    Parameters.name,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/webPubSub/{resourceName}/customDomains/{name}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/webPubSub/{resourceName}/customDomains/{name}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -457,8 +451,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -466,30 +460,29 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.resourceName,
-    Parameters.name
+    Parameters.name,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CustomDomainList
+      bodyMapper: Mappers.CustomDomainList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.resourceName
+    Parameters.resourceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

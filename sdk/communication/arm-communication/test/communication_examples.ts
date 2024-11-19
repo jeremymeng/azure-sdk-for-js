@@ -17,16 +17,23 @@ import { createTestCredential } from "@azure-tools/test-credential";
 import { assert } from "chai";
 import { Context } from "mocha";
 import { CommunicationServiceManagementClient } from "../src/communicationServiceManagementClient";
+import { hostname } from "os";
 
 const replaceableVariables: Record<string, string> = {
   AZURE_CLIENT_ID: "azure_client_id",
   AZURE_CLIENT_SECRET: "azure_client_secret",
   AZURE_TENANT_ID: "88888888-8888-8888-8888-888888888888",
-  SUBSCRIPTION_ID: "azure_subscription_id"
+  SUBSCRIPTION_ID: "88888888-8888-8888-8888-888888888888",
+  COMMUNICATION_AZURE_AUTHORITY_HOST: "COMMUNICATION_AZURE_AUTHORITY_HOST",
+  COMMUNICATION_RESOURCE_MANAGER_URL: "COMMUNICATION_RESOURCE_MANAGER_URL"
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -53,34 +60,34 @@ describe("CommunicationService test", () => {
     communicationServiceName = "mycommunicationServicexxx";
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await recorder.stop();
   });
 
-  it("communicationService create test", async function() {
-    const res = await client.communicationServices.beginCreateOrUpdateAndWait(resourceGroup,communicationServiceName,{location: location,dataLocation: "UnitedStates"});
-    assert.notEqual(res.id,undefined);
+  it("communicationService create test", async function () {
+    const res = await client.communicationServices.beginCreateOrUpdateAndWait(resourceGroup, communicationServiceName, { location: location, dataLocation: "UnitedStates" }, testPollingOptions);
+    assert.notEqual(res.id, undefined);
   });
 
-  it("communicationService get test", async function() {
-    const res = await client.communicationServices.get(resourceGroup,communicationServiceName);
-    assert.equal(res.name,communicationServiceName);
+  it("communicationService get test", async function () {
+    const res = await client.communicationServices.get(resourceGroup, communicationServiceName);
+    assert.equal(res.name, communicationServiceName);
   });
 
-  it("communicationService list test", async function() {
+  it("communicationService list test", async function () {
     const resArray = new Array();
-    for await (let item of client.communicationServices.listByResourceGroup(resourceGroup)){
-        resArray.push(item);
+    for await (let item of client.communicationServices.listByResourceGroup(resourceGroup)) {
+      resArray.push(item);
     }
-    assert.equal(resArray.length,1);
+    assert.equal(resArray.length, 1);
   });
 
-  it("communicationService delete test", async function() {
-    const res = await client.communicationServices.beginDeleteAndWait(resourceGroup,communicationServiceName,testPollingOptions);
+  it("communicationService delete test", async function () {
+    const res = await client.communicationServices.beginDeleteAndWait(resourceGroup, communicationServiceName, testPollingOptions);
     const resArray = new Array();
-    for await (let item of client.communicationServices.listByResourceGroup(resourceGroup)){
-        resArray.push(item);
+    for await (let item of client.communicationServices.listByResourceGroup(resourceGroup)) {
+      resArray.push(item);
     }
-    assert.equal(resArray.length,0);
+    assert.equal(resArray.length, 0);
   });
 });

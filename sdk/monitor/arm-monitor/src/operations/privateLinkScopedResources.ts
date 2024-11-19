@@ -6,31 +6,37 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { PrivateLinkScopedResources } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { MonitorClient } from "../monitorClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ScopedResource,
   PrivateLinkScopedResourcesListByPrivateLinkScopeNextOptionalParams,
   PrivateLinkScopedResourcesListByPrivateLinkScopeOptionalParams,
+  PrivateLinkScopedResourcesListByPrivateLinkScopeResponse,
   PrivateLinkScopedResourcesGetOptionalParams,
   PrivateLinkScopedResourcesGetResponse,
   PrivateLinkScopedResourcesCreateOrUpdateOptionalParams,
   PrivateLinkScopedResourcesCreateOrUpdateResponse,
   PrivateLinkScopedResourcesDeleteOptionalParams,
-  PrivateLinkScopedResourcesListByPrivateLinkScopeResponse,
-  PrivateLinkScopedResourcesListByPrivateLinkScopeNextResponse
+  PrivateLinkScopedResourcesListByPrivateLinkScopeNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing PrivateLinkScopedResources operations. */
 export class PrivateLinkScopedResourcesImpl
-  implements PrivateLinkScopedResources {
+  implements PrivateLinkScopedResources
+{
   private readonly client: MonitorClient;
 
   /**
@@ -50,12 +56,12 @@ export class PrivateLinkScopedResourcesImpl
   public listByPrivateLinkScope(
     resourceGroupName: string,
     scopeName: string,
-    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeOptionalParams
+    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeOptionalParams,
   ): PagedAsyncIterableIterator<ScopedResource> {
     const iter = this.listByPrivateLinkScopePagingAll(
       resourceGroupName,
       scopeName,
-      options
+      options,
     );
     return {
       next() {
@@ -64,49 +70,62 @@ export class PrivateLinkScopedResourcesImpl
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listByPrivateLinkScopePagingPage(
           resourceGroupName,
           scopeName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listByPrivateLinkScopePagingPage(
     resourceGroupName: string,
     scopeName: string,
-    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeOptionalParams
+    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<ScopedResource[]> {
-    let result = await this._listByPrivateLinkScope(
-      resourceGroupName,
-      scopeName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: PrivateLinkScopedResourcesListByPrivateLinkScopeResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByPrivateLinkScope(
+        resourceGroupName,
+        scopeName,
+        options,
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByPrivateLinkScopeNext(
         resourceGroupName,
         scopeName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listByPrivateLinkScopePagingAll(
     resourceGroupName: string,
     scopeName: string,
-    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeOptionalParams
+    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeOptionalParams,
   ): AsyncIterableIterator<ScopedResource> {
     for await (const page of this.listByPrivateLinkScopePagingPage(
       resourceGroupName,
       scopeName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -123,11 +142,11 @@ export class PrivateLinkScopedResourcesImpl
     resourceGroupName: string,
     scopeName: string,
     name: string,
-    options?: PrivateLinkScopedResourcesGetOptionalParams
+    options?: PrivateLinkScopedResourcesGetOptionalParams,
   ): Promise<PrivateLinkScopedResourcesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, scopeName, name, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -144,30 +163,29 @@ export class PrivateLinkScopedResourcesImpl
     scopeName: string,
     name: string,
     parameters: ScopedResource,
-    options?: PrivateLinkScopedResourcesCreateOrUpdateOptionalParams
+    options?: PrivateLinkScopedResourcesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<PrivateLinkScopedResourcesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<PrivateLinkScopedResourcesCreateOrUpdateResponse>,
       PrivateLinkScopedResourcesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<PrivateLinkScopedResourcesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -176,8 +194,8 @@ export class PrivateLinkScopedResourcesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -185,19 +203,22 @@ export class PrivateLinkScopedResourcesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, scopeName, name, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, scopeName, name, parameters, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PrivateLinkScopedResourcesCreateOrUpdateResponse,
+      OperationState<PrivateLinkScopedResourcesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -216,14 +237,14 @@ export class PrivateLinkScopedResourcesImpl
     scopeName: string,
     name: string,
     parameters: ScopedResource,
-    options?: PrivateLinkScopedResourcesCreateOrUpdateOptionalParams
+    options?: PrivateLinkScopedResourcesCreateOrUpdateOptionalParams,
   ): Promise<PrivateLinkScopedResourcesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       scopeName,
       name,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -239,25 +260,24 @@ export class PrivateLinkScopedResourcesImpl
     resourceGroupName: string,
     scopeName: string,
     name: string,
-    options?: PrivateLinkScopedResourcesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: PrivateLinkScopedResourcesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -266,8 +286,8 @@ export class PrivateLinkScopedResourcesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -275,19 +295,19 @@ export class PrivateLinkScopedResourcesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, scopeName, name, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, scopeName, name, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -304,13 +324,13 @@ export class PrivateLinkScopedResourcesImpl
     resourceGroupName: string,
     scopeName: string,
     name: string,
-    options?: PrivateLinkScopedResourcesDeleteOptionalParams
+    options?: PrivateLinkScopedResourcesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       scopeName,
       name,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -324,11 +344,11 @@ export class PrivateLinkScopedResourcesImpl
   private _listByPrivateLinkScope(
     resourceGroupName: string,
     scopeName: string,
-    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeOptionalParams
+    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeOptionalParams,
   ): Promise<PrivateLinkScopedResourcesListByPrivateLinkScopeResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, scopeName, options },
-      listByPrivateLinkScopeOperationSpec
+      listByPrivateLinkScopeOperationSpec,
     );
   }
 
@@ -343,11 +363,11 @@ export class PrivateLinkScopedResourcesImpl
     resourceGroupName: string,
     scopeName: string,
     nextLink: string,
-    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeNextOptionalParams
+    options?: PrivateLinkScopedResourcesListByPrivateLinkScopeNextOptionalParams,
   ): Promise<PrivateLinkScopedResourcesListByPrivateLinkScopeNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, scopeName, nextLink, options },
-      listByPrivateLinkScopeNextOperationSpec
+      listByPrivateLinkScopeNextOperationSpec,
     );
   }
 }
@@ -355,65 +375,62 @@ export class PrivateLinkScopedResourcesImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/privateLinkScopes/{scopeName}/scopedResources/{name}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/privateLinkScopes/{scopeName}/scopedResources/{name}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ScopedResource
+      bodyMapper: Mappers.ScopedResource,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion11],
+  queryParameters: [Parameters.apiVersion12],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.name,
-    Parameters.scopeName
+    Parameters.scopeName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/privateLinkScopes/{scopeName}/scopedResources/{name}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/privateLinkScopes/{scopeName}/scopedResources/{name}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ScopedResource
+      bodyMapper: Mappers.ScopedResource,
     },
     201: {
-      bodyMapper: Mappers.ScopedResource
+      bodyMapper: Mappers.ScopedResource,
     },
     202: {
-      bodyMapper: Mappers.ScopedResource
+      bodyMapper: Mappers.ScopedResource,
     },
     204: {
-      bodyMapper: Mappers.ScopedResource
+      bodyMapper: Mappers.ScopedResource,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
   requestBody: Parameters.parameters9,
-  queryParameters: [Parameters.apiVersion11],
+  queryParameters: [Parameters.apiVersion12],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.name,
-    Parameters.scopeName
+    Parameters.scopeName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/privateLinkScopes/{scopeName}/scopedResources/{name}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/privateLinkScopes/{scopeName}/scopedResources/{name}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -421,61 +438,59 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion11],
+  queryParameters: [Parameters.apiVersion12],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.name,
-    Parameters.scopeName
+    Parameters.scopeName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByPrivateLinkScopeOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/privateLinkScopes/{scopeName}/scopedResources",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/privateLinkScopes/{scopeName}/scopedResources",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ScopedResourceListResult
+      bodyMapper: Mappers.ScopedResourceListResult,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion11],
+  queryParameters: [Parameters.apiVersion12],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.scopeName
+    Parameters.resourceGroupName,
+    Parameters.scopeName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByPrivateLinkScopeNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ScopedResourceListResult
+      bodyMapper: Mappers.ScopedResourceListResult,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion11],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
+    Parameters.resourceGroupName,
     Parameters.nextLink,
-    Parameters.scopeName
+    Parameters.scopeName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

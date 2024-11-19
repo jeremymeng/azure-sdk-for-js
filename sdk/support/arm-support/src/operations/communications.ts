@@ -6,27 +6,32 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { Communications } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { MicrosoftSupport } from "../microsoftSupport";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   CommunicationDetails,
   CommunicationsListNextOptionalParams,
   CommunicationsListOptionalParams,
+  CommunicationsListResponse,
   CheckNameAvailabilityInput,
   CommunicationsCheckNameAvailabilityOptionalParams,
   CommunicationsCheckNameAvailabilityResponse,
-  CommunicationsListResponse,
   CommunicationsGetOptionalParams,
   CommunicationsGetResponse,
   CommunicationsCreateOptionalParams,
   CommunicationsCreateResponse,
-  CommunicationsListNextResponse
+  CommunicationsListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -54,7 +59,7 @@ export class CommunicationsImpl implements Communications {
    */
   public list(
     supportTicketName: string,
-    options?: CommunicationsListOptionalParams
+    options?: CommunicationsListOptionalParams,
   ): PagedAsyncIterableIterator<CommunicationDetails> {
     const iter = this.listPagingAll(supportTicketName, options);
     return {
@@ -64,33 +69,45 @@ export class CommunicationsImpl implements Communications {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(supportTicketName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(supportTicketName, options, settings);
+      },
     };
   }
 
   private async *listPagingPage(
     supportTicketName: string,
-    options?: CommunicationsListOptionalParams
+    options?: CommunicationsListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<CommunicationDetails[]> {
-    let result = await this._list(supportTicketName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: CommunicationsListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(supportTicketName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(
         supportTicketName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listPagingAll(
     supportTicketName: string,
-    options?: CommunicationsListOptionalParams
+    options?: CommunicationsListOptionalParams,
   ): AsyncIterableIterator<CommunicationDetails> {
     for await (const page of this.listPagingPage(supportTicketName, options)) {
       yield* page;
@@ -107,11 +124,11 @@ export class CommunicationsImpl implements Communications {
   checkNameAvailability(
     supportTicketName: string,
     checkNameAvailabilityInput: CheckNameAvailabilityInput,
-    options?: CommunicationsCheckNameAvailabilityOptionalParams
+    options?: CommunicationsCheckNameAvailabilityOptionalParams,
   ): Promise<CommunicationsCheckNameAvailabilityResponse> {
     return this.client.sendOperationRequest(
       { supportTicketName, checkNameAvailabilityInput, options },
-      checkNameAvailabilityOperationSpec
+      checkNameAvailabilityOperationSpec,
     );
   }
 
@@ -127,11 +144,11 @@ export class CommunicationsImpl implements Communications {
    */
   private _list(
     supportTicketName: string,
-    options?: CommunicationsListOptionalParams
+    options?: CommunicationsListOptionalParams,
   ): Promise<CommunicationsListResponse> {
     return this.client.sendOperationRequest(
       { supportTicketName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -144,11 +161,11 @@ export class CommunicationsImpl implements Communications {
   get(
     supportTicketName: string,
     communicationName: string,
-    options?: CommunicationsGetOptionalParams
+    options?: CommunicationsGetOptionalParams,
   ): Promise<CommunicationsGetResponse> {
     return this.client.sendOperationRequest(
       { supportTicketName, communicationName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -163,30 +180,29 @@ export class CommunicationsImpl implements Communications {
     supportTicketName: string,
     communicationName: string,
     createCommunicationParameters: CommunicationDetails,
-    options?: CommunicationsCreateOptionalParams
+    options?: CommunicationsCreateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CommunicationsCreateResponse>,
+    SimplePollerLike<
+      OperationState<CommunicationsCreateResponse>,
       CommunicationsCreateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CommunicationsCreateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -195,8 +211,8 @@ export class CommunicationsImpl implements Communications {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -204,25 +220,28 @@ export class CommunicationsImpl implements Communications {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         supportTicketName,
         communicationName,
         createCommunicationParameters,
-        options
+        options,
       },
-      createOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: createOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CommunicationsCreateResponse,
+      OperationState<CommunicationsCreateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -239,13 +258,13 @@ export class CommunicationsImpl implements Communications {
     supportTicketName: string,
     communicationName: string,
     createCommunicationParameters: CommunicationDetails,
-    options?: CommunicationsCreateOptionalParams
+    options?: CommunicationsCreateOptionalParams,
   ): Promise<CommunicationsCreateResponse> {
     const poller = await this.beginCreate(
       supportTicketName,
       communicationName,
       createCommunicationParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -259,11 +278,11 @@ export class CommunicationsImpl implements Communications {
   private _listNext(
     supportTicketName: string,
     nextLink: string,
-    options?: CommunicationsListNextOptionalParams
+    options?: CommunicationsListNextOptionalParams,
   ): Promise<CommunicationsListNextResponse> {
     return this.client.sendOperationRequest(
       { supportTicketName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -271,91 +290,87 @@ export class CommunicationsImpl implements Communications {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const checkNameAvailabilityOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Support/supportTickets/{supportTicketName}/checkNameAvailability",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Support/supportTickets/{supportTicketName}/checkNameAvailability",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.CheckNameAvailabilityOutput
+      bodyMapper: Mappers.CheckNameAvailabilityOutput,
     },
     default: {
-      bodyMapper: Mappers.ExceptionResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.checkNameAvailabilityInput,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.supportTicketName
+    Parameters.supportTicketName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Support/supportTickets/{supportTicketName}/communications",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Support/supportTickets/{supportTicketName}/communications",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationsListResult
+      bodyMapper: Mappers.CommunicationsListResult,
     },
     default: {
-      bodyMapper: Mappers.ExceptionResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.top, Parameters.filter],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.supportTicketName
+    Parameters.supportTicketName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Support/supportTickets/{supportTicketName}/communications/{communicationName}",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Support/supportTickets/{supportTicketName}/communications/{communicationName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationDetails
+      bodyMapper: Mappers.CommunicationDetails,
     },
     default: {
-      bodyMapper: Mappers.ExceptionResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.supportTicketName,
-    Parameters.communicationName
+    Parameters.communicationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Support/supportTickets/{supportTicketName}/communications/{communicationName}",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Support/supportTickets/{supportTicketName}/communications/{communicationName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationDetails
+      bodyMapper: Mappers.CommunicationDetails,
     },
     201: {
-      bodyMapper: Mappers.CommunicationDetails
+      bodyMapper: Mappers.CommunicationDetails,
     },
     202: {
-      bodyMapper: Mappers.CommunicationDetails
+      bodyMapper: Mappers.CommunicationDetails,
     },
     204: {
-      bodyMapper: Mappers.CommunicationDetails
+      bodyMapper: Mappers.CommunicationDetails,
     },
     default: {
-      bodyMapper: Mappers.ExceptionResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.createCommunicationParameters,
   queryParameters: [Parameters.apiVersion],
@@ -363,30 +378,29 @@ const createOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.supportTicketName,
-    Parameters.communicationName
+    Parameters.communicationName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationsListResult
+      bodyMapper: Mappers.CommunicationsListResult,
     },
     default: {
-      bodyMapper: Mappers.ExceptionResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion, Parameters.top, Parameters.filter],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.supportTicketName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

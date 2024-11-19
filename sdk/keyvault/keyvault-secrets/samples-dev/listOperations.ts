@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary Uses a SecretClient to iterate over secrets and their versions.
@@ -54,7 +54,7 @@ export async function main(): Promise<void> {
 
   // List the versions of BankAccountPassword
   for await (const secretProperties of client.listPropertiesOfSecretVersions(
-    bankAccountSecretName
+    bankAccountSecretName,
   )) {
     if (secretProperties.enabled) {
       const secret = await client.getSecret(secretProperties.name);

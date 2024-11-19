@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   DevBoxDefinition,
   DevBoxDefinitionsListByDevCenterOptionalParams,
@@ -20,8 +20,9 @@ import {
   DevBoxDefinitionsUpdateOptionalParams,
   DevBoxDefinitionsUpdateResponse,
   DevBoxDefinitionsDeleteOptionalParams,
+  DevBoxDefinitionsDeleteResponse,
   DevBoxDefinitionsGetByProjectOptionalParams,
-  DevBoxDefinitionsGetByProjectResponse
+  DevBoxDefinitionsGetByProjectResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -36,7 +37,7 @@ export interface DevBoxDefinitions {
   listByDevCenter(
     resourceGroupName: string,
     devCenterName: string,
-    options?: DevBoxDefinitionsListByDevCenterOptionalParams
+    options?: DevBoxDefinitionsListByDevCenterOptionalParams,
   ): PagedAsyncIterableIterator<DevBoxDefinition>;
   /**
    * List Dev Box definitions configured for a project.
@@ -47,7 +48,7 @@ export interface DevBoxDefinitions {
   listByProject(
     resourceGroupName: string,
     projectName: string,
-    options?: DevBoxDefinitionsListByProjectOptionalParams
+    options?: DevBoxDefinitionsListByProjectOptionalParams,
   ): PagedAsyncIterableIterator<DevBoxDefinition>;
   /**
    * Gets a Dev Box definition
@@ -60,7 +61,7 @@ export interface DevBoxDefinitions {
     resourceGroupName: string,
     devCenterName: string,
     devBoxDefinitionName: string,
-    options?: DevBoxDefinitionsGetOptionalParams
+    options?: DevBoxDefinitionsGetOptionalParams,
   ): Promise<DevBoxDefinitionsGetResponse>;
   /**
    * Creates or updates a Dev Box definition.
@@ -75,10 +76,10 @@ export interface DevBoxDefinitions {
     devCenterName: string,
     devBoxDefinitionName: string,
     body: DevBoxDefinition,
-    options?: DevBoxDefinitionsCreateOrUpdateOptionalParams
+    options?: DevBoxDefinitionsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DevBoxDefinitionsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<DevBoxDefinitionsCreateOrUpdateResponse>,
       DevBoxDefinitionsCreateOrUpdateResponse
     >
   >;
@@ -95,7 +96,7 @@ export interface DevBoxDefinitions {
     devCenterName: string,
     devBoxDefinitionName: string,
     body: DevBoxDefinition,
-    options?: DevBoxDefinitionsCreateOrUpdateOptionalParams
+    options?: DevBoxDefinitionsCreateOrUpdateOptionalParams,
   ): Promise<DevBoxDefinitionsCreateOrUpdateResponse>;
   /**
    * Partially updates a Dev Box definition.
@@ -110,10 +111,10 @@ export interface DevBoxDefinitions {
     devCenterName: string,
     devBoxDefinitionName: string,
     body: DevBoxDefinitionUpdate,
-    options?: DevBoxDefinitionsUpdateOptionalParams
+    options?: DevBoxDefinitionsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DevBoxDefinitionsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<DevBoxDefinitionsUpdateResponse>,
       DevBoxDefinitionsUpdateResponse
     >
   >;
@@ -130,7 +131,7 @@ export interface DevBoxDefinitions {
     devCenterName: string,
     devBoxDefinitionName: string,
     body: DevBoxDefinitionUpdate,
-    options?: DevBoxDefinitionsUpdateOptionalParams
+    options?: DevBoxDefinitionsUpdateOptionalParams,
   ): Promise<DevBoxDefinitionsUpdateResponse>;
   /**
    * Deletes a Dev Box definition
@@ -143,8 +144,13 @@ export interface DevBoxDefinitions {
     resourceGroupName: string,
     devCenterName: string,
     devBoxDefinitionName: string,
-    options?: DevBoxDefinitionsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: DevBoxDefinitionsDeleteOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<DevBoxDefinitionsDeleteResponse>,
+      DevBoxDefinitionsDeleteResponse
+    >
+  >;
   /**
    * Deletes a Dev Box definition
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -156,8 +162,8 @@ export interface DevBoxDefinitions {
     resourceGroupName: string,
     devCenterName: string,
     devBoxDefinitionName: string,
-    options?: DevBoxDefinitionsDeleteOptionalParams
-  ): Promise<void>;
+    options?: DevBoxDefinitionsDeleteOptionalParams,
+  ): Promise<DevBoxDefinitionsDeleteResponse>;
   /**
    * Gets a Dev Box definition configured for a project
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -169,6 +175,6 @@ export interface DevBoxDefinitions {
     resourceGroupName: string,
     projectName: string,
     devBoxDefinitionName: string,
-    options?: DevBoxDefinitionsGetByProjectOptionalParams
+    options?: DevBoxDefinitionsGetByProjectOptionalParams,
   ): Promise<DevBoxDefinitionsGetByProjectResponse>;
 }

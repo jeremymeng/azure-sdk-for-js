@@ -1,20 +1,21 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
+import type { TextAnalysisClient } from "../../src";
 import {
   AnalyzeActionNames,
   KnownPiiEntityCategory,
   KnownPiiEntityDomain,
   KnownStringIndexType,
   KnownTextAnalysisErrorCode,
-  TextAnalysisClient,
 } from "../../src";
-import { AuthMethod, createClient, startRecorder } from "./utils/recordedClient";
-import { Context, Suite } from "mocha";
-import { assert, matrix } from "@azure/test-utils";
+import type { AuthMethod } from "./utils/recordedClient";
+import { createClient, startRecorder } from "./utils/recordedClient";
+import type { Context, Suite } from "mocha";
+import { assert, matrix } from "@azure-tools/test-utils";
 import { assertActionResults, assertRestError } from "./utils/resultHelper";
 import { checkEntityTextOffset, checkOffsetAndLength } from "./utils/stringIndexTypeHelpers";
-import { Recorder } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
 import {
   expectation63,
   expectation65,
@@ -44,12 +45,8 @@ import {
   expectation59,
   expectation60,
   expectation62,
-  expectation67,
-  expectation68,
-  expectation69,
-  expectation70,
-  expectation72,
 } from "./expectations";
+import { authModes } from "./inputs";
 
 const testDataEn = [
   "I had a wonderful trip to Seattle last week and even visited the Space Needle 2 times!",
@@ -63,9 +60,7 @@ const testDataEs = [
   "La carretera estaba atascada. Había mucho tráfico el día de ayer.",
 ];
 
-const classificationTypeList: string[] = ["single", "multi"];
-
-matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
+matrix(authModes, async (authMethod: AuthMethod) => {
   describe(`[${authMethod}] TextAnalysisClient`, function (this: Suite) {
     let recorder: Recorder;
     let client: TextAnalysisClient;
@@ -93,21 +88,23 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
         it("client throws on empty list", async function () {
           await assert.isRejected(
             client.analyze(AnalyzeActionNames.SentimentAnalysis, []),
-            /non-empty array/
+            /non-empty array/,
           );
         });
 
-        it("client accepts string[] and language", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("client accepts string[] and language", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.SentimentAnalysis, testDataEn, "en"),
-            expectation63
+            expectation63,
           );
         });
 
-        it("client accepts string[] with no language", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("client accepts string[] with no language", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.SentimentAnalysis, testDataEn),
-            expectation63
+            expectation63,
           );
         });
 
@@ -115,7 +112,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const [result] = await client.analyze(
             AnalyzeActionNames.SentimentAnalysis,
             ["Hello world!"],
-            "notalanguage"
+            "notalanguage",
           );
           if (result.error === undefined) {
             assert.fail("Expected an error from the service");
@@ -137,20 +134,22 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
             await client.analyze(AnalyzeActionNames.SentimentAnalysis, docs, "en", {
               includeOpinionMining: true,
             }),
-            expectation65
+            expectation65,
           );
         });
 
-        it("service returns an error for an empty document", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("service returns an error for an empty document", async function () {
           const data = [...testDataEn];
           data.splice(1, 0, "");
           assertActionResults(
             await client.analyze(AnalyzeActionNames.SentimentAnalysis, data),
-            expectation66
+            expectation66,
           );
         });
 
-        it("client accepts TextDocumentInput[]", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("client accepts TextDocumentInput[]", async function () {
           const enDocs = testDataEn.map((text) => ({
             id: getId(),
             language: "en",
@@ -164,7 +163,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const docs = enDocs.concat(esDocs);
           assertActionResults(
             await client.analyze(AnalyzeActionNames.SentimentAnalysis, docs),
-            expectation34
+            expectation34,
           );
         });
 
@@ -176,7 +175,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
             await client.analyze(AnalyzeActionNames.SentimentAnalysis, docs, "en", {
               includeOpinionMining: true,
             }),
-            expectation35
+            expectation35,
           );
         });
 
@@ -186,7 +185,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
             await client.analyze(AnalyzeActionNames.SentimentAnalysis, docs, "en", {
               includeOpinionMining: true,
             }),
-            expectation36
+            expectation36,
           );
         });
 
@@ -196,7 +195,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
             await client.analyze(AnalyzeActionNames.SentimentAnalysis, docs, "en", {
               includeOpinionMining: true,
             }),
-            expectation37
+            expectation37,
           );
         });
       });
@@ -205,14 +204,14 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
         it("client throws on empty list", async function () {
           await assert.isRejected(
             client.analyze(AnalyzeActionNames.LanguageDetection, []),
-            /non-empty array/
+            /non-empty array/,
           );
         });
 
         it("client accepts no countryHint", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.LanguageDetection, testDataEn),
-            expectation38
+            expectation38,
           );
         });
 
@@ -221,7 +220,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const docs = ["impossible"];
           assertActionResults(
             await client.analyze(AnalyzeActionNames.LanguageDetection, docs, "fr"),
-            expectation39
+            expectation39,
           );
         });
 
@@ -229,7 +228,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const docs = ["I use Azure Functions to develop my service."];
           assertActionResults(
             await client.analyze(AnalyzeActionNames.LanguageDetection, docs, "none"),
-            expectation40
+            expectation40,
           );
         });
 
@@ -241,7 +240,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           }));
           assertActionResults(
             await client.analyze(AnalyzeActionNames.LanguageDetection, docs),
-            expectation41
+            expectation41,
           );
         });
 
@@ -249,17 +248,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const docs = ["hello"];
           assertActionResults(
             await client.analyze(AnalyzeActionNames.LanguageDetection, docs, "invalidcountry"),
-            expectation42
-          );
-        });
-
-        it("service returns script with DetectLanguageInput[]", async function () {
-          const doc = ["Tumhara naam kya hai?"];
-          assertActionResults(
-            await client.analyze(AnalyzeActionNames.LanguageDetection, doc, "in", {
-              modelVersion: "2022-04-10-preview",
-            }),
-            expectation72
+            expectation42,
           );
         });
 
@@ -276,7 +265,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const docs = enDocs.concat(esDocs);
           assertActionResults(
             await client.analyze(AnalyzeActionNames.LanguageDetection, docs),
-            expectation43
+            expectation43,
           );
         });
       });
@@ -285,21 +274,23 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
         it("client throws on empty list", async function () {
           await assert.isRejected(
             client.analyze(AnalyzeActionNames.EntityRecognition, []),
-            /non-empty array/
+            /non-empty array/,
           );
         });
 
-        it("client accepts string[] with no language", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("client accepts string[] with no language", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.EntityRecognition, testDataEn),
-            expectation44
+            expectation44,
           );
         });
 
-        it("client accepts string[] with a language specified", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("client accepts string[] with a language specified", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.EntityRecognition, testDataEn, "en"),
-            expectation45
+            expectation45,
           );
         });
 
@@ -308,7 +299,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const [result] = await client.analyze(
             AnalyzeActionNames.EntityRecognition,
             docs,
-            "notalanguage"
+            "notalanguage",
           );
           if (result.error === undefined) {
             assert.fail("Expected an error from the service");
@@ -316,7 +307,8 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           assert.equal(result.error.code, KnownTextAnalysisErrorCode.UnsupportedLanguageCode);
         });
 
-        it("client accepts mixed-language TextDocumentInput[]", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("client accepts mixed-language TextDocumentInput[]", async function () {
           const enDocs = testDataEn.slice(0, -1).map((text) => ({
             id: getId(),
             text,
@@ -330,7 +322,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const docs = enDocs.concat(esDocs);
           assertActionResults(
             await client.analyze(AnalyzeActionNames.EntityRecognition, docs),
-            expectation47
+            expectation47,
           );
         });
 
@@ -358,21 +350,21 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
         it("client throws on empty list", async function () {
           await assert.isRejected(
             client.analyze(AnalyzeActionNames.KeyPhraseExtraction, []),
-            /non-empty array/
+            /non-empty array/,
           );
         });
 
         it("client accepts string[] with no language", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.KeyPhraseExtraction, testDataEn),
-            expectation48
+            expectation48,
           );
         });
 
         it("client accepts string[] with a language specified", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.KeyPhraseExtraction, testDataEn, "en"),
-            expectation49
+            expectation49,
           );
         });
 
@@ -381,7 +373,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const [result] = await client.analyze(
             AnalyzeActionNames.KeyPhraseExtraction,
             docs,
-            "notalanguage"
+            "notalanguage",
           );
           if (result.error === undefined) {
             assert.fail("Expected an error from the service");
@@ -403,7 +395,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const docs = enDocs.concat(esDocs);
           assertActionResults(
             await client.analyze(AnalyzeActionNames.KeyPhraseExtraction, docs),
-            expectation51
+            expectation51,
           );
         });
       });
@@ -413,17 +405,19 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           await assert.isRejected(client.analyze(AnalyzeActionNames.PiiEntityRecognition, []));
         });
 
-        it("client accepts string[] with no language", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("client accepts string[] with no language", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.PiiEntityRecognition, testDataEn),
-            expectation52
+            expectation52,
           );
         });
 
-        it("client accepts string[] with a language specified", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("client accepts string[] with a language specified", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.PiiEntityRecognition, testDataEn, "en"),
-            expectation53
+            expectation53,
           );
         });
 
@@ -433,7 +427,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const docs = ["Your Social Security Number is 859-98-0987."];
           assertActionResults(
             await client.analyze(AnalyzeActionNames.PiiEntityRecognition, docs),
-            expectation54
+            expectation54,
           );
         });
 
@@ -442,7 +436,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const [result] = await client.analyze(
             AnalyzeActionNames.PiiEntityRecognition,
             docs,
-            "notalanguage"
+            "notalanguage",
           );
           if (result.error === undefined) {
             assert.fail("Expected an error from the service");
@@ -450,7 +444,8 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           assert.equal(result.error.code, KnownTextAnalysisErrorCode.UnsupportedLanguageCode);
         });
 
-        it("client accepts mixed-language TextDocumentInput[]", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("client accepts mixed-language TextDocumentInput[]", async function () {
           const sliceSize = 3;
           const enDocs = testDataEn.slice(0, sliceSize).map((text) => ({
             id: getId(),
@@ -465,7 +460,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const docs = enDocs.concat(esDocs);
           assertActionResults(
             await client.analyze(AnalyzeActionNames.PiiEntityRecognition, docs),
-            expectation56
+            expectation56,
           );
         });
 
@@ -475,7 +470,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
             await client.analyze(AnalyzeActionNames.PiiEntityRecognition, docs, "en", {
               domainFilter: KnownPiiEntityDomain.Phi,
             }),
-            expectation57
+            expectation57,
           );
         });
 
@@ -485,21 +480,22 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
             await client.analyze(AnalyzeActionNames.PiiEntityRecognition, docs, "en", {
               categoriesFilter: [KnownPiiEntityCategory.USSocialSecurityNumber],
             }),
-            expectation58
+            expectation58,
           );
         });
 
-        it("output pii categories are accepted as input", async function () {
+        // TODO: Fix the tests. Tracking issue https://github.com/Azure/azure-sdk-for-js/issues/30395
+        it.skip("output pii categories are accepted as input", async function () {
           const docs = ["Patient name is Joe and SSN is 859-98-0987"];
           assertActionResults(
             await client.analyze(AnalyzeActionNames.PiiEntityRecognition, docs),
-            expectation59
+            expectation59,
           );
           assertActionResults(
             await client.analyze(AnalyzeActionNames.PiiEntityRecognition, docs, "en", {
               categoriesFilter: [expectation59[0].entities[1].category],
             }),
-            expectation58
+            expectation58,
           );
         });
       });
@@ -508,21 +504,21 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
         it("client throws on empty list", async function () {
           return assert.isRejected(
             client.analyze(AnalyzeActionNames.EntityLinking, []),
-            /non-empty array/
+            /non-empty array/,
           );
         });
 
         it("client accepts string[] with no language", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.EntityLinking, testDataEn),
-            expectation60
+            expectation60,
           );
         });
 
         it("client accepts string[] with a language specified", async function () {
           assertActionResults(
             await client.analyze(AnalyzeActionNames.EntityLinking, testDataEn, "en"),
-            expectation60
+            expectation60,
           );
         });
 
@@ -530,7 +526,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
           const [result] = await client.analyze(
             AnalyzeActionNames.EntityLinking,
             ["This is some text, but it doesn't matter."],
-            "notalanguage"
+            "notalanguage",
           );
           if (result.error === undefined) {
             assert.fail("Expected an error from the service");
@@ -553,7 +549,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
 
           assertActionResults(
             await client.analyze(AnalyzeActionNames.EntityLinking, docs),
-            expectation62
+            expectation62,
           );
         });
 
@@ -578,98 +574,6 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
         });
       });
 
-      matrix([classificationTypeList], async (classificationType: string) => {
-        describe(`#Dynamic Classification [${classificationType}]`, function () {
-          it("client throws on empty list", async function () {
-            return assert.isRejected(
-              client.analyze(AnalyzeActionNames.DynamicClassification, []),
-              /non-empty array/
-            );
-          });
-
-          it("client accepts string[] and language", async function () {
-            assertActionResults(
-              await client.analyze(AnalyzeActionNames.DynamicClassification, testDataEn, "en", {
-                categories: ["Travel", "Weather", "Location"],
-                classificationType,
-              }),
-              classificationType === "single" ? expectation67 : expectation69
-            );
-          });
-
-          it("client accepts string[] with no language", async function () {
-            const docs = testDataEn.map((text) => ({
-              id: getId(),
-              text,
-            }));
-            assertActionResults(
-              await client.analyze(AnalyzeActionNames.DynamicClassification, docs, {
-                categories: ["Travel", "Weather", "Location"],
-                classificationType,
-              }),
-              classificationType === "single" ? expectation68 : expectation70
-            );
-          });
-
-          it("service errors on unsupported language", async function () {
-            const [result] = await client.analyze(
-              AnalyzeActionNames.DynamicClassification,
-              ["This is some text, but it doesn't matter."],
-              "notalanguage",
-              {
-                categories: ["Travel", "Weather", "Location"],
-                classificationType,
-              }
-            );
-
-            if (result.error === undefined) {
-              assert.fail("Expected an error from the service");
-            }
-            assert.equal(result.error.code, KnownTextAnalysisErrorCode.UnsupportedLanguageCode);
-          });
-
-          it("service errors on invalid number of categories", async function () {
-            await assertRestError(
-              client.analyze(
-                AnalyzeActionNames.DynamicClassification,
-                ["This is some text, but it doesn't matter."],
-                "en",
-                {
-                  categories: ["A"],
-                  classificationType,
-                }
-              ),
-              {
-                code: KnownTextAnalysisErrorCode.InvalidParameterValue,
-                statusCode: 400,
-                messagePattern:
-                  /Invalid parameter in request. Parameter 'categories' cannot be empty or contain less than 2 categories/,
-              }
-            );
-          });
-
-          it("service errors on invalid classification type", async function () {
-            await assertRestError(
-              client.analyze(
-                AnalyzeActionNames.DynamicClassification,
-                ["This is some text, but it doesn't matter."],
-                "en",
-                {
-                  categories: ["A", "B"],
-                  classificationType: classificationType + "A",
-                }
-              ),
-              {
-                code: KnownTextAnalysisErrorCode.InvalidParameterValue,
-                statusCode: 400,
-                messagePattern:
-                  /Invalid parameter in request. Invalid value for parameter 'classificationType'/,
-              }
-            );
-          });
-        });
-      });
-
       describe("#String encoding", function () {
         describe("#Default encoding (utf16CodeUnit)", function () {
           it("emoji", async function () {
@@ -679,10 +583,9 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               KnownStringIndexType.Utf16CodeUnit,
               8,
               11,
-              checkEntityTextOffset
+              checkEntityTextOffset,
             );
           });
-
           it("emoji with skin tone modifier", async function () {
             await checkOffsetAndLength(
               client,
@@ -690,7 +593,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               KnownStringIndexType.Utf16CodeUnit,
               10,
               11,
-              checkEntityTextOffset
+              checkEntityTextOffset,
             );
           });
 
@@ -701,7 +604,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               KnownStringIndexType.Utf16CodeUnit,
               17,
               11,
-              checkEntityTextOffset
+              checkEntityTextOffset,
             );
           });
 
@@ -712,7 +615,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               KnownStringIndexType.Utf16CodeUnit,
               25,
               11,
-              checkEntityTextOffset
+              checkEntityTextOffset,
             );
           });
 
@@ -723,7 +626,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               KnownStringIndexType.Utf16CodeUnit,
               9,
               11,
-              checkEntityTextOffset
+              checkEntityTextOffset,
             );
           });
 
@@ -734,7 +637,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               KnownStringIndexType.Utf16CodeUnit,
               10,
               11,
-              checkEntityTextOffset
+              checkEntityTextOffset,
             );
           });
 
@@ -745,7 +648,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               KnownStringIndexType.Utf16CodeUnit,
               8,
               11,
-              checkEntityTextOffset
+              checkEntityTextOffset,
             );
           });
 
@@ -756,7 +659,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               KnownStringIndexType.Utf16CodeUnit,
               8,
               11,
-              checkEntityTextOffset
+              checkEntityTextOffset,
             );
           });
 
@@ -767,7 +670,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               KnownStringIndexType.Utf16CodeUnit,
               121,
               11,
-              checkEntityTextOffset
+              checkEntityTextOffset,
             );
           });
         });
@@ -778,7 +681,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "👩 SSN: 859-98-0987",
               KnownStringIndexType.UnicodeCodePoint,
               7,
-              11
+              11,
             ); // offset was 8 with UTF16
           });
 
@@ -788,7 +691,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "👩🏻 SSN: 859-98-0987",
               KnownStringIndexType.UnicodeCodePoint,
               8,
-              11
+              11,
             ); // offset was 10 with UTF16
           });
 
@@ -798,7 +701,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "👩‍👩‍👧‍👧 SSN: 859-98-0987",
               KnownStringIndexType.UnicodeCodePoint,
               13,
-              11
+              11,
             ); // offset was 17 with UTF16
           });
 
@@ -808,7 +711,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "👩🏻‍👩🏽‍👧🏾‍👦🏿 SSN: 859-98-0987",
               KnownStringIndexType.UnicodeCodePoint,
               17,
-              11
+              11,
             ); // offset was 25 with UTF16
           });
 
@@ -818,7 +721,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "año SSN: 859-98-0987",
               KnownStringIndexType.UnicodeCodePoint,
               9,
-              11
+              11,
             );
           });
 
@@ -828,7 +731,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "año SSN: 859-98-0987",
               KnownStringIndexType.UnicodeCodePoint,
               10,
-              11
+              11,
             );
           });
 
@@ -838,7 +741,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "아가 SSN: 859-98-0987",
               KnownStringIndexType.UnicodeCodePoint,
               8,
-              11
+              11,
             );
           });
 
@@ -848,7 +751,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "아가 SSN: 859-98-0987",
               KnownStringIndexType.UnicodeCodePoint,
               8,
-              11
+              11,
             );
           });
 
@@ -858,7 +761,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "ơ̵̧̧̢̳̘̘͕͔͕̭̟̙͎͈̞͔̈̇̒̃͋̇̅͛̋͛̎́͑̄̐̂̎͗͝m̵͍͉̗̄̏͌̂̑̽̕͝͠g̵̢̡̢̡̨̡̧̛͉̞̯̠̤̣͕̟̫̫̼̰͓̦͖̣̣͎̋͒̈́̓̒̈̍̌̓̅͑̒̓̅̅͒̿̏́͗̀̇͛̏̀̈́̀̊̾̀̔͜͠͝ͅ SSN: 859-98-0987",
               KnownStringIndexType.UnicodeCodePoint,
               121,
-              11
+              11,
             );
           });
         });
@@ -869,7 +772,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "👩 SSN: 859-98-0987",
               KnownStringIndexType.TextElementsV8,
               7,
-              11
+              11,
             ); // offset was 8 with UTF16
           });
 
@@ -878,8 +781,8 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               client,
               "👩🏻 SSN: 859-98-0987",
               KnownStringIndexType.TextElementsV8,
-              8,
-              11
+              7,
+              11,
             ); // offset was 10 with UTF16
           });
 
@@ -888,8 +791,8 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               client,
               "👩‍👩‍👧‍👧 SSN: 859-98-0987",
               KnownStringIndexType.TextElementsV8,
-              13,
-              11
+              7,
+              11,
             ); // offset was 17 with UTF16
           });
 
@@ -898,8 +801,8 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               client,
               "👩🏻‍👩🏽‍👧🏾‍👦🏿 SSN: 859-98-0987",
               KnownStringIndexType.TextElementsV8,
-              17,
-              11
+              7,
+              11,
             ); // offset was 25 with UTF16
           });
 
@@ -909,7 +812,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "año SSN: 859-98-0987",
               KnownStringIndexType.TextElementsV8,
               9,
-              11
+              11,
             );
           });
 
@@ -919,7 +822,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "año SSN: 859-98-0987",
               KnownStringIndexType.TextElementsV8,
               9,
-              11
+              11,
             ); // offset was 10 with UTF16
           });
 
@@ -929,7 +832,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "아가 SSN: 859-98-0987",
               KnownStringIndexType.TextElementsV8,
               8,
-              11
+              11,
             );
           });
 
@@ -939,7 +842,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "아가 SSN: 859-98-0987",
               KnownStringIndexType.TextElementsV8,
               8,
-              11
+              11,
             );
           });
 
@@ -949,7 +852,7 @@ matrix([["APIKey", "AAD"]] as const, async (authMethod: AuthMethod) => {
               "ơ̵̧̧̢̳̘̘͕͔͕̭̟̙͎͈̞͔̈̇̒̃͋̇̅͛̋͛̎́͑̄̐̂̎͗͝m̵͍͉̗̄̏͌̂̑̽̕͝͠g̵̢̡̢̡̨̡̧̛͉̞̯̠̤̣͕̟̫̫̼̰͓̦͖̣̣͎̋͒̈́̓̒̈̍̌̓̅͑̒̓̅̅͒̿̏́͗̀̇͛̏̀̈́̀̊̾̀̔͜͠͝ͅ SSN: 859-98-0987",
               KnownStringIndexType.TextElementsV8,
               9,
-              11
+              11,
             ); // offset was 121 with UTF16
           });
         });

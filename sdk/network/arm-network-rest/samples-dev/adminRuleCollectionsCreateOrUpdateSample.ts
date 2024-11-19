@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -46,7 +46,7 @@ async function createOrUpdateAnAdminRuleCollection() {
       resourceGroupName,
       networkManagerName,
       configurationName,
-      ruleCollectionName
+      ruleCollectionName,
     )
     .put(options);
   console.log(result);

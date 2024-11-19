@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT Licence.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 /**
  * This sample demonstrates how to send/receive messages to/from session enabled queues/subscriptions
@@ -16,6 +16,7 @@
  */
 
 import { delay, ProcessErrorArgs, ServiceBusClient, ServiceBusMessage } from "@azure/service-bus";
+import { DefaultAzureCredential } from "@azure/identity";
 
 // Load the .env file if it exists
 import * as dotenv from "dotenv";
@@ -23,7 +24,7 @@ dotenv.config();
 
 // Define connection string and related Service Bus entity names here
 // Ensure on portal.azure.com that queue/topic has Sessions feature enabled
-const connectionString = process.env.SERVICEBUS_CONNECTION_STRING || "<connection string>";
+const fqdn = process.env.SERVICEBUS_FQDN || "<your-servicebus-namespace>.servicebus.windows.net";
 const queueName = process.env.QUEUE_NAME_WITH_SESSIONS || "<queue name>";
 
 const listOfScientists = [
@@ -40,7 +41,8 @@ const listOfScientists = [
 ];
 
 export async function main() {
-  const sbClient = new ServiceBusClient(connectionString);
+  const credential = new DefaultAzureCredential();
+  const sbClient = new ServiceBusClient(fqdn, credential);
 
   try {
     console.log(`Sending 5 messages to 'session-1'`);

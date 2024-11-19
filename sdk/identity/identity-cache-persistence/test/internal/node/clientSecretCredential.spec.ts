@@ -1,17 +1,19 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable sort-imports */
 
-import { ClientSecretCredential, TokenCachePersistenceOptions } from "../../../../identity/src";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../../../identity/test/msalTestUtils";
-import { Recorder, env } from "@azure-tools/test-recorder";
-import { MsalNode } from "../../../../identity/src/msal/nodeFlows/msalNodeCommon";
-import { createPersistence } from "./setup.spec";
+import type { TokenCachePersistenceOptions } from "@azure/identity";
+import { ClientSecretCredential } from "@azure/identity";
+import { msalNodeTestSetup, type MsalTestCleanup } from "./msalNodeTestSetup";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { env } from "@azure-tools/test-recorder";
+
 import { ConfidentialClientApplication } from "@azure/msal-node";
-import Sinon from "sinon";
+import type Sinon from "sinon";
 import assert from "assert";
+import { createPersistence } from "./setup.spec";
 
 const scope = "https://graph.microsoft.com/.default";
 
@@ -26,12 +28,15 @@ describe("ClientSecretCredential (internal)", function (this: Mocha.Suite) {
     cleanup = setup.cleanup;
     recorder = setup.recorder;
 
-    getTokenSilentSpy = setup.sandbox.spy(MsalNode.prototype, "getTokenSilent");
+    getTokenSilentSpy = setup.sandbox.spy(
+      ConfidentialClientApplication.prototype,
+      "acquireTokenSilent",
+    );
 
     // MsalClientSecret calls to this method underneath.
     doGetTokenSpy = setup.sandbox.spy(
       ConfidentialClientApplication.prototype,
-      "acquireTokenByClientCredential"
+      "acquireTokenByClientCredential",
     );
   });
   afterEach(async function () {
@@ -58,7 +63,7 @@ describe("ClientSecretCredential (internal)", function (this: Mocha.Suite) {
       env.AZURE_TENANT_ID!,
       env.AZURE_CLIENT_ID!,
       env.AZURE_CLIENT_SECRET!,
-      recorder.configureClientOptions({ tokenCachePersistenceOptions })
+      recorder.configureClientOptions({ tokenCachePersistenceOptions }),
     );
 
     await credential.getToken(scope);
@@ -96,7 +101,7 @@ describe("ClientSecretCredential (internal)", function (this: Mocha.Suite) {
       env.AZURE_TENANT_ID!,
       env.AZURE_CLIENT_ID!,
       env.AZURE_CLIENT_SECRET!,
-      recorder.configureClientOptions({ tokenCachePersistenceOptions })
+      recorder.configureClientOptions({ tokenCachePersistenceOptions }),
     );
 
     await credential.getToken(scope);

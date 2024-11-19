@@ -8,8 +8,8 @@
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import {
-  CapabilityProperties,
-  LocationBasedCapabilitiesExecuteOptionalParams
+  FlexibleServerCapability,
+  LocationBasedCapabilitiesExecuteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -22,6 +22,6 @@ export interface LocationBasedCapabilities {
    */
   listExecute(
     locationName: string,
-    options?: LocationBasedCapabilitiesExecuteOptionalParams
-  ): PagedAsyncIterableIterator<CapabilityProperties>;
+    options?: LocationBasedCapabilitiesExecuteOptionalParams,
+  ): PagedAsyncIterableIterator<FlexibleServerCapability>;
 }

@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { AppPlatformManagementClient } from "../appPlatformManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ConfigurationServiceResource,
   ConfigurationServicesListNextOptionalParams,
@@ -28,6 +32,8 @@ import {
   ConfigurationServiceSettings,
   ConfigurationServicesValidateOptionalParams,
   ConfigurationServicesValidateResponse,
+  ConfigurationServicesValidateResourceOptionalParams,
+  ConfigurationServicesValidateResourceResponse,
   ConfigurationServicesListNextResponse
 } from "../models";
 
@@ -158,8 +164,8 @@ export class ConfigurationServicesImpl implements ConfigurationServices {
     configurationServiceResource: ConfigurationServiceResource,
     options?: ConfigurationServicesCreateOrUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationServicesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationServicesCreateOrUpdateResponse>,
       ConfigurationServicesCreateOrUpdateResponse
     >
   > {
@@ -169,7 +175,7 @@ export class ConfigurationServicesImpl implements ConfigurationServices {
     ): Promise<ConfigurationServicesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -202,19 +208,22 @@ export class ConfigurationServicesImpl implements ConfigurationServices {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         serviceName,
         configurationServiceName,
         configurationServiceResource,
         options
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: createOrUpdateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      ConfigurationServicesCreateOrUpdateResponse,
+      OperationState<ConfigurationServicesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -261,14 +270,14 @@ export class ConfigurationServicesImpl implements ConfigurationServices {
     serviceName: string,
     configurationServiceName: string,
     options?: ConfigurationServicesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -301,13 +310,18 @@ export class ConfigurationServicesImpl implements ConfigurationServices {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, serviceName, configurationServiceName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        serviceName,
+        configurationServiceName,
+        options
+      },
+      spec: deleteOperationSpec
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -371,8 +385,8 @@ export class ConfigurationServicesImpl implements ConfigurationServices {
     settings: ConfigurationServiceSettings,
     options?: ConfigurationServicesValidateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationServicesValidateResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationServicesValidateResponse>,
       ConfigurationServicesValidateResponse
     >
   > {
@@ -382,7 +396,7 @@ export class ConfigurationServicesImpl implements ConfigurationServices {
     ): Promise<ConfigurationServicesValidateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -415,21 +429,24 @@ export class ConfigurationServicesImpl implements ConfigurationServices {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         serviceName,
         configurationServiceName,
         settings,
         options
       },
-      validateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: validateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      ConfigurationServicesValidateResponse,
+      OperationState<ConfigurationServicesValidateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location"
     });
     await poller.poll();
     return poller;
@@ -456,6 +473,115 @@ export class ConfigurationServicesImpl implements ConfigurationServices {
       serviceName,
       configurationServiceName,
       settings,
+      options
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Check if the Application Configuration Service resource is valid.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serviceName The name of the Service resource.
+   * @param configurationServiceName The name of Application Configuration Service.
+   * @param configurationServiceResource Application Configuration Service resource to be validated
+   * @param options The options parameters.
+   */
+  async beginValidateResource(
+    resourceGroupName: string,
+    serviceName: string,
+    configurationServiceName: string,
+    configurationServiceResource: ConfigurationServiceResource,
+    options?: ConfigurationServicesValidateResourceOptionalParams
+  ): Promise<
+    SimplePollerLike<
+      OperationState<ConfigurationServicesValidateResourceResponse>,
+      ConfigurationServicesValidateResourceResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec
+    ): Promise<ConfigurationServicesValidateResourceResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec
+    ) => {
+      let currentRawResponse:
+        | coreClient.FullOperationResponse
+        | undefined = undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback
+        }
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON()
+        }
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        serviceName,
+        configurationServiceName,
+        configurationServiceResource,
+        options
+      },
+      spec: validateResourceOperationSpec
+    });
+    const poller = await createHttpPoller<
+      ConfigurationServicesValidateResourceResponse,
+      OperationState<ConfigurationServicesValidateResourceResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location"
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Check if the Application Configuration Service resource is valid.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serviceName The name of the Service resource.
+   * @param configurationServiceName The name of Application Configuration Service.
+   * @param configurationServiceResource Application Configuration Service resource to be validated
+   * @param options The options parameters.
+   */
+  async beginValidateResourceAndWait(
+    resourceGroupName: string,
+    serviceName: string,
+    configurationServiceName: string,
+    configurationServiceResource: ConfigurationServiceResource,
+    options?: ConfigurationServicesValidateResourceOptionalParams
+  ): Promise<ConfigurationServicesValidateResourceResponse> {
+    const poller = await this.beginValidateResource(
+      resourceGroupName,
+      serviceName,
+      configurationServiceName,
+      configurationServiceResource,
       options
     );
     return poller.pollUntilDone();
@@ -621,6 +747,40 @@ const validateOperationSpec: coreClient.OperationSpec = {
   mediaType: "json",
   serializer
 };
+const validateResourceOperationSpec: coreClient.OperationSpec = {
+  path:
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppPlatform/Spring/{serviceName}/configurationServices/{configurationServiceName}/validateResource",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ConfigurationServiceSettingsValidateResult
+    },
+    201: {
+      bodyMapper: Mappers.ConfigurationServiceSettingsValidateResult
+    },
+    202: {
+      bodyMapper: Mappers.ConfigurationServiceSettingsValidateResult
+    },
+    204: {
+      bodyMapper: Mappers.ConfigurationServiceSettingsValidateResult
+    },
+    default: {
+      bodyMapper: Mappers.CloudError
+    }
+  },
+  requestBody: Parameters.configurationServiceResource,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.serviceName,
+    Parameters.configurationServiceName
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer
+};
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
@@ -632,7 +792,6 @@ const listNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,

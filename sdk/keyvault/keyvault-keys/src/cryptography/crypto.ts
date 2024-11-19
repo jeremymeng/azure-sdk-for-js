@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
+import type { Verify } from "node:crypto";
 import {
-  Verify,
   createHash as cryptoCreateHash,
   createVerify as cryptoCreateVerify,
   randomBytes as cryptoRandomBytes,
-} from "crypto";
+} from "node:crypto";
 
 /**
  * @internal
@@ -23,7 +23,6 @@ const algorithmToHashAlgorithm: { [s: string]: string } = {
   ES512: "SHA512",
   PS512: "SHA512",
   RS512: "SHA512",
-  EdDSA: "SHA256",
 };
 
 /**
@@ -35,8 +34,8 @@ export async function createHash(algorithm: string, data: Uint8Array): Promise<B
   if (!hashAlgorithm) {
     throw new Error(
       `Invalid algorithm ${algorithm} passed to createHash. Supported algorithms: ${Object.keys(
-        algorithmToHashAlgorithm
-      ).join(", ")}`
+        algorithmToHashAlgorithm,
+      ).join(", ")}`,
     );
   }
   const hash = cryptoCreateHash(hashAlgorithm);
@@ -54,8 +53,8 @@ export function createVerify(algorithm: string, data: Uint8Array): Verify {
   if (!verifyAlgorithm) {
     throw new Error(
       `Invalid algorithm ${algorithm} passed to createHash. Supported algorithms: ${Object.keys(
-        algorithmToHashAlgorithm
-      ).join(", ")}`
+        algorithmToHashAlgorithm,
+      ).join(", ")}`,
     );
   }
   const verifier = cryptoCreateVerify(verifyAlgorithm);

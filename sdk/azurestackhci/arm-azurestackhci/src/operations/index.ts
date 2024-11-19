@@ -8,5 +8,14 @@
 
 export * from "./arcSettings";
 export * from "./clusters";
+export * from "./deploymentSettings";
+export * from "./edgeDevices";
 export * from "./extensions";
+export * from "./offers";
 export * from "./operations";
+export * from "./publishers";
+export * from "./securitySettings";
+export * from "./skus";
+export * from "./updateRuns";
+export * from "./updateSummariesOperations";
+export * from "./updates";

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { RequestParameters } from "@azure-rest/core-client";
 import { LedgerEntry, LedgerUser } from "./models";
@@ -76,10 +76,12 @@ export type GetCurrentLedgerEntryParameters = GetCurrentLedgerEntryQueryParam &
   RequestParameters;
 export type DeleteUserParameters = RequestParameters;
 export type GetUserParameters = RequestParameters;
+/** Details about a Confidential Ledger user. */
+export type LedgerUserResourceMergeAndPatch = Partial<LedgerUser>;
 
 export interface CreateOrUpdateUserBodyParam {
   /** Details about a Confidential Ledger user. */
-  body: LedgerUser;
+  body: LedgerUserResourceMergeAndPatch;
 }
 
 export interface CreateOrUpdateUserMediaTypesParam {

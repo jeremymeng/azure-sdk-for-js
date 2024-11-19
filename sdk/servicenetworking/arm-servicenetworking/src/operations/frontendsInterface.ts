@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ServiceNetworkingManagementClient } from "../serviceNetworkingManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   Frontend,
   FrontendsInterfaceListByTrafficControllerNextOptionalParams,
@@ -28,7 +32,8 @@ import {
   FrontendsInterfaceUpdateOptionalParams,
   FrontendsInterfaceUpdateResponse,
   FrontendsInterfaceDeleteOptionalParams,
-  FrontendsInterfaceListByTrafficControllerNextResponse
+  FrontendsInterfaceDeleteResponse,
+  FrontendsInterfaceListByTrafficControllerNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -53,12 +58,12 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
   public listByTrafficController(
     resourceGroupName: string,
     trafficControllerName: string,
-    options?: FrontendsInterfaceListByTrafficControllerOptionalParams
+    options?: FrontendsInterfaceListByTrafficControllerOptionalParams,
   ): PagedAsyncIterableIterator<Frontend> {
     const iter = this.listByTrafficControllerPagingAll(
       resourceGroupName,
       trafficControllerName,
-      options
+      options,
     );
     return {
       next() {
@@ -75,9 +80,9 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
           resourceGroupName,
           trafficControllerName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -85,7 +90,7 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     options?: FrontendsInterfaceListByTrafficControllerOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<Frontend[]> {
     let result: FrontendsInterfaceListByTrafficControllerResponse;
     let continuationToken = settings?.continuationToken;
@@ -93,7 +98,7 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
       result = await this._listByTrafficController(
         resourceGroupName,
         trafficControllerName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -105,7 +110,7 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
         resourceGroupName,
         trafficControllerName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -117,12 +122,12 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
   private async *listByTrafficControllerPagingAll(
     resourceGroupName: string,
     trafficControllerName: string,
-    options?: FrontendsInterfaceListByTrafficControllerOptionalParams
+    options?: FrontendsInterfaceListByTrafficControllerOptionalParams,
   ): AsyncIterableIterator<Frontend> {
     for await (const page of this.listByTrafficControllerPagingPage(
       resourceGroupName,
       trafficControllerName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -137,16 +142,16 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
   private _listByTrafficController(
     resourceGroupName: string,
     trafficControllerName: string,
-    options?: FrontendsInterfaceListByTrafficControllerOptionalParams
+    options?: FrontendsInterfaceListByTrafficControllerOptionalParams,
   ): Promise<FrontendsInterfaceListByTrafficControllerResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, trafficControllerName, options },
-      listByTrafficControllerOperationSpec
+      listByTrafficControllerOperationSpec,
     );
   }
 
   /**
-   * Get a Traffic Controller Frontend
+   * Get a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -156,16 +161,16 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     frontendName: string,
-    options?: FrontendsInterfaceGetOptionalParams
+    options?: FrontendsInterfaceGetOptionalParams,
   ): Promise<FrontendsInterfaceGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, trafficControllerName, frontendName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
-   * Create a Traffic Controller Frontend
+   * Create a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -177,30 +182,29 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
     trafficControllerName: string,
     frontendName: string,
     resource: Frontend,
-    options?: FrontendsInterfaceCreateOrUpdateOptionalParams
+    options?: FrontendsInterfaceCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<FrontendsInterfaceCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<FrontendsInterfaceCreateOrUpdateResponse>,
       FrontendsInterfaceCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<FrontendsInterfaceCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -209,8 +213,8 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -218,33 +222,36 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         trafficControllerName,
         frontendName,
         resource,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      FrontendsInterfaceCreateOrUpdateResponse,
+      OperationState<FrontendsInterfaceCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Create a Traffic Controller Frontend
+   * Create a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -256,20 +263,20 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
     trafficControllerName: string,
     frontendName: string,
     resource: Frontend,
-    options?: FrontendsInterfaceCreateOrUpdateOptionalParams
+    options?: FrontendsInterfaceCreateOrUpdateOptionalParams,
   ): Promise<FrontendsInterfaceCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       trafficControllerName,
       frontendName,
       resource,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * Update a Traffic Controller Frontend
+   * Update a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -281,7 +288,7 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
     trafficControllerName: string,
     frontendName: string,
     properties: FrontendUpdate,
-    options?: FrontendsInterfaceUpdateOptionalParams
+    options?: FrontendsInterfaceUpdateOptionalParams,
   ): Promise<FrontendsInterfaceUpdateResponse> {
     return this.client.sendOperationRequest(
       {
@@ -289,14 +296,14 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
         trafficControllerName,
         frontendName,
         properties,
-        options
+        options,
       },
-      updateOperationSpec
+      updateOperationSpec,
     );
   }
 
   /**
-   * Delete a Traffic Controller Frontend
+   * Delete a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -306,25 +313,29 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     frontendName: string,
-    options?: FrontendsInterfaceDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: FrontendsInterfaceDeleteOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<FrontendsInterfaceDeleteResponse>,
+      FrontendsInterfaceDeleteResponse
+    >
+  > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<void> => {
+      spec: coreClient.OperationSpec,
+    ): Promise<FrontendsInterfaceDeleteResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -333,8 +344,8 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -342,27 +353,30 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, trafficControllerName, frontendName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, trafficControllerName, frontendName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      FrontendsInterfaceDeleteResponse,
+      OperationState<FrontendsInterfaceDeleteResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Delete a Traffic Controller Frontend
+   * Delete a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -372,13 +386,13 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     frontendName: string,
-    options?: FrontendsInterfaceDeleteOptionalParams
-  ): Promise<void> {
+    options?: FrontendsInterfaceDeleteOptionalParams,
+  ): Promise<FrontendsInterfaceDeleteResponse> {
     const poller = await this.beginDelete(
       resourceGroupName,
       trafficControllerName,
       frontendName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -395,11 +409,11 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     nextLink: string,
-    options?: FrontendsInterfaceListByTrafficControllerNextOptionalParams
+    options?: FrontendsInterfaceListByTrafficControllerNextOptionalParams,
   ): Promise<FrontendsInterfaceListByTrafficControllerNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, trafficControllerName, nextLink, options },
-      listByTrafficControllerNextOperationSpec
+      listByTrafficControllerNextOperationSpec,
     );
   }
 }
@@ -407,38 +421,15 @@ export class FrontendsInterfaceImpl implements FrontendsInterface {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listByTrafficControllerOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.FrontendListResult
+      bodyMapper: Mappers.FrontendListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.trafficControllerName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends/{frontendName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.Frontend
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -446,31 +437,51 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.trafficControllerName,
-    Parameters.frontendName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends/{frontendName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.Frontend,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.trafficControllerName,
+    Parameters.frontendName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends/{frontendName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends/{frontendName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Frontend
+      bodyMapper: Mappers.Frontend,
     },
     201: {
-      bodyMapper: Mappers.Frontend
+      bodyMapper: Mappers.Frontend,
     },
     202: {
-      bodyMapper: Mappers.Frontend
+      bodyMapper: Mappers.Frontend,
     },
     204: {
-      bodyMapper: Mappers.Frontend
+      bodyMapper: Mappers.Frontend,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.resource2,
   queryParameters: [Parameters.apiVersion],
@@ -479,23 +490,22 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.trafficControllerName,
-    Parameters.frontendName
+    Parameters.frontendName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends/{frontendName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends/{frontendName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.Frontend
+      bodyMapper: Mappers.Frontend,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.properties2,
   queryParameters: [Parameters.apiVersion],
@@ -504,24 +514,31 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.trafficControllerName,
-    Parameters.frontendName
+    Parameters.frontendName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends/{frontendName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceNetworking/trafficControllers/{trafficControllerName}/frontends/{frontendName}",
   httpMethod: "DELETE",
   responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
+    200: {
+      headersMapper: Mappers.FrontendsInterfaceDeleteHeaders,
+    },
+    201: {
+      headersMapper: Mappers.FrontendsInterfaceDeleteHeaders,
+    },
+    202: {
+      headersMapper: Mappers.FrontendsInterfaceDeleteHeaders,
+    },
+    204: {
+      headersMapper: Mappers.FrontendsInterfaceDeleteHeaders,
+    },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -529,29 +546,29 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.trafficControllerName,
-    Parameters.frontendName
+    Parameters.frontendName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByTrafficControllerNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.FrontendListResult
+      bodyMapper: Mappers.FrontendListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.trafficControllerName
+    Parameters.trafficControllerName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

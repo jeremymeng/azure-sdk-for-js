@@ -1,25 +1,18 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import * as sinon from "sinon";
-import {
+import { describe, it, assert, vi } from "vitest";
+import type {
   CompositeMapper,
   FullOperationResponse,
   OperationRequest,
   OperationSpec,
   SerializerOptions,
-  createSerializer,
-  deserializationPolicy,
-} from "../src";
-import {
-  PipelineResponse,
-  RawHttpHeaders,
-  SendRequest,
-  createHttpHeaders,
-  createPipelineRequest,
-} from "@azure/core-rest-pipeline";
-import { assert } from "chai";
-import { getOperationRequestInfo } from "../src/operationHelpers";
+} from "../src/index.js";
+import { createSerializer, deserializationPolicy } from "../src/index.js";
+import type { PipelineResponse, RawHttpHeaders, SendRequest } from "@azure/core-rest-pipeline";
+import { createHttpHeaders, createPipelineRequest } from "@azure/core-rest-pipeline";
+import { getOperationRequestInfo } from "../src/operationHelpers.js";
 import { parseXML } from "@azure/core-xml";
 
 describe("deserializationPolicy", function () {
@@ -684,7 +677,7 @@ describe("deserializationPolicy", function () {
         assert.strictEqual(e.response.parsedBody.code, "ContainerAlreadyExists");
         assert.strictEqual(
           e.response.parsedBody.message,
-          "The specified container already exists."
+          "The specified container already exists.",
         );
       }
     });
@@ -747,6 +740,52 @@ describe("deserializationPolicy", function () {
       assert.notExists(result.parsedHeaders?.["x-ms-bar"]);
       assert.strictEqual(result.parsedBody.extraProp, "An extra property value");
     });
+
+    it(`json response body with null value`, async function () {
+      const BodyMapper: CompositeMapper = {
+        serializedName: "getproperties-body",
+        type: {
+          name: "Composite",
+          className: "PropertiesBody",
+          modelProperties: {
+            message: {
+              serializedName: "message",
+              type: {
+                name: "String",
+              },
+            },
+            status: {
+              serializedName: "properties.status",
+              type: {
+                name: "String",
+              },
+            },
+          },
+        },
+      };
+
+      const serializer = createSerializer({ BodyMapper }, false);
+
+      const operationSpec: OperationSpec = {
+        httpMethod: "GET",
+        responses: {
+          200: {
+            bodyMapper: BodyMapper,
+          },
+        },
+        serializer,
+      };
+
+      const result = await getDeserializedResponse({
+        operationSpec,
+        bodyAsText: '{"message": null, "extraProp": "An extra property value", "properties": null}',
+        status: 200,
+      });
+      assert.exists(result);
+      assert.isNull(result.parsedBody.message);
+      assert.isUndefined(result.parsedBody.status);
+      assert.strictEqual(result.parsedBody.extraProp, "An extra property value");
+    });
   });
 });
 
@@ -759,7 +798,7 @@ async function getDeserializedResponse(
     bodyAsText?: string;
     xmlContentTypes?: string[];
     serializerOptions?: SerializerOptions;
-  } = {}
+  } = {},
 ): Promise<FullOperationResponse> {
   const policy = deserializationPolicy({
     expectedContentTypes: { xml: options.xmlContentTypes },
@@ -777,8 +816,8 @@ async function getDeserializedResponse(
     bodyAsText: options.bodyAsText,
     status: options.status ?? 200,
   };
-  const next = sinon.stub<Parameters<SendRequest>, ReturnType<SendRequest>>();
-  next.resolves(res);
+  const next = vi.fn<SendRequest>();
+  next.mockResolvedValue(res);
 
   const response = await policy.sendRequest(request, next);
   return response;

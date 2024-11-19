@@ -1,23 +1,27 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { MetricAttributes } from "@opentelemetry/api";
-import { DataPointType, Histogram, ResourceMetrics } from "@opentelemetry/sdk-metrics";
-import {
+import type { Attributes } from "@opentelemetry/api";
+import type { Histogram, ResourceMetrics } from "@opentelemetry/sdk-metrics";
+import { DataPointType } from "@opentelemetry/sdk-metrics";
+import type {
   TelemetryItem as Envelope,
   MetricsData,
   MetricDataPoint,
-  KnownContextTagKeys,
-} from "../generated";
-import { Tags } from "../types";
-import {
-  PreAggregatedMetricPropertyNames,
-  StandardMetricIds,
-  StandardMetrics,
-} from "./constants/applicationinsights";
-import { createTagsFromResource, getDependencyTarget } from "./common";
+} from "../generated/index.js";
+import { createTagsFromResource } from "./common.js";
+import { BreezePerformanceCounterNames, OTelPerformanceCounterNames } from "../types.js";
 
-function createPropertiesFromMetricAttributes(attributes?: MetricAttributes): {
+const breezePerformanceCountersMap = new Map<string, string>([
+  [OTelPerformanceCounterNames.PRIVATE_BYTES, BreezePerformanceCounterNames.PRIVATE_BYTES],
+  [OTelPerformanceCounterNames.AVAILABLE_BYTES, BreezePerformanceCounterNames.AVAILABLE_BYTES],
+  [OTelPerformanceCounterNames.PROCESSOR_TIME, BreezePerformanceCounterNames.PROCESSOR_TIME],
+  [OTelPerformanceCounterNames.PROCESS_TIME, BreezePerformanceCounterNames.PROCESS_TIME],
+  [OTelPerformanceCounterNames.REQUEST_RATE, BreezePerformanceCounterNames.REQUEST_RATE],
+  [OTelPerformanceCounterNames.REQUEST_DURATION, BreezePerformanceCounterNames.REQUEST_DURATION],
+]);
+
+function createPropertiesFromMetricAttributes(attributes?: Attributes): {
   [propertyName: string]: string;
 } {
   const properties: { [propertyName: string]: string } = {};
@@ -36,9 +40,9 @@ function createPropertiesFromMetricAttributes(attributes?: MetricAttributes): {
 export function resourceMetricsToEnvelope(
   metrics: ResourceMetrics,
   ikey: string,
-  isStatsbeat?: boolean
+  isStatsbeat?: boolean,
 ): Envelope[] {
-  let envelopes: Envelope[] = [];
+  const envelopes: Envelope[] = [];
   const time = new Date();
   const instrumentationKey = ikey;
   const tags = createTagsFromResource(metrics.resource);
@@ -52,30 +56,25 @@ export function resourceMetricsToEnvelope(
 
   metrics.scopeMetrics.forEach((scopeMetric) => {
     scopeMetric.metrics.forEach((metric) => {
-      const isStandardMetric = metric.descriptor?.name?.startsWith("azureMonitor.");
       metric.dataPoints.forEach((dataPoint) => {
-        let baseData: MetricsData = {
+        const baseData: MetricsData = {
           metrics: [],
           version: 2,
           properties: {},
         };
-        if (isStandardMetric) {
-          baseData.properties = createStandardMetricsProperties(
-            metric.descriptor.name,
-            dataPoint.attributes,
-            tags
-          );
-        } else {
-          baseData.properties = createPropertiesFromMetricAttributes(dataPoint.attributes);
+        baseData.properties = createPropertiesFromMetricAttributes(dataPoint.attributes);
+        let perfCounterName;
+        if (breezePerformanceCountersMap.has(metric.descriptor.name)) {
+          perfCounterName = breezePerformanceCountersMap.get(metric.descriptor.name);
         }
-        var metricDataPoint: MetricDataPoint = {
-          name: metric.descriptor.name,
+        const metricDataPoint: MetricDataPoint = {
+          name: perfCounterName ? perfCounterName : metric.descriptor.name,
           value: 0,
           dataPointType: "Aggregation",
         };
         if (
-          metric.dataPointType == DataPointType.SUM ||
-          metric.dataPointType == DataPointType.GAUGE
+          metric.dataPointType === DataPointType.SUM ||
+          metric.dataPointType === DataPointType.GAUGE
         ) {
           metricDataPoint.value = dataPoint.value as number;
           metricDataPoint.count = 1;
@@ -86,7 +85,7 @@ export function resourceMetricsToEnvelope(
           metricDataPoint.min = (dataPoint.value as Histogram).min;
         }
         baseData.metrics.push(metricDataPoint);
-        let envelope: Envelope = {
+        const envelope: Envelope = {
           name: envelopeName,
           time: time,
           sampleRate: 100, // Metrics are never sampled
@@ -106,41 +105,4 @@ export function resourceMetricsToEnvelope(
   });
 
   return envelopes;
-}
-
-function createStandardMetricsProperties(
-  name: string,
-  attributes: MetricAttributes,
-  tags: Tags
-): {
-  [propertyName: string]: string;
-} {
-  const properties: { [propertyName: string]: string } = {};
-  properties[PreAggregatedMetricPropertyNames.IsAutocollected] = "True";
-  properties[PreAggregatedMetricPropertyNames.cloudRoleInstance] =
-    tags[KnownContextTagKeys.AiCloudRoleInstance];
-  properties[PreAggregatedMetricPropertyNames.cloudRoleName] =
-    tags[KnownContextTagKeys.AiCloudRole];
-
-  if (name == StandardMetrics.HTTP_REQUEST_DURATION) {
-    properties[PreAggregatedMetricPropertyNames.metricId] = StandardMetricIds.REQUEST_DURATION;
-    let statusCode = String(attributes["http.status_code"]);
-    properties[PreAggregatedMetricPropertyNames.requestResultCode] = statusCode;
-    properties[PreAggregatedMetricPropertyNames.requestSuccess] =
-      statusCode == "200" ? "True" : "False";
-  } else if (name == StandardMetrics.HTTP_DEPENDENCY_DURATION) {
-    properties[PreAggregatedMetricPropertyNames.metricId] = StandardMetricIds.DEPENDENCY_DURATION;
-    let statusCode = String(attributes["http.status_code"]);
-    properties[PreAggregatedMetricPropertyNames.dependencyTarget] = getDependencyTarget(attributes);
-    properties[PreAggregatedMetricPropertyNames.dependencyResultCode] = statusCode;
-    properties[PreAggregatedMetricPropertyNames.dependencyType] = "http";
-    properties[PreAggregatedMetricPropertyNames.dependencySuccess] =
-      statusCode == "200" ? "True" : "False";
-  } else if (name == StandardMetrics.TRACE_COUNT) {
-    properties[PreAggregatedMetricPropertyNames.metricId] = StandardMetricIds.TRACE_COUNT;
-  } else if (name == StandardMetrics.EXCEPTION_COUNT) {
-    properties[PreAggregatedMetricPropertyNames.metricId] = StandardMetricIds.EXCEPTION_COUNT;
-  }
-
-  return properties;
 }

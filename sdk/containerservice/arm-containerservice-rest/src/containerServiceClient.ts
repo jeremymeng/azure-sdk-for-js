@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { ClientOptions, getClient } from "@azure-rest/core-client";
-import { TokenCredential } from "@azure/core-auth";
-import { ContainerServiceClient } from "./clientDefinitions";
+import type { ClientOptions } from "@azure-rest/core-client";
+import { getClient } from "@azure-rest/core-client";
+import type { TokenCredential } from "@azure/core-auth";
+import type { ContainerServiceClient } from "./clientDefinitions";
 import { customizedApiVersionPolicy } from "./customizedApiVersionPolicy";
 
 export default function createClient(
   credentials: TokenCredential,
-  options: ClientOptions = {}
+  options: ClientOptions = {},
 ): ContainerServiceClient {
   const baseUrl = options.baseUrl ?? "https://management.azure.com";
   options.apiVersion = options.apiVersion ?? "2022-05-02-preview";

@@ -1,22 +1,30 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { TokenCredential } from "@azure/core-auth";
-import { CommonClientOptions } from "@azure/core-client";
-import { GeneratedMonitorIngestionClient } from "./generated";
-import { UploadLogsError, UploadLogsOptions, UploadLogsResult } from "./models";
-import { GZippingPolicy } from "./gZippingPolicy";
-import { concurrentRun } from "./utils/concurrentPoolHelper";
-import { splitDataToChunks } from "./utils/splitDataToChunksHelper";
-
+import type { TokenCredential } from "@azure/core-auth";
+import type { CommonClientOptions } from "@azure/core-client";
+import { GeneratedMonitorIngestionClient } from "./generated/index.js";
+import type { LogsUploadFailure, LogsUploadOptions } from "./models.js";
+import { AggregateLogsUploadError } from "./models.js";
+import { GZippingPolicy } from "./gZippingPolicy.js";
+import { concurrentRun } from "./utils/concurrentPoolHelper.js";
+import { splitDataToChunks } from "./utils/splitDataToChunksHelper.js";
+import { isError } from "@azure/core-util";
+import { KnownMonitorAudience } from "./constants.js";
 /**
  * Options for Monitor Logs Ingestion Client
  */
 export interface LogsIngestionClientOptions extends CommonClientOptions {
   /** Api Version */
   apiVersion?: string;
+
+  /**
+   * The Audience to use for authentication with Microsoft Entra ID. The
+   * audience is not considered when using a shared key.
+   * {@link KnownMonitorAudience} can be used interchangeably with audience
+   */
+  audience?: string;
 }
-const defaultIngestionScope = "https://monitor.azure.com//.default";
 const DEFAULT_MAX_CONCURRENCY = 5;
 
 /**
@@ -37,14 +45,18 @@ export class LogsIngestionClient {
   constructor(
     endpoint: string,
     tokenCredential: TokenCredential,
-    options?: LogsIngestionClientOptions
+    options?: LogsIngestionClientOptions,
   ) {
+    const scope: string = options?.audience
+      ? `${options.audience}/.default`
+      : `${KnownMonitorAudience.AzurePublicCloud}/.default`;
+
     this.endpoint = endpoint;
     this._dataClient = new GeneratedMonitorIngestionClient(tokenCredential, this.endpoint, {
       ...options,
-      credentialScopes: defaultIngestionScope,
+      credentialScopes: scope,
     });
-    // adding gziping policy because this is a single method client which needs gzipping
+    // adding gzipping policy because this is a single method client which needs gzipping
     this._dataClient.pipeline.addPolicy(GZippingPolicy);
   }
 
@@ -60,44 +72,42 @@ export class LogsIngestionClient {
     ruleId: string,
     streamName: string,
     logs: Record<string, unknown>[],
-    // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
-    options?: UploadLogsOptions
-  ): Promise<UploadLogsResult> {
+
+    options?: LogsUploadOptions,
+  ): Promise<void> {
     // TODO: Do we need to worry about memory issues when loading data for 100GB ?? JS max allocation is 1 or 2GB
 
     // This splits logs into 1MB chunks
     const chunkArray = splitDataToChunks(logs);
-    const noOfChunks = chunkArray.length;
     const concurrency = Math.max(options?.maxConcurrency ?? DEFAULT_MAX_CONCURRENCY, 1);
 
-    const uploadResultErrors: Array<UploadLogsError> = [];
-    await concurrentRun(concurrency, chunkArray, async (eachChunk): Promise<void> => {
-      try {
-        await this._dataClient.upload(ruleId, streamName, eachChunk, {
-          contentEncoding: "gzip",
-        });
-      } catch (e: any) {
-        uploadResultErrors.push({
-          cause: e,
-          failedLogs: eachChunk,
-        });
-      }
-    });
-
-    if (uploadResultErrors.length === 0) {
-      return {
-        status: "Success",
-      };
-    } else if (uploadResultErrors.length < noOfChunks && uploadResultErrors.length > 0) {
-      return {
-        errors: uploadResultErrors,
-        status: "PartialFailure",
-      };
-    } else {
-      return {
-        errors: uploadResultErrors,
-        status: "Failure",
-      };
+    const uploadResultErrors: Array<LogsUploadFailure> = [];
+    await concurrentRun(
+      concurrency,
+      chunkArray,
+      async (eachChunk): Promise<void> => {
+        try {
+          await this._dataClient.upload(ruleId, streamName, eachChunk, {
+            contentEncoding: "gzip",
+            abortSignal: options?.abortSignal,
+          });
+        } catch (e: unknown) {
+          if (options?.onError) {
+            options.onError({
+              failedLogs: eachChunk,
+              cause: isError(e) ? e : new Error(e as string),
+            });
+          }
+          uploadResultErrors.push({
+            cause: isError(e) ? e : new Error(e as string),
+            failedLogs: eachChunk,
+          });
+        }
+      },
+      options?.abortSignal,
+    );
+    if (uploadResultErrors.length > 0) {
+      throw new AggregateLogsUploadError(uploadResultErrors);
     }
   }
 }

@@ -6,56 +6,116 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { VmmServers } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { Scvmm } from "../scvmm";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import { ScVmm } from "../scVmm";
 import {
-  VMMServer,
-  VmmServersListByResourceGroupNextOptionalParams,
-  VmmServersListByResourceGroupOptionalParams,
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
+import {
+  VmmServer,
   VmmServersListBySubscriptionNextOptionalParams,
   VmmServersListBySubscriptionOptionalParams,
+  VmmServersListBySubscriptionResponse,
+  VmmServersListByResourceGroupNextOptionalParams,
+  VmmServersListByResourceGroupOptionalParams,
+  VmmServersListByResourceGroupResponse,
   VmmServersGetOptionalParams,
   VmmServersGetResponse,
   VmmServersCreateOrUpdateOptionalParams,
   VmmServersCreateOrUpdateResponse,
-  VmmServersDeleteOptionalParams,
-  ResourcePatch,
+  VmmServerTagsUpdate,
   VmmServersUpdateOptionalParams,
   VmmServersUpdateResponse,
-  VmmServersListByResourceGroupResponse,
-  VmmServersListBySubscriptionResponse,
+  VmmServersDeleteOptionalParams,
+  VmmServersDeleteResponse,
+  VmmServersListBySubscriptionNextResponse,
   VmmServersListByResourceGroupNextResponse,
-  VmmServersListBySubscriptionNextResponse
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing VmmServers operations. */
 export class VmmServersImpl implements VmmServers {
-  private readonly client: Scvmm;
+  private readonly client: ScVmm;
 
   /**
    * Initialize a new instance of the class VmmServers class.
    * @param client Reference to the service client
    */
-  constructor(client: Scvmm) {
+  constructor(client: ScVmm) {
     this.client = client;
   }
 
   /**
+   * List of VmmServers in a subscription.
+   * @param options The options parameters.
+   */
+  public listBySubscription(
+    options?: VmmServersListBySubscriptionOptionalParams,
+  ): PagedAsyncIterableIterator<VmmServer> {
+    const iter = this.listBySubscriptionPagingAll(options);
+    return {
+      next() {
+        return iter.next();
+      },
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listBySubscriptionPagingPage(options, settings);
+      },
+    };
+  }
+
+  private async *listBySubscriptionPagingPage(
+    options?: VmmServersListBySubscriptionOptionalParams,
+    settings?: PageSettings,
+  ): AsyncIterableIterator<VmmServer[]> {
+    let result: VmmServersListBySubscriptionResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listBySubscription(options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
+    while (continuationToken) {
+      result = await this._listBySubscriptionNext(continuationToken, options);
+      continuationToken = result.nextLink;
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
+  }
+
+  private async *listBySubscriptionPagingAll(
+    options?: VmmServersListBySubscriptionOptionalParams,
+  ): AsyncIterableIterator<VmmServer> {
+    for await (const page of this.listBySubscriptionPagingPage(options)) {
+      yield* page;
+    }
+  }
+
+  /**
    * List of VmmServers in a resource group.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param options The options parameters.
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: VmmServersListByResourceGroupOptionalParams
-  ): PagedAsyncIterableIterator<VMMServer> {
+    options?: VmmServersListByResourceGroupOptionalParams,
+  ): PagedAsyncIterableIterator<VmmServer> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
       next() {
@@ -64,37 +124,53 @@ export class VmmServersImpl implements VmmServers {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listByResourceGroupPagingPage(resourceGroupName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listByResourceGroupPagingPage(
+          resourceGroupName,
+          options,
+          settings,
+        );
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
-    options?: VmmServersListByResourceGroupOptionalParams
-  ): AsyncIterableIterator<VMMServer[]> {
-    let result = await this._listByResourceGroup(resourceGroupName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    options?: VmmServersListByResourceGroupOptionalParams,
+    settings?: PageSettings,
+  ): AsyncIterableIterator<VmmServer[]> {
+    let result: VmmServersListByResourceGroupResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByResourceGroup(resourceGroupName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: VmmServersListByResourceGroupOptionalParams
-  ): AsyncIterableIterator<VMMServer> {
+    options?: VmmServersListByResourceGroupOptionalParams,
+  ): AsyncIterableIterator<VmmServer> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -104,96 +180,81 @@ export class VmmServersImpl implements VmmServers {
    * List of VmmServers in a subscription.
    * @param options The options parameters.
    */
-  public listBySubscription(
-    options?: VmmServersListBySubscriptionOptionalParams
-  ): PagedAsyncIterableIterator<VMMServer> {
-    const iter = this.listBySubscriptionPagingAll(options);
-    return {
-      next() {
-        return iter.next();
-      },
-      [Symbol.asyncIterator]() {
-        return this;
-      },
-      byPage: () => {
-        return this.listBySubscriptionPagingPage(options);
-      }
-    };
-  }
-
-  private async *listBySubscriptionPagingPage(
-    options?: VmmServersListBySubscriptionOptionalParams
-  ): AsyncIterableIterator<VMMServer[]> {
-    let result = await this._listBySubscription(options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
-    while (continuationToken) {
-      result = await this._listBySubscriptionNext(continuationToken, options);
-      continuationToken = result.nextLink;
-      yield result.value || [];
-    }
-  }
-
-  private async *listBySubscriptionPagingAll(
-    options?: VmmServersListBySubscriptionOptionalParams
-  ): AsyncIterableIterator<VMMServer> {
-    for await (const page of this.listBySubscriptionPagingPage(options)) {
-      yield* page;
-    }
+  private _listBySubscription(
+    options?: VmmServersListBySubscriptionOptionalParams,
+  ): Promise<VmmServersListBySubscriptionResponse> {
+    return this.client.sendOperationRequest(
+      { options },
+      listBySubscriptionOperationSpec,
+    );
   }
 
   /**
-   * Implements VMMServer GET method.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
+   * List of VmmServers in a resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param options The options parameters.
+   */
+  private _listByResourceGroup(
+    resourceGroupName: string,
+    options?: VmmServersListByResourceGroupOptionalParams,
+  ): Promise<VmmServersListByResourceGroupResponse> {
+    return this.client.sendOperationRequest(
+      { resourceGroupName, options },
+      listByResourceGroupOperationSpec,
+    );
+  }
+
+  /**
+   * Implements VmmServer GET method.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
    * @param options The options parameters.
    */
   get(
     resourceGroupName: string,
     vmmServerName: string,
-    options?: VmmServersGetOptionalParams
+    options?: VmmServersGetOptionalParams,
   ): Promise<VmmServersGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, vmmServerName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
-   * Onboards the SCVMM fabric as an Azure VmmServer resource.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param body Request payload.
+   * Onboards the SCVmm fabric as an Azure VmmServer resource.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
+   * @param resource Resource create parameters.
    * @param options The options parameters.
    */
   async beginCreateOrUpdate(
     resourceGroupName: string,
     vmmServerName: string,
-    body: VMMServer,
-    options?: VmmServersCreateOrUpdateOptionalParams
+    resource: VmmServer,
+    options?: VmmServersCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VmmServersCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VmmServersCreateOrUpdateResponse>,
       VmmServersCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VmmServersCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -202,8 +263,8 @@ export class VmmServersImpl implements VmmServers {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -211,165 +272,84 @@ export class VmmServersImpl implements VmmServers {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, vmmServerName, body, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, vmmServerName, resource, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VmmServersCreateOrUpdateResponse,
+      OperationState<VmmServersCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Onboards the SCVMM fabric as an Azure VmmServer resource.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param body Request payload.
+   * Onboards the SCVmm fabric as an Azure VmmServer resource.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
+   * @param resource Resource create parameters.
    * @param options The options parameters.
    */
   async beginCreateOrUpdateAndWait(
     resourceGroupName: string,
     vmmServerName: string,
-    body: VMMServer,
-    options?: VmmServersCreateOrUpdateOptionalParams
+    resource: VmmServer,
+    options?: VmmServersCreateOrUpdateOptionalParams,
   ): Promise<VmmServersCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       vmmServerName,
-      body,
-      options
-    );
-    return poller.pollUntilDone();
-  }
-
-  /**
-   * Deboards the SCVMM fabric from Azure.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param options The options parameters.
-   */
-  async beginDelete(
-    resourceGroupName: string,
-    vmmServerName: string,
-    options?: VmmServersDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
-    const directSendOperation = async (
-      args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<void> => {
-      return this.client.sendOperationRequest(args, spec);
-    };
-    const sendOperation = async (
-      args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
-      const providedCallback = args.options?.onResponse;
-      const callback: coreClient.RawResponseCallback = (
-        rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
-      ) => {
-        currentRawResponse = rawResponse;
-        providedCallback?.(rawResponse, flatResponse);
-      };
-      const updatedArgs = {
-        ...args,
-        options: {
-          ...args.options,
-          onResponse: callback
-        }
-      };
-      const flatResponse = await directSendOperation(updatedArgs, spec);
-      return {
-        flatResponse,
-        rawResponse: {
-          statusCode: currentRawResponse!.status,
-          body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
-      };
-    };
-
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, vmmServerName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
-    });
-    await poller.poll();
-    return poller;
-  }
-
-  /**
-   * Deboards the SCVMM fabric from Azure.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param options The options parameters.
-   */
-  async beginDeleteAndWait(
-    resourceGroupName: string,
-    vmmServerName: string,
-    options?: VmmServersDeleteOptionalParams
-  ): Promise<void> {
-    const poller = await this.beginDelete(
-      resourceGroupName,
-      vmmServerName,
-      options
+      resource,
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Updates the VmmServers resource.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param body VmmServers patch payload.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
+   * @param properties The resource properties to be updated.
    * @param options The options parameters.
    */
   async beginUpdate(
     resourceGroupName: string,
     vmmServerName: string,
-    body: ResourcePatch,
-    options?: VmmServersUpdateOptionalParams
+    properties: VmmServerTagsUpdate,
+    options?: VmmServersUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VmmServersUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VmmServersUpdateResponse>,
       VmmServersUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VmmServersUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -378,8 +358,8 @@ export class VmmServersImpl implements VmmServers {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -387,20 +367,23 @@ export class VmmServersImpl implements VmmServers {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, vmmServerName, body, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, vmmServerName, properties, options },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VmmServersUpdateResponse,
+      OperationState<VmmServersUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -408,69 +391,114 @@ export class VmmServersImpl implements VmmServers {
 
   /**
    * Updates the VmmServers resource.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param body VmmServers patch payload.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
+   * @param properties The resource properties to be updated.
    * @param options The options parameters.
    */
   async beginUpdateAndWait(
     resourceGroupName: string,
     vmmServerName: string,
-    body: ResourcePatch,
-    options?: VmmServersUpdateOptionalParams
+    properties: VmmServerTagsUpdate,
+    options?: VmmServersUpdateOptionalParams,
   ): Promise<VmmServersUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       vmmServerName,
-      body,
-      options
+      properties,
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * List of VmmServers in a resource group.
-   * @param resourceGroupName The name of the resource group.
+   * Removes the SCVmm fabric from Azure.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
    * @param options The options parameters.
    */
-  private _listByResourceGroup(
+  async beginDelete(
     resourceGroupName: string,
-    options?: VmmServersListByResourceGroupOptionalParams
-  ): Promise<VmmServersListByResourceGroupResponse> {
-    return this.client.sendOperationRequest(
-      { resourceGroupName, options },
-      listByResourceGroupOperationSpec
-    );
+    vmmServerName: string,
+    options?: VmmServersDeleteOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VmmServersDeleteResponse>,
+      VmmServersDeleteResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<VmmServersDeleteResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, vmmServerName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VmmServersDeleteResponse,
+      OperationState<VmmServersDeleteResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "azure-async-operation",
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
-   * List of VmmServers in a subscription.
+   * Removes the SCVmm fabric from Azure.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
    * @param options The options parameters.
    */
-  private _listBySubscription(
-    options?: VmmServersListBySubscriptionOptionalParams
-  ): Promise<VmmServersListBySubscriptionResponse> {
-    return this.client.sendOperationRequest(
-      { options },
-      listBySubscriptionOperationSpec
-    );
-  }
-
-  /**
-   * ListByResourceGroupNext
-   * @param resourceGroupName The name of the resource group.
-   * @param nextLink The nextLink from the previous successful call to the ListByResourceGroup method.
-   * @param options The options parameters.
-   */
-  private _listByResourceGroupNext(
+  async beginDeleteAndWait(
     resourceGroupName: string,
-    nextLink: string,
-    options?: VmmServersListByResourceGroupNextOptionalParams
-  ): Promise<VmmServersListByResourceGroupNextResponse> {
-    return this.client.sendOperationRequest(
-      { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+    vmmServerName: string,
+    options?: VmmServersDeleteOptionalParams,
+  ): Promise<VmmServersDeleteResponse> {
+    const poller = await this.beginDelete(
+      resourceGroupName,
+      vmmServerName,
+      options,
     );
+    return poller.pollUntilDone();
   }
 
   /**
@@ -480,203 +508,221 @@ export class VmmServersImpl implements VmmServers {
    */
   private _listBySubscriptionNext(
     nextLink: string,
-    options?: VmmServersListBySubscriptionNextOptionalParams
+    options?: VmmServersListBySubscriptionNextOptionalParams,
   ): Promise<VmmServersListBySubscriptionNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listBySubscriptionNextOperationSpec
+      listBySubscriptionNextOperationSpec,
+    );
+  }
+
+  /**
+   * ListByResourceGroupNext
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param nextLink The nextLink from the previous successful call to the ListByResourceGroup method.
+   * @param options The options parameters.
+   */
+  private _listByResourceGroupNext(
+    resourceGroupName: string,
+    nextLink: string,
+    options?: VmmServersListByResourceGroupNextOptionalParams,
+  ): Promise<VmmServersListByResourceGroupNextResponse> {
+    return this.client.sendOperationRequest(
+      { resourceGroupName, nextLink, options },
+      listByResourceGroupNextOperationSpec,
     );
   }
 }
 // Operation Specifications
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}",
+const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.ScVmm/vmmServers",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VMMServer
+      bodyMapper: Mappers.VmmServerListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [Parameters.$host, Parameters.subscriptionId],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.VmmServerListResult,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.vmmServerName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.VmmServer,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.vmmServerName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.VMMServer
+      bodyMapper: Mappers.VmmServer,
     },
     201: {
-      bodyMapper: Mappers.VMMServer
+      bodyMapper: Mappers.VmmServer,
     },
     202: {
-      bodyMapper: Mappers.VMMServer
+      bodyMapper: Mappers.VmmServer,
     },
     204: {
-      bodyMapper: Mappers.VMMServer
+      bodyMapper: Mappers.VmmServer,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  requestBody: Parameters.body,
+  requestBody: Parameters.resource6,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.vmmServerName
+    Parameters.vmmServerName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
+};
+const updateOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}",
+  httpMethod: "PATCH",
+  responses: {
+    200: {
+      bodyMapper: Mappers.VmmServer,
+    },
+    201: {
+      bodyMapper: Mappers.VmmServer,
+    },
+    202: {
+      bodyMapper: Mappers.VmmServer,
+    },
+    204: {
+      bodyMapper: Mappers.VmmServer,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.properties5,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.vmmServerName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}",
   httpMethod: "DELETE",
   responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
+    200: {
+      headersMapper: Mappers.VmmServersDeleteHeaders,
+    },
+    201: {
+      headersMapper: Mappers.VmmServersDeleteHeaders,
+    },
+    202: {
+      headersMapper: Mappers.VmmServersDeleteHeaders,
+    },
+    204: {
+      headersMapper: Mappers.VmmServersDeleteHeaders,
+    },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.force],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.vmmServerName
+    Parameters.vmmServerName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
-};
-const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}",
-  httpMethod: "PATCH",
-  responses: {
-    200: {
-      bodyMapper: Mappers.VMMServer
-    },
-    201: {
-      bodyMapper: Mappers.VMMServer
-    },
-    202: {
-      bodyMapper: Mappers.VMMServer
-    },
-    204: {
-      bodyMapper: Mappers.VMMServer
-    },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  requestBody: Parameters.body1,
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.vmmServerName
-  ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
-const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.VMMServerListResult
-    },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
-  path: "/subscriptions/{subscriptionId}/providers/Microsoft.ScVmm/vmmServers",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.VMMServerListResult
-    },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [Parameters.$host, Parameters.subscriptionId],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.VMMServerListResult
-    },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.nextLink
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listBySubscriptionNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VMMServerListResult
+      bodyMapper: Mappers.VmmServerListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.nextLink,
     Parameters.subscriptionId,
-    Parameters.nextLink
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
+  path: "{nextLink}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.VmmServerListResult,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  urlParameters: [
+    Parameters.$host,
+    Parameters.nextLink,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };

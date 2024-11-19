@@ -1,17 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
-  HttpClient,
-  PipelineRequest,
-  createEmptyPipeline,
-  createHttpHeaders,
-} from "@azure/core-rest-pipeline";
+import type { HttpClient, PipelineRequest } from "@azure/core-rest-pipeline";
+import { createEmptyPipeline, createHttpHeaders } from "@azure/core-rest-pipeline";
 import { apiVersionPolicy } from "../../src/utils/apiVersionPolicy";
 import { assert } from "chai";
 
-describe("apiVersionPolicy", () => {
-  it("should override the default api-version", async () => {
+describe("apiVersionPolicy", function () {
+  it("should override the default api-version", async function () {
     const expectedVersion = "2020-12-06";
     const fakeClient: HttpClient = {
       async sendRequest(req) {

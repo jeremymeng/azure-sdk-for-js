@@ -10,27 +10,37 @@
 // Licensed under the MIT License.
 import { ContainerAppsAPIClient } from "@azure/arm-appcontainers";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
- * This sample demonstrates how to Get all workload Profile States for a Premium Managed Environment.
+ * This sample demonstrates how to Get all workload Profile States for a Managed Environment.
  *
- * @summary Get all workload Profile States for a Premium Managed Environment.
- * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2022-06-01-preview/examples/ManagedEnvironments_ListWorkloadProfileStates.json
+ * @summary Get all workload Profile States for a Managed Environment.
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/ManagedEnvironments_ListWorkloadProfileStates.json
  */
 async function listEnvironmentsBySubscription() {
-  const subscriptionId = "8efdecc5-919e-44eb-b179-915dca89ebf9";
-  const resourceGroupName = "examplerg";
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] ||
+    "8efdecc5-919e-44eb-b179-915dca89ebf9";
+  const resourceGroupName =
+    process.env["APPCONTAINERS_RESOURCE_GROUP"] || "examplerg";
   const environmentName = "jlaw-demo1";
   const credential = new DefaultAzureCredential();
   const client = new ContainerAppsAPIClient(credential, subscriptionId);
   const resArray = new Array();
   for await (let item of client.managedEnvironments.listWorkloadProfileStates(
     resourceGroupName,
-    environmentName
+    environmentName,
   )) {
     resArray.push(item);
   }
   console.log(resArray);
 }
 
-listEnvironmentsBySubscription().catch(console.error);
+async function main() {
+  listEnvironmentsBySubscription();
+}
+
+main().catch(console.error);

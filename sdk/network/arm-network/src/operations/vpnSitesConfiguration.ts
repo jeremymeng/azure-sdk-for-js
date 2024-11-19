@@ -11,11 +11,15 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetworkManagementClient } from "../networkManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   GetVpnSitesConfigurationRequest,
-  VpnSitesConfigurationDownloadOptionalParams
+  VpnSitesConfigurationDownloadOptionalParams,
 } from "../models";
 
 /** Class containing VpnSitesConfiguration operations. */
@@ -41,25 +45,24 @@ export class VpnSitesConfigurationImpl implements VpnSitesConfiguration {
     resourceGroupName: string,
     virtualWANName: string,
     request: GetVpnSitesConfigurationRequest,
-    options?: VpnSitesConfigurationDownloadOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VpnSitesConfigurationDownloadOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -68,8 +71,8 @@ export class VpnSitesConfigurationImpl implements VpnSitesConfiguration {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -77,20 +80,20 @@ export class VpnSitesConfigurationImpl implements VpnSitesConfiguration {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, virtualWANName, request, options },
-      downloadOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, virtualWANName, request, options },
+      spec: downloadOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -107,13 +110,13 @@ export class VpnSitesConfigurationImpl implements VpnSitesConfiguration {
     resourceGroupName: string,
     virtualWANName: string,
     request: GetVpnSitesConfigurationRequest,
-    options?: VpnSitesConfigurationDownloadOptionalParams
+    options?: VpnSitesConfigurationDownloadOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDownload(
       resourceGroupName,
       virtualWANName,
       request,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -122,8 +125,7 @@ export class VpnSitesConfigurationImpl implements VpnSitesConfiguration {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const downloadOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualWans/{virtualWANName}/vpnConfiguration",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualWans/{virtualWANName}/vpnConfiguration",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -131,8 +133,8 @@ const downloadOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.request2,
   queryParameters: [Parameters.apiVersion],
@@ -140,9 +142,9 @@ const downloadOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.virtualWANName
+    Parameters.virtualWANName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };

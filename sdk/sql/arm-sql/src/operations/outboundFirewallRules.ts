@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SqlManagementClient } from "../sqlManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   OutboundFirewallRule,
   OutboundFirewallRulesListByServerNextOptionalParams,
@@ -25,7 +29,7 @@ import {
   OutboundFirewallRulesCreateOrUpdateOptionalParams,
   OutboundFirewallRulesCreateOrUpdateResponse,
   OutboundFirewallRulesDeleteOptionalParams,
-  OutboundFirewallRulesListByServerNextResponse
+  OutboundFirewallRulesListByServerNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -51,12 +55,12 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
   public listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: OutboundFirewallRulesListByServerOptionalParams
+    options?: OutboundFirewallRulesListByServerOptionalParams,
   ): PagedAsyncIterableIterator<OutboundFirewallRule> {
     const iter = this.listByServerPagingAll(
       resourceGroupName,
       serverName,
-      options
+      options,
     );
     return {
       next() {
@@ -73,9 +77,9 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
           resourceGroupName,
           serverName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -83,7 +87,7 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
     resourceGroupName: string,
     serverName: string,
     options?: OutboundFirewallRulesListByServerOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<OutboundFirewallRule[]> {
     let result: OutboundFirewallRulesListByServerResponse;
     let continuationToken = settings?.continuationToken;
@@ -99,7 +103,7 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
         resourceGroupName,
         serverName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -111,12 +115,12 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
   private async *listByServerPagingAll(
     resourceGroupName: string,
     serverName: string,
-    options?: OutboundFirewallRulesListByServerOptionalParams
+    options?: OutboundFirewallRulesListByServerOptionalParams,
   ): AsyncIterableIterator<OutboundFirewallRule> {
     for await (const page of this.listByServerPagingPage(
       resourceGroupName,
       serverName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -134,11 +138,11 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
     resourceGroupName: string,
     serverName: string,
     outboundRuleFqdn: string,
-    options?: OutboundFirewallRulesGetOptionalParams
+    options?: OutboundFirewallRulesGetOptionalParams,
   ): Promise<OutboundFirewallRulesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, outboundRuleFqdn, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -156,30 +160,29 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
     serverName: string,
     outboundRuleFqdn: string,
     parameters: OutboundFirewallRule,
-    options?: OutboundFirewallRulesCreateOrUpdateOptionalParams
+    options?: OutboundFirewallRulesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<OutboundFirewallRulesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<OutboundFirewallRulesCreateOrUpdateResponse>,
       OutboundFirewallRulesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<OutboundFirewallRulesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -188,8 +191,8 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -197,19 +200,28 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, serverName, outboundRuleFqdn, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        serverName,
+        outboundRuleFqdn,
+        parameters,
+        options,
+      },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      OutboundFirewallRulesCreateOrUpdateResponse,
+      OperationState<OutboundFirewallRulesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -229,14 +241,14 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
     serverName: string,
     outboundRuleFqdn: string,
     parameters: OutboundFirewallRule,
-    options?: OutboundFirewallRulesCreateOrUpdateOptionalParams
+    options?: OutboundFirewallRulesCreateOrUpdateOptionalParams,
   ): Promise<OutboundFirewallRulesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       serverName,
       outboundRuleFqdn,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -253,25 +265,24 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
     resourceGroupName: string,
     serverName: string,
     outboundRuleFqdn: string,
-    options?: OutboundFirewallRulesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: OutboundFirewallRulesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -280,8 +291,8 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -289,19 +300,19 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, serverName, outboundRuleFqdn, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, serverName, outboundRuleFqdn, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -319,13 +330,13 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
     resourceGroupName: string,
     serverName: string,
     outboundRuleFqdn: string,
-    options?: OutboundFirewallRulesDeleteOptionalParams
+    options?: OutboundFirewallRulesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       serverName,
       outboundRuleFqdn,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -340,11 +351,11 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
   private _listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: OutboundFirewallRulesListByServerOptionalParams
+    options?: OutboundFirewallRulesListByServerOptionalParams,
   ): Promise<OutboundFirewallRulesListByServerResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, options },
-      listByServerOperationSpec
+      listByServerOperationSpec,
     );
   }
 
@@ -360,11 +371,11 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
     resourceGroupName: string,
     serverName: string,
     nextLink: string,
-    options?: OutboundFirewallRulesListByServerNextOptionalParams
+    options?: OutboundFirewallRulesListByServerNextOptionalParams,
   ): Promise<OutboundFirewallRulesListByServerNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, nextLink, options },
-      listByServerNextOperationSpec
+      listByServerNextOperationSpec,
     );
   }
 }
@@ -372,109 +383,105 @@ export class OutboundFirewallRulesImpl implements OutboundFirewallRules {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/outboundFirewallRules/{outboundRuleFqdn}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/outboundFirewallRules/{outboundRuleFqdn}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.OutboundFirewallRule
+      bodyMapper: Mappers.OutboundFirewallRule,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion6],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.outboundRuleFqdn
+    Parameters.outboundRuleFqdn,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/outboundFirewallRules/{outboundRuleFqdn}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/outboundFirewallRules/{outboundRuleFqdn}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.OutboundFirewallRule
+      bodyMapper: Mappers.OutboundFirewallRule,
     },
     201: {
-      bodyMapper: Mappers.OutboundFirewallRule
+      bodyMapper: Mappers.OutboundFirewallRule,
     },
     202: {
-      bodyMapper: Mappers.OutboundFirewallRule
+      bodyMapper: Mappers.OutboundFirewallRule,
     },
     204: {
-      bodyMapper: Mappers.OutboundFirewallRule
+      bodyMapper: Mappers.OutboundFirewallRule,
     },
-    default: {}
+    default: {},
   },
-  requestBody: Parameters.parameters79,
-  queryParameters: [Parameters.apiVersion3],
+  requestBody: Parameters.parameters61,
+  queryParameters: [Parameters.apiVersion6],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.outboundRuleFqdn
+    Parameters.outboundRuleFqdn,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/outboundFirewallRules/{outboundRuleFqdn}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/outboundFirewallRules/{outboundRuleFqdn}",
   httpMethod: "DELETE",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion6],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.outboundRuleFqdn
+    Parameters.outboundRuleFqdn,
   ],
-  serializer
+  serializer,
 };
 const listByServerOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/outboundFirewallRules",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/outboundFirewallRules",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.OutboundFirewallRuleListResult
+      bodyMapper: Mappers.OutboundFirewallRuleListResult,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion6],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.serverName
+    Parameters.serverName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByServerNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.OutboundFirewallRuleListResult
+      bodyMapper: Mappers.OutboundFirewallRuleListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

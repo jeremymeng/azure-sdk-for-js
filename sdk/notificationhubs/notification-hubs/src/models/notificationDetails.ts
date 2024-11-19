@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * Represents the notification outcome states.
@@ -99,6 +99,11 @@ export interface NotificationDetails {
   fcmOutcomeCounts?: NotificationOutcome[];
 
   /**
+   * FCM V1 outcome counts per state.
+   */
+  fcmV1OutcomeCounts?: NotificationOutcome[];
+
+  /**
    * ADM outcome counts per state.
    */
   admOutcomeCounts?: NotificationOutcome[];
@@ -112,6 +117,11 @@ export interface NotificationDetails {
    * Web Push outcome counts per state.
    */
   browserOutcomeCounts?: NotificationOutcome[];
+
+  /**
+   * Xiaomi outcome counts per state.
+   */
+  xiaomiOutcomeCounts?: NotificationOutcome[];
 }
 
 /**

@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { EventGridManagementClient } from "../eventGridManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   SystemTopic,
   SystemTopicsListBySubscriptionNextOptionalParams,
@@ -32,7 +36,7 @@ import {
   SystemTopicsUpdateOptionalParams,
   SystemTopicsUpdateResponse,
   SystemTopicsListBySubscriptionNextResponse,
-  SystemTopicsListByResourceGroupNextResponse
+  SystemTopicsListByResourceGroupNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -53,7 +57,7 @@ export class SystemTopicsImpl implements SystemTopics {
    * @param options The options parameters.
    */
   public listBySubscription(
-    options?: SystemTopicsListBySubscriptionOptionalParams
+    options?: SystemTopicsListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<SystemTopic> {
     const iter = this.listBySubscriptionPagingAll(options);
     return {
@@ -68,13 +72,13 @@ export class SystemTopicsImpl implements SystemTopics {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listBySubscriptionPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listBySubscriptionPagingPage(
     options?: SystemTopicsListBySubscriptionOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<SystemTopic[]> {
     let result: SystemTopicsListBySubscriptionResponse;
     let continuationToken = settings?.continuationToken;
@@ -95,7 +99,7 @@ export class SystemTopicsImpl implements SystemTopics {
   }
 
   private async *listBySubscriptionPagingAll(
-    options?: SystemTopicsListBySubscriptionOptionalParams
+    options?: SystemTopicsListBySubscriptionOptionalParams,
   ): AsyncIterableIterator<SystemTopic> {
     for await (const page of this.listBySubscriptionPagingPage(options)) {
       yield* page;
@@ -109,7 +113,7 @@ export class SystemTopicsImpl implements SystemTopics {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: SystemTopicsListByResourceGroupOptionalParams
+    options?: SystemTopicsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<SystemTopic> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -126,16 +130,16 @@ export class SystemTopicsImpl implements SystemTopics {
         return this.listByResourceGroupPagingPage(
           resourceGroupName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
     options?: SystemTopicsListByResourceGroupOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<SystemTopic[]> {
     let result: SystemTopicsListByResourceGroupResponse;
     let continuationToken = settings?.continuationToken;
@@ -150,7 +154,7 @@ export class SystemTopicsImpl implements SystemTopics {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -161,11 +165,11 @@ export class SystemTopicsImpl implements SystemTopics {
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: SystemTopicsListByResourceGroupOptionalParams
+    options?: SystemTopicsListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<SystemTopic> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -180,11 +184,11 @@ export class SystemTopicsImpl implements SystemTopics {
   get(
     resourceGroupName: string,
     systemTopicName: string,
-    options?: SystemTopicsGetOptionalParams
+    options?: SystemTopicsGetOptionalParams,
   ): Promise<SystemTopicsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, systemTopicName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -199,30 +203,29 @@ export class SystemTopicsImpl implements SystemTopics {
     resourceGroupName: string,
     systemTopicName: string,
     systemTopicInfo: SystemTopic,
-    options?: SystemTopicsCreateOrUpdateOptionalParams
+    options?: SystemTopicsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SystemTopicsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<SystemTopicsCreateOrUpdateResponse>,
       SystemTopicsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<SystemTopicsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -231,8 +234,8 @@ export class SystemTopicsImpl implements SystemTopics {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -240,19 +243,22 @@ export class SystemTopicsImpl implements SystemTopics {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, systemTopicName, systemTopicInfo, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, systemTopicName, systemTopicInfo, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      SystemTopicsCreateOrUpdateResponse,
+      OperationState<SystemTopicsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -269,13 +275,13 @@ export class SystemTopicsImpl implements SystemTopics {
     resourceGroupName: string,
     systemTopicName: string,
     systemTopicInfo: SystemTopic,
-    options?: SystemTopicsCreateOrUpdateOptionalParams
+    options?: SystemTopicsCreateOrUpdateOptionalParams,
   ): Promise<SystemTopicsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       systemTopicName,
       systemTopicInfo,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -289,25 +295,24 @@ export class SystemTopicsImpl implements SystemTopics {
   async beginDelete(
     resourceGroupName: string,
     systemTopicName: string,
-    options?: SystemTopicsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: SystemTopicsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -316,8 +321,8 @@ export class SystemTopicsImpl implements SystemTopics {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -325,19 +330,19 @@ export class SystemTopicsImpl implements SystemTopics {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, systemTopicName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, systemTopicName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -352,12 +357,12 @@ export class SystemTopicsImpl implements SystemTopics {
   async beginDeleteAndWait(
     resourceGroupName: string,
     systemTopicName: string,
-    options?: SystemTopicsDeleteOptionalParams
+    options?: SystemTopicsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       systemTopicName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -373,30 +378,29 @@ export class SystemTopicsImpl implements SystemTopics {
     resourceGroupName: string,
     systemTopicName: string,
     systemTopicUpdateParameters: SystemTopicUpdateParameters,
-    options?: SystemTopicsUpdateOptionalParams
+    options?: SystemTopicsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SystemTopicsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<SystemTopicsUpdateResponse>,
       SystemTopicsUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<SystemTopicsUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -405,8 +409,8 @@ export class SystemTopicsImpl implements SystemTopics {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -414,24 +418,27 @@ export class SystemTopicsImpl implements SystemTopics {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         systemTopicName,
         systemTopicUpdateParameters,
-        options
+        options,
       },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      SystemTopicsUpdateResponse,
+      OperationState<SystemTopicsUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -448,13 +455,13 @@ export class SystemTopicsImpl implements SystemTopics {
     resourceGroupName: string,
     systemTopicName: string,
     systemTopicUpdateParameters: SystemTopicUpdateParameters,
-    options?: SystemTopicsUpdateOptionalParams
+    options?: SystemTopicsUpdateOptionalParams,
   ): Promise<SystemTopicsUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       systemTopicName,
       systemTopicUpdateParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -464,11 +471,11 @@ export class SystemTopicsImpl implements SystemTopics {
    * @param options The options parameters.
    */
   private _listBySubscription(
-    options?: SystemTopicsListBySubscriptionOptionalParams
+    options?: SystemTopicsListBySubscriptionOptionalParams,
   ): Promise<SystemTopicsListBySubscriptionResponse> {
     return this.client.sendOperationRequest(
       { options },
-      listBySubscriptionOperationSpec
+      listBySubscriptionOperationSpec,
     );
   }
 
@@ -479,11 +486,11 @@ export class SystemTopicsImpl implements SystemTopics {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: SystemTopicsListByResourceGroupOptionalParams
+    options?: SystemTopicsListByResourceGroupOptionalParams,
   ): Promise<SystemTopicsListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -494,11 +501,11 @@ export class SystemTopicsImpl implements SystemTopics {
    */
   private _listBySubscriptionNext(
     nextLink: string,
-    options?: SystemTopicsListBySubscriptionNextOptionalParams
+    options?: SystemTopicsListBySubscriptionNextOptionalParams,
   ): Promise<SystemTopicsListBySubscriptionNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listBySubscriptionNextOperationSpec
+      listBySubscriptionNextOperationSpec,
     );
   }
 
@@ -511,11 +518,11 @@ export class SystemTopicsImpl implements SystemTopics {
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: SystemTopicsListByResourceGroupNextOptionalParams
+    options?: SystemTopicsListByResourceGroupNextOptionalParams,
   ): Promise<SystemTopicsListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 }
@@ -523,43 +530,41 @@ export class SystemTopicsImpl implements SystemTopics {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{systemTopicName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{systemTopicName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SystemTopic
+      bodyMapper: Mappers.SystemTopic,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.systemTopicName
+    Parameters.systemTopicName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{systemTopicName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{systemTopicName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.SystemTopic
+      bodyMapper: Mappers.SystemTopic,
     },
     201: {
-      bodyMapper: Mappers.SystemTopic
+      bodyMapper: Mappers.SystemTopic,
     },
     202: {
-      bodyMapper: Mappers.SystemTopic
+      bodyMapper: Mappers.SystemTopic,
     },
     204: {
-      bodyMapper: Mappers.SystemTopic
+      bodyMapper: Mappers.SystemTopic,
     },
-    default: {}
+    default: {},
   },
   requestBody: Parameters.systemTopicInfo,
   queryParameters: [Parameters.apiVersion],
@@ -567,15 +572,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.systemTopicName
+    Parameters.systemTopicName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{systemTopicName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{systemTopicName}",
   httpMethod: "DELETE",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
   queryParameters: [Parameters.apiVersion],
@@ -583,28 +587,27 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.systemTopicName
+    Parameters.systemTopicName,
   ],
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{systemTopicName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics/{systemTopicName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.SystemTopic
+      bodyMapper: Mappers.SystemTopic,
     },
     201: {
-      bodyMapper: Mappers.SystemTopic
+      bodyMapper: Mappers.SystemTopic,
     },
     202: {
-      bodyMapper: Mappers.SystemTopic
+      bodyMapper: Mappers.SystemTopic,
     },
     204: {
-      bodyMapper: Mappers.SystemTopic
+      bodyMapper: Mappers.SystemTopic,
     },
-    default: {}
+    default: {},
   },
   requestBody: Parameters.systemTopicUpdateParameters,
   queryParameters: [Parameters.apiVersion],
@@ -612,78 +615,76 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.systemTopicName
+    Parameters.systemTopicName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/systemTopics",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/systemTopics",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SystemTopicsListResult
+      bodyMapper: Mappers.SystemTopicsListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [Parameters.apiVersion, Parameters.filter, Parameters.top],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/systemTopics",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SystemTopicsListResult
+      bodyMapper: Mappers.SystemTopicsListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [Parameters.apiVersion, Parameters.filter, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listBySubscriptionNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SystemTopicsListResult
+      bodyMapper: Mappers.SystemTopicsListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SystemTopicsListResult
+      bodyMapper: Mappers.SystemTopicsListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -1,9 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { createTracingClient, TracingSpanOptions, TracingSpanKind } from "@azure/core-tracing";
-import { ConnectionConfig } from "@azure/core-amqp";
-import { packageJsonInfo } from "../util/constants";
+import type { TracingSpanOptions, TracingSpanKind } from "@azure/core-tracing";
+import { createTracingClient } from "@azure/core-tracing";
+import type { ConnectionConfig } from "@azure/core-amqp";
+import { packageJsonInfo } from "../util/constants.js";
+
+/**
+ * The names of the operations that can be instrumented.
+ */
+export type MessagingOperationNames = "publish" | "receive" | "process" | "settle";
 
 /**
  * The {@link TracingClient} that is used to add tracing spans.
@@ -18,16 +24,25 @@ export const tracingClient = createTracingClient({
  * Creates {@link TracingSpanOptions} from the provided data.
  * @param serviceBusConfig - The configuration object containing initial attributes to set on the span.
  * @param spanKind - The {@link TracingSpanKind} for the newly created span.
+ * @param operation - The operation type.
  * @returns a {@link TracingSpanOptions} that can be passed to a {@link TracingClient}
  */
 export function toSpanOptions(
   serviceBusConfig: Pick<ConnectionConfig, "host"> & { entityPath: string },
-  spanKind?: TracingSpanKind
+  operation: MessagingOperationNames,
+  spanKind?: TracingSpanKind,
 ): TracingSpanOptions {
+  const propertyName =
+    operation === "process" || operation === "receive"
+      ? "messaging.source.name"
+      : "messaging.destination.name";
+
   const spanOptions: TracingSpanOptions = {
     spanAttributes: {
-      "message_bus.destination": serviceBusConfig.entityPath,
-      "peer.address": serviceBusConfig.host,
+      "messaging.system": "servicebus",
+      [propertyName]: serviceBusConfig.entityPath,
+      "messaging.operation": operation,
+      "net.peer.name": serviceBusConfig.host,
     },
   };
   if (spanKind) {

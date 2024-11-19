@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 /**
@@ -15,18 +15,15 @@
  * @azsdk-weight 100
  */
 
-import * as dotenv from "dotenv";
+import "dotenv/config";
 import { createClientContext, scheduleNotification } from "@azure/notification-hubs/api";
 import { createAppleNotification } from "@azure/notification-hubs/models";
-
-// Load the .env file if it exists
-dotenv.config();
 
 // Define connection string and hub name
 const connectionString = process.env.NOTIFICATIONHUBS_CONNECTION_STRING || "<connection string>";
 const hubName = process.env.NOTIFICATION_HUB_NAME || "<hub name>";
 
-async function main() {
+async function main(): Promise<void> {
   const context = createClientContext(connectionString, hubName);
 
   const messageBody = `{ "aps" : { "alert" : "Hello" } }`;

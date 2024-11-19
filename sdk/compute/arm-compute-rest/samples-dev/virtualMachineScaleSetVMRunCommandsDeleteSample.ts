@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -36,7 +36,7 @@ async function deleteVirtualMachineScaleSetVMRunCommand() {
       resourceGroupName,
       vmScaleSetName,
       instanceId,
-      runCommandName
+      runCommandName,
     )
     .delete(options);
   const poller = getLongRunningPoller(client, initialResponse);

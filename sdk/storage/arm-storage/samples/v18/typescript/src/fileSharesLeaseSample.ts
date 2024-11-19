@@ -11,19 +11,23 @@
 import {
   LeaseShareRequest,
   FileSharesLeaseOptionalParams,
-  StorageManagementClient
+  StorageManagementClient,
 } from "@azure/arm-storage";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to The Lease Share operation establishes and manages a lock on a share for delete operations. The lock duration can be 15 to 60 seconds, or can be infinite.
  *
  * @summary The Lease Share operation establishes and manages a lock on a share for delete operations. The lock duration can be 15 to 60 seconds, or can be infinite.
- * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2022-09-01/examples/FileSharesLease_Acquire.json
+ * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2023-05-01/examples/FileSharesLease_Acquire.json
  */
 async function acquireALeaseOnAShare() {
-  const subscriptionId = "{subscription-id}";
-  const resourceGroupName = "res3376";
+  const subscriptionId =
+    process.env["STORAGE_SUBSCRIPTION_ID"] || "{subscription-id}";
+  const resourceGroupName = process.env["STORAGE_RESOURCE_GROUP"] || "res3376";
   const accountName = "sto328";
   const shareName = "share124";
   const parameters: LeaseShareRequest = {
@@ -31,7 +35,7 @@ async function acquireALeaseOnAShare() {
     breakPeriod: undefined,
     leaseDuration: -1,
     leaseId: undefined,
-    proposedLeaseId: undefined
+    proposedLeaseId: undefined,
   };
   const options: FileSharesLeaseOptionalParams = { parameters };
   const credential = new DefaultAzureCredential();
@@ -40,22 +44,21 @@ async function acquireALeaseOnAShare() {
     resourceGroupName,
     accountName,
     shareName,
-    options
+    options,
   );
   console.log(result);
 }
-
-acquireALeaseOnAShare().catch(console.error);
 
 /**
  * This sample demonstrates how to The Lease Share operation establishes and manages a lock on a share for delete operations. The lock duration can be 15 to 60 seconds, or can be infinite.
  *
  * @summary The Lease Share operation establishes and manages a lock on a share for delete operations. The lock duration can be 15 to 60 seconds, or can be infinite.
- * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2022-09-01/examples/FileSharesLease_Break.json
+ * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2023-05-01/examples/FileSharesLease_Break.json
  */
 async function breakALeaseOnAShare() {
-  const subscriptionId = "{subscription-id}";
-  const resourceGroupName = "res3376";
+  const subscriptionId =
+    process.env["STORAGE_SUBSCRIPTION_ID"] || "{subscription-id}";
+  const resourceGroupName = process.env["STORAGE_RESOURCE_GROUP"] || "res3376";
   const accountName = "sto328";
   const shareName = "share12";
   const parameters: LeaseShareRequest = {
@@ -63,7 +66,7 @@ async function breakALeaseOnAShare() {
     breakPeriod: undefined,
     leaseDuration: undefined,
     leaseId: "8698f513-fa75-44a1-b8eb-30ba336af27d",
-    proposedLeaseId: undefined
+    proposedLeaseId: undefined,
   };
   const options: FileSharesLeaseOptionalParams = { parameters };
   const credential = new DefaultAzureCredential();
@@ -72,9 +75,14 @@ async function breakALeaseOnAShare() {
     resourceGroupName,
     accountName,
     shareName,
-    options
+    options,
   );
   console.log(result);
 }
 
-breakALeaseOnAShare().catch(console.error);
+async function main() {
+  acquireALeaseOnAShare();
+  breakALeaseOnAShare();
+}
+
+main().catch(console.error);

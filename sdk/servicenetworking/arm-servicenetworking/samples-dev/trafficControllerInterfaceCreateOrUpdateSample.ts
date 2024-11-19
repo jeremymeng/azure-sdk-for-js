@@ -10,7 +10,7 @@
 // Licensed under the MIT License.
 import {
   TrafficController,
-  ServiceNetworkingManagementClient
+  ServiceNetworkingManagementClient,
 } from "@azure/arm-servicenetworking";
 import { DefaultAzureCredential } from "@azure/identity";
 import * as dotenv from "dotenv";
@@ -21,28 +21,29 @@ dotenv.config();
  * This sample demonstrates how to Create a TrafficController
  *
  * @summary Create a TrafficController
- * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/cadl/examples/TrafficControllerPut.json
+ * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/preview/2024-05-01-preview/examples/TrafficControllerPut.json
  */
 async function putTrafficController() {
   const subscriptionId =
     process.env["SERVICENETWORKING_SUBSCRIPTION_ID"] || "subid";
   const resourceGroupName =
     process.env["SERVICENETWORKING_RESOURCE_GROUP"] || "rg1";
-  const trafficControllerName = "TC1";
+  const trafficControllerName = "tc1";
   const resource: TrafficController = {
-    location: "West US",
-    tags: { key1: "value1" }
+    location: "NorthCentralUS",
+    tags: { key1: "value1" },
   };
   const credential = new DefaultAzureCredential();
   const client = new ServiceNetworkingManagementClient(
     credential,
-    subscriptionId
+    subscriptionId,
   );
-  const result = await client.trafficControllerInterface.beginCreateOrUpdateAndWait(
-    resourceGroupName,
-    trafficControllerName,
-    resource
-  );
+  const result =
+    await client.trafficControllerInterface.beginCreateOrUpdateAndWait(
+      resourceGroupName,
+      trafficControllerName,
+      resource,
+    );
   console.log(result);
 }
 

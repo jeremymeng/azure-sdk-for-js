@@ -11,34 +11,34 @@ import * as coreRestPipeline from "@azure/core-rest-pipeline";
 import {
   PipelineRequest,
   PipelineResponse,
-  SendRequest
+  SendRequest,
 } from "@azure/core-rest-pipeline";
 import * as coreAuth from "@azure/core-auth";
 import {
-  ClustersImpl,
   ApplicationsImpl,
-  LocationsImpl,
+  ClustersImpl,
   ConfigurationsImpl,
   ExtensionsImpl,
+  LocationsImpl,
+  OperationsImpl,
+  PrivateEndpointConnectionsImpl,
+  PrivateLinkResourcesImpl,
   ScriptActionsImpl,
   ScriptExecutionHistoryImpl,
-  OperationsImpl,
   VirtualMachinesImpl,
-  PrivateEndpointConnectionsImpl,
-  PrivateLinkResourcesImpl
 } from "./operations";
 import {
-  Clusters,
   Applications,
-  Locations,
+  Clusters,
   Configurations,
   Extensions,
+  Locations,
+  Operations,
+  PrivateEndpointConnections,
+  PrivateLinkResources,
   ScriptActions,
   ScriptExecutionHistory,
-  Operations,
   VirtualMachines,
-  PrivateEndpointConnections,
-  PrivateLinkResources
 } from "./operationsInterfaces";
 import { HDInsightManagementClientOptionalParams } from "./models";
 
@@ -57,7 +57,7 @@ export class HDInsightManagementClient extends coreClient.ServiceClient {
   constructor(
     credentials: coreAuth.TokenCredential,
     subscriptionId: string,
-    options?: HDInsightManagementClientOptionalParams
+    options?: HDInsightManagementClientOptionalParams,
   ) {
     if (credentials === undefined) {
       throw new Error("'credentials' cannot be null");
@@ -72,36 +72,34 @@ export class HDInsightManagementClient extends coreClient.ServiceClient {
     }
     const defaults: HDInsightManagementClientOptionalParams = {
       requestContentType: "application/json; charset=utf-8",
-      credential: credentials
+      credential: credentials,
     };
 
-    const packageDetails = `azsdk-js-arm-hdinsight/1.2.1`;
+    const packageDetails = `azsdk-js-arm-hdinsight/1.3.0-beta.3`;
     const userAgentPrefix =
       options.userAgentOptions && options.userAgentOptions.userAgentPrefix
         ? `${options.userAgentOptions.userAgentPrefix} ${packageDetails}`
         : `${packageDetails}`;
 
-    if (!options.credentialScopes) {
-      options.credentialScopes = ["https://management.azure.com/.default"];
-    }
     const optionsWithDefaults = {
       ...defaults,
       ...options,
       userAgentOptions: {
-        userAgentPrefix
+        userAgentPrefix,
       },
-      baseUri:
-        options.endpoint ?? options.baseUri ?? "https://management.azure.com"
+      endpoint:
+        options.endpoint ?? options.baseUri ?? "https://management.azure.com",
     };
     super(optionsWithDefaults);
 
     let bearerTokenAuthenticationPolicyFound: boolean = false;
     if (options?.pipeline && options.pipeline.getOrderedPolicies().length > 0) {
-      const pipelinePolicies: coreRestPipeline.PipelinePolicy[] = options.pipeline.getOrderedPolicies();
+      const pipelinePolicies: coreRestPipeline.PipelinePolicy[] =
+        options.pipeline.getOrderedPolicies();
       bearerTokenAuthenticationPolicyFound = pipelinePolicies.some(
         (pipelinePolicy) =>
           pipelinePolicy.name ===
-          coreRestPipeline.bearerTokenAuthenticationPolicyName
+          coreRestPipeline.bearerTokenAuthenticationPolicyName,
       );
     }
     if (
@@ -111,17 +109,19 @@ export class HDInsightManagementClient extends coreClient.ServiceClient {
       !bearerTokenAuthenticationPolicyFound
     ) {
       this.pipeline.removePolicy({
-        name: coreRestPipeline.bearerTokenAuthenticationPolicyName
+        name: coreRestPipeline.bearerTokenAuthenticationPolicyName,
       });
       this.pipeline.addPolicy(
         coreRestPipeline.bearerTokenAuthenticationPolicy({
           credential: credentials,
-          scopes: `${optionsWithDefaults.credentialScopes}`,
+          scopes:
+            optionsWithDefaults.credentialScopes ??
+            `${optionsWithDefaults.endpoint}/.default`,
           challengeCallbacks: {
             authorizeRequestOnChallenge:
-              coreClient.authorizeRequestOnClaimChallenge
-          }
-        })
+              coreClient.authorizeRequestOnClaimChallenge,
+          },
+        }),
       );
     }
     // Parameter assignments
@@ -129,18 +129,18 @@ export class HDInsightManagementClient extends coreClient.ServiceClient {
 
     // Assigning values to Constant parameters
     this.$host = options.$host || "https://management.azure.com";
-    this.apiVersion = options.apiVersion || "2021-06-01";
-    this.clusters = new ClustersImpl(this);
+    this.apiVersion = options.apiVersion || "2024-08-01-preview";
     this.applications = new ApplicationsImpl(this);
-    this.locations = new LocationsImpl(this);
+    this.clusters = new ClustersImpl(this);
     this.configurations = new ConfigurationsImpl(this);
     this.extensions = new ExtensionsImpl(this);
-    this.scriptActions = new ScriptActionsImpl(this);
-    this.scriptExecutionHistory = new ScriptExecutionHistoryImpl(this);
+    this.locations = new LocationsImpl(this);
     this.operations = new OperationsImpl(this);
-    this.virtualMachines = new VirtualMachinesImpl(this);
     this.privateEndpointConnections = new PrivateEndpointConnectionsImpl(this);
     this.privateLinkResources = new PrivateLinkResourcesImpl(this);
+    this.scriptActions = new ScriptActionsImpl(this);
+    this.scriptExecutionHistory = new ScriptExecutionHistoryImpl(this);
+    this.virtualMachines = new VirtualMachinesImpl(this);
     this.addCustomApiVersionPolicy(options.apiVersion);
   }
 
@@ -153,7 +153,7 @@ export class HDInsightManagementClient extends coreClient.ServiceClient {
       name: "CustomApiVersionPolicy",
       async sendRequest(
         request: PipelineRequest,
-        next: SendRequest
+        next: SendRequest,
       ): Promise<PipelineResponse> {
         const param = request.url.split("?");
         if (param.length > 1) {
@@ -167,20 +167,20 @@ export class HDInsightManagementClient extends coreClient.ServiceClient {
           request.url = param[0] + "?" + newParams.join("&");
         }
         return next(request);
-      }
+      },
     };
     this.pipeline.addPolicy(apiVersionPolicy);
   }
 
-  clusters: Clusters;
   applications: Applications;
-  locations: Locations;
+  clusters: Clusters;
   configurations: Configurations;
   extensions: Extensions;
-  scriptActions: ScriptActions;
-  scriptExecutionHistory: ScriptExecutionHistory;
+  locations: Locations;
   operations: Operations;
-  virtualMachines: VirtualMachines;
   privateEndpointConnections: PrivateEndpointConnections;
   privateLinkResources: PrivateLinkResources;
+  scriptActions: ScriptActions;
+  scriptExecutionHistory: ScriptExecutionHistory;
+  virtualMachines: VirtualMachines;
 }

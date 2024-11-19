@@ -10,16 +10,22 @@
 // Licensed under the MIT License.
 import { DeviceUpdate } from "@azure/arm-deviceupdate";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to (INTERNAL - DO NOT USE) Get the specified private endpoint connection proxy associated with the device update account.
  *
  * @summary (INTERNAL - DO NOT USE) Get the specified private endpoint connection proxy associated with the device update account.
- * x-ms-original-file: specification/deviceupdate/resource-manager/Microsoft.DeviceUpdate/stable/2022-10-01/examples/PrivateEndpointConnectionProxies/PrivateEndpointConnectionProxy_Get.json
+ * x-ms-original-file: specification/deviceupdate/resource-manager/Microsoft.DeviceUpdate/stable/2023-07-01/examples/PrivateEndpointConnectionProxies/PrivateEndpointConnectionProxy_Get.json
  */
 async function privateEndpointConnectionProxyGet() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
-  const resourceGroupName = "test-rg";
+  const subscriptionId =
+    process.env["DEVICEUPDATE_SUBSCRIPTION_ID"] ||
+    "00000000-0000-0000-0000-000000000000";
+  const resourceGroupName =
+    process.env["DEVICEUPDATE_RESOURCE_GROUP"] || "test-rg";
   const accountName = "contoso";
   const privateEndpointConnectionProxyId = "peexample01";
   const credential = new DefaultAzureCredential();
@@ -32,4 +38,8 @@ async function privateEndpointConnectionProxyGet() {
   console.log(result);
 }
 
-privateEndpointConnectionProxyGet().catch(console.error);
+async function main() {
+  privateEndpointConnectionProxyGet();
+}
+
+main().catch(console.error);

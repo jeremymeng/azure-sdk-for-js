@@ -6,53 +6,54 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { InventoryItems } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { Scvmm } from "../scvmm";
+import { ScVmm } from "../scVmm";
 import {
   InventoryItem,
-  InventoryItemsListByVMMServerNextOptionalParams,
-  InventoryItemsListByVMMServerOptionalParams,
-  InventoryItemsCreateOptionalParams,
-  InventoryItemsCreateResponse,
+  InventoryItemsListByVmmServerNextOptionalParams,
+  InventoryItemsListByVmmServerOptionalParams,
+  InventoryItemsListByVmmServerResponse,
   InventoryItemsGetOptionalParams,
   InventoryItemsGetResponse,
+  InventoryItemsCreateOptionalParams,
+  InventoryItemsCreateResponse,
   InventoryItemsDeleteOptionalParams,
-  InventoryItemsListByVMMServerResponse,
-  InventoryItemsListByVMMServerNextResponse
+  InventoryItemsListByVmmServerNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing InventoryItems operations. */
 export class InventoryItemsImpl implements InventoryItems {
-  private readonly client: Scvmm;
+  private readonly client: ScVmm;
 
   /**
    * Initialize a new instance of the class InventoryItems class.
    * @param client Reference to the service client
    */
-  constructor(client: Scvmm) {
+  constructor(client: ScVmm) {
     this.client = client;
   }
 
   /**
-   * Returns the list of inventoryItems in the given VMMServer.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
+   * Returns the list of inventoryItems in the given VmmServer.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
    * @param options The options parameters.
    */
-  public listByVMMServer(
+  public listByVmmServer(
     resourceGroupName: string,
     vmmServerName: string,
-    options?: InventoryItemsListByVMMServerOptionalParams
+    options?: InventoryItemsListByVmmServerOptionalParams,
   ): PagedAsyncIterableIterator<InventoryItem> {
-    const iter = this.listByVMMServerPagingAll(
+    const iter = this.listByVmmServerPagingAll(
       resourceGroupName,
       vmmServerName,
-      options
+      options,
     );
     return {
       next() {
@@ -61,186 +62,181 @@ export class InventoryItemsImpl implements InventoryItems {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listByVMMServerPagingPage(
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listByVmmServerPagingPage(
           resourceGroupName,
           vmmServerName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
-  private async *listByVMMServerPagingPage(
+  private async *listByVmmServerPagingPage(
     resourceGroupName: string,
     vmmServerName: string,
-    options?: InventoryItemsListByVMMServerOptionalParams
+    options?: InventoryItemsListByVmmServerOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<InventoryItem[]> {
-    let result = await this._listByVMMServer(
-      resourceGroupName,
-      vmmServerName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: InventoryItemsListByVmmServerResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByVmmServer(
+        resourceGroupName,
+        vmmServerName,
+        options,
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
-      result = await this._listByVMMServerNext(
+      result = await this._listByVmmServerNext(
         resourceGroupName,
         vmmServerName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
-  private async *listByVMMServerPagingAll(
+  private async *listByVmmServerPagingAll(
     resourceGroupName: string,
     vmmServerName: string,
-    options?: InventoryItemsListByVMMServerOptionalParams
+    options?: InventoryItemsListByVmmServerOptionalParams,
   ): AsyncIterableIterator<InventoryItem> {
-    for await (const page of this.listByVMMServerPagingPage(
+    for await (const page of this.listByVmmServerPagingPage(
       resourceGroupName,
       vmmServerName,
-      options
+      options,
     )) {
       yield* page;
     }
   }
 
   /**
-   * Create Or Update InventoryItem.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param inventoryItemName Name of the inventoryItem.
+   * Returns the list of inventoryItems in the given VmmServer.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
    * @param options The options parameters.
    */
-  create(
+  private _listByVmmServer(
     resourceGroupName: string,
     vmmServerName: string,
-    inventoryItemName: string,
-    options?: InventoryItemsCreateOptionalParams
-  ): Promise<InventoryItemsCreateResponse> {
+    options?: InventoryItemsListByVmmServerOptionalParams,
+  ): Promise<InventoryItemsListByVmmServerResponse> {
     return this.client.sendOperationRequest(
-      { resourceGroupName, vmmServerName, inventoryItemName, options },
-      createOperationSpec
+      { resourceGroupName, vmmServerName, options },
+      listByVmmServerOperationSpec,
     );
   }
 
   /**
    * Shows an inventory item.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param inventoryItemName Name of the inventoryItem.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
+   * @param inventoryItemResourceName Name of the inventoryItem.
    * @param options The options parameters.
    */
   get(
     resourceGroupName: string,
     vmmServerName: string,
-    inventoryItemName: string,
-    options?: InventoryItemsGetOptionalParams
+    inventoryItemResourceName: string,
+    options?: InventoryItemsGetOptionalParams,
   ): Promise<InventoryItemsGetResponse> {
     return this.client.sendOperationRequest(
-      { resourceGroupName, vmmServerName, inventoryItemName, options },
-      getOperationSpec
+      { resourceGroupName, vmmServerName, inventoryItemResourceName, options },
+      getOperationSpec,
+    );
+  }
+
+  /**
+   * Create Or Update InventoryItem.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
+   * @param inventoryItemResourceName Name of the inventoryItem.
+   * @param resource Resource create parameters.
+   * @param options The options parameters.
+   */
+  create(
+    resourceGroupName: string,
+    vmmServerName: string,
+    inventoryItemResourceName: string,
+    resource: InventoryItem,
+    options?: InventoryItemsCreateOptionalParams,
+  ): Promise<InventoryItemsCreateResponse> {
+    return this.client.sendOperationRequest(
+      {
+        resourceGroupName,
+        vmmServerName,
+        inventoryItemResourceName,
+        resource,
+        options,
+      },
+      createOperationSpec,
     );
   }
 
   /**
    * Deletes an inventoryItem.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param inventoryItemName Name of the inventoryItem.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
+   * @param inventoryItemResourceName Name of the inventoryItem.
    * @param options The options parameters.
    */
   delete(
     resourceGroupName: string,
     vmmServerName: string,
-    inventoryItemName: string,
-    options?: InventoryItemsDeleteOptionalParams
+    inventoryItemResourceName: string,
+    options?: InventoryItemsDeleteOptionalParams,
   ): Promise<void> {
     return this.client.sendOperationRequest(
-      { resourceGroupName, vmmServerName, inventoryItemName, options },
-      deleteOperationSpec
+      { resourceGroupName, vmmServerName, inventoryItemResourceName, options },
+      deleteOperationSpec,
     );
   }
 
   /**
-   * Returns the list of inventoryItems in the given VMMServer.
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
+   * ListByVmmServerNext
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param vmmServerName Name of the VmmServer.
+   * @param nextLink The nextLink from the previous successful call to the ListByVmmServer method.
    * @param options The options parameters.
    */
-  private _listByVMMServer(
-    resourceGroupName: string,
-    vmmServerName: string,
-    options?: InventoryItemsListByVMMServerOptionalParams
-  ): Promise<InventoryItemsListByVMMServerResponse> {
-    return this.client.sendOperationRequest(
-      { resourceGroupName, vmmServerName, options },
-      listByVMMServerOperationSpec
-    );
-  }
-
-  /**
-   * ListByVMMServerNext
-   * @param resourceGroupName The name of the resource group.
-   * @param vmmServerName Name of the VMMServer.
-   * @param nextLink The nextLink from the previous successful call to the ListByVMMServer method.
-   * @param options The options parameters.
-   */
-  private _listByVMMServerNext(
+  private _listByVmmServerNext(
     resourceGroupName: string,
     vmmServerName: string,
     nextLink: string,
-    options?: InventoryItemsListByVMMServerNextOptionalParams
-  ): Promise<InventoryItemsListByVMMServerNextResponse> {
+    options?: InventoryItemsListByVmmServerNextOptionalParams,
+  ): Promise<InventoryItemsListByVmmServerNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, vmmServerName, nextLink, options },
-      listByVMMServerNextOperationSpec
+      listByVmmServerNextOperationSpec,
     );
   }
 }
 // Operation Specifications
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
-const createOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}/inventoryItems/{inventoryItemName}",
-  httpMethod: "PUT",
-  responses: {
-    200: {
-      bodyMapper: Mappers.InventoryItem
-    },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  requestBody: Parameters.body12,
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.vmmServerName,
-    Parameters.inventoryItemName
-  ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}/inventoryItems/{inventoryItemName}",
+const listByVmmServerOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}/inventoryItems",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.InventoryItem
+      bodyMapper: Mappers.InventoryItemListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -248,21 +244,68 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.vmmServerName,
-    Parameters.inventoryItemName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}/inventoryItems/{inventoryItemResourceName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.InventoryItem,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.vmmServerName,
+    Parameters.inventoryItemResourceName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const createOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}/inventoryItems/{inventoryItemResourceName}",
+  httpMethod: "PUT",
+  responses: {
+    200: {
+      bodyMapper: Mappers.InventoryItem,
+    },
+    201: {
+      bodyMapper: Mappers.InventoryItem,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.resource7,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.vmmServerName,
+    Parameters.inventoryItemResourceName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}/inventoryItems/{inventoryItemName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}/inventoryItems/{inventoryItemResourceName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -270,52 +313,29 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.vmmServerName,
-    Parameters.inventoryItemName
+    Parameters.inventoryItemResourceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
-const listByVMMServerOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/vmmServers/{vmmServerName}/inventoryItems",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.InventoryItemsList
-    },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.vmmServerName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const listByVMMServerNextOperationSpec: coreClient.OperationSpec = {
+const listByVmmServerNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.InventoryItemsList
+      bodyMapper: Mappers.InventoryItemListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.nextLink,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.vmmServerName,
-    Parameters.nextLink
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

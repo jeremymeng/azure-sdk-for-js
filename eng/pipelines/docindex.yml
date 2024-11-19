@@ -4,6 +4,34 @@ variables:
 jobs:
   - template: /eng/common/pipelines/templates/jobs/docindex.yml
 
+  - job: UpgradeRexTool
+    timeoutInMinutes: 10
+    pool:
+      vmImage: ubuntu-22.04
+
+    steps:
+      - template: /eng/common/pipelines/templates/steps/sparse-checkout.yml
+        parameters:
+          Paths:
+            - eng/
+
+      - task: Powershell@2
+        inputs:
+          pwsh: true
+          filePath: eng/scripts/docs/Update-RexValidationTool.ps1
+        displayName: Update JS REX Validation Tool
+
+      - template: /eng/common/pipelines/templates/steps/create-pull-request.yml
+        parameters:
+          PRBranchName: docs/rex-tool-upgrade
+          # Force push as this task updates a single file and history is not
+          # necessary for changes in this branch.
+          PushArgs: -f
+          PRTitle: Upgrade JS REX Validation Tool
+          PRBody: |
+            This PR upgrades the JS REX Validation Tool to the latest version.
+            Testing was done in $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
+
   - job: UpdateDocsMsBuildConfig
     timeoutInMinutes: 90
     pool:
@@ -12,7 +40,6 @@ jobs:
       DocRepoLocation: $(Pipeline.Workspace)/docs
       DocRepoOwner: MicrosoftDocs
       DocRepoName: azure-docs-sdk-node
-      DocValidationImageId: azuresdkimages.azurecr.io/jsrefautocr:latest
     steps:
       # Sync docs repo (this can be sparse)
       - template: /eng/common/pipelines/templates/steps/sparse-checkout.yml
@@ -26,19 +53,22 @@ jobs:
           Repositories:
             - Name: $(DocRepoOwner)/$(DocRepoName)
               WorkingDirectory: $(DocRepoLocation)
-      # Pull and build the docker image.
-      - template: /eng/common/pipelines/templates/steps/docker-pull-image.yml
-        parameters:
-          ContainerRegistryClientId: $(azuresdkimages-cr-clientid)
-          ContainerRegistryClientSecret: $(azuresdkimages-cr-clientsecret)
-          ImageId: "$(DocValidationImageId)"
 
-      # Call update docs ci script to onboard packages
+      - template: /eng/pipelines/templates/steps/install-rex-validation-tool.yml
+
+      - task: Powershell@2
+        inputs:
+          pwsh: true
+          filePath: eng/common/scripts/Update-DocsMsPackageMonikers.ps1
+          arguments: -DocRepoLocation $(DocRepoLocation)
+        displayName: Move deprecated packages to legacy moniker
+        condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Force.MainUpdate'], 'true')))
+
       - task: Powershell@2
         inputs:
           pwsh: true
           filePath: eng/common/scripts/Update-DocsMsPackages.ps1
-          arguments: -DocRepoLocation $(DocRepoLocation) -ImageId '$(DocValidationImageId)'
+          arguments: -DocRepoLocation $(DocRepoLocation)
         displayName: Update Docs Onboarding for main branch
         condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Force.MainUpdate'], 'true')))
 
@@ -46,11 +76,7 @@ jobs:
         inputs:
           pwsh: true
           filePath: eng/common/scripts/Service-Level-Readme-Automation.ps1
-          arguments: >-
-            -DocRepoLocation $(DocRepoLocation)
-            -TenantId '$(opensource-aad-tenant-id)'
-            -ClientId '$(opensource-aad-app-id)'
-            -ClientSecret '$(opensource-aad-secret)'
+          arguments: -DocRepoLocation $(DocRepoLocation)
         displayName: Generate Service Level Readme for main branch
         condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Force.MainUpdate'], 'true')))
 
@@ -64,6 +90,14 @@ jobs:
         displayName: Generate ToC for main branch
         condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Force.MainUpdate'], 'true')))
 
+      - task: Powershell@2
+        inputs:
+          pwsh: true
+          filePath: eng/common/scripts/Verify-RequiredDocsJsonMembers.ps1
+          arguments: >-
+            -DocRepoLocation $(DocRepoLocation)
+        displayName: Verify Required Docs Json Members
+
       # Push changes to docs repo
       - template: /eng/common/pipelines/templates/steps/set-default-branch.yml
         parameters:
@@ -73,7 +107,7 @@ jobs:
         parameters:
           BaseRepoBranch: $(DefaultBranch)
           BaseRepoOwner: $(DocRepoOwner)
-          CommitMsg: "Update docs CI configuration"
+          CommitMsg: "Update docs CI configuration Build: $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
           TargetRepoName: $(DocRepoName)
           TargetRepoOwner: $(DocRepoOwner)
           WorkingDirectory: $(DocRepoLocation)
@@ -100,11 +134,7 @@ jobs:
         inputs:
           pwsh: true
           filePath: eng/common/scripts/Service-Level-Readme-Automation.ps1
-          arguments: >-
-            -DocRepoLocation $(DocRepoLocation)
-            -TenantId '$(opensource-aad-tenant-id)'
-            -ClientId '$(opensource-aad-app-id)'
-            -ClientSecret '$(opensource-aad-secret)'
+          arguments: -DocRepoLocation $(DocRepoLocation)
         displayName: Generate Service Level Readme for Daily docs
 
       - task: Powershell@2
@@ -115,6 +145,14 @@ jobs:
             -DocRepoLocation $(DocRepoLocation)
             -OutputLocation $(DocRepoLocation)/docs-ref-mapping/reference-unified.yml
         displayName: Generate ToC for Daily docs
+
+      - task: Powershell@2
+        inputs:
+          pwsh: true
+          filePath: eng/common/scripts/Verify-RequiredDocsJsonMembers.ps1
+          arguments: >-
+            -DocRepoLocation $(DocRepoLocation)
+        displayName: Verify Required Docs Json Members
 
       - template: /eng/common/pipelines/templates/steps/git-push-changes.yml
         parameters:
@@ -127,14 +165,18 @@ jobs:
           ScriptDirectory: $(Build.SourcesDirectory)/eng/common/scripts
           PushArgs: -f
 
-      - task: PowerShell@2
+      - task: AzureCLI@2
         displayName: Queue Docs CI build
         inputs:
-          pwsh: true
-          filePath: eng/common/scripts/Queue-Pipeline.ps1
-          arguments: >
-            -Organization "apidrop"
-            -Project "Content%20CI"
-            -DefinitionId 3452
-            -Base64EncodedAuthToken "$(azuresdk-apidrop-devops-queue-build-pat)"
-            -BuildParametersJson '{"params":"{ \"target_repo\": { \"url\": \"https://github.com/MicrosoftDocs/azure-docs-sdk-node\", \"branch\": \"$(DailyDocsBranchName)\", \"folder\": \"./\" }, \"source_repos\": [] }"}'
+          azureSubscription: msdocs-apidrop-connection
+          scriptType: pscore
+          scriptLocation: inlineScript
+          inlineScript: |
+            $accessToken = az account get-access-token --resource "499b84ac-1321-427f-aa17-267ca6975798" --query "accessToken" --output tsv
+            $buildParamJson = '{"params":"{ \"target_repo\": { \"url\": \"https://github.com/MicrosoftDocs/azure-docs-sdk-node\", \"branch\": \"$(DailyDocsBranchName)\", \"folder\": \"./\" }, \"source_repos\": [] }"}'
+            eng/common/scripts/Queue-Pipeline.ps1 `
+              -Organization "apidrop" `
+              -Project "Content%20CI" `
+              -DefinitionId 3452 `
+              -BuildParametersJson $buildParamJson `
+              -BearerToken $accessToken

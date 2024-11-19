@@ -10,16 +10,18 @@
 // Licensed under the MIT License.
 const { DeviceUpdate } = require("@azure/arm-deviceupdate");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Checks whether instance exists.
  *
  * @summary Checks whether instance exists.
- * x-ms-original-file: specification/deviceupdate/resource-manager/Microsoft.DeviceUpdate/stable/2022-10-01/examples/Instances/Instances_Head.json
+ * x-ms-original-file: specification/deviceupdate/resource-manager/Microsoft.DeviceUpdate/stable/2023-07-01/examples/Instances/Instances_Head.json
  */
 async function checksWhetherInstanceExists() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
-  const resourceGroupName = "test-rg";
+  const subscriptionId =
+    process.env["DEVICEUPDATE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
+  const resourceGroupName = process.env["DEVICEUPDATE_RESOURCE_GROUP"] || "test-rg";
   const accountName = "contoso";
   const instanceName = "blue";
   const credential = new DefaultAzureCredential();
@@ -28,4 +30,8 @@ async function checksWhetherInstanceExists() {
   console.log(result);
 }
 
-checksWhetherInstanceExists().catch(console.error);
+async function main() {
+  checksWhetherInstanceExists();
+}
+
+main().catch(console.error);

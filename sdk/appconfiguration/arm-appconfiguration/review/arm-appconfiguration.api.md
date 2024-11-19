@@ -6,9 +6,9 @@
 
 import * as coreAuth from '@azure/core-auth';
 import * as coreClient from '@azure/core-client';
+import { OperationState } from '@azure/core-lro';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
+import { SimplePollerLike } from '@azure/core-lro';
 
 // @public
 export type ActionsRequired = string;
@@ -47,6 +47,10 @@ export class AppConfigurationManagementClient extends coreClient.ServiceClient {
     // (undocumented)
     privateLinkResources: PrivateLinkResources;
     // (undocumented)
+    replicas: Replicas;
+    // (undocumented)
+    snapshots: Snapshots;
+    // (undocumented)
     subscriptionId: string;
 }
 
@@ -58,10 +62,16 @@ export interface AppConfigurationManagementClientOptionalParams extends coreClie
 }
 
 // @public
+export type AuthenticationMode = string;
+
+// @public
 export interface CheckNameAvailabilityParameters {
     name: string;
     type: ConfigurationResourceType;
 }
+
+// @public
+export type CompositionType = string;
 
 // @public
 export type ConfigurationResourceType = string;
@@ -70,6 +80,7 @@ export type ConfigurationResourceType = string;
 export interface ConfigurationStore extends TrackedResource {
     createMode?: CreateMode;
     readonly creationDate?: Date;
+    dataPlaneProxy?: DataPlaneProxyProperties;
     disableLocalAuth?: boolean;
     enablePurgeProtection?: boolean;
     encryption?: EncryptionProperties;
@@ -91,13 +102,13 @@ export interface ConfigurationStoreListResult {
 
 // @public
 export interface ConfigurationStores {
-    beginCreate(resourceGroupName: string, configStoreName: string, configStoreCreationParameters: ConfigurationStore, options?: ConfigurationStoresCreateOptionalParams): Promise<PollerLike<PollOperationState<ConfigurationStoresCreateResponse>, ConfigurationStoresCreateResponse>>;
+    beginCreate(resourceGroupName: string, configStoreName: string, configStoreCreationParameters: ConfigurationStore, options?: ConfigurationStoresCreateOptionalParams): Promise<SimplePollerLike<OperationState<ConfigurationStoresCreateResponse>, ConfigurationStoresCreateResponse>>;
     beginCreateAndWait(resourceGroupName: string, configStoreName: string, configStoreCreationParameters: ConfigurationStore, options?: ConfigurationStoresCreateOptionalParams): Promise<ConfigurationStoresCreateResponse>;
-    beginDelete(resourceGroupName: string, configStoreName: string, options?: ConfigurationStoresDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, configStoreName: string, options?: ConfigurationStoresDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, configStoreName: string, options?: ConfigurationStoresDeleteOptionalParams): Promise<void>;
-    beginPurgeDeleted(location: string, configStoreName: string, options?: ConfigurationStoresPurgeDeletedOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginPurgeDeleted(location: string, configStoreName: string, options?: ConfigurationStoresPurgeDeletedOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginPurgeDeletedAndWait(location: string, configStoreName: string, options?: ConfigurationStoresPurgeDeletedOptionalParams): Promise<void>;
-    beginUpdate(resourceGroupName: string, configStoreName: string, configStoreUpdateParameters: ConfigurationStoreUpdateParameters, options?: ConfigurationStoresUpdateOptionalParams): Promise<PollerLike<PollOperationState<ConfigurationStoresUpdateResponse>, ConfigurationStoresUpdateResponse>>;
+    beginUpdate(resourceGroupName: string, configStoreName: string, configStoreUpdateParameters: ConfigurationStoreUpdateParameters, options?: ConfigurationStoresUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ConfigurationStoresUpdateResponse>, ConfigurationStoresUpdateResponse>>;
     beginUpdateAndWait(resourceGroupName: string, configStoreName: string, configStoreUpdateParameters: ConfigurationStoreUpdateParameters, options?: ConfigurationStoresUpdateOptionalParams): Promise<ConfigurationStoresUpdateResponse>;
     get(resourceGroupName: string, configStoreName: string, options?: ConfigurationStoresGetOptionalParams): Promise<ConfigurationStoresGetResponse>;
     getDeleted(location: string, configStoreName: string, options?: ConfigurationStoresGetDeletedOptionalParams): Promise<ConfigurationStoresGetDeletedResponse>;
@@ -139,7 +150,6 @@ export type ConfigurationStoresGetResponse = ConfigurationStore;
 
 // @public
 export interface ConfigurationStoresListByResourceGroupNextOptionalParams extends coreClient.OperationOptions {
-    skipToken?: string;
 }
 
 // @public
@@ -169,7 +179,6 @@ export type ConfigurationStoresListDeletedResponse = DeletedConfigurationStoreLi
 
 // @public
 export interface ConfigurationStoresListKeysNextOptionalParams extends coreClient.OperationOptions {
-    skipToken?: string;
 }
 
 // @public
@@ -185,7 +194,6 @@ export type ConfigurationStoresListKeysResponse = ApiKeyListResult;
 
 // @public
 export interface ConfigurationStoresListNextOptionalParams extends coreClient.OperationOptions {
-    skipToken?: string;
 }
 
 // @public
@@ -223,6 +231,7 @@ export type ConfigurationStoresUpdateResponse = ConfigurationStore;
 
 // @public
 export interface ConfigurationStoreUpdateParameters {
+    dataPlaneProxy?: DataPlaneProxyProperties;
     disableLocalAuth?: boolean;
     enablePurgeProtection?: boolean;
     encryption?: EncryptionProperties;
@@ -242,6 +251,12 @@ export type CreatedByType = string;
 
 // @public
 export type CreateMode = "Recover" | "Default";
+
+// @public
+export interface DataPlaneProxyProperties {
+    authenticationMode?: AuthenticationMode;
+    privateLinkDelegation?: PrivateLinkDelegation;
+}
 
 // @public
 export interface DeletedConfigurationStore {
@@ -276,6 +291,15 @@ export interface ErrorAdditionalInfo {
 }
 
 // @public
+export interface ErrorDetail {
+    readonly additionalInfo?: ErrorAdditionalInfo[];
+    readonly code?: string;
+    readonly details?: ErrorDetail[];
+    readonly message?: string;
+    readonly target?: string;
+}
+
+// @public
 export interface ErrorDetails {
     readonly additionalInfo?: ErrorAdditionalInfo[];
     readonly code?: string;
@@ -285,6 +309,11 @@ export interface ErrorDetails {
 // @public
 export interface ErrorResponse {
     error?: ErrorDetails;
+}
+
+// @public
+export interface ErrorResponseAutoGenerated {
+    error?: ErrorDetail;
 }
 
 // @public
@@ -311,6 +340,12 @@ export interface KeyValue {
 }
 
 // @public
+export interface KeyValueFilter {
+    key: string;
+    label?: string;
+}
+
+// @public
 export interface KeyValueListResult {
     nextLink?: string;
     value?: KeyValue[];
@@ -318,11 +353,10 @@ export interface KeyValueListResult {
 
 // @public
 export interface KeyValues {
-    beginDelete(resourceGroupName: string, configStoreName: string, keyValueName: string, options?: KeyValuesDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, configStoreName: string, keyValueName: string, options?: KeyValuesDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, configStoreName: string, keyValueName: string, options?: KeyValuesDeleteOptionalParams): Promise<void>;
     createOrUpdate(resourceGroupName: string, configStoreName: string, keyValueName: string, options?: KeyValuesCreateOrUpdateOptionalParams): Promise<KeyValuesCreateOrUpdateResponse>;
     get(resourceGroupName: string, configStoreName: string, keyValueName: string, options?: KeyValuesGetOptionalParams): Promise<KeyValuesGetResponse>;
-    listByConfigurationStore(resourceGroupName: string, configStoreName: string, options?: KeyValuesListByConfigurationStoreOptionalParams): PagedAsyncIterableIterator<KeyValue>;
 }
 
 // @public
@@ -347,22 +381,6 @@ export interface KeyValuesGetOptionalParams extends coreClient.OperationOptions 
 export type KeyValuesGetResponse = KeyValue;
 
 // @public
-export interface KeyValuesListByConfigurationStoreNextOptionalParams extends coreClient.OperationOptions {
-    skipToken?: string;
-}
-
-// @public
-export type KeyValuesListByConfigurationStoreNextResponse = KeyValueListResult;
-
-// @public
-export interface KeyValuesListByConfigurationStoreOptionalParams extends coreClient.OperationOptions {
-    skipToken?: string;
-}
-
-// @public
-export type KeyValuesListByConfigurationStoreResponse = KeyValueListResult;
-
-// @public
 export interface KeyVaultProperties {
     identityClientId?: string;
     keyIdentifier?: string;
@@ -372,6 +390,18 @@ export interface KeyVaultProperties {
 export enum KnownActionsRequired {
     None = "None",
     Recreate = "Recreate"
+}
+
+// @public
+export enum KnownAuthenticationMode {
+    Local = "Local",
+    PassThrough = "Pass-through"
+}
+
+// @public
+export enum KnownCompositionType {
+    Key = "Key",
+    KeyLabel = "Key_Label"
 }
 
 // @public
@@ -404,6 +434,12 @@ export enum KnownIdentityType {
 }
 
 // @public
+export enum KnownPrivateLinkDelegation {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
+}
+
+// @public
 export enum KnownProvisioningState {
     Canceled = "Canceled",
     Creating = "Creating",
@@ -417,6 +453,23 @@ export enum KnownProvisioningState {
 export enum KnownPublicNetworkAccess {
     Disabled = "Disabled",
     Enabled = "Enabled"
+}
+
+// @public
+export enum KnownReplicaProvisioningState {
+    Canceled = "Canceled",
+    Creating = "Creating",
+    Deleting = "Deleting",
+    Failed = "Failed",
+    Succeeded = "Succeeded"
+}
+
+// @public
+export enum KnownSnapshotStatus {
+    Archived = "Archived",
+    Failed = "Failed",
+    Provisioning = "Provisioning",
+    Ready = "Ready"
 }
 
 // @public
@@ -496,7 +549,6 @@ export type OperationsCheckNameAvailabilityResponse = NameAvailabilityStatus;
 
 // @public
 export interface OperationsListNextOptionalParams extends coreClient.OperationOptions {
-    skipToken?: string;
 }
 
 // @public
@@ -550,9 +602,9 @@ export interface PrivateEndpointConnectionReference {
 
 // @public
 export interface PrivateEndpointConnections {
-    beginCreateOrUpdate(resourceGroupName: string, configStoreName: string, privateEndpointConnectionName: string, privateEndpointConnection: PrivateEndpointConnection, options?: PrivateEndpointConnectionsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<PrivateEndpointConnectionsCreateOrUpdateResponse>, PrivateEndpointConnectionsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, configStoreName: string, privateEndpointConnectionName: string, privateEndpointConnection: PrivateEndpointConnection, options?: PrivateEndpointConnectionsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<PrivateEndpointConnectionsCreateOrUpdateResponse>, PrivateEndpointConnectionsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, configStoreName: string, privateEndpointConnectionName: string, privateEndpointConnection: PrivateEndpointConnection, options?: PrivateEndpointConnectionsCreateOrUpdateOptionalParams): Promise<PrivateEndpointConnectionsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, configStoreName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, configStoreName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, configStoreName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, configStoreName: string, privateEndpointConnectionName: string, options?: PrivateEndpointConnectionsGetOptionalParams): Promise<PrivateEndpointConnectionsGetResponse>;
     listByConfigurationStore(resourceGroupName: string, configStoreName: string, options?: PrivateEndpointConnectionsListByConfigurationStoreOptionalParams): PagedAsyncIterableIterator<PrivateEndpointConnection>;
@@ -593,6 +645,9 @@ export interface PrivateEndpointConnectionsListByConfigurationStoreOptionalParam
 
 // @public
 export type PrivateEndpointConnectionsListByConfigurationStoreResponse = PrivateEndpointConnectionListResult;
+
+// @public
+export type PrivateLinkDelegation = string;
 
 // @public
 export interface PrivateLinkResource {
@@ -656,6 +711,78 @@ export interface RegenerateKeyParameters {
 }
 
 // @public
+export interface Replica {
+    readonly endpoint?: string;
+    readonly id?: string;
+    location?: string;
+    readonly name?: string;
+    readonly provisioningState?: ReplicaProvisioningState;
+    readonly systemData?: SystemData;
+    readonly type?: string;
+}
+
+// @public
+export interface ReplicaListResult {
+    nextLink?: string;
+    value?: Replica[];
+}
+
+// @public
+export type ReplicaProvisioningState = string;
+
+// @public
+export interface Replicas {
+    beginCreate(resourceGroupName: string, configStoreName: string, replicaName: string, replicaCreationParameters: Replica, options?: ReplicasCreateOptionalParams): Promise<SimplePollerLike<OperationState<ReplicasCreateResponse>, ReplicasCreateResponse>>;
+    beginCreateAndWait(resourceGroupName: string, configStoreName: string, replicaName: string, replicaCreationParameters: Replica, options?: ReplicasCreateOptionalParams): Promise<ReplicasCreateResponse>;
+    beginDelete(resourceGroupName: string, configStoreName: string, replicaName: string, options?: ReplicasDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
+    beginDeleteAndWait(resourceGroupName: string, configStoreName: string, replicaName: string, options?: ReplicasDeleteOptionalParams): Promise<void>;
+    get(resourceGroupName: string, configStoreName: string, replicaName: string, options?: ReplicasGetOptionalParams): Promise<ReplicasGetResponse>;
+    listByConfigurationStore(resourceGroupName: string, configStoreName: string, options?: ReplicasListByConfigurationStoreOptionalParams): PagedAsyncIterableIterator<Replica>;
+}
+
+// @public
+export interface ReplicasCreateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ReplicasCreateResponse = Replica;
+
+// @public
+export interface ReplicasDeleteHeaders {
+    azureAsyncOperation?: string;
+}
+
+// @public
+export interface ReplicasDeleteOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export interface ReplicasGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ReplicasGetResponse = Replica;
+
+// @public
+export interface ReplicasListByConfigurationStoreNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ReplicasListByConfigurationStoreNextResponse = ReplicaListResult;
+
+// @public
+export interface ReplicasListByConfigurationStoreOptionalParams extends coreClient.OperationOptions {
+    skipToken?: string;
+}
+
+// @public
+export type ReplicasListByConfigurationStoreResponse = ReplicaListResult;
+
+// @public
 export interface Resource {
     readonly id?: string;
     readonly name?: string;
@@ -682,6 +809,52 @@ export interface ServiceSpecification {
 export interface Sku {
     name: string;
 }
+
+// @public
+export interface Snapshot {
+    compositionType?: CompositionType;
+    readonly created?: Date;
+    readonly etag?: string;
+    readonly expires?: Date;
+    filters?: KeyValueFilter[];
+    readonly id?: string;
+    readonly itemsCount?: number;
+    readonly name?: string;
+    readonly provisioningState?: ProvisioningState;
+    retentionPeriod?: number;
+    readonly size?: number;
+    readonly status?: SnapshotStatus;
+    tags?: {
+        [propertyName: string]: string;
+    };
+    readonly type?: string;
+}
+
+// @public
+export interface Snapshots {
+    beginCreate(resourceGroupName: string, configStoreName: string, snapshotName: string, body: Snapshot, options?: SnapshotsCreateOptionalParams): Promise<SimplePollerLike<OperationState<SnapshotsCreateResponse>, SnapshotsCreateResponse>>;
+    beginCreateAndWait(resourceGroupName: string, configStoreName: string, snapshotName: string, body: Snapshot, options?: SnapshotsCreateOptionalParams): Promise<SnapshotsCreateResponse>;
+    get(resourceGroupName: string, configStoreName: string, snapshotName: string, options?: SnapshotsGetOptionalParams): Promise<SnapshotsGetResponse>;
+}
+
+// @public
+export interface SnapshotsCreateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type SnapshotsCreateResponse = Snapshot;
+
+// @public
+export interface SnapshotsGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type SnapshotsGetResponse = Snapshot;
+
+// @public
+export type SnapshotStatus = string;
 
 // @public
 export interface SystemData {

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * This sample shows how to copy a model from one resource to another. The model is created with a new model ID (and
@@ -27,7 +27,7 @@ async function main() {
 
   const sourceEndpoint = process.env.FORM_RECOGNIZER_SOURCE_ENDPOINT || "<source endpoint>";
   const sourceCredential = new AzureKeyCredential(
-    process.env.FORM_RECOGNIZER_SOURCE_API_KEY || "<source api key>"
+    process.env.FORM_RECOGNIZER_SOURCE_API_KEY || "<source api key>",
   );
   const sourceModelId = process.env.COPY_SOURCE_MODEL_ID || "<source model id>";
 

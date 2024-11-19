@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
-  Recorder,
-  RecorderStartOptions,
-  assertEnvironmentVariable,
-} from "@azure-tools/test-recorder";
+import type { Recorder, RecorderStartOptions } from "@azure-tools/test-recorder";
+import { assertEnvironmentVariable } from "@azure-tools/test-recorder";
 import { KnownSchemaFormats, SchemaRegistryClient } from "../../../src";
 import { createTestCredential } from "@azure-tools/test-credential";
 
@@ -25,6 +22,10 @@ export const recorderOptions: RecorderStartOptions = {
     [getFQNSVarName(KnownSchemaFormats.Custom)]: "https://endpoint",
     SCHEMA_REGISTRY_GROUP: "group-1",
   },
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK4001", // uri name is not a secret and is replaced using envSetupForPlayback
+  ],
 };
 
 export function createRecordedClient(inputs: {
@@ -36,7 +37,7 @@ export function createRecordedClient(inputs: {
   const client = new SchemaRegistryClient(
     assertEnvironmentVariable(getFQNSVarName(format)),
     credential,
-    recorder.configureClientOptions({})
+    recorder.configureClientOptions({}),
   );
   return client;
 }

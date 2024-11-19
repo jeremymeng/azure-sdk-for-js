@@ -1,34 +1,43 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { TokenCredential } from "@azure/core-auth";
-import { bearerTokenAuthenticationPolicy } from "@azure/core-rest-pipeline";
-import { createKeyVaultChallengeCallbacks } from "@azure/keyvault-common";
-import { LATEST_API_VERSION } from "./constants";
-import { KeyVaultClient, Setting as GeneratedSetting } from "./generated";
-import { logger } from "./log";
-import {
+import type { TokenCredential } from "@azure/core-auth";
+import { keyVaultAuthenticationPolicy } from "@azure/keyvault-common";
+import { LATEST_API_VERSION } from "./constants.js";
+import type { Setting as GeneratedSetting } from "./generated/index.js";
+import { KeyVaultClient } from "./generated/index.js";
+import { logger } from "./log.js";
+import type {
   UpdateSettingOptions,
   GetSettingOptions,
   ListSettingsOptions,
   ListSettingsResponse,
   KeyVaultSetting,
   SettingsClientOptions,
-} from "./settingsClientModels";
+  BooleanKeyVaultSetting,
+} from "./settingsClientModels.js";
 
 function makeSetting(generatedSetting: GeneratedSetting): KeyVaultSetting {
   if (generatedSetting.type === "boolean") {
     return {
+      kind: "boolean",
       name: generatedSetting.name,
       value: generatedSetting.value === "true" ? true : false,
-      kind: "boolean",
     };
   } else {
     return {
+      kind: generatedSetting.type,
       name: generatedSetting.name,
       value: generatedSetting.value,
     };
   }
+}
+
+/**
+ * Determines whether a given {@link KeyVaultSetting} is a {@link BooleanKeyVaultSetting}, i.e. has a boolean value.
+ */
+export function isBooleanSetting(setting: KeyVaultSetting): setting is BooleanKeyVaultSetting {
+  return setting.kind === "boolean" && typeof setting.value === "boolean";
 }
 
 /**
@@ -64,6 +73,7 @@ export class KeyVaultSettingsClient {
    * @param options - options used to configure Key Vault API requests.
 
    */
+  // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
   constructor(vaultUrl: string, credential: TokenCredential, options: SettingsClientOptions = {}) {
     this.vaultUrl = vaultUrl;
 
@@ -82,29 +92,26 @@ export class KeyVaultSettingsClient {
     };
 
     this.client = new KeyVaultClient(apiVersion, clientOptions);
-    this.client.pipeline.addPolicy(
-      bearerTokenAuthenticationPolicy({
-        credential,
-        scopes: [],
-        challengeCallbacks: createKeyVaultChallengeCallbacks(options),
-      })
-    );
+
+    // The authentication policy must come after the deserialization policy since the deserialization policy
+    // converts 401 responses to an Error, and we don't want to deal with that.
+    this.client.pipeline.addPolicy(keyVaultAuthenticationPolicy(credential, clientOptions), {
+      afterPolicies: ["deserializationPolicy"],
+    });
   }
 
   /**
    * Updates the named account setting.
    *
-   * @param settingName - the name of the account setting. Must be a valid settings option.
-   * @param value - the value of the pool setting.
+   * @param setting - the setting to update. The name of the setting must be a valid settings option.
    * @param options - the optional parameters.
    */
   async updateSetting(
-    settingName: string,
-    value: boolean,
-    options: UpdateSettingOptions = {}
+    setting: KeyVaultSetting,
+    options: UpdateSettingOptions = {},
   ): Promise<KeyVaultSetting> {
     return makeSetting(
-      await this.client.updateSetting(this.vaultUrl, settingName, String(value), options)
+      await this.client.updateSetting(this.vaultUrl, setting.name, String(setting.value), options),
     );
   }
 
@@ -123,6 +130,7 @@ export class KeyVaultSettingsClient {
    *
    * @param options - the optional parameters.
    */
+  // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
   async getSettings(options: ListSettingsOptions = {}): Promise<ListSettingsResponse> {
     const { settings } = await this.client.getSettings(this.vaultUrl, options);
     return { settings: settings?.map(makeSetting) ?? [] };

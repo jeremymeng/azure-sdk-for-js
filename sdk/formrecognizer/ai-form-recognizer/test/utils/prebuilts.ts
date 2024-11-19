@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { PrebuiltBusinessCardModel } from "./schemas/prebuilt-businessCard";
 import { PrebuiltDocumentModel } from "./schemas/prebuilt-document";
@@ -10,7 +10,6 @@ import { PrebuiltLayoutModel } from "./schemas/prebuilt-layout";
 import { PrebuiltReadModel } from "./schemas/prebuilt-read";
 import { PrebuiltReceiptModel } from "./schemas/prebuilt-receipt";
 import { PrebuiltTaxUsW2Model } from "./schemas/prebuilt-tax.us.w2";
-import { PrebuiltVaccinationCardModel } from "./schemas/prebuilt-vaccinationCard";
 
 /**
  * Prebuilt models used for testing.
@@ -18,7 +17,6 @@ import { PrebuiltVaccinationCardModel } from "./schemas/prebuilt-vaccinationCard
 export const PrebuiltModels = {
   Receipt: PrebuiltReceiptModel,
   BusinessCard: PrebuiltBusinessCardModel,
-  VaccinationCard: PrebuiltVaccinationCardModel,
   Invoice: PrebuiltInvoiceModel,
   IdentityDocument: PrebuiltIdDocumentModel,
   TaxUsW2: PrebuiltTaxUsW2Model,

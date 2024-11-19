@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetworkManagementClient } from "../networkManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   SecurityRule,
   SecurityRulesListNextOptionalParams,
@@ -25,7 +29,7 @@ import {
   SecurityRulesGetResponse,
   SecurityRulesCreateOrUpdateOptionalParams,
   SecurityRulesCreateOrUpdateResponse,
-  SecurityRulesListNextResponse
+  SecurityRulesListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -50,12 +54,12 @@ export class SecurityRulesImpl implements SecurityRules {
   public list(
     resourceGroupName: string,
     networkSecurityGroupName: string,
-    options?: SecurityRulesListOptionalParams
+    options?: SecurityRulesListOptionalParams,
   ): PagedAsyncIterableIterator<SecurityRule> {
     const iter = this.listPagingAll(
       resourceGroupName,
       networkSecurityGroupName,
-      options
+      options,
     );
     return {
       next() {
@@ -72,9 +76,9 @@ export class SecurityRulesImpl implements SecurityRules {
           resourceGroupName,
           networkSecurityGroupName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -82,7 +86,7 @@ export class SecurityRulesImpl implements SecurityRules {
     resourceGroupName: string,
     networkSecurityGroupName: string,
     options?: SecurityRulesListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<SecurityRule[]> {
     let result: SecurityRulesListResponse;
     let continuationToken = settings?.continuationToken;
@@ -90,7 +94,7 @@ export class SecurityRulesImpl implements SecurityRules {
       result = await this._list(
         resourceGroupName,
         networkSecurityGroupName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -102,7 +106,7 @@ export class SecurityRulesImpl implements SecurityRules {
         resourceGroupName,
         networkSecurityGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -114,12 +118,12 @@ export class SecurityRulesImpl implements SecurityRules {
   private async *listPagingAll(
     resourceGroupName: string,
     networkSecurityGroupName: string,
-    options?: SecurityRulesListOptionalParams
+    options?: SecurityRulesListOptionalParams,
   ): AsyncIterableIterator<SecurityRule> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       networkSecurityGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -136,25 +140,24 @@ export class SecurityRulesImpl implements SecurityRules {
     resourceGroupName: string,
     networkSecurityGroupName: string,
     securityRuleName: string,
-    options?: SecurityRulesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: SecurityRulesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -163,8 +166,8 @@ export class SecurityRulesImpl implements SecurityRules {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -172,25 +175,25 @@ export class SecurityRulesImpl implements SecurityRules {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         networkSecurityGroupName,
         securityRuleName,
-        options
+        options,
       },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -207,13 +210,13 @@ export class SecurityRulesImpl implements SecurityRules {
     resourceGroupName: string,
     networkSecurityGroupName: string,
     securityRuleName: string,
-    options?: SecurityRulesDeleteOptionalParams
+    options?: SecurityRulesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       networkSecurityGroupName,
       securityRuleName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -229,16 +232,16 @@ export class SecurityRulesImpl implements SecurityRules {
     resourceGroupName: string,
     networkSecurityGroupName: string,
     securityRuleName: string,
-    options?: SecurityRulesGetOptionalParams
+    options?: SecurityRulesGetOptionalParams,
   ): Promise<SecurityRulesGetResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         networkSecurityGroupName,
         securityRuleName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -256,30 +259,29 @@ export class SecurityRulesImpl implements SecurityRules {
     networkSecurityGroupName: string,
     securityRuleName: string,
     securityRuleParameters: SecurityRule,
-    options?: SecurityRulesCreateOrUpdateOptionalParams
+    options?: SecurityRulesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SecurityRulesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<SecurityRulesCreateOrUpdateResponse>,
       SecurityRulesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<SecurityRulesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -288,8 +290,8 @@ export class SecurityRulesImpl implements SecurityRules {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -297,26 +299,29 @@ export class SecurityRulesImpl implements SecurityRules {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         networkSecurityGroupName,
         securityRuleName,
         securityRuleParameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      SecurityRulesCreateOrUpdateResponse,
+      OperationState<SecurityRulesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -336,14 +341,14 @@ export class SecurityRulesImpl implements SecurityRules {
     networkSecurityGroupName: string,
     securityRuleName: string,
     securityRuleParameters: SecurityRule,
-    options?: SecurityRulesCreateOrUpdateOptionalParams
+    options?: SecurityRulesCreateOrUpdateOptionalParams,
   ): Promise<SecurityRulesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       networkSecurityGroupName,
       securityRuleName,
       securityRuleParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -357,11 +362,11 @@ export class SecurityRulesImpl implements SecurityRules {
   private _list(
     resourceGroupName: string,
     networkSecurityGroupName: string,
-    options?: SecurityRulesListOptionalParams
+    options?: SecurityRulesListOptionalParams,
   ): Promise<SecurityRulesListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, networkSecurityGroupName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -376,11 +381,11 @@ export class SecurityRulesImpl implements SecurityRules {
     resourceGroupName: string,
     networkSecurityGroupName: string,
     nextLink: string,
-    options?: SecurityRulesListNextOptionalParams
+    options?: SecurityRulesListNextOptionalParams,
   ): Promise<SecurityRulesListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, networkSecurityGroupName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -388,8 +393,7 @@ export class SecurityRulesImpl implements SecurityRules {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules/{securityRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules/{securityRuleName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -397,8 +401,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -406,22 +410,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.networkSecurityGroupName,
-    Parameters.securityRuleName
+    Parameters.securityRuleName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules/{securityRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules/{securityRuleName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SecurityRule
+      bodyMapper: Mappers.SecurityRule,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -429,31 +432,30 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.networkSecurityGroupName,
-    Parameters.securityRuleName
+    Parameters.securityRuleName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules/{securityRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules/{securityRuleName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.SecurityRule
+      bodyMapper: Mappers.SecurityRule,
     },
     201: {
-      bodyMapper: Mappers.SecurityRule
+      bodyMapper: Mappers.SecurityRule,
     },
     202: {
-      bodyMapper: Mappers.SecurityRule
+      bodyMapper: Mappers.SecurityRule,
     },
     204: {
-      bodyMapper: Mappers.SecurityRule
+      bodyMapper: Mappers.SecurityRule,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.securityRuleParameters,
   queryParameters: [Parameters.apiVersion],
@@ -462,53 +464,51 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.networkSecurityGroupName,
-    Parameters.securityRuleName
+    Parameters.securityRuleName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SecurityRuleListResult
+      bodyMapper: Mappers.SecurityRuleListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.networkSecurityGroupName
+    Parameters.networkSecurityGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SecurityRuleListResult
+      bodyMapper: Mappers.SecurityRuleListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.networkSecurityGroupName
+    Parameters.networkSecurityGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

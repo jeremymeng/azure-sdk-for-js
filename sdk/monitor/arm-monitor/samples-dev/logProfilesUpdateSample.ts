@@ -10,6 +10,9 @@
 // Licensed under the MIT License.
 import { LogProfileResourcePatch, MonitorClient } from "@azure/arm-monitor";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Updates an existing LogProfilesResource. To update other fields use the CreateOrUpdate method.
@@ -18,7 +21,9 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2016-03-01/examples/patchLogProfile.json
  */
 async function patchALogProfile() {
-  const subscriptionId = "df602c9c-7aa0-407d-a6fb-eb20c8bd1192";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] ||
+    "df602c9c-7aa0-407d-a6fb-eb20c8bd1192";
   const logProfileName = "Rac46PostSwapRG";
   const logProfilesResource: LogProfileResourcePatch = {
     categories: ["Write", "Delete", "Action"],
@@ -27,15 +32,19 @@ async function patchALogProfile() {
     serviceBusRuleId: "",
     storageAccountId:
       "/subscriptions/df602c9c-7aa0-407d-a6fb-eb20c8bd1192/resourceGroups/JohnKemTest/providers/Microsoft.Storage/storageAccounts/johnkemtest8162",
-    tags: { key1: "value1" }
+    tags: { key1: "value1" },
   };
   const credential = new DefaultAzureCredential();
   const client = new MonitorClient(credential, subscriptionId);
   const result = await client.logProfiles.update(
     logProfileName,
-    logProfilesResource
+    logProfilesResource,
   );
   console.log(result);
 }
 
-patchALogProfile().catch(console.error);
+async function main() {
+  patchALogProfile();
+}
+
+main().catch(console.error);

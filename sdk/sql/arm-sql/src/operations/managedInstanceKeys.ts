@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SqlManagementClient } from "../sqlManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ManagedInstanceKey,
   ManagedInstanceKeysListByInstanceNextOptionalParams,
@@ -25,7 +29,7 @@ import {
   ManagedInstanceKeysCreateOrUpdateOptionalParams,
   ManagedInstanceKeysCreateOrUpdateResponse,
   ManagedInstanceKeysDeleteOptionalParams,
-  ManagedInstanceKeysListByInstanceNextResponse
+  ManagedInstanceKeysListByInstanceNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -51,12 +55,12 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
   public listByInstance(
     resourceGroupName: string,
     managedInstanceName: string,
-    options?: ManagedInstanceKeysListByInstanceOptionalParams
+    options?: ManagedInstanceKeysListByInstanceOptionalParams,
   ): PagedAsyncIterableIterator<ManagedInstanceKey> {
     const iter = this.listByInstancePagingAll(
       resourceGroupName,
       managedInstanceName,
-      options
+      options,
     );
     return {
       next() {
@@ -73,9 +77,9 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
           resourceGroupName,
           managedInstanceName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -83,7 +87,7 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
     resourceGroupName: string,
     managedInstanceName: string,
     options?: ManagedInstanceKeysListByInstanceOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ManagedInstanceKey[]> {
     let result: ManagedInstanceKeysListByInstanceResponse;
     let continuationToken = settings?.continuationToken;
@@ -91,7 +95,7 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
       result = await this._listByInstance(
         resourceGroupName,
         managedInstanceName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -103,7 +107,7 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
         resourceGroupName,
         managedInstanceName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -115,12 +119,12 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
   private async *listByInstancePagingAll(
     resourceGroupName: string,
     managedInstanceName: string,
-    options?: ManagedInstanceKeysListByInstanceOptionalParams
+    options?: ManagedInstanceKeysListByInstanceOptionalParams,
   ): AsyncIterableIterator<ManagedInstanceKey> {
     for await (const page of this.listByInstancePagingPage(
       resourceGroupName,
       managedInstanceName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -136,11 +140,11 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
   private _listByInstance(
     resourceGroupName: string,
     managedInstanceName: string,
-    options?: ManagedInstanceKeysListByInstanceOptionalParams
+    options?: ManagedInstanceKeysListByInstanceOptionalParams,
   ): Promise<ManagedInstanceKeysListByInstanceResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, managedInstanceName, options },
-      listByInstanceOperationSpec
+      listByInstanceOperationSpec,
     );
   }
 
@@ -156,11 +160,11 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
     resourceGroupName: string,
     managedInstanceName: string,
     keyName: string,
-    options?: ManagedInstanceKeysGetOptionalParams
+    options?: ManagedInstanceKeysGetOptionalParams,
   ): Promise<ManagedInstanceKeysGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, managedInstanceName, keyName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -178,30 +182,29 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
     managedInstanceName: string,
     keyName: string,
     parameters: ManagedInstanceKey,
-    options?: ManagedInstanceKeysCreateOrUpdateOptionalParams
+    options?: ManagedInstanceKeysCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ManagedInstanceKeysCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ManagedInstanceKeysCreateOrUpdateResponse>,
       ManagedInstanceKeysCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<ManagedInstanceKeysCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -210,8 +213,8 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -219,19 +222,28 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, managedInstanceName, keyName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        managedInstanceName,
+        keyName,
+        parameters,
+        options,
+      },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      ManagedInstanceKeysCreateOrUpdateResponse,
+      OperationState<ManagedInstanceKeysCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -251,14 +263,14 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
     managedInstanceName: string,
     keyName: string,
     parameters: ManagedInstanceKey,
-    options?: ManagedInstanceKeysCreateOrUpdateOptionalParams
+    options?: ManagedInstanceKeysCreateOrUpdateOptionalParams,
   ): Promise<ManagedInstanceKeysCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       managedInstanceName,
       keyName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -275,25 +287,24 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
     resourceGroupName: string,
     managedInstanceName: string,
     keyName: string,
-    options?: ManagedInstanceKeysDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: ManagedInstanceKeysDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -302,8 +313,8 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -311,19 +322,19 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, managedInstanceName, keyName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, managedInstanceName, keyName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -341,13 +352,13 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
     resourceGroupName: string,
     managedInstanceName: string,
     keyName: string,
-    options?: ManagedInstanceKeysDeleteOptionalParams
+    options?: ManagedInstanceKeysDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       managedInstanceName,
       keyName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -364,11 +375,11 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
     resourceGroupName: string,
     managedInstanceName: string,
     nextLink: string,
-    options?: ManagedInstanceKeysListByInstanceNextOptionalParams
+    options?: ManagedInstanceKeysListByInstanceNextOptionalParams,
   ): Promise<ManagedInstanceKeysListByInstanceNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, managedInstanceName, nextLink, options },
-      listByInstanceNextOperationSpec
+      listByInstanceNextOperationSpec,
     );
   }
 }
@@ -376,109 +387,105 @@ export class ManagedInstanceKeysImpl implements ManagedInstanceKeys {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listByInstanceOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/keys",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/keys",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceKeyListResult
+      bodyMapper: Mappers.ManagedInstanceKeyListResult,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2, Parameters.filter1],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.managedInstanceName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/keys/{keyName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.ManagedInstanceKey
-    },
-    default: {}
-  },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.filter1, Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.managedInstanceName,
-    Parameters.keyName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/keys/{keyName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ManagedInstanceKey,
+    },
+    default: {},
+  },
+  queryParameters: [Parameters.apiVersion3],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.managedInstanceName,
+    Parameters.keyName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/keys/{keyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/keys/{keyName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceKey
+      bodyMapper: Mappers.ManagedInstanceKey,
     },
     201: {
-      bodyMapper: Mappers.ManagedInstanceKey
+      bodyMapper: Mappers.ManagedInstanceKey,
     },
     202: {
-      bodyMapper: Mappers.ManagedInstanceKey
+      bodyMapper: Mappers.ManagedInstanceKey,
     },
     204: {
-      bodyMapper: Mappers.ManagedInstanceKey
+      bodyMapper: Mappers.ManagedInstanceKey,
     },
-    default: {}
+    default: {},
   },
-  requestBody: Parameters.parameters50,
-  queryParameters: [Parameters.apiVersion2],
+  requestBody: Parameters.parameters34,
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.managedInstanceName,
-    Parameters.keyName
+    Parameters.keyName,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/keys/{keyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/keys/{keyName}",
   httpMethod: "DELETE",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.managedInstanceName,
-    Parameters.keyName
+    Parameters.keyName,
   ],
-  serializer
+  serializer,
 };
 const listByInstanceNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceKeyListResult
+      bodyMapper: Mappers.ManagedInstanceKeyListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.nextLink,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

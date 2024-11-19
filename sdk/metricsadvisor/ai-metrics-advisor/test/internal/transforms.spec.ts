@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { assert } from "chai";
 
-import {
+import type {
   AnomalyDetectionConfiguration as ServiceAnomalyDetectionConfiguration,
   AnomalyFeedback as ServiceAnomalyFeedback,
   ChangePointFeedback as ServiceChangePointFeedback,
@@ -13,7 +13,7 @@ import {
   PeriodFeedback as ServicePeriodFeedback,
   WholeMetricConfiguration as ServiceWholeMetricConfiguration,
 } from "../../src/generated/models";
-import {
+import type {
   AzureBlobDataFeedSource,
   DataFeedGranularity,
   MetricDetectionCondition,
@@ -71,7 +71,7 @@ describe("Transforms", () => {
     assert.equal(actual.id, original.anomalyDetectionConfigurationId);
     assert.deepStrictEqual(
       actual.wholeSeriesDetectionCondition,
-      original.wholeMetricConfiguration as MetricDetectionCondition
+      original.wholeMetricConfiguration as MetricDetectionCondition,
     );
   });
 
@@ -190,7 +190,7 @@ describe("Transforms", () => {
     assert.strictEqual(actualSource.blobTemplate, serviceDataFeed.dataSourceParameter.blobTemplate);
     assert.strictEqual(
       actualSource.connectionString,
-      serviceDataFeed.dataSourceParameter.connectionString
+      serviceDataFeed.dataSourceParameter.connectionString,
     );
     assert.strictEqual(actualSource.container, serviceDataFeed.dataSourceParameter.container);
     assert.strictEqual(actual.name, serviceDataFeed.dataFeedName);

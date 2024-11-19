@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { assert } from "@azure/test-utils";
-import { TextDecoder, TextEncoder } from "util";
-import {
+import { assert } from "@azure-tools/test-utils";
+import type {
   AckMessage,
   ConnectedMessage,
   DisconnectedMessage,
@@ -383,7 +382,11 @@ describe("JsonProtocol", function () {
     tests.forEach(({ testName, message, assertFunc }) => {
       it(`parse message test ${testName}`, () => {
         const parsedMsg = protocol.parseMessages(JSON.stringify(message));
-        assertFunc(parsedMsg!);
+        if (!Array.isArray(parsedMsg)) {
+          assertFunc(parsedMsg!);
+        } else {
+          throw new Error("should not be an array");
+        }
       });
     });
   });

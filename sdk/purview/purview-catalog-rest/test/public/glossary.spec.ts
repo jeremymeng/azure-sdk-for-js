@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { getLongRunningPoller, PurviewCatalogClient } from "../../src";
+// Licensed under the MIT License.
+import type { PurviewCatalogClient } from "../../src";
+import { getLongRunningPoller } from "../../src";
 import { Recorder } from "@azure-tools/test-recorder";
 
 import { assert } from "chai";
 import { createClient } from "./utils/recordedClient";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 
 describe("purview catalog glossary test", () => {
   let recorder: Recorder;
@@ -47,7 +48,7 @@ describe("purview catalog glossary test", () => {
           headersForRemoval: ["Content-Type", "Transfer-Encoding"],
         },
       },
-      ["playback", "record"]
+      ["playback", "record"],
     );
     await recorder.setMatcher("BodilessMatcher");
     const initialResponse = await client
@@ -64,7 +65,7 @@ describe("purview catalog glossary test", () => {
 
     console.log("LRO init resp: ", initialResponse);
     const poller = getLongRunningPoller(client, initialResponse, {
-      intervalInMs: 0,
+      intervalInMs: 100,
     });
 
     const result = await poller.pollUntilDone();

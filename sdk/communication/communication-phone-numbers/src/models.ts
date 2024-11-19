@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { OperationOptions } from "@azure/core-client";
-import {
+import type { OperationOptions } from "@azure/core-client";
+import type {
   PhoneNumberAssignmentType,
   PhoneNumberSearchRequest,
   PhoneNumbersListAreaCodesOptionalParams,
   PhoneNumberType,
-} from "./generated/src/models/";
+} from "./generated/src/models/index.js";
 
 /**
  * The result of the phone numbers purchase operation.
@@ -67,6 +67,23 @@ export interface ListLocalitiesOptions extends OperationOptions {
 }
 
 /**
+ * Additional options for the search operator information request.
+ */
+export interface SearchOperatorInformationOptions extends OperationOptions {
+  includeAdditionalOperatorDetails: boolean;
+}
+
+/**
+ * Additional options that can be passed to list SIP routes.
+ */
+export interface ListSipRoutesOptions extends OperationOptions {}
+
+/**
+ * Additional options that can be passed to list SIP trunks.
+ */
+export interface ListSipTrunksOptions extends OperationOptions {}
+
+/**
  * Additional options that can be passed to the available offerings request.
  */
 export interface ListOfferingsOptions extends OperationOptions {
@@ -88,11 +105,17 @@ export {
   PhoneNumberOffering,
   PhoneNumberSearchRequest,
   PhoneNumberSearchResult,
+  PhoneNumberSearchResultError,
   PhoneNumberType,
   PurchasedPhoneNumber,
-} from "./generated/src/models/";
+  OperatorDetails,
+  OperatorInformation,
+  OperatorInformationOptions,
+  OperatorInformationResult,
+  OperatorNumberType,
+} from "./generated/src/models/index.js";
 
-export { SipRoutingError, SipTrunkRoute } from "./generated/src/siprouting/models";
+export { SipRoutingError, SipTrunkRoute } from "./generated/src/siprouting/models/index.js";
 
 /**
  * Represents a SIP trunk for routing calls. See RFC 4904.

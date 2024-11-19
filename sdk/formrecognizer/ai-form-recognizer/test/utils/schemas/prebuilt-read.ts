@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Model:       prebuilt-read
 // Description: Extract text from documents.
-// API Version: 2022-08-31
-// Created:     Thu Aug 25 2022
+// API Version: 2023-07-31
+// Created:     Wed Apr 05 2023
 
 import * as fr from "../../../src";
 
@@ -12,7 +12,7 @@ import * as fr from "../../../src";
  * Extract text from documents.
  */
 export const PrebuiltReadModel = fr.createModelFromSchema(
-  modelInfo()
+  modelInfo(),
 ) as fr.DocumentModel<PrebuiltReadResult>;
 
 export interface PrebuiltReadResult extends fr.AnalyzeResultCommon {
@@ -41,7 +41,7 @@ function modelInfo() {
   return {
     modelId: "prebuilt-read",
     description: "Extract text from documents.",
-    createdOn: "2022-08-31T00:00:00.000Z",
-    apiVersion: "2022-08-31",
+    createdOn: "2023-02-28T00:00:00.000Z",
+    apiVersion: "2023-07-31",
   } as const;
 }

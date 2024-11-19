@@ -6,7 +6,7 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
 import { ProblemClassifications } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -17,7 +17,7 @@ import {
   ProblemClassificationsListOptionalParams,
   ProblemClassificationsListResponse,
   ProblemClassificationsGetOptionalParams,
-  ProblemClassificationsGetResponse
+  ProblemClassificationsGetResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -43,7 +43,7 @@ export class ProblemClassificationsImpl implements ProblemClassifications {
    */
   public list(
     serviceName: string,
-    options?: ProblemClassificationsListOptionalParams
+    options?: ProblemClassificationsListOptionalParams,
   ): PagedAsyncIterableIterator<ProblemClassification> {
     const iter = this.listPagingAll(serviceName, options);
     return {
@@ -53,23 +53,28 @@ export class ProblemClassificationsImpl implements ProblemClassifications {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(serviceName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(serviceName, options, settings);
+      },
     };
   }
 
   private async *listPagingPage(
     serviceName: string,
-    options?: ProblemClassificationsListOptionalParams
+    options?: ProblemClassificationsListOptionalParams,
+    _settings?: PageSettings,
   ): AsyncIterableIterator<ProblemClassification[]> {
-    let result = await this._list(serviceName, options);
+    let result: ProblemClassificationsListResponse;
+    result = await this._list(serviceName, options);
     yield result.value || [];
   }
 
   private async *listPagingAll(
     serviceName: string,
-    options?: ProblemClassificationsListOptionalParams
+    options?: ProblemClassificationsListOptionalParams,
   ): AsyncIterableIterator<ProblemClassification> {
     for await (const page of this.listPagingPage(serviceName, options)) {
       yield* page;
@@ -86,11 +91,11 @@ export class ProblemClassificationsImpl implements ProblemClassifications {
    */
   private _list(
     serviceName: string,
-    options?: ProblemClassificationsListOptionalParams
+    options?: ProblemClassificationsListOptionalParams,
   ): Promise<ProblemClassificationsListResponse> {
     return this.client.sendOperationRequest(
       { serviceName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -103,11 +108,11 @@ export class ProblemClassificationsImpl implements ProblemClassifications {
   get(
     serviceName: string,
     problemClassificationName: string,
-    options?: ProblemClassificationsGetOptionalParams
+    options?: ProblemClassificationsGetOptionalParams,
   ): Promise<ProblemClassificationsGetResponse> {
     return this.client.sendOperationRequest(
       { serviceName, problemClassificationName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 }
@@ -115,40 +120,38 @@ export class ProblemClassificationsImpl implements ProblemClassifications {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/providers/Microsoft.Support/services/{serviceName}/problemClassifications",
+  path: "/providers/Microsoft.Support/services/{serviceName}/problemClassifications",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ProblemClassificationsListResult
+      bodyMapper: Mappers.ProblemClassificationsListResult,
     },
     default: {
-      bodyMapper: Mappers.ExceptionResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.serviceName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/providers/Microsoft.Support/services/{serviceName}/problemClassifications/{problemClassificationName}",
+  path: "/providers/Microsoft.Support/services/{serviceName}/problemClassifications/{problemClassificationName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ProblemClassification
+      bodyMapper: Mappers.ProblemClassification,
     },
     default: {
-      bodyMapper: Mappers.ExceptionResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.serviceName,
-    Parameters.problemClassificationName
+    Parameters.problemClassificationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 /// <reference lib="esnext.asynciterable" />
 
 import {
@@ -7,14 +7,15 @@ import {
   isKeyCredential,
   parseClientArguments,
 } from "@azure/communication-common";
-import { KeyCredential, TokenCredential, isTokenCredential } from "@azure/core-auth";
-import { CommonClientOptions, OperationOptions } from "@azure/core-client";
-import { InternalPipelineOptions } from "@azure/core-rest-pipeline";
-import { SmsApiClient } from "./generated/src/smsApiClient";
-import { extractOperationOptions } from "./extractOperationOptions";
-import { generateSendMessageRequest } from "./utils/smsUtils";
-import { logger } from "./logger";
-import { tracingClient } from "./generated/src/tracing";
+import type { KeyCredential, TokenCredential } from "@azure/core-auth";
+import { isTokenCredential } from "@azure/core-auth";
+import type { CommonClientOptions, OperationOptions } from "@azure/core-client";
+import type { InternalPipelineOptions } from "@azure/core-rest-pipeline";
+import { SmsApiClient } from "./generated/src/smsApiClient.js";
+import { extractOperationOptions } from "./extractOperationOptions.js";
+import { generateSendMessageRequest } from "./utils/smsUtils.js";
+import { logger } from "./logger.js";
+import { tracingClient } from "./generated/src/tracing.js";
 
 /**
  * Client options used to configure SMS Client API requests.
@@ -54,6 +55,8 @@ export interface SmsSendOptions extends OperationOptions {
    * Report.
    */
   tag?: string;
+  /** Time to wait for a delivery report. After this time a delivery report with timeout error code is generated. */
+  deliveryReportTimeoutInSeconds?: number;
 }
 
 export interface SmsSendResult {
@@ -121,7 +124,7 @@ export class SmsClient {
   constructor(
     connectionStringOrUrl: string,
     credentialOrOptions?: KeyCredential | TokenCredential | SmsClientOptions,
-    maybeOptions: SmsClientOptions = {}
+    maybeOptions: SmsClientOptions = {},
   ) {
     const { url, credential } = parseClientArguments(connectionStringOrUrl, credentialOrOptions);
     const options = isSmsClientOptions(credentialOrOptions) ? credentialOrOptions : maybeOptions;
@@ -148,13 +151,13 @@ export class SmsClient {
    */
   public async send(
     sendRequest: SmsSendRequest,
-    options: SmsSendOptions = { enableDeliveryReport: false }
+    options: SmsSendOptions = { enableDeliveryReport: false },
   ): Promise<SmsSendResult[]> {
     const { operationOptions, restOptions } = extractOperationOptions(options);
     return tracingClient.withSpan("SmsClient-Send", operationOptions, async (updatedOptions) => {
       const response = await this.api.sms.send(
         generateSendMessageRequest(sendRequest, restOptions),
-        updatedOptions
+        updatedOptions,
       );
       return response.value;
     });

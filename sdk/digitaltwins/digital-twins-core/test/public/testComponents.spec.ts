@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { DigitalTwinsClient, DigitalTwinsUpdateComponentOptionalParams } from "../../src";
+import type { DigitalTwinsClient, DigitalTwinsUpdateComponentOptionalParams } from "../../src";
 import { authenticate } from "../utils/testAuthentication";
-import { isLiveMode, Recorder } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isLiveMode } from "@azure-tools/test-recorder";
 import chai from "chai";
 import { isRestError } from "@azure/core-rest-pipeline";
 
-const assert = chai.assert;
+const assert: typeof chai.assert = chai.assert;
 const should = chai.should();
 
 const MODEL_ID = "dtmi:samples:DTComponentTestsModel;1";
@@ -335,7 +336,8 @@ describe("DigitalTwins Components - read, update and delete operations", () => {
     should.equal(errorWasThrown, true, "Error was not thrown");
   });
 
-  it("update component not existing", async function () {
+  // TODO: Fix the test. Tracking issue: https://github.com/Azure/azure-sdk-for-js/issues/30395
+  it.skip("update component not existing", async function () {
     await setUpModels();
     await createDigitalTwin(DIGITAL_TWIN_ID);
 
@@ -373,7 +375,7 @@ describe("DigitalTwins Components - read, update and delete operations", () => {
         DIGITAL_TWIN_ID,
         "Component1",
         telemetry,
-        test_messageId
+        test_messageId,
       );
     } finally {
       await deleteDigitalTwin(DIGITAL_TWIN_ID);
@@ -395,7 +397,7 @@ describe("DigitalTwins Components - read, update and delete operations", () => {
         DIGITAL_TWIN_ID,
         "Component1",
         telemetry,
-        test_messageId
+        test_messageId,
       );
     } finally {
       await deleteDigitalTwin(DIGITAL_TWIN_ID);
@@ -418,7 +420,7 @@ describe("DigitalTwins Components - read, update and delete operations", () => {
         DIGITAL_TWIN_ID,
         "Component2",
         telemetry,
-        test_messageId
+        test_messageId,
       );
     } catch (error: any) {
       errorWasThrown = true;

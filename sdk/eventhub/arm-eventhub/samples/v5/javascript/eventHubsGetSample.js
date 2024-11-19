@@ -10,16 +10,19 @@
 // Licensed under the MIT License.
 const { EventHubManagementClient } = require("@azure/arm-eventhub");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Gets an Event Hubs description for the specified Event Hub.
  *
  * @summary Gets an Event Hubs description for the specified Event Hub.
- * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2021-11-01/examples/EventHubs/EHEventHubGet.json
+ * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2024-01-01/examples/EventHubs/EHEventHubGet.json
  */
 async function eventHubGet() {
-  const subscriptionId = "e2f361f0-3b27-4503-a9cc-21cfba380093";
-  const resourceGroupName = "Default-NotificationHubs-AustraliaEast";
+  const subscriptionId =
+    process.env["EVENTHUB_SUBSCRIPTION_ID"] || "e2f361f0-3b27-4503-a9cc-21cfba380093";
+  const resourceGroupName =
+    process.env["EVENTHUB_RESOURCE_GROUP"] || "Default-NotificationHubs-AustraliaEast";
   const namespaceName = "sdk-Namespace-716";
   const eventHubName = "sdk-EventHub-10";
   const credential = new DefaultAzureCredential();
@@ -28,4 +31,8 @@ async function eventHubGet() {
   console.log(result);
 }
 
-eventHubGet().catch(console.error);
+async function main() {
+  eventHubGet();
+}
+
+main().catch(console.error);

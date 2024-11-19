@@ -10,6 +10,9 @@
 // Licensed under the MIT License.
 import { SecurityCenter } from "@azure/arm-security";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Gets list of all supported Security Solutions for subscription and location.
@@ -18,14 +21,21 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/stable/2020-01-01/examples/SecuritySolutionsReferenceData/GetSecuritySolutionsReferenceDataSubscriptionLocation_example.json
  */
 async function getSecuritySolutionsFromASecurityDataLocation() {
-  const subscriptionId = "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
+  const subscriptionId =
+    process.env["SECURITY_SUBSCRIPTION_ID"] ||
+    "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
   const ascLocation = "westcentralus";
   const credential = new DefaultAzureCredential();
   const client = new SecurityCenter(credential, subscriptionId);
-  const result = await client.securitySolutionsReferenceDataOperations.listByHomeRegion(
-    ascLocation
-  );
+  const result =
+    await client.securitySolutionsReferenceDataOperations.listByHomeRegion(
+      ascLocation,
+    );
   console.log(result);
 }
 
-getSecuritySolutionsFromASecurityDataLocation().catch(console.error);
+async function main() {
+  getSecuritySolutionsFromASecurityDataLocation();
+}
+
+main().catch(console.error);

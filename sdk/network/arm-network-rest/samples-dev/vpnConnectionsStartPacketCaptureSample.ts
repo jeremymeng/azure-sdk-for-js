@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -39,7 +39,7 @@ async function startPacketCaptureOnVpnConnectionWithFilter() {
       subscriptionId,
       resourceGroupName,
       gatewayName,
-      vpnConnectionName
+      vpnConnectionName,
     )
     .post(options);
   const poller = getLongRunningPoller(client, initialResponse);
@@ -71,7 +71,7 @@ async function startPacketCaptureOnVpnConnectionWithoutFilter() {
       subscriptionId,
       resourceGroupName,
       gatewayName,
-      vpnConnectionName
+      vpnConnectionName,
     )
     .post(options);
   const poller = getLongRunningPoller(client, initialResponse);

@@ -1,22 +1,23 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { Test } from "mocha";
+import type { Test } from "mocha";
 
+import type { RecorderStartOptions } from "@azure-tools/test-recorder";
 import {
   Recorder,
-  RecorderStartOptions,
   assertEnvironmentVariable,
   env,
   isPlaybackMode,
 } from "@azure-tools/test-recorder";
 
-import { AzureKeyCredential, PollerOptions } from "../../src";
-import { KeyCredential, TokenCredential } from "@azure/core-auth";
+import type { PollerOptions } from "../../src";
+import { AzureKeyCredential } from "../../src";
+import type { KeyCredential, TokenCredential } from "@azure/core-auth";
 import { createClientLogger } from "@azure/logger";
 import { createTestCredential } from "@azure-tools/test-credential";
-import { CommonClientOptions } from "@azure/core-client";
-import { PollOperationState } from "@azure/core-lro";
+import type { CommonClientOptions } from "@azure/core-client";
+import type { PollOperationState } from "@azure/core-lro";
 
 export const logger = createClientLogger("ai-form-recognizer:test");
 
@@ -70,7 +71,7 @@ export const recorderOptions: RecorderStartOptions = {
           env["FORM_RECOGNIZER_SELECTION_MARK_STORAGE_CONTAINER_SAS_URL"]?.split("/")[2] || "",
         value:
           envSetupForPlayback["FORM_RECOGNIZER_SELECTION_MARK_STORAGE_CONTAINER_SAS_URL"].split(
-            "/"
+            "/",
           )[2],
       },
       // sas tokens
@@ -87,7 +88,7 @@ export const recorderOptions: RecorderStartOptions = {
           env["FORM_RECOGNIZER_SELECTION_MARK_STORAGE_CONTAINER_SAS_URL"]?.split("?")[1] || "",
         value:
           envSetupForPlayback["FORM_RECOGNIZER_SELECTION_MARK_STORAGE_CONTAINER_SAS_URL"].split(
-            "?"
+            "?",
           )[1],
       },
     ],
@@ -115,10 +116,10 @@ export async function createRecordedClient<T>(
     new (
       endpoint: string,
       credential: TokenCredential | KeyCredential,
-      options?: CommonClientOptions
+      options?: CommonClientOptions,
     ): T;
   },
-  useApiKey: boolean = false
+  useApiKey: boolean = false,
 ): Promise<RecordedClient<T>> {
   const recorder = await createRecorder(currentTest);
   return {
@@ -127,7 +128,7 @@ export async function createRecordedClient<T>(
       useApiKey
         ? new AzureKeyCredential(assertEnvironmentVariable("FORM_RECOGNIZER_API_KEY"))
         : createTestCredential(),
-      recorder.configureClientOptions({})
+      recorder.configureClientOptions({}),
     ),
     recorder,
   };

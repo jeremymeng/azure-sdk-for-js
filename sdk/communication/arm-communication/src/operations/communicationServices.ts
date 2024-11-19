@@ -6,27 +6,32 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { CommunicationServices } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { CommunicationServiceManagementClient } from "../communicationServiceManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   CommunicationServiceResource,
   CommunicationServicesListBySubscriptionNextOptionalParams,
   CommunicationServicesListBySubscriptionOptionalParams,
+  CommunicationServicesListBySubscriptionResponse,
   CommunicationServicesListByResourceGroupNextOptionalParams,
   CommunicationServicesListByResourceGroupOptionalParams,
+  CommunicationServicesListByResourceGroupResponse,
   NameAvailabilityParameters,
   CommunicationServicesCheckNameAvailabilityOptionalParams,
   CommunicationServicesCheckNameAvailabilityResponse,
   CommunicationServicesLinkNotificationHubOptionalParams,
   CommunicationServicesLinkNotificationHubResponse,
-  CommunicationServicesListBySubscriptionResponse,
-  CommunicationServicesListByResourceGroupResponse,
   CommunicationServiceResourceUpdate,
   CommunicationServicesUpdateOptionalParams,
   CommunicationServicesUpdateResponse,
@@ -41,7 +46,7 @@ import {
   CommunicationServicesRegenerateKeyOptionalParams,
   CommunicationServicesRegenerateKeyResponse,
   CommunicationServicesListBySubscriptionNextResponse,
-  CommunicationServicesListByResourceGroupNextResponse
+  CommunicationServicesListByResourceGroupNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -62,7 +67,7 @@ export class CommunicationServicesImpl implements CommunicationServices {
    * @param options The options parameters.
    */
   public listBySubscription(
-    options?: CommunicationServicesListBySubscriptionOptionalParams
+    options?: CommunicationServicesListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<CommunicationServiceResource> {
     const iter = this.listBySubscriptionPagingAll(options);
     return {
@@ -72,27 +77,39 @@ export class CommunicationServicesImpl implements CommunicationServices {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listBySubscriptionPagingPage(options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listBySubscriptionPagingPage(options, settings);
+      },
     };
   }
 
   private async *listBySubscriptionPagingPage(
-    options?: CommunicationServicesListBySubscriptionOptionalParams
+    options?: CommunicationServicesListBySubscriptionOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<CommunicationServiceResource[]> {
-    let result = await this._listBySubscription(options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: CommunicationServicesListBySubscriptionResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listBySubscription(options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listBySubscriptionNext(continuationToken, options);
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listBySubscriptionPagingAll(
-    options?: CommunicationServicesListBySubscriptionOptionalParams
+    options?: CommunicationServicesListBySubscriptionOptionalParams,
   ): AsyncIterableIterator<CommunicationServiceResource> {
     for await (const page of this.listBySubscriptionPagingPage(options)) {
       yield* page;
@@ -106,7 +123,7 @@ export class CommunicationServicesImpl implements CommunicationServices {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: CommunicationServicesListByResourceGroupOptionalParams
+    options?: CommunicationServicesListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<CommunicationServiceResource> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -116,37 +133,53 @@ export class CommunicationServicesImpl implements CommunicationServices {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listByResourceGroupPagingPage(resourceGroupName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listByResourceGroupPagingPage(
+          resourceGroupName,
+          options,
+          settings,
+        );
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
-    options?: CommunicationServicesListByResourceGroupOptionalParams
+    options?: CommunicationServicesListByResourceGroupOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<CommunicationServiceResource[]> {
-    let result = await this._listByResourceGroup(resourceGroupName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: CommunicationServicesListByResourceGroupResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByResourceGroup(resourceGroupName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: CommunicationServicesListByResourceGroupOptionalParams
+    options?: CommunicationServicesListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<CommunicationServiceResource> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -159,11 +192,11 @@ export class CommunicationServicesImpl implements CommunicationServices {
    */
   checkNameAvailability(
     nameAvailabilityParameters: NameAvailabilityParameters,
-    options?: CommunicationServicesCheckNameAvailabilityOptionalParams
+    options?: CommunicationServicesCheckNameAvailabilityOptionalParams,
   ): Promise<CommunicationServicesCheckNameAvailabilityResponse> {
     return this.client.sendOperationRequest(
       { nameAvailabilityParameters, options },
-      checkNameAvailabilityOperationSpec
+      checkNameAvailabilityOperationSpec,
     );
   }
 
@@ -176,11 +209,11 @@ export class CommunicationServicesImpl implements CommunicationServices {
   linkNotificationHub(
     resourceGroupName: string,
     communicationServiceName: string,
-    options?: CommunicationServicesLinkNotificationHubOptionalParams
+    options?: CommunicationServicesLinkNotificationHubOptionalParams,
   ): Promise<CommunicationServicesLinkNotificationHubResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, communicationServiceName, options },
-      linkNotificationHubOperationSpec
+      linkNotificationHubOperationSpec,
     );
   }
 
@@ -189,11 +222,11 @@ export class CommunicationServicesImpl implements CommunicationServices {
    * @param options The options parameters.
    */
   private _listBySubscription(
-    options?: CommunicationServicesListBySubscriptionOptionalParams
+    options?: CommunicationServicesListBySubscriptionOptionalParams,
   ): Promise<CommunicationServicesListBySubscriptionResponse> {
     return this.client.sendOperationRequest(
       { options },
-      listBySubscriptionOperationSpec
+      listBySubscriptionOperationSpec,
     );
   }
 
@@ -204,11 +237,11 @@ export class CommunicationServicesImpl implements CommunicationServices {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: CommunicationServicesListByResourceGroupOptionalParams
+    options?: CommunicationServicesListByResourceGroupOptionalParams,
   ): Promise<CommunicationServicesListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -219,90 +252,16 @@ export class CommunicationServicesImpl implements CommunicationServices {
    * @param parameters Parameters for the update operation
    * @param options The options parameters.
    */
-  async beginUpdate(
+  update(
     resourceGroupName: string,
     communicationServiceName: string,
     parameters: CommunicationServiceResourceUpdate,
-    options?: CommunicationServicesUpdateOptionalParams
-  ): Promise<
-    PollerLike<
-      PollOperationState<CommunicationServicesUpdateResponse>,
-      CommunicationServicesUpdateResponse
-    >
-  > {
-    const directSendOperation = async (
-      args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<CommunicationServicesUpdateResponse> => {
-      return this.client.sendOperationRequest(args, spec);
-    };
-    const sendOperation = async (
-      args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
-      const providedCallback = args.options?.onResponse;
-      const callback: coreClient.RawResponseCallback = (
-        rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
-      ) => {
-        currentRawResponse = rawResponse;
-        providedCallback?.(rawResponse, flatResponse);
-      };
-      const updatedArgs = {
-        ...args,
-        options: {
-          ...args.options,
-          onResponse: callback
-        }
-      };
-      const flatResponse = await directSendOperation(updatedArgs, spec);
-      return {
-        flatResponse,
-        rawResponse: {
-          statusCode: currentRawResponse!.status,
-          body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
-      };
-    };
-
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, communicationServiceName, parameters, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
-    });
-    await poller.poll();
-    return poller;
-  }
-
-  /**
-   * Operation to update an existing CommunicationService.
-   * @param resourceGroupName The name of the resource group. The name is case insensitive.
-   * @param communicationServiceName The name of the CommunicationService resource.
-   * @param parameters Parameters for the update operation
-   * @param options The options parameters.
-   */
-  async beginUpdateAndWait(
-    resourceGroupName: string,
-    communicationServiceName: string,
-    parameters: CommunicationServiceResourceUpdate,
-    options?: CommunicationServicesUpdateOptionalParams
+    options?: CommunicationServicesUpdateOptionalParams,
   ): Promise<CommunicationServicesUpdateResponse> {
-    const poller = await this.beginUpdate(
-      resourceGroupName,
-      communicationServiceName,
-      parameters,
-      options
+    return this.client.sendOperationRequest(
+      { resourceGroupName, communicationServiceName, parameters, options },
+      updateOperationSpec,
     );
-    return poller.pollUntilDone();
   }
 
   /**
@@ -314,11 +273,11 @@ export class CommunicationServicesImpl implements CommunicationServices {
   get(
     resourceGroupName: string,
     communicationServiceName: string,
-    options?: CommunicationServicesGetOptionalParams
+    options?: CommunicationServicesGetOptionalParams,
   ): Promise<CommunicationServicesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, communicationServiceName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -333,30 +292,29 @@ export class CommunicationServicesImpl implements CommunicationServices {
     resourceGroupName: string,
     communicationServiceName: string,
     parameters: CommunicationServiceResource,
-    options?: CommunicationServicesCreateOrUpdateOptionalParams
+    options?: CommunicationServicesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CommunicationServicesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<CommunicationServicesCreateOrUpdateResponse>,
       CommunicationServicesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CommunicationServicesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -365,8 +323,8 @@ export class CommunicationServicesImpl implements CommunicationServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -374,20 +332,28 @@ export class CommunicationServicesImpl implements CommunicationServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, communicationServiceName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        communicationServiceName,
+        parameters,
+        options,
+      },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CommunicationServicesCreateOrUpdateResponse,
+      OperationState<CommunicationServicesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -404,13 +370,13 @@ export class CommunicationServicesImpl implements CommunicationServices {
     resourceGroupName: string,
     communicationServiceName: string,
     parameters: CommunicationServiceResource,
-    options?: CommunicationServicesCreateOrUpdateOptionalParams
+    options?: CommunicationServicesCreateOrUpdateOptionalParams,
   ): Promise<CommunicationServicesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       communicationServiceName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -424,25 +390,24 @@ export class CommunicationServicesImpl implements CommunicationServices {
   async beginDelete(
     resourceGroupName: string,
     communicationServiceName: string,
-    options?: CommunicationServicesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CommunicationServicesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -451,8 +416,8 @@ export class CommunicationServicesImpl implements CommunicationServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -460,20 +425,20 @@ export class CommunicationServicesImpl implements CommunicationServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, communicationServiceName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, communicationServiceName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -488,12 +453,12 @@ export class CommunicationServicesImpl implements CommunicationServices {
   async beginDeleteAndWait(
     resourceGroupName: string,
     communicationServiceName: string,
-    options?: CommunicationServicesDeleteOptionalParams
+    options?: CommunicationServicesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       communicationServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -507,11 +472,11 @@ export class CommunicationServicesImpl implements CommunicationServices {
   listKeys(
     resourceGroupName: string,
     communicationServiceName: string,
-    options?: CommunicationServicesListKeysOptionalParams
+    options?: CommunicationServicesListKeysOptionalParams,
   ): Promise<CommunicationServicesListKeysResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, communicationServiceName, options },
-      listKeysOperationSpec
+      listKeysOperationSpec,
     );
   }
 
@@ -523,91 +488,16 @@ export class CommunicationServicesImpl implements CommunicationServices {
    * @param parameters Parameter that describes the Regenerate Key Operation.
    * @param options The options parameters.
    */
-  async beginRegenerateKey(
+  regenerateKey(
     resourceGroupName: string,
     communicationServiceName: string,
     parameters: RegenerateKeyParameters,
-    options?: CommunicationServicesRegenerateKeyOptionalParams
-  ): Promise<
-    PollerLike<
-      PollOperationState<CommunicationServicesRegenerateKeyResponse>,
-      CommunicationServicesRegenerateKeyResponse
-    >
-  > {
-    const directSendOperation = async (
-      args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<CommunicationServicesRegenerateKeyResponse> => {
-      return this.client.sendOperationRequest(args, spec);
-    };
-    const sendOperation = async (
-      args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
-      const providedCallback = args.options?.onResponse;
-      const callback: coreClient.RawResponseCallback = (
-        rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
-      ) => {
-        currentRawResponse = rawResponse;
-        providedCallback?.(rawResponse, flatResponse);
-      };
-      const updatedArgs = {
-        ...args,
-        options: {
-          ...args.options,
-          onResponse: callback
-        }
-      };
-      const flatResponse = await directSendOperation(updatedArgs, spec);
-      return {
-        flatResponse,
-        rawResponse: {
-          statusCode: currentRawResponse!.status,
-          body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
-      };
-    };
-
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, communicationServiceName, parameters, options },
-      regenerateKeyOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
-    });
-    await poller.poll();
-    return poller;
-  }
-
-  /**
-   * Regenerate CommunicationService access key. PrimaryKey and SecondaryKey cannot be regenerated at the
-   * same time.
-   * @param resourceGroupName The name of the resource group. The name is case insensitive.
-   * @param communicationServiceName The name of the CommunicationService resource.
-   * @param parameters Parameter that describes the Regenerate Key Operation.
-   * @param options The options parameters.
-   */
-  async beginRegenerateKeyAndWait(
-    resourceGroupName: string,
-    communicationServiceName: string,
-    parameters: RegenerateKeyParameters,
-    options?: CommunicationServicesRegenerateKeyOptionalParams
+    options?: CommunicationServicesRegenerateKeyOptionalParams,
   ): Promise<CommunicationServicesRegenerateKeyResponse> {
-    const poller = await this.beginRegenerateKey(
-      resourceGroupName,
-      communicationServiceName,
-      parameters,
-      options
+    return this.client.sendOperationRequest(
+      { resourceGroupName, communicationServiceName, parameters, options },
+      regenerateKeyOperationSpec,
     );
-    return poller.pollUntilDone();
   }
 
   /**
@@ -617,11 +507,11 @@ export class CommunicationServicesImpl implements CommunicationServices {
    */
   private _listBySubscriptionNext(
     nextLink: string,
-    options?: CommunicationServicesListBySubscriptionNextOptionalParams
+    options?: CommunicationServicesListBySubscriptionNextOptionalParams,
   ): Promise<CommunicationServicesListBySubscriptionNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listBySubscriptionNextOperationSpec
+      listBySubscriptionNextOperationSpec,
     );
   }
 
@@ -634,11 +524,11 @@ export class CommunicationServicesImpl implements CommunicationServices {
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: CommunicationServicesListByResourceGroupNextOptionalParams
+    options?: CommunicationServicesListByResourceGroupNextOptionalParams,
   ): Promise<CommunicationServicesListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 }
@@ -646,35 +536,33 @@ export class CommunicationServicesImpl implements CommunicationServices {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const checkNameAvailabilityOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Communication/checkNameAvailability",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Communication/checkNameAvailability",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.CheckNameAvailabilityResponse
+      bodyMapper: Mappers.CheckNameAvailabilityResponse,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.nameAvailabilityParameters,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const linkNotificationHubOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}/linkNotificationHub",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}/linkNotificationHub",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.LinkedNotificationHub
+      bodyMapper: Mappers.LinkedNotificationHub,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.linkNotificationHubParameters,
   queryParameters: [Parameters.apiVersion],
@@ -682,70 +570,58 @@ const linkNotificationHubOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.communicationServiceName
+    Parameters.communicationServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Communication/communicationServices",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Communication/communicationServices",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationServiceResourceList
+      bodyMapper: Mappers.CommunicationServiceResourceList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationServiceResourceList
+      bodyMapper: Mappers.CommunicationServiceResourceList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationServiceResource
-    },
-    201: {
-      bodyMapper: Mappers.CommunicationServiceResource
-    },
-    202: {
-      bodyMapper: Mappers.CommunicationServiceResource
-    },
-    204: {
-      bodyMapper: Mappers.CommunicationServiceResource
+      bodyMapper: Mappers.CommunicationServiceResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters,
   queryParameters: [Parameters.apiVersion],
@@ -753,54 +629,52 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.communicationServiceName
+    Parameters.communicationServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationServiceResource
+      bodyMapper: Mappers.CommunicationServiceResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.communicationServiceName
+    Parameters.communicationServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationServiceResource
+      bodyMapper: Mappers.CommunicationServiceResource,
     },
     201: {
-      bodyMapper: Mappers.CommunicationServiceResource
+      bodyMapper: Mappers.CommunicationServiceResource,
     },
     202: {
-      bodyMapper: Mappers.CommunicationServiceResource
+      bodyMapper: Mappers.CommunicationServiceResource,
     },
     204: {
-      bodyMapper: Mappers.CommunicationServiceResource
+      bodyMapper: Mappers.CommunicationServiceResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters1,
   queryParameters: [Parameters.apiVersion],
@@ -808,15 +682,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.communicationServiceName
+    Parameters.communicationServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -824,61 +697,50 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.communicationServiceName
+    Parameters.communicationServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listKeysOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}/listKeys",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}/listKeys",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationServiceKeys
+      bodyMapper: Mappers.CommunicationServiceKeys,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.communicationServiceName
+    Parameters.communicationServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const regenerateKeyOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}/regenerateKey",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Communication/communicationServices/{communicationServiceName}/regenerateKey",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationServiceKeys
-    },
-    201: {
-      bodyMapper: Mappers.CommunicationServiceKeys
-    },
-    202: {
-      bodyMapper: Mappers.CommunicationServiceKeys
-    },
-    204: {
-      bodyMapper: Mappers.CommunicationServiceKeys
+      bodyMapper: Mappers.CommunicationServiceKeys,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters2,
   queryParameters: [Parameters.apiVersion],
@@ -886,50 +748,48 @@ const regenerateKeyOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.communicationServiceName
+    Parameters.communicationServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listBySubscriptionNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationServiceResourceList
+      bodyMapper: Mappers.CommunicationServiceResourceList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CommunicationServiceResourceList
+      bodyMapper: Mappers.CommunicationServiceResourceList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

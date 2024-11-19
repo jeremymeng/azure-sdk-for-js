@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { DevCenterClient } from "../devCenterClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   Pool,
   PoolsListByProjectNextOptionalParams,
@@ -28,7 +32,10 @@ import {
   PoolsUpdateOptionalParams,
   PoolsUpdateResponse,
   PoolsDeleteOptionalParams,
-  PoolsListByProjectNextResponse
+  PoolsDeleteResponse,
+  PoolsRunHealthChecksOptionalParams,
+  PoolsRunHealthChecksResponse,
+  PoolsListByProjectNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -53,12 +60,12 @@ export class PoolsImpl implements Pools {
   public listByProject(
     resourceGroupName: string,
     projectName: string,
-    options?: PoolsListByProjectOptionalParams
+    options?: PoolsListByProjectOptionalParams,
   ): PagedAsyncIterableIterator<Pool> {
     const iter = this.listByProjectPagingAll(
       resourceGroupName,
       projectName,
-      options
+      options,
     );
     return {
       next() {
@@ -75,9 +82,9 @@ export class PoolsImpl implements Pools {
           resourceGroupName,
           projectName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -85,7 +92,7 @@ export class PoolsImpl implements Pools {
     resourceGroupName: string,
     projectName: string,
     options?: PoolsListByProjectOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<Pool[]> {
     let result: PoolsListByProjectResponse;
     let continuationToken = settings?.continuationToken;
@@ -93,7 +100,7 @@ export class PoolsImpl implements Pools {
       result = await this._listByProject(
         resourceGroupName,
         projectName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -105,7 +112,7 @@ export class PoolsImpl implements Pools {
         resourceGroupName,
         projectName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -117,12 +124,12 @@ export class PoolsImpl implements Pools {
   private async *listByProjectPagingAll(
     resourceGroupName: string,
     projectName: string,
-    options?: PoolsListByProjectOptionalParams
+    options?: PoolsListByProjectOptionalParams,
   ): AsyncIterableIterator<Pool> {
     for await (const page of this.listByProjectPagingPage(
       resourceGroupName,
       projectName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -137,11 +144,11 @@ export class PoolsImpl implements Pools {
   private _listByProject(
     resourceGroupName: string,
     projectName: string,
-    options?: PoolsListByProjectOptionalParams
+    options?: PoolsListByProjectOptionalParams,
   ): Promise<PoolsListByProjectResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, projectName, options },
-      listByProjectOperationSpec
+      listByProjectOperationSpec,
     );
   }
 
@@ -156,11 +163,11 @@ export class PoolsImpl implements Pools {
     resourceGroupName: string,
     projectName: string,
     poolName: string,
-    options?: PoolsGetOptionalParams
+    options?: PoolsGetOptionalParams,
   ): Promise<PoolsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, projectName, poolName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -177,30 +184,29 @@ export class PoolsImpl implements Pools {
     projectName: string,
     poolName: string,
     body: Pool,
-    options?: PoolsCreateOrUpdateOptionalParams
+    options?: PoolsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<PoolsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<PoolsCreateOrUpdateResponse>,
       PoolsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<PoolsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -209,8 +215,8 @@ export class PoolsImpl implements Pools {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -218,20 +224,23 @@ export class PoolsImpl implements Pools {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, projectName, poolName, body, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, projectName, poolName, body, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PoolsCreateOrUpdateResponse,
+      OperationState<PoolsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -250,14 +259,14 @@ export class PoolsImpl implements Pools {
     projectName: string,
     poolName: string,
     body: Pool,
-    options?: PoolsCreateOrUpdateOptionalParams
+    options?: PoolsCreateOrUpdateOptionalParams,
   ): Promise<PoolsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       projectName,
       poolName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -275,27 +284,26 @@ export class PoolsImpl implements Pools {
     projectName: string,
     poolName: string,
     body: PoolUpdate,
-    options?: PoolsUpdateOptionalParams
+    options?: PoolsUpdateOptionalParams,
   ): Promise<
-    PollerLike<PollOperationState<PoolsUpdateResponse>, PoolsUpdateResponse>
+    SimplePollerLike<OperationState<PoolsUpdateResponse>, PoolsUpdateResponse>
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<PoolsUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -304,8 +312,8 @@ export class PoolsImpl implements Pools {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -313,20 +321,23 @@ export class PoolsImpl implements Pools {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, projectName, poolName, body, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, projectName, poolName, body, options },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PoolsUpdateResponse,
+      OperationState<PoolsUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -345,14 +356,14 @@ export class PoolsImpl implements Pools {
     projectName: string,
     poolName: string,
     body: PoolUpdate,
-    options?: PoolsUpdateOptionalParams
+    options?: PoolsUpdateOptionalParams,
   ): Promise<PoolsUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       projectName,
       poolName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -368,25 +379,26 @@ export class PoolsImpl implements Pools {
     resourceGroupName: string,
     projectName: string,
     poolName: string,
-    options?: PoolsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: PoolsDeleteOptionalParams,
+  ): Promise<
+    SimplePollerLike<OperationState<PoolsDeleteResponse>, PoolsDeleteResponse>
+  > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<void> => {
+      spec: coreClient.OperationSpec,
+    ): Promise<PoolsDeleteResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -395,8 +407,8 @@ export class PoolsImpl implements Pools {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -404,20 +416,23 @@ export class PoolsImpl implements Pools {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, projectName, poolName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, projectName, poolName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PoolsDeleteResponse,
+      OperationState<PoolsDeleteResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -434,13 +449,108 @@ export class PoolsImpl implements Pools {
     resourceGroupName: string,
     projectName: string,
     poolName: string,
-    options?: PoolsDeleteOptionalParams
-  ): Promise<void> {
+    options?: PoolsDeleteOptionalParams,
+  ): Promise<PoolsDeleteResponse> {
     const poller = await this.beginDelete(
       resourceGroupName,
       projectName,
       poolName,
-      options
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Triggers a refresh of the pool status.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param projectName The name of the project.
+   * @param poolName Name of the pool.
+   * @param options The options parameters.
+   */
+  async beginRunHealthChecks(
+    resourceGroupName: string,
+    projectName: string,
+    poolName: string,
+    options?: PoolsRunHealthChecksOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<PoolsRunHealthChecksResponse>,
+      PoolsRunHealthChecksResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<PoolsRunHealthChecksResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, projectName, poolName, options },
+      spec: runHealthChecksOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PoolsRunHealthChecksResponse,
+      OperationState<PoolsRunHealthChecksResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "azure-async-operation",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Triggers a refresh of the pool status.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param projectName The name of the project.
+   * @param poolName Name of the pool.
+   * @param options The options parameters.
+   */
+  async beginRunHealthChecksAndWait(
+    resourceGroupName: string,
+    projectName: string,
+    poolName: string,
+    options?: PoolsRunHealthChecksOptionalParams,
+  ): Promise<PoolsRunHealthChecksResponse> {
+    const poller = await this.beginRunHealthChecks(
+      resourceGroupName,
+      projectName,
+      poolName,
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -456,11 +566,11 @@ export class PoolsImpl implements Pools {
     resourceGroupName: string,
     projectName: string,
     nextLink: string,
-    options?: PoolsListByProjectNextOptionalParams
+    options?: PoolsListByProjectNextOptionalParams,
   ): Promise<PoolsListByProjectNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, projectName, nextLink, options },
-      listByProjectNextOperationSpec
+      listByProjectNextOperationSpec,
     );
   }
 }
@@ -468,38 +578,36 @@ export class PoolsImpl implements Pools {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listByProjectOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PoolListResult
+      bodyMapper: Mappers.PoolListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.projectName
+    Parameters.projectName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools/{poolName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools/{poolName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.Pool
+      bodyMapper: Mappers.Pool,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -507,31 +615,30 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.projectName,
-    Parameters.poolName
+    Parameters.poolName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools/{poolName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools/{poolName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Pool
+      bodyMapper: Mappers.Pool,
     },
     201: {
-      bodyMapper: Mappers.Pool
+      bodyMapper: Mappers.Pool,
     },
     202: {
-      bodyMapper: Mappers.Pool
+      bodyMapper: Mappers.Pool,
     },
     204: {
-      bodyMapper: Mappers.Pool
+      bodyMapper: Mappers.Pool,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.body14,
   queryParameters: [Parameters.apiVersion],
@@ -540,32 +647,31 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.projectName,
-    Parameters.poolName
+    Parameters.poolName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools/{poolName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools/{poolName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.Pool
+      bodyMapper: Mappers.Pool,
     },
     201: {
-      bodyMapper: Mappers.Pool
+      bodyMapper: Mappers.Pool,
     },
     202: {
-      bodyMapper: Mappers.Pool
+      bodyMapper: Mappers.Pool,
     },
     204: {
-      bodyMapper: Mappers.Pool
+      bodyMapper: Mappers.Pool,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.body15,
   queryParameters: [Parameters.apiVersion],
@@ -574,24 +680,31 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.projectName,
-    Parameters.poolName
+    Parameters.poolName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools/{poolName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools/{poolName}",
   httpMethod: "DELETE",
   responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
+    200: {
+      headersMapper: Mappers.PoolsDeleteHeaders,
+    },
+    201: {
+      headersMapper: Mappers.PoolsDeleteHeaders,
+    },
+    202: {
+      headersMapper: Mappers.PoolsDeleteHeaders,
+    },
+    204: {
+      headersMapper: Mappers.PoolsDeleteHeaders,
+    },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -599,30 +712,60 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.projectName,
-    Parameters.poolName
+    Parameters.poolName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const runHealthChecksOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevCenter/projects/{projectName}/pools/{poolName}/runHealthChecks",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      headersMapper: Mappers.PoolsRunHealthChecksHeaders,
+    },
+    201: {
+      headersMapper: Mappers.PoolsRunHealthChecksHeaders,
+    },
+    202: {
+      headersMapper: Mappers.PoolsRunHealthChecksHeaders,
+    },
+    204: {
+      headersMapper: Mappers.PoolsRunHealthChecksHeaders,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.projectName,
+    Parameters.poolName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const listByProjectNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PoolListResult
+      bodyMapper: Mappers.PoolListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.nextLink,
-    Parameters.projectName
+    Parameters.projectName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

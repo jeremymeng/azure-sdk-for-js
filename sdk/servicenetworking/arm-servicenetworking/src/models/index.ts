@@ -129,9 +129,52 @@ export interface TrafficControllerListResult {
   nextLink?: string;
 }
 
+/** Traffic Controller Properties. */
+export interface TrafficControllerProperties {
+  /**
+   * Configuration Endpoints.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly configurationEndpoints?: string[];
+  /**
+   * Frontends References List
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly frontends?: ResourceId[];
+  /**
+   * Associations References List
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly associations?: ResourceId[];
+  /**
+   * Security Policies References List
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly securityPolicies?: ResourceId[];
+  /** Security Policy Configuration */
+  securityPolicyConfigurations?: SecurityPolicyConfigurations;
+  /**
+   * The status of the last operation.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: ProvisioningState;
+}
+
 /** Resource ID definition used by parent to reference child resources. */
-export interface ResourceID {
+export interface ResourceId {
   /** Resource ID of child resource. */
+  id: string;
+}
+
+/** SecurityPolicyConfigurations Subresource of Traffic Controller. */
+export interface SecurityPolicyConfigurations {
+  /** Contains reference to a WAF-type security policy that is applied at the Traffic Controller level. */
+  wafSecurityPolicy?: WafSecurityPolicy;
+}
+
+/** Web Application Firewall Security Policy */
+export interface WafSecurityPolicy {
+  /** Resource ID of the Waf Security Policy */
   id: string;
 }
 
@@ -179,16 +222,47 @@ export interface SystemData {
 export interface TrafficControllerUpdate {
   /** Resource tags. */
   tags?: { [propertyName: string]: string };
-  /** The updatable properties of the TrafficController. */
-  properties?: Record<string, unknown>;
+  /** The resource-specific properties for this resource. */
+  properties?: TrafficControllerUpdateProperties;
 }
 
-/** The response of a Traffic Controller Association list operation. */
+/** The updatable properties of the TrafficController. */
+export interface TrafficControllerUpdateProperties {
+  /** Security Policy Configuration */
+  securityPolicyConfigurations?: SecurityPolicyConfigurationsUpdate;
+}
+
+/** SecurityPolicyConfigurations Subresource of Traffic Controller. */
+export interface SecurityPolicyConfigurationsUpdate {
+  /** Contains reference to a WAF-type security policy that is applied at the Traffic Controller level. */
+  wafSecurityPolicy?: WafSecurityPolicyUpdate;
+}
+
+/** Web Application Firewall Security Policy */
+export interface WafSecurityPolicyUpdate {
+  /** Resource ID of the Waf Security Policy */
+  id?: string;
+}
+
+/** The response of a Association list operation. */
 export interface AssociationListResult {
   /** The Association items on this page */
   value: Association[];
   /** The link to the next page of items */
   nextLink?: string;
+}
+
+/** Association Properties. */
+export interface AssociationProperties {
+  /** Association Type */
+  associationType: AssociationType;
+  /** Association Subnet */
+  subnet?: AssociationSubnet;
+  /**
+   * Provisioning State of Traffic Controller Association Resource
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: ProvisioningState;
 }
 
 /** Association Subnet. */
@@ -201,19 +275,25 @@ export interface AssociationSubnet {
 export interface AssociationUpdate {
   /** Resource tags. */
   tags?: { [propertyName: string]: string };
-  /** The updatable properties of the Association. */
+  /** The resource-specific properties for this resource. */
   properties?: AssociationUpdateProperties;
 }
 
 /** The updatable properties of the Association. */
 export interface AssociationUpdateProperties {
   /** Association Type */
-  associationType?: "subnets";
+  associationType?: AssociationType;
   /** Association Subnet */
-  subnet?: AssociationSubnet;
+  subnet?: AssociationSubnetUpdate;
 }
 
-/** The response of a Traffic Controller Frontend list operation. */
+/** Association Subnet. */
+export interface AssociationSubnetUpdate {
+  /** Association ID. */
+  id?: string;
+}
+
+/** The response of a Frontend list operation. */
 export interface FrontendListResult {
   /** The Frontend items on this page */
   value: Frontend[];
@@ -221,28 +301,74 @@ export interface FrontendListResult {
   nextLink?: string;
 }
 
-/** Frontend IP Address. */
-export interface FrontendPropertiesIPAddress {
-  /** IP Address. */
-  id: string;
+/** Frontend Properties. */
+export interface FrontendProperties {
+  /**
+   * The Fully Qualified Domain Name of the DNS record associated to a Traffic Controller frontend.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly fqdn?: string;
+  /**
+   * Provisioning State of Traffic Controller Frontend Resource
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: ProvisioningState;
 }
 
 /** The type used for update operations of the Frontend. */
 export interface FrontendUpdate {
   /** Resource tags. */
   tags?: { [propertyName: string]: string };
-  /** The updatable properties of the Frontend. */
-  properties?: FrontendUpdateProperties;
 }
 
-/** The updatable properties of the Frontend. */
-export interface FrontendUpdateProperties {
-  /** Frontend Mode (Optional). */
-  mode?: "public";
-  /** Frontend IP Address Type (Optional). */
-  ipAddressVersion?: FrontendIPAddressVersion;
-  /** Frontend Public IP Address (Optional). */
-  publicIPAddress?: FrontendPropertiesIPAddress;
+/** The response of a SecurityPolicy list operation. */
+export interface SecurityPolicyListResult {
+  /** The SecurityPolicy items on this page */
+  value: SecurityPolicy[];
+  /** The link to the next page of items */
+  nextLink?: string;
+}
+
+/** SecurityPolicy Properties. */
+export interface SecurityPolicyProperties {
+  /**
+   * Type of the Traffic Controller Security Policy
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly policyType?: PolicyType;
+  /** Web Application Firewall Policy of the Traffic Controller Security Policy */
+  wafPolicy?: WafPolicy;
+  /**
+   * Provisioning State of Traffic Controller SecurityPolicy Resource
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: ProvisioningState;
+}
+
+/** Web Application Firewall Policy */
+export interface WafPolicy {
+  /** Resource ID of the WAF */
+  id: string;
+}
+
+/** The type used for update operations of the SecurityPolicy. */
+export interface SecurityPolicyUpdate {
+  /** Resource tags. */
+  tags?: { [propertyName: string]: string };
+  /** The resource-specific properties for this resource. */
+  properties?: SecurityPolicyUpdateProperties;
+}
+
+/** The updatable properties of the SecurityPolicy. */
+export interface SecurityPolicyUpdateProperties {
+  /** Web Application Firewall Policy of the Traffic Controller Security Policy */
+  wafPolicy?: WafPolicyUpdate;
+}
+
+/** Web Application Firewall Policy */
+export interface WafPolicyUpdate {
+  /** Resource ID of the WAF */
+  id?: string;
 }
 
 /** The resource model definition for an Azure Resource Manager tracked top level resource which has 'tags' and a 'location' */
@@ -255,54 +381,26 @@ export interface TrackedResource extends Resource {
 
 /** Concrete tracked resource types can be created by aliasing this type using a specific property type. */
 export interface TrafficController extends TrackedResource {
-  /**
-   * Configuration Endpoints.
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly configurationEndpoints?: string[];
-  /**
-   * Frontends References List
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly frontends?: ResourceID[];
-  /**
-   * Associations References List
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly associations?: ResourceID[];
-  /**
-   * The status of the last operation.
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly provisioningState?: ProvisioningState;
+  /** The resource-specific properties for this resource. */
+  properties?: TrafficControllerProperties;
 }
 
 /** Association Subresource of Traffic Controller */
 export interface Association extends TrackedResource {
-  /** Association Type */
-  associationType?: "subnets";
-  /** Association Subnet */
-  subnet?: AssociationSubnet;
-  /**
-   * Provisioning State
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly provisioningState?: ProvisioningState;
+  /** The resource-specific properties for this resource. */
+  properties?: AssociationProperties;
 }
 
-/** Frontend Subresource of Traffic Controller. */
+/** Frontend Sub Resource of Traffic Controller. */
 export interface Frontend extends TrackedResource {
-  /** Frontend Mode (Optional). */
-  mode?: "public";
-  /** Frontend IP Address Version (Optional). */
-  ipAddressVersion?: FrontendIPAddressVersion;
-  /** Frontend Public IP Address (Optional). */
-  publicIPAddress?: FrontendPropertiesIPAddress;
-  /**
-   * test doc
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly provisioningState?: ProvisioningState;
+  /** The resource-specific properties for this resource. */
+  properties?: FrontendProperties;
+}
+
+/** SecurityPolicy Subresource of Traffic Controller. */
+export interface SecurityPolicy extends TrackedResource {
+  /** The resource-specific properties for this resource. */
+  properties?: SecurityPolicyProperties;
 }
 
 /** Defines headers for TrafficControllerInterface_createOrUpdate operation. */
@@ -313,6 +411,7 @@ export interface TrafficControllerInterfaceCreateOrUpdateHeaders {
 
 /** Defines headers for TrafficControllerInterface_delete operation. */
 export interface TrafficControllerInterfaceDeleteHeaders {
+  /** The Location header contains the URL where the status of the long running operation can be checked. */
   location?: string;
   /** The Retry-After header can indicate how long the client should wait before polling the operation status. */
   retryAfter?: number;
@@ -326,6 +425,7 @@ export interface AssociationsInterfaceCreateOrUpdateHeaders {
 
 /** Defines headers for AssociationsInterface_delete operation. */
 export interface AssociationsInterfaceDeleteHeaders {
+  /** The Location header contains the URL where the status of the long running operation can be checked. */
   location?: string;
   /** The Retry-After header can indicate how long the client should wait before polling the operation status. */
   retryAfter?: number;
@@ -339,6 +439,21 @@ export interface FrontendsInterfaceCreateOrUpdateHeaders {
 
 /** Defines headers for FrontendsInterface_delete operation. */
 export interface FrontendsInterfaceDeleteHeaders {
+  /** The Location header contains the URL where the status of the long running operation can be checked. */
+  location?: string;
+  /** The Retry-After header can indicate how long the client should wait before polling the operation status. */
+  retryAfter?: number;
+}
+
+/** Defines headers for SecurityPoliciesInterface_createOrUpdate operation. */
+export interface SecurityPoliciesInterfaceCreateOrUpdateHeaders {
+  /** The Retry-After header can indicate how long the client should wait before polling the operation status. */
+  retryAfter?: number;
+}
+
+/** Defines headers for SecurityPoliciesInterface_delete operation. */
+export interface SecurityPoliciesInterfaceDeleteHeaders {
+  /** The Location header contains the URL where the status of the long running operation can be checked. */
   location?: string;
   /** The Retry-After header can indicate how long the client should wait before polling the operation status. */
   retryAfter?: number;
@@ -351,7 +466,7 @@ export enum KnownOrigin {
   /** System */
   System = "system",
   /** UserSystem */
-  UserSystem = "user,system"
+  UserSystem = "user,system",
 }
 
 /**
@@ -368,7 +483,7 @@ export type Origin = string;
 /** Known values of {@link ActionType} that the service accepts. */
 export enum KnownActionType {
   /** Internal */
-  Internal = "Internal"
+  Internal = "Internal",
 }
 
 /**
@@ -382,20 +497,20 @@ export type ActionType = string;
 
 /** Known values of {@link ProvisioningState} that the service accepts. */
 export enum KnownProvisioningState {
-  /** Succeeded */
-  Succeeded = "Succeeded",
-  /** Failed */
-  Failed = "Failed",
-  /** Canceled */
-  Canceled = "Canceled",
-  /** Provisioning */
+  /** Resource in Provisioning State */
   Provisioning = "Provisioning",
-  /** Updating */
+  /** Resource in Updating State */
   Updating = "Updating",
-  /** Deleting */
+  /** Resource in Deleting State */
   Deleting = "Deleting",
-  /** Accepted */
-  Accepted = "Accepted"
+  /** Resource in Accepted State */
+  Accepted = "Accepted",
+  /** Resource in Succeeded State */
+  Succeeded = "Succeeded",
+  /** Resource in Failed State */
+  Failed = "Failed",
+  /** Resource in Canceled State */
+  Canceled = "Canceled",
 }
 
 /**
@@ -403,13 +518,13 @@ export enum KnownProvisioningState {
  * {@link KnownProvisioningState} can be used interchangeably with ProvisioningState,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **Succeeded** \
- * **Failed** \
- * **Canceled** \
- * **Provisioning** \
- * **Updating** \
- * **Deleting** \
- * **Accepted**
+ * **Provisioning**: Resource in Provisioning State \
+ * **Updating**: Resource in Updating State \
+ * **Deleting**: Resource in Deleting State \
+ * **Accepted**: Resource in Accepted State \
+ * **Succeeded**: Resource in Succeeded State \
+ * **Failed**: Resource in Failed State \
+ * **Canceled**: Resource in Canceled State
  */
 export type ProvisioningState = string;
 
@@ -422,7 +537,7 @@ export enum KnownCreatedByType {
   /** ManagedIdentity */
   ManagedIdentity = "ManagedIdentity",
   /** Key */
-  Key = "Key"
+  Key = "Key",
 }
 
 /**
@@ -436,8 +551,36 @@ export enum KnownCreatedByType {
  * **Key**
  */
 export type CreatedByType = string;
-/** Defines values for FrontendIPAddressVersion. */
-export type FrontendIPAddressVersion = "IPv4" | "IPv6";
+
+/** Known values of {@link AssociationType} that the service accepts. */
+export enum KnownAssociationType {
+  /** Association of Type Subnet */
+  Subnets = "subnets",
+}
+
+/**
+ * Defines values for AssociationType. \
+ * {@link KnownAssociationType} can be used interchangeably with AssociationType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **subnets**: Association of Type Subnet
+ */
+export type AssociationType = string;
+
+/** Known values of {@link PolicyType} that the service accepts. */
+export enum KnownPolicyType {
+  /** Policy of Type WAF */
+  WAF = "waf",
+}
+
+/**
+ * Defines values for PolicyType. \
+ * {@link KnownPolicyType} can be used interchangeably with PolicyType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **waf**: Policy of Type WAF
+ */
+export type PolicyType = string;
 
 /** Optional parameters. */
 export interface OperationsListOptionalParams
@@ -458,14 +601,16 @@ export interface TrafficControllerInterfaceListBySubscriptionOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listBySubscription operation. */
-export type TrafficControllerInterfaceListBySubscriptionResponse = TrafficControllerListResult;
+export type TrafficControllerInterfaceListBySubscriptionResponse =
+  TrafficControllerListResult;
 
 /** Optional parameters. */
 export interface TrafficControllerInterfaceListByResourceGroupOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByResourceGroup operation. */
-export type TrafficControllerInterfaceListByResourceGroupResponse = TrafficControllerListResult;
+export type TrafficControllerInterfaceListByResourceGroupResponse =
+  TrafficControllerListResult;
 
 /** Optional parameters. */
 export interface TrafficControllerInterfaceGetOptionalParams
@@ -484,7 +629,8 @@ export interface TrafficControllerInterfaceCreateOrUpdateOptionalParams
 }
 
 /** Contains response data for the createOrUpdate operation. */
-export type TrafficControllerInterfaceCreateOrUpdateResponse = TrafficController;
+export type TrafficControllerInterfaceCreateOrUpdateResponse =
+  TrafficController;
 
 /** Optional parameters. */
 export interface TrafficControllerInterfaceUpdateOptionalParams
@@ -502,26 +648,33 @@ export interface TrafficControllerInterfaceDeleteOptionalParams
   resumeFrom?: string;
 }
 
+/** Contains response data for the delete operation. */
+export type TrafficControllerInterfaceDeleteResponse =
+  TrafficControllerInterfaceDeleteHeaders;
+
 /** Optional parameters. */
 export interface TrafficControllerInterfaceListBySubscriptionNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listBySubscriptionNext operation. */
-export type TrafficControllerInterfaceListBySubscriptionNextResponse = TrafficControllerListResult;
+export type TrafficControllerInterfaceListBySubscriptionNextResponse =
+  TrafficControllerListResult;
 
 /** Optional parameters. */
 export interface TrafficControllerInterfaceListByResourceGroupNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByResourceGroupNext operation. */
-export type TrafficControllerInterfaceListByResourceGroupNextResponse = TrafficControllerListResult;
+export type TrafficControllerInterfaceListByResourceGroupNextResponse =
+  TrafficControllerListResult;
 
 /** Optional parameters. */
 export interface AssociationsInterfaceListByTrafficControllerOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByTrafficController operation. */
-export type AssociationsInterfaceListByTrafficControllerResponse = AssociationListResult;
+export type AssociationsInterfaceListByTrafficControllerResponse =
+  AssociationListResult;
 
 /** Optional parameters. */
 export interface AssociationsInterfaceGetOptionalParams
@@ -558,19 +711,25 @@ export interface AssociationsInterfaceDeleteOptionalParams
   resumeFrom?: string;
 }
 
+/** Contains response data for the delete operation. */
+export type AssociationsInterfaceDeleteResponse =
+  AssociationsInterfaceDeleteHeaders;
+
 /** Optional parameters. */
 export interface AssociationsInterfaceListByTrafficControllerNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByTrafficControllerNext operation. */
-export type AssociationsInterfaceListByTrafficControllerNextResponse = AssociationListResult;
+export type AssociationsInterfaceListByTrafficControllerNextResponse =
+  AssociationListResult;
 
 /** Optional parameters. */
 export interface FrontendsInterfaceListByTrafficControllerOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByTrafficController operation. */
-export type FrontendsInterfaceListByTrafficControllerResponse = FrontendListResult;
+export type FrontendsInterfaceListByTrafficControllerResponse =
+  FrontendListResult;
 
 /** Optional parameters. */
 export interface FrontendsInterfaceGetOptionalParams
@@ -607,12 +766,71 @@ export interface FrontendsInterfaceDeleteOptionalParams
   resumeFrom?: string;
 }
 
+/** Contains response data for the delete operation. */
+export type FrontendsInterfaceDeleteResponse = FrontendsInterfaceDeleteHeaders;
+
 /** Optional parameters. */
 export interface FrontendsInterfaceListByTrafficControllerNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByTrafficControllerNext operation. */
-export type FrontendsInterfaceListByTrafficControllerNextResponse = FrontendListResult;
+export type FrontendsInterfaceListByTrafficControllerNextResponse =
+  FrontendListResult;
+
+/** Optional parameters. */
+export interface SecurityPoliciesInterfaceListByTrafficControllerOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByTrafficController operation. */
+export type SecurityPoliciesInterfaceListByTrafficControllerResponse =
+  SecurityPolicyListResult;
+
+/** Optional parameters. */
+export interface SecurityPoliciesInterfaceGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type SecurityPoliciesInterfaceGetResponse = SecurityPolicy;
+
+/** Optional parameters. */
+export interface SecurityPoliciesInterfaceCreateOrUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the createOrUpdate operation. */
+export type SecurityPoliciesInterfaceCreateOrUpdateResponse = SecurityPolicy;
+
+/** Optional parameters. */
+export interface SecurityPoliciesInterfaceUpdateOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the update operation. */
+export type SecurityPoliciesInterfaceUpdateResponse = SecurityPolicy;
+
+/** Optional parameters. */
+export interface SecurityPoliciesInterfaceDeleteOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the delete operation. */
+export type SecurityPoliciesInterfaceDeleteResponse =
+  SecurityPoliciesInterfaceDeleteHeaders;
+
+/** Optional parameters. */
+export interface SecurityPoliciesInterfaceListByTrafficControllerNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByTrafficControllerNext operation. */
+export type SecurityPoliciesInterfaceListByTrafficControllerNextResponse =
+  SecurityPolicyListResult;
 
 /** Optional parameters. */
 export interface ServiceNetworkingManagementClientOptionalParams

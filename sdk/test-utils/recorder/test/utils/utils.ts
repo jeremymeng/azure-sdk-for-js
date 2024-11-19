@@ -1,8 +1,11 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { createPipelineRequest, HttpMethods, PipelineResponse } from "@azure/core-rest-pipeline";
-import { expect } from "chai";
-import { env } from "../../src";
-import { isLiveMode, TestMode } from "../../src/utils/utils";
+import { expect } from "vitest";
+import { isLiveMode, TestMode } from "../../src/utils/utils.js";
 import { ServiceClient } from "@azure/core-client";
+import { env } from "../../src/utils/env.js";
 
 export const setTestMode = (mode: TestMode): TestMode => {
   env.TEST_MODE = mode;
@@ -11,23 +14,10 @@ export const setTestMode = (mode: TestMode): TestMode => {
 };
 
 /**
- * Returns the test server url
- * Acts as the endpoint [ Works as a substitute to the actual Azure Services ]
+ * The test server url.
+ * This server acts as the endpoint [ Works as a substitute to the actual Azure Services ]
  */
-export function getTestServerUrl(): string {
-  // utils/server.ts creates a localhost server at port 8080
-  // - In "live" mode, we are hitting directly the localhost endpoint
-  // - In "record" and "playback" modes, we need to hit the localhost of the host network
-  //   from the proxy tool running in the docker container.
-  //   `host.docker.internal` alias can be used in the docker container to access host's network(localhost)
-  //
-  // if PROXY_MANUAL_START=true, we start the proxy tool using the dotnet tool instead of the `docker run` command
-  //  - in this case, we don't need to hit the localhost using the alias
-  //  - needed for the CI since we have difficulties with the mac machines
-  return !isLiveMode() && !(env.PROXY_MANUAL_START === "true")
-    ? `http://host.docker.internal:8080` // Accessing host's network(localhost) through docker container
-    : `http://127.0.0.1:8080`;
-}
+export const TEST_SERVER_URL = "http://127.0.0.1:8080";
 
 export async function makeRequestAndVerifyResponse(
   client: ServiceClient,
@@ -39,10 +29,10 @@ export async function makeRequestAndVerifyResponse(
     method: HttpMethods;
   },
   expectedResponse: { [key: string]: unknown } | undefined,
-  expectedHeaders?: { [key: string]: string }
+  expectedHeaders?: { [key: string]: string },
 ): Promise<PipelineResponse> {
   const req = createPipelineRequest({
-    url: request.url ?? getTestServerUrl() + request.path,
+    url: request.url ?? TEST_SERVER_URL + request.path,
     body: request.body,
     method: request.method,
     allowInsecureConnection: isLiveMode(),

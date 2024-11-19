@@ -9,11 +9,12 @@
 import {
   OperationParameter,
   OperationURLParameter,
-  OperationQueryParameter
+  OperationQueryParameter,
 } from "@azure/core-client";
 import {
   ImageTemplate as ImageTemplateMapper,
-  ImageTemplateUpdateParameters as ImageTemplateUpdateParametersMapper
+  ImageTemplateUpdateParameters as ImageTemplateUpdateParametersMapper,
+  Trigger as TriggerMapper,
 } from "../models/mappers";
 
 export const accept: OperationParameter = {
@@ -23,9 +24,9 @@ export const accept: OperationParameter = {
     isConstant: true,
     serializedName: "Accept",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const $host: OperationURLParameter = {
@@ -34,10 +35,10 @@ export const $host: OperationURLParameter = {
     serializedName: "$host",
     required: true,
     type: {
-      name: "String"
-    }
+      name: "String",
+    },
   },
-  skipEncoding: true
+  skipEncoding: true,
 };
 
 export const subscriptionId: OperationURLParameter = {
@@ -46,21 +47,21 @@ export const subscriptionId: OperationURLParameter = {
     serializedName: "subscriptionId",
     required: true,
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const apiVersion: OperationQueryParameter = {
   parameterPath: "apiVersion",
   mapper: {
-    defaultValue: "2022-02-14",
+    defaultValue: "2024-02-01",
     isConstant: true,
     serializedName: "api-version",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const resourceGroupName: OperationURLParameter = {
@@ -69,9 +70,9 @@ export const resourceGroupName: OperationURLParameter = {
     serializedName: "resourceGroupName",
     required: true,
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const contentType: OperationParameter = {
@@ -81,47 +82,47 @@ export const contentType: OperationParameter = {
     isConstant: true,
     serializedName: "Content-Type",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const parameters: OperationParameter = {
   parameterPath: "parameters",
-  mapper: ImageTemplateMapper
+  mapper: ImageTemplateMapper,
 };
 
 export const imageTemplateName: OperationURLParameter = {
   parameterPath: "imageTemplateName",
   mapper: {
     constraints: {
-      Pattern: new RegExp("^[A-Za-z0-9-_.]{1,64}$")
+      Pattern: new RegExp("^[A-Za-z0-9-_.]{1,64}$"),
     },
     serializedName: "imageTemplateName",
     required: true,
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const parameters1: OperationParameter = {
   parameterPath: "parameters",
-  mapper: ImageTemplateUpdateParametersMapper
+  mapper: ImageTemplateUpdateParametersMapper,
 };
 
 export const runOutputName: OperationURLParameter = {
   parameterPath: "runOutputName",
   mapper: {
     constraints: {
-      Pattern: new RegExp("^[A-Za-z0-9-_.]{1,64}$")
+      Pattern: new RegExp("^[A-Za-z0-9-_.]{1,64}$"),
     },
     serializedName: "runOutputName",
     required: true,
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const nextLink: OperationURLParameter = {
@@ -130,8 +131,27 @@ export const nextLink: OperationURLParameter = {
     serializedName: "nextLink",
     required: true,
     type: {
-      name: "String"
-    }
+      name: "String",
+    },
   },
-  skipEncoding: true
+  skipEncoding: true,
+};
+
+export const triggerName: OperationURLParameter = {
+  parameterPath: "triggerName",
+  mapper: {
+    constraints: {
+      Pattern: new RegExp("^[A-Za-z0-9-_.]{1,64}$"),
+    },
+    serializedName: "triggerName",
+    required: true,
+    type: {
+      name: "String",
+    },
+  },
+};
+
+export const parameters2: OperationParameter = {
+  parameterPath: "parameters",
+  mapper: TriggerMapper,
 };

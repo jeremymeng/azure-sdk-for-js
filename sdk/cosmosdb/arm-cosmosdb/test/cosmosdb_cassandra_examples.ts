@@ -21,14 +21,15 @@ import { CosmosDBManagementClient } from "../src/cosmosDBManagementClient";
 
 
 const replaceableVariables: Record<string, string> = {
-  AZURE_CLIENT_ID: "azure_client_id",
-  AZURE_CLIENT_SECRET: "azure_client_secret",
-  AZURE_TENANT_ID: "88888888-8888-8888-8888-888888888888",
-  SUBSCRIPTION_ID: "azure_subscription_id"
+  SUBSCRIPTION_ID: "88888888-8888-8888-8888-888888888888"
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -51,9 +52,9 @@ describe("Cosmosdb test", () => {
     // This is an example of how the environment variables are used
     const credential = createTestCredential();
     client = new CosmosDBManagementClient(credential, subscriptionId, recorder.configureClientOptions({}));
-    location = "eastus";
+    location = "eastasia";
     resourceGroupName = "myjstest";
-    accountName = "myaccountxxyy1";
+    accountName = "myaccountxxyz1";
     keyspaceName = "mykeyspacexxx";
   });
 
@@ -68,7 +69,7 @@ describe("Cosmosdb test", () => {
       locations: [
         {
           failoverPriority: 0,
-          locationName: "eastus",
+          locationName: "eastasia",
           isZoneRedundant: false
         }
       ],
@@ -129,6 +130,19 @@ describe("Cosmosdb test", () => {
     await client.cassandraResources.beginDeleteCassandraKeyspaceAndWait(resourceGroupName, accountName, keyspaceName, testPollingOptions);
     const resArray = new Array();
     for await (let item of client.cassandraResources.listCassandraKeyspaces(resourceGroupName, accountName)) {
+      resArray.push(item);
+    }
+    assert.equal(resArray.length, 0);
+  });
+
+  it("databaseAccount delete for cassandraResources test", async function () {
+    await client.databaseAccounts.beginDeleteAndWait(
+      resourceGroupName,
+      accountName,
+      testPollingOptions
+    );
+    const resArray = new Array();
+    for await (let item of client.databaseAccounts.listByResourceGroup(resourceGroupName)) {
       resArray.push(item);
     }
     assert.equal(resArray.length, 0);

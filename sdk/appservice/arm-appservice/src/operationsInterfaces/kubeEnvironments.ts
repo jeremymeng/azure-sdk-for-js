@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   KubeEnvironment,
   KubeEnvironmentsListBySubscriptionOptionalParams,
@@ -19,7 +19,7 @@ import {
   KubeEnvironmentsDeleteOptionalParams,
   KubeEnvironmentPatchResource,
   KubeEnvironmentsUpdateOptionalParams,
-  KubeEnvironmentsUpdateResponse
+  KubeEnvironmentsUpdateResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface KubeEnvironments {
    * @param options The options parameters.
    */
   listBySubscription(
-    options?: KubeEnvironmentsListBySubscriptionOptionalParams
+    options?: KubeEnvironmentsListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<KubeEnvironment>;
   /**
    * Description for Get all the Kubernetes Environments in a resource group.
@@ -39,7 +39,7 @@ export interface KubeEnvironments {
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: KubeEnvironmentsListByResourceGroupOptionalParams
+    options?: KubeEnvironmentsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<KubeEnvironment>;
   /**
    * Description for Get the properties of a Kubernetes Environment.
@@ -50,7 +50,7 @@ export interface KubeEnvironments {
   get(
     resourceGroupName: string,
     name: string,
-    options?: KubeEnvironmentsGetOptionalParams
+    options?: KubeEnvironmentsGetOptionalParams,
   ): Promise<KubeEnvironmentsGetResponse>;
   /**
    * Description for Creates or updates a Kubernetes Environment.
@@ -63,10 +63,10 @@ export interface KubeEnvironments {
     resourceGroupName: string,
     name: string,
     kubeEnvironmentEnvelope: KubeEnvironment,
-    options?: KubeEnvironmentsCreateOrUpdateOptionalParams
+    options?: KubeEnvironmentsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<KubeEnvironmentsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<KubeEnvironmentsCreateOrUpdateResponse>,
       KubeEnvironmentsCreateOrUpdateResponse
     >
   >;
@@ -81,7 +81,7 @@ export interface KubeEnvironments {
     resourceGroupName: string,
     name: string,
     kubeEnvironmentEnvelope: KubeEnvironment,
-    options?: KubeEnvironmentsCreateOrUpdateOptionalParams
+    options?: KubeEnvironmentsCreateOrUpdateOptionalParams,
   ): Promise<KubeEnvironmentsCreateOrUpdateResponse>;
   /**
    * Description for Delete a Kubernetes Environment.
@@ -92,8 +92,8 @@ export interface KubeEnvironments {
   beginDelete(
     resourceGroupName: string,
     name: string,
-    options?: KubeEnvironmentsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: KubeEnvironmentsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Description for Delete a Kubernetes Environment.
    * @param resourceGroupName Name of the resource group to which the resource belongs.
@@ -103,7 +103,7 @@ export interface KubeEnvironments {
   beginDeleteAndWait(
     resourceGroupName: string,
     name: string,
-    options?: KubeEnvironmentsDeleteOptionalParams
+    options?: KubeEnvironmentsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Description for Creates or updates a Kubernetes Environment.
@@ -116,6 +116,6 @@ export interface KubeEnvironments {
     resourceGroupName: string,
     name: string,
     kubeEnvironmentEnvelope: KubeEnvironmentPatchResource,
-    options?: KubeEnvironmentsUpdateOptionalParams
+    options?: KubeEnvironmentsUpdateOptionalParams,
   ): Promise<KubeEnvironmentsUpdateResponse>;
 }

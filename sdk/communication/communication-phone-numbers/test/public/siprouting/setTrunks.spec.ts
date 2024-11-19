@@ -1,47 +1,45 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
+import type { SipRoutingClient } from "../../../src/index.js";
 
-import { assert } from "chai";
-import { Context } from "mocha";
-
-import { SipRoutingClient } from "../../../src";
-
-import { isPlaybackMode, Recorder } from "@azure-tools/test-recorder";
-import { SipTrunk, SipTrunkRoute } from "../../../src/models";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isPlaybackMode } from "@azure-tools/test-recorder";
+import type { SipTrunk, SipTrunkRoute } from "../../../src/models.js";
 import {
   clearSipConfiguration,
   createRecordedClient,
   createRecordedClientWithToken,
   getUniqueFqdn,
+  listAllRoutes,
+  listAllTrunks,
   resetUniqueFqdns,
-} from "./utils/recordedClient";
-import { matrix } from "@azure/test-utils";
+} from "./utils/recordedClient.js";
+import { matrix } from "@azure-tools/test-utils-vitest";
+import { describe, it, assert, beforeEach, afterEach, beforeAll } from "vitest";
 
-matrix([[true, false]], async function (useAad) {
-  describe(`SipRoutingClient - set trunks${useAad ? " [AAD]" : ""}`, function () {
+matrix([[true, false]], async (useAad) => {
+  describe(`SipRoutingClient - set trunks${useAad ? " [AAD]" : ""}`, () => {
     let client: SipRoutingClient;
     let recorder: Recorder;
     let firstFqdn = "";
     let secondFqdn = "";
 
-    before(async function (this: Context) {
+    beforeAll(async () => {
       if (!isPlaybackMode()) {
         await clearSipConfiguration();
       }
     });
 
-    beforeEach(async function (this: Context) {
+    beforeEach(async (ctx) => {
       ({ client, recorder } = useAad
-        ? await createRecordedClientWithToken(this)
-        : await createRecordedClient(this));
+        ? await createRecordedClientWithToken(ctx)
+        : await createRecordedClient(ctx));
       firstFqdn = getUniqueFqdn(recorder);
       secondFqdn = getUniqueFqdn(recorder);
     });
 
-    afterEach(async function (this: Context) {
-      if (!this.currentTest?.isPending()) {
-        await recorder.stop();
-      }
+    afterEach(async () => {
+      await recorder.stop();
       resetUniqueFqdns();
     });
 
@@ -79,7 +77,7 @@ matrix([[true, false]], async function (useAad) {
       const setTrunks = await client.setTrunks(trunks);
       assert.deepEqual(setTrunks, trunks);
 
-      const storedTrunks = await client.getTrunks();
+      const storedTrunks = await listAllTrunks(client);
       assert.deepEqual(storedTrunks, trunks);
     });
 
@@ -96,7 +94,7 @@ matrix([[true, false]], async function (useAad) {
       const setTrunks = await client.setTrunks(trunks);
       assert.deepEqual(setTrunks, trunks);
 
-      const storedTrunks = await client.getTrunks();
+      const storedTrunks = await listAllTrunks(client);
       assert.deepEqual(storedTrunks, trunks);
     });
 
@@ -105,7 +103,7 @@ matrix([[true, false]], async function (useAad) {
 
       await client.setTrunks([]);
 
-      const storedTrunks = await client.getTrunks();
+      const storedTrunks = await listAllTrunks(client);
       assert.isNotNull(storedTrunks);
       assert.isArray(storedTrunks);
       assert.isEmpty(storedTrunks);
@@ -120,7 +118,7 @@ matrix([[true, false]], async function (useAad) {
 
       await client.setTrunks([]);
 
-      const storedTrunks = await client.getTrunks();
+      const storedTrunks = await listAllTrunks(client);
       assert.isNotNull(storedTrunks);
       assert.isArray(storedTrunks);
       assert.isEmpty(storedTrunks);
@@ -192,7 +190,7 @@ matrix([[true, false]], async function (useAad) {
         await client.setTrunks([{ fqdn: firstFqdn, sipSignalingPort: 1234 }]);
       } catch (error: any) {
         assert.equal(error.code, "UnprocessableConfiguration");
-        const storedTrunks = await client.getTrunks();
+        const storedTrunks = await listAllTrunks(client);
         assert.isNotNull(storedTrunks);
         assert.isArray(storedTrunks);
         assert.deepEqual(storedTrunks, expectedTrunks);
@@ -230,8 +228,8 @@ matrix([[true, false]], async function (useAad) {
       ];
       await client.setTrunks(trunks);
 
-      assert.deepEqual(await client.getTrunks(), trunks);
-      assert.deepEqual(await client.getRoutes(), routes);
+      assert.deepEqual(await listAllTrunks(client), trunks);
+      assert.deepEqual(await listAllRoutes(client), routes);
     });
   });
 });

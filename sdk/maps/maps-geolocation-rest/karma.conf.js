@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // https://github.com/karma-runner/karma-chrome-launcher
 process.env.CHROME_BIN = require("puppeteer").executablePath();
@@ -20,9 +20,7 @@ module.exports = function (config) {
       "karma-mocha",
       "karma-mocha-reporter",
       "karma-chrome-launcher",
-      "karma-edge-launcher",
       "karma-firefox-launcher",
-      "karma-ie-launcher",
       "karma-env-preprocessor",
       "karma-coverage",
       "karma-sourcemap-loader",
@@ -53,15 +51,7 @@ module.exports = function (config) {
       // "dist-test/index.js": ["coverage"]
     },
 
-    envPreprocessor: [
-      "TEST_MODE",
-      "MAPS_SUBSCRIPTION_KEY",
-      "MAPS_CLIENT_ID",
-      "AZURE_CLIENT_SECRET",
-      "AZURE_CLIENT_ID",
-      "AZURE_TENANT_ID",
-      "RECORDINGS_RELATIVE_PATH",
-    ],
+    envPreprocessor: ["TEST_MODE", "MAPS_RESOURCE_CLIENT_ID", "RECORDINGS_RELATIVE_PATH"],
 
     // test results reporter to use
     // possible values: 'dots', 'progress'

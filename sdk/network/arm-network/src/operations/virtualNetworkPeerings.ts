@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetworkManagementClient } from "../networkManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   VirtualNetworkPeering,
   VirtualNetworkPeeringsListNextOptionalParams,
@@ -25,7 +29,7 @@ import {
   VirtualNetworkPeeringsGetResponse,
   VirtualNetworkPeeringsCreateOrUpdateOptionalParams,
   VirtualNetworkPeeringsCreateOrUpdateResponse,
-  VirtualNetworkPeeringsListNextResponse
+  VirtualNetworkPeeringsListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -50,12 +54,12 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
   public list(
     resourceGroupName: string,
     virtualNetworkName: string,
-    options?: VirtualNetworkPeeringsListOptionalParams
+    options?: VirtualNetworkPeeringsListOptionalParams,
   ): PagedAsyncIterableIterator<VirtualNetworkPeering> {
     const iter = this.listPagingAll(
       resourceGroupName,
       virtualNetworkName,
-      options
+      options,
     );
     return {
       next() {
@@ -72,9 +76,9 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
           resourceGroupName,
           virtualNetworkName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -82,7 +86,7 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
     resourceGroupName: string,
     virtualNetworkName: string,
     options?: VirtualNetworkPeeringsListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<VirtualNetworkPeering[]> {
     let result: VirtualNetworkPeeringsListResponse;
     let continuationToken = settings?.continuationToken;
@@ -98,7 +102,7 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
         resourceGroupName,
         virtualNetworkName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -110,12 +114,12 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
   private async *listPagingAll(
     resourceGroupName: string,
     virtualNetworkName: string,
-    options?: VirtualNetworkPeeringsListOptionalParams
+    options?: VirtualNetworkPeeringsListOptionalParams,
   ): AsyncIterableIterator<VirtualNetworkPeering> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       virtualNetworkName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -132,25 +136,24 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
     resourceGroupName: string,
     virtualNetworkName: string,
     virtualNetworkPeeringName: string,
-    options?: VirtualNetworkPeeringsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VirtualNetworkPeeringsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -159,8 +162,8 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -168,25 +171,25 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         virtualNetworkName,
         virtualNetworkPeeringName,
-        options
+        options,
       },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -203,13 +206,13 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
     resourceGroupName: string,
     virtualNetworkName: string,
     virtualNetworkPeeringName: string,
-    options?: VirtualNetworkPeeringsDeleteOptionalParams
+    options?: VirtualNetworkPeeringsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       virtualNetworkName,
       virtualNetworkPeeringName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -225,16 +228,16 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
     resourceGroupName: string,
     virtualNetworkName: string,
     virtualNetworkPeeringName: string,
-    options?: VirtualNetworkPeeringsGetOptionalParams
+    options?: VirtualNetworkPeeringsGetOptionalParams,
   ): Promise<VirtualNetworkPeeringsGetResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         virtualNetworkName,
         virtualNetworkPeeringName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -252,30 +255,29 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
     virtualNetworkName: string,
     virtualNetworkPeeringName: string,
     virtualNetworkPeeringParameters: VirtualNetworkPeering,
-    options?: VirtualNetworkPeeringsCreateOrUpdateOptionalParams
+    options?: VirtualNetworkPeeringsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualNetworkPeeringsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualNetworkPeeringsCreateOrUpdateResponse>,
       VirtualNetworkPeeringsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VirtualNetworkPeeringsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -284,8 +286,8 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -293,26 +295,29 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         virtualNetworkName,
         virtualNetworkPeeringName,
         virtualNetworkPeeringParameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VirtualNetworkPeeringsCreateOrUpdateResponse,
+      OperationState<VirtualNetworkPeeringsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -332,14 +337,14 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
     virtualNetworkName: string,
     virtualNetworkPeeringName: string,
     virtualNetworkPeeringParameters: VirtualNetworkPeering,
-    options?: VirtualNetworkPeeringsCreateOrUpdateOptionalParams
+    options?: VirtualNetworkPeeringsCreateOrUpdateOptionalParams,
   ): Promise<VirtualNetworkPeeringsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       virtualNetworkName,
       virtualNetworkPeeringName,
       virtualNetworkPeeringParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -353,11 +358,11 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
   private _list(
     resourceGroupName: string,
     virtualNetworkName: string,
-    options?: VirtualNetworkPeeringsListOptionalParams
+    options?: VirtualNetworkPeeringsListOptionalParams,
   ): Promise<VirtualNetworkPeeringsListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, virtualNetworkName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -372,11 +377,11 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
     resourceGroupName: string,
     virtualNetworkName: string,
     nextLink: string,
-    options?: VirtualNetworkPeeringsListNextOptionalParams
+    options?: VirtualNetworkPeeringsListNextOptionalParams,
   ): Promise<VirtualNetworkPeeringsListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, virtualNetworkName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -384,8 +389,7 @@ export class VirtualNetworkPeeringsImpl implements VirtualNetworkPeerings {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/virtualNetworkPeerings/{virtualNetworkPeeringName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/virtualNetworkPeerings/{virtualNetworkPeeringName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -393,8 +397,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -402,22 +406,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.virtualNetworkName,
-    Parameters.virtualNetworkPeeringName
+    Parameters.virtualNetworkPeeringName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/virtualNetworkPeerings/{virtualNetworkPeeringName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/virtualNetworkPeerings/{virtualNetworkPeeringName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkPeering
+      bodyMapper: Mappers.VirtualNetworkPeering,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -425,31 +428,30 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.virtualNetworkName,
-    Parameters.virtualNetworkPeeringName
+    Parameters.virtualNetworkPeeringName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/virtualNetworkPeerings/{virtualNetworkPeeringName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/virtualNetworkPeerings/{virtualNetworkPeeringName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkPeering
+      bodyMapper: Mappers.VirtualNetworkPeering,
     },
     201: {
-      bodyMapper: Mappers.VirtualNetworkPeering
+      bodyMapper: Mappers.VirtualNetworkPeering,
     },
     202: {
-      bodyMapper: Mappers.VirtualNetworkPeering
+      bodyMapper: Mappers.VirtualNetworkPeering,
     },
     204: {
-      bodyMapper: Mappers.VirtualNetworkPeering
+      bodyMapper: Mappers.VirtualNetworkPeering,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.virtualNetworkPeeringParameters,
   queryParameters: [Parameters.apiVersion, Parameters.syncRemoteAddressSpace],
@@ -458,53 +460,51 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.virtualNetworkName,
-    Parameters.virtualNetworkPeeringName
+    Parameters.virtualNetworkPeeringName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/virtualNetworkPeerings",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/virtualNetworkPeerings",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkPeeringListResult
+      bodyMapper: Mappers.VirtualNetworkPeeringListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.virtualNetworkName
+    Parameters.virtualNetworkName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkPeeringListResult
+      bodyMapper: Mappers.VirtualNetworkPeeringListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.virtualNetworkName
+    Parameters.virtualNetworkName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

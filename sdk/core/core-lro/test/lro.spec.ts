@@ -1,21 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
-  ImplementationName,
-  assertDivergentBehavior,
-  assertError,
-  createDoubleHeaders,
-} from "./utils/utils";
-import { assert, matrix } from "@azure/test-utils";
-import { createRunLroWith, createTestPoller } from "./utils/router";
-import { AbortController } from "@azure/abort-controller";
+import type { ImplementationName, Result } from "./utils/utils.js";
+import { assertDivergentBehavior, assertError, createDoubleHeaders } from "./utils/utils.js";
+import { describe, it, assert, expect } from "vitest";
+import { createRunLroWith, createTestPoller } from "./utils/router.js";
+import { delay } from "@azure/core-util";
+import { matrix } from "@azure-tools/test-utils-vitest";
 
 matrix(
-  [
-    ["createPoller", "LroEngine"],
-    [true, false],
-  ] as const,
+  [["createPoller"], [true, false]] as const,
   async function (implName: ImplementationName, throwOnNon2xxResponse: boolean) {
     const runLro = createRunLroWith({ implName, throwOnNon2xxResponse });
     describe(`${implName} (throwOnNon2xxResponse = ${throwOnNon2xxResponse})`, function () {
@@ -694,6 +688,115 @@ matrix(
               assert.equal(result.id, "100");
             });
 
+            it("should handle PUT with final-state-via", async () => {
+              const path = "/put/final-state-via";
+              const locationPath = `/LROPostDoubleHeadersFinalAzureHeaderGet/location`;
+              const operationLocationPath = `/LROPostDoubleHeadersFinalAzureHeaderGet/asyncOperationUrl`;
+              const result = await runLro({
+                routes: [
+                  {
+                    method: "PUT",
+                    path,
+                    status: 202,
+                    body: "",
+                    headers: {
+                      Location: locationPath,
+                      [headerName]: operationLocationPath,
+                    },
+                  },
+                  {
+                    method: "GET",
+                    path: operationLocationPath,
+                    status: 200,
+                    body: `{ "status": "succeeded"}`,
+                  },
+                  {
+                    method: "GET",
+                    path,
+                    status: 200,
+                    body: `{ "id": "100" }`,
+                  },
+                  {
+                    method: "GET",
+                    path: locationPath,
+                    status: 400,
+                  },
+                ],
+                resourceLocationConfig: "azure-async-operation",
+              });
+              assert.equal(result.statusCode, 200);
+              assert.equal(result.id, "100");
+            });
+
+            it("should handle POST with final-state-via: operation-location", async () => {
+              const path = "/post/final-state-via";
+              const locationPath = `/LROPostFinalStateViaOperationLocation/location`;
+              const operationLocationPath = `/LROPostFinalStateViaOperationLocation/asyncOperationUrl`;
+              const result = await runLro({
+                routes: [
+                  {
+                    method: "POST",
+                    status: 202,
+                    path,
+                    body: "",
+                    headers: {
+                      Location: locationPath,
+                      [headerName]: operationLocationPath,
+                    },
+                  },
+                  {
+                    method: "GET",
+                    path: operationLocationPath,
+                    status: 200,
+                    body: `{ "status": "succeeded", "id": "100"}`,
+                  },
+                  {
+                    method: "GET",
+                    path: locationPath,
+                    status: 400,
+                  },
+                ],
+                resourceLocationConfig: "operation-location",
+              });
+              assert.equal(result.statusCode, 200);
+              assert.equal(result.id, "100");
+            });
+
+            it("should handle POST with final-state-via: location", async () => {
+              const path = "/post/final-state-via";
+              const locationPath = `/LROPostFinalStateViaOperationLocation/location`;
+              const operationLocationPath = `/LROPostFinalStateViaOperationLocation/asyncOperationUrl`;
+              const result = await runLro({
+                routes: [
+                  {
+                    method: "POST",
+                    status: 202,
+                    path,
+                    body: "",
+                    headers: {
+                      Location: locationPath,
+                      [headerName]: operationLocationPath,
+                    },
+                  },
+                  {
+                    method: "GET",
+                    path: operationLocationPath,
+                    status: 200,
+                    body: `{ "status": "succeeded"}`,
+                  },
+                  {
+                    method: "GET",
+                    path: locationPath,
+                    status: 200,
+                    body: `{ "id": "100" }`,
+                  },
+                ],
+                resourceLocationConfig: "location",
+              });
+              assert.equal(result.statusCode, 200);
+              assert.equal(result.id, "100");
+            });
+
             it("should handle postDoubleHeadersFinalAzureHeaderGetDefault", async () => {
               const resourceLocationPath =
                 "/LROPostDoubleHeadersFinalAzureHeaderGetDefault/location";
@@ -1037,9 +1140,9 @@ matrix(
               assert.equal(result.id, "100");
             });
 
-            it("should handle patchAsync", async () => {
-              const resourceLocationPath = `/patchasync/succeeded`;
-              const pollingPath = `/patchasync/operationresults/123`;
+            it("should handle patchAsyncLocationHeader", async () => {
+              const resourceLocationPath = `/patchasynclocationheader/succeeded`;
+              const pollingPath = `/patchasynclocationheader/operationresults/123`;
               const result = await runLro({
                 routes: [
                   {
@@ -1068,6 +1171,44 @@ matrix(
                   {
                     method: "GET",
                     path: resourceLocationPath,
+                    status: 200,
+                    body: `{ "name": "sku" , "id": "100" }`,
+                  },
+                ],
+              });
+              assert.equal(result.name, "sku");
+              assert.equal(result.id, "100");
+            });
+
+            it("should handle patchAsyncNoLocationHeader", async () => {
+              const initialResourcePath = `/patchasyncnolocationheader/succeeded`;
+              const pollingPath = `/patchasyncnolocationheader/operationresults/123`;
+              const result = await runLro({
+                routes: [
+                  {
+                    method: "PATCH",
+                    status: 201,
+                    path: initialResourcePath,
+                    headers: {
+                      [headerName]: pollingPath,
+                    },
+                    body: `{ "properties": { "provisioningState": "Updating" } }`,
+                  },
+                  {
+                    method: "GET",
+                    path: pollingPath,
+                    status: 200,
+                    body: `{ "status": "InProgress"}`,
+                  },
+                  {
+                    method: "GET",
+                    path: pollingPath,
+                    status: 200,
+                    body: `{ "status": "Succeeded"}`,
+                  },
+                  {
+                    method: "GET",
+                    path: initialResourcePath,
                     status: 200,
                     body: `{ "name": "sku" , "id": "100" }`,
                   },
@@ -1440,6 +1581,42 @@ matrix(
               assert.deepInclude(result, { id: "100", name: "foo" });
             });
 
+            it("should handle resourceLocation being null", async () => {
+              const locationPath = "/postlocation/retry/succeeded/operationResults/foo/200/";
+              const pollingPath = "/postlocation/retry/succeeded/operationResults/200/";
+              const result = await runLro({
+                routes: [
+                  {
+                    method: "POST",
+                    status: 202,
+                    headers: {
+                      [headerName]: pollingPath,
+                      "retry-after": "0",
+                    },
+                    body: `{"status":"Accepted"}`,
+                  },
+                  {
+                    method: "GET",
+                    path: pollingPath,
+                    status: 202,
+                    headers: {
+                      location: locationPath,
+                      [headerName]: pollingPath,
+                      "retry-after": "0",
+                    },
+                    body: `{"status":"Accepted"}`,
+                  },
+                  {
+                    method: "GET",
+                    path: pollingPath,
+                    status: 200,
+                    body: `{"status":"Succeeded", "resourceLocation": null}`,
+                  },
+                ],
+              });
+              assert.deepInclude(result, { status: "Succeeded" });
+            });
+
             it("should handle postAsyncRetrycanceled", async () => {
               const pollingPath = "/postasync/retry/canceled/operationResults/200/";
               const body = { status: "Canceled" };
@@ -1474,7 +1651,7 @@ matrix(
               });
             });
           });
-        }
+        },
       );
 
       describe("LRO Sad scenarios", () => {
@@ -1926,7 +2103,7 @@ matrix(
             }),
             {
               name: "SyntaxError",
-            }
+            },
           );
         });
 
@@ -1981,7 +2158,7 @@ matrix(
             }),
             {
               name: "SyntaxError",
-            }
+            },
           );
         });
 
@@ -2060,7 +2237,7 @@ matrix(
             }),
             {
               name: "SyntaxError",
-            }
+            },
           );
         });
 
@@ -2139,33 +2316,141 @@ matrix(
             }),
             {
               name: "SyntaxError",
-            }
+            },
           );
         });
       });
 
-      describe("serialized state", () => {
-        let state: any, serializedState: string;
-        it("should handle serializing the state", async () => {
-          const poller = await createTestPoller({
+      describe("rehydration LRO", () => {
+        // fake LRO which means no polling and the initial response would returnt the result directly
+        it("could handle rehydration for fake LRO", async () => {
+          const bodyObj = {
+            properties: { provisioningState: "Succeeded" },
+            id: "100",
+            name: "foo",
+          };
+          const retResult = {
+            ...bodyObj,
+            statusCode: 200,
+          };
+
+          const poller = createTestPoller({
             routes: [
               {
                 method: "PUT",
                 status: 200,
-                body: `{ "properties": { "provisioningState": "Succeeded"}, "id": "100", "name": "foo" }`,
+                body: JSON.stringify(bodyObj),
               },
             ],
             implName,
             throwOnNon2xxResponse,
           });
-          poller.onProgress((currentState) => {
-            if (state === undefined && serializedState === undefined) {
-              state = currentState;
-              serializedState = JSON.stringify({ state: currentState });
-              assert.equal(serializedState, poller.toString());
-            }
+          assert.isUndefined(poller.operationState);
+          const serialized = await poller.serialize();
+          const expectedSerialized = JSON.stringify({
+            state: {
+              status: "succeeded",
+              config: {
+                metadata: { mode: "Body" },
+                operationLocation: "path",
+                initialRequestUrl: "path",
+                requestMethod: "PUT",
+              },
+              result: retResult,
+            },
           });
-          await poller.pollUntilDone();
+          assert.equal(serialized, expectedSerialized);
+          assert.exists(poller.operationState);
+          assert.equal(poller.operationState.status, "succeeded");
+          const restoredPoller = createTestPoller({
+            routes: [],
+            restoreFrom: serialized,
+            implName,
+            throwOnNon2xxResponse,
+          });
+          assert.equal(serialized, await restoredPoller.serialize());
+          assert.equal(poller.operationState!.status, "succeeded");
+          assert.deepEqual(poller.result, retResult);
+        });
+
+        it("could handle rehydration for real LRO", async () => {
+          const bodyObj = {
+            properties: { provisioningState: "Succeeded" },
+            id: "100",
+            name: "foo",
+          };
+          const retResult: Result = {
+            ...bodyObj,
+            statusCode: 200,
+          };
+          const pollingPath = `pollingPath`;
+          let pollCount = 0;
+          const pollingRoutes = [
+            ...Array(10).fill({
+              method: "GET",
+              path: pollingPath,
+              body: `{ "status": "running" }`,
+              status: 200,
+            }),
+            {
+              method: "GET",
+              path: pollingPath,
+              body: JSON.stringify(bodyObj),
+              status: 200,
+            },
+          ];
+          const poller = createTestPoller({
+            routes: [
+              {
+                method: "POST",
+                status: 202,
+                headers: {
+                  "Operation-Location": pollingPath,
+                },
+              },
+            ],
+            throwOnNon2xxResponse,
+            implName,
+            updateState: () => {
+              pollCount++;
+            },
+          });
+          assert.isUndefined(poller.operationState);
+          const serialized = await poller.serialize();
+          assert.equal(pollCount, 0);
+          const expectedSerialized = JSON.stringify({
+            state: {
+              status: "running",
+              config: {
+                metadata: { mode: "OperationLocation" },
+                operationLocation: "pollingPath",
+                initialRequestUrl: "path",
+                requestMethod: "POST",
+              },
+            },
+          });
+          assert.equal(serialized, expectedSerialized);
+          assert.isNotNull(poller.operationState);
+          assert.equal(poller.operationState!.status, "running");
+          pollCount = 0;
+          const restoredPoller = createTestPoller({
+            routes: pollingRoutes,
+            restoreFrom: serialized,
+            implName,
+            throwOnNon2xxResponse,
+            updateState: () => {
+              pollCount++;
+            },
+          });
+          assert.equal(pollCount, 0);
+          assert.deepEqual(retResult, await restoredPoller);
+          assert.equal(pollCount, 11);
+          assert.equal(restoredPoller.operationState.status, "succeeded");
+          assert.deepEqual(restoredPoller.result, retResult);
+          assert.isUndefined(poller.result);
+          // duplicate awaitting would not trigger extra pollings
+          await restoredPoller;
+          assert.equal(pollCount, 11);
         });
       });
 
@@ -2187,19 +2472,19 @@ matrix(
                 method: "GET",
                 path: pollingPath,
                 status: 200,
-                body: `{"status":"running"}`,
+                body: `{ "status": "running" }`,
               },
               {
                 method: "GET",
                 path: pollingPath,
                 status: 200,
-                body: `{"status":"running"}`,
+                body: `{ "status": "running" }`,
               },
               {
                 method: "GET",
                 path: pollingPath,
                 status: 200,
-                body: `{"status":"succeeded"}`,
+                body: `{ "status": "succeeded" }`,
               },
             ],
             onProgress: (state) => {
@@ -2232,19 +2517,19 @@ matrix(
                 method: "GET",
                 path: pollingPath,
                 status: 200,
-                body: `{"status":"running"}`,
+                body: `{ "status": "running" }`,
               },
               {
                 method: "GET",
                 path: pollingPath,
                 status: 200,
-                body: `{"status":"running"}`,
+                body: `{ "status": "running" }`,
               },
               {
                 method: "GET",
                 path: pollingPath,
                 status: 200,
-                body: `{"status":"succeeded"}`,
+                body: `{ "status": "succeeded" }`,
               },
             ],
             updateState: (state: any) => {
@@ -2275,13 +2560,13 @@ matrix(
                   location: locationPath,
                   [headerName]: pollingPath,
                 },
-                body: `{"properties":{"provisioningState":"Accepted"},"id":"100","name":"foo"}`,
+                body: `{ "properties": { "provisioningState": "Accepted" }, "id": "100", "name": "foo" }`,
               },
               {
                 method: "GET",
                 path: pollingPath,
                 status: 202,
-                body: `{"status":"Accepted"}`,
+                body: `{ "status": "Accepted" }`,
                 headers: {
                   location: locationPath,
                   [headerName]: pollingPath,
@@ -2291,13 +2576,13 @@ matrix(
                 method: "GET",
                 path: pollingPath,
                 status: 200,
-                body: `{"properties":{"provisioningState":"Succeeded"},"id":"100","name":"foo"}`,
+                body: `{ "properties": { "provisioningState": "Succeeded" }, "id": "100", "name": "foo" }`,
               },
               {
                 method: "GET",
                 path: locationPath,
                 status: 200,
-                body: `{"properties":{"provisioningState":"Succeeded"},"id":"100","name":"foo"}`,
+                body: `{ "properties": { "provisioningState": "Succeeded" }, "id": "100", "name": "foo" }`,
               },
             ],
             processResult: (res: unknown) => {
@@ -2314,7 +2599,7 @@ matrix(
               {
                 method: "PUT",
                 status: 200,
-                body: `{"properties":{"provisioningState":"Succeeded"},"id":"100","name":"foo"}`,
+                body: `{ "properties": { "provisioningState": "Succeeded" }, "id": "100", "name": "foo" }`,
               },
             ],
             processResult: (res: unknown) => {
@@ -2330,7 +2615,7 @@ matrix(
         it("cancelled poller gives access to partial results", async () => {
           const body = { status: "canceled", results: [1, 2] };
           const pollingPath = "/LROPostDoubleHeadersFinalAzureHeaderGetDefault/asyncOperationUrl";
-          const poller = await createTestPoller({
+          const poller = createTestPoller({
             routes: [
               {
                 method: "POST",
@@ -2344,7 +2629,7 @@ matrix(
                 method: "GET",
                 path: pollingPath,
                 status: 200,
-                body: `{ "status": "running"}`,
+                body: `{ "status": "running" }`,
               },
               {
                 method: "GET",
@@ -2366,15 +2651,14 @@ matrix(
               result: { ...body, statusCode: 200 },
             },
           });
-          const result = poller.getResult();
-          assert.deepEqual(result!.results, [1, 2]);
+          assert.deepEqual(poller.result!.results, [1, 2]);
         });
       });
       describe("abort signals", function () {
         it("poll can be aborted", async () => {
           let pollCount = 0;
           const pollingPath = "pollingPath";
-          const poller = await createTestPoller({
+          const poller = createTestPoller({
             routes: [
               {
                 method: "POST",
@@ -2386,13 +2670,13 @@ matrix(
               ...Array(10).fill({
                 method: "GET",
                 path: pollingPath,
-                body: `{ "status": "running"}`,
+                body: `{ "status": "running" }`,
                 status: 200,
               }),
               {
                 method: "GET",
                 path: pollingPath,
-                body: `{ "status": "succeeded"}`,
+                body: `{ "status": "succeeded" }`,
                 status: 200,
               },
             ],
@@ -2412,24 +2696,15 @@ matrix(
             }),
             {
               messagePattern: /The operation was aborted/,
-            }
-          );
-          await assertDivergentBehavior({
-            op: poller.pollUntilDone(),
-            throwOnNon2xxResponse,
-            throwing: {
-              messagePattern: /The operation was aborted/,
             },
-            notThrowing: { result: undefined },
-          });
-          assert.equal(pollCount, 1);
-          assert.ok(poller.isDone());
+          );
+          assert.isFalse(poller.isDone);
         });
 
         it("pollUntilDone can be aborted", async () => {
           let pollCount = 0;
           const pollingPath = "pollingPath";
-          const poller = await createTestPoller({
+          const poller = createTestPoller({
             routes: [
               {
                 method: "POST",
@@ -2441,13 +2716,13 @@ matrix(
               ...Array(10).fill({
                 method: "GET",
                 path: pollingPath,
-                body: `{ "status": "running"}`,
+                body: `{ "status": "running" }`,
                 status: 200,
               }),
               {
                 method: "GET",
                 path: pollingPath,
-                body: `{ "status": "succeeded"}`,
+                body: `{ "status": "succeeded" }`,
                 status: 200,
               },
             ],
@@ -2467,16 +2742,17 @@ matrix(
             }),
             {
               messagePattern: /The operation was aborted/,
-            }
+            },
           );
           assert.equal(pollCount, 1);
-          assert.ok(poller.isDone());
+          assert.isFalse(poller.isDone);
         });
 
-        it("pollUntilDone is aborted when stopPolling() gets called", async () => {
+        it("pollUntilDone() respects the abort signal", async () => {
           let pollCount = 0;
           const pollingPath = "pollingPath";
-          const poller = await createTestPoller({
+          const abortController = new AbortController();
+          const poller = createTestPoller({
             routes: [
               {
                 method: "POST",
@@ -2485,16 +2761,16 @@ matrix(
                   "Operation-Location": pollingPath,
                 },
               },
-              ...Array(10).fill({
+              ...Array(20).fill({
                 method: "GET",
                 path: pollingPath,
-                body: `{ "status": "running"}`,
+                body: `{ "status": "running" }`,
                 status: 200,
               }),
               {
                 method: "GET",
                 path: pollingPath,
-                body: `{ "status": "succeeded"}`,
+                body: `{ "status": "succeeded" }`,
                 status: 200,
               },
             ],
@@ -2502,30 +2778,84 @@ matrix(
             implName,
             updateState: () => {
               pollCount++;
+              if (pollCount === 10) {
+                abortController.abort();
+              }
             },
           });
-          const abortController = new AbortController();
           await poller.poll();
-          abortController.abort();
           assert.equal(pollCount, 1);
-          const promise = poller.pollUntilDone();
-          poller.stopPolling();
+          const promise = poller.pollUntilDone({
+            abortSignal: abortController.signal,
+          });
           await assertError(promise);
-          /**
-           * There is a behavior difference in how each poller is being stopped.
-           * TODO: revisit this if it becomes an issue.
-           */
-          assert.equal(pollCount, implName === "createPoller" ? 2 : 1);
+          assert.equal(pollCount, 10);
+          assert.isFalse(poller.isDone);
         });
       });
       describe("general behavior", function () {
+        it("awaitting poller would return result directly", async () => {
+          const bodyObj = {
+            properties: { provisioningState: "Succeeded" },
+            id: "100",
+            name: "foo",
+          };
+          const retResult: Result = {
+            ...bodyObj,
+            statusCode: 200,
+          };
+          const pollingPath = `pollingPath`;
+          let pollCount = 0;
+          const pollingRoutes = [
+            {
+              method: "POST",
+              status: 202,
+              headers: {
+                "Operation-Location": pollingPath,
+              },
+            },
+            ...Array(10).fill({
+              method: "GET",
+              path: pollingPath,
+              body: `{ "status": "running" }`,
+              status: 200,
+            }),
+            {
+              method: "GET",
+              path: pollingPath,
+              body: JSON.stringify(bodyObj),
+              status: 200,
+            },
+          ];
+          const poller = createTestPoller({
+            routes: pollingRoutes,
+            throwOnNon2xxResponse,
+            implName,
+            updateState: () => {
+              pollCount++;
+            },
+          });
+          assert.isUndefined(poller.operationState);
+          assert.isUndefined(poller.result);
+          assert.equal(pollCount, 0);
+          const result = await poller;
+          assert.deepEqual(retResult, result);
+          assert.equal(pollCount, 11);
+          assert.isNotNull(poller.operationState);
+          assert.equal(poller.operationState!.status, "succeeded");
+          assert.deepEqual(poller.result, retResult);
+          assert.equal(poller.result, result);
+          // duplicate awaitting would not trigger extra pollings
+          await poller;
+          assert.equal(pollCount, 11);
+        });
         it("poll() doesn't poll after the poller is in a succeed status", async function () {
-          const poller = await createTestPoller({
+          const poller = createTestPoller({
             routes: [
               {
                 method: "PUT",
                 status: 200,
-                body: `{ "properties": { "provisioningState": "Succeeded"}, "id": "100", "name": "foo" }`,
+                body: `{ "properties": { "provisioningState": "Succeeded" }, "id": "100", "name": "foo" }`,
               },
             ],
             throwOnNon2xxResponse,
@@ -2536,7 +2866,7 @@ matrix(
         });
         it("poll() doesn't poll after the poller is in a failed status", async function () {
           const bodyObj = { properties: { provisioningState: "Failed" }, id: "100", name: "foo" };
-          const poller = await createTestPoller({
+          const poller = createTestPoller({
             routes: [
               {
                 method: "PUT",
@@ -2546,10 +2876,24 @@ matrix(
             ],
             throwOnNon2xxResponse,
           });
+          const pollerState = {
+            status: "failed",
+            config: {
+              metadata: { mode: "Body" },
+              operationLocation: "path",
+              resourceLocation: undefined,
+              initialRequestUrl: "path",
+              requestMethod: "PUT",
+            },
+            result: {
+              ...bodyObj,
+              statusCode: 200,
+            },
+          };
           await assertDivergentBehavior({
-            op: poller.poll() as any,
+            op: poller.poll(),
             notThrowing: {
-              result: undefined,
+              partResult: pollerState,
             },
             throwing: {
               messagePattern: /failed/,
@@ -2569,7 +2913,7 @@ matrix(
         });
         it("poll() doesn't poll after the poller is in a canceled status", async function () {
           const bodyObj = { properties: { provisioningState: "Canceled" }, id: "100", name: "foo" };
-          const poller = await createTestPoller({
+          const poller = createTestPoller({
             routes: [
               {
                 method: "PUT",
@@ -2580,9 +2924,14 @@ matrix(
             throwOnNon2xxResponse,
           });
           await assertDivergentBehavior({
-            op: poller.poll() as any,
+            op: poller.poll(),
             notThrowing: {
-              result: undefined,
+              partResult: {
+                result: {
+                  ...bodyObj,
+                  statusCode: 200,
+                },
+              },
             },
             throwing: {
               messagePattern: /canceled/,
@@ -2599,9 +2948,272 @@ matrix(
             },
             throwOnNon2xxResponse,
           });
-          assert.equal(poller.getResult()?.properties?.provisioningState, "Canceled");
+          assert.equal(poller.result?.properties?.provisioningState, "Canceled");
+        });
+        it("prints an error message based on the error in the status monitor", async () => {
+          const pollingPath = "/postlocation/retry/succeeded/operationResults/200/";
+          const code = "InvalidRequest";
+          const message = "Bad Request";
+          const body = { status: "Failed", error: { code, message } };
+          await assertDivergentBehavior({
+            op: runLro({
+              routes: [
+                {
+                  method: "POST",
+                  status: 202,
+                  headers: {
+                    "Operation-Location": pollingPath,
+                  },
+                  body: `{ "status": "Running" }`,
+                },
+                {
+                  method: "GET",
+                  path: pollingPath,
+                  status: 200,
+                  body: JSON.stringify(body),
+                },
+              ],
+            }),
+            throwOnNon2xxResponse,
+            throwing: {
+              messagePattern: new RegExp(
+                `The long-running operation has failed. ${code}. ${message}`,
+              ),
+            },
+            notThrowing: {
+              result: { ...body, statusCode: 200 },
+            },
+          });
+        });
+        it("processResult() could be asynchronized", async () => {
+          const processResult = async (res: unknown): Promise<Result> => {
+            await delay(1);
+            return { statusCode: (res as Result).statusCode } as Result;
+          };
+          const poller = createTestPoller({
+            routes: [
+              {
+                method: "PUT",
+                status: 200,
+                body: `{ "properties": { "provisioningState": "Succeeded" }, "id": "100", "name": "foo" }`,
+              },
+            ],
+            throwOnNon2xxResponse,
+            processResult,
+          });
+          const result = await poller.pollUntilDone();
+          assert.equal(result.statusCode, 200);
+          assert.isUndefined(result.properties?.provisioningState);
+        });
+        it("processResult() could be synchronized", async () => {
+          const processResult = async (res: unknown): Promise<Result> => {
+            return { statusCode: (res as Result).statusCode } as Result;
+          };
+          const poller = createTestPoller({
+            routes: [
+              {
+                method: "PUT",
+                status: 200,
+                body: `{ "properties": { "provisioningState": "Succeeded" }, "id": "100", "name": "foo" }`,
+              },
+            ],
+            throwOnNon2xxResponse,
+            processResult,
+          });
+          const result = await poller.pollUntilDone();
+          assert.equal(result.statusCode, 200);
+          assert.isUndefined(result.properties?.provisioningState);
+        });
+        it("submitted() is resolved once the initial response is back and poller state is ready", async () => {
+          let pollCount = 0;
+          const pollingPath = "pollingPath";
+          const poller = createTestPoller({
+            routes: [
+              {
+                method: "POST",
+                status: 202,
+                headers: {
+                  "Operation-Location": pollingPath,
+                },
+              },
+              ...Array(10).fill({
+                method: "GET",
+                path: pollingPath,
+                body: `{ "status": "running" }`,
+                status: 200,
+              }),
+              {
+                method: "GET",
+                path: pollingPath,
+                body: `{ "status": "succeeded" }`,
+                status: 200,
+              },
+            ],
+            implName,
+            throwOnNon2xxResponse,
+            updateState: () => {
+              pollCount++;
+            },
+          });
+          assert.isUndefined(poller.operationState);
+          await poller.submitted();
+          assert.equal(pollCount, 0);
+          assert.isNotNull(poller.operationState);
+          assert.equal(poller.operationState!.status, "running");
+        });
+      });
+
+      describe("promise poller", () => {
+        describe("await the same poller in multiple times", () => {
+          it("should be the same result", async () => {
+            const poller = createTestPoller({
+              routes: [
+                {
+                  method: "PUT",
+                  status: 200,
+                  body: `{ "properties": { "provisioningState": "Succeeded" }, "id": "100", "name": "foo" }`,
+                },
+              ],
+              throwOnNon2xxResponse,
+            });
+            const await1 = await poller;
+            const await2 = await poller;
+            const await3 = await poller;
+            assert.equal(await1.statusCode, 200);
+            assert.isTrue(await1 === await2);
+            assert.isTrue(await1 === await3);
+          });
+          it("thenable should return the same result", async () => {
+            const poller = createTestPoller({
+              routes: [
+                {
+                  method: "PUT",
+                  status: 200,
+                  body: `{ "properties": { "provisioningState": "Succeeded" }, "id": "100", "name": "foo" }`,
+                },
+              ],
+              throwOnNon2xxResponse,
+            });
+            let callbackCounts = 0;
+            const await1 = await poller.then((result) => {
+              callbackCounts++;
+              assert.equal(result.statusCode, 200);
+              return result;
+            });
+            const await2 = await poller.then((result) => {
+              callbackCounts++;
+              assert.equal(result.statusCode, 200);
+              return result;
+            });
+            assert.isTrue(await1 === await2);
+            assert.equal(callbackCounts, 2);
+            await poller.finally(() => callbackCounts++);
+            assert.equal(callbackCounts, 3);
+          });
+          it("should trigger the whole polling process to server side only once", async () => {
+            let pollCount = 0;
+            const pollingPath = "pollingPath";
+            const poller = createTestPoller({
+              routes: [
+                {
+                  method: "POST",
+                  status: 202,
+                  headers: {
+                    "Operation-Location": pollingPath,
+                  },
+                },
+                ...Array(10).fill({
+                  method: "GET",
+                  path: pollingPath,
+                  body: `{ "status": "running" }`,
+                  status: 200,
+                }),
+                {
+                  method: "GET",
+                  path: pollingPath,
+                  body: `{ "status": "succeeded" }`,
+                  status: 200,
+                },
+              ],
+              implName,
+              throwOnNon2xxResponse,
+              updateState: () => {
+                pollCount++;
+              },
+            });
+            await poller;
+            await poller;
+            await poller;
+            assert.equal(pollCount, 11);
+          });
+          it("should catch the same error in multiple times", async () => {
+            const body = { status: "canceled", results: [1, 2] };
+            const errMsg = "Operation was canceled";
+            const pollingPath = "/LROPostDoubleHeadersFinalAzureHeaderGetDefault/asyncOperationUrl";
+            const poller = createTestPoller({
+              routes: [
+                {
+                  method: "POST",
+                  status: 202,
+                  headers: {
+                    location: "/postasync/retry/succeeded/operationResults/foo/200/",
+                    ["Operation-Location"]: pollingPath,
+                    "retry-after": "0",
+                  },
+                  body: `{ "properties": { "provisioningState": "Accepted"}, "id": "100", "name": "foo"}`,
+                },
+                {
+                  method: "GET",
+                  path: pollingPath,
+                  status: 200,
+                  body: JSON.stringify(body),
+                },
+              ],
+              implName,
+              throwOnNon2xxResponse: true,
+            });
+            await expect(poller).rejects.toThrow(errMsg);
+          });
+          it("should work properly when mixing catch and await", async () => {
+            const body = { status: "canceled", results: [1, 2] };
+            const errMsg = "Operation was canceled";
+            const pollingPath = "/LROPostDoubleHeadersFinalAzureHeaderGetDefault/asyncOperationUrl";
+            const poller = createTestPoller({
+              routes: [
+                {
+                  method: "POST",
+                  status: 202,
+                  headers: {
+                    location: "/postasync/retry/succeeded/operationResults/foo/200/",
+                    ["Operation-Location"]: pollingPath,
+                    "retry-after": "0",
+                  },
+                  body: `{ "properties": { "provisioningState": "Accepted"}, "id": "100", "name": "foo"}`,
+                },
+                {
+                  method: "GET",
+                  path: pollingPath,
+                  status: 200,
+                  body: JSON.stringify(body),
+                },
+              ],
+              implName,
+              throwOnNon2xxResponse: true,
+            });
+            let err: any;
+            let callbackCounts = 0;
+            await poller.catch((e) => {
+              callbackCounts++;
+              err = e;
+            });
+            assert.equal(err.message, errMsg);
+            await expect(poller).rejects.toThrow(errMsg);
+            assert.equal(callbackCounts, 1);
+            await expect(poller.finally(() => callbackCounts++)).rejects.toThrow(errMsg);
+            assert.equal(callbackCounts, 2);
+          });
         });
       });
     });
-  }
+  },
 );

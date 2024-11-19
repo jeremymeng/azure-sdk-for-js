@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { SasIPRange, ipRangeToString } from "./SasIPRange";
+import type { SasIPRange } from "./SasIPRange";
+import { ipRangeToString } from "./SasIPRange";
 import { truncatedISO8061Date } from "./utils/utils.common";
 
 /**
@@ -130,7 +131,7 @@ export class SASQueryParameters {
     expiresOn?: Date,
     ipRange?: SasIPRange,
     identifier?: string,
-    resource?: string
+    resource?: string,
   ) {
     this.version = version;
     this.services = services;
@@ -171,21 +172,21 @@ export class SASQueryParameters {
           this.tryAppendQueryParameter(
             queries,
             param,
-            this.startsOn ? truncatedISO8061Date(this.startsOn, false) : undefined
+            this.startsOn ? truncatedISO8061Date(this.startsOn, false) : undefined,
           );
           break;
         case "se":
           this.tryAppendQueryParameter(
             queries,
             param,
-            this.expiresOn ? truncatedISO8061Date(this.expiresOn, false) : undefined
+            this.expiresOn ? truncatedISO8061Date(this.expiresOn, false) : undefined,
           );
           break;
         case "sip":
           this.tryAppendQueryParameter(
             queries,
             param,
-            this.ipRange ? ipRangeToString(this.ipRange) : undefined
+            this.ipRange ? ipRangeToString(this.ipRange) : undefined,
           );
           break;
         case "si":

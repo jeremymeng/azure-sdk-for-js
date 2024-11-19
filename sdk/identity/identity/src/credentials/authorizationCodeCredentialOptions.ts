@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { MultiTenantTokenCredentialOptions } from "./multiTenantTokenCredentialOptions";
+import type { AuthorityValidationOptions } from "./authorityValidationOptions.js";
+import type { MultiTenantTokenCredentialOptions } from "./multiTenantTokenCredentialOptions.js";
 
 /**
  * Options for the {@link AuthorizationCodeCredential}
  */
-export interface AuthorizationCodeCredentialOptions extends MultiTenantTokenCredentialOptions {}
+export interface AuthorizationCodeCredentialOptions
+  extends MultiTenantTokenCredentialOptions,
+    AuthorityValidationOptions {}

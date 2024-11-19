@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -34,7 +34,7 @@ async function deleteNetworkVirtualApplianceSite() {
       subscriptionId,
       resourceGroupName,
       networkVirtualApplianceName,
-      siteName
+      siteName,
     )
     .delete(options);
   const poller = getLongRunningPoller(client, initialResponse);

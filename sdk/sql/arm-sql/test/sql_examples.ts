@@ -19,14 +19,15 @@ import { Context } from "mocha";
 import { SqlManagementClient } from "../src/sqlManagementClient";
 
 const replaceableVariables: Record<string, string> = {
-  AZURE_CLIENT_ID: "azure_client_id",
-  AZURE_CLIENT_SECRET: "azure_client_secret",
-  AZURE_TENANT_ID: "88888888-8888-8888-8888-888888888888",
   SUBSCRIPTION_ID: "azure_subscription_id"
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -49,7 +50,7 @@ describe("Sql test", () => {
     // This is an example of how the environment variables are used
     const credential = createTestCredential();
     client = new SqlManagementClient(credential, subscriptionId, recorder.configureClientOptions({}));
-    location = "eastus";
+    location = "westus";
     resourceGroup = "myjstest";
     databaseName = "mydatabasezzzz";
     serverName = "myserverppp";
@@ -61,7 +62,7 @@ describe("Sql test", () => {
 
   it("servers create test", async function () {
     const res = await client.servers.beginCreateOrUpdateAndWait(resourceGroup, serverName, {
-      location: "eastus",
+      location,
       administratorLogin: "dummylogin",
       administratorLoginPassword: "Placeholder123",
       version: "12.0"
@@ -71,10 +72,18 @@ describe("Sql test", () => {
 
   it("databases create test", async function () {
     const res = await client.databases.beginCreateOrUpdateAndWait(resourceGroup, serverName, databaseName, {
-      location: "eastus",
+      location,
       readScale: "Disabled"
     }, testPollingOptions)
     assert.equal(res.name, databaseName);
+  });
+
+  it("databaseSecurityAlertPolicies create test", async function () {
+    const res = await client.databaseSecurityAlertPolicies.createOrUpdate(resourceGroup, serverName, databaseName, "Default", {
+      disabledAlerts: ["Sql_Injection", "Access_Anomaly"],
+      state: "Enabled",
+    })
+    assert.equal(res.name, "Default");
   });
 
   it("servers get test", async function () {

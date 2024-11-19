@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { LoadBalancingStrategy } from "../loadBalancerStrategies/loadBalancingStrategy";
-import { RetryOptions } from "@azure/core-amqp";
-import { Typed } from "rhea-promise";
-import { SubscribeOptions } from "../eventHubConsumerClientModels";
-import { idempotentProducerAmqpPropertyNames } from "../util/constants";
+import type { LoadBalancingStrategy } from "../loadBalancerStrategies/loadBalancingStrategy.js";
+import type { RetryOptions } from "@azure/core-amqp";
+import type { Typed } from "rhea-promise";
+import type { SubscribeOptions } from "../eventHubConsumerClientModels.js";
+import type { idempotentProducerAmqpPropertyNames } from "../util/constants.js";
 
 /**
  * The set of options to configure the behavior of an `EventHubProducer`.
@@ -94,7 +94,7 @@ export interface CommonEventProcessorOptions
  * ```
  * @internal
  */
-export interface EventHubConsumerOptions {
+export interface PartitionReceiverOptions {
   /**
    * The owner level associated with an exclusive consumer.
    *
@@ -125,6 +125,10 @@ export interface EventHubConsumerOptions {
    * prefer to work directly with the bytes present in the message body than have the client attempt to parse it.
    */
   skipParsingBodyAsJson?: boolean;
+  /**
+   * The count of events requested eagerly and queued without regard to whether a read was requested.
+   */
+  prefetchCount?: number;
 }
 
 /**

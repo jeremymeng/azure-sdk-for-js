@@ -10,7 +10,6 @@ import {
   env,
   Recorder,
   RecorderStartOptions,
-  delay,
   isPlaybackMode,
 } from "@azure-tools/test-recorder";
 import { createTestCredential } from "@azure-tools/test-credential";
@@ -27,7 +26,14 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+  ],
+};
+
+export const testPollingOptions = {
+  updateIntervalInMs: isPlaybackMode() ? 0 : undefined,
 };
 
 describe("Links test", () => {
@@ -39,7 +45,6 @@ describe("Links test", () => {
   let resourceGroup: string;
   let linksName: string;
   let resourceName: string;
-  let resource2Id: string;
 
   beforeEach(async function (this: Context) {
     recorder = new Recorder(this.currentTest);
@@ -60,13 +65,13 @@ describe("Links test", () => {
   });
 
   async function create_resourceId() {
-    const result = await resources_client.resources.beginCreateOrUpdateAndWait(resourceGroup, "Microsoft.Compute", "", "availabilitySets", resourceName, "2019-07-01", { location: "eastus" });
+    const result = await resources_client.resources.beginCreateOrUpdateAndWait(resourceGroup, "Microsoft.Compute", "", "availabilitySets", resourceName, "2019-07-01", { location: "eastus" }, testPollingOptions);
     console.log(result)
     return result;
   }
 
   async function create_resourceId2() {
-    const result = await resources_client.resources.beginCreateOrUpdateAndWait(resourceGroup, "Microsoft.Compute", "", "availabilitySets", resourceName + "2", "2019-07-01", { location: "eastus" });
+    const result = await resources_client.resources.beginCreateOrUpdateAndWait(resourceGroup, "Microsoft.Compute", "", "availabilitySets", resourceName + "2", "2019-07-01", { location: "eastus" }, testPollingOptions);
     console.log(result)
     return result;
   }

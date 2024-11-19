@@ -1,20 +1,25 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { Recorder, assertEnvironmentVariable } from "@azure-tools/test-recorder";
-import { matrix } from "@azure/test-utils";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { assertEnvironmentVariable } from "@azure-tools/test-recorder";
+import { matrix } from "@azure-tools/test-utils";
 import { assert } from "chai";
 import fs from "fs";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import path from "path";
-import {
+import type {
   AnalyzedDocument,
-  DocumentAnalysisClient,
-  DocumentModelAdministrationClient,
   DocumentTable,
   DocumentModelDetails,
+  DocumentBarcode,
 } from "../../../src";
-import { DocumentSelectionMarkField } from "../../../src/models/fields";
+import {
+  DocumentAnalysisClient,
+  DocumentModelAdministrationClient,
+  FormRecognizerFeature,
+} from "../../../src";
+import type { DocumentSelectionMarkField } from "../../../src/models/fields";
 import {
   createRecorder,
   getRandomNumber,
@@ -25,17 +30,10 @@ import { DocumentModelBuildMode } from "../../../src/options/BuildModelOptions";
 import { createValidator } from "../../utils/fieldValidator";
 
 import { PrebuiltModels } from "../../utils/prebuilts";
-import { PrebuiltIdDocumentDocument } from "../../../samples-dev/prebuilt/prebuilt-idDocument";
+import type { PrebuiltIdDocumentDocument } from "../../../samples-dev/prebuilt/prebuilt-idDocument";
+import { ASSET_PATH, makeTestUrl } from "../../utils/etc";
 
 const endpoint = (): string => assertEnvironmentVariable("FORM_RECOGNIZER_ENDPOINT");
-
-function makeTestUrl(urlPath: string): string {
-  const testingContainerUrl = assertEnvironmentVariable(
-    "FORM_RECOGNIZER_TESTING_CONTAINER_SAS_URL"
-  );
-  const parts = testingContainerUrl.split("?");
-  return `${parts[0]}${urlPath}?${parts[1]}`;
-}
 
 function assertDefined(value: unknown, message?: string): asserts value {
   return assert.ok(value, message);
@@ -43,7 +41,6 @@ function assertDefined(value: unknown, message?: string): asserts value {
 
 matrix([[true, false]] as const, async (useAad) => {
   describe(`[${useAad ? "AAD" : "API Key"}] analysis (Node)`, () => {
-    const ASSET_PATH = path.resolve(path.join(process.cwd(), "assets"));
     let client: DocumentAnalysisClient;
     let recorder: Recorder;
 
@@ -53,7 +50,7 @@ matrix([[true, false]] as const, async (useAad) => {
       client = new DocumentAnalysisClient(
         endpoint(),
         makeCredential(useAad),
-        recorder.configureClientOptions({})
+        recorder.configureClientOptions({}),
       );
     });
 
@@ -71,7 +68,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Layout,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { pages, tables } = await poller.pollUntilDone();
 
@@ -91,13 +88,13 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           "prebuilt-layout",
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { pages, paragraphs } = await poller.pollUntilDone();
 
         assert.ok(
           paragraphs && paragraphs.length > 0,
-          `Expected non-empty paragraphs but got ${paragraphs}.`
+          `Expected non-empty paragraphs but got ${paragraphs}.`,
         );
 
         assert.ok(pages && pages.length > 0, `Expect no-empty pages but got ${pages}`);
@@ -110,7 +107,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Layout,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { pages, tables } = await poller.pollUntilDone();
 
@@ -129,7 +126,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Layout,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { pages, tables } = await poller.pollUntilDone();
 
@@ -148,7 +145,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Layout,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { pages, tables } = await poller.pollUntilDone();
 
@@ -163,10 +160,10 @@ matrix([[true, false]] as const, async (useAad) => {
       it("url", async () => {
         const url = makeTestUrl("/Invoice_1.pdf");
 
-        const poller = await client.beginAnalyzeDocument(
+        const poller = await client.beginAnalyzeDocumentFromUrl(
           PrebuiltModels.Layout,
           url,
-          testPollingOptions
+          testPollingOptions,
         );
         const { pages, tables } = await poller.pollUntilDone();
 
@@ -185,7 +182,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Layout,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
 
         const { pages } = await poller.pollUntilDone();
@@ -193,10 +190,10 @@ matrix([[true, false]] as const, async (useAad) => {
         assert.isNotEmpty(pages);
 
         /* There should be a table on the page, but the layout engine does not recognize it, maybe because it is too small and sparse.
-          assert.isNotEmpty(tables);
-          const [table] = tables;
-          assert.ok(table.boundingRegions?.[0].boundingBox);
-          assert.equal(table.boundingRegions?.[0].pageNumber, 1);*/
+        assert.isNotEmpty(tables);
+        const [table] = tables;
+        assert.ok(table.boundingRegions?.[0].boundingBox);
+        assert.equal(table.boundingRegions?.[0].pageNumber, 1);*/
 
         assert.equal(pages?.[0].pageNumber, 1);
         assert.isNotEmpty(pages?.[0].selectionMarks);
@@ -206,7 +203,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/Invoice_1.pdf");
 
         // Just make sure that this doesn't throw
-        const poller = await client.beginAnalyzeDocument(PrebuiltModels.Layout, url, {
+        const poller = await client.beginAnalyzeDocumentFromUrl(PrebuiltModels.Layout, url, {
           locale: "en-US",
           ...testPollingOptions,
         });
@@ -218,7 +215,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/Invoice_1.pdf");
 
         try {
-          const poller = await client.beginAnalyzeDocument(PrebuiltModels.Layout, url, {
+          const poller = await client.beginAnalyzeDocumentFromUrl(PrebuiltModels.Layout, url, {
             locale: "thisIsNotAValidLanguage",
             ...testPollingOptions,
           });
@@ -235,7 +232,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/Invoice_1.pdf");
 
         // Just make sure that this doesn't throw
-        const poller = await client.beginAnalyzeDocument(PrebuiltModels.Layout, url, {
+        const poller = await client.beginAnalyzeDocumentFromUrl(PrebuiltModels.Layout, url, {
           pages: "1",
           ...testPollingOptions,
         });
@@ -247,7 +244,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/Invoice_1.pdf");
 
         try {
-          const poller = await client.beginAnalyzeDocument(PrebuiltModels.Layout, url, {
+          const poller = await client.beginAnalyzeDocumentFromUrl(PrebuiltModels.Layout, url, {
             // No page 2 in document
             pages: "2",
             ...testPollingOptions,
@@ -259,6 +256,58 @@ matrix([[true, false]] as const, async (useAad) => {
           // Just make sure we didn't get a bad error message
           assert.isFalse((ex as Error).message.includes("<empty>"));
         }
+      });
+
+      it("barcode", async function () {
+        const url = makeTestUrl("/barcode2.tif");
+
+        const poller = await client.beginAnalyzeDocumentFromUrl("prebuilt-read", url, {
+          ...testPollingOptions,
+          features: [FormRecognizerFeature.Barcodes],
+        });
+
+        const { pages } = await poller.pollUntilDone();
+
+        assert.isNotEmpty(pages);
+
+        assert.isNotEmpty(pages?.[0].barcodes);
+
+        const [barcode1, barcode2] = pages?.[0].barcodes as DocumentBarcode[];
+
+        assert.equal(barcode1.kind, "Code39");
+        assert.equal(barcode1.value, "D589992-X");
+
+        assert.equal(barcode2.kind, "Code39");
+        assert.equal(barcode2.value, "SYN121720213429");
+      });
+
+      it("annotations", async function () {
+        const url = makeTestUrl("/annotations.jpg");
+
+        const poller = await client.beginAnalyzeDocumentFromUrl(
+          "prebuilt-layout",
+          url,
+          testPollingOptions,
+        );
+
+        const { pages } = await poller.pollUntilDone();
+
+        assert.isNotEmpty(pages);
+      });
+
+      it("formula", async function () {
+        const url = makeTestUrl("/formula1.jpg");
+
+        const poller = await client.beginAnalyzeDocumentFromUrl("prebuilt-document", url, {
+          ...testPollingOptions,
+          features: [FormRecognizerFeature.Formulas],
+        });
+
+        const { pages } = await poller.pollUntilDone();
+
+        assert.isNotEmpty(pages);
+
+        assert.isNotEmpty(pages?.[0].formulas);
       });
     });
 
@@ -287,14 +336,16 @@ matrix([[true, false]] as const, async (useAad) => {
         invoiceTotal: {
           amount: 56651.49,
           currencySymbol: "$",
+          currencyCode: "USD",
         },
         items: [
           {
             amount: {
               amount: 56651.49,
               currencySymbol: "$",
+              currencyCode: "USD",
             },
-            date: "2017-06-18T00:00:00.000Z",
+            date: "2017-06-24T00:00:00.000Z",
             productCode: "34278587",
           },
         ],
@@ -311,17 +362,17 @@ matrix([[true, false]] as const, async (useAad) => {
           const trainingClient = new DocumentModelAdministrationClient(
             endpoint(),
             makeCredential(useAad),
-            recorder.configureClientOptions({})
+            recorder.configureClientOptions({}),
           );
           modelName = recorder.variable(
             "customFormModelName",
-            `customFormModelName${getRandomNumber()}`
+            `customFormModelName${getRandomNumber()}`,
           );
           const poller = await trainingClient.beginBuildDocumentModel(
             modelName,
             assertEnvironmentVariable("FORM_RECOGNIZER_SELECTION_MARK_STORAGE_CONTAINER_SAS_URL"),
             DocumentModelBuildMode.Template,
-            testPollingOptions
+            testPollingOptions,
           );
           _model = await poller.pollUntilDone();
 
@@ -331,6 +382,7 @@ matrix([[true, false]] as const, async (useAad) => {
         return _model;
       }
 
+      // hits invalid argument error
       it("with selection marks", async () => {
         const { modelId } = await requireModel();
 
@@ -350,10 +402,10 @@ matrix([[true, false]] as const, async (useAad) => {
         assert.ok(pages?.[0]);
 
         /* There should be a table in the response, but it isn't recognized (maybe because it's too small or sparse)
-          assert.isNotEmpty(tables);
-          const [table] = tables!;
-          assert.ok(table.boundingRegions?.[0].boundingBox);
-          assert.equal(table.boundingRegions?.[0].pageNumber, 1);*/
+        assert.isNotEmpty(tables);
+        const [table] = tables!;
+        assert.ok(table.boundingRegions?.[0].boundingBox);
+        assert.equal(table.boundingRegions?.[0].pageNumber, 1);*/
 
         assert.equal(pages?.[0].pageNumber, 1);
         assert.isNotEmpty(pages?.[0].selectionMarks);
@@ -366,7 +418,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Invoice,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
 
         const { documents } = await poller.pollUntilDone();
@@ -417,7 +469,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Receipt,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { documents } = await poller.pollUntilDone();
         assert.isNotEmpty(documents);
@@ -464,7 +516,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Receipt,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { documents } = await poller.pollUntilDone();
 
@@ -507,10 +559,10 @@ matrix([[true, false]] as const, async (useAad) => {
         });
         const url = makeTestUrl("/contoso-allinone.jpg");
 
-        const poller = await client.beginAnalyzeDocument(
+        const poller = await client.beginAnalyzeDocumentFromUrl(
           PrebuiltModels.Receipt,
           url,
-          testPollingOptions
+          testPollingOptions,
         );
         const { documents } = await poller.pollUntilDone();
 
@@ -568,7 +620,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Receipt,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { documents } = await poller.pollUntilDone();
 
@@ -581,7 +633,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/contoso-allinone.jpg");
 
         // Just make sure that this doesn't throw
-        const poller = await client.beginAnalyzeDocument(PrebuiltModels.Receipt, url, {
+        const poller = await client.beginAnalyzeDocumentFromUrl(PrebuiltModels.Receipt, url, {
           locale: "en-IN",
           ...testPollingOptions,
         });
@@ -593,7 +645,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/contoso-allinone.jpg");
 
         try {
-          const poller = await client.beginAnalyzeDocument(PrebuiltModels.Receipt, url, {
+          const poller = await client.beginAnalyzeDocumentFromUrl(PrebuiltModels.Receipt, url, {
             locale: "thisIsNotAValidLocaleString",
             ...testPollingOptions,
           });
@@ -628,9 +680,9 @@ matrix([[true, false]] as const, async (useAad) => {
             suburb: "Paddington",
           },
         ],
-        workPhones: ["+10209875432"],
-        mobilePhones: ["+10791112345"],
-        faxes: ["+10207892345"],
+        workPhones: ["+442098765432"],
+        mobilePhones: ["+447911123456"],
+        faxes: ["+442067892345"],
         emails: ["avery.smith@contoso.com"],
         websites: ["https://www.contoso.com/"],
       });
@@ -642,7 +694,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.BusinessCard,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { documents } = await poller.pollUntilDone();
 
@@ -661,10 +713,10 @@ matrix([[true, false]] as const, async (useAad) => {
       it("url", async () => {
         const url = makeTestUrl("/businessCard.png");
 
-        const poller = await client.beginAnalyzeDocument(
+        const poller = await client.beginAnalyzeDocumentFromUrl(
           PrebuiltModels.BusinessCard,
           url,
-          testPollingOptions
+          testPollingOptions,
         );
         const { documents } = await poller.pollUntilDone();
         const businessCard = documents?.[0];
@@ -679,7 +731,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/businessCard.jpg");
 
         // Just make sure that this doesn't throw
-        const poller = await client.beginAnalyzeDocument(PrebuiltModels.BusinessCard, url, {
+        const poller = await client.beginAnalyzeDocumentFromUrl(PrebuiltModels.BusinessCard, url, {
           locale: "en-IN",
           ...testPollingOptions,
         });
@@ -706,9 +758,9 @@ matrix([[true, false]] as const, async (useAad) => {
               suburb: "Paddington",
             },
           ],
-          workPhones: ["+912098765432"],
-          mobilePhones: ["+917911123456"],
-          faxes: ["+912067892345"],
+          workPhones: ["+442098765432"],
+          mobilePhones: ["+447911123456"],
+          faxes: ["+442067892345"],
           emails: ["avery.smith@contoso.com"],
           websites: ["https://www.contoso.com/"],
         });
@@ -719,10 +771,14 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/businessCard.jpg");
 
         try {
-          const poller = await client.beginAnalyzeDocument(PrebuiltModels.BusinessCard, url, {
-            locale: "thisIsNotAValidLocaleString",
-            ...testPollingOptions,
-          });
+          const poller = await client.beginAnalyzeDocumentFromUrl(
+            PrebuiltModels.BusinessCard,
+            url,
+            {
+              locale: "thisIsNotAValidLocaleString",
+              ...testPollingOptions,
+            },
+          );
 
           await poller.pollUntilDone();
           assert.fail("Expected an exception due to invalid locale.");
@@ -758,14 +814,16 @@ matrix([[true, false]] as const, async (useAad) => {
         invoiceTotal: {
           amount: 56651.49,
           currencySymbol: "$",
+          currencyCode: "USD",
         },
         items: [
           {
             amount: {
               amount: 56651.49,
               currencySymbol: "$",
+              currencyCode: "USD",
             },
-            date: "2017-06-18T00:00:00.000Z",
+            date: "2017-06-24T00:00:00.000Z",
             productCode: "34278587",
           },
         ],
@@ -778,7 +836,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.Invoice,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
         const { documents, pages, tables } = await poller.pollUntilDone();
         const invoice = documents?.[0];
@@ -796,10 +854,10 @@ matrix([[true, false]] as const, async (useAad) => {
       it("url", async () => {
         const url = makeTestUrl("/Invoice_1.pdf");
 
-        const poller = await client.beginAnalyzeDocument(
+        const poller = await client.beginAnalyzeDocumentFromUrl(
           PrebuiltModels.Invoice,
           url,
-          testPollingOptions
+          testPollingOptions,
         );
         const { documents, pages, tables } = await poller.pollUntilDone();
         const invoice = documents?.[0];
@@ -818,7 +876,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/Invoice_1.pdf");
 
         try {
-          const poller = await client.beginAnalyzeDocument(PrebuiltModels.Invoice, url, {
+          const poller = await client.beginAnalyzeDocumentFromUrl(PrebuiltModels.Invoice, url, {
             locale: "thisIsNotAValidLocaleString",
             ...testPollingOptions,
           });
@@ -866,7 +924,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.IdentityDocument,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
 
         const { documents } = await poller.pollUntilDone();
@@ -886,7 +944,7 @@ matrix([[true, false]] as const, async (useAad) => {
           countryRegion: "USA",
           region: "Washington",
           documentNumber: "WDLABCD456DG",
-          documentDiscriminator: "DDWDLABCD456DG 1234567XX1101",
+          documentDiscriminator: "DDWDLABCD456DG1234567XX1101",
           firstName: "LIAM R.",
           lastName: "TALBOT",
           address: {
@@ -907,10 +965,10 @@ matrix([[true, false]] as const, async (useAad) => {
           restrictions: "B",
         });
 
-        const poller = await client.beginAnalyzeDocument(
+        const poller = await client.beginAnalyzeDocumentFromUrl(
           PrebuiltModels.IdentityDocument,
           url,
-          testPollingOptions
+          testPollingOptions,
         );
         const { documents, pages } = await poller.pollUntilDone();
         const idDocumentNaive = documents?.[0];
@@ -935,10 +993,14 @@ matrix([[true, false]] as const, async (useAad) => {
         const url = makeTestUrl("/license.png");
 
         try {
-          const poller = await client.beginAnalyzeDocument(PrebuiltModels.IdentityDocument, url, {
-            locale: "thisIsNotAValidLocaleString",
-            ...testPollingOptions,
-          });
+          const poller = await client.beginAnalyzeDocumentFromUrl(
+            PrebuiltModels.IdentityDocument,
+            url,
+            {
+              locale: "thisIsNotAValidLocaleString",
+              ...testPollingOptions,
+            },
+          );
 
           await poller.pollUntilDone();
           assert.fail("Expected an exception due to invalid locale.");
@@ -953,7 +1015,7 @@ matrix([[true, false]] as const, async (useAad) => {
       const validator = createValidator({
         w2FormVariant: "W-2",
         taxYear: "2018",
-        w2Copy: "Copy 2 -- To Be Filed with Employee's State, City, or Local Income Tax Return,",
+        w2Copy: "Copy 2 -. To Be Filed with Employee's State, City, or Local Income Tax Return,",
         employee: {
           socialSecurityNumber: "123-45-6789",
           name: "ANGEL BROWN",
@@ -1007,17 +1069,19 @@ matrix([[true, false]] as const, async (useAad) => {
             amount: 123.3,
           },
         ],
-        isStatutoryEmployee: "true",
-        isThirdPartySickPay: "true",
         other: "DISINS 170.85",
         stateTaxInfos: [
           {
             state: "PA",
             employerStateIdNumber: "87654321",
+            stateWagesTipsEtc: 37160.56,
+            stateIncomeTax: 1135.65,
           },
           {
             state: "WA",
-            employerStateIdNumber: "112345678",
+            employerStateIdNumber: "12345678",
+            stateWagesTipsEtc: 9631.2,
+            stateIncomeTax: 1032.3,
           },
         ],
         localTaxInfos: [
@@ -1041,7 +1105,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.TaxUsW2,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
 
         const { documents } = await poller.pollUntilDone();
@@ -1057,17 +1121,12 @@ matrix([[true, false]] as const, async (useAad) => {
 
     describe("healthInsuranceCard - US", function () {
       const validator = createValidator({
-        insurer: "PREMERA| BLUE CROSS",
+        insurer: "PREMERA BLUE CROSS",
         member: {
           name: "ANGEL BROWN",
           employer: "Microsoft",
           idNumberSuffix: "01",
         },
-        dependents: [
-          {
-            name: "Coinsurance Max",
-          },
-        ],
         idNumber: {
           prefix: "ABC",
           number: "123456789",
@@ -1079,14 +1138,16 @@ matrix([[true, false]] as const, async (useAad) => {
         },
         copays: [
           {
-            benefit: "deductible",
-            amount: "$1,500",
+            benefit: "Deductible",
           },
           {
-            benefit: "coinsurancemax",
-            amount: "$1,000",
+            benefit: "Coinsurance Max",
           },
         ],
+        plan: {
+          number: "456",
+          name: "HEALTH SAVINGS PLAN",
+        },
       });
 
       it("png file stream", async function (this: Mocha.Context) {
@@ -1096,7 +1157,7 @@ matrix([[true, false]] as const, async (useAad) => {
         const poller = await client.beginAnalyzeDocument(
           PrebuiltModels.HealthInsuranceCardUs,
           stream,
-          testPollingOptions
+          testPollingOptions,
         );
 
         const { documents } = await poller.pollUntilDone();
@@ -1105,40 +1166,6 @@ matrix([[true, false]] as const, async (useAad) => {
         assert.isNotEmpty(documents);
 
         validator(healthInsuranceCard as AnalyzedDocument);
-      });
-    });
-
-    describe.skip("vaccinationCard", function () {
-      const validator = createValidator({
-        cardHolderInfo: {
-          firstName: "Angel",
-        },
-        vaccines: [
-          {
-            manufacturer: "Pfizer",
-          },
-          {
-            manufacturer: "Pfizer",
-          },
-        ],
-      });
-
-      it("jpg file stream", async function (this: Mocha.Context) {
-        const filePath = path.join(ASSET_PATH, "vaccinationCard", "vaccination.jpg");
-        const stream = fs.createReadStream(filePath);
-
-        const poller = await client.beginAnalyzeDocument(
-          PrebuiltModels.VaccinationCard,
-          stream,
-          testPollingOptions
-        );
-
-        const { documents } = await poller.pollUntilDone();
-        const vaccinationCard = documents?.[0];
-
-        assert.isNotEmpty(documents);
-
-        validator(vaccinationCard as AnalyzedDocument);
       });
     });
   }).timeout(60000);

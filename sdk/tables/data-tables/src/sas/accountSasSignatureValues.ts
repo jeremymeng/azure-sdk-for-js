@@ -1,15 +1,18 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { AccountSasPermissions, accountSasPermissionsToString } from "./accountSasPermissions";
-import { SasIPRange, ipRangeToString } from "./sasIPRange";
-import { SasProtocol, SasQueryParameters } from "./sasQueryParameters";
+import type { AccountSasPermissions } from "./accountSasPermissions";
+import { accountSasPermissionsToString } from "./accountSasPermissions";
+import type { SasIPRange } from "./sasIPRange";
+import { ipRangeToString } from "./sasIPRange";
+import type { SasProtocol } from "./sasQueryParameters";
+import { SasQueryParameters } from "./sasQueryParameters";
 import {
   accountSasResourceTypesFromString,
   accountSasResourceTypesToString,
 } from "./accountSasResourceTypes";
 import { accountSasServicesFromString, accountSasServicesToString } from "./accountSasServices";
-import { NamedKeyCredential } from "@azure/core-auth";
+import type { NamedKeyCredential } from "@azure/core-auth";
 import { SERVICE_VERSION } from "../utils/constants";
 import { computeHMACSHA256 } from "../utils/computeHMACSHA256";
 import { truncatedISO8061Date } from "../utils/truncateISO8061Date";
@@ -87,7 +90,7 @@ export interface AccountSasSignatureValues {
  */
 export function generateAccountSasQueryParameters(
   accountSasSignatureValues: AccountSasSignatureValues,
-  credential: NamedKeyCredential
+  credential: NamedKeyCredential,
 ): SasQueryParameters {
   const version = accountSasSignatureValues.version
     ? accountSasSignatureValues.version
@@ -95,11 +98,11 @@ export function generateAccountSasQueryParameters(
 
   const parsedPermissions = accountSasPermissionsToString(accountSasSignatureValues.permissions);
   const parsedServices = accountSasServicesToString(
-    accountSasServicesFromString(accountSasSignatureValues.services)
+    accountSasServicesFromString(accountSasSignatureValues.services),
   );
   // to and from string to guarantee the correct order of resoruce types is generated
   const parsedResourceTypes = accountSasResourceTypesToString(
-    accountSasResourceTypesFromString(accountSasSignatureValues.resourceTypes)
+    accountSasResourceTypesFromString(accountSasSignatureValues.resourceTypes),
   );
 
   const stringToSign = [

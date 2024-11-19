@@ -33,7 +33,8 @@ import {
   RequestPolicyOptions,
 } from "./policies/requestPolicy";
 import { SerializerOptions, XML_ATTRKEY, XML_CHARKEY } from "./util/serializer.common";
-import { ServiceCallback, isNode } from "./util/utils";
+import { ServiceCallback } from "./util/utils";
+import { isNode } from "@azure/core-util";
 import { TokenCredential, isTokenCredential } from "@azure/core-auth";
 import {
   getDefaultUserAgentHeaderName,
@@ -1065,10 +1066,7 @@ function getCredentialScopes(
   baseUri?: string
 ): string | string[] | undefined {
   if (options?.credentialScopes) {
-    const scopes = options.credentialScopes;
-    return Array.isArray(scopes)
-      ? scopes.map((scope) => new URL(scope).toString())
-      : new URL(scopes).toString();
+    return options.credentialScopes;
   }
 
   if (baseUri) {

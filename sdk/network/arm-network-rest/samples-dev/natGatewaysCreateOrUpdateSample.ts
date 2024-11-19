@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -48,7 +48,7 @@ async function createNatGateway() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/natGateways/{natGatewayName}",
       subscriptionId,
       resourceGroupName,
-      natGatewayName
+      natGatewayName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);

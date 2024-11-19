@@ -8,11 +8,14 @@
 
 export * from "./clusters";
 export * from "./clusterPrincipalAssignments";
+export * from "./skus";
 export * from "./databases";
 export * from "./attachedDatabaseConfigurations";
 export * from "./managedPrivateEndpoints";
+export * from "./databaseOperations";
 export * from "./databasePrincipalAssignments";
 export * from "./scripts";
+export * from "./sandboxCustomImages";
 export * from "./privateEndpointConnections";
 export * from "./privateLinkResources";
 export * from "./dataConnections";

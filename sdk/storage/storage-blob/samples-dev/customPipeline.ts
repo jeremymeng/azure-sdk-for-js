@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary use custom HTTP pipeline options when connecting to the service
@@ -31,7 +31,7 @@ async function main() {
   // List containers
   const blobServiceClient = new BlobServiceClient(
     `https://${account}.blob.core.windows.net`,
-    pipeline
+    pipeline,
   );
 
   let i = 1;

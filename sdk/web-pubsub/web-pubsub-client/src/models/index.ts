@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { AbortSignalLike } from "@azure/abort-controller";
-import { WebPubSubClientProtocol } from "../protocols";
-import { DisconnectedMessage, GroupDataMessage, ServerDataMessage } from "./messages";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { WebPubSubClientProtocol } from "../protocols";
+import type { DisconnectedMessage, GroupDataMessage, ServerDataMessage } from "./messages";
 
 /**
  * The client options
@@ -20,7 +20,7 @@ export interface WebPubSubClientOptions {
   /**
    * Whether to enable restoring group after reconnecting
    */
-  autoRestoreGroups?: boolean;
+  autoRejoinGroups?: boolean;
   /**
    * The retry options for operations like joining group and sending messages
    */
@@ -108,11 +108,11 @@ export interface SendToGroupOptions {
   /**
    * Whether the message needs to echo to sender
    */
-  noEcho: boolean;
+  noEcho?: boolean;
   /**
    * If true, the message won't contains ackId. No AckMessage will be returned from the service.
    */
-  fireAndForget: boolean;
+  fireAndForget?: boolean;
   /**
    * The optional ackId. If not specified, client will generate one.
    */
@@ -130,7 +130,7 @@ export interface SendEventOptions {
   /**
    * If true, the message won't contains ackId. No AckMessage will be returned from the service.
    */
-  fireAndForget: boolean;
+  fireAndForget?: boolean;
   /**
    * The optional ackId. If not specified, client will generate one.
    */
@@ -195,9 +195,9 @@ export interface OnGroupDataMessageArgs {
 }
 
 /**
- * Parameter of RestoreGroupFailed callback
+ * Parameter of RejoinGroupFailed callback
  */
-export interface OnRestoreGroupFailedArgs {
+export interface OnRejoinGroupFailedArgs {
   /**
    * The group name
    */
@@ -213,9 +213,9 @@ export interface OnRestoreGroupFailedArgs {
  */
 export interface WebPubSubResult {
   /**
-   * The ack message from the service
+   * The ack message from the service. If the message is fire-and-forget, this will be undefined.
    */
-  ackId: number;
+  ackId?: number;
   /**
    * Whether the message is duplicated.
    */

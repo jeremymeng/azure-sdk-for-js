@@ -18,9 +18,7 @@ module.exports = function (config) {
       "karma-mocha",
       "karma-mocha-reporter",
       "karma-chrome-launcher",
-      "karma-edge-launcher",
       "karma-firefox-launcher",
-      "karma-ie-launcher",
       "karma-env-preprocessor",
       "karma-coverage",
       "karma-sourcemap-loader",
@@ -48,13 +46,7 @@ module.exports = function (config) {
     // inject following environment values into browser testing with window.__env__
     // environment values MUST be exported or set with same console running "karma start"
     // https://www.npmjs.com/package/karma-env-preprocessor
-    envPreprocessor: [
-      "TEST_MODE",
-      "ENDPOINT",
-      "SEARCH_API_ADMIN_KEY",
-      "SEARCH_API_ADMIN_KEY_ALT",
-      "RECORDINGS_RELATIVE_PATH",
-    ],
+    envPreprocessor: ["TEST_MODE", "ENDPOINT", "RECORDINGS_RELATIVE_PATH"],
 
     // test results reporter to use
     // possible values: 'dots', 'progress'

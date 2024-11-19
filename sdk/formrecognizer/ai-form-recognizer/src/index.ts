@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * Azure Cognitive Services [Form Recognizer](https://azure.microsoft.com/services/cognitive-services/form-recognizer/)
@@ -24,6 +24,8 @@ export {
   DocumentSpan,
   DocumentLanguage,
   DocumentStyle,
+  FontStyle,
+  FontWeight,
   DocumentTableCellKind,
   LengthUnit,
   DocumentModelDetails,
@@ -36,7 +38,6 @@ export {
   AnalyzeResultOperationStatus,
   SelectionMarkState,
   ParagraphRole,
-  GetOperationResponse,
   OperationDetails,
   ErrorModel,
   InnerError,
@@ -44,6 +45,25 @@ export {
   DocumentModelBuildOperationDetails,
   DocumentModelComposeOperationDetails,
   DocumentModelCopyToOperationDetails,
+  DocumentClassifierBuildOperationDetails,
+  DocumentClassifierDetails,
+  ClassifierDocumentTypeDetails,
+  DocumentBarcodeKind,
+  DocumentFormulaKind,
+  QuotaDetails,
+  // KnownXYZ enums
+  KnownDocumentBuildMode,
+  KnownDocumentFieldType,
+  KnownDocumentBarcodeKind,
+  KnownDocumentFormulaKind,
+  KnownDocumentSignatureType,
+  KnownDocumentTableCellKind,
+  KnownFontStyle,
+  KnownFontWeight,
+  KnownLengthUnit,
+  KnownOperationKind,
+  KnownParagraphRole,
+  KnownSelectionMarkState,
 } from "./generated";
 export {
   AnalysisPoller,
@@ -53,7 +73,13 @@ export {
   AnalyzedDocument,
   FormRecognizerRequestBody,
 } from "./lro/analysis";
-export { DocumentModelPoller, DocumentModelOperationState } from "./lro/administration";
+export {
+  DocumentModelPoller,
+  DocumentClassifierPoller,
+  DocumentModelOperationState,
+  DocumentClassifierOperationState,
+  ModelAdministrationOperationStateCommon,
+} from "./lro/administration";
 export * from "./models";
 export * from "./options";
 export * from "./documentModel";

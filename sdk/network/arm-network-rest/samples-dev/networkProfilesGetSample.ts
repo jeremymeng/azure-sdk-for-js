@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -31,7 +31,7 @@ async function getNetworkProfile() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkProfiles/{networkProfileName}",
       subscriptionId,
       resourceGroupName,
-      networkProfileName
+      networkProfileName,
     )
     .get(options);
   console.log(result);
@@ -58,7 +58,7 @@ async function getNetworkProfileWithContainerNetworkInterfaces() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkProfiles/{networkProfileName}",
       subscriptionId,
       resourceGroupName,
-      networkProfileName
+      networkProfileName,
     )
     .get(options);
   console.log(result);

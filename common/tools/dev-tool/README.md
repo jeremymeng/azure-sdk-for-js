@@ -6,7 +6,7 @@ It provides a place to centralize scripts, resources, and processes for developm
 
 ## Installation
 
-`dev-tool` runs using ts-node, so it does not need to be built. It is ready-to-go after a `rush update`. It additionally does not need to be installed to a user's machine in order to be used in `package.json` scripts, since it provides the `dev-tool` binary to any dependent packages through the `bin` entry in its `package.json`. Simply add `@azure/dev-tool` to the `devDependencies` of a package, and the `dev-tool` binary will become available. If you wish to use `dev-tool` from the CLI manually, you can install it globally on your system by running `npm install -g` from this directory.
+`dev-tool` runs using [tsx](https://tsx.is/), so it does not need to be built. It is ready-to-go after a `rush update`. It additionally does not need to be installed to a user's machine in order to be used in `package.json` scripts, since it provides the `dev-tool` binary to any dependent packages through the `bin` entry in its `package.json`. Simply add `@azure/dev-tool` to the `devDependencies` of a package, and the `dev-tool` binary will become available. If you wish to use `dev-tool` from the CLI manually, you can install it globally on your system by running `npm install -g` from this directory.
 
 ## Usage
 
@@ -20,10 +20,14 @@ It provides a place to centralize scripts, resources, and processes for developm
 - `samples`
   - `dev` (link samples to local sources for access to IntelliSense during development)
   - `prep` (prepare samples for local source-linked execution)
+  - `publish` (make a "camera-ready" copy of a package's samples)
   - `run` (execute a sample or all samples within a directory)
   - `check-node-versions` (execute samples with different node versions, typically in preparation for release)
 - `test-proxy`
-  - `start` (start the test-proxy tool. This requires docker.)
+  - `init` (initializes `assets.json` in your package folder)
+  - `push` (pushes the assets, referenced by assets.json, into git)
+  - `reset` (reset the assets, referenced by assets.json, from git to their original files referenced by the tag. Will prompt if there's pending changes)
+  - `restore` (restore the assets, referenced by assets.json, from git)
   - `wait-for-proxy-endpoint` (waits until the proxy endpoint is ready or aborts in 120 seconds, whichever happens first)
 - `run`
 
@@ -38,6 +42,7 @@ It provides a place to centralize scripts, resources, and processes for developm
       ```bash
       dev-tool run test:node-ts-input -- --timeout 1200000 'test/*.spec.ts'
       ```
+
   - `test:node-js-input` (runs the node tests with JS input files with the default mocha configs, and concurrently runs the proxy tool in record/playback modes if it is not already active)
 
     - Mocha settings added by default
@@ -79,7 +84,7 @@ As an example, we can create a new `hello-world` command under the `dev-tool pac
 
 ```typescript
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license
+// Licensed under the MIT License
 
 import { createPrinter } from "../../util/printer";
 import { leafCommand, makeCommandInfo } from "../../framework/command";
@@ -90,8 +95,8 @@ export const commandInfo = makeCommandInfo("hello-world", "print a lovely messag
   echo: {
     kind: "string",
     description: "override the message to be printed",
-    default: "Hello world!"
-  }
+    default: "Hello world!",
+  },
 });
 
 export default leafCommand(commandInfo, async (options) => {
@@ -117,7 +122,7 @@ As a last step, add a mapping for the `"hello-world"` command to the sub-command
 // ...
 
 export default subCommand(commandInfo, {
-  "hello-world": () => import("./hello-world")
+  "hello-world": () => import("./hello-world"),
   // ... rest of the sub-commands still here
 });
 ```
@@ -142,14 +147,14 @@ Instead of creating a single file `hello-world.ts`, we will instead create a fol
 
 ```typescript
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license
+// Licensed under the MIT License
 
 import { subCommand, makeCommandInfo } from "../../framework/command";
 
 export const commandInfo = makeCommandInfo("hello", "commands for printing some lovely messages");
 
 export default subCommand(commandInfo, {
-  world: () => import("./world")
+  world: () => import("./world"),
 });
 ```
 
@@ -161,7 +166,7 @@ This simple file establishes the mapping from the command name `"world"` to our 
 
 ```typescript
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license
+// Licensed under the MIT License
 
 import { createPrinter } from "../../util/printer";
 import { leafCommand, makeCommandInfo } from "../../framework/command";
@@ -172,8 +177,8 @@ export const commandInfo = makeCommandInfo("world", "print a lovely message", {
   echo: {
     kind: "string",
     description: "override the message to be printed",
-    default: "Hello world!"
-  }
+    default: "Hello world!",
+  },
 });
 
 export default leafCommand(commandInfo, async (options) => {
@@ -200,7 +205,7 @@ The final step is to add a mapping to our new subcommand to the`baseCommands` ma
  * All of dev-tool's base commands and the modules that define them
  */
 export const baseCommands = {
-  hello: () => import("./hello")
+  hello: () => import("./hello"),
   // ... all other sub-commands still here
 } as const;
 

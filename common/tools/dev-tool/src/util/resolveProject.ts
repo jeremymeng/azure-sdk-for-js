@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import fs from "fs-extra";
-import path from "path";
-
+import path from "node:path";
 import { createPrinter } from "./printer";
+import { SampleConfiguration } from "./samples/configuration";
+import { pathToFileURL } from "node:url";
 
 const { debug } = createPrinter("resolve-project");
 
@@ -26,14 +27,25 @@ declare global {
   interface PackageJson {
     name: string;
     version: string;
+    "sdk-type"?: "client" | "mgmt" | "perf-test" | "utility";
     description: string;
-    main: string;
+    main?: string;
     types: string;
+    exports?: {
+      [path: string]: {
+        import?: string;
+        require?: string;
+        types?: string;
+        [extraTypes: `types@${string}`]: string;
+      };
+    };
     typesVersions?: {
       [k: string]: {
         [k: string]: string[];
       };
     };
+    tshy?: Record<string, object>;
+    type?: string;
     module?: string;
     bin?: Record<string, string>;
     files: string[];
@@ -51,7 +63,36 @@ declare global {
 
     dependencies: Record<string, string>;
     devDependencies: Record<string, string>;
+
+    [METADATA_KEY]?: AzureSdkMetadata;
   }
+}
+
+export const METADATA_KEY = "//metadata";
+
+/**
+ * Metadata that is specifically used by the Azure SDK tooling.
+ */
+export interface AzureSdkMetadata {
+  /**
+   * Configuration for samples.
+   */
+  sampleConfiguration?: SampleConfiguration;
+
+  /**
+   * The date this package was last migrated.
+   */
+  migrationDate?: string;
+
+  /**
+   * Paths that contain instances of the package's version number that should be updated automatically.
+   */
+  constantPaths?: Array<{
+    /** The path to the containing file. */
+    path: string;
+    /** A line prefix to match */
+    prefix: string;
+  }>;
 }
 
 /**
@@ -81,6 +122,8 @@ async function isAzureSDKPackage(fileName: string): Promise<boolean> {
 
   if (/^@azure(-[a-z]+)?\//.test(f.name)) {
     return true;
+  } else if (f.name.startsWith("@typespec")) {
+    return true;
   } else {
     return false;
   }
@@ -95,7 +138,7 @@ async function findAzSDKPackageJson(directory: string): Promise<[string, Package
 
   for (const file of files) {
     if (file === "package.json") {
-      const fullPath = path.join(directory, file);
+      const fullPath = pathToFileURL(path.join(directory, file)).href;
       const packageObject = (await import(fullPath)).default;
       if (await isAzureSDKPackage(fullPath)) {
         return [directory, packageObject];
@@ -119,7 +162,9 @@ async function findAzSDKPackageJson(directory: string): Promise<[string, Package
  * @param workingDirectory the directory to resolve the package from
  * @returns the package info for the SDK project that owns the given directory
  */
-export async function resolveProject(workingDirectory: string): Promise<ProjectInfo> {
+export async function resolveProject(
+  workingDirectory: string = process.cwd(),
+): Promise<ProjectInfo> {
   if (!fs.existsSync(workingDirectory)) {
     throw new Error(`No such file or directory: ${workingDirectory}`);
   }
@@ -134,7 +179,7 @@ export async function resolveProject(workingDirectory: string): Promise<ProjectI
 
   if (!packageJson.name || !packageJson.version) {
     throw new Error(
-      `Malformed package (did not have a name or version): ${path}, name="${packageJson.name}", version="${packageJson.version}"`
+      `Malformed package (did not have a name or version): ${path}, name="${packageJson.name}", version="${packageJson.version}"`,
     );
   }
 
@@ -152,8 +197,7 @@ export async function resolveProject(workingDirectory: string): Promise<ProjectI
  * @param start - an optional starting point (defaults to CWD)
  * @returns an absolute path to the root of the monorepo
  */
-export async function resolveRoot(start?: string): Promise<string> {
-  start ??= process.cwd();
+export async function resolveRoot(start: string = process.cwd()): Promise<string> {
   if (await fs.pathExists(path.join(start, "rush.json"))) {
     return start;
   } else {
@@ -164,4 +208,25 @@ export async function resolveRoot(start?: string): Promise<string> {
       return resolveRoot(nextPath);
     }
   }
+}
+
+export async function isModuleProject() {
+  const projectInfo = await resolveProject(process.cwd());
+  return projectInfo.packageJson.type === "module";
+}
+
+/**
+ * @param info - the project to bind to
+ * @returns - a "require"-like function that always resolves relative to the input project
+ */
+export function bindRequireFunction(info: ProjectInfo): (id: string) => unknown {
+  return (moduleSpecifier) => {
+    try {
+      return require(
+        path.join(info.path, "node_modules", moduleSpecifier.split("/").join(path.sep)),
+      );
+    } catch {
+      return require(moduleSpecifier);
+    }
+  };
 }

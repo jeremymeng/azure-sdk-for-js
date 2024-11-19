@@ -6,23 +6,28 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { SingleSignOn } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { DynatraceObservability } from "../dynatraceObservability";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   DynatraceSingleSignOnResource,
   SingleSignOnListNextOptionalParams,
   SingleSignOnListOptionalParams,
+  SingleSignOnListResponse,
   SingleSignOnCreateOrUpdateOptionalParams,
   SingleSignOnCreateOrUpdateResponse,
   SingleSignOnGetOptionalParams,
   SingleSignOnGetResponse,
-  SingleSignOnListResponse,
   SingleSignOnListNextResponse
 } from "../models";
 
@@ -58,8 +63,16 @@ export class SingleSignOnImpl implements SingleSignOn {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(resourceGroupName, monitorName, options);
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(
+          resourceGroupName,
+          monitorName,
+          options,
+          settings
+        );
       }
     };
   }
@@ -67,11 +80,18 @@ export class SingleSignOnImpl implements SingleSignOn {
   private async *listPagingPage(
     resourceGroupName: string,
     monitorName: string,
-    options?: SingleSignOnListOptionalParams
+    options?: SingleSignOnListOptionalParams,
+    settings?: PageSettings
   ): AsyncIterableIterator<DynatraceSingleSignOnResource[]> {
-    let result = await this._list(resourceGroupName, monitorName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: SingleSignOnListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(resourceGroupName, monitorName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(
         resourceGroupName,
@@ -80,7 +100,9 @@ export class SingleSignOnImpl implements SingleSignOn {
         options
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -113,8 +135,8 @@ export class SingleSignOnImpl implements SingleSignOn {
     resource: DynatraceSingleSignOnResource,
     options?: SingleSignOnCreateOrUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<SingleSignOnCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<SingleSignOnCreateOrUpdateResponse>,
       SingleSignOnCreateOrUpdateResponse
     >
   > {
@@ -124,7 +146,7 @@ export class SingleSignOnImpl implements SingleSignOn {
     ): Promise<SingleSignOnCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -157,15 +179,24 @@ export class SingleSignOnImpl implements SingleSignOn {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, monitorName, configurationName, resource, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        monitorName,
+        configurationName,
+        resource,
+        options
+      },
+      spec: createOrUpdateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      SingleSignOnCreateOrUpdateResponse,
+      OperationState<SingleSignOnCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation"
     });
     await poller.poll();
     return poller;
@@ -275,7 +306,7 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  requestBody: Parameters.resource4,
+  requestBody: Parameters.resource3,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
@@ -344,7 +375,6 @@ const listNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { AbortSignalLike } from "@azure/abort-controller";
-import { HttpResponse, TransferProgressEvent } from "@azure/core-http";
+// Licensed under the MIT License.
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { TransferProgressEvent } from "@azure/core-rest-pipeline";
 
-import {
+import type {
   LeaseAccessConditions,
   ModifiedAccessConditions as ModifiedAccessConditionsModel,
   UserDelegationKeyModel,
@@ -11,8 +11,9 @@ import {
   ServiceRenameContainerOptions,
   ContainerRenameResponse,
   ContainerUndeleteResponse,
+  WithResponse,
 } from "@azure/storage-blob";
-import { DataLakePathClient } from "./clients";
+import type { DataLakePathClient } from "./clients";
 export type ModifiedAccessConditions = Omit<ModifiedAccessConditionsModel, "ifTags">;
 
 /**
@@ -35,24 +36,28 @@ export type FileSystemRenameResponse = ContainerRenameResponse;
  */
 export type FileSystemUndeleteResponse = ContainerUndeleteResponse;
 
-import {
+import type {
   CpkInfo,
   FileSystemListBlobHierarchySegmentHeaders,
   FileSystemListPathsHeaders,
   LeaseAction,
   ListBlobsHierarchySegmentResponse,
-  PathCreateResponse,
-  PathDeleteResponse,
+  PathAppendDataHeaders,
+  PathCreateHeaders,
+  PathDeleteHeaders,
+  PathFlushDataHeaders,
   PathGetPropertiesHeaders as PathGetPropertiesHeadersModel,
   PathList as PathListModel,
+  PathSetAccessControlHeaders,
+  PathSetExpiryHeaders,
   PathUndeleteHeaders,
 } from "./generated/src/models";
-import { DataLakeSASPermissions } from "./sas/DataLakeSASPermissions";
-import { DirectorySASPermissions } from "./sas/DirectorySASPermissions";
-import { FileSystemSASPermissions } from "./sas/FileSystemSASPermissions";
-import { SasIPRange } from "./sas/SasIPRange";
-import { SASProtocol } from "./sas/SASQueryParameters";
-import { CommonOptions } from "./StorageClient";
+import type { DataLakeSASPermissions } from "./sas/DataLakeSASPermissions";
+import type { DirectorySASPermissions } from "./sas/DirectorySASPermissions";
+import type { FileSystemSASPermissions } from "./sas/FileSystemSASPermissions";
+import type { SasIPRange } from "./sas/SasIPRange";
+import type { SASProtocol } from "./sas/SASQueryParameters";
+import type { CommonOptions } from "./StorageClient";
 
 export {
   LeaseAccessConditions,
@@ -72,33 +77,38 @@ export {
   EncryptionAlgorithmType,
   FileSystemListPathsHeaders,
   FileSystemListBlobHierarchySegmentHeaders,
-  FileSystemListPathsResponse as ListPathsSegmentResponse,
   ListBlobsHierarchySegmentResponse,
   Path as PathModel,
   PathList as PathListModel,
   PathCreateHeaders,
   PathDeleteHeaders,
-  PathDeleteResponse,
   PathGetPropertiesHeaders as PathGetPropertiesHeadersModel,
   PathSetAccessControlHeaders,
-  PathSetAccessControlResponse,
-  PathSetAccessControlResponse as PathSetPermissionsResponse,
   PathResourceType as PathResourceTypeModel,
   PathUndeleteHeaders,
   PathUpdateHeaders,
   PathAppendDataHeaders,
   PathFlushDataHeaders,
-  PathAppendDataResponse as FileAppendResponse,
-  PathFlushDataResponse as FileFlushResponse,
-  PathFlushDataResponse as FileUploadResponse,
   PathGetPropertiesAction as PathGetPropertiesActionModel,
   PathRenameMode as PathRenameModeModel,
   PathExpiryOptions as FileExpiryMode,
-  PathSetExpiryResponse as FileSetExpiryResponse,
   PathSetExpiryHeaders as FileSetExpiryHeaders,
 } from "./generated/src/models";
 
-export { PathCreateResponse };
+export type PathCreateResponse = WithResponse<PathCreateHeaders, PathCreateHeaders>;
+export type PathDeleteResponse = WithResponse<PathDeleteHeaders, PathDeleteHeaders>;
+export type FileFlushResponse = WithResponse<PathFlushDataHeaders, PathFlushDataHeaders>;
+export type FileUploadResponse = WithResponse<PathFlushDataHeaders, PathFlushDataHeaders>;
+export type PathSetAccessControlResponse = WithResponse<
+  PathSetAccessControlHeaders,
+  PathSetAccessControlHeaders
+>;
+export type PathSetPermissionsResponse = WithResponse<
+  PathSetAccessControlHeaders,
+  PathSetAccessControlHeaders
+>;
+export type FileAppendResponse = WithResponse<PathAppendDataHeaders, PathAppendDataHeaders>;
+export type FileSetExpiryResponse = WithResponse<PathSetExpiryHeaders, PathSetExpiryHeaders>;
 
 /**
  * Common options of the {@link FileSystemGenerateSasUrlOptions}, {@link DirectoryGenerateSasUrlOptions}
@@ -195,14 +205,11 @@ export interface UserDelegationKey {
   value: string;
 }
 
-export type ServiceGetUserDelegationKeyResponse = UserDelegationKey &
-  ServiceGetUserDelegationKeyHeaders & {
-    _response: HttpResponse & {
-      parsedHeaders: ServiceGetUserDelegationKeyHeaders;
-      bodyAsText: string;
-      parsedBody: UserDelegationKeyModel;
-    };
-  };
+export type ServiceGetUserDelegationKeyResponse = WithResponse<
+  UserDelegationKey & ServiceGetUserDelegationKeyHeaders,
+  ServiceGetUserDelegationKeyHeaders,
+  UserDelegationKeyModel
+>;
 
 export interface ServiceListFileSystemsOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -257,14 +264,11 @@ export interface ServiceListFileSystemsSegmentHeaders {
   version?: string;
 }
 
-export type ServiceListFileSystemsSegmentResponse = ListFileSystemsSegmentResponse &
-  ServiceListFileSystemsSegmentHeaders & {
-    _response: HttpResponse & {
-      parsedHeaders: ServiceListFileSystemsSegmentHeaders;
-      bodyAsText: string;
-      parsedBody: ListFileSystemsSegmentResponse;
-    };
-  };
+export type ServiceListFileSystemsSegmentResponse = WithResponse<
+  ListFileSystemsSegmentResponse & ServiceListFileSystemsSegmentHeaders,
+  ServiceListFileSystemsSegmentHeaders,
+  ListFileSystemsSegmentResponse
+>;
 
 /**
  * Options to configure {@link DataLakeServiceClient.generateAccountSasUrl} operation.
@@ -336,11 +340,10 @@ export interface FileSystemCreateHeaders {
   date?: Date;
 }
 
-export type FileSystemCreateResponse = FileSystemCreateHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: FileSystemCreateHeaders;
-  };
-};
+export type FileSystemCreateResponse = WithResponse<
+  FileSystemCreateHeaders,
+  FileSystemCreateHeaders
+>;
 
 export interface FileSystemDeleteOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -354,11 +357,10 @@ export interface FileSystemDeleteHeaders {
   date?: Date;
 }
 
-export type FileSystemDeleteResponse = FileSystemDeleteHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: FileSystemDeleteHeaders;
-  };
-};
+export type FileSystemDeleteResponse = WithResponse<
+  FileSystemDeleteHeaders,
+  FileSystemDeleteHeaders
+>;
 
 export interface FileSystemGetPropertiesOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -385,11 +387,10 @@ export interface FileSystemGetPropertiesHeaders {
   defaultEncryptionScope?: string;
 }
 
-export type FileSystemGetPropertiesResponse = FileSystemGetPropertiesHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: FileSystemGetPropertiesHeaders;
-  };
-};
+export type FileSystemGetPropertiesResponse = WithResponse<
+  FileSystemGetPropertiesHeaders,
+  FileSystemGetPropertiesHeaders
+>;
 
 export interface FileSystemSetMetadataOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -405,11 +406,10 @@ export interface FileSystemSetMetadataHeaders {
   date?: Date;
 }
 
-export type FileSystemSetMetadataResponse = FileSystemSetMetadataHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: FileSystemSetMetadataHeaders;
-  };
-};
+export type FileSystemSetMetadataResponse = WithResponse<
+  FileSystemSetMetadataHeaders,
+  FileSystemSetMetadataHeaders
+>;
 
 export interface FileSystemGetAccessPolicyOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -443,15 +443,13 @@ export interface SignedIdentifier<T> {
   accessPolicy: T;
 }
 
-export type FileSystemGetAccessPolicyResponse = {
-  signedIdentifiers: SignedIdentifier<AccessPolicy>[];
-} & FileSystemGetAccessPolicyHeaders & {
-    _response: HttpResponse & {
-      parsedHeaders: FileSystemGetAccessPolicyHeaders;
-      bodyAsText: string;
-      parsedBody: SignedIdentifier<RawAccessPolicy>[];
-    };
-  };
+export type FileSystemGetAccessPolicyResponse = WithResponse<
+  {
+    signedIdentifiers: SignedIdentifier<AccessPolicy>[];
+  } & FileSystemGetAccessPolicyHeaders,
+  FileSystemGetAccessPolicyHeaders,
+  SignedIdentifier<RawAccessPolicy>[]
+>;
 
 export interface FileSystemSetAccessPolicyOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -467,11 +465,10 @@ export interface FileSystemSetAccessPolicyHeaders {
   date?: Date;
 }
 
-export type FileSystemSetAccessPolicyResponse = FileSystemSetAccessPolicyHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: FileSystemSetAccessPolicyHeaders;
-  };
-};
+export type FileSystemSetAccessPolicyResponse = WithResponse<
+  FileSystemSetAccessPolicyHeaders,
+  FileSystemSetAccessPolicyHeaders
+>;
 
 export interface ListPathsOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -505,20 +502,21 @@ export interface Path {
    * Expiry time of the path.
    */
   expiresOn?: Date;
+  /**
+   * Specifies the encryption context to set on the file.
+   */
+  encryptionContext?: string;
 }
 
 export interface PathList {
   pathItems?: Path[];
 }
 
-export type FileSystemListPathsResponse = PathList &
-  FileSystemListPathsHeaders & {
-    _response: HttpResponse & {
-      parsedHeaders: FileSystemListPathsHeaders;
-      bodyAsText: string;
-      parsedBody: PathListModel;
-    };
-  };
+export type FileSystemListPathsResponse = WithResponse<
+  PathList & FileSystemListPathsHeaders,
+  FileSystemListPathsHeaders,
+  PathListModel
+>;
 
 export interface ListDeletedPathsOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -541,32 +539,22 @@ export interface DeletedPathList {
   pathItems?: DeletedPath[];
 }
 
-export type FileSystemListDeletedPathsResponse = DeletedPathList &
-  FileSystemListBlobHierarchySegmentHeaders &
-  ListBlobsHierarchySegmentResponse & {
-    _response: HttpResponse & {
-      /** The response body as text (string format) */
-      bodyAsText: string;
-
-      /** The response body as parsed JSON or XML */
-      parsedBody: ListBlobsHierarchySegmentResponse;
-      /** The parsed HTTP response headers. */
-      parsedHeaders: FileSystemListBlobHierarchySegmentHeaders;
-    };
-
-    continuation?: string;
-  };
+export type FileSystemListDeletedPathsResponse = WithResponse<
+  DeletedPathList &
+    FileSystemListBlobHierarchySegmentHeaders &
+    ListBlobsHierarchySegmentResponse & { continuation?: string },
+  FileSystemListBlobHierarchySegmentHeaders,
+  ListBlobsHierarchySegmentResponse
+>;
 
 export interface FileSystemUndeletePathOption extends CommonOptions {
   abortSignal?: AbortSignalLike;
 }
 
-export type FileSystemUndeletePathResponse = PathUndeleteHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: PathUndeleteHeaders;
-  };
-  pathClient: DataLakePathClient;
-};
+export type FileSystemUndeletePathResponse = WithResponse<
+  PathUndeleteHeaders & { pathClient: DataLakePathClient },
+  PathUndeleteHeaders
+>;
 
 /**
  * Option interface for Data Lake file system exists operations
@@ -721,6 +709,10 @@ export interface PathCreateOptions extends CommonOptions {
    * Does not apply to directories.
    */
   expiresOn?: number | Date;
+  /**
+   * Optional. Specifies the encryption context to set on the file.
+   */
+  encryptionContext?: string;
 }
 
 export interface PathCreateIfNotExistsOptions extends CommonOptions {
@@ -760,6 +752,10 @@ export interface PathCreateIfNotExistsOptions extends CommonOptions {
    * Does not apply to directories.
    */
   expiresOn?: number | Date;
+  /**
+   * Optional. Specifies the encryption context to set on the file.
+   */
+  encryptionContext?: string;
 }
 
 export interface PathDeleteOptions extends CommonOptions {
@@ -787,15 +783,16 @@ export interface PathAccessControl {
   owner?: string;
   group?: string;
   permissions?: PathPermissions;
+  /**
+   * POSIX access control rights on files and directories.
+   */
   acl: PathAccessControlItem[];
 }
 
-export type PathGetAccessControlResponse = PathAccessControl &
-  PathGetAccessControlHeaders & {
-    _response: HttpResponse & {
-      parsedHeaders: PathGetPropertiesHeadersModel;
-    };
-  };
+export type PathGetAccessControlResponse = WithResponse<
+  PathAccessControl & PathGetAccessControlHeaders,
+  PathGetPropertiesHeadersModel
+>;
 
 export interface PathSetAccessControlOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -977,13 +974,23 @@ export interface PathGetPropertiesHeaders {
    * The time the file will expire.
    */
   expiresOn?: Date;
+  /**
+   * Optional. Specifies the encryption context to set on the file.
+   */
+  encryptionContext?: string;
+  owner?: string;
+  group?: string;
+  permissions?: PathPermissions;
+  /**
+   * POSIX access control rights on files and directories.
+   */
+  acl: PathAccessControlItem[];
 }
 
-export type PathGetPropertiesResponse = PathGetPropertiesHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: PathGetPropertiesHeaders;
-  };
-};
+export type PathGetPropertiesResponse = WithResponse<
+  PathGetPropertiesHeaders,
+  PathGetPropertiesHeaders
+>;
 
 export interface PathSetHttpHeadersOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -1008,11 +1015,10 @@ export interface PathSetHttpHeadersHeaders {
   date?: Date;
 }
 
-export type PathSetHttpHeadersResponse = PathSetHttpHeadersHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: PathSetHttpHeadersHeaders;
-  };
-};
+export type PathSetHttpHeadersResponse = WithResponse<
+  PathSetHttpHeadersHeaders,
+  PathSetHttpHeadersHeaders
+>;
 
 export interface PathSetMetadataOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -1034,11 +1040,7 @@ export interface PathSetMetadataHeaders {
   encryptionKeySha256?: string;
 }
 
-export type PathSetMetadataResponse = PathSetMetadataHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: PathSetMetadataHeaders;
-  };
-};
+export type PathSetMetadataResponse = WithResponse<PathSetMetadataHeaders, PathSetMetadataHeaders>;
 
 export interface PathMoveOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -1055,11 +1057,7 @@ export interface PathRemoveHeaders {
   contentLength?: number;
 }
 
-export type PathMoveResponse = PathRemoveHeaders & {
-  _response: HttpResponse & {
-    parsedHeaders: PathRemoveHeaders;
-  };
-};
+export type PathMoveResponse = WithResponse<PathRemoveHeaders, PathRemoveHeaders>;
 
 /**
  * Option interface for Data Lake directory/file exists operations
@@ -1169,6 +1167,10 @@ export interface FileReadOptions extends CommonOptions {
 
 export interface FileReadHeaders {
   lastModified?: Date;
+  /**
+   * Returns the date and time the file was created.
+   */
+  createdOn?: Date;
   metadata?: Metadata;
   contentLength?: number;
   contentType?: string;
@@ -1199,15 +1201,26 @@ export interface FileReadHeaders {
   encryptionKeySha256?: string;
   fileContentMD5?: Uint8Array; // Content MD5 for whole file
   contentCrc64?: Uint8Array;
+  /**
+   * Specifies the encryption context to set on the file.
+   */
+  encryptionContext?: string;
+  owner?: string;
+  group?: string;
+  permissions?: PathPermissions;
+  /**
+   * POSIX access control rights on files and directories.
+   */
+  acl: PathAccessControlItem[];
 }
 
-export type FileReadResponse = FileReadHeaders & {
-  contentAsBlob?: Promise<Blob>;
-  readableStreamBody?: NodeJS.ReadableStream;
-  _response: HttpResponse & {
-    parsedHeaders: FileReadHeaders;
-  };
-};
+export type FileReadResponse = WithResponse<
+  FileReadHeaders & {
+    contentAsBlob?: Promise<Blob>;
+    readableStreamBody?: NodeJS.ReadableStream;
+  },
+  FileReadHeaders
+>;
 
 export interface FileAppendOptions extends CommonOptions {
   abortSignal?: AbortSignalLike;
@@ -1229,7 +1242,7 @@ export interface FileAppendOptions extends CommonOptions {
   /**
    * The lease duration is required to acquire a lease, and specifies the duration of the lease in seconds.  The lease duration must be between 15 and 60 seconds or -1 for infinite lease.
    * */
-  leaseDuration?: number;
+  leaseDurationInSeconds?: number;
   /**
    * Optional. If "acquire" it will acquire the lease. If "auto-renew" it will renew the lease. If "release" it will release the lease only on flush. If "acquire-release" it will acquire & complete the operation & release the lease once operation is done.
    * */
@@ -1253,7 +1266,7 @@ export interface FileFlushOptions extends CommonOptions {
   /**
    * The lease duration is required to acquire a lease, and specifies the duration of the lease in seconds.  The lease duration must be between 15 and 60 seconds or -1 for infinite lease.
    */
-  leaseDuration?: number;
+  leaseDurationInSeconds?: number;
   /**
    * Optional. If "acquire" it will acquire the lease. If "auto-renew" it will renew the lease. If "release" it will release the lease only on flush. If "acquire-release" it will acquire & complete the operation & release the lease once operation is done.
    */
@@ -1357,6 +1370,10 @@ export interface FileParallelUploadOptions extends CommonOptions {
    * Customer Provided Key Info.
    */
   customerProvidedKey?: CpkInfo;
+  /**
+   * Specifies the encryption context to set on the file.
+   */
+  encryptionContext?: string;
 }
 
 /**
@@ -1567,6 +1584,23 @@ export declare interface FileSystemEncryptionScope {
 
   /** Optional.  Version 2021-02-12 and newer.  If true, prevents any request from specifying a different encryption scope than the scope set on the container. */
   preventEncryptionScopeOverride?: boolean;
+}
+
+/**
+ * Defines the known cloud audiences for Storage.
+ */
+export enum StorageDataLakeAudience {
+  /**
+   * The OAuth scope to use to retrieve an AAD token for Azure Storage.
+   */
+  StorageOAuthScopes = "https://storage.azure.com/.default",
+}
+
+/**
+ * To get OAuth audience for a storage account for datalake service.
+ */
+export function getDataLakeServiceAccountAudience(storageAccountName: string): string {
+  return `https://${storageAccountName}.dfs.core.windows.net/.default`;
 }
 
 /** *********************************************************/

@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetworkManagementClient } from "../networkManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ApplicationGatewayPrivateEndpointConnection,
   ApplicationGatewayPrivateEndpointConnectionsListNextOptionalParams,
@@ -25,13 +29,14 @@ import {
   ApplicationGatewayPrivateEndpointConnectionsUpdateResponse,
   ApplicationGatewayPrivateEndpointConnectionsGetOptionalParams,
   ApplicationGatewayPrivateEndpointConnectionsGetResponse,
-  ApplicationGatewayPrivateEndpointConnectionsListNextResponse
+  ApplicationGatewayPrivateEndpointConnectionsListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing ApplicationGatewayPrivateEndpointConnections operations. */
 export class ApplicationGatewayPrivateEndpointConnectionsImpl
-  implements ApplicationGatewayPrivateEndpointConnections {
+  implements ApplicationGatewayPrivateEndpointConnections
+{
   private readonly client: NetworkManagementClient;
 
   /**
@@ -51,12 +56,12 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
   public list(
     resourceGroupName: string,
     applicationGatewayName: string,
-    options?: ApplicationGatewayPrivateEndpointConnectionsListOptionalParams
+    options?: ApplicationGatewayPrivateEndpointConnectionsListOptionalParams,
   ): PagedAsyncIterableIterator<ApplicationGatewayPrivateEndpointConnection> {
     const iter = this.listPagingAll(
       resourceGroupName,
       applicationGatewayName,
-      options
+      options,
     );
     return {
       next() {
@@ -73,9 +78,9 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
           resourceGroupName,
           applicationGatewayName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -83,7 +88,7 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
     resourceGroupName: string,
     applicationGatewayName: string,
     options?: ApplicationGatewayPrivateEndpointConnectionsListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ApplicationGatewayPrivateEndpointConnection[]> {
     let result: ApplicationGatewayPrivateEndpointConnectionsListResponse;
     let continuationToken = settings?.continuationToken;
@@ -91,7 +96,7 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
       result = await this._list(
         resourceGroupName,
         applicationGatewayName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -103,7 +108,7 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
         resourceGroupName,
         applicationGatewayName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -115,12 +120,12 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
   private async *listPagingAll(
     resourceGroupName: string,
     applicationGatewayName: string,
-    options?: ApplicationGatewayPrivateEndpointConnectionsListOptionalParams
+    options?: ApplicationGatewayPrivateEndpointConnectionsListOptionalParams,
   ): AsyncIterableIterator<ApplicationGatewayPrivateEndpointConnection> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       applicationGatewayName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -137,25 +142,24 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
     resourceGroupName: string,
     applicationGatewayName: string,
     connectionName: string,
-    options?: ApplicationGatewayPrivateEndpointConnectionsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: ApplicationGatewayPrivateEndpointConnectionsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -164,8 +168,8 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -173,20 +177,25 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, applicationGatewayName, connectionName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        applicationGatewayName,
+        connectionName,
+        options,
+      },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -203,13 +212,13 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
     resourceGroupName: string,
     applicationGatewayName: string,
     connectionName: string,
-    options?: ApplicationGatewayPrivateEndpointConnectionsDeleteOptionalParams
+    options?: ApplicationGatewayPrivateEndpointConnectionsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       applicationGatewayName,
       connectionName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -228,32 +237,29 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
     applicationGatewayName: string,
     connectionName: string,
     parameters: ApplicationGatewayPrivateEndpointConnection,
-    options?: ApplicationGatewayPrivateEndpointConnectionsUpdateOptionalParams
+    options?: ApplicationGatewayPrivateEndpointConnectionsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        ApplicationGatewayPrivateEndpointConnectionsUpdateResponse
-      >,
+    SimplePollerLike<
+      OperationState<ApplicationGatewayPrivateEndpointConnectionsUpdateResponse>,
       ApplicationGatewayPrivateEndpointConnectionsUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<ApplicationGatewayPrivateEndpointConnectionsUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -262,8 +268,8 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -271,26 +277,29 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         applicationGatewayName,
         connectionName,
         parameters,
-        options
+        options,
       },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      ApplicationGatewayPrivateEndpointConnectionsUpdateResponse,
+      OperationState<ApplicationGatewayPrivateEndpointConnectionsUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -310,14 +319,14 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
     applicationGatewayName: string,
     connectionName: string,
     parameters: ApplicationGatewayPrivateEndpointConnection,
-    options?: ApplicationGatewayPrivateEndpointConnectionsUpdateOptionalParams
+    options?: ApplicationGatewayPrivateEndpointConnectionsUpdateOptionalParams,
   ): Promise<ApplicationGatewayPrivateEndpointConnectionsUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       applicationGatewayName,
       connectionName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -333,11 +342,11 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
     resourceGroupName: string,
     applicationGatewayName: string,
     connectionName: string,
-    options?: ApplicationGatewayPrivateEndpointConnectionsGetOptionalParams
+    options?: ApplicationGatewayPrivateEndpointConnectionsGetOptionalParams,
   ): Promise<ApplicationGatewayPrivateEndpointConnectionsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, applicationGatewayName, connectionName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -350,11 +359,11 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
   private _list(
     resourceGroupName: string,
     applicationGatewayName: string,
-    options?: ApplicationGatewayPrivateEndpointConnectionsListOptionalParams
+    options?: ApplicationGatewayPrivateEndpointConnectionsListOptionalParams,
   ): Promise<ApplicationGatewayPrivateEndpointConnectionsListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, applicationGatewayName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -369,11 +378,11 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
     resourceGroupName: string,
     applicationGatewayName: string,
     nextLink: string,
-    options?: ApplicationGatewayPrivateEndpointConnectionsListNextOptionalParams
+    options?: ApplicationGatewayPrivateEndpointConnectionsListNextOptionalParams,
   ): Promise<ApplicationGatewayPrivateEndpointConnectionsListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, applicationGatewayName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -381,8 +390,7 @@ export class ApplicationGatewayPrivateEndpointConnectionsImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/privateEndpointConnections/{connectionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/privateEndpointConnections/{connectionName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -390,8 +398,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -399,31 +407,30 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.applicationGatewayName,
     Parameters.subscriptionId,
-    Parameters.connectionName
+    Parameters.connectionName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/privateEndpointConnections/{connectionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/privateEndpointConnections/{connectionName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection
+      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection,
     },
     201: {
-      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection
+      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection,
     },
     202: {
-      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection
+      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection,
     },
     204: {
-      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection
+      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters2,
   queryParameters: [Parameters.apiVersion],
@@ -432,23 +439,22 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.applicationGatewayName,
     Parameters.subscriptionId,
-    Parameters.connectionName
+    Parameters.connectionName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/privateEndpointConnections/{connectionName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/privateEndpointConnections/{connectionName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection
+      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnection,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -456,52 +462,50 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.applicationGatewayName,
     Parameters.subscriptionId,
-    Parameters.connectionName
+    Parameters.connectionName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/privateEndpointConnections",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/privateEndpointConnections",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnectionListResult
+      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnectionListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.applicationGatewayName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnectionListResult
+      bodyMapper: Mappers.ApplicationGatewayPrivateEndpointConnectionListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.applicationGatewayName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   RoleInstance,
   CloudServiceRoleInstancesListOptionalParams,
@@ -20,7 +20,7 @@ import {
   CloudServiceRoleInstancesReimageOptionalParams,
   CloudServiceRoleInstancesRebuildOptionalParams,
   CloudServiceRoleInstancesGetRemoteDesktopFileOptionalParams,
-  CloudServiceRoleInstancesGetRemoteDesktopFileResponse
+  CloudServiceRoleInstancesGetRemoteDesktopFileResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -36,7 +36,7 @@ export interface CloudServiceRoleInstances {
   list(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesListOptionalParams
+    options?: CloudServiceRoleInstancesListOptionalParams,
   ): PagedAsyncIterableIterator<RoleInstance>;
   /**
    * Deletes a role instance from a cloud service.
@@ -49,8 +49,8 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: CloudServiceRoleInstancesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a role instance from a cloud service.
    * @param roleInstanceName Name of the role instance.
@@ -62,7 +62,7 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesDeleteOptionalParams
+    options?: CloudServiceRoleInstancesDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Gets a role instance from a cloud service.
@@ -75,7 +75,7 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesGetOptionalParams
+    options?: CloudServiceRoleInstancesGetOptionalParams,
   ): Promise<CloudServiceRoleInstancesGetResponse>;
   /**
    * Retrieves information about the run-time state of a role instance in a cloud service.
@@ -88,7 +88,7 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesGetInstanceViewOptionalParams
+    options?: CloudServiceRoleInstancesGetInstanceViewOptionalParams,
   ): Promise<CloudServiceRoleInstancesGetInstanceViewResponse>;
   /**
    * The Reboot Role Instance asynchronous operation requests a reboot of a role instance in the cloud
@@ -102,8 +102,8 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesRestartOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: CloudServiceRoleInstancesRestartOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * The Reboot Role Instance asynchronous operation requests a reboot of a role instance in the cloud
    * service.
@@ -116,7 +116,7 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesRestartOptionalParams
+    options?: CloudServiceRoleInstancesRestartOptionalParams,
   ): Promise<void>;
   /**
    * The Reimage Role Instance asynchronous operation reinstalls the operating system on instances of web
@@ -130,8 +130,8 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesReimageOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: CloudServiceRoleInstancesReimageOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * The Reimage Role Instance asynchronous operation reinstalls the operating system on instances of web
    * roles or worker roles.
@@ -144,7 +144,7 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesReimageOptionalParams
+    options?: CloudServiceRoleInstancesReimageOptionalParams,
   ): Promise<void>;
   /**
    * The Rebuild Role Instance asynchronous operation reinstalls the operating system on instances of web
@@ -159,8 +159,8 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesRebuildOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: CloudServiceRoleInstancesRebuildOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * The Rebuild Role Instance asynchronous operation reinstalls the operating system on instances of web
    * roles or worker roles and initializes the storage resources that are used by them. If you do not
@@ -174,7 +174,7 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesRebuildOptionalParams
+    options?: CloudServiceRoleInstancesRebuildOptionalParams,
   ): Promise<void>;
   /**
    * Gets a remote desktop file for a role instance in a cloud service.
@@ -187,6 +187,6 @@ export interface CloudServiceRoleInstances {
     roleInstanceName: string,
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServiceRoleInstancesGetRemoteDesktopFileOptionalParams
+    options?: CloudServiceRoleInstancesGetRemoteDesktopFileOptionalParams,
   ): Promise<CloudServiceRoleInstancesGetRemoteDesktopFileResponse>;
 }

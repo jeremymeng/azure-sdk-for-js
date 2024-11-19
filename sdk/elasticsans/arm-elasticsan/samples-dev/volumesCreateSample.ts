@@ -18,20 +18,22 @@ dotenv.config();
  * This sample demonstrates how to Create a Volume.
  *
  * @summary Create a Volume.
- * x-ms-original-file: specification/elasticsan/resource-manager/Microsoft.ElasticSan/preview/2021-11-20-preview/examples/Volumes_Create_MaximumSet_Gen.json
+ * x-ms-original-file: specification/elasticsan/resource-manager/Microsoft.ElasticSan/preview/2024-06-01-preview/examples/Volumes_Create_MaximumSet_Gen.json
  */
 async function volumesCreateMaximumSetGen() {
   const subscriptionId =
-    process.env["ELASTICSANS_SUBSCRIPTION_ID"] || "aaaaaaaaaaaaaaaaaa";
+    process.env["ELASTICSANS_SUBSCRIPTION_ID"] || "subscriptionid";
   const resourceGroupName =
-    process.env["ELASTICSANS_RESOURCE_GROUP"] || "rgelasticsan";
-  const elasticSanName = "ti7q-k952-1qB3J_5";
-  const volumeGroupName = "u_5I_1j4t3";
-  const volumeName = "9132y";
+    process.env["ELASTICSANS_RESOURCE_GROUP"] || "resourcegroupname";
+  const elasticSanName = "elasticsanname";
+  const volumeGroupName = "volumegroupname";
+  const volumeName = "volumename";
   const parameters: Volume = {
-    creationData: { createSource: "None", sourceUri: "aaaaaa" },
-    sizeGiB: 22,
-    tags: { key7423: "aaaa" }
+    properties: {
+      creationData: { createSource: "None", sourceId: "ARM Id of Resource" },
+      managedBy: { resourceId: "mtkeip" },
+      sizeGiB: 9,
+    },
   };
   const credential = new DefaultAzureCredential();
   const client = new ElasticSanManagement(credential, subscriptionId);
@@ -40,7 +42,7 @@ async function volumesCreateMaximumSetGen() {
     elasticSanName,
     volumeGroupName,
     volumeName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
@@ -49,17 +51,17 @@ async function volumesCreateMaximumSetGen() {
  * This sample demonstrates how to Create a Volume.
  *
  * @summary Create a Volume.
- * x-ms-original-file: specification/elasticsan/resource-manager/Microsoft.ElasticSan/preview/2021-11-20-preview/examples/Volumes_Create_MinimumSet_Gen.json
+ * x-ms-original-file: specification/elasticsan/resource-manager/Microsoft.ElasticSan/preview/2024-06-01-preview/examples/Volumes_Create_MinimumSet_Gen.json
  */
 async function volumesCreateMinimumSetGen() {
   const subscriptionId =
-    process.env["ELASTICSANS_SUBSCRIPTION_ID"] || "aaaaaaaaaaaaaaaaaa";
+    process.env["ELASTICSANS_SUBSCRIPTION_ID"] || "subscriptionid";
   const resourceGroupName =
-    process.env["ELASTICSANS_RESOURCE_GROUP"] || "rgelasticsan";
-  const elasticSanName = "ti7q-k952-1qB3J_5";
-  const volumeGroupName = "u_5I_1j4t3";
-  const volumeName = "9132y";
-  const parameters: Volume = {};
+    process.env["ELASTICSANS_RESOURCE_GROUP"] || "resourcegroupname";
+  const elasticSanName = "elasticsanname";
+  const volumeGroupName = "volumegroupname";
+  const volumeName = "volumename";
+  const parameters: Volume = { properties: { sizeGiB: 9 } };
   const credential = new DefaultAzureCredential();
   const client = new ElasticSanManagement(credential, subscriptionId);
   const result = await client.volumes.beginCreateAndWait(
@@ -67,7 +69,7 @@ async function volumesCreateMinimumSetGen() {
     elasticSanName,
     volumeGroupName,
     volumeName,
-    parameters
+    parameters,
   );
   console.log(result);
 }

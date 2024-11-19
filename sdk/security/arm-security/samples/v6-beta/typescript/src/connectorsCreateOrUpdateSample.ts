@@ -10,6 +10,9 @@
 // Licensed under the MIT License.
 import { ConnectorSetting, SecurityCenter } from "@azure/arm-security";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Create a cloud account connector or update an existing one. Connect to your cloud account. For AWS, use either account credentials or role-based authentication. For GCP, use account organization credentials.
@@ -18,13 +21,15 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/preview/2020-01-01-preview/examples/Connectors/CreateUpdateAwsAssumeRoleConnectorSubscription_example.json
  */
 async function awsAssumeRoleCreateACloudAccountConnectorForASubscription() {
-  const subscriptionId = "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
+  const subscriptionId =
+    process.env["SECURITY_SUBSCRIPTION_ID"] ||
+    "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
   const connectorName = "aws_dev2";
   const connectorSetting: ConnectorSetting = {
     authenticationDetails: {
       authenticationType: "awsAssumeRole",
       awsAssumeRoleArn: "arn:aws:iam::81231569658:role/AscConnector",
-      awsExternalId: "20ff7fc3-e762-44dd-bd96-b71116dcdc23"
+      awsExternalId: "20ff7fc3-e762-44dd-bd96-b71116dcdc23",
     },
     hybridComputeSettings: {
       autoProvision: "On",
@@ -33,22 +38,18 @@ async function awsAssumeRoleCreateACloudAccountConnectorForASubscription() {
       resourceGroupName: "AwsConnectorRG",
       servicePrincipal: {
         applicationId: "ad9bcd79-be9c-45ab-abd8-80ca1654a7d1",
-        secret: "<secret>"
-      }
-    }
+        secret: "<secret>",
+      },
+    },
   };
   const credential = new DefaultAzureCredential();
   const client = new SecurityCenter(credential, subscriptionId);
   const result = await client.connectors.createOrUpdate(
     connectorName,
-    connectorSetting
+    connectorSetting,
   );
   console.log(result);
 }
-
-awsAssumeRoleCreateACloudAccountConnectorForASubscription().catch(
-  console.error
-);
 
 /**
  * This sample demonstrates how to Create a cloud account connector or update an existing one. Connect to your cloud account. For AWS, use either account credentials or role-based authentication. For GCP, use account organization credentials.
@@ -57,13 +58,15 @@ awsAssumeRoleCreateACloudAccountConnectorForASubscription().catch(
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/preview/2020-01-01-preview/examples/Connectors/CreateUpdateAwsCredConnectorSubscription_example.json
  */
 async function awsCredCreateACloudAccountConnectorForASubscription() {
-  const subscriptionId = "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
+  const subscriptionId =
+    process.env["SECURITY_SUBSCRIPTION_ID"] ||
+    "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
   const connectorName = "aws_dev1";
   const connectorSetting: ConnectorSetting = {
     authenticationDetails: {
       authenticationType: "awsCreds",
       awsAccessKeyId: "AKIARPZCNODDNAEQFSOE",
-      awsSecretAccessKey: "<awsSecretAccessKey>"
+      awsSecretAccessKey: "<awsSecretAccessKey>",
     },
     hybridComputeSettings: {
       autoProvision: "On",
@@ -72,20 +75,18 @@ async function awsCredCreateACloudAccountConnectorForASubscription() {
       resourceGroupName: "AwsConnectorRG",
       servicePrincipal: {
         applicationId: "ad9bcd79-be9c-45ab-abd8-80ca1654a7d1",
-        secret: "<secret>"
-      }
-    }
+        secret: "<secret>",
+      },
+    },
   };
   const credential = new DefaultAzureCredential();
   const client = new SecurityCenter(credential, subscriptionId);
   const result = await client.connectors.createOrUpdate(
     connectorName,
-    connectorSetting
+    connectorSetting,
   );
   console.log(result);
 }
-
-awsCredCreateACloudAccountConnectorForASubscription().catch(console.error);
 
 /**
  * This sample demonstrates how to Create a cloud account connector or update an existing one. Connect to your cloud account. For AWS, use either account credentials or role-based authentication. For GCP, use account organization credentials.
@@ -94,7 +95,9 @@ awsCredCreateACloudAccountConnectorForASubscription().catch(console.error);
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/preview/2020-01-01-preview/examples/Connectors/CreateUpdateGcpCredentialsConnectorSubscription_example.json
  */
 async function gcpCredentialsCreateACloudAccountConnectorForASubscription() {
-  const subscriptionId = "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
+  const subscriptionId =
+    process.env["SECURITY_SUBSCRIPTION_ID"] ||
+    "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
   const connectorName = "gcp_dev";
   const connectorSetting: ConnectorSetting = {
     authenticationDetails: {
@@ -107,22 +110,26 @@ async function gcpCredentialsCreateACloudAccountConnectorForASubscription() {
       clientX509CertUrl:
         "https://www.googleapis.com/robot/v1/metadata/x509/asc-135%40asc-project-1234.iam.gserviceaccount.com",
       organizationId: "AscDemoOrg",
-      privateKey: "",
+      privateKey: "******",
       privateKeyId: "6efg587hra2568as34d22326b044cc20dc2af",
       projectId: "asc-project-1234",
-      tokenUri: "https://oauth2.googleapis.com/token"
+      tokenUri: "https://oauth2.googleapis.com/token",
     },
-    hybridComputeSettings: { autoProvision: "Off" }
+    hybridComputeSettings: { autoProvision: "Off" },
   };
   const credential = new DefaultAzureCredential();
   const client = new SecurityCenter(credential, subscriptionId);
   const result = await client.connectors.createOrUpdate(
     connectorName,
-    connectorSetting
+    connectorSetting,
   );
   console.log(result);
 }
 
-gcpCredentialsCreateACloudAccountConnectorForASubscription().catch(
-  console.error
-);
+async function main() {
+  awsAssumeRoleCreateACloudAccountConnectorForASubscription();
+  awsCredCreateACloudAccountConnectorForASubscription();
+  gcpCredentialsCreateACloudAccountConnectorForASubscription();
+}
+
+main().catch(console.error);

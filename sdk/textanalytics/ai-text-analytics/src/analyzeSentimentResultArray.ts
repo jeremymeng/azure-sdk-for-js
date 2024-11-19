@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   SentimentResponse,
   TextDocumentBatchStatistics,
   TextDocumentInput,
 } from "./generated/models";
+import type { AnalyzeSentimentResult } from "./analyzeSentimentResult";
 import {
-  AnalyzeSentimentResult,
   makeAnalyzeSentimentErrorResult,
   makeAnalyzeSentimentResult,
 } from "./analyzeSentimentResult";
@@ -36,12 +36,12 @@ export interface AnalyzeSentimentResultArray extends Array<AnalyzeSentimentResul
  */
 export function makeAnalyzeSentimentResultArray(
   input: TextDocumentInput[],
-  response: SentimentResponse
+  response: SentimentResponse,
 ): AnalyzeSentimentResultArray {
   return combineSuccessfulAndErroneousDocumentsWithStatisticsAndModelVersion(
     input,
     response,
     makeAnalyzeSentimentResult,
-    makeAnalyzeSentimentErrorResult
+    makeAnalyzeSentimentErrorResult,
   );
 }

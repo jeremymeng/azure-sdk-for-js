@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 import assert from "assert";
-import { Suite } from "mocha";
-import { Container, ContainerDefinition } from "../../../src";
+import type { Suite } from "mocha";
+import type { Container, ContainerDefinition } from "../../../src";
+import { IndexingMode } from "../../../src";
 import { DataType, IndexKind } from "../../../src";
-import { QueryIterator } from "../../../src";
-import { SqlQuerySpec } from "../../../src";
-import { FeedOptions } from "../../../src";
+import type { QueryIterator } from "../../../src";
+import type { SqlQuerySpec } from "../../../src";
+import type { FeedOptions } from "../../../src";
 import { TestData } from "../common/TestData";
 import { bulkInsertItems, getTestContainer, removeAllDatabases } from "../common/TestHelpers";
+import { expect } from "chai";
 
 describe("Aggregate Query", function (this: Suite) {
   this.timeout(process.env.MOCHA_TIMEOUT || 20000);
@@ -54,14 +56,14 @@ describe("Aggregate Query", function (this: Suite) {
       "Validate Aggregate Document Query",
       undefined,
       containerDefinition,
-      containerOptions
+      containerOptions,
     );
     await bulkInsertItems(container, documentDefinitions);
   });
 
   const validateFetchAll = async function (
     queryIterator: QueryIterator<any>,
-    expectedResults: any
+    expectedResults: any,
   ): Promise<number> {
     const { resources: results, requestCharge } = await queryIterator.fetchAll();
     assert(requestCharge > 0, "request charge was not greater than zero");
@@ -74,7 +76,7 @@ describe("Aggregate Query", function (this: Suite) {
     queryIterator: QueryIterator<any>,
     options: any,
     expectedResults: any[],
-    fetchAllRequestCharge: number
+    fetchAllRequestCharge: number,
   ): Promise<void> {
     const pageSize = options["maxItemCount"];
 
@@ -107,11 +109,11 @@ describe("Aggregate Query", function (this: Suite) {
         assert.equal(
           expectedResults.length,
           totalFetchedResults.length,
-          "executeNext: didn't fetch all the results"
+          "executeNext: didn't fetch all the results",
         );
         assert(
           results.length <= pageSize,
-          "executeNext: actual fetch size is more than the requested page size"
+          "executeNext: actual fetch size is more than the requested page size",
         );
       }
     }
@@ -126,13 +128,13 @@ describe("Aggregate Query", function (this: Suite) {
       totalExecuteNextRequestCharge;
     assert(
       percentDifference <= 0.01,
-      "difference between fetchAll request charge and executeNext request charge should be less than 1%"
+      "difference between fetchAll request charge and executeNext request charge should be less than 1%",
     );
   };
 
   const ValidateAsyncIterator = async function (
     queryIterator: QueryIterator<any>,
-    expectedResults: any[]
+    expectedResults: any[],
   ): Promise<void> {
     const results: any[] = [];
     let completed = false;
@@ -151,9 +153,12 @@ describe("Aggregate Query", function (this: Suite) {
 
   const executeQueryAndValidateResults = async function (
     query: string | SqlQuerySpec,
-    expectedResults: any[]
+    expectedResults: any[],
   ): Promise<void> {
-    const options: FeedOptions = { maxDegreeOfParallelism: 2, maxItemCount: 1 };
+    const options: FeedOptions = {
+      maxDegreeOfParallelism: 2,
+      maxItemCount: 1,
+    };
 
     const queryIterator = container.items.query(query, options);
     const fetchAllRequestCharge = await validateFetchAll(queryIterator, expectedResults);
@@ -162,7 +167,7 @@ describe("Aggregate Query", function (this: Suite) {
       queryIterator,
       options,
       expectedResults,
-      fetchAllRequestCharge
+      fetchAllRequestCharge,
     );
     queryIterator.reset();
     await ValidateAsyncIterator(queryIterator, expectedResults);
@@ -176,8 +181,8 @@ describe("Aggregate Query", function (this: Suite) {
 
   it("SELECT VALUE AVG with ORDER BY", async function () {
     await executeQueryAndValidateResults(
-      "SELECT VALUE AVG(r.key) FROM r WHERE IS_NUMBER(r.key) ORDER BY r.key",
-      [average]
+      "SELECT VALUE AVG(r.key) FROM r WHERE IS_NUMBER(r.key) ORDER BY r.key, r.field",
+      [average],
     );
   });
 
@@ -218,42 +223,42 @@ describe("Aggregate Query", function (this: Suite) {
   it("SELECT VALUE SUM with ORDER BY", async function () {
     await executeQueryAndValidateResults(
       "SELECT VALUE SUM(r.key) FROM r WHERE IS_NUMBER(r.key) ORDER BY r.key",
-      [testdata.sum]
+      [testdata.sum],
     );
   });
 
   it("SELECT VALUE AVG for single partiton", async function () {
     await executeQueryAndValidateResults(
       "SELECT VALUE AVG(r.field) FROM r WHERE r.key = 'uniquePartitionKey'",
-      [samePartitionSum / testdata.numberOfDocsWithSamePartitionKey]
+      [samePartitionSum / testdata.numberOfDocsWithSamePartitionKey],
     );
   });
 
   it("SELECT VALUE COUNT for single partiton", async function () {
     await executeQueryAndValidateResults(
       "SELECT VALUE COUNT(r.field) FROM r WHERE r.key = 'uniquePartitionKey'",
-      [testdata.numberOfDocsWithSamePartitionKey]
+      [testdata.numberOfDocsWithSamePartitionKey],
     );
   });
 
   it("SELECT VALUE MAX for single partiton", async function () {
     await executeQueryAndValidateResults(
       "SELECT VALUE MAX(r.field) FROM r WHERE r.key = 'uniquePartitionKey'",
-      [testdata.numberOfDocsWithSamePartitionKey]
+      [testdata.numberOfDocsWithSamePartitionKey],
     );
   });
 
   it("SELECT VALUE MIN for single partiton", async function () {
     await executeQueryAndValidateResults(
       "SELECT VALUE MIN(r.field) FROM r WHERE r.key = 'uniquePartitionKey'",
-      [1]
+      [1],
     );
   });
 
   it("SELECT VALUE SUM for single partiton", async function () {
     await executeQueryAndValidateResults(
       "SELECT VALUE SUM(r.field) FROM r WHERE r.key = 'uniquePartitionKey'",
-      [samePartitionSum]
+      [samePartitionSum],
     );
   });
 
@@ -283,5 +288,66 @@ describe("Aggregate Query", function (this: Suite) {
     });
     const response = await queryIterator.fetchAll();
     assert(response.resources.length === 0);
+  });
+
+  it.skip("should execute ORDER BY query with order on multiple fields when composite Index defined", async () => {
+    const containerDefinitionWithCompositeIndex: ContainerDefinition = {
+      id: "containerWithCompositeIndexingPolicy",
+      indexingPolicy: {
+        automatic: true,
+        indexingMode: IndexingMode.consistent,
+        includedPaths: [
+          {
+            path: "/*",
+          },
+        ],
+        excludedPaths: [
+          {
+            path: '/"systemMetadata"/*',
+          },
+        ],
+        compositeIndexes: [
+          [
+            { path: "/key", order: "ascending" },
+            { path: "/field", order: "ascending" },
+          ],
+        ],
+      },
+    };
+
+    const containerWithCompositeIndexDef = await getTestContainer(
+      "Validate multiple fields order by query",
+      undefined,
+      containerDefinitionWithCompositeIndex,
+    );
+
+    containerWithCompositeIndexDef.items.create({ id: "1", pk: "1", key: "1", field: "4" });
+    containerWithCompositeIndexDef.items.create({ id: "2", pk: "1", key: "2", field: "3" });
+    containerWithCompositeIndexDef.items.create({ id: "3", pk: "1", key: "3", field: "2" });
+    containerWithCompositeIndexDef.items.create({ id: "4", pk: "1", key: "4", field: "1" });
+    const queryIterator1 = containerWithCompositeIndexDef.items.query(
+      "SELECT * FROM r ORDER BY r.key, r.field",
+    );
+    const response = await queryIterator1.fetchAll();
+    assert(response.resources.length === 4);
+    try {
+      const queryIterator2 = containerWithCompositeIndexDef.items.query(
+        "SELECT * FROM r ORDER BY r.key DESC, r.field ASC",
+      );
+      await queryIterator2.fetchAll();
+      // If the fetch succeeds unexpectedly, fail the test
+      expect.fail("Expected composite index not found error, but the fetch succeeded");
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          "The order by query does not have a corresponding composite index that it can be served from.",
+        )
+      ) {
+        // If the fetch fails as expected, pass the test
+      } else {
+        expect.fail(`Unexpected error: ${error.message}`);
+      }
+    }
   });
 });

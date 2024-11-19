@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -58,7 +58,7 @@ async function updateLoadBalancerBackendPoolWithBackendAddressesContainingVirtua
       subscriptionId,
       resourceGroupName,
       loadBalancerName,
-      backendAddressPoolName
+      backendAddressPoolName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);
@@ -67,5 +67,5 @@ async function updateLoadBalancerBackendPoolWithBackendAddressesContainingVirtua
 }
 
 updateLoadBalancerBackendPoolWithBackendAddressesContainingVirtualNetworkAndIPAddress().catch(
-  console.error
+  console.error,
 );

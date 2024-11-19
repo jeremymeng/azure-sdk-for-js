@@ -1,9 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { AbortSignalLike } from "@azure/abort-controller";
-import { HttpHeaders, isNode, URLBuilder } from "@azure/core-http";
-import { ContainerEncryptionScope } from "@azure/storage-blob";
-import { CpkInfo, FileSystemEncryptionScope } from "../models";
+// Licensed under the MIT License.
+import type { HttpHeaders } from "@azure/core-rest-pipeline";
+import { createHttpHeaders } from "@azure/core-rest-pipeline";
+import { isNode } from "@azure/core-util";
+import type { ContainerEncryptionScope, WithResponse } from "@azure/storage-blob";
+import type {
+  CpkInfo,
+  FileSystemEncryptionScope,
+  PathAccessControlItem,
+  PathPermissions,
+} from "../models";
 
 import {
   DevelopmentConnectionString,
@@ -12,6 +18,9 @@ import {
   PathStylePorts,
   UrlConstants,
 } from "./constants";
+import type { HttpResponse } from "@azure/storage-blob";
+import type { HttpHeadersLike } from "@azure/core-http-compat";
+import { toAcl, toPermissions } from "../transforms";
 
 /**
  * Reserved URL characters must be properly escaped for Storage services like Blob or File.
@@ -66,13 +75,13 @@ import {
  * @param url -
  */
 export function escapeURLPath(url: string): string {
-  const urlParsed = URLBuilder.parse(url);
+  const urlParsed = new URL(url);
 
-  let path = urlParsed.getPath();
+  let path = urlParsed.pathname;
   path = path || "/";
 
   path = escape(path);
-  urlParsed.setPath(path);
+  urlParsed.pathname = path;
 
   return urlParsed.toString();
 }
@@ -110,7 +119,7 @@ export function getValueInConnString(
     | "AccountKey"
     | "DefaultEndpointsProtocol"
     | "EndpointSuffix"
-    | "SharedAccessSignature"
+    | "SharedAccessSignature",
 ): string {
   const elements = connectionString.split(";");
   for (const element of elements) {
@@ -165,7 +174,7 @@ export function extractConnectionStringParts(connectionString: string): Connecti
       const protocol = defaultEndpointsProtocol!.toLowerCase();
       if (protocol !== "https" && protocol !== "http") {
         throw new Error(
-          "Invalid DefaultEndpointsProtocol in the provided Connection String. Expecting 'https' or 'http'"
+          "Invalid DefaultEndpointsProtocol in the provided Connection String. Expecting 'https' or 'http'",
         );
       }
 
@@ -193,7 +202,11 @@ export function extractConnectionStringParts(connectionString: string): Connecti
     // SAS connection string
 
     const accountSas = getValueInConnString(connectionString, "SharedAccessSignature");
-    const accountName = getAccountNameFromUrl(blobEndpoint);
+    let accountName = getValueInConnString(connectionString, "AccountName");
+    // if accountName is empty, try to read it from BlobEndpoint
+    if (!accountName) {
+      accountName = getAccountNameFromUrl(blobEndpoint);
+    }
     if (!blobEndpoint) {
       throw new Error("Invalid BlobEndpoint in the provided SAS Connection String");
     } else if (!accountSas) {
@@ -209,6 +222,7 @@ export function extractConnectionStringParts(connectionString: string): Connecti
  *
  * @param text -
  */
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 function escape(text: string): string {
   return encodeURIComponent(text)
     .replace(/%2F/g, "/") // Don't escape for "/"
@@ -226,11 +240,11 @@ function escape(text: string): string {
  * @returns An updated URL string
  */
 export function appendToURLPath(url: string, name: string): string {
-  const urlParsed = URLBuilder.parse(url);
+  const urlParsed = new URL(url);
 
-  let path = urlParsed.getPath();
+  let path = urlParsed.pathname;
   path = path ? (path.endsWith("/") ? `${path}${name}` : `${path}/${name}`) : name;
-  urlParsed.setPath(path);
+  urlParsed.pathname = path;
 
   return urlParsed.toString();
 }
@@ -243,16 +257,16 @@ export function appendToURLPath(url: string, name: string): string {
  * @returns An updated URL string.
  */
 export function appendToURLQuery(url: string, queryParts: string): string {
-  const urlParsed = URLBuilder.parse(url);
+  const urlParsed = new URL(url);
 
-  let query = urlParsed.getQuery();
+  let query = urlParsed.search;
   if (query) {
     query += "&" + queryParts;
   } else {
     query = queryParts;
   }
 
-  urlParsed.setQuery(query);
+  urlParsed.search = query;
   return urlParsed.toString();
 }
 
@@ -266,8 +280,28 @@ export function appendToURLQuery(url: string, queryParts: string): string {
  * @returns An updated URL string
  */
 export function setURLParameter(url: string, name: string, value?: string): string {
-  const urlParsed = URLBuilder.parse(url);
-  urlParsed.setQueryParameter(name, value);
+  const urlParsed = new URL(url);
+  const encodedName = encodeURIComponent(name);
+  const encodedValue = value ? encodeURIComponent(value) : undefined;
+  // mutating searchParams will change the encoding, so we have to do this ourselves
+  const searchString = urlParsed.search === "" ? "?" : urlParsed.search;
+
+  const searchPieces: string[] = [];
+
+  for (const pair of searchString.slice(1).split("&")) {
+    if (pair) {
+      const [key] = pair.split("=", 2);
+      if (key !== encodedName) {
+        searchPieces.push(pair);
+      }
+    }
+  }
+  if (encodedValue) {
+    searchPieces.push(`${encodedName}=${encodedValue}`);
+  }
+
+  urlParsed.search = searchPieces.length ? `?${searchPieces.join("&")}` : "";
+
   return urlParsed.toString();
 }
 
@@ -278,8 +312,8 @@ export function setURLParameter(url: string, name: string, value?: string): stri
  * @param name -
  */
 export function getURLParameter(url: string, name: string): string | string[] | undefined {
-  const urlParsed = URLBuilder.parse(url);
-  return urlParsed.getQueryParameterValue(name);
+  const urlParsed = new URL(url);
+  return urlParsed.searchParams.get(name) ?? undefined;
 }
 
 /**
@@ -290,8 +324,8 @@ export function getURLParameter(url: string, name: string): string | string[] | 
  * @returns An updated URL string
  */
 export function setURLHost(url: string, host: string): string {
-  const urlParsed = URLBuilder.parse(url);
-  urlParsed.setHost(host);
+  const urlParsed = new URL(url);
+  urlParsed.hostname = host;
   return urlParsed.toString();
 }
 
@@ -301,8 +335,12 @@ export function setURLHost(url: string, host: string): string {
  * @param url - Source URL string
  */
 export function getURLPath(url: string): string | undefined {
-  const urlParsed = URLBuilder.parse(url);
-  return urlParsed.getPath();
+  try {
+    const urlParsed = new URL(url);
+    return urlParsed.pathname;
+  } catch (e) {
+    return undefined;
+  }
 }
 
 /**
@@ -311,9 +349,9 @@ export function getURLPath(url: string): string | undefined {
  * @param url -
  * @param path -
  */
-export function setURLPath(url: string, path?: string): string {
-  const urlParsed = URLBuilder.parse(url);
-  urlParsed.setPath(path);
+export function setURLPath(url: string, path: string): string {
+  const urlParsed = new URL(url);
+  urlParsed.pathname = path;
   return urlParsed.toString();
 }
 
@@ -323,8 +361,12 @@ export function setURLPath(url: string, path?: string): string {
  * @param url - Source URL string
  */
 export function getURLScheme(url: string): string | undefined {
-  const urlParsed = URLBuilder.parse(url);
-  return urlParsed.getScheme();
+  try {
+    const urlParsed = new URL(url);
+    return urlParsed.protocol.endsWith(":") ? urlParsed.protocol.slice(0, -1) : urlParsed.protocol;
+  } catch (e) {
+    return undefined;
+  }
 }
 
 /**
@@ -333,13 +375,13 @@ export function getURLScheme(url: string): string | undefined {
  * @param url - Source URL string
  */
 export function getURLPathAndQuery(url: string): string | undefined {
-  const urlParsed = URLBuilder.parse(url);
-  const pathString = urlParsed.getPath();
+  const urlParsed = new URL(url);
+  const pathString = urlParsed.pathname;
   if (!pathString) {
     throw new RangeError("Invalid url without valid path.");
   }
 
-  let queryString = urlParsed.getQuery() || "";
+  let queryString = urlParsed.search || "";
   queryString = queryString.trim();
   if (queryString !== "") {
     queryString = queryString.startsWith("?") ? queryString : `?${queryString}`; // Ensure query string start with '?'
@@ -354,13 +396,13 @@ export function getURLPathAndQuery(url: string): string | undefined {
  * @param url -
  */
 export function getURLQueries(url: string): { [key: string]: string } {
-  let queryString = URLBuilder.parse(url).getQuery();
+  let queryString = new URL(url).search;
   if (!queryString) {
     return {};
   }
 
   queryString = queryString.trim();
-  queryString = queryString.startsWith("?") ? queryString.substr(1) : queryString;
+  queryString = queryString.startsWith("?") ? queryString.substring(1) : queryString;
 
   let querySubStrings: string[] = queryString.split("&");
   querySubStrings = querySubStrings.filter((value: string) => {
@@ -383,24 +425,14 @@ export function getURLQueries(url: string): { [key: string]: string } {
 }
 
 /**
- * Get URL query string.
- *
- * @param url -
- */
-export function getURLQueryString(url: string): string | undefined {
-  const urlParsed = URLBuilder.parse(url);
-  return urlParsed.getQuery();
-}
-
-/**
  * Set URL query string.
  *
  * @param url -
  * @param queryString -
  */
 export function setURLQueries(url: string, queryString: string): string {
-  const urlParsed = URLBuilder.parse(url);
-  urlParsed.setQuery(queryString);
+  const urlParsed = new URL(url);
+  urlParsed.search = queryString;
   return urlParsed.toString();
 }
 
@@ -462,43 +494,6 @@ export function generateBlockID(blockIDPrefix: string, blockIndex: number): stri
   return base64encode(res);
 }
 
-/**
- * Delay specified time interval.
- *
- * @param timeInMs -
- * @param aborter -
- * @param abortError -
- */
-export async function delay(
-  timeInMs: number,
-  aborter?: AbortSignalLike,
-  abortError?: Error
-): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    /* eslint-disable-next-line prefer-const*/
-    let timeout: any;
-
-    const abortHandler = () => {
-      if (timeout !== undefined) {
-        clearTimeout(timeout);
-      }
-      reject(abortError);
-    };
-
-    const resolveHandler = () => {
-      if (aborter !== undefined) {
-        aborter.removeEventListener("abort", abortHandler);
-      }
-      resolve();
-    };
-
-    timeout = setTimeout(resolveHandler, timeInMs);
-    if (aborter !== undefined) {
-      aborter.addEventListener("abort", abortHandler);
-    }
-  });
-}
-
 export function sanitizeURL(url: string): string {
   let safeURL: string = url;
   if (getURLParameter(safeURL, UrlConstants.Parameters.SIGNATURE)) {
@@ -509,14 +504,14 @@ export function sanitizeURL(url: string): string {
 }
 
 export function sanitizeHeaders(originalHeader: HttpHeaders): HttpHeaders {
-  const headers: HttpHeaders = new HttpHeaders();
-  for (const header of originalHeader.headersArray()) {
-    if (header.name.toLowerCase() === HeaderConstants.AUTHORIZATION.toLowerCase()) {
-      headers.set(header.name, "*****");
-    } else if (header.name.toLowerCase() === HeaderConstants.X_MS_COPY_SOURCE) {
-      headers.set(header.name, sanitizeURL(header.value));
+  const headers: HttpHeaders = createHttpHeaders();
+  for (const [name, value] of originalHeader) {
+    if (name.toLowerCase() === HeaderConstants.AUTHORIZATION.toLowerCase()) {
+      headers.set(name, "*****");
+    } else if (name.toLowerCase() === HeaderConstants.X_MS_COPY_SOURCE) {
+      headers.set(name, sanitizeURL(value));
     } else {
-      headers.set(header.name, header.value);
+      headers.set(name, value);
     }
   }
 
@@ -533,50 +528,44 @@ export function iEqual(str1: string, str2: string): boolean {
 }
 
 /**
- * Extracts account name from the blobEndpointUrl
- * @param blobEndpointUrl - blobEndpointUrl to extract the account name from
- * @returns account name
+ * Extracts account name from the url
+ * @param url - url to extract the account name from
+ * @returns with the account name
  */
-export function getAccountNameFromUrl(blobEndpointUrl: string): string {
-  const parsedUrl: URLBuilder = URLBuilder.parse(blobEndpointUrl);
+export function getAccountNameFromUrl(url: string): string {
+  const parsedUrl = new URL(url);
   let accountName;
   try {
-    if (parsedUrl.getHost()!.split(".")[1] === "blob") {
+    if (parsedUrl.hostname.split(".")[1] === "blob") {
       // `${defaultEndpointsProtocol}://${accountName}.blob.${endpointSuffix}`;
-      accountName = parsedUrl.getHost()!.split(".")[0];
+      accountName = parsedUrl.hostname.split(".")[0];
     } else if (isIpEndpointStyle(parsedUrl)) {
       // IPv4/IPv6 address hosts... Example - http://192.0.0.10:10001/devstoreaccount1/
       // Single word domain without a [dot] in the endpoint... Example - http://localhost:10001/devstoreaccount1/
       // .getPath() -> /devstoreaccount1/
-      accountName = parsedUrl.getPath()!.split("/")[1];
+      accountName = parsedUrl.pathname.split("/")[1];
     } else {
       // Custom domain case: "https://customdomain.com/containername/blob".
       accountName = "";
     }
-
     return accountName;
   } catch (error: any) {
     throw new Error("Unable to extract accountName with provided information.");
   }
 }
 
-export function isIpEndpointStyle(parsedUrl: URLBuilder): boolean {
-  if (parsedUrl.getHost() === undefined) {
-    return false;
-  }
-
-  const host =
-    parsedUrl.getHost()! + (parsedUrl.getPort() === undefined ? "" : ":" + parsedUrl.getPort());
+export function isIpEndpointStyle(parsedUrl: URL): boolean {
+  const host = parsedUrl.host;
 
   // Case 1: Ipv6, use a broad regex to find out candidates whose host contains two ':'.
-  // Case 2: localhost(:port), use broad regex to match port part.
+  // Case 2: localhost(:port) or host.docker.internal, use broad regex to match port part.
   // Case 3: Ipv4, use broad regex which just check if host contains Ipv4.
   // For valid host please refer to https://man7.org/linux/man-pages/man7/hostname.7.html.
   return (
-    /^.*:.*:.*$|^localhost(:[0-9]+)?$|^(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])){3}(:[0-9]+)?$/.test(
-      host
+    /^.*:.*:.*$|^(localhost|host.docker.internal)(:[0-9]+)?$|^(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])){3}(:[0-9]+)?$/.test(
+      host,
     ) ||
-    (parsedUrl.getPort() !== undefined && PathStylePorts.includes(parsedUrl.getPort()!))
+    (Boolean(parsedUrl.port) && PathStylePorts.includes(parsedUrl.port))
   );
 }
 
@@ -585,17 +574,23 @@ export function isIpEndpointStyle(parsedUrl: URLBuilder): boolean {
  */
 export function windowsFileTimeTicksToTime(timeNumber: string | undefined): Date | undefined {
   if (!timeNumber) return undefined;
-  const timeNumberInternal = parseInt(timeNumber!);
-
-  if (timeNumberInternal === 0) return undefined;
-
   // A windows file time is a 64-bit value that represents the number of 100-nanosecond intervals that have elapsed
   // since 12:00 A.M. January 1, 1601 Coordinated Universal Time (UTC).
-  // Date accepts a value that represents miliseconds from 12:00 A.M. January 1, 1970
-  // Here should correct the year number after converting.
-  const date = new Date(timeNumberInternal / 10000);
-  date.setUTCFullYear(date.getUTCFullYear() - 369);
-  return date;
+  // JS Date accepts a value that represents milliseconds from 12:00 A.M. January 1, 1970
+  // So, we'll handle the calculations in milliseconds from here
+
+  // Time in milliseconds since "12:00 A.M. January 1, 1601"
+  const timeElapsed = parseInt(timeNumber) / 10000;
+
+  if (timeElapsed === 0) return undefined;
+
+  // Reference - https://stackoverflow.com/a/24188106/4137356
+
+  // Milliseconds calculated relative to "12:00 A.M. January 1, 1970" (will be negative)
+  const initialFrameOfReference = Date.UTC(1601, 0, 1);
+
+  // TimeRelativeTo1970 = (TimeAt1601 - TimeAt1970) + (Current - TimeAt1601) = (Current - TimeAt1970)
+  return new Date(initialFrameOfReference + timeElapsed);
 }
 
 export function ensureCpkIfSpecified(cpk: CpkInfo | undefined, isHttps: boolean): void {
@@ -609,7 +604,7 @@ export function ensureCpkIfSpecified(cpk: CpkInfo | undefined, isHttps: boolean)
 }
 
 export function ToBlobContainerEncryptionScope(
-  fileSystemEncryptionScope?: FileSystemEncryptionScope
+  fileSystemEncryptionScope?: FileSystemEncryptionScope,
 ): ContainerEncryptionScope | undefined {
   if (!fileSystemEncryptionScope) return undefined;
 
@@ -630,4 +625,73 @@ export function EscapePath(pathName: string): string {
     split[i] = encodeURIComponent(split[i]);
   }
   return split.join("/");
+}
+
+/**
+ * A typesafe helper for ensuring that a given response object has
+ * the original _response attached.
+ * @param response - A response object from calling a client operation
+ * @returns The same object, but with known _response property
+ */
+export function assertResponse<T extends object, Headers = undefined, Body = undefined>(
+  response: T,
+): WithResponse<T, Headers, Body> {
+  if (`_response` in response) {
+    return response as WithResponse<T, Headers, Body>;
+  }
+
+  throw new TypeError(`Unexpected response object ${response}`);
+}
+
+export interface PathGetPropertiesRawResponseWithExtraPropertiesLike {
+  encryptionContext?: string;
+  owner?: string;
+  group?: string;
+  permissions?: PathPermissions;
+  acl: PathAccessControlItem[];
+  _response: HttpResponse & {
+    parsedHeaders: {
+      encryptionContext?: string;
+      owner?: string;
+      group?: string;
+      permissions?: PathPermissions;
+      acl: PathAccessControlItem[];
+    };
+  };
+}
+
+function ParseHeaderValue(
+  rawResponse: PathGetPropertiesRawResponseWithExtraPropertiesLike,
+  headerName: string,
+): string | undefined {
+  if (rawResponse._response) {
+    const headers = rawResponse._response.headers as HttpHeadersLike;
+    if (headers) {
+      return headers.get(headerName);
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Parse extra properties values from headers in raw response.
+ */
+export function ParsePathGetPropertiesExtraHeaderValues(
+  rawResponse: PathGetPropertiesRawResponseWithExtraPropertiesLike,
+): PathGetPropertiesRawResponseWithExtraPropertiesLike {
+  const response = rawResponse;
+  response.encryptionContext = ParseHeaderValue(rawResponse, "x-ms-encryption-context");
+  response.owner = ParseHeaderValue(rawResponse, "x-ms-owner");
+  response.group = ParseHeaderValue(rawResponse, "x-ms-group");
+  response.permissions = toPermissions(ParseHeaderValue(rawResponse, "x-ms-permissions"));
+  response.acl = toAcl(ParseHeaderValue(rawResponse, "x-ms-acl"));
+  if (response._response?.parsedHeaders) {
+    response._response.parsedHeaders.encryptionContext = response.encryptionContext;
+    response._response.parsedHeaders.owner = response.owner;
+    response._response.parsedHeaders.group = response.group;
+    response._response.parsedHeaders.permissions = response.permissions;
+    response._response.parsedHeaders.acl = response.acl;
+  }
+  return response;
 }

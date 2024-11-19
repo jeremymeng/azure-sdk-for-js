@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -33,7 +33,7 @@ async function createNetworkSecurityGroup() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}",
       subscriptionId,
       resourceGroupName,
-      networkSecurityGroupName
+      networkSecurityGroupName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);
@@ -82,7 +82,7 @@ async function createNetworkSecurityGroupWithRule() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}",
       subscriptionId,
       resourceGroupName,
-      networkSecurityGroupName
+      networkSecurityGroupName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);

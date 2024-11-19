@@ -12,8 +12,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { CosmosDBManagementClient } from "../cosmosDBManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   TableGetResults,
   TableResourcesListTablesOptionalParams,
@@ -24,6 +28,7 @@ import {
   TableResourcesCreateUpdateTableOptionalParams,
   TableResourcesCreateUpdateTableResponse,
   TableResourcesDeleteTableOptionalParams,
+  TableResourcesDeleteTableResponse,
   TableResourcesGetTableThroughputOptionalParams,
   TableResourcesGetTableThroughputResponse,
   ThroughputSettingsUpdateParameters,
@@ -35,7 +40,7 @@ import {
   TableResourcesMigrateTableToManualThroughputResponse,
   ContinuousBackupRestoreLocation,
   TableResourcesRetrieveContinuousBackupInformationOptionalParams,
-  TableResourcesRetrieveContinuousBackupInformationResponse
+  TableResourcesRetrieveContinuousBackupInformationResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -60,12 +65,12 @@ export class TableResourcesImpl implements TableResources {
   public listTables(
     resourceGroupName: string,
     accountName: string,
-    options?: TableResourcesListTablesOptionalParams
+    options?: TableResourcesListTablesOptionalParams,
   ): PagedAsyncIterableIterator<TableGetResults> {
     const iter = this.listTablesPagingAll(
       resourceGroupName,
       accountName,
-      options
+      options,
     );
     return {
       next() {
@@ -82,9 +87,9 @@ export class TableResourcesImpl implements TableResources {
           resourceGroupName,
           accountName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -92,7 +97,7 @@ export class TableResourcesImpl implements TableResources {
     resourceGroupName: string,
     accountName: string,
     options?: TableResourcesListTablesOptionalParams,
-    _settings?: PageSettings
+    _settings?: PageSettings,
   ): AsyncIterableIterator<TableGetResults[]> {
     let result: TableResourcesListTablesResponse;
     result = await this._listTables(resourceGroupName, accountName, options);
@@ -102,12 +107,12 @@ export class TableResourcesImpl implements TableResources {
   private async *listTablesPagingAll(
     resourceGroupName: string,
     accountName: string,
-    options?: TableResourcesListTablesOptionalParams
+    options?: TableResourcesListTablesOptionalParams,
   ): AsyncIterableIterator<TableGetResults> {
     for await (const page of this.listTablesPagingPage(
       resourceGroupName,
       accountName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -122,11 +127,11 @@ export class TableResourcesImpl implements TableResources {
   private _listTables(
     resourceGroupName: string,
     accountName: string,
-    options?: TableResourcesListTablesOptionalParams
+    options?: TableResourcesListTablesOptionalParams,
   ): Promise<TableResourcesListTablesResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, options },
-      listTablesOperationSpec
+      listTablesOperationSpec,
     );
   }
 
@@ -141,11 +146,11 @@ export class TableResourcesImpl implements TableResources {
     resourceGroupName: string,
     accountName: string,
     tableName: string,
-    options?: TableResourcesGetTableOptionalParams
+    options?: TableResourcesGetTableOptionalParams,
   ): Promise<TableResourcesGetTableResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, tableName, options },
-      getTableOperationSpec
+      getTableOperationSpec,
     );
   }
 
@@ -162,30 +167,29 @@ export class TableResourcesImpl implements TableResources {
     accountName: string,
     tableName: string,
     createUpdateTableParameters: TableCreateUpdateParameters,
-    options?: TableResourcesCreateUpdateTableOptionalParams
+    options?: TableResourcesCreateUpdateTableOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TableResourcesCreateUpdateTableResponse>,
+    SimplePollerLike<
+      OperationState<TableResourcesCreateUpdateTableResponse>,
       TableResourcesCreateUpdateTableResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<TableResourcesCreateUpdateTableResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -194,8 +198,8 @@ export class TableResourcesImpl implements TableResources {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -203,25 +207,28 @@ export class TableResourcesImpl implements TableResources {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         accountName,
         tableName,
         createUpdateTableParameters,
-        options
+        options,
       },
-      createUpdateTableOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createUpdateTableOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      TableResourcesCreateUpdateTableResponse,
+      OperationState<TableResourcesCreateUpdateTableResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -240,14 +247,14 @@ export class TableResourcesImpl implements TableResources {
     accountName: string,
     tableName: string,
     createUpdateTableParameters: TableCreateUpdateParameters,
-    options?: TableResourcesCreateUpdateTableOptionalParams
+    options?: TableResourcesCreateUpdateTableOptionalParams,
   ): Promise<TableResourcesCreateUpdateTableResponse> {
     const poller = await this.beginCreateUpdateTable(
       resourceGroupName,
       accountName,
       tableName,
       createUpdateTableParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -263,25 +270,29 @@ export class TableResourcesImpl implements TableResources {
     resourceGroupName: string,
     accountName: string,
     tableName: string,
-    options?: TableResourcesDeleteTableOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: TableResourcesDeleteTableOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<TableResourcesDeleteTableResponse>,
+      TableResourcesDeleteTableResponse
+    >
+  > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<void> => {
+      spec: coreClient.OperationSpec,
+    ): Promise<TableResourcesDeleteTableResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -290,8 +301,8 @@ export class TableResourcesImpl implements TableResources {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -299,19 +310,22 @@ export class TableResourcesImpl implements TableResources {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, tableName, options },
-      deleteTableOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, tableName, options },
+      spec: deleteTableOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      TableResourcesDeleteTableResponse,
+      OperationState<TableResourcesDeleteTableResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -328,13 +342,13 @@ export class TableResourcesImpl implements TableResources {
     resourceGroupName: string,
     accountName: string,
     tableName: string,
-    options?: TableResourcesDeleteTableOptionalParams
-  ): Promise<void> {
+    options?: TableResourcesDeleteTableOptionalParams,
+  ): Promise<TableResourcesDeleteTableResponse> {
     const poller = await this.beginDeleteTable(
       resourceGroupName,
       accountName,
       tableName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -351,11 +365,11 @@ export class TableResourcesImpl implements TableResources {
     resourceGroupName: string,
     accountName: string,
     tableName: string,
-    options?: TableResourcesGetTableThroughputOptionalParams
+    options?: TableResourcesGetTableThroughputOptionalParams,
   ): Promise<TableResourcesGetTableThroughputResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, tableName, options },
-      getTableThroughputOperationSpec
+      getTableThroughputOperationSpec,
     );
   }
 
@@ -373,30 +387,29 @@ export class TableResourcesImpl implements TableResources {
     accountName: string,
     tableName: string,
     updateThroughputParameters: ThroughputSettingsUpdateParameters,
-    options?: TableResourcesUpdateTableThroughputOptionalParams
+    options?: TableResourcesUpdateTableThroughputOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TableResourcesUpdateTableThroughputResponse>,
+    SimplePollerLike<
+      OperationState<TableResourcesUpdateTableThroughputResponse>,
       TableResourcesUpdateTableThroughputResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<TableResourcesUpdateTableThroughputResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -405,8 +418,8 @@ export class TableResourcesImpl implements TableResources {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -414,25 +427,28 @@ export class TableResourcesImpl implements TableResources {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         accountName,
         tableName,
         updateThroughputParameters,
-        options
+        options,
       },
-      updateTableThroughputOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: updateTableThroughputOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      TableResourcesUpdateTableThroughputResponse,
+      OperationState<TableResourcesUpdateTableThroughputResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -452,14 +468,14 @@ export class TableResourcesImpl implements TableResources {
     accountName: string,
     tableName: string,
     updateThroughputParameters: ThroughputSettingsUpdateParameters,
-    options?: TableResourcesUpdateTableThroughputOptionalParams
+    options?: TableResourcesUpdateTableThroughputOptionalParams,
   ): Promise<TableResourcesUpdateTableThroughputResponse> {
     const poller = await this.beginUpdateTableThroughput(
       resourceGroupName,
       accountName,
       tableName,
       updateThroughputParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -475,30 +491,29 @@ export class TableResourcesImpl implements TableResources {
     resourceGroupName: string,
     accountName: string,
     tableName: string,
-    options?: TableResourcesMigrateTableToAutoscaleOptionalParams
+    options?: TableResourcesMigrateTableToAutoscaleOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TableResourcesMigrateTableToAutoscaleResponse>,
+    SimplePollerLike<
+      OperationState<TableResourcesMigrateTableToAutoscaleResponse>,
       TableResourcesMigrateTableToAutoscaleResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<TableResourcesMigrateTableToAutoscaleResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -507,8 +522,8 @@ export class TableResourcesImpl implements TableResources {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -516,19 +531,22 @@ export class TableResourcesImpl implements TableResources {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, tableName, options },
-      migrateTableToAutoscaleOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, tableName, options },
+      spec: migrateTableToAutoscaleOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      TableResourcesMigrateTableToAutoscaleResponse,
+      OperationState<TableResourcesMigrateTableToAutoscaleResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -545,13 +563,13 @@ export class TableResourcesImpl implements TableResources {
     resourceGroupName: string,
     accountName: string,
     tableName: string,
-    options?: TableResourcesMigrateTableToAutoscaleOptionalParams
+    options?: TableResourcesMigrateTableToAutoscaleOptionalParams,
   ): Promise<TableResourcesMigrateTableToAutoscaleResponse> {
     const poller = await this.beginMigrateTableToAutoscale(
       resourceGroupName,
       accountName,
       tableName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -567,30 +585,29 @@ export class TableResourcesImpl implements TableResources {
     resourceGroupName: string,
     accountName: string,
     tableName: string,
-    options?: TableResourcesMigrateTableToManualThroughputOptionalParams
+    options?: TableResourcesMigrateTableToManualThroughputOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TableResourcesMigrateTableToManualThroughputResponse>,
+    SimplePollerLike<
+      OperationState<TableResourcesMigrateTableToManualThroughputResponse>,
       TableResourcesMigrateTableToManualThroughputResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<TableResourcesMigrateTableToManualThroughputResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -599,8 +616,8 @@ export class TableResourcesImpl implements TableResources {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -608,19 +625,22 @@ export class TableResourcesImpl implements TableResources {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, tableName, options },
-      migrateTableToManualThroughputOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, tableName, options },
+      spec: migrateTableToManualThroughputOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      TableResourcesMigrateTableToManualThroughputResponse,
+      OperationState<TableResourcesMigrateTableToManualThroughputResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -637,13 +657,13 @@ export class TableResourcesImpl implements TableResources {
     resourceGroupName: string,
     accountName: string,
     tableName: string,
-    options?: TableResourcesMigrateTableToManualThroughputOptionalParams
+    options?: TableResourcesMigrateTableToManualThroughputOptionalParams,
   ): Promise<TableResourcesMigrateTableToManualThroughputResponse> {
     const poller = await this.beginMigrateTableToManualThroughput(
       resourceGroupName,
       accountName,
       tableName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -661,32 +681,29 @@ export class TableResourcesImpl implements TableResources {
     accountName: string,
     tableName: string,
     location: ContinuousBackupRestoreLocation,
-    options?: TableResourcesRetrieveContinuousBackupInformationOptionalParams
+    options?: TableResourcesRetrieveContinuousBackupInformationOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        TableResourcesRetrieveContinuousBackupInformationResponse
-      >,
+    SimplePollerLike<
+      OperationState<TableResourcesRetrieveContinuousBackupInformationResponse>,
       TableResourcesRetrieveContinuousBackupInformationResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<TableResourcesRetrieveContinuousBackupInformationResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -695,8 +712,8 @@ export class TableResourcesImpl implements TableResources {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -704,20 +721,23 @@ export class TableResourcesImpl implements TableResources {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, tableName, location, options },
-      retrieveContinuousBackupInformationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, tableName, location, options },
+      spec: retrieveContinuousBackupInformationOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      TableResourcesRetrieveContinuousBackupInformationResponse,
+      OperationState<TableResourcesRetrieveContinuousBackupInformationResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -736,14 +756,14 @@ export class TableResourcesImpl implements TableResources {
     accountName: string,
     tableName: string,
     location: ContinuousBackupRestoreLocation,
-    options?: TableResourcesRetrieveContinuousBackupInformationOptionalParams
+    options?: TableResourcesRetrieveContinuousBackupInformationOptionalParams,
   ): Promise<TableResourcesRetrieveContinuousBackupInformationResponse> {
     const poller = await this.beginRetrieveContinuousBackupInformation(
       resourceGroupName,
       accountName,
       tableName,
       location,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -752,32 +772,12 @@ export class TableResourcesImpl implements TableResources {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listTablesOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.TableListResult
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getTableOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.TableGetResults
-    }
+      bodyMapper: Mappers.TableListResult,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -785,28 +785,45 @@ const getTableOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.tableName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getTableOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.TableGetResults,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.tableName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createUpdateTableOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.TableGetResults
+      bodyMapper: Mappers.TableGetResults,
     },
     201: {
-      bodyMapper: Mappers.TableGetResults
+      bodyMapper: Mappers.TableGetResults,
     },
     202: {
-      bodyMapper: Mappers.TableGetResults
+      bodyMapper: Mappers.TableGetResults,
     },
     204: {
-      bodyMapper: Mappers.TableGetResults
-    }
+      bodyMapper: Mappers.TableGetResults,
+    },
   },
   requestBody: Parameters.createUpdateTableParameters,
   queryParameters: [Parameters.apiVersion],
@@ -815,35 +832,28 @@ const createUpdateTableOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.tableName
+    Parameters.tableName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteTableOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}",
   httpMethod: "DELETE",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {} },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.tableName
-  ],
-  serializer
-};
-const getTableThroughputOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/throughputSettings/default",
-  httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
-    }
+      headersMapper: Mappers.TableResourcesDeleteTableHeaders,
+    },
+    201: {
+      headersMapper: Mappers.TableResourcesDeleteTableHeaders,
+    },
+    202: {
+      headersMapper: Mappers.TableResourcesDeleteTableHeaders,
+    },
+    204: {
+      headersMapper: Mappers.TableResourcesDeleteTableHeaders,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -851,28 +861,45 @@ const getTableThroughputOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.tableName
+    Parameters.tableName,
+  ],
+  serializer,
+};
+const getTableThroughputOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/throughputSettings/default",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.tableName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const updateTableThroughputOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/throughputSettings/default",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/throughputSettings/default",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     201: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     202: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     204: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
-    }
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
+    },
   },
   requestBody: Parameters.updateThroughputParameters,
   queryParameters: [Parameters.apiVersion],
@@ -881,32 +908,31 @@ const updateTableThroughputOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.tableName
+    Parameters.tableName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const migrateTableToAutoscaleOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/throughputSettings/default/migrateToAutoscale",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/throughputSettings/default/migrateToAutoscale",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     201: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     202: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     204: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -914,31 +940,30 @@ const migrateTableToAutoscaleOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.tableName
+    Parameters.tableName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const migrateTableToManualThroughputOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/throughputSettings/default/migrateToManualThroughput",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/throughputSettings/default/migrateToManualThroughput",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     201: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     202: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     204: {
-      bodyMapper: Mappers.ThroughputSettingsGetResults
+      bodyMapper: Mappers.ThroughputSettingsGetResults,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -946,42 +971,42 @@ const migrateTableToManualThroughputOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.tableName
+    Parameters.tableName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
-const retrieveContinuousBackupInformationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/retrieveContinuousBackupInformation",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.BackupInformation
+const retrieveContinuousBackupInformationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/tables/{tableName}/retrieveContinuousBackupInformation",
+    httpMethod: "POST",
+    responses: {
+      200: {
+        bodyMapper: Mappers.BackupInformation,
+      },
+      201: {
+        bodyMapper: Mappers.BackupInformation,
+      },
+      202: {
+        bodyMapper: Mappers.BackupInformation,
+      },
+      204: {
+        bodyMapper: Mappers.BackupInformation,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorResponse,
+      },
     },
-    201: {
-      bodyMapper: Mappers.BackupInformation
-    },
-    202: {
-      bodyMapper: Mappers.BackupInformation
-    },
-    204: {
-      bodyMapper: Mappers.BackupInformation
-    },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  requestBody: Parameters.location,
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.tableName
-  ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
+    requestBody: Parameters.location,
+    queryParameters: [Parameters.apiVersion],
+    urlParameters: [
+      Parameters.$host,
+      Parameters.subscriptionId,
+      Parameters.resourceGroupName,
+      Parameters.accountName,
+      Parameters.tableName,
+    ],
+    headerParameters: [Parameters.accept, Parameters.contentType],
+    mediaType: "json",
+    serializer,
+  };

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { base64Decode, base64Encode } from "./bufferSerializer";
 
@@ -13,7 +13,7 @@ interface ContinuationToken {
  */
 export function encodeContinuationToken(
   nextPartitionKey?: string,
-  nextRowKey?: string
+  nextRowKey?: string,
 ): string | undefined {
   if (!nextPartitionKey) {
     return undefined;

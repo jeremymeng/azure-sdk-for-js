@@ -26,7 +26,11 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -81,7 +85,7 @@ describe("DigitalTwins test", () => {
 
   it("DigitalTwins delete test", async function () {
     const resArray = new Array();
-    const res = await client.digitalTwins.beginDeleteAndWait(resourceGroup, resourceName)
+    const res = await client.digitalTwins.beginDeleteAndWait(resourceGroup, resourceName, testPollingOptions)
     for await (let item of client.digitalTwins.listByResourceGroup(resourceGroup)) {
       resArray.push(item);
     }

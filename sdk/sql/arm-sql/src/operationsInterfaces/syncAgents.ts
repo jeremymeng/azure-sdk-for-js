@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   SyncAgent,
   SyncAgentsListByServerOptionalParams,
@@ -19,7 +19,7 @@ import {
   SyncAgentsCreateOrUpdateResponse,
   SyncAgentsDeleteOptionalParams,
   SyncAgentsGenerateKeyOptionalParams,
-  SyncAgentsGenerateKeyResponse
+  SyncAgentsGenerateKeyResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -35,7 +35,7 @@ export interface SyncAgents {
   listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: SyncAgentsListByServerOptionalParams
+    options?: SyncAgentsListByServerOptionalParams,
   ): PagedAsyncIterableIterator<SyncAgent>;
   /**
    * Lists databases linked to a sync agent.
@@ -49,7 +49,7 @@ export interface SyncAgents {
     resourceGroupName: string,
     serverName: string,
     syncAgentName: string,
-    options?: SyncAgentsListLinkedDatabasesOptionalParams
+    options?: SyncAgentsListLinkedDatabasesOptionalParams,
   ): PagedAsyncIterableIterator<SyncAgentLinkedDatabase>;
   /**
    * Gets a sync agent.
@@ -63,7 +63,7 @@ export interface SyncAgents {
     resourceGroupName: string,
     serverName: string,
     syncAgentName: string,
-    options?: SyncAgentsGetOptionalParams
+    options?: SyncAgentsGetOptionalParams,
   ): Promise<SyncAgentsGetResponse>;
   /**
    * Creates or updates a sync agent.
@@ -79,10 +79,10 @@ export interface SyncAgents {
     serverName: string,
     syncAgentName: string,
     parameters: SyncAgent,
-    options?: SyncAgentsCreateOrUpdateOptionalParams
+    options?: SyncAgentsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SyncAgentsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<SyncAgentsCreateOrUpdateResponse>,
       SyncAgentsCreateOrUpdateResponse
     >
   >;
@@ -100,7 +100,7 @@ export interface SyncAgents {
     serverName: string,
     syncAgentName: string,
     parameters: SyncAgent,
-    options?: SyncAgentsCreateOrUpdateOptionalParams
+    options?: SyncAgentsCreateOrUpdateOptionalParams,
   ): Promise<SyncAgentsCreateOrUpdateResponse>;
   /**
    * Deletes a sync agent.
@@ -114,8 +114,8 @@ export interface SyncAgents {
     resourceGroupName: string,
     serverName: string,
     syncAgentName: string,
-    options?: SyncAgentsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: SyncAgentsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a sync agent.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -128,7 +128,7 @@ export interface SyncAgents {
     resourceGroupName: string,
     serverName: string,
     syncAgentName: string,
-    options?: SyncAgentsDeleteOptionalParams
+    options?: SyncAgentsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Generates a sync agent key.
@@ -142,6 +142,6 @@ export interface SyncAgents {
     resourceGroupName: string,
     serverName: string,
     syncAgentName: string,
-    options?: SyncAgentsGenerateKeyOptionalParams
+    options?: SyncAgentsGenerateKeyOptionalParams,
   ): Promise<SyncAgentsGenerateKeyResponse>;
 }

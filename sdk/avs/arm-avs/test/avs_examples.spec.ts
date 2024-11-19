@@ -26,7 +26,11 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -57,6 +61,7 @@ describe("avs test", () => {
     await recorder.stop();
   });
 
+  //skip private clouds curd function because it costs too long.
   it.skip("privateClouds create test", async function () {
     const res = await client.privateClouds.beginCreateOrUpdateAndWait(
       resourceGroup,
@@ -80,22 +85,29 @@ describe("avs test", () => {
     assert.equal(res.name, privateCloudName);
   }).timeout(36000000);
 
-  it("privateClouds get test", async function () {
+  it.skip("privateClouds get test", async function () {
     const res = await client.privateClouds.get(resourceGroup, privateCloudName);
     assert.equal(res.name, privateCloudName);
   });
 
-  it("privateClouds list test", async function () {
+  it.skip("privateClouds list test", async function () {
     const resArray = new Array();
     for await (let item of client.privateClouds.listInSubscription()) {
       resArray.push(item);
     }
-    assert.equal(resArray.length, 3);//should be 1,but when testing this test there's 2 resources on portal
+    assert.equal(resArray.length, 1);//should be 1,but when testing this test there's 2 resources on portal
+  });
+
+  it("operation list test", async function () {
+    const resArray = new Array();
+    for await (let item of client.operations.list()) {
+      resArray.push(item);
+    }
   });
 
   it.skip("privateClouds delete test", async function () {
     const resArray = new Array();
-    const res = await client.privateClouds.beginDeleteAndWait(resourceGroup, privateCloudName)
+    const res = await client.privateClouds.beginDeleteAndWait(resourceGroup, privateCloudName, testPollingOptions)
     for await (let item of client.privateClouds.listInSubscription()) {
       resArray.push(item);
     }

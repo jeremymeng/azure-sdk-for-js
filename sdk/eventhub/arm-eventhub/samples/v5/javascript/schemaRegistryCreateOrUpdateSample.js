@@ -10,16 +10,18 @@
 // Licensed under the MIT License.
 const { EventHubManagementClient } = require("@azure/arm-eventhub");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
- * This sample demonstrates how to
+ * This sample demonstrates how to Creates or Updates an EventHub schema group.
  *
- * @summary
- * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2021-11-01/examples/SchemaRegistry/SchemaRegistryCreate.json
+ * @summary Creates or Updates an EventHub schema group.
+ * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2024-01-01/examples/SchemaRegistry/SchemaRegistryCreate.json
  */
 async function schemaRegistryCreate() {
-  const subscriptionId = "e8baea74-64ce-459b-bee3-5aa4c47b3ae3";
-  const resourceGroupName = "alitest";
+  const subscriptionId =
+    process.env["EVENTHUB_SUBSCRIPTION_ID"] || "e8baea74-64ce-459b-bee3-5aa4c47b3ae3";
+  const resourceGroupName = process.env["EVENTHUB_RESOURCE_GROUP"] || "alitest";
   const namespaceName = "ali-ua-test-eh-system-1";
   const schemaGroupName = "testSchemaGroup1";
   const parameters = {
@@ -33,9 +35,13 @@ async function schemaRegistryCreate() {
     resourceGroupName,
     namespaceName,
     schemaGroupName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
 
-schemaRegistryCreate().catch(console.error);
+async function main() {
+  schemaRegistryCreate();
+}
+
+main().catch(console.error);

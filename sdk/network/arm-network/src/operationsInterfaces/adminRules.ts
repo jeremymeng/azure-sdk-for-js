@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   BaseAdminRuleUnion,
   AdminRulesListOptionalParams,
@@ -15,7 +15,7 @@ import {
   AdminRulesGetResponse,
   AdminRulesCreateOrUpdateOptionalParams,
   AdminRulesCreateOrUpdateResponse,
-  AdminRulesDeleteOptionalParams
+  AdminRulesDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -34,7 +34,7 @@ export interface AdminRules {
     networkManagerName: string,
     configurationName: string,
     ruleCollectionName: string,
-    options?: AdminRulesListOptionalParams
+    options?: AdminRulesListOptionalParams,
   ): PagedAsyncIterableIterator<BaseAdminRuleUnion>;
   /**
    * Gets a network manager security configuration admin rule.
@@ -51,7 +51,7 @@ export interface AdminRules {
     configurationName: string,
     ruleCollectionName: string,
     ruleName: string,
-    options?: AdminRulesGetOptionalParams
+    options?: AdminRulesGetOptionalParams,
   ): Promise<AdminRulesGetResponse>;
   /**
    * Creates or updates an admin rule.
@@ -70,7 +70,7 @@ export interface AdminRules {
     ruleCollectionName: string,
     ruleName: string,
     adminRule: BaseAdminRuleUnion,
-    options?: AdminRulesCreateOrUpdateOptionalParams
+    options?: AdminRulesCreateOrUpdateOptionalParams,
   ): Promise<AdminRulesCreateOrUpdateResponse>;
   /**
    * Deletes an admin rule.
@@ -87,8 +87,8 @@ export interface AdminRules {
     configurationName: string,
     ruleCollectionName: string,
     ruleName: string,
-    options?: AdminRulesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: AdminRulesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes an admin rule.
    * @param resourceGroupName The name of the resource group.
@@ -104,6 +104,6 @@ export interface AdminRules {
     configurationName: string,
     ruleCollectionName: string,
     ruleName: string,
-    options?: AdminRulesDeleteOptionalParams
+    options?: AdminRulesDeleteOptionalParams,
   ): Promise<void>;
 }

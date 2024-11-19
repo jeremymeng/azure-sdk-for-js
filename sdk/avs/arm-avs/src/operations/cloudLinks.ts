@@ -6,14 +6,19 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { CloudLinks } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { AzureVMwareSolutionAPI } from "../azureVMwareSolutionAPI";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   CloudLink,
   CloudLinksListNextOptionalParams,
@@ -24,7 +29,7 @@ import {
   CloudLinksCreateOrUpdateOptionalParams,
   CloudLinksCreateOrUpdateResponse,
   CloudLinksDeleteOptionalParams,
-  CloudLinksListNextResponse
+  CloudLinksListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -41,7 +46,7 @@ export class CloudLinksImpl implements CloudLinks {
   }
 
   /**
-   * List cloud link in a private cloud
+   * List CloudLink resources by PrivateCloud
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
    * @param options The options parameters.
@@ -49,12 +54,12 @@ export class CloudLinksImpl implements CloudLinks {
   public list(
     resourceGroupName: string,
     privateCloudName: string,
-    options?: CloudLinksListOptionalParams
+    options?: CloudLinksListOptionalParams,
   ): PagedAsyncIterableIterator<CloudLink> {
     const iter = this.listPagingAll(
       resourceGroupName,
       privateCloudName,
-      options
+      options,
     );
     return {
       next() {
@@ -63,52 +68,65 @@ export class CloudLinksImpl implements CloudLinks {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listPagingPage(
           resourceGroupName,
           privateCloudName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listPagingPage(
     resourceGroupName: string,
     privateCloudName: string,
-    options?: CloudLinksListOptionalParams
+    options?: CloudLinksListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<CloudLink[]> {
-    let result = await this._list(resourceGroupName, privateCloudName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: CloudLinksListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(resourceGroupName, privateCloudName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(
         resourceGroupName,
         privateCloudName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listPagingAll(
     resourceGroupName: string,
     privateCloudName: string,
-    options?: CloudLinksListOptionalParams
+    options?: CloudLinksListOptionalParams,
   ): AsyncIterableIterator<CloudLink> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       privateCloudName,
-      options
+      options,
     )) {
       yield* page;
     }
   }
 
   /**
-   * List cloud link in a private cloud
+   * List CloudLink resources by PrivateCloud
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
    * @param options The options parameters.
@@ -116,39 +134,39 @@ export class CloudLinksImpl implements CloudLinks {
   private _list(
     resourceGroupName: string,
     privateCloudName: string,
-    options?: CloudLinksListOptionalParams
+    options?: CloudLinksListOptionalParams,
   ): Promise<CloudLinksListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
   /**
-   * Get an cloud link by name in a private cloud
+   * Get a CloudLink
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param cloudLinkName Name of the cloud link resource
+   * @param cloudLinkName Name of the cloud link.
    * @param options The options parameters.
    */
   get(
     resourceGroupName: string,
     privateCloudName: string,
     cloudLinkName: string,
-    options?: CloudLinksGetOptionalParams
+    options?: CloudLinksGetOptionalParams,
   ): Promise<CloudLinksGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, cloudLinkName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
-   * Create or update a cloud link in a private cloud
+   * Create a CloudLink
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
-   * @param privateCloudName The name of the private cloud.
-   * @param cloudLinkName Name of the cloud link resource
-   * @param cloudLink A cloud link in the private cloud
+   * @param privateCloudName Name of the private cloud
+   * @param cloudLinkName Name of the cloud link.
+   * @param cloudLink Resource create parameters.
    * @param options The options parameters.
    */
   async beginCreateOrUpdate(
@@ -156,30 +174,29 @@ export class CloudLinksImpl implements CloudLinks {
     privateCloudName: string,
     cloudLinkName: string,
     cloudLink: CloudLink,
-    options?: CloudLinksCreateOrUpdateOptionalParams
+    options?: CloudLinksCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CloudLinksCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<CloudLinksCreateOrUpdateResponse>,
       CloudLinksCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CloudLinksCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -188,8 +205,8 @@ export class CloudLinksImpl implements CloudLinks {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -197,36 +214,40 @@ export class CloudLinksImpl implements CloudLinks {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         privateCloudName,
         cloudLinkName,
         cloudLink,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CloudLinksCreateOrUpdateResponse,
+      OperationState<CloudLinksCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Create or update a cloud link in a private cloud
+   * Create a CloudLink
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
-   * @param privateCloudName The name of the private cloud.
-   * @param cloudLinkName Name of the cloud link resource
-   * @param cloudLink A cloud link in the private cloud
+   * @param privateCloudName Name of the private cloud
+   * @param cloudLinkName Name of the cloud link.
+   * @param cloudLink Resource create parameters.
    * @param options The options parameters.
    */
   async beginCreateOrUpdateAndWait(
@@ -234,48 +255,47 @@ export class CloudLinksImpl implements CloudLinks {
     privateCloudName: string,
     cloudLinkName: string,
     cloudLink: CloudLink,
-    options?: CloudLinksCreateOrUpdateOptionalParams
+    options?: CloudLinksCreateOrUpdateOptionalParams,
   ): Promise<CloudLinksCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       privateCloudName,
       cloudLinkName,
       cloudLink,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * Delete a cloud link in a private cloud
+   * Delete a CloudLink
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param cloudLinkName Name of the cloud link resource
+   * @param cloudLinkName Name of the cloud link.
    * @param options The options parameters.
    */
   async beginDelete(
     resourceGroupName: string,
     privateCloudName: string,
     cloudLinkName: string,
-    options?: CloudLinksDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudLinksDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -284,8 +304,8 @@ export class CloudLinksImpl implements CloudLinks {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -293,42 +313,43 @@ export class CloudLinksImpl implements CloudLinks {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, privateCloudName, cloudLinkName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, privateCloudName, cloudLinkName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Delete a cloud link in a private cloud
+   * Delete a CloudLink
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param cloudLinkName Name of the cloud link resource
+   * @param cloudLinkName Name of the cloud link.
    * @param options The options parameters.
    */
   async beginDeleteAndWait(
     resourceGroupName: string,
     privateCloudName: string,
     cloudLinkName: string,
-    options?: CloudLinksDeleteOptionalParams
+    options?: CloudLinksDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       privateCloudName,
       cloudLinkName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -344,11 +365,11 @@ export class CloudLinksImpl implements CloudLinks {
     resourceGroupName: string,
     privateCloudName: string,
     nextLink: string,
-    options?: CloudLinksListNextOptionalParams
+    options?: CloudLinksListNextOptionalParams,
   ): Promise<CloudLinksListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -356,38 +377,15 @@ export class CloudLinksImpl implements CloudLinks {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/cloudLinks",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/cloudLinks",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudLinkList
+      bodyMapper: Mappers.CloudLinkList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.privateCloudName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/cloudLinks/{cloudLinkName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.CloudLink
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -395,31 +393,51 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
-    Parameters.cloudLinkName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/cloudLinks/{cloudLinkName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.CloudLink,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.privateCloudName,
+    Parameters.cloudLinkName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/cloudLinks/{cloudLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/cloudLinks/{cloudLinkName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudLink
+      bodyMapper: Mappers.CloudLink,
     },
     201: {
-      bodyMapper: Mappers.CloudLink
+      bodyMapper: Mappers.CloudLink,
     },
     202: {
-      bodyMapper: Mappers.CloudLink
+      bodyMapper: Mappers.CloudLink,
     },
     204: {
-      bodyMapper: Mappers.CloudLink
+      bodyMapper: Mappers.CloudLink,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.cloudLink,
   queryParameters: [Parameters.apiVersion],
@@ -428,15 +446,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
-    Parameters.cloudLinkName
+    Parameters.cloudLinkName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/cloudLinks/{cloudLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/cloudLinks/{cloudLinkName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -444,8 +461,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -453,30 +470,29 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
-    Parameters.cloudLinkName
+    Parameters.cloudLinkName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudLinkList
+      bodyMapper: Mappers.CloudLinkList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.privateCloudName
+    Parameters.privateCloudName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

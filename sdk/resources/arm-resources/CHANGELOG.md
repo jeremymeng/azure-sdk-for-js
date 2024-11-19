@@ -1,6 +1,6 @@
 # Release History
 
-## 5.1.1 (Unreleased)
+## 5.2.1 (Unreleased)
 
 ### Features Added
 
@@ -10,9 +10,40 @@
 
 ### Other Changes
 
+## 5.2.0 (2023-03-13)
+    
+### Features Added
+
+  - Interface DeploymentOperationsListAtManagementGroupScopeNextOptionalParams no longer has parameter top
+  - Interface DeploymentOperationsListAtScopeNextOptionalParams no longer has parameter top
+  - Interface DeploymentOperationsListAtSubscriptionScopeNextOptionalParams no longer has parameter top
+  - Interface DeploymentOperationsListAtTenantScopeNextOptionalParams no longer has parameter top
+  - Interface DeploymentOperationsListNextOptionalParams no longer has parameter top
+  - Interface DeploymentsListAtManagementGroupScopeNextOptionalParams no longer has parameter filter
+  - Interface DeploymentsListAtManagementGroupScopeNextOptionalParams no longer has parameter top
+  - Interface DeploymentsListAtScopeNextOptionalParams no longer has parameter filter
+  - Interface DeploymentsListAtScopeNextOptionalParams no longer has parameter top
+  - Interface DeploymentsListAtSubscriptionScopeNextOptionalParams no longer has parameter filter
+  - Interface DeploymentsListAtSubscriptionScopeNextOptionalParams no longer has parameter top
+  - Interface DeploymentsListAtTenantScopeNextOptionalParams no longer has parameter filter
+  - Interface DeploymentsListAtTenantScopeNextOptionalParams no longer has parameter top
+  - Interface DeploymentsListByResourceGroupNextOptionalParams no longer has parameter filter
+  - Interface DeploymentsListByResourceGroupNextOptionalParams no longer has parameter top
+  - Interface ProvidersListAtTenantScopeNextOptionalParams no longer has parameter expand
+  - Interface ProvidersListNextOptionalParams no longer has parameter expand
+  - Interface ResourceGroupsListNextOptionalParams no longer has parameter filter
+  - Interface ResourceGroupsListNextOptionalParams no longer has parameter top
+  - Interface ResourcesListByResourceGroupNextOptionalParams no longer has parameter expand
+  - Interface ResourcesListByResourceGroupNextOptionalParams no longer has parameter filter
+  - Interface ResourcesListByResourceGroupNextOptionalParams no longer has parameter top
+  - Interface ResourcesListNextOptionalParams no longer has parameter expand
+  - Interface ResourcesListNextOptionalParams no longer has parameter filter
+  - Interface ResourcesListNextOptionalParams no longer has parameter top
+    
+    
 ## 5.1.0 (2022-11-10)
     
-**Features**
+### Features Added
 
   - Added Interface DeploymentWhatIfProperties
   - Added Interface GenericResource
@@ -20,7 +51,7 @@
     
 ## 5.0.1 (2022-04-18)
 
-**features**
+### Features Added
 
   - Bug fix
 
@@ -32,4 +63,4 @@ To understand the detail of the change, please refer to [Changelog](https://aka.
 
 To migrate the existing applications to the latest version, please refer to [Migration Guide](https://aka.ms/js-track2-migration-guide).
 
-To learn more, please refer to our documentation [Quick Start](https://aka.ms/js-track2-quickstart).
+To learn more, please refer to our documentation [Quick Start](https://aka.ms/azsdk/js/mgmt/quickstart ).

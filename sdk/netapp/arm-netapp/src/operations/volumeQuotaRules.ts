@@ -6,14 +6,18 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
 import { VolumeQuotaRules } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetAppManagementClient } from "../netAppManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   VolumeQuotaRule,
   VolumeQuotaRulesListByVolumeOptionalParams,
@@ -25,7 +29,7 @@ import {
   VolumeQuotaRulePatch,
   VolumeQuotaRulesUpdateOptionalParams,
   VolumeQuotaRulesUpdateResponse,
-  VolumeQuotaRulesDeleteOptionalParams
+  VolumeQuotaRulesDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -43,7 +47,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
 
   /**
    * List all quota rules associated with the volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -54,14 +58,14 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumeQuotaRulesListByVolumeOptionalParams
+    options?: VolumeQuotaRulesListByVolumeOptionalParams,
   ): PagedAsyncIterableIterator<VolumeQuotaRule> {
     const iter = this.listByVolumePagingAll(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     return {
       next() {
@@ -70,15 +74,19 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listByVolumePagingPage(
           resourceGroupName,
           accountName,
           poolName,
           volumeName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -87,14 +95,16 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumeQuotaRulesListByVolumeOptionalParams
+    options?: VolumeQuotaRulesListByVolumeOptionalParams,
+    _settings?: PageSettings,
   ): AsyncIterableIterator<VolumeQuotaRule[]> {
-    let result = await this._listByVolume(
+    let result: VolumeQuotaRulesListByVolumeResponse;
+    result = await this._listByVolume(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     yield result.value || [];
   }
@@ -104,14 +114,14 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumeQuotaRulesListByVolumeOptionalParams
+    options?: VolumeQuotaRulesListByVolumeOptionalParams,
   ): AsyncIterableIterator<VolumeQuotaRule> {
     for await (const page of this.listByVolumePagingPage(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -119,7 +129,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
 
   /**
    * List all quota rules associated with the volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -130,17 +140,17 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumeQuotaRulesListByVolumeOptionalParams
+    options?: VolumeQuotaRulesListByVolumeOptionalParams,
   ): Promise<VolumeQuotaRulesListByVolumeResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, poolName, volumeName, options },
-      listByVolumeOperationSpec
+      listByVolumeOperationSpec,
     );
   }
 
   /**
    * Get details of the specified quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -153,7 +163,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     poolName: string,
     volumeName: string,
     volumeQuotaRuleName: string,
-    options?: VolumeQuotaRulesGetOptionalParams
+    options?: VolumeQuotaRulesGetOptionalParams,
   ): Promise<VolumeQuotaRulesGetResponse> {
     return this.client.sendOperationRequest(
       {
@@ -162,15 +172,15 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
         poolName,
         volumeName,
         volumeQuotaRuleName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
    * Create the specified quota rule within the given volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -185,30 +195,29 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     volumeName: string,
     volumeQuotaRuleName: string,
     body: VolumeQuotaRule,
-    options?: VolumeQuotaRulesCreateOptionalParams
+    options?: VolumeQuotaRulesCreateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VolumeQuotaRulesCreateResponse>,
+    SimplePollerLike<
+      OperationState<VolumeQuotaRulesCreateResponse>,
       VolumeQuotaRulesCreateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VolumeQuotaRulesCreateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -217,8 +226,8 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -226,28 +235,31 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         accountName,
         poolName,
         volumeName,
         volumeQuotaRuleName,
         body,
-        options
+        options,
       },
-      createOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: createOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumeQuotaRulesCreateResponse,
+      OperationState<VolumeQuotaRulesCreateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -255,7 +267,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
 
   /**
    * Create the specified quota rule within the given volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -270,7 +282,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     volumeName: string,
     volumeQuotaRuleName: string,
     body: VolumeQuotaRule,
-    options?: VolumeQuotaRulesCreateOptionalParams
+    options?: VolumeQuotaRulesCreateOptionalParams,
   ): Promise<VolumeQuotaRulesCreateResponse> {
     const poller = await this.beginCreate(
       resourceGroupName,
@@ -279,14 +291,14 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
       volumeName,
       volumeQuotaRuleName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Patch a quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -301,30 +313,29 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     volumeName: string,
     volumeQuotaRuleName: string,
     body: VolumeQuotaRulePatch,
-    options?: VolumeQuotaRulesUpdateOptionalParams
+    options?: VolumeQuotaRulesUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VolumeQuotaRulesUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VolumeQuotaRulesUpdateResponse>,
       VolumeQuotaRulesUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VolumeQuotaRulesUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -333,8 +344,8 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -342,28 +353,31 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         accountName,
         poolName,
         volumeName,
         volumeQuotaRuleName,
         body,
-        options
+        options,
       },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumeQuotaRulesUpdateResponse,
+      OperationState<VolumeQuotaRulesUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -371,7 +385,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
 
   /**
    * Patch a quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -386,7 +400,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     volumeName: string,
     volumeQuotaRuleName: string,
     body: VolumeQuotaRulePatch,
-    options?: VolumeQuotaRulesUpdateOptionalParams
+    options?: VolumeQuotaRulesUpdateOptionalParams,
   ): Promise<VolumeQuotaRulesUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
@@ -395,14 +409,14 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
       volumeName,
       volumeQuotaRuleName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Delete quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -415,25 +429,24 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     poolName: string,
     volumeName: string,
     volumeQuotaRuleName: string,
-    options?: VolumeQuotaRulesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumeQuotaRulesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -442,8 +455,8 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -451,27 +464,27 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         accountName,
         poolName,
         volumeName,
         volumeQuotaRuleName,
-        options
+        options,
       },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -479,7 +492,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
 
   /**
    * Delete quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -492,7 +505,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
     poolName: string,
     volumeName: string,
     volumeQuotaRuleName: string,
-    options?: VolumeQuotaRulesDeleteOptionalParams
+    options?: VolumeQuotaRulesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
@@ -500,7 +513,7 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
       poolName,
       volumeName,
       volumeQuotaRuleName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -509,36 +522,15 @@ export class VolumeQuotaRulesImpl implements VolumeQuotaRules {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listByVolumeOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VolumeQuotaRulesList
+      bodyMapper: Mappers.VolumeQuotaRulesList,
     },
-    default: {}
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules/{volumeQuotaRuleName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.VolumeQuotaRule
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {}
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -548,31 +540,55 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.accountName,
     Parameters.poolName,
     Parameters.volumeName,
-    Parameters.volumeQuotaRuleName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules/{volumeQuotaRuleName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.VolumeQuotaRule,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+    Parameters.volumeQuotaRuleName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules/{volumeQuotaRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules/{volumeQuotaRuleName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.VolumeQuotaRule
+      bodyMapper: Mappers.VolumeQuotaRule,
     },
     201: {
-      bodyMapper: Mappers.VolumeQuotaRule
+      bodyMapper: Mappers.VolumeQuotaRule,
     },
     202: {
-      bodyMapper: Mappers.VolumeQuotaRule
+      bodyMapper: Mappers.VolumeQuotaRule,
     },
     204: {
-      bodyMapper: Mappers.VolumeQuotaRule
+      bodyMapper: Mappers.VolumeQuotaRule,
     },
-    default: {}
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  requestBody: Parameters.body24,
+  requestBody: Parameters.body27,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
@@ -581,32 +597,33 @@ const createOperationSpec: coreClient.OperationSpec = {
     Parameters.accountName,
     Parameters.poolName,
     Parameters.volumeName,
-    Parameters.volumeQuotaRuleName
+    Parameters.volumeQuotaRuleName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules/{volumeQuotaRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules/{volumeQuotaRuleName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.VolumeQuotaRule
+      bodyMapper: Mappers.VolumeQuotaRule,
     },
     201: {
-      bodyMapper: Mappers.VolumeQuotaRule
+      bodyMapper: Mappers.VolumeQuotaRule,
     },
     202: {
-      bodyMapper: Mappers.VolumeQuotaRule
+      bodyMapper: Mappers.VolumeQuotaRule,
     },
     204: {
-      bodyMapper: Mappers.VolumeQuotaRule
+      bodyMapper: Mappers.VolumeQuotaRule,
     },
-    default: {}
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  requestBody: Parameters.body25,
+  requestBody: Parameters.body28,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
@@ -615,17 +632,24 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.accountName,
     Parameters.poolName,
     Parameters.volumeName,
-    Parameters.volumeQuotaRuleName
+    Parameters.volumeQuotaRuleName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules/{volumeQuotaRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/volumeQuotaRules/{volumeQuotaRuleName}",
   httpMethod: "DELETE",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
@@ -634,7 +658,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.accountName,
     Parameters.poolName,
     Parameters.volumeName,
-    Parameters.volumeQuotaRuleName
+    Parameters.volumeQuotaRuleName,
   ],
-  serializer
+  headerParameters: [Parameters.accept],
+  serializer,
 };

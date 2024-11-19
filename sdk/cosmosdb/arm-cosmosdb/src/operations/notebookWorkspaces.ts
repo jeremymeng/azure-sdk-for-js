@@ -12,8 +12,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { CosmosDBManagementClient } from "../cosmosDBManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   NotebookWorkspace,
   NotebookWorkspacesListByDatabaseAccountOptionalParams,
@@ -28,7 +32,7 @@ import {
   NotebookWorkspacesListConnectionInfoOptionalParams,
   NotebookWorkspacesListConnectionInfoResponse,
   NotebookWorkspacesRegenerateAuthTokenOptionalParams,
-  NotebookWorkspacesStartOptionalParams
+  NotebookWorkspacesStartOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -53,12 +57,12 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
   public listByDatabaseAccount(
     resourceGroupName: string,
     accountName: string,
-    options?: NotebookWorkspacesListByDatabaseAccountOptionalParams
+    options?: NotebookWorkspacesListByDatabaseAccountOptionalParams,
   ): PagedAsyncIterableIterator<NotebookWorkspace> {
     const iter = this.listByDatabaseAccountPagingAll(
       resourceGroupName,
       accountName,
-      options
+      options,
     );
     return {
       next() {
@@ -75,9 +79,9 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
           resourceGroupName,
           accountName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -85,13 +89,13 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     resourceGroupName: string,
     accountName: string,
     options?: NotebookWorkspacesListByDatabaseAccountOptionalParams,
-    _settings?: PageSettings
+    _settings?: PageSettings,
   ): AsyncIterableIterator<NotebookWorkspace[]> {
     let result: NotebookWorkspacesListByDatabaseAccountResponse;
     result = await this._listByDatabaseAccount(
       resourceGroupName,
       accountName,
-      options
+      options,
     );
     yield result.value || [];
   }
@@ -99,12 +103,12 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
   private async *listByDatabaseAccountPagingAll(
     resourceGroupName: string,
     accountName: string,
-    options?: NotebookWorkspacesListByDatabaseAccountOptionalParams
+    options?: NotebookWorkspacesListByDatabaseAccountOptionalParams,
   ): AsyncIterableIterator<NotebookWorkspace> {
     for await (const page of this.listByDatabaseAccountPagingPage(
       resourceGroupName,
       accountName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -119,11 +123,11 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
   private _listByDatabaseAccount(
     resourceGroupName: string,
     accountName: string,
-    options?: NotebookWorkspacesListByDatabaseAccountOptionalParams
+    options?: NotebookWorkspacesListByDatabaseAccountOptionalParams,
   ): Promise<NotebookWorkspacesListByDatabaseAccountResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, options },
-      listByDatabaseAccountOperationSpec
+      listByDatabaseAccountOperationSpec,
     );
   }
 
@@ -138,11 +142,11 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     resourceGroupName: string,
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
-    options?: NotebookWorkspacesGetOptionalParams
+    options?: NotebookWorkspacesGetOptionalParams,
   ): Promise<NotebookWorkspacesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, notebookWorkspaceName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -160,30 +164,29 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
     notebookCreateUpdateParameters: NotebookWorkspaceCreateUpdateParameters,
-    options?: NotebookWorkspacesCreateOrUpdateOptionalParams
+    options?: NotebookWorkspacesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<NotebookWorkspacesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<NotebookWorkspacesCreateOrUpdateResponse>,
       NotebookWorkspacesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<NotebookWorkspacesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -192,8 +195,8 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -201,25 +204,28 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         accountName,
         notebookWorkspaceName,
         notebookCreateUpdateParameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      NotebookWorkspacesCreateOrUpdateResponse,
+      OperationState<NotebookWorkspacesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -239,14 +245,14 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
     notebookCreateUpdateParameters: NotebookWorkspaceCreateUpdateParameters,
-    options?: NotebookWorkspacesCreateOrUpdateOptionalParams
+    options?: NotebookWorkspacesCreateOrUpdateOptionalParams,
   ): Promise<NotebookWorkspacesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       accountName,
       notebookWorkspaceName,
       notebookCreateUpdateParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -262,25 +268,24 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     resourceGroupName: string,
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
-    options?: NotebookWorkspacesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: NotebookWorkspacesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -289,8 +294,8 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -298,19 +303,19 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, notebookWorkspaceName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, notebookWorkspaceName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -327,13 +332,13 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     resourceGroupName: string,
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
-    options?: NotebookWorkspacesDeleteOptionalParams
+    options?: NotebookWorkspacesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       accountName,
       notebookWorkspaceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -349,11 +354,11 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     resourceGroupName: string,
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
-    options?: NotebookWorkspacesListConnectionInfoOptionalParams
+    options?: NotebookWorkspacesListConnectionInfoOptionalParams,
   ): Promise<NotebookWorkspacesListConnectionInfoResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, notebookWorkspaceName, options },
-      listConnectionInfoOperationSpec
+      listConnectionInfoOperationSpec,
     );
   }
 
@@ -368,25 +373,24 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     resourceGroupName: string,
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
-    options?: NotebookWorkspacesRegenerateAuthTokenOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: NotebookWorkspacesRegenerateAuthTokenOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -395,8 +399,8 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -404,19 +408,19 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, notebookWorkspaceName, options },
-      regenerateAuthTokenOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, notebookWorkspaceName, options },
+      spec: regenerateAuthTokenOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -433,13 +437,13 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     resourceGroupName: string,
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
-    options?: NotebookWorkspacesRegenerateAuthTokenOptionalParams
+    options?: NotebookWorkspacesRegenerateAuthTokenOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRegenerateAuthToken(
       resourceGroupName,
       accountName,
       notebookWorkspaceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -455,25 +459,24 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     resourceGroupName: string,
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
-    options?: NotebookWorkspacesStartOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: NotebookWorkspacesStartOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -482,8 +485,8 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -491,19 +494,19 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, notebookWorkspaceName, options },
-      startOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, notebookWorkspaceName, options },
+      spec: startOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -520,13 +523,13 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
     resourceGroupName: string,
     accountName: string,
     notebookWorkspaceName: NotebookWorkspaceName,
-    options?: NotebookWorkspacesStartOptionalParams
+    options?: NotebookWorkspacesStartOptionalParams,
   ): Promise<void> {
     const poller = await this.beginStart(
       resourceGroupName,
       accountName,
       notebookWorkspaceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -535,38 +538,15 @@ export class NotebookWorkspacesImpl implements NotebookWorkspaces {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listByDatabaseAccountOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.NotebookWorkspaceListResult
+      bodyMapper: Mappers.NotebookWorkspaceListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.NotebookWorkspace
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -574,31 +554,51 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.notebookWorkspaceName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.NotebookWorkspace,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.notebookWorkspaceName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.NotebookWorkspace
+      bodyMapper: Mappers.NotebookWorkspace,
     },
     201: {
-      bodyMapper: Mappers.NotebookWorkspace
+      bodyMapper: Mappers.NotebookWorkspace,
     },
     202: {
-      bodyMapper: Mappers.NotebookWorkspace
+      bodyMapper: Mappers.NotebookWorkspace,
     },
     204: {
-      bodyMapper: Mappers.NotebookWorkspace
+      bodyMapper: Mappers.NotebookWorkspace,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.notebookCreateUpdateParameters,
   queryParameters: [Parameters.apiVersion],
@@ -607,15 +607,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.notebookWorkspaceName
+    Parameters.notebookWorkspaceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -623,8 +622,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -632,22 +631,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.notebookWorkspaceName
+    Parameters.notebookWorkspaceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listConnectionInfoOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}/listConnectionInfo",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}/listConnectionInfo",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.NotebookWorkspaceConnectionInfoResult
+      bodyMapper: Mappers.NotebookWorkspaceConnectionInfoResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -655,14 +653,13 @@ const listConnectionInfoOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.notebookWorkspaceName
+    Parameters.notebookWorkspaceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const regenerateAuthTokenOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}/regenerateAuthToken",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}/regenerateAuthToken",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -670,8 +667,8 @@ const regenerateAuthTokenOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -679,14 +676,13 @@ const regenerateAuthTokenOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.notebookWorkspaceName
+    Parameters.notebookWorkspaceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const startOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}/start",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/notebookWorkspaces/{notebookWorkspaceName}/start",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -694,8 +690,8 @@ const startOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -703,8 +699,8 @@ const startOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.notebookWorkspaceName
+    Parameters.notebookWorkspaceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

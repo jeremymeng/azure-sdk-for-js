@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Copyright (c) Microsoft.
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
 
 /**
  * This sample illustrates the lifecycle of a component using a scenario that shows how to:
@@ -96,7 +96,7 @@ async function main() {
   // Create digital twin
   const createdTwin = await serviceClient.upsertDigitalTwin(
     digitalTwinId,
-    JSON.stringify(temporaryTwin)
+    JSON.stringify(temporaryTwin),
   );
   console.log(`Created Digital Twin:`);
   console.log(inspect(createdTwin));
@@ -111,7 +111,7 @@ async function main() {
   const updateComponentResponse = await serviceClient.updateComponent(
     digitalTwinId,
     componentPath,
-    [patch]
+    [patch],
   );
   console.log(`Update Component response:`);
   console.log(inspect(updateComponentResponse));

@@ -10,12 +10,12 @@ add-credentials: false
 core-http-compat-mode: true
 use-core-v2: true
 license-header: MICROSOFT_MIT_NO_VERSION
-input-file: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/fead0dec636e7554fb8401370418085136d4f052/specification/keyvault/data-plane/Microsoft.KeyVault/preview/7.4-preview.1/keys.json
+input-file: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/7452e1cc7db72fbc6cd9539b390d8b8e5c2a1864/specification/keyvault/data-plane/Microsoft.KeyVault/stable/7.5/keys.json
 output-folder: ../
 source-code-folder-path: ./src/generated
 disable-async-iterators: true
 api-version-parameter: choice
-package-version: 4.7.0-beta.2
+package-version: 4.9.1
 use-extension:
   "@autorest/typescript": "6.0.0-beta.19"
 ```
@@ -58,4 +58,16 @@ directive:
     where: $.definitions.KeyReleasePolicy.properties.data
     transform: >
       $["x-ms-client-name"] = "encodedPolicy";
+```
+
+## Rename certain models back to what they were before 7.4
+
+```yaml
+directive:
+  - from: certificates.json
+    where: $.definitions.Action
+    transform: $.properties.action_type["x-ms-enum"].name = "ActionType";
+  - from: keys.json
+    where: $.definitions.LifetimeActionsType
+    transform: $.properties.type["x-ms-enum"].name = "ActionType";
 ```

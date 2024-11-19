@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -29,7 +29,7 @@ async function getAvailableSslPredefinedPolicyByName() {
     .path(
       "/subscriptions/{subscriptionId}/providers/Microsoft.Network/applicationGatewayAvailableSslOptions/default/predefinedPolicies/{predefinedPolicyName}",
       subscriptionId,
-      predefinedPolicyName
+      predefinedPolicyName,
     )
     .get(options);
   console.log(result);

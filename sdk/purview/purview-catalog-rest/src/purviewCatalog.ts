@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { getClient, ClientOptions } from "@azure-rest/core-client";
-import { TokenCredential } from "@azure/core-auth";
-import { PurviewCatalogClient } from "./clientDefinitions";
+import type { ClientOptions } from "@azure-rest/core-client";
+import { getClient } from "@azure-rest/core-client";
+import type { TokenCredential } from "@azure/core-auth";
+import type { PurviewCatalogClient } from "./clientDefinitions";
 
 export default function createClient(
   Endpoint: string,
   credentials: TokenCredential,
-  options: ClientOptions = {}
+  options: ClientOptions = {},
 ): PurviewCatalogClient {
   const baseUrl = options.baseUrl ?? `${Endpoint}/catalog/api`;
   options.apiVersion = options.apiVersion ?? "2022-03-01-preview";

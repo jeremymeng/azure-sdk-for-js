@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SecurityCenter } from "../securityCenter";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   AdaptiveNetworkHardening,
   AdaptiveNetworkHardeningsListByExtendedResourceNextOptionalParams,
@@ -24,13 +28,14 @@ import {
   AdaptiveNetworkHardeningsGetResponse,
   AdaptiveNetworkHardeningEnforceRequest,
   AdaptiveNetworkHardeningsEnforceOptionalParams,
-  AdaptiveNetworkHardeningsListByExtendedResourceNextResponse
+  AdaptiveNetworkHardeningsListByExtendedResourceNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing AdaptiveNetworkHardenings operations. */
 export class AdaptiveNetworkHardeningsImpl
-  implements AdaptiveNetworkHardenings {
+  implements AdaptiveNetworkHardenings
+{
   private readonly client: SecurityCenter;
 
   /**
@@ -55,14 +60,14 @@ export class AdaptiveNetworkHardeningsImpl
     resourceNamespace: string,
     resourceType: string,
     resourceName: string,
-    options?: AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams
+    options?: AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams,
   ): PagedAsyncIterableIterator<AdaptiveNetworkHardening> {
     const iter = this.listByExtendedResourcePagingAll(
       resourceGroupName,
       resourceNamespace,
       resourceType,
       resourceName,
-      options
+      options,
     );
     return {
       next() {
@@ -81,9 +86,9 @@ export class AdaptiveNetworkHardeningsImpl
           resourceType,
           resourceName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -93,7 +98,7 @@ export class AdaptiveNetworkHardeningsImpl
     resourceType: string,
     resourceName: string,
     options?: AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<AdaptiveNetworkHardening[]> {
     let result: AdaptiveNetworkHardeningsListByExtendedResourceResponse;
     let continuationToken = settings?.continuationToken;
@@ -103,7 +108,7 @@ export class AdaptiveNetworkHardeningsImpl
         resourceNamespace,
         resourceType,
         resourceName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -117,7 +122,7 @@ export class AdaptiveNetworkHardeningsImpl
         resourceType,
         resourceName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -131,14 +136,14 @@ export class AdaptiveNetworkHardeningsImpl
     resourceNamespace: string,
     resourceType: string,
     resourceName: string,
-    options?: AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams
+    options?: AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams,
   ): AsyncIterableIterator<AdaptiveNetworkHardening> {
     for await (const page of this.listByExtendedResourcePagingPage(
       resourceGroupName,
       resourceNamespace,
       resourceType,
       resourceName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -158,7 +163,7 @@ export class AdaptiveNetworkHardeningsImpl
     resourceNamespace: string,
     resourceType: string,
     resourceName: string,
-    options?: AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams
+    options?: AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams,
   ): Promise<AdaptiveNetworkHardeningsListByExtendedResourceResponse> {
     return this.client.sendOperationRequest(
       {
@@ -166,9 +171,9 @@ export class AdaptiveNetworkHardeningsImpl
         resourceNamespace,
         resourceType,
         resourceName,
-        options
+        options,
       },
-      listByExtendedResourceOperationSpec
+      listByExtendedResourceOperationSpec,
     );
   }
 
@@ -188,7 +193,7 @@ export class AdaptiveNetworkHardeningsImpl
     resourceType: string,
     resourceName: string,
     adaptiveNetworkHardeningResourceName: string,
-    options?: AdaptiveNetworkHardeningsGetOptionalParams
+    options?: AdaptiveNetworkHardeningsGetOptionalParams,
   ): Promise<AdaptiveNetworkHardeningsGetResponse> {
     return this.client.sendOperationRequest(
       {
@@ -197,9 +202,9 @@ export class AdaptiveNetworkHardeningsImpl
         resourceType,
         resourceName,
         adaptiveNetworkHardeningResourceName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -221,25 +226,24 @@ export class AdaptiveNetworkHardeningsImpl
     resourceName: string,
     adaptiveNetworkHardeningResourceName: string,
     body: AdaptiveNetworkHardeningEnforceRequest,
-    options?: AdaptiveNetworkHardeningsEnforceOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: AdaptiveNetworkHardeningsEnforceOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -248,8 +252,8 @@ export class AdaptiveNetworkHardeningsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -257,27 +261,27 @@ export class AdaptiveNetworkHardeningsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         resourceNamespace,
         resourceType,
         resourceName,
         adaptiveNetworkHardeningResourceName,
         body,
-        options
+        options,
       },
-      enforceOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: enforceOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -301,7 +305,7 @@ export class AdaptiveNetworkHardeningsImpl
     resourceName: string,
     adaptiveNetworkHardeningResourceName: string,
     body: AdaptiveNetworkHardeningEnforceRequest,
-    options?: AdaptiveNetworkHardeningsEnforceOptionalParams
+    options?: AdaptiveNetworkHardeningsEnforceOptionalParams,
   ): Promise<void> {
     const poller = await this.beginEnforce(
       resourceGroupName,
@@ -310,7 +314,7 @@ export class AdaptiveNetworkHardeningsImpl
       resourceName,
       adaptiveNetworkHardeningResourceName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -331,7 +335,7 @@ export class AdaptiveNetworkHardeningsImpl
     resourceType: string,
     resourceName: string,
     nextLink: string,
-    options?: AdaptiveNetworkHardeningsListByExtendedResourceNextOptionalParams
+    options?: AdaptiveNetworkHardeningsListByExtendedResourceNextOptionalParams,
   ): Promise<AdaptiveNetworkHardeningsListByExtendedResourceNextResponse> {
     return this.client.sendOperationRequest(
       {
@@ -340,9 +344,9 @@ export class AdaptiveNetworkHardeningsImpl
         resourceType,
         resourceName,
         nextLink,
-        options
+        options,
       },
-      listByExtendedResourceNextOperationSpec
+      listByExtendedResourceNextOperationSpec,
     );
   }
 }
@@ -350,42 +354,17 @@ export class AdaptiveNetworkHardeningsImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listByExtendedResourceOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceNamespace}/{resourceType}/{resourceName}/providers/Microsoft.Security/adaptiveNetworkHardenings",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceNamespace}/{resourceType}/{resourceName}/providers/Microsoft.Security/adaptiveNetworkHardenings",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AdaptiveNetworkHardeningsList
+      bodyMapper: Mappers.AdaptiveNetworkHardeningsList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion10],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.resourceNamespace,
-    Parameters.resourceType,
-    Parameters.resourceName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceNamespace}/{resourceType}/{resourceName}/providers/Microsoft.Security/adaptiveNetworkHardenings/{adaptiveNetworkHardeningResourceName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AdaptiveNetworkHardening
+      bodyMapper: Mappers.CloudError,
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
   },
-  queryParameters: [Parameters.apiVersion10],
+  queryParameters: [Parameters.apiVersion20],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -393,26 +372,22 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceNamespace,
     Parameters.resourceType,
     Parameters.resourceName,
-    Parameters.adaptiveNetworkHardeningResourceName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
-const enforceOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceNamespace}/{resourceType}/{resourceName}/providers/Microsoft.Security/adaptiveNetworkHardenings/{adaptiveNetworkHardeningResourceName}/{adaptiveNetworkHardeningEnforceAction}",
-  httpMethod: "POST",
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceNamespace}/{resourceType}/{resourceName}/providers/Microsoft.Security/adaptiveNetworkHardenings/{adaptiveNetworkHardeningResourceName}",
+  httpMethod: "GET",
   responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
+    200: {
+      bodyMapper: Mappers.AdaptiveNetworkHardening,
+    },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.body1,
-  queryParameters: [Parameters.apiVersion10],
+  queryParameters: [Parameters.apiVersion20],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -421,33 +396,58 @@ const enforceOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceType,
     Parameters.resourceName,
     Parameters.adaptiveNetworkHardeningResourceName,
-    Parameters.adaptiveNetworkHardeningEnforceAction
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const enforceOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceNamespace}/{resourceType}/{resourceName}/providers/Microsoft.Security/adaptiveNetworkHardenings/{adaptiveNetworkHardeningResourceName}/{adaptiveNetworkHardeningEnforceAction}",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.CloudError,
+    },
+  },
+  requestBody: Parameters.body2,
+  queryParameters: [Parameters.apiVersion20],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.resourceNamespace,
+    Parameters.resourceType,
+    Parameters.resourceName,
+    Parameters.adaptiveNetworkHardeningResourceName,
+    Parameters.adaptiveNetworkHardeningEnforceAction,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listByExtendedResourceNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AdaptiveNetworkHardeningsList
+      bodyMapper: Mappers.AdaptiveNetworkHardeningsList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion10],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName,
     Parameters.nextLink,
+    Parameters.resourceGroupName,
     Parameters.resourceNamespace,
     Parameters.resourceType,
-    Parameters.resourceName
+    Parameters.resourceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

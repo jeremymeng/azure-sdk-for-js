@@ -8,40 +8,51 @@
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import {
-  LogSearchRuleResource,
+  ScheduledQueryRuleResource,
   ScheduledQueryRulesListBySubscriptionOptionalParams,
   ScheduledQueryRulesListByResourceGroupOptionalParams,
-  ScheduledQueryRulesCreateOrUpdateOptionalParams,
-  ScheduledQueryRulesCreateOrUpdateResponse,
   ScheduledQueryRulesGetOptionalParams,
   ScheduledQueryRulesGetResponse,
-  LogSearchRuleResourcePatch,
+  ScheduledQueryRulesCreateOrUpdateOptionalParams,
+  ScheduledQueryRulesCreateOrUpdateResponse,
+  ScheduledQueryRuleResourcePatch,
   ScheduledQueryRulesUpdateOptionalParams,
   ScheduledQueryRulesUpdateResponse,
-  ScheduledQueryRulesDeleteOptionalParams
+  ScheduledQueryRulesDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Interface representing a ScheduledQueryRules. */
 export interface ScheduledQueryRules {
   /**
-   * List the Log Search rules within a subscription group.
+   * Retrieve a scheduled query rule definitions in a subscription.
    * @param options The options parameters.
    */
   listBySubscription(
-    options?: ScheduledQueryRulesListBySubscriptionOptionalParams
-  ): PagedAsyncIterableIterator<LogSearchRuleResource>;
+    options?: ScheduledQueryRulesListBySubscriptionOptionalParams,
+  ): PagedAsyncIterableIterator<ScheduledQueryRuleResource>;
   /**
-   * List the Log Search rules within a resource group.
+   * Retrieve scheduled query rule definitions in a resource group.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param options The options parameters.
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: ScheduledQueryRulesListByResourceGroupOptionalParams
-  ): PagedAsyncIterableIterator<LogSearchRuleResource>;
+    options?: ScheduledQueryRulesListByResourceGroupOptionalParams,
+  ): PagedAsyncIterableIterator<ScheduledQueryRuleResource>;
   /**
-   * Creates or updates an log search rule.
+   * Retrieve an scheduled query rule definition.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param ruleName The name of the rule.
+   * @param options The options parameters.
+   */
+  get(
+    resourceGroupName: string,
+    ruleName: string,
+    options?: ScheduledQueryRulesGetOptionalParams,
+  ): Promise<ScheduledQueryRulesGetResponse>;
+  /**
+   * Creates or updates a scheduled query rule.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ruleName The name of the rule.
    * @param parameters The parameters of the rule to create or update.
@@ -50,22 +61,11 @@ export interface ScheduledQueryRules {
   createOrUpdate(
     resourceGroupName: string,
     ruleName: string,
-    parameters: LogSearchRuleResource,
-    options?: ScheduledQueryRulesCreateOrUpdateOptionalParams
+    parameters: ScheduledQueryRuleResource,
+    options?: ScheduledQueryRulesCreateOrUpdateOptionalParams,
   ): Promise<ScheduledQueryRulesCreateOrUpdateResponse>;
   /**
-   * Gets an Log Search rule
-   * @param resourceGroupName The name of the resource group. The name is case insensitive.
-   * @param ruleName The name of the rule.
-   * @param options The options parameters.
-   */
-  get(
-    resourceGroupName: string,
-    ruleName: string,
-    options?: ScheduledQueryRulesGetOptionalParams
-  ): Promise<ScheduledQueryRulesGetResponse>;
-  /**
-   * Update log search Rule.
+   * Update a scheduled query rule.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ruleName The name of the rule.
    * @param parameters The parameters of the rule to update.
@@ -74,11 +74,11 @@ export interface ScheduledQueryRules {
   update(
     resourceGroupName: string,
     ruleName: string,
-    parameters: LogSearchRuleResourcePatch,
-    options?: ScheduledQueryRulesUpdateOptionalParams
+    parameters: ScheduledQueryRuleResourcePatch,
+    options?: ScheduledQueryRulesUpdateOptionalParams,
   ): Promise<ScheduledQueryRulesUpdateResponse>;
   /**
-   * Deletes a Log Search rule
+   * Deletes a scheduled query rule.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param ruleName The name of the rule.
    * @param options The options parameters.
@@ -86,6 +86,6 @@ export interface ScheduledQueryRules {
   delete(
     resourceGroupName: string,
     ruleName: string,
-    options?: ScheduledQueryRulesDeleteOptionalParams
+    options?: ScheduledQueryRulesDeleteOptionalParams,
   ): Promise<void>;
 }

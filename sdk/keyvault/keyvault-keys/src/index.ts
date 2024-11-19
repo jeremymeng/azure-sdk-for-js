@@ -1,29 +1,26 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 /// <reference lib="esnext.asynciterable" />
 
-import { bearerTokenAuthenticationPolicy } from "@azure/core-rest-pipeline";
+import type { TokenCredential } from "@azure/core-auth";
 
-import { TokenCredential } from "@azure/core-auth";
+import { logger } from "./log.js";
 
-import { logger } from "./log";
-
-import "@azure/core-paging";
 import { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
 import { PollOperationState, PollerLike } from "@azure/core-lro";
 
+import type { GetKeysOptionalParams } from "./generated/models/index.js";
 import {
   DeletionRecoveryLevel,
-  GetKeysOptionalParams,
   KnownDeletionRecoveryLevel,
   KnownJsonWebKeyType,
-} from "./generated/models";
-import { KeyVaultClient } from "./generated/keyVaultClient";
-import { SDK_VERSION } from "./constants";
-import { createKeyVaultChallengeCallbacks } from "../../keyvault-common/src";
+} from "./generated/models/index.js";
+import { KeyVaultClient } from "./generated/keyVaultClient.js";
+import { SDK_VERSION } from "./constants.js";
+import { keyVaultAuthenticationPolicy } from "@azure/keyvault-common";
 
-import { DeleteKeyPoller } from "./lro/delete/poller";
-import { RecoverDeletedKeyPoller } from "./lro/recover/poller";
+import { DeleteKeyPoller } from "./lro/delete/poller.js";
+import { RecoverDeletedKeyPoller } from "./lro/recover/poller.js";
 
 import {
   BackupKeyOptions,
@@ -69,10 +66,9 @@ import {
   RotateKeyOptions,
   UpdateKeyPropertiesOptions,
   UpdateKeyRotationPolicyOptions,
-  CreateOkpKeyOptions,
-} from "./keysModels";
+} from "./keysModels.js";
 
-import { CryptographyClient } from "./cryptographyClient";
+import { CryptographyClient } from "./cryptographyClient.js";
 
 import {
   AesCbcDecryptParameters,
@@ -106,16 +102,16 @@ import {
   VerifyResult,
   WrapKeyOptions,
   WrapResult,
-} from "./cryptographyClientModels";
+} from "./cryptographyClientModels.js";
 
-import { KeyVaultKeyIdentifier, parseKeyVaultKeyIdentifier } from "./identifier";
+import { KeyVaultKeyIdentifier, parseKeyVaultKeyIdentifier } from "./identifier.js";
 import {
   getDeletedKeyFromDeletedKeyItem,
   getKeyFromKeyBundle,
   getKeyPropertiesFromKeyItem,
   keyRotationTransformations,
-} from "./transformations";
-import { tracingClient } from "./tracing";
+} from "./transformations.js";
+import { tracingClient } from "./tracing.js";
 
 export {
   CryptographyClientOptions,
@@ -125,7 +121,6 @@ export {
   CreateKeyOptions,
   CreateRsaKeyOptions,
   CreateOctKeyOptions,
-  CreateOkpKeyOptions,
   CryptographyClient,
   CryptographyOptions,
   RsaEncryptionAlgorithm,
@@ -248,7 +243,7 @@ export class KeyClient {
   constructor(
     vaultUrl: string,
     credential: TokenCredential,
-    pipelineOptions: KeyClientOptions = {}
+    pipelineOptions: KeyClientOptions = {},
   ) {
     this.vaultUrl = vaultUrl;
 
@@ -262,12 +257,6 @@ export class KeyClient {
           ? `${userAgentOptions.userAgentPrefix} ${libInfo}`
           : libInfo,
     };
-
-    const authPolicy = bearerTokenAuthenticationPolicy({
-      credential,
-      scopes: [], // Scopes are going to be defined by the challenge callbacks.
-      challengeCallbacks: createKeyVaultChallengeCallbacks(pipelineOptions),
-    });
 
     const internalPipelineOptions = {
       ...pipelineOptions,
@@ -284,9 +273,14 @@ export class KeyClient {
     this.credential = credential;
     this.client = new KeyVaultClient(
       pipelineOptions.serviceVersion || LATEST_API_VERSION,
-      internalPipelineOptions
+      internalPipelineOptions,
     );
-    this.client.pipeline.addPolicy(authPolicy);
+
+    // The authentication policy must come after the deserialization policy since the deserialization policy
+    // converts 401 responses to an Error, and we don't want to deal with that.
+    this.client.pipeline.addPolicy(keyVaultAuthenticationPolicy(credential, pipelineOptions), {
+      afterPolicies: ["deserializationPolicy"],
+    });
   }
 
   /**
@@ -302,13 +296,13 @@ export class KeyClient {
    * ```
    * Creates a new key, stores it, then returns key parameters and properties to the client.
    * @param name - The name of the key.
-   * @param keyType - The type of the key. One of the following: 'EC', 'EC-HSM', 'RSA', 'RSA-HSM', 'oct', 'OKP', 'OKP-HSM'.
+   * @param keyType - The type of the key. One of the following: 'EC', 'EC-HSM', 'RSA', 'RSA-HSM', 'oct'.
    * @param options - The optional parameters.
    */
   public createKey(
     name: string,
     keyType: KeyType,
-    options?: CreateKeyOptions
+    options?: CreateKeyOptions,
   ): Promise<KeyVaultKey> {
     let unflattenedOptions = {};
 
@@ -330,27 +324,8 @@ export class KeyClient {
       async (updatedOptions) => {
         const response = await this.client.createKey(this.vaultUrl, name, keyType, updatedOptions);
         return getKeyFromKeyBundle(response);
-      }
+      },
     );
-  }
-
-  /**
-   * The createOKPKey method creates a new OKP key in Azure Key Vault. If the named key
-   * already exists, Azure Key Vault creates a new version of the key. It requires the keys/create
-   * permission.
-   *
-   * Example usage:
-   * ```ts
-   * const client = new KeyClient(url, credentials);
-   * let result = await client.createOkpKey("MyKey");
-   * ```
-   * Creates a new key, stores it, then returns key parameters and properties to the client.
-   * @param name - The name of the key.
-   * @param options - The optional parameters.
-   */
-  public createOkpKey(name: string, options?: CreateOkpKeyOptions): Promise<KeyVaultKey> {
-    const keyType = options?.hsm ? KnownKeyTypes.OKPHSM : KnownKeyTypes.OKP;
-    return this.createKey(name, keyType, options);
   }
 
   /**
@@ -430,7 +405,7 @@ export class KeyClient {
   public importKey(
     name: string,
     key: JsonWebKey,
-    options?: ImportKeyOptions
+    options?: ImportKeyOptions,
   ): Promise<KeyVaultKey> {
     let unflattenedOptions = {};
 
@@ -461,7 +436,7 @@ export class KeyClient {
       async (updatedOptions) => {
         const response = await this.client.importKey(this.vaultUrl, name, key, updatedOptions);
         return getKeyFromKeyBundle(response);
-      }
+      },
     );
   }
 
@@ -480,11 +455,11 @@ export class KeyClient {
    */
   public getCryptographyClient(
     keyName: string,
-    options?: GetCryptographyClientOptions
+    options?: GetCryptographyClientOptions,
   ): CryptographyClient {
     const keyUrl = new URL(
       ["keys", keyName, options?.keyVersion].filter(Boolean).join("/"),
-      this.vaultUrl
+      this.vaultUrl,
     );
 
     // The goals of this method are discoverability and performance (by sharing a client and pipeline).
@@ -497,7 +472,7 @@ export class KeyClient {
     const cryptoClient = new CryptographyClient(
       keyUrl.toString(),
       this.credential,
-      constructorOptions
+      constructorOptions,
     );
     return cryptoClient;
   }
@@ -531,7 +506,7 @@ export class KeyClient {
    */
   public async beginDeleteKey(
     name: string,
-    options: BeginDeleteKeyOptions = {}
+    options: BeginDeleteKeyOptions = {},
   ): Promise<PollerLike<PollOperationState<DeletedKey>, DeletedKey>> {
     const poller = new DeleteKeyPoller({
       name,
@@ -568,7 +543,7 @@ export class KeyClient {
   public updateKeyProperties(
     name: string,
     keyVersion: string,
-    options?: UpdateKeyPropertiesOptions
+    options?: UpdateKeyPropertiesOptions,
   ): Promise<KeyVaultKey>;
   /**
    * The updateKeyProperties method changes specified properties of the latest version of an existing stored key. Properties that
@@ -589,7 +564,7 @@ export class KeyClient {
    */
   public updateKeyProperties(
     name: string,
-    options?: UpdateKeyPropertiesOptions
+    options?: UpdateKeyPropertiesOptions,
   ): Promise<KeyVaultKey>;
   public updateKeyProperties(
     ...args: [string, string, UpdateKeyPropertiesOptions?] | [string, UpdateKeyPropertiesOptions?]
@@ -612,10 +587,10 @@ export class KeyClient {
           this.vaultUrl,
           name,
           keyVersion,
-          unflattenedOptions
+          unflattenedOptions,
         );
         return getKeyFromKeyBundle(response);
-      }
+      },
     );
   }
 
@@ -626,7 +601,7 @@ export class KeyClient {
    * @returns - The standardized arguments collection.
    */
   private disambiguateUpdateKeyPropertiesArgs(
-    args: [string, string, UpdateKeyPropertiesOptions?] | [string, UpdateKeyPropertiesOptions?]
+    args: [string, string, UpdateKeyPropertiesOptions?] | [string, UpdateKeyPropertiesOptions?],
   ): [string, string, UpdateKeyPropertiesOptions] {
     if (typeof args[1] === "string") {
       // [name, keyVersion, options?] => [name, keyVersion, options || {}]
@@ -656,7 +631,7 @@ export class KeyClient {
         this.vaultUrl,
         name,
         options && options.version ? options.version : "",
-        updatedOptions
+        updatedOptions,
       );
       return getKeyFromKeyBundle(response);
     });
@@ -735,7 +710,7 @@ export class KeyClient {
    */
   public async beginRecoverDeletedKey(
     name: string,
-    options: BeginRecoverDeletedKeyOptions = {}
+    options: BeginRecoverDeletedKeyOptions = {},
   ): Promise<PollerLike<PollOperationState<DeletedKey>, DeletedKey>> {
     const poller = new RecoverDeletedKeyPoller({
       name,
@@ -787,7 +762,7 @@ export class KeyClient {
    */
   public async restoreKeyBackup(
     backup: Uint8Array,
-    options: RestoreKeyBackupOptions = {}
+    options: RestoreKeyBackupOptions = {},
   ): Promise<KeyVaultKey> {
     return tracingClient.withSpan(`KeyClient.restoreKeyBackup`, options, async (updatedOptions) => {
       const response = await this.client.restoreKey(this.vaultUrl, backup, updatedOptions);
@@ -851,7 +826,7 @@ export class KeyClient {
   public releaseKey(
     name: string,
     targetAttestationToken: string,
-    options: ReleaseKeyOptions = {}
+    options: ReleaseKeyOptions = {},
   ): Promise<ReleaseKeyResult> {
     return tracingClient.withSpan("KeyClient.releaseKey", options, async (updatedOptions) => {
       const { nonce, algorithm, ...rest } = updatedOptions;
@@ -864,7 +839,7 @@ export class KeyClient {
           enc: algorithm,
           nonce,
           ...rest,
-        }
+        },
       );
 
       return { value: result.value! };
@@ -887,7 +862,7 @@ export class KeyClient {
    */
   public getKeyRotationPolicy(
     keyName: string,
-    options: GetKeyRotationPolicyOptions = {}
+    options: GetKeyRotationPolicyOptions = {},
   ): Promise<KeyRotationPolicy> {
     return tracingClient.withSpan("KeyClient.getKeyRotationPolicy", options, async () => {
       const policy = await this.client.getKeyRotationPolicy(this.vaultUrl, keyName);
@@ -912,7 +887,7 @@ export class KeyClient {
   public updateKeyRotationPolicy(
     keyName: string,
     policy: KeyRotationPolicyProperties,
-    options: UpdateKeyRotationPolicyOptions = {}
+    options: UpdateKeyRotationPolicyOptions = {},
   ): Promise<KeyRotationPolicy> {
     return tracingClient.withSpan(
       "KeyClient.updateKeyRotationPolicy",
@@ -922,10 +897,10 @@ export class KeyClient {
           this.vaultUrl,
           keyName,
           keyRotationTransformations.propertiesToGenerated(policy),
-          updatedOptions
+          updatedOptions,
         );
         return keyRotationTransformations.generatedToPublic(result);
-      }
+      },
     );
   }
 
@@ -938,7 +913,7 @@ export class KeyClient {
   private async *listPropertiesOfKeyVersionsPage(
     name: string,
     continuationState: PageSettings,
-    options?: ListPropertiesOfKeyVersionsOptions
+    options?: ListPropertiesOfKeyVersionsOptions,
   ): AsyncIterableIterator<KeyProperties[]> {
     if (continuationState.continuationToken == null) {
       const optionsComplete: GetKeysOptionalParams = {
@@ -948,7 +923,7 @@ export class KeyClient {
       const currentSetResponse = await tracingClient.withSpan(
         "KeyClient.listPropertiesOfKeyVersionsPage",
         optionsComplete,
-        async (updatedOptions) => this.client.getKeyVersions(this.vaultUrl, name, updatedOptions)
+        async (updatedOptions) => this.client.getKeyVersions(this.vaultUrl, name, updatedOptions),
       );
 
       continuationState.continuationToken = currentSetResponse.nextLink;
@@ -963,10 +938,10 @@ export class KeyClient {
         async (updatedOptions) =>
           this.client.getKeyVersionsNext(
             this.vaultUrl,
-            continuationState.continuationToken!,
             name,
-            updatedOptions
-          )
+            continuationState.continuationToken!,
+            updatedOptions,
+          ),
       );
       continuationState.continuationToken = currentSetResponse.nextLink;
       if (currentSetResponse.value) {
@@ -984,7 +959,7 @@ export class KeyClient {
    */
   private async *listPropertiesOfKeyVersionsAll(
     name: string,
-    options?: ListPropertiesOfKeyVersionsOptions
+    options?: ListPropertiesOfKeyVersionsOptions,
   ): AsyncIterableIterator<KeyProperties> {
     const f = {};
 
@@ -1012,7 +987,7 @@ export class KeyClient {
    */
   public listPropertiesOfKeyVersions(
     name: string,
-    options: ListPropertiesOfKeyVersionsOptions = {}
+    options: ListPropertiesOfKeyVersionsOptions = {},
   ): PagedAsyncIterableIterator<KeyProperties> {
     const iter = this.listPropertiesOfKeyVersionsAll(name, options);
 
@@ -1035,7 +1010,7 @@ export class KeyClient {
    */
   private async *listPropertiesOfKeysPage(
     continuationState: PageSettings,
-    options?: ListPropertiesOfKeysOptions
+    options?: ListPropertiesOfKeysOptions,
   ): AsyncIterableIterator<KeyProperties[]> {
     if (continuationState.continuationToken == null) {
       const optionsComplete: GetKeysOptionalParams = {
@@ -1045,7 +1020,7 @@ export class KeyClient {
       const currentSetResponse = await tracingClient.withSpan(
         "KeyClient.listPropertiesOfKeysPage",
         optionsComplete,
-        async (updatedOptions) => this.client.getKeys(this.vaultUrl, updatedOptions)
+        async (updatedOptions) => this.client.getKeys(this.vaultUrl, updatedOptions),
       );
 
       continuationState.continuationToken = currentSetResponse.nextLink;
@@ -1061,8 +1036,8 @@ export class KeyClient {
           this.client.getKeysNext(
             this.vaultUrl,
             continuationState.continuationToken!,
-            updatedOptions
-          )
+            updatedOptions,
+          ),
       );
       continuationState.continuationToken = currentSetResponse.nextLink;
       if (currentSetResponse.value) {
@@ -1078,7 +1053,7 @@ export class KeyClient {
    * @param options - Common options for the iterative endpoints.
    */
   private async *listPropertiesOfKeysAll(
-    options?: ListPropertiesOfKeysOptions
+    options?: ListPropertiesOfKeysOptions,
   ): AsyncIterableIterator<KeyProperties> {
     const f = {};
 
@@ -1105,7 +1080,7 @@ export class KeyClient {
    * @param options - The optional parameters.
    */
   public listPropertiesOfKeys(
-    options: ListPropertiesOfKeysOptions = {}
+    options: ListPropertiesOfKeysOptions = {},
   ): PagedAsyncIterableIterator<KeyProperties> {
     const iter = this.listPropertiesOfKeysAll(options);
 
@@ -1127,7 +1102,7 @@ export class KeyClient {
    */
   private async *listDeletedKeysPage(
     continuationState: PageSettings,
-    options?: ListDeletedKeysOptions
+    options?: ListDeletedKeysOptions,
   ): AsyncIterableIterator<DeletedKey[]> {
     if (continuationState.continuationToken == null) {
       const optionsComplete: GetKeysOptionalParams = {
@@ -1137,7 +1112,7 @@ export class KeyClient {
       const currentSetResponse = await tracingClient.withSpan(
         "KeyClient.listDeletedKeysPage",
         optionsComplete,
-        async (updatedOptions) => this.client.getDeletedKeys(this.vaultUrl, updatedOptions)
+        async (updatedOptions) => this.client.getDeletedKeys(this.vaultUrl, updatedOptions),
       );
       continuationState.continuationToken = currentSetResponse.nextLink;
       if (currentSetResponse.value) {
@@ -1152,8 +1127,8 @@ export class KeyClient {
           this.client.getDeletedKeysNext(
             this.vaultUrl,
             continuationState.continuationToken!,
-            updatedOptions
-          )
+            updatedOptions,
+          ),
       );
       continuationState.continuationToken = currentSetResponse.nextLink;
       if (currentSetResponse.value) {
@@ -1169,7 +1144,7 @@ export class KeyClient {
    * @param options - Common options for the iterative endpoints.
    */
   private async *listDeletedKeysAll(
-    options?: ListDeletedKeysOptions
+    options?: ListDeletedKeysOptions,
   ): AsyncIterableIterator<DeletedKey> {
     const f = {};
 
@@ -1195,7 +1170,7 @@ export class KeyClient {
    * @param options - The optional parameters.
    */
   public listDeletedKeys(
-    options: ListDeletedKeysOptions = {}
+    options: ListDeletedKeysOptions = {},
   ): PagedAsyncIterableIterator<DeletedKey> {
     const iter = this.listDeletedKeysAll(options);
 

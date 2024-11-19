@@ -6,21 +6,26 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { Caches } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { StorageCacheManagementClient } from "../storageCacheManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   Cache,
   CachesListNextOptionalParams,
   CachesListOptionalParams,
+  CachesListResponse,
   CachesListByResourceGroupNextOptionalParams,
   CachesListByResourceGroupOptionalParams,
-  CachesListResponse,
   CachesListByResourceGroupResponse,
   CachesDeleteOptionalParams,
   CachesGetOptionalParams,
@@ -45,7 +50,7 @@ import {
   CachesSpaceAllocationOptionalParams,
   CachesSpaceAllocationResponse,
   CachesListNextResponse,
-  CachesListByResourceGroupNextResponse
+  CachesListByResourceGroupNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -62,11 +67,11 @@ export class CachesImpl implements Caches {
   }
 
   /**
-   * Returns all Caches the user has access to under a subscription.
+   * Returns all caches the user has access to under a subscription.
    * @param options The options parameters.
    */
   public list(
-    options?: CachesListOptionalParams
+    options?: CachesListOptionalParams,
   ): PagedAsyncIterableIterator<Cache> {
     const iter = this.listPagingAll(options);
     return {
@@ -76,27 +81,39 @@ export class CachesImpl implements Caches {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(options, settings);
+      },
     };
   }
 
   private async *listPagingPage(
-    options?: CachesListOptionalParams
+    options?: CachesListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<Cache[]> {
-    let result = await this._list(options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: CachesListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(continuationToken, options);
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listPagingAll(
-    options?: CachesListOptionalParams
+    options?: CachesListOptionalParams,
   ): AsyncIterableIterator<Cache> {
     for await (const page of this.listPagingPage(options)) {
       yield* page;
@@ -104,13 +121,13 @@ export class CachesImpl implements Caches {
   }
 
   /**
-   * Returns all Caches the user has access to under a resource group.
-   * @param resourceGroupName Target resource group.
+   * Returns all caches the user has access to under a resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param options The options parameters.
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: CachesListByResourceGroupOptionalParams
+    options?: CachesListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<Cache> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -120,96 +137,111 @@ export class CachesImpl implements Caches {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listByResourceGroupPagingPage(resourceGroupName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listByResourceGroupPagingPage(
+          resourceGroupName,
+          options,
+          settings,
+        );
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
-    options?: CachesListByResourceGroupOptionalParams
+    options?: CachesListByResourceGroupOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<Cache[]> {
-    let result = await this._listByResourceGroup(resourceGroupName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: CachesListByResourceGroupResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByResourceGroup(resourceGroupName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: CachesListByResourceGroupOptionalParams
+    options?: CachesListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<Cache> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
   }
 
   /**
-   * Returns all Caches the user has access to under a subscription.
+   * Returns all caches the user has access to under a subscription.
    * @param options The options parameters.
    */
   private _list(
-    options?: CachesListOptionalParams
+    options?: CachesListOptionalParams,
   ): Promise<CachesListResponse> {
     return this.client.sendOperationRequest({ options }, listOperationSpec);
   }
 
   /**
-   * Returns all Caches the user has access to under a resource group.
-   * @param resourceGroupName Target resource group.
+   * Returns all caches the user has access to under a resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param options The options parameters.
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: CachesListByResourceGroupOptionalParams
+    options?: CachesListByResourceGroupOptionalParams,
   ): Promise<CachesListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
   /**
-   * Schedules a Cache for deletion.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Schedules a cache for deletion.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginDelete(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CachesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -218,8 +250,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -227,96 +259,98 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Schedules a Cache for deletion.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Schedules a cache for deletion.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginDeleteAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesDeleteOptionalParams
+    options?: CachesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       cacheName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * Returns a Cache.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Returns a cache.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   get(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesGetOptionalParams
+    options?: CachesGetOptionalParams,
   ): Promise<CachesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, cacheName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
-   * Create or update a Cache.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Create or update a cache.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
+   * @param cache Object containing the user-selectable properties of the new cache. If read-only
+   *              properties are included, they must match the existing values of those properties.
    * @param options The options parameters.
    */
   async beginCreateOrUpdate(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesCreateOrUpdateOptionalParams
+    cache: Cache,
+    options?: CachesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CachesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<CachesCreateOrUpdateResponse>,
       CachesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CachesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -325,8 +359,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -334,91 +368,168 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, cache, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CachesCreateOrUpdateResponse,
+      OperationState<CachesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Create or update a Cache.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Create or update a cache.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
+   * @param cache Object containing the user-selectable properties of the new cache. If read-only
+   *              properties are included, they must match the existing values of those properties.
    * @param options The options parameters.
    */
   async beginCreateOrUpdateAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesCreateOrUpdateOptionalParams
+    cache: Cache,
+    options?: CachesCreateOrUpdateOptionalParams,
   ): Promise<CachesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       cacheName,
-      options
+      cache,
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * Update a Cache instance.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Update a cache instance.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
-  update(
+  async beginUpdate(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesUpdateOptionalParams
-  ): Promise<CachesUpdateResponse> {
-    return this.client.sendOperationRequest(
-      { resourceGroupName, cacheName, options },
-      updateOperationSpec
-    );
+    options?: CachesUpdateOptionalParams,
+  ): Promise<
+    SimplePollerLike<OperationState<CachesUpdateResponse>, CachesUpdateResponse>
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<CachesUpdateResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CachesUpdateResponse,
+      OperationState<CachesUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "azure-async-operation",
+    });
+    await poller.poll();
+    return poller;
   }
 
   /**
-   * Tells a Cache to write generate debug info for support to process.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Update a cache instance.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
+   *                  the [-0-9a-zA-Z_] char class.
+   * @param options The options parameters.
+   */
+  async beginUpdateAndWait(
+    resourceGroupName: string,
+    cacheName: string,
+    options?: CachesUpdateOptionalParams,
+  ): Promise<CachesUpdateResponse> {
+    const poller = await this.beginUpdate(
+      resourceGroupName,
+      cacheName,
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Tells a cache to write generate debug info for support to process.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginDebugInfo(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesDebugInfoOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CachesDebugInfoOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -427,8 +538,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -436,75 +547,74 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      debugInfoOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: debugInfoOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Tells a Cache to write generate debug info for support to process.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Tells a cache to write generate debug info for support to process.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginDebugInfoAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesDebugInfoOptionalParams
+    options?: CachesDebugInfoOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDebugInfo(
       resourceGroupName,
       cacheName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * Tells a Cache to write all dirty data to the Storage Target(s). During the flush, clients will see
+   * Tells a cache to write all dirty data to the Storage Target(s). During the flush, clients will see
    * errors returned until the flush is complete.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginFlush(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesFlushOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CachesFlushOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -513,8 +623,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -522,71 +632,70 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      flushOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: flushOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Tells a Cache to write all dirty data to the Storage Target(s). During the flush, clients will see
+   * Tells a cache to write all dirty data to the Storage Target(s). During the flush, clients will see
    * errors returned until the flush is complete.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginFlushAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesFlushOptionalParams
+    options?: CachesFlushOptionalParams,
   ): Promise<void> {
     const poller = await this.beginFlush(resourceGroupName, cacheName, options);
     return poller.pollUntilDone();
   }
 
   /**
-   * Tells a Stopped state Cache to transition to Active state.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Tells a Stopped state cache to transition to Active state.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginStart(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesStartOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CachesStartOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -595,8 +704,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -604,70 +713,69 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      startOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: startOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Tells a Stopped state Cache to transition to Active state.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Tells a Stopped state cache to transition to Active state.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginStartAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesStartOptionalParams
+    options?: CachesStartOptionalParams,
   ): Promise<void> {
     const poller = await this.beginStart(resourceGroupName, cacheName, options);
     return poller.pollUntilDone();
   }
 
   /**
-   * Tells an Active Cache to transition to Stopped state.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Tells an Active cache to transition to Stopped state.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginStop(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesStopOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CachesStopOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -676,8 +784,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -685,36 +793,36 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      stopOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: stopOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Tells an Active Cache to transition to Stopped state.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Tells an Active cache to transition to Stopped state.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginStopAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesStopOptionalParams
+    options?: CachesStopOptionalParams,
   ): Promise<void> {
     const poller = await this.beginStop(resourceGroupName, cacheName, options);
     return poller.pollUntilDone();
@@ -722,38 +830,37 @@ export class CachesImpl implements Caches {
 
   /**
    * Create a priming job. This operation is only allowed when the cache is healthy.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginStartPrimingJob(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesStartPrimingJobOptionalParams
+    options?: CachesStartPrimingJobOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CachesStartPrimingJobResponse>,
+    SimplePollerLike<
+      OperationState<CachesStartPrimingJobResponse>,
       CachesStartPrimingJobResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CachesStartPrimingJobResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -762,8 +869,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -771,20 +878,23 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      startPrimingJobOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: startPrimingJobOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CachesStartPrimingJobResponse,
+      OperationState<CachesStartPrimingJobResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -792,58 +902,57 @@ export class CachesImpl implements Caches {
 
   /**
    * Create a priming job. This operation is only allowed when the cache is healthy.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginStartPrimingJobAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesStartPrimingJobOptionalParams
+    options?: CachesStartPrimingJobOptionalParams,
   ): Promise<CachesStartPrimingJobResponse> {
     const poller = await this.beginStartPrimingJob(
       resourceGroupName,
       cacheName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Schedule a priming job for deletion.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginStopPrimingJob(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesStopPrimingJobOptionalParams
+    options?: CachesStopPrimingJobOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CachesStopPrimingJobResponse>,
+    SimplePollerLike<
+      OperationState<CachesStopPrimingJobResponse>,
       CachesStopPrimingJobResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CachesStopPrimingJobResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -852,8 +961,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -861,20 +970,23 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      stopPrimingJobOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: stopPrimingJobOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CachesStopPrimingJobResponse,
+      OperationState<CachesStopPrimingJobResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -882,58 +994,57 @@ export class CachesImpl implements Caches {
 
   /**
    * Schedule a priming job for deletion.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginStopPrimingJobAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesStopPrimingJobOptionalParams
+    options?: CachesStopPrimingJobOptionalParams,
   ): Promise<CachesStopPrimingJobResponse> {
     const poller = await this.beginStopPrimingJob(
       resourceGroupName,
       cacheName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Schedule a priming job to be paused.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginPausePrimingJob(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesPausePrimingJobOptionalParams
+    options?: CachesPausePrimingJobOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CachesPausePrimingJobResponse>,
+    SimplePollerLike<
+      OperationState<CachesPausePrimingJobResponse>,
       CachesPausePrimingJobResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CachesPausePrimingJobResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -942,8 +1053,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -951,20 +1062,23 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      pausePrimingJobOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: pausePrimingJobOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CachesPausePrimingJobResponse,
+      OperationState<CachesPausePrimingJobResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -972,58 +1086,57 @@ export class CachesImpl implements Caches {
 
   /**
    * Schedule a priming job to be paused.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginPausePrimingJobAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesPausePrimingJobOptionalParams
+    options?: CachesPausePrimingJobOptionalParams,
   ): Promise<CachesPausePrimingJobResponse> {
     const poller = await this.beginPausePrimingJob(
       resourceGroupName,
       cacheName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Resumes a paused priming job.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginResumePrimingJob(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesResumePrimingJobOptionalParams
+    options?: CachesResumePrimingJobOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CachesResumePrimingJobResponse>,
+    SimplePollerLike<
+      OperationState<CachesResumePrimingJobResponse>,
       CachesResumePrimingJobResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CachesResumePrimingJobResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1032,8 +1145,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1041,20 +1154,23 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      resumePrimingJobOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: resumePrimingJobOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CachesResumePrimingJobResponse,
+      OperationState<CachesResumePrimingJobResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -1062,53 +1178,52 @@ export class CachesImpl implements Caches {
 
   /**
    * Resumes a paused priming job.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginResumePrimingJobAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesResumePrimingJobOptionalParams
+    options?: CachesResumePrimingJobOptionalParams,
   ): Promise<CachesResumePrimingJobResponse> {
     const poller = await this.beginResumePrimingJob(
       resourceGroupName,
       cacheName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
-   * Upgrade a Cache's firmware if a new version is available. Otherwise, this operation has no effect.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Upgrade a cache's firmware if a new version is available. Otherwise, this operation has no effect.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginUpgradeFirmware(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesUpgradeFirmwareOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CachesUpgradeFirmwareOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1117,8 +1232,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1126,79 +1241,78 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      upgradeFirmwareOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: upgradeFirmwareOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
   }
 
   /**
-   * Upgrade a Cache's firmware if a new version is available. Otherwise, this operation has no effect.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * Upgrade a cache's firmware if a new version is available. Otherwise, this operation has no effect.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginUpgradeFirmwareAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesUpgradeFirmwareOptionalParams
+    options?: CachesUpgradeFirmwareOptionalParams,
   ): Promise<void> {
     const poller = await this.beginUpgradeFirmware(
       resourceGroupName,
       cacheName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Update cache space allocation.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginSpaceAllocation(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesSpaceAllocationOptionalParams
+    options?: CachesSpaceAllocationOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CachesSpaceAllocationResponse>,
+    SimplePollerLike<
+      OperationState<CachesSpaceAllocationResponse>,
       CachesSpaceAllocationResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CachesSpaceAllocationResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1207,8 +1321,8 @@ export class CachesImpl implements Caches {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1216,20 +1330,23 @@ export class CachesImpl implements Caches {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cacheName, options },
-      spaceAllocationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cacheName, options },
+      spec: spaceAllocationOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CachesSpaceAllocationResponse,
+      OperationState<CachesSpaceAllocationResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -1237,20 +1354,20 @@ export class CachesImpl implements Caches {
 
   /**
    * Update cache space allocation.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param options The options parameters.
    */
   async beginSpaceAllocationAndWait(
     resourceGroupName: string,
     cacheName: string,
-    options?: CachesSpaceAllocationOptionalParams
+    options?: CachesSpaceAllocationOptionalParams,
   ): Promise<CachesSpaceAllocationResponse> {
     const poller = await this.beginSpaceAllocation(
       resourceGroupName,
       cacheName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -1262,28 +1379,28 @@ export class CachesImpl implements Caches {
    */
   private _listNext(
     nextLink: string,
-    options?: CachesListNextOptionalParams
+    options?: CachesListNextOptionalParams,
   ): Promise<CachesListNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 
   /**
    * ListByResourceGroupNext
-   * @param resourceGroupName Target resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param nextLink The nextLink from the previous successful call to the ListByResourceGroup method.
    * @param options The options parameters.
    */
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: CachesListByResourceGroupNextOptionalParams
+    options?: CachesListByResourceGroupNextOptionalParams,
   ): Promise<CachesListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 }
@@ -1291,46 +1408,43 @@ export class CachesImpl implements Caches {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.StorageCache/caches",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.StorageCache/caches",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CachesListResult
+      bodyMapper: Mappers.CachesListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CachesListResult
+      bodyMapper: Mappers.CachesListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -1338,61 +1452,59 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.Cache
+      bodyMapper: Mappers.Cache,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Cache
+      bodyMapper: Mappers.Cache,
     },
     201: {
-      bodyMapper: Mappers.Cache
+      bodyMapper: Mappers.Cache,
     },
     202: {
-      bodyMapper: Mappers.Cache
+      bodyMapper: Mappers.Cache,
     },
     204: {
-      bodyMapper: Mappers.Cache
+      bodyMapper: Mappers.Cache,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.cache,
   queryParameters: [Parameters.apiVersion],
@@ -1400,39 +1512,46 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.Cache
+      bodyMapper: Mappers.Cache,
+    },
+    201: {
+      bodyMapper: Mappers.Cache,
+    },
+    202: {
+      bodyMapper: Mappers.Cache,
+    },
+    204: {
+      bodyMapper: Mappers.Cache,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.cache,
+  requestBody: Parameters.cache1,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const debugInfoOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/debugInfo",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/debugInfo",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1440,22 +1559,21 @@ const debugInfoOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const flushOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/flush",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/flush",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1463,22 +1581,21 @@ const flushOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const startOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/start",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/start",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1486,22 +1603,21 @@ const startOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const stopOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/stop",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/stop",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1509,39 +1625,38 @@ const stopOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const startPrimingJobOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/startPrimingJob",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/startPrimingJob",
   httpMethod: "POST",
   responses: {
     200: {
-      headersMapper: Mappers.CachesStartPrimingJobHeaders
+      headersMapper: Mappers.CachesStartPrimingJobHeaders,
     },
     201: {
-      headersMapper: Mappers.CachesStartPrimingJobHeaders
+      headersMapper: Mappers.CachesStartPrimingJobHeaders,
     },
     202: {
-      headersMapper: Mappers.CachesStartPrimingJobHeaders
+      headersMapper: Mappers.CachesStartPrimingJobHeaders,
     },
     204: {
-      headersMapper: Mappers.CachesStartPrimingJobHeaders
+      headersMapper: Mappers.CachesStartPrimingJobHeaders,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.primingjob,
   queryParameters: [Parameters.apiVersion],
@@ -1549,32 +1664,31 @@ const startPrimingJobOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const stopPrimingJobOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/stopPrimingJob",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/stopPrimingJob",
   httpMethod: "POST",
   responses: {
     200: {
-      headersMapper: Mappers.CachesStopPrimingJobHeaders
+      headersMapper: Mappers.CachesStopPrimingJobHeaders,
     },
     201: {
-      headersMapper: Mappers.CachesStopPrimingJobHeaders
+      headersMapper: Mappers.CachesStopPrimingJobHeaders,
     },
     202: {
-      headersMapper: Mappers.CachesStopPrimingJobHeaders
+      headersMapper: Mappers.CachesStopPrimingJobHeaders,
     },
     204: {
-      headersMapper: Mappers.CachesStopPrimingJobHeaders
+      headersMapper: Mappers.CachesStopPrimingJobHeaders,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.primingJobId,
   queryParameters: [Parameters.apiVersion],
@@ -1582,32 +1696,31 @@ const stopPrimingJobOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const pausePrimingJobOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/pausePrimingJob",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/pausePrimingJob",
   httpMethod: "POST",
   responses: {
     200: {
-      headersMapper: Mappers.CachesPausePrimingJobHeaders
+      headersMapper: Mappers.CachesPausePrimingJobHeaders,
     },
     201: {
-      headersMapper: Mappers.CachesPausePrimingJobHeaders
+      headersMapper: Mappers.CachesPausePrimingJobHeaders,
     },
     202: {
-      headersMapper: Mappers.CachesPausePrimingJobHeaders
+      headersMapper: Mappers.CachesPausePrimingJobHeaders,
     },
     204: {
-      headersMapper: Mappers.CachesPausePrimingJobHeaders
+      headersMapper: Mappers.CachesPausePrimingJobHeaders,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.primingJobId,
   queryParameters: [Parameters.apiVersion],
@@ -1615,32 +1728,31 @@ const pausePrimingJobOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const resumePrimingJobOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/resumePrimingJob",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/resumePrimingJob",
   httpMethod: "POST",
   responses: {
     200: {
-      headersMapper: Mappers.CachesResumePrimingJobHeaders
+      headersMapper: Mappers.CachesResumePrimingJobHeaders,
     },
     201: {
-      headersMapper: Mappers.CachesResumePrimingJobHeaders
+      headersMapper: Mappers.CachesResumePrimingJobHeaders,
     },
     202: {
-      headersMapper: Mappers.CachesResumePrimingJobHeaders
+      headersMapper: Mappers.CachesResumePrimingJobHeaders,
     },
     204: {
-      headersMapper: Mappers.CachesResumePrimingJobHeaders
+      headersMapper: Mappers.CachesResumePrimingJobHeaders,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.primingJobId,
   queryParameters: [Parameters.apiVersion],
@@ -1648,15 +1760,14 @@ const resumePrimingJobOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const upgradeFirmwareOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/upgrade",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/upgrade",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1664,39 +1775,38 @@ const upgradeFirmwareOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const spaceAllocationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/spaceAllocation",
+  path: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StorageCache/caches/{cacheName}/spaceAllocation",
   httpMethod: "POST",
   responses: {
     200: {
-      headersMapper: Mappers.CachesSpaceAllocationHeaders
+      headersMapper: Mappers.CachesSpaceAllocationHeaders,
     },
     201: {
-      headersMapper: Mappers.CachesSpaceAllocationHeaders
+      headersMapper: Mappers.CachesSpaceAllocationHeaders,
     },
     202: {
-      headersMapper: Mappers.CachesSpaceAllocationHeaders
+      headersMapper: Mappers.CachesSpaceAllocationHeaders,
     },
     204: {
-      headersMapper: Mappers.CachesSpaceAllocationHeaders
+      headersMapper: Mappers.CachesSpaceAllocationHeaders,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.spaceAllocation,
   queryParameters: [Parameters.apiVersion],
@@ -1704,50 +1814,48 @@ const spaceAllocationOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cacheName
+    Parameters.cacheName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CachesListResult
+      bodyMapper: Mappers.CachesListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.subscriptionId
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CachesListResult
+      bodyMapper: Mappers.CachesListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.nextLink,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

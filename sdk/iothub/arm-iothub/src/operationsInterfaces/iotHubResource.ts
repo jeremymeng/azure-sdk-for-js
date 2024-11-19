@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   IotHubDescription,
   IotHubResourceListBySubscriptionOptionalParams,
@@ -166,7 +166,8 @@ export interface IotHubResource {
   /**
    * Create or update the metadata of an Iot hub. The usual pattern to modify a property is to retrieve
    * the IoT hub metadata and security metadata, and then combine them with the modified values in a new
-   * body to update the IoT hub.
+   * body to update the IoT hub. If certain properties are missing in the JSON, updating IoT Hub may
+   * cause these values to fallback to default, which may lead to unexpected behavior.
    * @param resourceGroupName The name of the resource group that contains the IoT hub.
    * @param resourceName The name of the IoT hub.
    * @param iotHubDescription The IoT hub metadata and security metadata.
@@ -178,15 +179,16 @@ export interface IotHubResource {
     iotHubDescription: IotHubDescription,
     options?: IotHubResourceCreateOrUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<IotHubResourceCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<IotHubResourceCreateOrUpdateResponse>,
       IotHubResourceCreateOrUpdateResponse
     >
   >;
   /**
    * Create or update the metadata of an Iot hub. The usual pattern to modify a property is to retrieve
    * the IoT hub metadata and security metadata, and then combine them with the modified values in a new
-   * body to update the IoT hub.
+   * body to update the IoT hub. If certain properties are missing in the JSON, updating IoT Hub may
+   * cause these values to fallback to default, which may lead to unexpected behavior.
    * @param resourceGroupName The name of the resource group that contains the IoT hub.
    * @param resourceName The name of the IoT hub.
    * @param iotHubDescription The IoT hub metadata and security metadata.
@@ -211,8 +213,8 @@ export interface IotHubResource {
     iotHubTags: TagsResource,
     options?: IotHubResourceUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<IotHubResourceUpdateResponse>,
+    SimplePollerLike<
+      OperationState<IotHubResourceUpdateResponse>,
       IotHubResourceUpdateResponse
     >
   >;
@@ -240,8 +242,8 @@ export interface IotHubResource {
     resourceName: string,
     options?: IotHubResourceDeleteOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<IotHubResourceDeleteResponse>,
+    SimplePollerLike<
+      OperationState<IotHubResourceDeleteResponse>,
       IotHubResourceDeleteResponse
     >
   >;

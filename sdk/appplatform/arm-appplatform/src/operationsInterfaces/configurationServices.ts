@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ConfigurationServiceResource,
   ConfigurationServicesListOptionalParams,
@@ -18,7 +18,9 @@ import {
   ConfigurationServicesDeleteOptionalParams,
   ConfigurationServiceSettings,
   ConfigurationServicesValidateOptionalParams,
-  ConfigurationServicesValidateResponse
+  ConfigurationServicesValidateResponse,
+  ConfigurationServicesValidateResourceOptionalParams,
+  ConfigurationServicesValidateResourceResponse
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -67,8 +69,8 @@ export interface ConfigurationServices {
     configurationServiceResource: ConfigurationServiceResource,
     options?: ConfigurationServicesCreateOrUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationServicesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationServicesCreateOrUpdateResponse>,
       ConfigurationServicesCreateOrUpdateResponse
     >
   >;
@@ -102,7 +104,7 @@ export interface ConfigurationServices {
     serviceName: string,
     configurationServiceName: string,
     options?: ConfigurationServicesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Disable the default Application Configuration Service.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -133,8 +135,8 @@ export interface ConfigurationServices {
     settings: ConfigurationServiceSettings,
     options?: ConfigurationServicesValidateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationServicesValidateResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationServicesValidateResponse>,
       ConfigurationServicesValidateResponse
     >
   >;
@@ -154,4 +156,41 @@ export interface ConfigurationServices {
     settings: ConfigurationServiceSettings,
     options?: ConfigurationServicesValidateOptionalParams
   ): Promise<ConfigurationServicesValidateResponse>;
+  /**
+   * Check if the Application Configuration Service resource is valid.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serviceName The name of the Service resource.
+   * @param configurationServiceName The name of Application Configuration Service.
+   * @param configurationServiceResource Application Configuration Service resource to be validated
+   * @param options The options parameters.
+   */
+  beginValidateResource(
+    resourceGroupName: string,
+    serviceName: string,
+    configurationServiceName: string,
+    configurationServiceResource: ConfigurationServiceResource,
+    options?: ConfigurationServicesValidateResourceOptionalParams
+  ): Promise<
+    SimplePollerLike<
+      OperationState<ConfigurationServicesValidateResourceResponse>,
+      ConfigurationServicesValidateResourceResponse
+    >
+  >;
+  /**
+   * Check if the Application Configuration Service resource is valid.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serviceName The name of the Service resource.
+   * @param configurationServiceName The name of Application Configuration Service.
+   * @param configurationServiceResource Application Configuration Service resource to be validated
+   * @param options The options parameters.
+   */
+  beginValidateResourceAndWait(
+    resourceGroupName: string,
+    serviceName: string,
+    configurationServiceName: string,
+    configurationServiceResource: ConfigurationServiceResource,
+    options?: ConfigurationServicesValidateResourceOptionalParams
+  ): Promise<ConfigurationServicesValidateResourceResponse>;
 }

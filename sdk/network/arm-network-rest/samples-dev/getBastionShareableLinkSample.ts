@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -46,7 +46,7 @@ async function returnsTheBastionShareableLinksForTheRequestVMS() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/bastionHosts/{bastionHostName}/getShareableLinks",
       subscriptionId,
       resourceGroupName,
-      bastionHostName
+      bastionHostName,
     )
     .post(options);
   const pageData = paginate(client, initialResponse);

@@ -13,24 +13,30 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SqlManagementClient } from "../sqlManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ServerDevOpsAuditingSettings,
   ServerDevOpsAuditSettingsListByServerNextOptionalParams,
   ServerDevOpsAuditSettingsListByServerOptionalParams,
   ServerDevOpsAuditSettingsListByServerResponse,
+  DevOpsAuditingSettingsName,
   ServerDevOpsAuditSettingsGetOptionalParams,
   ServerDevOpsAuditSettingsGetResponse,
   ServerDevOpsAuditSettingsCreateOrUpdateOptionalParams,
   ServerDevOpsAuditSettingsCreateOrUpdateResponse,
-  ServerDevOpsAuditSettingsListByServerNextResponse
+  ServerDevOpsAuditSettingsListByServerNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing ServerDevOpsAuditSettings operations. */
 export class ServerDevOpsAuditSettingsImpl
-  implements ServerDevOpsAuditSettings {
+  implements ServerDevOpsAuditSettings
+{
   private readonly client: SqlManagementClient;
 
   /**
@@ -51,12 +57,12 @@ export class ServerDevOpsAuditSettingsImpl
   public listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: ServerDevOpsAuditSettingsListByServerOptionalParams
+    options?: ServerDevOpsAuditSettingsListByServerOptionalParams,
   ): PagedAsyncIterableIterator<ServerDevOpsAuditingSettings> {
     const iter = this.listByServerPagingAll(
       resourceGroupName,
       serverName,
-      options
+      options,
     );
     return {
       next() {
@@ -73,9 +79,9 @@ export class ServerDevOpsAuditSettingsImpl
           resourceGroupName,
           serverName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -83,7 +89,7 @@ export class ServerDevOpsAuditSettingsImpl
     resourceGroupName: string,
     serverName: string,
     options?: ServerDevOpsAuditSettingsListByServerOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ServerDevOpsAuditingSettings[]> {
     let result: ServerDevOpsAuditSettingsListByServerResponse;
     let continuationToken = settings?.continuationToken;
@@ -99,7 +105,7 @@ export class ServerDevOpsAuditSettingsImpl
         resourceGroupName,
         serverName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -111,144 +117,15 @@ export class ServerDevOpsAuditSettingsImpl
   private async *listByServerPagingAll(
     resourceGroupName: string,
     serverName: string,
-    options?: ServerDevOpsAuditSettingsListByServerOptionalParams
+    options?: ServerDevOpsAuditSettingsListByServerOptionalParams,
   ): AsyncIterableIterator<ServerDevOpsAuditingSettings> {
     for await (const page of this.listByServerPagingPage(
       resourceGroupName,
       serverName,
-      options
+      options,
     )) {
       yield* page;
     }
-  }
-
-  /**
-   * Gets a server's DevOps audit settings.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
-   * @param serverName The name of the server.
-   * @param devOpsAuditingSettingsName The name of the devops audit settings. This should always be
-   *                                   'default'.
-   * @param options The options parameters.
-   */
-  get(
-    resourceGroupName: string,
-    serverName: string,
-    devOpsAuditingSettingsName: string,
-    options?: ServerDevOpsAuditSettingsGetOptionalParams
-  ): Promise<ServerDevOpsAuditSettingsGetResponse> {
-    return this.client.sendOperationRequest(
-      { resourceGroupName, serverName, devOpsAuditingSettingsName, options },
-      getOperationSpec
-    );
-  }
-
-  /**
-   * Creates or updates a server's DevOps audit settings.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
-   * @param serverName The name of the server.
-   * @param devOpsAuditingSettingsName The name of the devops audit settings. This should always be
-   *                                   'default'.
-   * @param parameters Properties of DevOps audit settings
-   * @param options The options parameters.
-   */
-  async beginCreateOrUpdate(
-    resourceGroupName: string,
-    serverName: string,
-    devOpsAuditingSettingsName: string,
-    parameters: ServerDevOpsAuditingSettings,
-    options?: ServerDevOpsAuditSettingsCreateOrUpdateOptionalParams
-  ): Promise<
-    PollerLike<
-      PollOperationState<ServerDevOpsAuditSettingsCreateOrUpdateResponse>,
-      ServerDevOpsAuditSettingsCreateOrUpdateResponse
-    >
-  > {
-    const directSendOperation = async (
-      args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<ServerDevOpsAuditSettingsCreateOrUpdateResponse> => {
-      return this.client.sendOperationRequest(args, spec);
-    };
-    const sendOperation = async (
-      args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
-      const providedCallback = args.options?.onResponse;
-      const callback: coreClient.RawResponseCallback = (
-        rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
-      ) => {
-        currentRawResponse = rawResponse;
-        providedCallback?.(rawResponse, flatResponse);
-      };
-      const updatedArgs = {
-        ...args,
-        options: {
-          ...args.options,
-          onResponse: callback
-        }
-      };
-      const flatResponse = await directSendOperation(updatedArgs, spec);
-      return {
-        flatResponse,
-        rawResponse: {
-          statusCode: currentRawResponse!.status,
-          body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
-      };
-    };
-
-    const lro = new LroImpl(
-      sendOperation,
-      {
-        resourceGroupName,
-        serverName,
-        devOpsAuditingSettingsName,
-        parameters,
-        options
-      },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
-    });
-    await poller.poll();
-    return poller;
-  }
-
-  /**
-   * Creates or updates a server's DevOps audit settings.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
-   * @param serverName The name of the server.
-   * @param devOpsAuditingSettingsName The name of the devops audit settings. This should always be
-   *                                   'default'.
-   * @param parameters Properties of DevOps audit settings
-   * @param options The options parameters.
-   */
-  async beginCreateOrUpdateAndWait(
-    resourceGroupName: string,
-    serverName: string,
-    devOpsAuditingSettingsName: string,
-    parameters: ServerDevOpsAuditingSettings,
-    options?: ServerDevOpsAuditSettingsCreateOrUpdateOptionalParams
-  ): Promise<ServerDevOpsAuditSettingsCreateOrUpdateResponse> {
-    const poller = await this.beginCreateOrUpdate(
-      resourceGroupName,
-      serverName,
-      devOpsAuditingSettingsName,
-      parameters,
-      options
-    );
-    return poller.pollUntilDone();
   }
 
   /**
@@ -261,12 +138,140 @@ export class ServerDevOpsAuditSettingsImpl
   private _listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: ServerDevOpsAuditSettingsListByServerOptionalParams
+    options?: ServerDevOpsAuditSettingsListByServerOptionalParams,
   ): Promise<ServerDevOpsAuditSettingsListByServerResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, options },
-      listByServerOperationSpec
+      listByServerOperationSpec,
     );
+  }
+
+  /**
+   * Gets a server's DevOps audit settings.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serverName The name of the server.
+   * @param devOpsAuditingSettingsName
+   * @param options The options parameters.
+   */
+  get(
+    resourceGroupName: string,
+    serverName: string,
+    devOpsAuditingSettingsName: DevOpsAuditingSettingsName,
+    options?: ServerDevOpsAuditSettingsGetOptionalParams,
+  ): Promise<ServerDevOpsAuditSettingsGetResponse> {
+    return this.client.sendOperationRequest(
+      { resourceGroupName, serverName, devOpsAuditingSettingsName, options },
+      getOperationSpec,
+    );
+  }
+
+  /**
+   * Creates or updates a server's DevOps audit settings.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serverName The name of the server.
+   * @param devOpsAuditingSettingsName
+   * @param parameters Properties of DevOps audit settings
+   * @param options The options parameters.
+   */
+  async beginCreateOrUpdate(
+    resourceGroupName: string,
+    serverName: string,
+    devOpsAuditingSettingsName: DevOpsAuditingSettingsName,
+    parameters: ServerDevOpsAuditingSettings,
+    options?: ServerDevOpsAuditSettingsCreateOrUpdateOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<ServerDevOpsAuditSettingsCreateOrUpdateResponse>,
+      ServerDevOpsAuditSettingsCreateOrUpdateResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<ServerDevOpsAuditSettingsCreateOrUpdateResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        serverName,
+        devOpsAuditingSettingsName,
+        parameters,
+        options,
+      },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      ServerDevOpsAuditSettingsCreateOrUpdateResponse,
+      OperationState<ServerDevOpsAuditSettingsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "azure-async-operation",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Creates or updates a server's DevOps audit settings.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serverName The name of the server.
+   * @param devOpsAuditingSettingsName
+   * @param parameters Properties of DevOps audit settings
+   * @param options The options parameters.
+   */
+  async beginCreateOrUpdateAndWait(
+    resourceGroupName: string,
+    serverName: string,
+    devOpsAuditingSettingsName: DevOpsAuditingSettingsName,
+    parameters: ServerDevOpsAuditingSettings,
+    options?: ServerDevOpsAuditSettingsCreateOrUpdateOptionalParams,
+  ): Promise<ServerDevOpsAuditSettingsCreateOrUpdateResponse> {
+    const poller = await this.beginCreateOrUpdate(
+      resourceGroupName,
+      serverName,
+      devOpsAuditingSettingsName,
+      parameters,
+      options,
+    );
+    return poller.pollUntilDone();
   }
 
   /**
@@ -281,106 +286,103 @@ export class ServerDevOpsAuditSettingsImpl
     resourceGroupName: string,
     serverName: string,
     nextLink: string,
-    options?: ServerDevOpsAuditSettingsListByServerNextOptionalParams
+    options?: ServerDevOpsAuditSettingsListByServerNextOptionalParams,
   ): Promise<ServerDevOpsAuditSettingsListByServerNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, nextLink, options },
-      listByServerNextOperationSpec
+      listByServerNextOperationSpec,
     );
   }
 }
 // Operation Specifications
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/devOpsAuditingSettings/{devOpsAuditingSettingsName}",
+const listByServerOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/devOpsAuditingSettings",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ServerDevOpsAuditingSettings
+      bodyMapper: Mappers.ServerDevOpsAuditSettingsListResult,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.devOpsAuditingSettingsName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/devOpsAuditingSettings/{devOpsAuditingSettingsName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ServerDevOpsAuditingSettings,
+    },
+    default: {},
+  },
+  queryParameters: [Parameters.apiVersion5],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.serverName,
+    Parameters.devOpsAuditingSettingsName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/devOpsAuditingSettings/{devOpsAuditingSettingsName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/devOpsAuditingSettings/{devOpsAuditingSettingsName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ServerDevOpsAuditingSettings
+      bodyMapper: Mappers.ServerDevOpsAuditingSettings,
     },
     201: {
-      bodyMapper: Mappers.ServerDevOpsAuditingSettings
+      bodyMapper: Mappers.ServerDevOpsAuditingSettings,
     },
     202: {
-      bodyMapper: Mappers.ServerDevOpsAuditingSettings
+      bodyMapper: Mappers.ServerDevOpsAuditingSettings,
     },
     204: {
-      bodyMapper: Mappers.ServerDevOpsAuditingSettings
+      bodyMapper: Mappers.ServerDevOpsAuditingSettings,
     },
-    default: {}
+    default: {},
   },
-  requestBody: Parameters.parameters61,
-  queryParameters: [Parameters.apiVersion2],
+  requestBody: Parameters.parameters45,
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.devOpsAuditingSettingsName
+    Parameters.devOpsAuditingSettingsName,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
-};
-const listByServerOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/devOpsAuditingSettings",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.ServerDevOpsAuditSettingsListResult
-    },
-    default: {}
-  },
-  queryParameters: [Parameters.apiVersion2],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.serverName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByServerNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ServerDevOpsAuditSettingsListResult
+      bodyMapper: Mappers.ServerDevOpsAuditSettingsListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

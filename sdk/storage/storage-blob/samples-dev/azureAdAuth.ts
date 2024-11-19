@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * ONLY AVAILABLE IN NODE.JS RUNTIME
@@ -52,7 +52,7 @@ async function main() {
 
   const blobServiceClient = new BlobServiceClient(
     `https://${account}.blob.core.windows.net`,
-    new DefaultAzureCredential()
+    new DefaultAzureCredential(),
   );
 
   // Create a container

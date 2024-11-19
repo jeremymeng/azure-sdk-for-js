@@ -6,7 +6,8 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { ScriptPackages } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -19,7 +20,7 @@ import {
   ScriptPackagesListResponse,
   ScriptPackagesGetOptionalParams,
   ScriptPackagesGetResponse,
-  ScriptPackagesListNextResponse
+  ScriptPackagesListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -36,7 +37,7 @@ export class ScriptPackagesImpl implements ScriptPackages {
   }
 
   /**
-   * List script packages available to run on the private cloud
+   * List ScriptPackage resources by PrivateCloud
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
    * @param options The options parameters.
@@ -44,12 +45,12 @@ export class ScriptPackagesImpl implements ScriptPackages {
   public list(
     resourceGroupName: string,
     privateCloudName: string,
-    options?: ScriptPackagesListOptionalParams
+    options?: ScriptPackagesListOptionalParams,
   ): PagedAsyncIterableIterator<ScriptPackage> {
     const iter = this.listPagingAll(
       resourceGroupName,
       privateCloudName,
-      options
+      options,
     );
     return {
       next() {
@@ -58,52 +59,65 @@ export class ScriptPackagesImpl implements ScriptPackages {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listPagingPage(
           resourceGroupName,
           privateCloudName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listPagingPage(
     resourceGroupName: string,
     privateCloudName: string,
-    options?: ScriptPackagesListOptionalParams
+    options?: ScriptPackagesListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<ScriptPackage[]> {
-    let result = await this._list(resourceGroupName, privateCloudName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: ScriptPackagesListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(resourceGroupName, privateCloudName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(
         resourceGroupName,
         privateCloudName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listPagingAll(
     resourceGroupName: string,
     privateCloudName: string,
-    options?: ScriptPackagesListOptionalParams
+    options?: ScriptPackagesListOptionalParams,
   ): AsyncIterableIterator<ScriptPackage> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       privateCloudName,
-      options
+      options,
     )) {
       yield* page;
     }
   }
 
   /**
-   * List script packages available to run on the private cloud
+   * List ScriptPackage resources by PrivateCloud
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
    * @param options The options parameters.
@@ -111,30 +125,30 @@ export class ScriptPackagesImpl implements ScriptPackages {
   private _list(
     resourceGroupName: string,
     privateCloudName: string,
-    options?: ScriptPackagesListOptionalParams
+    options?: ScriptPackagesListOptionalParams,
   ): Promise<ScriptPackagesListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
   /**
-   * Get a script package available to run on a private cloud
+   * Get a ScriptPackage
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param scriptPackageName Name of the script package in the private cloud
+   * @param scriptPackageName Name of the script package.
    * @param options The options parameters.
    */
   get(
     resourceGroupName: string,
     privateCloudName: string,
     scriptPackageName: string,
-    options?: ScriptPackagesGetOptionalParams
+    options?: ScriptPackagesGetOptionalParams,
   ): Promise<ScriptPackagesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, scriptPackageName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -149,11 +163,11 @@ export class ScriptPackagesImpl implements ScriptPackages {
     resourceGroupName: string,
     privateCloudName: string,
     nextLink: string,
-    options?: ScriptPackagesListNextOptionalParams
+    options?: ScriptPackagesListNextOptionalParams,
   ): Promise<ScriptPackagesListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -161,38 +175,15 @@ export class ScriptPackagesImpl implements ScriptPackages {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/scriptPackages",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/scriptPackages",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ScriptPackagesList
+      bodyMapper: Mappers.ScriptPackagesList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.privateCloudName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/scriptPackages/{scriptPackageName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.ScriptPackage
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -200,30 +191,50 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
-    Parameters.scriptPackageName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/scriptPackages/{scriptPackageName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ScriptPackage,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.privateCloudName,
+    Parameters.scriptPackageName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ScriptPackagesList
+      bodyMapper: Mappers.ScriptPackagesList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.privateCloudName
+    Parameters.privateCloudName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

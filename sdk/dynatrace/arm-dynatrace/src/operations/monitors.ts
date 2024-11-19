@@ -6,36 +6,44 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { Monitors } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { DynatraceObservability } from "../dynatraceObservability";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   MonitoredResource,
   MonitorsListMonitoredResourcesNextOptionalParams,
   MonitorsListMonitoredResourcesOptionalParams,
+  MonitorsListMonitoredResourcesResponse,
   MonitorResource,
   MonitorsListBySubscriptionIdNextOptionalParams,
   MonitorsListBySubscriptionIdOptionalParams,
+  MonitorsListBySubscriptionIdResponse,
   MonitorsListByResourceGroupNextOptionalParams,
   MonitorsListByResourceGroupOptionalParams,
+  MonitorsListByResourceGroupResponse,
   VMInfo,
   MonitorsListHostsNextOptionalParams,
   MonitorsListHostsOptionalParams,
+  MonitorsListHostsResponse,
   AppServiceInfo,
   MonitorsListAppServicesNextOptionalParams,
   MonitorsListAppServicesOptionalParams,
+  MonitorsListAppServicesResponse,
   LinkableEnvironmentResponse,
   LinkableEnvironmentRequest,
   MonitorsListLinkableEnvironmentsNextOptionalParams,
   MonitorsListLinkableEnvironmentsOptionalParams,
-  MonitorsGetAccountCredentialsOptionalParams,
-  MonitorsGetAccountCredentialsResponse,
-  MonitorsListMonitoredResourcesResponse,
+  MonitorsListLinkableEnvironmentsResponse,
   MonitorsGetVMHostPayloadOptionalParams,
   MonitorsGetVMHostPayloadResponse,
   MonitorsGetOptionalParams,
@@ -46,13 +54,13 @@ import {
   MonitorsUpdateOptionalParams,
   MonitorsUpdateResponse,
   MonitorsDeleteOptionalParams,
-  MonitorsListBySubscriptionIdResponse,
-  MonitorsListByResourceGroupResponse,
-  MonitorsListHostsResponse,
-  MonitorsListAppServicesResponse,
+  MarketplaceSaaSResourceDetailsRequest,
+  MonitorsGetMarketplaceSaaSResourceDetailsOptionalParams,
+  MonitorsGetMarketplaceSaaSResourceDetailsResponse,
+  MonitorsGetMetricStatusOptionalParams,
+  MonitorsGetMetricStatusResponse,
   MonitorsGetSSODetailsOptionalParams,
   MonitorsGetSSODetailsResponse,
-  MonitorsListLinkableEnvironmentsResponse,
   MonitorsListMonitoredResourcesNextResponse,
   MonitorsListBySubscriptionIdNextResponse,
   MonitorsListByResourceGroupNextResponse,
@@ -97,11 +105,15 @@ export class MonitorsImpl implements Monitors {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listMonitoredResourcesPagingPage(
           resourceGroupName,
           monitorName,
-          options
+          options,
+          settings
         );
       }
     };
@@ -110,15 +122,22 @@ export class MonitorsImpl implements Monitors {
   private async *listMonitoredResourcesPagingPage(
     resourceGroupName: string,
     monitorName: string,
-    options?: MonitorsListMonitoredResourcesOptionalParams
+    options?: MonitorsListMonitoredResourcesOptionalParams,
+    settings?: PageSettings
   ): AsyncIterableIterator<MonitoredResource[]> {
-    let result = await this._listMonitoredResources(
-      resourceGroupName,
-      monitorName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: MonitorsListMonitoredResourcesResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listMonitoredResources(
+        resourceGroupName,
+        monitorName,
+        options
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listMonitoredResourcesNext(
         resourceGroupName,
@@ -127,7 +146,9 @@ export class MonitorsImpl implements Monitors {
         options
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -160,22 +181,34 @@ export class MonitorsImpl implements Monitors {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listBySubscriptionIdPagingPage(options);
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listBySubscriptionIdPagingPage(options, settings);
       }
     };
   }
 
   private async *listBySubscriptionIdPagingPage(
-    options?: MonitorsListBySubscriptionIdOptionalParams
+    options?: MonitorsListBySubscriptionIdOptionalParams,
+    settings?: PageSettings
   ): AsyncIterableIterator<MonitorResource[]> {
-    let result = await this._listBySubscriptionId(options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: MonitorsListBySubscriptionIdResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listBySubscriptionId(options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listBySubscriptionIdNext(continuationToken, options);
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -204,19 +237,33 @@ export class MonitorsImpl implements Monitors {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listByResourceGroupPagingPage(resourceGroupName, options);
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listByResourceGroupPagingPage(
+          resourceGroupName,
+          options,
+          settings
+        );
       }
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
-    options?: MonitorsListByResourceGroupOptionalParams
+    options?: MonitorsListByResourceGroupOptionalParams,
+    settings?: PageSettings
   ): AsyncIterableIterator<MonitorResource[]> {
-    let result = await this._listByResourceGroup(resourceGroupName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: MonitorsListByResourceGroupResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByResourceGroup(resourceGroupName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
@@ -224,7 +271,9 @@ export class MonitorsImpl implements Monitors {
         options
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -241,7 +290,7 @@ export class MonitorsImpl implements Monitors {
   }
 
   /**
-   * List the compute resources currently being monitored by the Dynatrace resource.
+   * List the VM/VMSS resources currently being monitored by the Dynatrace resource.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param monitorName Monitor resource name
    * @param options The options parameters.
@@ -263,11 +312,15 @@ export class MonitorsImpl implements Monitors {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listHostsPagingPage(
           resourceGroupName,
           monitorName,
-          options
+          options,
+          settings
         );
       }
     };
@@ -276,11 +329,18 @@ export class MonitorsImpl implements Monitors {
   private async *listHostsPagingPage(
     resourceGroupName: string,
     monitorName: string,
-    options?: MonitorsListHostsOptionalParams
+    options?: MonitorsListHostsOptionalParams,
+    settings?: PageSettings
   ): AsyncIterableIterator<VMInfo[]> {
-    let result = await this._listHosts(resourceGroupName, monitorName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: MonitorsListHostsResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listHosts(resourceGroupName, monitorName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listHostsNext(
         resourceGroupName,
@@ -289,7 +349,9 @@ export class MonitorsImpl implements Monitors {
         options
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -330,11 +392,15 @@ export class MonitorsImpl implements Monitors {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listAppServicesPagingPage(
           resourceGroupName,
           monitorName,
-          options
+          options,
+          settings
         );
       }
     };
@@ -343,15 +409,22 @@ export class MonitorsImpl implements Monitors {
   private async *listAppServicesPagingPage(
     resourceGroupName: string,
     monitorName: string,
-    options?: MonitorsListAppServicesOptionalParams
+    options?: MonitorsListAppServicesOptionalParams,
+    settings?: PageSettings
   ): AsyncIterableIterator<AppServiceInfo[]> {
-    let result = await this._listAppServices(
-      resourceGroupName,
-      monitorName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: MonitorsListAppServicesResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listAppServices(
+        resourceGroupName,
+        monitorName,
+        options
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listAppServicesNext(
         resourceGroupName,
@@ -360,7 +433,9 @@ export class MonitorsImpl implements Monitors {
         options
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -404,12 +479,16 @@ export class MonitorsImpl implements Monitors {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listLinkableEnvironmentsPagingPage(
           resourceGroupName,
           monitorName,
           request,
-          options
+          options,
+          settings
         );
       }
     };
@@ -419,16 +498,23 @@ export class MonitorsImpl implements Monitors {
     resourceGroupName: string,
     monitorName: string,
     request: LinkableEnvironmentRequest,
-    options?: MonitorsListLinkableEnvironmentsOptionalParams
+    options?: MonitorsListLinkableEnvironmentsOptionalParams,
+    settings?: PageSettings
   ): AsyncIterableIterator<LinkableEnvironmentResponse[]> {
-    let result = await this._listLinkableEnvironments(
-      resourceGroupName,
-      monitorName,
-      request,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: MonitorsListLinkableEnvironmentsResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listLinkableEnvironments(
+        resourceGroupName,
+        monitorName,
+        request,
+        options
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listLinkableEnvironmentsNext(
         resourceGroupName,
@@ -438,7 +524,9 @@ export class MonitorsImpl implements Monitors {
         options
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -456,23 +544,6 @@ export class MonitorsImpl implements Monitors {
     )) {
       yield* page;
     }
-  }
-
-  /**
-   * Gets the user account credentials for a Monitor
-   * @param resourceGroupName The name of the resource group. The name is case insensitive.
-   * @param monitorName Monitor resource name
-   * @param options The options parameters.
-   */
-  getAccountCredentials(
-    resourceGroupName: string,
-    monitorName: string,
-    options?: MonitorsGetAccountCredentialsOptionalParams
-  ): Promise<MonitorsGetAccountCredentialsResponse> {
-    return this.client.sendOperationRequest(
-      { resourceGroupName, monitorName, options },
-      getAccountCredentialsOperationSpec
-    );
   }
 
   /**
@@ -540,8 +611,8 @@ export class MonitorsImpl implements Monitors {
     resource: MonitorResource,
     options?: MonitorsCreateOrUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<MonitorsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<MonitorsCreateOrUpdateResponse>,
       MonitorsCreateOrUpdateResponse
     >
   > {
@@ -551,7 +622,7 @@ export class MonitorsImpl implements Monitors {
     ): Promise<MonitorsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -584,15 +655,18 @@ export class MonitorsImpl implements Monitors {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, monitorName, resource, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, monitorName, resource, options },
+      spec: createOrUpdateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      MonitorsCreateOrUpdateResponse,
+      OperationState<MonitorsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation"
     });
     await poller.poll();
     return poller;
@@ -649,14 +723,14 @@ export class MonitorsImpl implements Monitors {
     resourceGroupName: string,
     monitorName: string,
     options?: MonitorsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -689,15 +763,15 @@ export class MonitorsImpl implements Monitors {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, monitorName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, monitorName, options },
+      spec: deleteOperationSpec
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation"
     });
     await poller.poll();
     return poller;
@@ -751,7 +825,22 @@ export class MonitorsImpl implements Monitors {
   }
 
   /**
-   * List the compute resources currently being monitored by the Dynatrace resource.
+   * Get Marketplace SaaS resource details of a tenant under a specific subscription
+   * @param request Tenant Id
+   * @param options The options parameters.
+   */
+  getMarketplaceSaaSResourceDetails(
+    request: MarketplaceSaaSResourceDetailsRequest,
+    options?: MonitorsGetMarketplaceSaaSResourceDetailsOptionalParams
+  ): Promise<MonitorsGetMarketplaceSaaSResourceDetailsResponse> {
+    return this.client.sendOperationRequest(
+      { request, options },
+      getMarketplaceSaaSResourceDetailsOperationSpec
+    );
+  }
+
+  /**
+   * List the VM/VMSS resources currently being monitored by the Dynatrace resource.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param monitorName Monitor resource name
    * @param options The options parameters.
@@ -764,6 +853,23 @@ export class MonitorsImpl implements Monitors {
     return this.client.sendOperationRequest(
       { resourceGroupName, monitorName, options },
       listHostsOperationSpec
+    );
+  }
+
+  /**
+   * Get metric status
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param monitorName Name of the Monitor resource
+   * @param options The options parameters.
+   */
+  getMetricStatus(
+    resourceGroupName: string,
+    monitorName: string,
+    options?: MonitorsGetMetricStatusOptionalParams
+  ): Promise<MonitorsGetMetricStatusResponse> {
+    return this.client.sendOperationRequest(
+      { resourceGroupName, monitorName, options },
+      getMetricStatusOperationSpec
     );
   }
 
@@ -934,28 +1040,6 @@ export class MonitorsImpl implements Monitors {
 // Operation Specifications
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
-const getAccountCredentialsOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Dynatrace.Observability/monitors/{monitorName}/getAccountCredentials",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AccountInfoSecure
-    },
-    default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.monitorName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
 const listMonitoredResourcesOperationSpec: coreClient.OperationSpec = {
   path:
     "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Dynatrace.Observability/monitors/{monitorName}/listMonitoredResources",
@@ -1140,6 +1224,28 @@ const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
   headerParameters: [Parameters.accept],
   serializer
 };
+const getMarketplaceSaaSResourceDetailsOperationSpec: coreClient.OperationSpec = {
+  path:
+    "/subscriptions/{subscriptionId}/providers/Dynatrace.Observability/getMarketplaceSaaSResourceDetails",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      bodyMapper: Mappers.MarketplaceSaaSResourceDetailsResponse
+    },
+    404: {
+      isError: true
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse
+    }
+  },
+  requestBody: Parameters.request,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [Parameters.$host, Parameters.subscriptionId],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer
+};
 const listHostsOperationSpec: coreClient.OperationSpec = {
   path:
     "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Dynatrace.Observability/monitors/{monitorName}/listHosts",
@@ -1147,6 +1253,28 @@ const listHostsOperationSpec: coreClient.OperationSpec = {
   responses: {
     200: {
       bodyMapper: Mappers.VMHostsListResponse
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse
+    }
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.monitorName
+  ],
+  headerParameters: [Parameters.accept],
+  serializer
+};
+const getMetricStatusOperationSpec: coreClient.OperationSpec = {
+  path:
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Dynatrace.Observability/monitors/{monitorName}/getMetricStatus",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      bodyMapper: Mappers.MetricsStatusResponse
     },
     default: {
       bodyMapper: Mappers.ErrorResponse
@@ -1199,7 +1327,7 @@ const getSSODetailsOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  requestBody: Parameters.request,
+  requestBody: Parameters.request1,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
@@ -1223,7 +1351,7 @@ const listLinkableEnvironmentsOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  requestBody: Parameters.request1,
+  requestBody: Parameters.request2,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
@@ -1246,7 +1374,6 @@ const listMonitoredResourcesNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -1268,7 +1395,6 @@ const listBySubscriptionIdNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -1288,7 +1414,6 @@ const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -1309,7 +1434,6 @@ const listHostsNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -1331,7 +1455,6 @@ const listAppServicesNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -1353,7 +1476,6 @@ const listLinkableEnvironmentsNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,

@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   VirtualNetwork,
   VirtualNetworksListAllOptionalParams,
@@ -25,7 +25,7 @@ import {
   VirtualNetworksUpdateTagsOptionalParams,
   VirtualNetworksUpdateTagsResponse,
   VirtualNetworksCheckIPAddressAvailabilityOptionalParams,
-  VirtualNetworksCheckIPAddressAvailabilityResponse
+  VirtualNetworksCheckIPAddressAvailabilityResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -36,7 +36,7 @@ export interface VirtualNetworks {
    * @param options The options parameters.
    */
   listAll(
-    options?: VirtualNetworksListAllOptionalParams
+    options?: VirtualNetworksListAllOptionalParams,
   ): PagedAsyncIterableIterator<VirtualNetwork>;
   /**
    * Gets all virtual networks in a resource group.
@@ -45,7 +45,7 @@ export interface VirtualNetworks {
    */
   list(
     resourceGroupName: string,
-    options?: VirtualNetworksListOptionalParams
+    options?: VirtualNetworksListOptionalParams,
   ): PagedAsyncIterableIterator<VirtualNetwork>;
   /**
    * Lists usage stats.
@@ -56,7 +56,7 @@ export interface VirtualNetworks {
   listUsage(
     resourceGroupName: string,
     virtualNetworkName: string,
-    options?: VirtualNetworksListUsageOptionalParams
+    options?: VirtualNetworksListUsageOptionalParams,
   ): PagedAsyncIterableIterator<VirtualNetworkUsage>;
   /**
    * Gets the Ddos Protection Status of all IP Addresses under the Virtual Network
@@ -67,7 +67,7 @@ export interface VirtualNetworks {
   beginListDdosProtectionStatusAndWait(
     resourceGroupName: string,
     virtualNetworkName: string,
-    options?: VirtualNetworksListDdosProtectionStatusOptionalParams
+    options?: VirtualNetworksListDdosProtectionStatusOptionalParams,
   ): PagedAsyncIterableIterator<PublicIpDdosProtectionStatusResult>;
   /**
    * Deletes the specified virtual network.
@@ -78,8 +78,8 @@ export interface VirtualNetworks {
   beginDelete(
     resourceGroupName: string,
     virtualNetworkName: string,
-    options?: VirtualNetworksDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: VirtualNetworksDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes the specified virtual network.
    * @param resourceGroupName The name of the resource group.
@@ -89,7 +89,7 @@ export interface VirtualNetworks {
   beginDeleteAndWait(
     resourceGroupName: string,
     virtualNetworkName: string,
-    options?: VirtualNetworksDeleteOptionalParams
+    options?: VirtualNetworksDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Gets the specified virtual network by resource group.
@@ -100,7 +100,7 @@ export interface VirtualNetworks {
   get(
     resourceGroupName: string,
     virtualNetworkName: string,
-    options?: VirtualNetworksGetOptionalParams
+    options?: VirtualNetworksGetOptionalParams,
   ): Promise<VirtualNetworksGetResponse>;
   /**
    * Creates or updates a virtual network in the specified resource group.
@@ -113,10 +113,10 @@ export interface VirtualNetworks {
     resourceGroupName: string,
     virtualNetworkName: string,
     parameters: VirtualNetwork,
-    options?: VirtualNetworksCreateOrUpdateOptionalParams
+    options?: VirtualNetworksCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualNetworksCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualNetworksCreateOrUpdateResponse>,
       VirtualNetworksCreateOrUpdateResponse
     >
   >;
@@ -131,7 +131,7 @@ export interface VirtualNetworks {
     resourceGroupName: string,
     virtualNetworkName: string,
     parameters: VirtualNetwork,
-    options?: VirtualNetworksCreateOrUpdateOptionalParams
+    options?: VirtualNetworksCreateOrUpdateOptionalParams,
   ): Promise<VirtualNetworksCreateOrUpdateResponse>;
   /**
    * Updates a virtual network tags.
@@ -144,7 +144,7 @@ export interface VirtualNetworks {
     resourceGroupName: string,
     virtualNetworkName: string,
     parameters: TagsObject,
-    options?: VirtualNetworksUpdateTagsOptionalParams
+    options?: VirtualNetworksUpdateTagsOptionalParams,
   ): Promise<VirtualNetworksUpdateTagsResponse>;
   /**
    * Checks whether a private IP address is available for use.
@@ -157,6 +157,6 @@ export interface VirtualNetworks {
     resourceGroupName: string,
     virtualNetworkName: string,
     ipAddress: string,
-    options?: VirtualNetworksCheckIPAddressAvailabilityOptionalParams
+    options?: VirtualNetworksCheckIPAddressAvailabilityOptionalParams,
   ): Promise<VirtualNetworksCheckIPAddressAvailabilityResponse>;
 }

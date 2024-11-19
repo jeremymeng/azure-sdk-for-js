@@ -6,25 +6,31 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { VirtualMachineImageTemplates } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ImageBuilderClient } from "../imageBuilderClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ImageTemplate,
   VirtualMachineImageTemplatesListNextOptionalParams,
   VirtualMachineImageTemplatesListOptionalParams,
+  VirtualMachineImageTemplatesListResponse,
   VirtualMachineImageTemplatesListByResourceGroupNextOptionalParams,
   VirtualMachineImageTemplatesListByResourceGroupOptionalParams,
+  VirtualMachineImageTemplatesListByResourceGroupResponse,
   RunOutput,
   VirtualMachineImageTemplatesListRunOutputsNextOptionalParams,
   VirtualMachineImageTemplatesListRunOutputsOptionalParams,
-  VirtualMachineImageTemplatesListResponse,
-  VirtualMachineImageTemplatesListByResourceGroupResponse,
+  VirtualMachineImageTemplatesListRunOutputsResponse,
   VirtualMachineImageTemplatesCreateOrUpdateOptionalParams,
   VirtualMachineImageTemplatesCreateOrUpdateResponse,
   ImageTemplateUpdateParameters,
@@ -33,20 +39,21 @@ import {
   VirtualMachineImageTemplatesGetOptionalParams,
   VirtualMachineImageTemplatesGetResponse,
   VirtualMachineImageTemplatesDeleteOptionalParams,
+  VirtualMachineImageTemplatesDeleteResponse,
   VirtualMachineImageTemplatesRunOptionalParams,
   VirtualMachineImageTemplatesCancelOptionalParams,
-  VirtualMachineImageTemplatesListRunOutputsResponse,
   VirtualMachineImageTemplatesGetRunOutputOptionalParams,
   VirtualMachineImageTemplatesGetRunOutputResponse,
   VirtualMachineImageTemplatesListNextResponse,
   VirtualMachineImageTemplatesListByResourceGroupNextResponse,
-  VirtualMachineImageTemplatesListRunOutputsNextResponse
+  VirtualMachineImageTemplatesListRunOutputsNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing VirtualMachineImageTemplates operations. */
 export class VirtualMachineImageTemplatesImpl
-  implements VirtualMachineImageTemplates {
+  implements VirtualMachineImageTemplates
+{
   private readonly client: ImageBuilderClient;
 
   /**
@@ -62,7 +69,7 @@ export class VirtualMachineImageTemplatesImpl
    * @param options The options parameters.
    */
   public list(
-    options?: VirtualMachineImageTemplatesListOptionalParams
+    options?: VirtualMachineImageTemplatesListOptionalParams,
   ): PagedAsyncIterableIterator<ImageTemplate> {
     const iter = this.listPagingAll(options);
     return {
@@ -72,27 +79,39 @@ export class VirtualMachineImageTemplatesImpl
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(options, settings);
+      },
     };
   }
 
   private async *listPagingPage(
-    options?: VirtualMachineImageTemplatesListOptionalParams
+    options?: VirtualMachineImageTemplatesListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<ImageTemplate[]> {
-    let result = await this._list(options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: VirtualMachineImageTemplatesListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(continuationToken, options);
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listPagingAll(
-    options?: VirtualMachineImageTemplatesListOptionalParams
+    options?: VirtualMachineImageTemplatesListOptionalParams,
   ): AsyncIterableIterator<ImageTemplate> {
     for await (const page of this.listPagingPage(options)) {
       yield* page;
@@ -106,7 +125,7 @@ export class VirtualMachineImageTemplatesImpl
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: VirtualMachineImageTemplatesListByResourceGroupOptionalParams
+    options?: VirtualMachineImageTemplatesListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<ImageTemplate> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -116,37 +135,53 @@ export class VirtualMachineImageTemplatesImpl
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listByResourceGroupPagingPage(resourceGroupName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listByResourceGroupPagingPage(
+          resourceGroupName,
+          options,
+          settings,
+        );
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
-    options?: VirtualMachineImageTemplatesListByResourceGroupOptionalParams
+    options?: VirtualMachineImageTemplatesListByResourceGroupOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<ImageTemplate[]> {
-    let result = await this._listByResourceGroup(resourceGroupName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: VirtualMachineImageTemplatesListByResourceGroupResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByResourceGroup(resourceGroupName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: VirtualMachineImageTemplatesListByResourceGroupOptionalParams
+    options?: VirtualMachineImageTemplatesListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<ImageTemplate> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -161,12 +196,12 @@ export class VirtualMachineImageTemplatesImpl
   public listRunOutputs(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesListRunOutputsOptionalParams
+    options?: VirtualMachineImageTemplatesListRunOutputsOptionalParams,
   ): PagedAsyncIterableIterator<RunOutput> {
     const iter = this.listRunOutputsPagingAll(
       resourceGroupName,
       imageTemplateName,
-      options
+      options,
     );
     return {
       next() {
@@ -175,49 +210,62 @@ export class VirtualMachineImageTemplatesImpl
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listRunOutputsPagingPage(
           resourceGroupName,
           imageTemplateName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listRunOutputsPagingPage(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesListRunOutputsOptionalParams
+    options?: VirtualMachineImageTemplatesListRunOutputsOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<RunOutput[]> {
-    let result = await this._listRunOutputs(
-      resourceGroupName,
-      imageTemplateName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: VirtualMachineImageTemplatesListRunOutputsResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listRunOutputs(
+        resourceGroupName,
+        imageTemplateName,
+        options,
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listRunOutputsNext(
         resourceGroupName,
         imageTemplateName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listRunOutputsPagingAll(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesListRunOutputsOptionalParams
+    options?: VirtualMachineImageTemplatesListRunOutputsOptionalParams,
   ): AsyncIterableIterator<RunOutput> {
     for await (const page of this.listRunOutputsPagingPage(
       resourceGroupName,
       imageTemplateName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -228,7 +276,7 @@ export class VirtualMachineImageTemplatesImpl
    * @param options The options parameters.
    */
   private _list(
-    options?: VirtualMachineImageTemplatesListOptionalParams
+    options?: VirtualMachineImageTemplatesListOptionalParams,
   ): Promise<VirtualMachineImageTemplatesListResponse> {
     return this.client.sendOperationRequest({ options }, listOperationSpec);
   }
@@ -240,11 +288,11 @@ export class VirtualMachineImageTemplatesImpl
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: VirtualMachineImageTemplatesListByResourceGroupOptionalParams
+    options?: VirtualMachineImageTemplatesListByResourceGroupOptionalParams,
   ): Promise<VirtualMachineImageTemplatesListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -259,30 +307,29 @@ export class VirtualMachineImageTemplatesImpl
     resourceGroupName: string,
     imageTemplateName: string,
     parameters: ImageTemplate,
-    options?: VirtualMachineImageTemplatesCreateOrUpdateOptionalParams
+    options?: VirtualMachineImageTemplatesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualMachineImageTemplatesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualMachineImageTemplatesCreateOrUpdateResponse>,
       VirtualMachineImageTemplatesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VirtualMachineImageTemplatesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -291,8 +338,8 @@ export class VirtualMachineImageTemplatesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -300,20 +347,23 @@ export class VirtualMachineImageTemplatesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, imageTemplateName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, imageTemplateName, parameters, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VirtualMachineImageTemplatesCreateOrUpdateResponse,
+      OperationState<VirtualMachineImageTemplatesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -330,13 +380,13 @@ export class VirtualMachineImageTemplatesImpl
     resourceGroupName: string,
     imageTemplateName: string,
     parameters: ImageTemplate,
-    options?: VirtualMachineImageTemplatesCreateOrUpdateOptionalParams
+    options?: VirtualMachineImageTemplatesCreateOrUpdateOptionalParams,
   ): Promise<VirtualMachineImageTemplatesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       imageTemplateName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -352,30 +402,29 @@ export class VirtualMachineImageTemplatesImpl
     resourceGroupName: string,
     imageTemplateName: string,
     parameters: ImageTemplateUpdateParameters,
-    options?: VirtualMachineImageTemplatesUpdateOptionalParams
+    options?: VirtualMachineImageTemplatesUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualMachineImageTemplatesUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualMachineImageTemplatesUpdateResponse>,
       VirtualMachineImageTemplatesUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VirtualMachineImageTemplatesUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -384,8 +433,8 @@ export class VirtualMachineImageTemplatesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -393,20 +442,23 @@ export class VirtualMachineImageTemplatesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, imageTemplateName, parameters, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, imageTemplateName, parameters, options },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VirtualMachineImageTemplatesUpdateResponse,
+      OperationState<VirtualMachineImageTemplatesUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -423,13 +475,13 @@ export class VirtualMachineImageTemplatesImpl
     resourceGroupName: string,
     imageTemplateName: string,
     parameters: ImageTemplateUpdateParameters,
-    options?: VirtualMachineImageTemplatesUpdateOptionalParams
+    options?: VirtualMachineImageTemplatesUpdateOptionalParams,
   ): Promise<VirtualMachineImageTemplatesUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       imageTemplateName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -443,11 +495,11 @@ export class VirtualMachineImageTemplatesImpl
   get(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesGetOptionalParams
+    options?: VirtualMachineImageTemplatesGetOptionalParams,
   ): Promise<VirtualMachineImageTemplatesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, imageTemplateName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -460,25 +512,29 @@ export class VirtualMachineImageTemplatesImpl
   async beginDelete(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VirtualMachineImageTemplatesDeleteOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VirtualMachineImageTemplatesDeleteResponse>,
+      VirtualMachineImageTemplatesDeleteResponse
+    >
+  > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<void> => {
+      spec: coreClient.OperationSpec,
+    ): Promise<VirtualMachineImageTemplatesDeleteResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -487,8 +543,8 @@ export class VirtualMachineImageTemplatesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -496,20 +552,23 @@ export class VirtualMachineImageTemplatesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, imageTemplateName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, imageTemplateName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VirtualMachineImageTemplatesDeleteResponse,
+      OperationState<VirtualMachineImageTemplatesDeleteResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -524,12 +583,12 @@ export class VirtualMachineImageTemplatesImpl
   async beginDeleteAndWait(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesDeleteOptionalParams
-  ): Promise<void> {
+    options?: VirtualMachineImageTemplatesDeleteOptionalParams,
+  ): Promise<VirtualMachineImageTemplatesDeleteResponse> {
     const poller = await this.beginDelete(
       resourceGroupName,
       imageTemplateName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -543,25 +602,24 @@ export class VirtualMachineImageTemplatesImpl
   async beginRun(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesRunOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VirtualMachineImageTemplatesRunOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -570,8 +628,8 @@ export class VirtualMachineImageTemplatesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -579,20 +637,20 @@ export class VirtualMachineImageTemplatesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, imageTemplateName, options },
-      runOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, imageTemplateName, options },
+      spec: runOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -607,12 +665,12 @@ export class VirtualMachineImageTemplatesImpl
   async beginRunAndWait(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesRunOptionalParams
+    options?: VirtualMachineImageTemplatesRunOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRun(
       resourceGroupName,
       imageTemplateName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -626,25 +684,24 @@ export class VirtualMachineImageTemplatesImpl
   async beginCancel(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesCancelOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VirtualMachineImageTemplatesCancelOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -653,8 +710,8 @@ export class VirtualMachineImageTemplatesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -662,20 +719,20 @@ export class VirtualMachineImageTemplatesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, imageTemplateName, options },
-      cancelOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, imageTemplateName, options },
+      spec: cancelOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -690,12 +747,12 @@ export class VirtualMachineImageTemplatesImpl
   async beginCancelAndWait(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesCancelOptionalParams
+    options?: VirtualMachineImageTemplatesCancelOptionalParams,
   ): Promise<void> {
     const poller = await this.beginCancel(
       resourceGroupName,
       imageTemplateName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -709,11 +766,11 @@ export class VirtualMachineImageTemplatesImpl
   private _listRunOutputs(
     resourceGroupName: string,
     imageTemplateName: string,
-    options?: VirtualMachineImageTemplatesListRunOutputsOptionalParams
+    options?: VirtualMachineImageTemplatesListRunOutputsOptionalParams,
   ): Promise<VirtualMachineImageTemplatesListRunOutputsResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, imageTemplateName, options },
-      listRunOutputsOperationSpec
+      listRunOutputsOperationSpec,
     );
   }
 
@@ -728,11 +785,11 @@ export class VirtualMachineImageTemplatesImpl
     resourceGroupName: string,
     imageTemplateName: string,
     runOutputName: string,
-    options?: VirtualMachineImageTemplatesGetRunOutputOptionalParams
+    options?: VirtualMachineImageTemplatesGetRunOutputOptionalParams,
   ): Promise<VirtualMachineImageTemplatesGetRunOutputResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, imageTemplateName, runOutputName, options },
-      getRunOutputOperationSpec
+      getRunOutputOperationSpec,
     );
   }
 
@@ -743,11 +800,11 @@ export class VirtualMachineImageTemplatesImpl
    */
   private _listNext(
     nextLink: string,
-    options?: VirtualMachineImageTemplatesListNextOptionalParams
+    options?: VirtualMachineImageTemplatesListNextOptionalParams,
   ): Promise<VirtualMachineImageTemplatesListNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 
@@ -760,11 +817,11 @@ export class VirtualMachineImageTemplatesImpl
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: VirtualMachineImageTemplatesListByResourceGroupNextOptionalParams
+    options?: VirtualMachineImageTemplatesListByResourceGroupNextOptionalParams,
   ): Promise<VirtualMachineImageTemplatesListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 
@@ -779,11 +836,11 @@ export class VirtualMachineImageTemplatesImpl
     resourceGroupName: string,
     imageTemplateName: string,
     nextLink: string,
-    options?: VirtualMachineImageTemplatesListRunOutputsNextOptionalParams
+    options?: VirtualMachineImageTemplatesListRunOutputsNextOptionalParams,
   ): Promise<VirtualMachineImageTemplatesListRunOutputsNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, imageTemplateName, nextLink, options },
-      listRunOutputsNextOperationSpec
+      listRunOutputsNextOperationSpec,
     );
   }
 }
@@ -791,63 +848,60 @@ export class VirtualMachineImageTemplatesImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.VirtualMachineImages/imageTemplates",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.VirtualMachineImages/imageTemplates",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ImageTemplateListResult
+      bodyMapper: Mappers.ImageTemplateListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ImageTemplateListResult
+      bodyMapper: Mappers.ImageTemplateListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ImageTemplate
+      bodyMapper: Mappers.ImageTemplate,
     },
     201: {
-      bodyMapper: Mappers.ImageTemplate
+      bodyMapper: Mappers.ImageTemplate,
     },
     202: {
-      bodyMapper: Mappers.ImageTemplate
+      bodyMapper: Mappers.ImageTemplate,
     },
     204: {
-      bodyMapper: Mappers.ImageTemplate
+      bodyMapper: Mappers.ImageTemplate,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters,
   queryParameters: [Parameters.apiVersion],
@@ -855,32 +909,31 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.imageTemplateName
+    Parameters.imageTemplateName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.ImageTemplate
+      bodyMapper: Mappers.ImageTemplate,
     },
     201: {
-      bodyMapper: Mappers.ImageTemplate
+      bodyMapper: Mappers.ImageTemplate,
     },
     202: {
-      bodyMapper: Mappers.ImageTemplate
+      bodyMapper: Mappers.ImageTemplate,
     },
     204: {
-      bodyMapper: Mappers.ImageTemplate
+      bodyMapper: Mappers.ImageTemplate,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters1,
   queryParameters: [Parameters.apiVersion],
@@ -888,136 +941,22 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.imageTemplateName
+    Parameters.imageTemplateName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ImageTemplate
+      bodyMapper: Mappers.ImageTemplate,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.imageTemplateName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
-  httpMethod: "DELETE",
-  responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.imageTemplateName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const runOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/run",
-  httpMethod: "POST",
-  responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.imageTemplateName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const cancelOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/cancel",
-  httpMethod: "POST",
-  responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.imageTemplateName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const listRunOutputsOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/runOutputs",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.RunOutputCollection
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.imageTemplateName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getRunOutputOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/runOutputs/{runOutputName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.RunOutput
-    },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -1025,71 +964,184 @@ const getRunOutputOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.imageTemplateName,
-    Parameters.runOutputName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const deleteOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
+  httpMethod: "DELETE",
+  responses: {
+    200: {
+      headersMapper: Mappers.VirtualMachineImageTemplatesDeleteHeaders,
+    },
+    201: {
+      headersMapper: Mappers.VirtualMachineImageTemplatesDeleteHeaders,
+    },
+    202: {
+      headersMapper: Mappers.VirtualMachineImageTemplatesDeleteHeaders,
+    },
+    204: {
+      headersMapper: Mappers.VirtualMachineImageTemplatesDeleteHeaders,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.imageTemplateName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const runOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/run",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.imageTemplateName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const cancelOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/cancel",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.imageTemplateName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const listRunOutputsOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/runOutputs",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.RunOutputCollection,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.imageTemplateName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const getRunOutputOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/runOutputs/{runOutputName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.RunOutput,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.imageTemplateName,
+    Parameters.runOutputName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ImageTemplateListResult
+      bodyMapper: Mappers.ImageTemplateListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ImageTemplateListResult
+      bodyMapper: Mappers.ImageTemplateListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listRunOutputsNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RunOutputCollection
+      bodyMapper: Mappers.RunOutputCollection,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.imageTemplateName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

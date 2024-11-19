@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -33,7 +33,7 @@ async function getNetworkVirtualApplianceSite() {
       subscriptionId,
       resourceGroupName,
       networkVirtualApplianceName,
-      siteName
+      siteName,
     )
     .get(options);
   console.log(result);

@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   Frontend,
   FrontendsInterfaceListByTrafficControllerOptionalParams,
@@ -18,7 +18,8 @@ import {
   FrontendUpdate,
   FrontendsInterfaceUpdateOptionalParams,
   FrontendsInterfaceUpdateResponse,
-  FrontendsInterfaceDeleteOptionalParams
+  FrontendsInterfaceDeleteOptionalParams,
+  FrontendsInterfaceDeleteResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -33,10 +34,10 @@ export interface FrontendsInterface {
   listByTrafficController(
     resourceGroupName: string,
     trafficControllerName: string,
-    options?: FrontendsInterfaceListByTrafficControllerOptionalParams
+    options?: FrontendsInterfaceListByTrafficControllerOptionalParams,
   ): PagedAsyncIterableIterator<Frontend>;
   /**
-   * Get a Traffic Controller Frontend
+   * Get a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -46,10 +47,10 @@ export interface FrontendsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     frontendName: string,
-    options?: FrontendsInterfaceGetOptionalParams
+    options?: FrontendsInterfaceGetOptionalParams,
   ): Promise<FrontendsInterfaceGetResponse>;
   /**
-   * Create a Traffic Controller Frontend
+   * Create a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -61,15 +62,15 @@ export interface FrontendsInterface {
     trafficControllerName: string,
     frontendName: string,
     resource: Frontend,
-    options?: FrontendsInterfaceCreateOrUpdateOptionalParams
+    options?: FrontendsInterfaceCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<FrontendsInterfaceCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<FrontendsInterfaceCreateOrUpdateResponse>,
       FrontendsInterfaceCreateOrUpdateResponse
     >
   >;
   /**
-   * Create a Traffic Controller Frontend
+   * Create a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -81,10 +82,10 @@ export interface FrontendsInterface {
     trafficControllerName: string,
     frontendName: string,
     resource: Frontend,
-    options?: FrontendsInterfaceCreateOrUpdateOptionalParams
+    options?: FrontendsInterfaceCreateOrUpdateOptionalParams,
   ): Promise<FrontendsInterfaceCreateOrUpdateResponse>;
   /**
-   * Update a Traffic Controller Frontend
+   * Update a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -96,10 +97,10 @@ export interface FrontendsInterface {
     trafficControllerName: string,
     frontendName: string,
     properties: FrontendUpdate,
-    options?: FrontendsInterfaceUpdateOptionalParams
+    options?: FrontendsInterfaceUpdateOptionalParams,
   ): Promise<FrontendsInterfaceUpdateResponse>;
   /**
-   * Delete a Traffic Controller Frontend
+   * Delete a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -109,10 +110,15 @@ export interface FrontendsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     frontendName: string,
-    options?: FrontendsInterfaceDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: FrontendsInterfaceDeleteOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<FrontendsInterfaceDeleteResponse>,
+      FrontendsInterfaceDeleteResponse
+    >
+  >;
   /**
-   * Delete a Traffic Controller Frontend
+   * Delete a Frontend
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param trafficControllerName traffic controller name for path
    * @param frontendName Frontends
@@ -122,6 +128,6 @@ export interface FrontendsInterface {
     resourceGroupName: string,
     trafficControllerName: string,
     frontendName: string,
-    options?: FrontendsInterfaceDeleteOptionalParams
-  ): Promise<void>;
+    options?: FrontendsInterfaceDeleteOptionalParams,
+  ): Promise<FrontendsInterfaceDeleteResponse>;
 }

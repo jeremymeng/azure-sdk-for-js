@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SqlManagementClient } from "../sqlManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ManagedInstanceLongTermRetentionBackup,
   LongTermRetentionManagedInstanceBackupsListByDatabaseNextOptionalParams,
@@ -46,13 +50,14 @@ import {
   LongTermRetentionManagedInstanceBackupsListByLocationNextResponse,
   LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseNextResponse,
   LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceNextResponse,
-  LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationNextResponse
+  LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing LongTermRetentionManagedInstanceBackups operations. */
 export class LongTermRetentionManagedInstanceBackupsImpl
-  implements LongTermRetentionManagedInstanceBackups {
+  implements LongTermRetentionManagedInstanceBackups
+{
   private readonly client: SqlManagementClient;
 
   /**
@@ -74,13 +79,13 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     databaseName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByDatabaseOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByDatabaseOptionalParams,
   ): PagedAsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     const iter = this.listByDatabasePagingAll(
       locationName,
       managedInstanceName,
       databaseName,
-      options
+      options,
     );
     return {
       next() {
@@ -98,9 +103,9 @@ export class LongTermRetentionManagedInstanceBackupsImpl
           managedInstanceName,
           databaseName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -109,7 +114,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     options?: LongTermRetentionManagedInstanceBackupsListByDatabaseOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup[]> {
     let result: LongTermRetentionManagedInstanceBackupsListByDatabaseResponse;
     let continuationToken = settings?.continuationToken;
@@ -118,7 +123,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         locationName,
         managedInstanceName,
         databaseName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -131,7 +136,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         managedInstanceName,
         databaseName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -144,13 +149,13 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     databaseName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByDatabaseOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByDatabaseOptionalParams,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     for await (const page of this.listByDatabasePagingPage(
       locationName,
       managedInstanceName,
       databaseName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -165,12 +170,12 @@ export class LongTermRetentionManagedInstanceBackupsImpl
   public listByInstance(
     locationName: string,
     managedInstanceName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByInstanceOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByInstanceOptionalParams,
   ): PagedAsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     const iter = this.listByInstancePagingAll(
       locationName,
       managedInstanceName,
-      options
+      options,
     );
     return {
       next() {
@@ -187,9 +192,9 @@ export class LongTermRetentionManagedInstanceBackupsImpl
           locationName,
           managedInstanceName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -197,7 +202,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     options?: LongTermRetentionManagedInstanceBackupsListByInstanceOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup[]> {
     let result: LongTermRetentionManagedInstanceBackupsListByInstanceResponse;
     let continuationToken = settings?.continuationToken;
@@ -205,7 +210,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
       result = await this._listByInstance(
         locationName,
         managedInstanceName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -217,7 +222,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         locationName,
         managedInstanceName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -229,12 +234,12 @@ export class LongTermRetentionManagedInstanceBackupsImpl
   private async *listByInstancePagingAll(
     locationName: string,
     managedInstanceName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByInstanceOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByInstanceOptionalParams,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     for await (const page of this.listByInstancePagingPage(
       locationName,
       managedInstanceName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -247,7 +252,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
    */
   public listByLocation(
     locationName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByLocationOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByLocationOptionalParams,
   ): PagedAsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     const iter = this.listByLocationPagingAll(locationName, options);
     return {
@@ -262,14 +267,14 @@ export class LongTermRetentionManagedInstanceBackupsImpl
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listByLocationPagingPage(locationName, options, settings);
-      }
+      },
     };
   }
 
   private async *listByLocationPagingPage(
     locationName: string,
     options?: LongTermRetentionManagedInstanceBackupsListByLocationOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup[]> {
     let result: LongTermRetentionManagedInstanceBackupsListByLocationResponse;
     let continuationToken = settings?.continuationToken;
@@ -284,7 +289,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
       result = await this._listByLocationNext(
         locationName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -295,11 +300,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
 
   private async *listByLocationPagingAll(
     locationName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByLocationOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByLocationOptionalParams,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     for await (const page of this.listByLocationPagingPage(
       locationName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -319,14 +324,14 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     databaseName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseOptionalParams,
   ): PagedAsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     const iter = this.listByResourceGroupDatabasePagingAll(
       resourceGroupName,
       locationName,
       managedInstanceName,
       databaseName,
-      options
+      options,
     );
     return {
       next() {
@@ -345,9 +350,9 @@ export class LongTermRetentionManagedInstanceBackupsImpl
           managedInstanceName,
           databaseName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -357,7 +362,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup[]> {
     let result: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseResponse;
     let continuationToken = settings?.continuationToken;
@@ -367,7 +372,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         locationName,
         managedInstanceName,
         databaseName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -381,7 +386,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         managedInstanceName,
         databaseName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -395,14 +400,14 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     databaseName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseOptionalParams,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     for await (const page of this.listByResourceGroupDatabasePagingPage(
       resourceGroupName,
       locationName,
       managedInstanceName,
       databaseName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -420,13 +425,13 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     resourceGroupName: string,
     locationName: string,
     managedInstanceName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceOptionalParams,
   ): PagedAsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     const iter = this.listByResourceGroupInstancePagingAll(
       resourceGroupName,
       locationName,
       managedInstanceName,
-      options
+      options,
     );
     return {
       next() {
@@ -444,9 +449,9 @@ export class LongTermRetentionManagedInstanceBackupsImpl
           locationName,
           managedInstanceName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -455,7 +460,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup[]> {
     let result: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceResponse;
     let continuationToken = settings?.continuationToken;
@@ -464,7 +469,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         resourceGroupName,
         locationName,
         managedInstanceName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -477,7 +482,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         locationName,
         managedInstanceName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -490,13 +495,13 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     resourceGroupName: string,
     locationName: string,
     managedInstanceName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceOptionalParams,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     for await (const page of this.listByResourceGroupInstancePagingPage(
       resourceGroupName,
       locationName,
       managedInstanceName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -512,12 +517,12 @@ export class LongTermRetentionManagedInstanceBackupsImpl
   public listByResourceGroupLocation(
     resourceGroupName: string,
     locationName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationOptionalParams,
   ): PagedAsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     const iter = this.listByResourceGroupLocationPagingAll(
       resourceGroupName,
       locationName,
-      options
+      options,
     );
     return {
       next() {
@@ -534,9 +539,9 @@ export class LongTermRetentionManagedInstanceBackupsImpl
           resourceGroupName,
           locationName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -544,7 +549,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     resourceGroupName: string,
     locationName: string,
     options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup[]> {
     let result: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationResponse;
     let continuationToken = settings?.continuationToken;
@@ -552,7 +557,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
       result = await this._listByResourceGroupLocation(
         resourceGroupName,
         locationName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -564,7 +569,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         resourceGroupName,
         locationName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -576,12 +581,12 @@ export class LongTermRetentionManagedInstanceBackupsImpl
   private async *listByResourceGroupLocationPagingAll(
     resourceGroupName: string,
     locationName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationOptionalParams,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionBackup> {
     for await (const page of this.listByResourceGroupLocationPagingPage(
       resourceGroupName,
       locationName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -600,11 +605,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     backupName: string,
-    options?: LongTermRetentionManagedInstanceBackupsGetOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsGetOptionalParams,
   ): Promise<LongTermRetentionManagedInstanceBackupsGetResponse> {
     return this.client.sendOperationRequest(
       { locationName, managedInstanceName, databaseName, backupName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -621,25 +626,24 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     backupName: string,
-    options?: LongTermRetentionManagedInstanceBackupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: LongTermRetentionManagedInstanceBackupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -648,8 +652,8 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -657,19 +661,25 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { locationName, managedInstanceName, databaseName, backupName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        locationName,
+        managedInstanceName,
+        databaseName,
+        backupName,
+        options,
+      },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -688,14 +698,14 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     backupName: string,
-    options?: LongTermRetentionManagedInstanceBackupsDeleteOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       locationName,
       managedInstanceName,
       databaseName,
       backupName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -711,11 +721,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     databaseName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByDatabaseOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByDatabaseOptionalParams,
   ): Promise<LongTermRetentionManagedInstanceBackupsListByDatabaseResponse> {
     return this.client.sendOperationRequest(
       { locationName, managedInstanceName, databaseName, options },
-      listByDatabaseOperationSpec
+      listByDatabaseOperationSpec,
     );
   }
 
@@ -728,11 +738,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
   private _listByInstance(
     locationName: string,
     managedInstanceName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByInstanceOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByInstanceOptionalParams,
   ): Promise<LongTermRetentionManagedInstanceBackupsListByInstanceResponse> {
     return this.client.sendOperationRequest(
       { locationName, managedInstanceName, options },
-      listByInstanceOperationSpec
+      listByInstanceOperationSpec,
     );
   }
 
@@ -743,11 +753,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
    */
   private _listByLocation(
     locationName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByLocationOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsListByLocationOptionalParams,
   ): Promise<LongTermRetentionManagedInstanceBackupsListByLocationResponse> {
     return this.client.sendOperationRequest(
       { locationName, options },
-      listByLocationOperationSpec
+      listByLocationOperationSpec,
     );
   }
 
@@ -767,10 +777,8 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     backupName: string,
-    options?: LongTermRetentionManagedInstanceBackupsGetByResourceGroupOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsGetByResourceGroupResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsGetByResourceGroupOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsGetByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
@@ -778,9 +786,9 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         managedInstanceName,
         databaseName,
         backupName,
-        options
+        options,
       },
-      getByResourceGroupOperationSpec
+      getByResourceGroupOperationSpec,
     );
   }
 
@@ -800,25 +808,24 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     backupName: string,
-    options?: LongTermRetentionManagedInstanceBackupsDeleteByResourceGroupOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: LongTermRetentionManagedInstanceBackupsDeleteByResourceGroupOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -827,8 +834,8 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -836,26 +843,26 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         locationName,
         managedInstanceName,
         databaseName,
         backupName,
-        options
+        options,
       },
-      deleteByResourceGroupOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: deleteByResourceGroupOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -877,7 +884,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     backupName: string,
-    options?: LongTermRetentionManagedInstanceBackupsDeleteByResourceGroupOptionalParams
+    options?: LongTermRetentionManagedInstanceBackupsDeleteByResourceGroupOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDeleteByResourceGroup(
       resourceGroupName,
@@ -885,7 +892,7 @@ export class LongTermRetentionManagedInstanceBackupsImpl
       managedInstanceName,
       databaseName,
       backupName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -904,19 +911,17 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     databaseName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         locationName,
         managedInstanceName,
         databaseName,
-        options
+        options,
       },
-      listByResourceGroupDatabaseOperationSpec
+      listByResourceGroupDatabaseOperationSpec,
     );
   }
 
@@ -932,13 +937,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     resourceGroupName: string,
     locationName: string,
     managedInstanceName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, locationName, managedInstanceName, options },
-      listByResourceGroupInstanceOperationSpec
+      listByResourceGroupInstanceOperationSpec,
     );
   }
 
@@ -952,13 +955,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
   private _listByResourceGroupLocation(
     resourceGroupName: string,
     locationName: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, locationName, options },
-      listByResourceGroupLocationOperationSpec
+      listByResourceGroupLocationOperationSpec,
     );
   }
 
@@ -975,13 +976,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     nextLink: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByDatabaseNextOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsListByDatabaseNextResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsListByDatabaseNextOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsListByDatabaseNextResponse> {
     return this.client.sendOperationRequest(
       { locationName, managedInstanceName, databaseName, nextLink, options },
-      listByDatabaseNextOperationSpec
+      listByDatabaseNextOperationSpec,
     );
   }
 
@@ -996,13 +995,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     nextLink: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByInstanceNextOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsListByInstanceNextResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsListByInstanceNextOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsListByInstanceNextResponse> {
     return this.client.sendOperationRequest(
       { locationName, managedInstanceName, nextLink, options },
-      listByInstanceNextOperationSpec
+      listByInstanceNextOperationSpec,
     );
   }
 
@@ -1015,13 +1012,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
   private _listByLocationNext(
     locationName: string,
     nextLink: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByLocationNextOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsListByLocationNextResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsListByLocationNextOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsListByLocationNextResponse> {
     return this.client.sendOperationRequest(
       { locationName, nextLink, options },
-      listByLocationNextOperationSpec
+      listByLocationNextOperationSpec,
     );
   }
 
@@ -1042,10 +1037,8 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     managedInstanceName: string,
     databaseName: string,
     nextLink: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseNextOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseNextResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseNextOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsListByResourceGroupDatabaseNextResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
@@ -1053,9 +1046,9 @@ export class LongTermRetentionManagedInstanceBackupsImpl
         managedInstanceName,
         databaseName,
         nextLink,
-        options
+        options,
       },
-      listByResourceGroupDatabaseNextOperationSpec
+      listByResourceGroupDatabaseNextOperationSpec,
     );
   }
 
@@ -1074,19 +1067,17 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     locationName: string,
     managedInstanceName: string,
     nextLink: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceNextOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceNextResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceNextOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsListByResourceGroupInstanceNextResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         locationName,
         managedInstanceName,
         nextLink,
-        options
+        options,
       },
-      listByResourceGroupInstanceNextOperationSpec
+      listByResourceGroupInstanceNextOperationSpec,
     );
   }
 
@@ -1103,13 +1094,11 @@ export class LongTermRetentionManagedInstanceBackupsImpl
     resourceGroupName: string,
     locationName: string,
     nextLink: string,
-    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationNextOptionalParams
-  ): Promise<
-    LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationNextResponse
-  > {
+    options?: LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationNextOptionalParams,
+  ): Promise<LongTermRetentionManagedInstanceBackupsListByResourceGroupLocationNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, locationName, nextLink, options },
-      listByResourceGroupLocationNextOperationSpec
+      listByResourceGroupLocationNextOperationSpec,
     );
   }
 }
@@ -1117,126 +1106,120 @@ export class LongTermRetentionManagedInstanceBackupsImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups/{backupName}",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups/{backupName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackup
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackup,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion1],
+  queryParameters: [Parameters.apiVersion7],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.databaseName,
     Parameters.locationName,
     Parameters.managedInstanceName,
-    Parameters.backupName
+    Parameters.backupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups/{backupName}",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups/{backupName}",
   httpMethod: "DELETE",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion1],
+  queryParameters: [Parameters.apiVersion7],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.databaseName,
     Parameters.locationName,
     Parameters.managedInstanceName,
-    Parameters.backupName
+    Parameters.backupName,
   ],
-  serializer
+  serializer,
 };
 const listByDatabaseOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [
-    Parameters.apiVersion1,
+    Parameters.apiVersion7,
     Parameters.onlyLatestPerDatabase,
-    Parameters.databaseState
+    Parameters.databaseState,
   ],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.databaseName,
     Parameters.locationName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByInstanceOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionManagedInstanceBackups",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionManagedInstanceBackups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [
-    Parameters.apiVersion1,
+    Parameters.apiVersion7,
     Parameters.onlyLatestPerDatabase,
-    Parameters.databaseState
+    Parameters.databaseState,
   ],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.locationName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByLocationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstanceBackups",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstanceBackups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [
-    Parameters.apiVersion1,
+    Parameters.apiVersion7,
     Parameters.onlyLatestPerDatabase,
-    Parameters.databaseState
+    Parameters.databaseState,
   ],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.locationName
+    Parameters.locationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups/{backupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups/{backupName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackup
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackup,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion1],
+  queryParameters: [Parameters.apiVersion7],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -1244,17 +1227,16 @@ const getByResourceGroupOperationSpec: coreClient.OperationSpec = {
     Parameters.databaseName,
     Parameters.locationName,
     Parameters.managedInstanceName,
-    Parameters.backupName
+    Parameters.backupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const deleteByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups/{backupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups/{backupName}",
   httpMethod: "DELETE",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion1],
+  queryParameters: [Parameters.apiVersion7],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
@@ -1262,24 +1244,23 @@ const deleteByResourceGroupOperationSpec: coreClient.OperationSpec = {
     Parameters.databaseName,
     Parameters.locationName,
     Parameters.managedInstanceName,
-    Parameters.backupName
+    Parameters.backupName,
   ],
-  serializer
+  serializer,
 };
 const listByResourceGroupDatabaseOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionDatabases/{databaseName}/longTermRetentionManagedInstanceBackups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [
-    Parameters.apiVersion1,
+    Parameters.apiVersion7,
     Parameters.onlyLatestPerDatabase,
-    Parameters.databaseState
+    Parameters.databaseState,
   ],
   urlParameters: [
     Parameters.$host,
@@ -1287,68 +1268,66 @@ const listByResourceGroupDatabaseOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.databaseName,
     Parameters.locationName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupInstanceOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionManagedInstanceBackups",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstances/{managedInstanceName}/longTermRetentionManagedInstanceBackups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [
-    Parameters.apiVersion1,
+    Parameters.apiVersion7,
     Parameters.onlyLatestPerDatabase,
-    Parameters.databaseState
+    Parameters.databaseState,
   ],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.locationName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupLocationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstanceBackups",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/locations/{locationName}/longTermRetentionManagedInstanceBackups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [
-    Parameters.apiVersion1,
+    Parameters.apiVersion7,
     Parameters.onlyLatestPerDatabase,
-    Parameters.databaseState
+    Parameters.databaseState,
   ],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.locationName
+    Parameters.locationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByDatabaseNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
@@ -1356,56 +1335,56 @@ const listByDatabaseNextOperationSpec: coreClient.OperationSpec = {
     Parameters.databaseName,
     Parameters.nextLink,
     Parameters.locationName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByInstanceNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.nextLink,
     Parameters.locationName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByLocationNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.locationName
+    Parameters.locationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupDatabaseNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
@@ -1414,19 +1393,19 @@ const listByResourceGroupDatabaseNextOperationSpec: coreClient.OperationSpec = {
     Parameters.databaseName,
     Parameters.nextLink,
     Parameters.locationName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupInstanceNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
@@ -1434,27 +1413,27 @@ const listByResourceGroupInstanceNextOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.nextLink,
     Parameters.locationName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupLocationNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionBackupListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.nextLink,
-    Parameters.locationName
+    Parameters.locationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

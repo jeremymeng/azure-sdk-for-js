@@ -10,19 +10,23 @@
 // Licensed under the MIT License.
 import {
   AccountSasParameters,
-  StorageManagementClient
+  StorageManagementClient,
 } from "@azure/arm-storage";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to List SAS credentials of a storage account.
  *
  * @summary List SAS credentials of a storage account.
- * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2022-09-01/examples/StorageAccountListAccountSAS.json
+ * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2023-05-01/examples/StorageAccountListAccountSAS.json
  */
 async function storageAccountListAccountSas() {
-  const subscriptionId = "{subscription-id}";
-  const resourceGroupName = "res7985";
+  const subscriptionId =
+    process.env["STORAGE_SUBSCRIPTION_ID"] || "{subscription-id}";
+  const resourceGroupName = process.env["STORAGE_RESOURCE_GROUP"] || "res7985";
   const accountName = "sto8588";
   const parameters: AccountSasParameters = {
     keyToSign: "key1",
@@ -31,16 +35,20 @@ async function storageAccountListAccountSas() {
     protocols: "https,http",
     resourceTypes: "s",
     services: "b",
-    sharedAccessStartTime: new Date("2017-05-24T10:42:03.1567373Z")
+    sharedAccessStartTime: new Date("2017-05-24T10:42:03.1567373Z"),
   };
   const credential = new DefaultAzureCredential();
   const client = new StorageManagementClient(credential, subscriptionId);
   const result = await client.storageAccounts.listAccountSAS(
     resourceGroupName,
     accountName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
 
-storageAccountListAccountSas().catch(console.error);
+async function main() {
+  storageAccountListAccountSas();
+}
+
+main().catch(console.error);

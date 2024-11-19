@@ -1,18 +1,16 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { Test } from "mocha";
+import type { Test } from "mocha";
 
-import {
-  assertEnvironmentVariable,
-  Recorder,
-  RecorderStartOptions,
-} from "@azure-tools/test-recorder";
+import type { RecorderStartOptions } from "@azure-tools/test-recorder";
+import { assertEnvironmentVariable, Recorder } from "@azure-tools/test-recorder";
 
-import { EventGridPublisherClient, InputSchema } from "../../../src";
-import { AzureKeyCredential } from "@azure/core-auth";
-import { AdditionalPolicyConfig } from "@azure/core-client";
-import { FindReplaceSanitizer } from "@azure-tools/test-recorder/types/src/utils/utils";
+import type { InputSchema } from "../../../src";
+import { EventGridPublisherClient } from "../../../src";
+import { createTestCredential } from "@azure-tools/test-credential";
+import type { AdditionalPolicyConfig } from "@azure/core-client";
+import type { FindReplaceSanitizer } from "@azure-tools/test-recorder/types/src/utils/utils";
 
 export interface RecordedClient<T extends InputSchema> {
   client: EventGridPublisherClient<T>;
@@ -20,11 +18,8 @@ export interface RecordedClient<T extends InputSchema> {
 }
 
 const envSetupForPlayback: { [k: string]: string } = {
-  EVENT_GRID_EVENT_GRID_SCHEMA_API_KEY: "api_key",
   EVENT_GRID_EVENT_GRID_SCHEMA_ENDPOINT: "https://endpoint/api/events",
-  EVENT_GRID_CLOUD_EVENT_SCHEMA_API_KEY: "api_key",
   EVENT_GRID_CLOUD_EVENT_SCHEMA_ENDPOINT: "https://endpoint/api/events",
-  EVENT_GRID_CUSTOM_SCHEMA_API_KEY: "api_key",
   EVENT_GRID_CUSTOM_SCHEMA_ENDPOINT: "https://endpoint/api/events",
 };
 
@@ -40,17 +35,21 @@ const suffixlessEndpointSanitizer = (endpointEnv: string): FindReplaceSanitizer 
 
 export const recorderOptions: RecorderStartOptions = {
   envSetupForPlayback,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK4001",
+  ],
 };
 
 export async function createRecordedClient<T extends InputSchema>(
   currentTest: Test | undefined,
   endpointEnv: string,
   eventSchema: T,
-  apiKeyEnv: string,
   options: {
     removeApiEventsSuffixBool?: boolean;
     additionalPolicies?: AdditionalPolicyConfig[];
-  } = {}
+  } = {},
 ): Promise<RecordedClient<T>> {
   const recorder = new Recorder(currentTest);
   await recorder.start(recorderOptions);
@@ -68,10 +67,10 @@ export async function createRecordedClient<T extends InputSchema>(
         ? removeApiEventsSuffix(assertEnvironmentVariable(endpointEnv))
         : assertEnvironmentVariable(endpointEnv),
       eventSchema,
-      new AzureKeyCredential(assertEnvironmentVariable(apiKeyEnv)),
+      createTestCredential(),
       recorder.configureClientOptions({
         additionalPolicies: options.additionalPolicies,
-      })
+      }),
     ),
     recorder,
   };

@@ -14,8 +14,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ArtifactsClient } from "../artifactsClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   SparkConfigurationResource,
   SparkConfigurationGetSparkConfigurationsByWorkspaceNextOptionalParams,
@@ -28,13 +32,14 @@ import {
   SparkConfigurationDeleteSparkConfigurationOptionalParams,
   ArtifactRenameRequest,
   SparkConfigurationRenameSparkConfigurationOptionalParams,
-  SparkConfigurationGetSparkConfigurationsByWorkspaceNextResponse
+  SparkConfigurationGetSparkConfigurationsByWorkspaceNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing SparkConfigurationOperations operations. */
 export class SparkConfigurationOperationsImpl
-  implements SparkConfigurationOperations {
+  implements SparkConfigurationOperations
+{
   private readonly client: ArtifactsClient;
 
   /**
@@ -50,7 +55,7 @@ export class SparkConfigurationOperationsImpl
    * @param options The options parameters.
    */
   public listSparkConfigurationsByWorkspace(
-    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams
+    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<SparkConfigurationResource> {
     const iter = this.getSparkConfigurationsByWorkspacePagingAll(options);
     return {
@@ -66,15 +71,15 @@ export class SparkConfigurationOperationsImpl
         }
         return this.getSparkConfigurationsByWorkspacePagingPage(
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *getSparkConfigurationsByWorkspacePagingPage(
     options?: SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<SparkConfigurationResource[]> {
     let result: SparkConfigurationGetSparkConfigurationsByWorkspaceResponse;
     let continuationToken = settings?.continuationToken;
@@ -88,7 +93,7 @@ export class SparkConfigurationOperationsImpl
     while (continuationToken) {
       result = await this._getSparkConfigurationsByWorkspaceNext(
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -98,10 +103,10 @@ export class SparkConfigurationOperationsImpl
   }
 
   private async *getSparkConfigurationsByWorkspacePagingAll(
-    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams
+    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams,
   ): AsyncIterableIterator<SparkConfigurationResource> {
     for await (const page of this.getSparkConfigurationsByWorkspacePagingPage(
-      options
+      options,
     )) {
       yield* page;
     }
@@ -112,7 +117,7 @@ export class SparkConfigurationOperationsImpl
    * @param options The options parameters.
    */
   private async _getSparkConfigurationsByWorkspace(
-    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams
+    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams,
   ): Promise<SparkConfigurationGetSparkConfigurationsByWorkspaceResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient._getSparkConfigurationsByWorkspace",
@@ -120,11 +125,9 @@ export class SparkConfigurationOperationsImpl
       async (options) => {
         return this.client.sendOperationRequest(
           { options },
-          getSparkConfigurationsByWorkspaceOperationSpec
-        ) as Promise<
-          SparkConfigurationGetSparkConfigurationsByWorkspaceResponse
-        >;
-      }
+          getSparkConfigurationsByWorkspaceOperationSpec,
+        ) as Promise<SparkConfigurationGetSparkConfigurationsByWorkspaceResponse>;
+      },
     );
   }
 
@@ -137,40 +140,38 @@ export class SparkConfigurationOperationsImpl
   async beginCreateOrUpdateSparkConfiguration(
     sparkConfigurationName: string,
     sparkConfiguration: SparkConfigurationResource,
-    options?: SparkConfigurationCreateOrUpdateSparkConfigurationOptionalParams
+    options?: SparkConfigurationCreateOrUpdateSparkConfigurationOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        SparkConfigurationCreateOrUpdateSparkConfigurationResponse
-      >,
+    SimplePollerLike<
+      OperationState<SparkConfigurationCreateOrUpdateSparkConfigurationResponse>,
       SparkConfigurationCreateOrUpdateSparkConfigurationResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<SparkConfigurationCreateOrUpdateSparkConfigurationResponse> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginCreateOrUpdateSparkConfiguration",
         options ?? {},
         async () => {
-          return this.client.sendOperationRequest(args, spec) as Promise<
-            SparkConfigurationCreateOrUpdateSparkConfigurationResponse
-          >;
-        }
+          return this.client.sendOperationRequest(
+            args,
+            spec,
+          ) as Promise<SparkConfigurationCreateOrUpdateSparkConfigurationResponse>;
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -179,8 +180,8 @@ export class SparkConfigurationOperationsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -188,19 +189,22 @@ export class SparkConfigurationOperationsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { sparkConfigurationName, sparkConfiguration, options },
-      createOrUpdateSparkConfigurationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { sparkConfigurationName, sparkConfiguration, options },
+      spec: createOrUpdateSparkConfigurationOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      SparkConfigurationCreateOrUpdateSparkConfigurationResponse,
+      OperationState<SparkConfigurationCreateOrUpdateSparkConfigurationResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -215,12 +219,12 @@ export class SparkConfigurationOperationsImpl
   async beginCreateOrUpdateSparkConfigurationAndWait(
     sparkConfigurationName: string,
     sparkConfiguration: SparkConfigurationResource,
-    options?: SparkConfigurationCreateOrUpdateSparkConfigurationOptionalParams
+    options?: SparkConfigurationCreateOrUpdateSparkConfigurationOptionalParams,
   ): Promise<SparkConfigurationCreateOrUpdateSparkConfigurationResponse> {
     const poller = await this.beginCreateOrUpdateSparkConfiguration(
       sparkConfigurationName,
       sparkConfiguration,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -232,7 +236,7 @@ export class SparkConfigurationOperationsImpl
    */
   async getSparkConfiguration(
     sparkConfigurationName: string,
-    options?: SparkConfigurationGetSparkConfigurationOptionalParams
+    options?: SparkConfigurationGetSparkConfigurationOptionalParams,
   ): Promise<SparkConfigurationGetSparkConfigurationResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient.getSparkConfiguration",
@@ -240,9 +244,9 @@ export class SparkConfigurationOperationsImpl
       async (options) => {
         return this.client.sendOperationRequest(
           { sparkConfigurationName, options },
-          getSparkConfigurationOperationSpec
+          getSparkConfigurationOperationSpec,
         ) as Promise<SparkConfigurationGetSparkConfigurationResponse>;
-      }
+      },
     );
   }
 
@@ -253,31 +257,30 @@ export class SparkConfigurationOperationsImpl
    */
   async beginDeleteSparkConfiguration(
     sparkConfigurationName: string,
-    options?: SparkConfigurationDeleteSparkConfigurationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: SparkConfigurationDeleteSparkConfigurationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginDeleteSparkConfiguration",
         options ?? {},
         async () => {
           return this.client.sendOperationRequest(args, spec) as Promise<void>;
-        }
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -286,8 +289,8 @@ export class SparkConfigurationOperationsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -295,19 +298,19 @@ export class SparkConfigurationOperationsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { sparkConfigurationName, options },
-      deleteSparkConfigurationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { sparkConfigurationName, options },
+      spec: deleteSparkConfigurationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -320,11 +323,11 @@ export class SparkConfigurationOperationsImpl
    */
   async beginDeleteSparkConfigurationAndWait(
     sparkConfigurationName: string,
-    options?: SparkConfigurationDeleteSparkConfigurationOptionalParams
+    options?: SparkConfigurationDeleteSparkConfigurationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDeleteSparkConfiguration(
       sparkConfigurationName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -338,31 +341,30 @@ export class SparkConfigurationOperationsImpl
   async beginRenameSparkConfiguration(
     sparkConfigurationName: string,
     request: ArtifactRenameRequest,
-    options?: SparkConfigurationRenameSparkConfigurationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: SparkConfigurationRenameSparkConfigurationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginRenameSparkConfiguration",
         options ?? {},
         async () => {
           return this.client.sendOperationRequest(args, spec) as Promise<void>;
-        }
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -371,8 +373,8 @@ export class SparkConfigurationOperationsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -380,19 +382,19 @@ export class SparkConfigurationOperationsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { sparkConfigurationName, request, options },
-      renameSparkConfigurationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { sparkConfigurationName, request, options },
+      spec: renameSparkConfigurationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -407,12 +409,12 @@ export class SparkConfigurationOperationsImpl
   async beginRenameSparkConfigurationAndWait(
     sparkConfigurationName: string,
     request: ArtifactRenameRequest,
-    options?: SparkConfigurationRenameSparkConfigurationOptionalParams
+    options?: SparkConfigurationRenameSparkConfigurationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRenameSparkConfiguration(
       sparkConfigurationName,
       request,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -425,7 +427,7 @@ export class SparkConfigurationOperationsImpl
    */
   private async _getSparkConfigurationsByWorkspaceNext(
     nextLink: string,
-    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceNextOptionalParams
+    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceNextOptionalParams,
   ): Promise<SparkConfigurationGetSparkConfigurationsByWorkspaceNextResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient._getSparkConfigurationsByWorkspaceNext",
@@ -433,80 +435,80 @@ export class SparkConfigurationOperationsImpl
       async (options) => {
         return this.client.sendOperationRequest(
           { nextLink, options },
-          getSparkConfigurationsByWorkspaceNextOperationSpec
-        ) as Promise<
-          SparkConfigurationGetSparkConfigurationsByWorkspaceNextResponse
-        >;
-      }
+          getSparkConfigurationsByWorkspaceNextOperationSpec,
+        ) as Promise<SparkConfigurationGetSparkConfigurationsByWorkspaceNextResponse>;
+      },
     );
   }
 }
 // Operation Specifications
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
-const getSparkConfigurationsByWorkspaceOperationSpec: coreClient.OperationSpec = {
-  path: "/sparkconfigurations",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.SparkConfigurationListResponse
+const getSparkConfigurationsByWorkspaceOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/sparkconfigurations",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.SparkConfigurationListResponse,
+      },
+      default: {
+        bodyMapper: Mappers.CloudError,
+      },
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion3],
-  urlParameters: [Parameters.endpoint],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const createOrUpdateSparkConfigurationOperationSpec: coreClient.OperationSpec = {
-  path: "/sparkconfigurations/{sparkConfigurationName}",
-  httpMethod: "PUT",
-  responses: {
-    200: {
-      bodyMapper: Mappers.SparkConfigurationResource
+    queryParameters: [Parameters.apiVersion4],
+    urlParameters: [Parameters.endpoint],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const createOrUpdateSparkConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/sparkconfigurations/{sparkConfigurationName}",
+    httpMethod: "PUT",
+    responses: {
+      200: {
+        bodyMapper: Mappers.SparkConfigurationResource,
+      },
+      201: {
+        bodyMapper: Mappers.SparkConfigurationResource,
+      },
+      202: {
+        bodyMapper: Mappers.SparkConfigurationResource,
+      },
+      204: {
+        bodyMapper: Mappers.SparkConfigurationResource,
+      },
+      default: {
+        bodyMapper: Mappers.CloudError,
+      },
     },
-    201: {
-      bodyMapper: Mappers.SparkConfigurationResource
-    },
-    202: {
-      bodyMapper: Mappers.SparkConfigurationResource
-    },
-    204: {
-      bodyMapper: Mappers.SparkConfigurationResource
-    },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  requestBody: Parameters.sparkConfiguration,
-  queryParameters: [Parameters.apiVersion3],
-  urlParameters: [Parameters.endpoint, Parameters.sparkConfigurationName],
-  headerParameters: [
-    Parameters.accept,
-    Parameters.contentType,
-    Parameters.ifMatch
-  ],
-  mediaType: "json",
-  serializer
-};
+    requestBody: Parameters.sparkConfiguration,
+    queryParameters: [Parameters.apiVersion4],
+    urlParameters: [Parameters.endpoint, Parameters.sparkConfigurationName],
+    headerParameters: [
+      Parameters.accept,
+      Parameters.contentType,
+      Parameters.ifMatch,
+    ],
+    mediaType: "json",
+    serializer,
+  };
 const getSparkConfigurationOperationSpec: coreClient.OperationSpec = {
   path: "/sparkconfigurations/{sparkConfigurationName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SparkConfigurationResource
+      bodyMapper: Mappers.SparkConfigurationResource,
     },
     304: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint, Parameters.sparkConfigurationName],
   headerParameters: [Parameters.accept, Parameters.ifNoneMatch],
-  serializer
+  serializer,
 };
 const deleteSparkConfigurationOperationSpec: coreClient.OperationSpec = {
   path: "/sparkconfigurations/{sparkConfigurationName}",
@@ -517,13 +519,13 @@ const deleteSparkConfigurationOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint, Parameters.sparkConfigurationName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const renameSparkConfigurationOperationSpec: coreClient.OperationSpec = {
   path: "/sparkconfigurations/{sparkConfigurationName}/rename",
@@ -534,28 +536,29 @@ const renameSparkConfigurationOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.request,
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.endpoint, Parameters.sparkConfigurationName],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const getSparkConfigurationsByWorkspaceNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.SparkConfigurationListResponse
+const getSparkConfigurationsByWorkspaceNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "{nextLink}",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.SparkConfigurationListResponse,
+      },
+      default: {
+        bodyMapper: Mappers.CloudError,
+      },
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  urlParameters: [Parameters.endpoint, Parameters.nextLink],
-  headerParameters: [Parameters.accept],
-  serializer
-};
+    urlParameters: [Parameters.endpoint, Parameters.nextLink],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };

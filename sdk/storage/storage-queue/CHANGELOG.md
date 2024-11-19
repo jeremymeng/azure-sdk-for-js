@@ -1,12 +1,96 @@
 # Release History
 
-## 12.12.0 (Unreleased)
+## 12.25.0 (2024-11-13)
 
 ### Features Added
 
-### Breaking Changes
+- Added support for service version 2025-01-05.
+
+## 12.24.0 (2024-09-22)
+
+### Features Added
+
+- Includes all features released in 12.24.0-beta.1.
+
+### Other Changes
+
+- Upgraded dependency on `@azure/core-xml` to version `1.4.3`.
+
+## 12.24.0-beta.1 (2024-08-09)
+
+### Features Added
+
+- Added support for service version 2024-11-04.
+- Added ability to retrieve SAS string to sign for debugging purposes.
+
+## 12.23.0 (2024-07-18)
+
+### Features Added
+
+- Includes all features released in 12.23.0-beta.1.
 
 ### Bugs Fixed
+
+- Correct content-length header with request body length. (#30138)
+
+## 12.23.0-beta.1 (2024-06-13)
+
+### Features Added
+
+- Added support for service version 2024-08-04.
+- Added more detailed messaging for authorization failure cases.
+
+## 12.22.0 (2024-06-04)
+
+### Features Added
+
+- Includes all features released in 12.22.0-beta.1.
+- Allow HTTP connections
+
+## 12.17.0 (2024-05-11)
+
+### Features Added
+
+- Added support for service version 2024-05-04.
+
+## 12.16.0 (2023-11-09)
+
+### Features Added
+
+- Includes all features released in 12.16.0-beta.1.
+
+## 12.22.0-beta.1 (2023-11-01)
+
+### Other Changes
+
+- Migrated dependency on `@azure/core-http` to `@azure/core-rest-pipeline`.
+
+## 12.16.0-beta.1 (2023-10-18)
+
+### Features Added
+
+- Added support for service version 2023-11-03.
+- Added support for indicating audience in StoragePipelineOptions.
+
+## 12.15.0 (2023-09-14)
+
+### Features Added
+
+- Added support for service version 2023-08-03.
+
+## 12.14.0 (2023-07-12)
+
+### Features Added
+
+- Added support for service version 2023-01-03.
+
+## 12.13.0 (2023-04-13)
+
+### Features Added
+
+- Added support for service version 2022-11-02.
+
+## 12.12.0 (2023-02-23)
 
 ### Other Changes
 

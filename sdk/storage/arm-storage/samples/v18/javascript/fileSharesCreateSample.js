@@ -10,16 +10,17 @@
 // Licensed under the MIT License.
 const { StorageManagementClient } = require("@azure/arm-storage");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Creates a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share.
  *
  * @summary Creates a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share.
- * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2022-09-01/examples/FileSharesPut_NFS.json
+ * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2023-05-01/examples/FileSharesPut_NFS.json
  */
 async function createNfsShares() {
-  const subscriptionId = "{subscription-id}";
-  const resourceGroupName = "res346";
+  const subscriptionId = process.env["STORAGE_SUBSCRIPTION_ID"] || "{subscription-id}";
+  const resourceGroupName = process.env["STORAGE_RESOURCE_GROUP"] || "res346";
   const accountName = "sto666";
   const shareName = "share1235";
   const fileShare = { enabledProtocols: "NFS" };
@@ -29,22 +30,20 @@ async function createNfsShares() {
     resourceGroupName,
     accountName,
     shareName,
-    fileShare
+    fileShare,
   );
   console.log(result);
 }
-
-createNfsShares().catch(console.error);
 
 /**
  * This sample demonstrates how to Creates a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share.
  *
  * @summary Creates a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share.
- * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2022-09-01/examples/FileSharesPut.json
+ * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2023-05-01/examples/FileSharesPut.json
  */
 async function putShares() {
-  const subscriptionId = "{subscription-id}";
-  const resourceGroupName = "res3376";
+  const subscriptionId = process.env["STORAGE_SUBSCRIPTION_ID"] || "{subscription-id}";
+  const resourceGroupName = process.env["STORAGE_RESOURCE_GROUP"] || "res3376";
   const accountName = "sto328";
   const shareName = "share6185";
   const fileShare = {};
@@ -54,22 +53,20 @@ async function putShares() {
     resourceGroupName,
     accountName,
     shareName,
-    fileShare
+    fileShare,
   );
   console.log(result);
 }
-
-putShares().catch(console.error);
 
 /**
  * This sample demonstrates how to Creates a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share.
  *
  * @summary Creates a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share.
- * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2022-09-01/examples/FileSharesPut_AccessTier.json
+ * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2023-05-01/examples/FileSharesPut_AccessTier.json
  */
 async function putSharesWithAccessTier() {
-  const subscriptionId = "{subscription-id}";
-  const resourceGroupName = "res346";
+  const subscriptionId = process.env["STORAGE_SUBSCRIPTION_ID"] || "{subscription-id}";
+  const resourceGroupName = process.env["STORAGE_RESOURCE_GROUP"] || "res346";
   const accountName = "sto666";
   const shareName = "share1235";
   const fileShare = { accessTier: "Hot" };
@@ -79,9 +76,15 @@ async function putSharesWithAccessTier() {
     resourceGroupName,
     accountName,
     shareName,
-    fileShare
+    fileShare,
   );
   console.log(result);
 }
 
-putSharesWithAccessTier().catch(console.error);
+async function main() {
+  createNfsShares();
+  putShares();
+  putSharesWithAccessTier();
+}
+
+main().catch(console.error);

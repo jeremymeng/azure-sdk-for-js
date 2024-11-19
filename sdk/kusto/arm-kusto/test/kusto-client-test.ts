@@ -19,14 +19,15 @@ import { assert } from "chai";
 import { Context } from "mocha";
 
 const replaceableVariables: Record<string, string> = {
-  AZURE_CLIENT_ID: "azure_client_id",
-  AZURE_CLIENT_SECRET: "azure_client_secret",
-  AZURE_TENANT_ID: "88888888-8888-8888-8888-888888888888",
-  SUBSCRIPTION_ID: "azure_subscription_id"
+  SUBSCRIPTION_ID: "88888888-8888-8888-8888-888888888888"
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -39,8 +40,6 @@ describe("KustoManagementClient", () => {
   let client: KustoManagementClient;
   let resourceGroup: string;
   let clusterName_1: string;
-  let clusterName_2: string;
-  let clusterParameters: Cluster;
 
   beforeEach(async function (this: Context) {
     recorder = new Recorder(this.currentTest);
@@ -51,17 +50,6 @@ describe("KustoManagementClient", () => {
     client = new KustoManagementClient(credential, subscriptionId, recorder.configureClientOptions({}));
     resourceGroup = "myjstest";
     clusterName_1 = "mytestclustername5";
-    clusterName_2 = "mytestclustername6";
-    clusterParameters = {
-      "location": "westeurope",
-      "sku": {
-        "name": "Standard_L8s_v2",
-        "tier": "Standard"
-      },
-      "identity": {
-        "type": "SystemAssigned"
-      },
-    };
   });
 
   afterEach(async function () {
@@ -70,11 +58,24 @@ describe("KustoManagementClient", () => {
 
   //kusto_client.clusters.beginCreateOrUpdateAndWait
   it("could create clusters", async function () {
-    let res = await client.clusters.beginCreateOrUpdateAndWait(resourceGroup, clusterName_1, clusterParameters, testPollingOptions);
+    let res = await client.clusters.beginCreateOrUpdateAndWait(resourceGroup, clusterName_1,
+      {
+        location: "eastus",
+        sku: { name: "Standard_L16as_v3", capacity: 2, tier: "Standard" },
+        identity: {
+          type: "SystemAssigned"
+        },
+        languageExtensions: {
+          value: [
+            {
+              languageExtensionImageName: "Python3_10_8",
+              languageExtensionName: "PYTHON",
+            },
+          ],
+        },
+      }, testPollingOptions);
     assert.strictEqual(res.name, clusterName_1);
-    res = await client.clusters.beginCreateOrUpdateAndWait(resourceGroup, clusterName_2, clusterParameters, testPollingOptions);
-    assert.strictEqual(res.name, clusterName_2);
-  });
+  }).timeout(7200000);
 
   //kusto_client.clusters.beginUpdateAndWait
   // it("could update tags in cluster", async () => {
@@ -86,7 +87,7 @@ describe("KustoManagementClient", () => {
   //   };
   //   const res = await client.clusters.beginUpdateAndWait(resourceGroup, clusterName_2, updateParams, testPollingOptions);
   //   if (!isPlaybackMode()) {
-  //     await delay(600000);
+  //     await delay(isPlaybackMode() ? 1000 :600000);
   //   }
   //   assert.equal(res.name, clusterName_2);
   // });
@@ -103,15 +104,17 @@ describe("KustoManagementClient", () => {
     for await (const item of client.clusters.listByResourceGroup(resourceGroup)) {
       resArray.push(item);
     }
-    assert.ok(resArray.length >= 2);
+    assert.equal(resArray.length, 1);
   });
 
   //kusto_client.clusters.beginDeleteAndWait
   it("could delete clusters", async () => {
-    let res: any = await client.clusters.beginDeleteAndWait(resourceGroup, clusterName_1, testPollingOptions);
-    assert.strictEqual(res?.body?.status, "Succeeded");
-    res = await client.clusters.beginDeleteAndWait(resourceGroup, clusterName_2, testPollingOptions);
-    assert.strictEqual(res?.body?.status, "Succeeded");
+    let res = await client.clusters.beginDeleteAndWait(resourceGroup, clusterName_1, testPollingOptions);
+    const resArray = new Array();
+    for await (const item of client.clusters.listByResourceGroup(resourceGroup)) {
+      resArray.push(item);
+    }
+    assert.equal(resArray.length, 0);
   });
 
 });

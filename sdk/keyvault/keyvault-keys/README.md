@@ -387,7 +387,7 @@ Another way to wait until the key is fully deleted is to do individual calls, as
 ```typescript
 const { DefaultAzureCredential } = require("@azure/identity");
 const { KeyClient } = require("@azure/keyvault-keys");
-const { delay } = require("@azure/core-http");
+const { delay } = require("@azure/core-util");
 
 const credential = new DefaultAzureCredential();
 
@@ -421,14 +421,14 @@ In addition, KeyClient provides a method to rotate a key on-demand by creating a
 const { DefaultAzureCredential } = require("@azure/identity");
 const { KeyClient } = require("@azure/keyvault-keys");
 
-const vaultUrl = `https://<YOUR KEYVAULT NAME>.vault.azure.net`;
+const url = `https://<YOUR KEYVAULT NAME>.vault.azure.net`;
 const client = new KeyClient(url, new DefaultAzureCredential());
 
 async function main() {
   const keyName = "MyKeyName";
 
   // Set the key's automated rotation policy to rotate the key 30 days before expiry.
-  const policy = await client.updateKeyRotationPolicy(key.name, {
+  const policy = await client.updateKeyRotationPolicy(keyName, {
     lifetimeActions: [
       {
         action: "Rotate",
@@ -441,10 +441,10 @@ async function main() {
   });
 
   // You can get the current key rotation policy of a given key by calling the getKeyRotationPolicy method.
-  const currentPolicy = await client.getKeyRotationPolicy(key.name);
+  const currentPolicy = await client.getKeyRotationPolicy(keyName);
 
   // Finally, you can rotate a key on-demand by creating a new version of the given key.
-  const rotatedKey = await client.rotateKey(key.name);
+  const rotatedKey = await client.rotateKey(keyName);
 }
 
 main();
@@ -527,6 +527,8 @@ async function main() {
     }
   }
 }
+
+main();
 ```
 
 ## Cryptography
@@ -560,6 +562,8 @@ async function main() {
   // Lastly, create our cryptography client and connect to the service
   const cryptographyClient = new CryptographyClient(myKey, credential);
 }
+
+main();
 ```
 
 ### Encrypt
@@ -845,8 +849,8 @@ If you'd like to contribute to this library, please read the [contributing guide
 [azure_keyvault_portal]: https://docs.microsoft.com/azure/key-vault/general/quick-create-portal
 [azure_keyvault_mhsm]: https://docs.microsoft.com/azure/key-vault/managed-hsm/overview
 [azure_keyvault_mhsm_cli]: https://docs.microsoft.com/azure/key-vault/managed-hsm/quick-create-cli
-[default_azure_credential]: https://docs.microsoft.com/java/api/overview/azure/identity-readme?view=azure-java-stable#defaultazurecredential
+[default_azure_credential]: https://learn.microsoft.com/javascript/api/@azure/identity/defaultazurecredential?view=azure-node-latest
 [managed_identity]: https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview
-[azure_identity]: https://docs.microsoft.com/java/api/overview/azure/identity-readme?view=azure-java-stable
+[azure_identity]: https://learn.microsoft.com/javascript/api/overview/azure/identity-readme?view=azure-node-latest
 
 ![Impressions](https://azure-sdk-impressions.azurewebsites.net/api/impressions/azure-sdk-for-js%2Fsdk%2Fkeyvault%2Fkeyvault-keys%2FREADME.png)

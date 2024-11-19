@@ -6,7 +6,8 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import * as coreHttp from "@azure/core-http";
+import * as coreClient from "@azure/core-client";
+import * as coreHttpCompat from "@azure/core-http-compat";
 
 export interface FileSystemList {
   filesystems?: FileSystem[];
@@ -22,6 +23,7 @@ export interface StorageError {
   /** The service error response object. */
   error?: StorageErrorError;
   code?: string;
+  authenticationErrorDetail?: string;
 }
 
 /** The service error response object. */
@@ -49,6 +51,7 @@ export interface Path {
   encryptionScope?: string;
   creationTime?: string;
   expiryTime?: string;
+  encryptionContext?: string;
 }
 
 /** An enumeration of blobs */
@@ -714,8 +717,10 @@ export interface CpkInfo {
 }
 
 /** Known values of {@link EncryptionAlgorithmType} that the service accepts. */
-export const enum KnownEncryptionAlgorithmType {
+export enum KnownEncryptionAlgorithmType {
+  /** None */
   None = "None",
+  /** AES256 */
   AES256 = "AES256"
 }
 
@@ -723,7 +728,7 @@ export const enum KnownEncryptionAlgorithmType {
  * Defines values for EncryptionAlgorithmType. \
  * {@link KnownEncryptionAlgorithmType} can be used interchangeably with EncryptionAlgorithmType,
  *  this enum contains the known values that the service supports.
- * ### Know values supported by the service
+ * ### Known values supported by the service
  * **None** \
  * **AES256**
  */
@@ -774,7 +779,7 @@ export type LeaseAction =
 
 /** Optional parameters. */
 export interface ServiceListFileSystemsOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Filters results to filesystems within the specified prefix. */
   prefix?: string;
   /** Optional.  When deleting a directory, the number of paths that are deleted with each invocation is limited.  If the number of paths to be deleted exceeds this limit, a continuation token is returned in this response header.  When a continuation token is returned in the response, it must be specified in a subsequent invocation of the delete operation to continue deleting the directory. */
@@ -789,22 +794,11 @@ export interface ServiceListFileSystemsOptionalParams
 
 /** Contains response data for the listFileSystems operation. */
 export type ServiceListFileSystemsResponse = ServiceListFileSystemsHeaders &
-  FileSystemList & {
-    /** The underlying HTTP response. */
-    _response: coreHttp.HttpResponse & {
-      /** The response body as text (string format) */
-      bodyAsText: string;
-
-      /** The response body as parsed JSON or XML */
-      parsedBody: FileSystemList;
-      /** The parsed HTTP response headers. */
-      parsedHeaders: ServiceListFileSystemsHeaders;
-    };
-  };
+  FileSystemList;
 
 /** Optional parameters. */
 export interface FileSystemCreateOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Provides a client-generated, opaque value with a 1 KB character limit that is recorded in the analytics logs when storage analytics logging is enabled. */
   requestId?: string;
   /** The timeout parameter is expressed in seconds. For more information, see <a href="https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/setting-timeouts-for-blob-service-operations">Setting Timeouts for Blob Service Operations.</a> */
@@ -814,17 +808,11 @@ export interface FileSystemCreateOptionalParams
 }
 
 /** Contains response data for the create operation. */
-export type FileSystemCreateResponse = FileSystemCreateHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: FileSystemCreateHeaders;
-  };
-};
+export type FileSystemCreateResponse = FileSystemCreateHeaders;
 
 /** Optional parameters. */
 export interface FileSystemSetPropertiesOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Provides a client-generated, opaque value with a 1 KB character limit that is recorded in the analytics logs when storage analytics logging is enabled. */
@@ -836,17 +824,11 @@ export interface FileSystemSetPropertiesOptionalParams
 }
 
 /** Contains response data for the setProperties operation. */
-export type FileSystemSetPropertiesResponse = FileSystemSetPropertiesHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: FileSystemSetPropertiesHeaders;
-  };
-};
+export type FileSystemSetPropertiesResponse = FileSystemSetPropertiesHeaders;
 
 /** Optional parameters. */
 export interface FileSystemGetPropertiesOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Provides a client-generated, opaque value with a 1 KB character limit that is recorded in the analytics logs when storage analytics logging is enabled. */
   requestId?: string;
   /** The timeout parameter is expressed in seconds. For more information, see <a href="https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/setting-timeouts-for-blob-service-operations">Setting Timeouts for Blob Service Operations.</a> */
@@ -854,17 +836,11 @@ export interface FileSystemGetPropertiesOptionalParams
 }
 
 /** Contains response data for the getProperties operation. */
-export type FileSystemGetPropertiesResponse = FileSystemGetPropertiesHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: FileSystemGetPropertiesHeaders;
-  };
-};
+export type FileSystemGetPropertiesResponse = FileSystemGetPropertiesHeaders;
 
 /** Optional parameters. */
 export interface FileSystemDeleteOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Provides a client-generated, opaque value with a 1 KB character limit that is recorded in the analytics logs when storage analytics logging is enabled. */
@@ -874,17 +850,11 @@ export interface FileSystemDeleteOptionalParams
 }
 
 /** Contains response data for the delete operation. */
-export type FileSystemDeleteResponse = FileSystemDeleteHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: FileSystemDeleteHeaders;
-  };
-};
+export type FileSystemDeleteResponse = FileSystemDeleteHeaders;
 
 /** Optional parameters. */
 export interface FileSystemListPathsOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Optional.  When deleting a directory, the number of paths that are deleted with each invocation is limited.  If the number of paths to be deleted exceeds this limit, a continuation token is returned in this response header.  When a continuation token is returned in the response, it must be specified in a subsequent invocation of the delete operation to continue deleting the directory. */
   continuation?: string;
   /** An optional value that specifies the maximum number of items to return. If omitted or greater than 5,000, the response will include up to 5,000 items. */
@@ -900,23 +870,11 @@ export interface FileSystemListPathsOptionalParams
 }
 
 /** Contains response data for the listPaths operation. */
-export type FileSystemListPathsResponse = FileSystemListPathsHeaders &
-  PathList & {
-    /** The underlying HTTP response. */
-    _response: coreHttp.HttpResponse & {
-      /** The response body as text (string format) */
-      bodyAsText: string;
-
-      /** The response body as parsed JSON or XML */
-      parsedBody: PathList;
-      /** The parsed HTTP response headers. */
-      parsedHeaders: FileSystemListPathsHeaders;
-    };
-  };
+export type FileSystemListPathsResponse = FileSystemListPathsHeaders & PathList;
 
 /** Optional parameters. */
 export interface FileSystemListBlobHierarchySegmentOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Filters results to filesystems within the specified prefix. */
   prefix?: string;
   /** An optional value that specifies the maximum number of items to return. If omitted or greater than 5,000, the response will include up to 5,000 items. */
@@ -935,21 +893,10 @@ export interface FileSystemListBlobHierarchySegmentOptionalParams
 
 /** Contains response data for the listBlobHierarchySegment operation. */
 export type FileSystemListBlobHierarchySegmentResponse = FileSystemListBlobHierarchySegmentHeaders &
-  ListBlobsHierarchySegmentResponse & {
-    /** The underlying HTTP response. */
-    _response: coreHttp.HttpResponse & {
-      /** The response body as text (string format) */
-      bodyAsText: string;
-
-      /** The response body as parsed JSON or XML */
-      parsedBody: ListBlobsHierarchySegmentResponse;
-      /** The parsed HTTP response headers. */
-      parsedHeaders: FileSystemListBlobHierarchySegmentHeaders;
-    };
-  };
+  ListBlobsHierarchySegmentResponse;
 
 /** Optional parameters. */
-export interface PathCreateOptionalParams extends coreHttp.OperationOptions {
+export interface PathCreateOptionalParams extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Parameter group */
@@ -994,19 +941,15 @@ export interface PathCreateOptionalParams extends coreHttp.OperationOptions {
   expiryOptions?: PathExpiryOptions;
   /** The time to set the blob to expiry */
   expiresOn?: string;
+  /** Specifies the encryption context to set on the file. */
+  encryptionContext?: string;
 }
 
 /** Contains response data for the create operation. */
-export type PathCreateResponse = PathCreateHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathCreateHeaders;
-  };
-};
+export type PathCreateResponse = PathCreateHeaders;
 
 /** Optional parameters. */
-export interface PathUpdateOptionalParams extends coreHttp.OperationOptions {
+export interface PathUpdateOptionalParams extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Parameter group */
@@ -1045,21 +988,10 @@ export interface PathUpdateOptionalParams extends coreHttp.OperationOptions {
 
 /** Contains response data for the update operation. */
 export type PathUpdateResponse = PathUpdateHeaders &
-  SetAccessControlRecursiveResponse & {
-    /** The underlying HTTP response. */
-    _response: coreHttp.HttpResponse & {
-      /** The response body as text (string format) */
-      bodyAsText: string;
-
-      /** The response body as parsed JSON or XML */
-      parsedBody: SetAccessControlRecursiveResponse;
-      /** The parsed HTTP response headers. */
-      parsedHeaders: PathUpdateHeaders;
-    };
-  };
+  SetAccessControlRecursiveResponse;
 
 /** Optional parameters. */
-export interface PathLeaseOptionalParams extends coreHttp.OperationOptions {
+export interface PathLeaseOptionalParams extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Parameter group */
@@ -1075,16 +1007,10 @@ export interface PathLeaseOptionalParams extends coreHttp.OperationOptions {
 }
 
 /** Contains response data for the lease operation. */
-export type PathLeaseResponse = PathLeaseHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathLeaseHeaders;
-  };
-};
+export type PathLeaseResponse = PathLeaseHeaders;
 
 /** Optional parameters. */
-export interface PathReadOptionalParams extends coreHttp.OperationOptions {
+export interface PathReadOptionalParams extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Parameter group */
@@ -1117,17 +1043,11 @@ export type PathReadResponse = PathReadHeaders & {
    * Always `undefined` in the browser.
    */
   readableStreamBody?: NodeJS.ReadableStream;
-
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathReadHeaders;
-  };
 };
 
 /** Optional parameters. */
 export interface PathGetPropertiesOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Parameter group */
@@ -1143,16 +1063,10 @@ export interface PathGetPropertiesOptionalParams
 }
 
 /** Contains response data for the getProperties operation. */
-export type PathGetPropertiesResponse = PathGetPropertiesHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathGetPropertiesHeaders;
-  };
-};
+export type PathGetPropertiesResponse = PathGetPropertiesHeaders;
 
 /** Optional parameters. */
-export interface PathDeleteOptionalParams extends coreHttp.OperationOptions {
+export interface PathDeleteOptionalParams extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Parameter group */
@@ -1165,20 +1079,16 @@ export interface PathDeleteOptionalParams extends coreHttp.OperationOptions {
   timeout?: number;
   /** Required */
   recursive?: boolean;
+  /** If true, paginated behavior will be seen. Pagination is for the recursive ACL checks as a POSIX requirement in the server and Delete in an atomic operation once the ACL checks are completed. If false or missing, normal default behavior will kick in, which may timeout in case of very large directories due to recursive ACL checks. This new parameter is introduced for backward compatibility. */
+  paginated?: boolean;
 }
 
 /** Contains response data for the delete operation. */
-export type PathDeleteResponse = PathDeleteHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathDeleteHeaders;
-  };
-};
+export type PathDeleteResponse = PathDeleteHeaders;
 
 /** Optional parameters. */
 export interface PathSetAccessControlOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Parameter group */
@@ -1198,17 +1108,11 @@ export interface PathSetAccessControlOptionalParams
 }
 
 /** Contains response data for the setAccessControl operation. */
-export type PathSetAccessControlResponse = PathSetAccessControlHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathSetAccessControlHeaders;
-  };
-};
+export type PathSetAccessControlResponse = PathSetAccessControlHeaders;
 
 /** Optional parameters. */
 export interface PathSetAccessControlRecursiveOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Optional.  When deleting a directory, the number of paths that are deleted with each invocation is limited.  If the number of paths to be deleted exceeds this limit, a continuation token is returned in this response header.  When a continuation token is returned in the response, it must be specified in a subsequent invocation of the delete operation to continue deleting the directory. */
   continuation?: string;
   /** Provides a client-generated, opaque value with a 1 KB character limit that is recorded in the analytics logs when storage analytics logging is enabled. */
@@ -1225,21 +1129,11 @@ export interface PathSetAccessControlRecursiveOptionalParams
 
 /** Contains response data for the setAccessControlRecursive operation. */
 export type PathSetAccessControlRecursiveResponse = PathSetAccessControlRecursiveHeaders &
-  SetAccessControlRecursiveResponse & {
-    /** The underlying HTTP response. */
-    _response: coreHttp.HttpResponse & {
-      /** The response body as text (string format) */
-      bodyAsText: string;
-
-      /** The response body as parsed JSON or XML */
-      parsedBody: SetAccessControlRecursiveResponse;
-      /** The parsed HTTP response headers. */
-      parsedHeaders: PathSetAccessControlRecursiveHeaders;
-    };
-  };
+  SetAccessControlRecursiveResponse;
 
 /** Optional parameters. */
-export interface PathFlushDataOptionalParams extends coreHttp.OperationOptions {
+export interface PathFlushDataOptionalParams
+  extends coreClient.OperationOptions {
   /** Parameter group */
   modifiedAccessConditions?: ModifiedAccessConditions;
   /** Parameter group */
@@ -1269,17 +1163,11 @@ export interface PathFlushDataOptionalParams extends coreHttp.OperationOptions {
 }
 
 /** Contains response data for the flushData operation. */
-export type PathFlushDataResponse = PathFlushDataHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathFlushDataHeaders;
-  };
-};
+export type PathFlushDataResponse = PathFlushDataHeaders;
 
 /** Optional parameters. */
 export interface PathAppendDataOptionalParams
-  extends coreHttp.OperationOptions {
+  extends coreClient.OperationOptions {
   /** Parameter group */
   leaseAccessConditions?: LeaseAccessConditions;
   /** Parameter group */
@@ -1307,16 +1195,11 @@ export interface PathAppendDataOptionalParams
 }
 
 /** Contains response data for the appendData operation. */
-export type PathAppendDataResponse = PathAppendDataHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathAppendDataHeaders;
-  };
-};
+export type PathAppendDataResponse = PathAppendDataHeaders;
 
 /** Optional parameters. */
-export interface PathSetExpiryOptionalParams extends coreHttp.OperationOptions {
+export interface PathSetExpiryOptionalParams
+  extends coreClient.OperationOptions {
   /** Provides a client-generated, opaque value with a 1 KB character limit that is recorded in the analytics logs when storage analytics logging is enabled. */
   requestId?: string;
   /** The timeout parameter is expressed in seconds. For more information, see <a href="https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/setting-timeouts-for-blob-service-operations">Setting Timeouts for Blob Service Operations.</a> */
@@ -1326,16 +1209,11 @@ export interface PathSetExpiryOptionalParams extends coreHttp.OperationOptions {
 }
 
 /** Contains response data for the setExpiry operation. */
-export type PathSetExpiryResponse = PathSetExpiryHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathSetExpiryHeaders;
-  };
-};
+export type PathSetExpiryResponse = PathSetExpiryHeaders;
 
 /** Optional parameters. */
-export interface PathUndeleteOptionalParams extends coreHttp.OperationOptions {
+export interface PathUndeleteOptionalParams
+  extends coreClient.OperationOptions {
   /** Provides a client-generated, opaque value with a 1 KB character limit that is recorded in the analytics logs when storage analytics logging is enabled. */
   requestId?: string;
   /** The timeout parameter is expressed in seconds. For more information, see <a href="https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/setting-timeouts-for-blob-service-operations">Setting Timeouts for Blob Service Operations.</a> */
@@ -1345,17 +1223,11 @@ export interface PathUndeleteOptionalParams extends coreHttp.OperationOptions {
 }
 
 /** Contains response data for the undelete operation. */
-export type PathUndeleteResponse = PathUndeleteHeaders & {
-  /** The underlying HTTP response. */
-  _response: coreHttp.HttpResponse & {
-    /** The parsed HTTP response headers. */
-    parsedHeaders: PathUndeleteHeaders;
-  };
-};
+export type PathUndeleteResponse = PathUndeleteHeaders;
 
 /** Optional parameters. */
 export interface StorageClientOptionalParams
-  extends coreHttp.ServiceClientOptions {
+  extends coreHttpCompat.ExtendedServiceClientOptions {
   /** Specifies the version of the operation to use for this request. */
   version?: string;
   /** The value must be "filesystem" for all filesystem operations. */

@@ -10,19 +10,25 @@
 // Licensed under the MIT License.
 import {
   RegenerateAccessKeyParameters,
-  EventHubManagementClient
+  EventHubManagementClient,
 } from "@azure/arm-eventhub";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Regenerates the primary or secondary connection strings for the specified Namespace.
  *
  * @summary Regenerates the primary or secondary connection strings for the specified Namespace.
- * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2021-11-01/examples/NameSpaces/EHNameSpaceAuthorizationRuleRegenerateKey.json
+ * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2024-01-01/examples/NameSpaces/EHNameSpaceAuthorizationRuleRegenerateKey.json
  */
 async function nameSpaceAuthorizationRuleRegenerateKey() {
-  const subscriptionId = "5f750a97-50d9-4e36-8081-c9ee4c0210d4";
-  const resourceGroupName = "ArunMonocle";
+  const subscriptionId =
+    process.env["EVENTHUB_SUBSCRIPTION_ID"] ||
+    "5f750a97-50d9-4e36-8081-c9ee4c0210d4";
+  const resourceGroupName =
+    process.env["EVENTHUB_RESOURCE_GROUP"] || "ArunMonocle";
   const namespaceName = "sdk-Namespace-8980";
   const authorizationRuleName = "sdk-Authrules-8929";
   const parameters: RegenerateAccessKeyParameters = { keyType: "PrimaryKey" };
@@ -32,9 +38,13 @@ async function nameSpaceAuthorizationRuleRegenerateKey() {
     resourceGroupName,
     namespaceName,
     authorizationRuleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
 
-nameSpaceAuthorizationRuleRegenerateKey().catch(console.error);
+async function main() {
+  nameSpaceAuthorizationRuleRegenerateKey();
+}
+
+main().catch(console.error);

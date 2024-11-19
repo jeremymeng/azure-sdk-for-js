@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -37,7 +37,7 @@ async function createPublicIPPrefixAllocationMethod() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
       subscriptionId,
       resourceGroupName,
-      publicIpPrefixName
+      publicIpPrefixName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);
@@ -71,7 +71,7 @@ async function createPublicIPPrefixDefaults() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
       subscriptionId,
       resourceGroupName,
-      publicIpPrefixName
+      publicIpPrefixName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);

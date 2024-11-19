@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { DeviceUpdateClient, isUnexpected } from "../../src";
-import { Context } from "mocha";
+// Licensed under the MIT License.
+import type { DeviceUpdateClient } from "../../src";
+import { isUnexpected } from "../../src";
+import type { Context } from "mocha";
 import { assert } from "chai";
 import { Recorder } from "@azure-tools/test-recorder";
 import { createRecordedClient, startRecorder } from "./utils/recordedClient";
@@ -31,7 +32,7 @@ describe("update test", () => {
 
     if (isUnexpected(response)) {
       assert.fail(
-        `GET "/deviceUpdate/sdkInstance/updates/providers" failed with ${response.status}`
+        `GET "/deviceUpdate/sdkInstance/updates/providers" failed with ${response.status}`,
       );
     }
 
@@ -43,13 +44,13 @@ describe("update test", () => {
       .path(
         "/deviceUpdate/{instanceId}/updates/providers/{provider}/names",
         "sdkinstance",
-        provider
+        provider,
       )
       .get();
 
     if (isUnexpected(response)) {
       assert.fail(
-        `GET "/deviceUpdate/sdkInstance/updates/providers/fabrikam/names" failed with ${response.status}`
+        `GET "/deviceUpdate/sdkInstance/updates/providers/fabrikam/names" failed with ${response.status}`,
       );
     }
 
@@ -70,13 +71,13 @@ describe("update test", () => {
         "/deviceUpdate/{instanceId}/updates/providers/{provider}/names/{name}/versions",
         "sdkinstance",
         provider,
-        name
+        name,
       )
       .get();
 
     if (isUnexpected(response)) {
       assert.fail(
-        `GET "/deviceUpdate/sdkInstance/updates/providers/fabrikam/names/vacuum/versions" failed with ${response.status}`
+        `GET "/deviceUpdate/sdkInstance/updates/providers/fabrikam/names/vacuum/versions" failed with ${response.status}`,
       );
     }
 
@@ -89,7 +90,7 @@ describe("update test", () => {
         "/deviceUpdate/{instanceId}/updates/providers/{provider}/names/{name}/versions",
         "sdkinstance",
         "foo",
-        "bar"
+        "bar",
       )
       .get();
 
@@ -103,13 +104,13 @@ describe("update test", () => {
         "sdkinstance",
         provider,
         name,
-        version
+        version,
       )
       .get();
 
     if (isUnexpected(response)) {
       assert.fail(
-        `GET "/deviceUpdate/sdkInstance/updates/providers/fabrikam/names/vacuum" failed with ${response.status}`
+        `GET "/deviceUpdate/sdkInstance/updates/providers/fabrikam/names/vacuum" failed with ${response.status}`,
       );
     }
 
@@ -123,7 +124,7 @@ describe("update test", () => {
         "sdkinstance",
         "foo",
         "bar",
-        "1.2"
+        "1.2",
       )
       .get();
 
@@ -137,13 +138,13 @@ describe("update test", () => {
         "sdkinstance",
         provider,
         name,
-        version
+        version,
       )
       .get();
 
     if (isUnexpected(response)) {
       assert.fail(
-        `GET "/deviceUpdate/sdkInstance/updates/providers/fabrikam/names/vacuum/versions/1.2" failed with ${response.status}`
+        `GET "/deviceUpdate/sdkInstance/updates/providers/fabrikam/names/vacuum/versions/1.2" failed with ${response.status}`,
       );
     }
 
@@ -157,7 +158,7 @@ describe("update test", () => {
         "sdkinstance",
         "foo",
         "bar",
-        "1.2"
+        "1.2",
       )
       .get();
 

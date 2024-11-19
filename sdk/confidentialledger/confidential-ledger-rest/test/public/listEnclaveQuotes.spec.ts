@@ -1,19 +1,20 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { ConfidentialLedgerClient, isUnexpected } from "../../src";
+// Licensed under the MIT License.
+import type { ConfidentialLedgerClient } from "../../src";
+import { isUnexpected } from "../../src";
 import { createClient, createRecorder } from "./utils/recordedClient";
 
-import { Context } from "mocha";
-import { Recorder } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
 import { assert } from "chai";
+import type { Context } from "mocha";
 
-describe("List Enclaves", () => {
+describe("List Enclaves", function () {
   let recorder: Recorder;
   let client: ConfidentialLedgerClient;
 
   beforeEach(async function (this: Context) {
-    recorder = createRecorder(this);
-    client = await createClient();
+    recorder = await createRecorder(this);
+    client = await createClient(recorder);
   });
 
   afterEach(async function () {

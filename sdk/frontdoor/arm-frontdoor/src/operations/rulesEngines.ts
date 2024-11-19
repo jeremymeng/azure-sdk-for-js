@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { FrontDoorManagementClient } from "../frontDoorManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   RulesEngine,
   RulesEnginesListByFrontDoorNextOptionalParams,
@@ -25,7 +29,7 @@ import {
   RulesEnginesCreateOrUpdateOptionalParams,
   RulesEnginesCreateOrUpdateResponse,
   RulesEnginesDeleteOptionalParams,
-  RulesEnginesListByFrontDoorNextResponse
+  RulesEnginesListByFrontDoorNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -50,12 +54,12 @@ export class RulesEnginesImpl implements RulesEngines {
   public listByFrontDoor(
     resourceGroupName: string,
     frontDoorName: string,
-    options?: RulesEnginesListByFrontDoorOptionalParams
+    options?: RulesEnginesListByFrontDoorOptionalParams,
   ): PagedAsyncIterableIterator<RulesEngine> {
     const iter = this.listByFrontDoorPagingAll(
       resourceGroupName,
       frontDoorName,
-      options
+      options,
     );
     return {
       next() {
@@ -72,9 +76,9 @@ export class RulesEnginesImpl implements RulesEngines {
           resourceGroupName,
           frontDoorName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -82,7 +86,7 @@ export class RulesEnginesImpl implements RulesEngines {
     resourceGroupName: string,
     frontDoorName: string,
     options?: RulesEnginesListByFrontDoorOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<RulesEngine[]> {
     let result: RulesEnginesListByFrontDoorResponse;
     let continuationToken = settings?.continuationToken;
@@ -90,7 +94,7 @@ export class RulesEnginesImpl implements RulesEngines {
       result = await this._listByFrontDoor(
         resourceGroupName,
         frontDoorName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -102,7 +106,7 @@ export class RulesEnginesImpl implements RulesEngines {
         resourceGroupName,
         frontDoorName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -114,12 +118,12 @@ export class RulesEnginesImpl implements RulesEngines {
   private async *listByFrontDoorPagingAll(
     resourceGroupName: string,
     frontDoorName: string,
-    options?: RulesEnginesListByFrontDoorOptionalParams
+    options?: RulesEnginesListByFrontDoorOptionalParams,
   ): AsyncIterableIterator<RulesEngine> {
     for await (const page of this.listByFrontDoorPagingPage(
       resourceGroupName,
       frontDoorName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -134,11 +138,11 @@ export class RulesEnginesImpl implements RulesEngines {
   private _listByFrontDoor(
     resourceGroupName: string,
     frontDoorName: string,
-    options?: RulesEnginesListByFrontDoorOptionalParams
+    options?: RulesEnginesListByFrontDoorOptionalParams,
   ): Promise<RulesEnginesListByFrontDoorResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, frontDoorName, options },
-      listByFrontDoorOperationSpec
+      listByFrontDoorOperationSpec,
     );
   }
 
@@ -153,11 +157,11 @@ export class RulesEnginesImpl implements RulesEngines {
     resourceGroupName: string,
     frontDoorName: string,
     rulesEngineName: string,
-    options?: RulesEnginesGetOptionalParams
+    options?: RulesEnginesGetOptionalParams,
   ): Promise<RulesEnginesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, frontDoorName, rulesEngineName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -175,30 +179,29 @@ export class RulesEnginesImpl implements RulesEngines {
     frontDoorName: string,
     rulesEngineName: string,
     rulesEngineParameters: RulesEngine,
-    options?: RulesEnginesCreateOrUpdateOptionalParams
+    options?: RulesEnginesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<RulesEnginesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<RulesEnginesCreateOrUpdateResponse>,
       RulesEnginesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<RulesEnginesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -207,8 +210,8 @@ export class RulesEnginesImpl implements RulesEngines {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -216,26 +219,29 @@ export class RulesEnginesImpl implements RulesEngines {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         frontDoorName,
         rulesEngineName,
         rulesEngineParameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      RulesEnginesCreateOrUpdateResponse,
+      OperationState<RulesEnginesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -255,14 +261,14 @@ export class RulesEnginesImpl implements RulesEngines {
     frontDoorName: string,
     rulesEngineName: string,
     rulesEngineParameters: RulesEngine,
-    options?: RulesEnginesCreateOrUpdateOptionalParams
+    options?: RulesEnginesCreateOrUpdateOptionalParams,
   ): Promise<RulesEnginesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       frontDoorName,
       rulesEngineName,
       rulesEngineParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -278,25 +284,24 @@ export class RulesEnginesImpl implements RulesEngines {
     resourceGroupName: string,
     frontDoorName: string,
     rulesEngineName: string,
-    options?: RulesEnginesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: RulesEnginesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -305,8 +310,8 @@ export class RulesEnginesImpl implements RulesEngines {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -314,20 +319,20 @@ export class RulesEnginesImpl implements RulesEngines {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, frontDoorName, rulesEngineName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, frontDoorName, rulesEngineName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -344,13 +349,13 @@ export class RulesEnginesImpl implements RulesEngines {
     resourceGroupName: string,
     frontDoorName: string,
     rulesEngineName: string,
-    options?: RulesEnginesDeleteOptionalParams
+    options?: RulesEnginesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       frontDoorName,
       rulesEngineName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -366,11 +371,11 @@ export class RulesEnginesImpl implements RulesEngines {
     resourceGroupName: string,
     frontDoorName: string,
     nextLink: string,
-    options?: RulesEnginesListByFrontDoorNextOptionalParams
+    options?: RulesEnginesListByFrontDoorNextOptionalParams,
   ): Promise<RulesEnginesListByFrontDoorNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, frontDoorName, nextLink, options },
-      listByFrontDoorNextOperationSpec
+      listByFrontDoorNextOperationSpec,
     );
   }
 }
@@ -378,87 +383,83 @@ export class RulesEnginesImpl implements RulesEngines {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listByFrontDoorOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoors/{frontDoorName}/rulesEngines",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoors/{frontDoorName}/rulesEngines",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RulesEngineListResult
+      bodyMapper: Mappers.RulesEngineListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.frontDoorName
+    Parameters.subscriptionId,
+    Parameters.frontDoorName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoors/{frontDoorName}/rulesEngines/{rulesEngineName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoors/{frontDoorName}/rulesEngines/{rulesEngineName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RulesEngine
+      bodyMapper: Mappers.RulesEngine,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.subscriptionId,
     Parameters.resourceGroupName,
+    Parameters.subscriptionId,
     Parameters.frontDoorName,
-    Parameters.rulesEngineName
+    Parameters.rulesEngineName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoors/{frontDoorName}/rulesEngines/{rulesEngineName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoors/{frontDoorName}/rulesEngines/{rulesEngineName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.RulesEngine
+      bodyMapper: Mappers.RulesEngine,
     },
     201: {
-      bodyMapper: Mappers.RulesEngine
+      bodyMapper: Mappers.RulesEngine,
     },
     202: {
-      bodyMapper: Mappers.RulesEngine
+      bodyMapper: Mappers.RulesEngine,
     },
     204: {
-      bodyMapper: Mappers.RulesEngine
+      bodyMapper: Mappers.RulesEngine,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.rulesEngineParameters,
   queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.subscriptionId,
     Parameters.resourceGroupName,
+    Parameters.subscriptionId,
     Parameters.frontDoorName,
-    Parameters.rulesEngineName
+    Parameters.rulesEngineName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoors/{frontDoorName}/rulesEngines/{rulesEngineName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoors/{frontDoorName}/rulesEngines/{rulesEngineName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -466,39 +467,38 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.subscriptionId,
     Parameters.resourceGroupName,
+    Parameters.subscriptionId,
     Parameters.frontDoorName,
-    Parameters.rulesEngineName
+    Parameters.rulesEngineName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByFrontDoorNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.RulesEngineListResult
+      bodyMapper: Mappers.RulesEngineListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion1],
   urlParameters: [
     Parameters.$host,
-    Parameters.subscriptionId,
     Parameters.resourceGroupName,
+    Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.frontDoorName
+    Parameters.frontDoorName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

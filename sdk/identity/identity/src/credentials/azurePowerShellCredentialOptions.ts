@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { MultiTenantTokenCredentialOptions } from "./multiTenantTokenCredentialOptions";
+import type { MultiTenantTokenCredentialOptions } from "./multiTenantTokenCredentialOptions.js";
 
 /**
  * Options for the {@link AzurePowerShellCredential}
@@ -11,4 +11,8 @@ export interface AzurePowerShellCredentialOptions extends MultiTenantTokenCreden
    * Allows specifying a tenant ID
    */
   tenantId?: string;
+  /**
+   * Process timeout configurable for making token requests, provided in milliseconds
+   */
+  processTimeoutInMs?: number;
 }

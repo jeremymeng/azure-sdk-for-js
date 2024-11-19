@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -53,7 +53,7 @@ async function createNetworkProfileDefaults() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkProfiles/{networkProfileName}",
       subscriptionId,
       resourceGroupName,
-      networkProfileName
+      networkProfileName,
     )
     .put(options);
   console.log(result);

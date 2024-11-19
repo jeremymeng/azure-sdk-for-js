@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   TriggerResource,
   TriggerGetTriggersByWorkspaceOptionalParams,
@@ -23,7 +23,7 @@ import {
   TriggerUnsubscribeTriggerFromEventsOptionalParams,
   TriggerUnsubscribeTriggerFromEventsResponse,
   TriggerStartTriggerOptionalParams,
-  TriggerStopTriggerOptionalParams
+  TriggerStopTriggerOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -34,7 +34,7 @@ export interface TriggerOperations {
    * @param options The options parameters.
    */
   listTriggersByWorkspace(
-    options?: TriggerGetTriggersByWorkspaceOptionalParams
+    options?: TriggerGetTriggersByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<TriggerResource>;
   /**
    * Creates or updates a trigger.
@@ -45,10 +45,10 @@ export interface TriggerOperations {
   beginCreateOrUpdateTrigger(
     triggerName: string,
     trigger: TriggerResource,
-    options?: TriggerCreateOrUpdateTriggerOptionalParams
+    options?: TriggerCreateOrUpdateTriggerOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TriggerCreateOrUpdateTriggerResponse>,
+    SimplePollerLike<
+      OperationState<TriggerCreateOrUpdateTriggerResponse>,
       TriggerCreateOrUpdateTriggerResponse
     >
   >;
@@ -61,7 +61,7 @@ export interface TriggerOperations {
   beginCreateOrUpdateTriggerAndWait(
     triggerName: string,
     trigger: TriggerResource,
-    options?: TriggerCreateOrUpdateTriggerOptionalParams
+    options?: TriggerCreateOrUpdateTriggerOptionalParams,
   ): Promise<TriggerCreateOrUpdateTriggerResponse>;
   /**
    * Gets a trigger.
@@ -70,7 +70,7 @@ export interface TriggerOperations {
    */
   getTrigger(
     triggerName: string,
-    options?: TriggerGetTriggerOptionalParams
+    options?: TriggerGetTriggerOptionalParams,
   ): Promise<TriggerGetTriggerResponse>;
   /**
    * Deletes a trigger.
@@ -79,8 +79,8 @@ export interface TriggerOperations {
    */
   beginDeleteTrigger(
     triggerName: string,
-    options?: TriggerDeleteTriggerOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: TriggerDeleteTriggerOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a trigger.
    * @param triggerName The trigger name.
@@ -88,7 +88,7 @@ export interface TriggerOperations {
    */
   beginDeleteTriggerAndWait(
     triggerName: string,
-    options?: TriggerDeleteTriggerOptionalParams
+    options?: TriggerDeleteTriggerOptionalParams,
   ): Promise<void>;
   /**
    * Subscribe event trigger to events.
@@ -97,10 +97,10 @@ export interface TriggerOperations {
    */
   beginSubscribeTriggerToEvents(
     triggerName: string,
-    options?: TriggerSubscribeTriggerToEventsOptionalParams
+    options?: TriggerSubscribeTriggerToEventsOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TriggerSubscribeTriggerToEventsResponse>,
+    SimplePollerLike<
+      OperationState<TriggerSubscribeTriggerToEventsResponse>,
       TriggerSubscribeTriggerToEventsResponse
     >
   >;
@@ -111,7 +111,7 @@ export interface TriggerOperations {
    */
   beginSubscribeTriggerToEventsAndWait(
     triggerName: string,
-    options?: TriggerSubscribeTriggerToEventsOptionalParams
+    options?: TriggerSubscribeTriggerToEventsOptionalParams,
   ): Promise<TriggerSubscribeTriggerToEventsResponse>;
   /**
    * Get a trigger's event subscription status.
@@ -120,7 +120,7 @@ export interface TriggerOperations {
    */
   getEventSubscriptionStatus(
     triggerName: string,
-    options?: TriggerGetEventSubscriptionStatusOptionalParams
+    options?: TriggerGetEventSubscriptionStatusOptionalParams,
   ): Promise<TriggerGetEventSubscriptionStatusResponse>;
   /**
    * Unsubscribe event trigger from events.
@@ -129,10 +129,10 @@ export interface TriggerOperations {
    */
   beginUnsubscribeTriggerFromEvents(
     triggerName: string,
-    options?: TriggerUnsubscribeTriggerFromEventsOptionalParams
+    options?: TriggerUnsubscribeTriggerFromEventsOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TriggerUnsubscribeTriggerFromEventsResponse>,
+    SimplePollerLike<
+      OperationState<TriggerUnsubscribeTriggerFromEventsResponse>,
       TriggerUnsubscribeTriggerFromEventsResponse
     >
   >;
@@ -143,7 +143,7 @@ export interface TriggerOperations {
    */
   beginUnsubscribeTriggerFromEventsAndWait(
     triggerName: string,
-    options?: TriggerUnsubscribeTriggerFromEventsOptionalParams
+    options?: TriggerUnsubscribeTriggerFromEventsOptionalParams,
   ): Promise<TriggerUnsubscribeTriggerFromEventsResponse>;
   /**
    * Starts a trigger.
@@ -152,8 +152,8 @@ export interface TriggerOperations {
    */
   beginStartTrigger(
     triggerName: string,
-    options?: TriggerStartTriggerOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: TriggerStartTriggerOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Starts a trigger.
    * @param triggerName The trigger name.
@@ -161,7 +161,7 @@ export interface TriggerOperations {
    */
   beginStartTriggerAndWait(
     triggerName: string,
-    options?: TriggerStartTriggerOptionalParams
+    options?: TriggerStartTriggerOptionalParams,
   ): Promise<void>;
   /**
    * Stops a trigger.
@@ -170,8 +170,8 @@ export interface TriggerOperations {
    */
   beginStopTrigger(
     triggerName: string,
-    options?: TriggerStopTriggerOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: TriggerStopTriggerOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Stops a trigger.
    * @param triggerName The trigger name.
@@ -179,6 +179,6 @@ export interface TriggerOperations {
    */
   beginStopTriggerAndWait(
     triggerName: string,
-    options?: TriggerStopTriggerOptionalParams
+    options?: TriggerStopTriggerOptionalParams,
   ): Promise<void>;
 }

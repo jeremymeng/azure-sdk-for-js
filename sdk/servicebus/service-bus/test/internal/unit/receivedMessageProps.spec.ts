@@ -1,21 +1,17 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-
-import chai from "chai";
-import chaiAsPromised from "chai-as-promised";
-import { ServiceBusMessage } from "../../../src";
-import { TestMessage } from "../../public/utils/testUtils";
-import { fromRheaMessage, toRheaMessage } from "../../../src/serviceBusMessage";
-import { Message as RheaMessage } from "rhea-promise";
+// Licensed under the MIT License.
+import type { ServiceBusMessage } from "../../../src/index.js";
+import { TestMessage } from "../../public/utils/testUtils.js";
+import { fromRheaMessage, toRheaMessage } from "../../../src/serviceBusMessage.js";
+import type { Message as RheaMessage } from "rhea-promise";
 import { Constants } from "@azure/core-amqp";
-
-const should = chai.should();
-chai.use(chaiAsPromised);
+import { describe, it } from "vitest";
+import { should } from "../../public/utils/chai.js";
 
 describe("Message translations", () => {
   describe("expiresAtUtc is not invalid on received message", function (): void {
     async function verifyExpiresAtUtc(
-      transformMessage?: (msg: ServiceBusMessage) => ServiceBusMessage
+      transformMessage?: (msg: ServiceBusMessage) => ServiceBusMessage,
     ): Promise<void> {
       let testMessage = TestMessage.getSample();
       if (transformMessage) testMessage = transformMessage(testMessage);
@@ -24,7 +20,7 @@ describe("Message translations", () => {
         ...toRheaMessage(testMessage, { encode: (body) => body }),
         message_annotations: { [Constants.enqueuedTime]: Date.now().valueOf() },
       };
-      const expiresAtUtc = fromRheaMessage(rheaMsg, false).expiresAtUtc;
+      const expiresAtUtc = fromRheaMessage(rheaMsg, { skipParsingBodyAsJson: false }).expiresAtUtc;
       should.not.equal(expiresAtUtc?.toString(), "Invalid Date", "expiresAtUtc is Invalid Date");
     }
 

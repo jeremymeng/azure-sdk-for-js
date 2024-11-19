@@ -6,7 +6,8 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { DataCollectionRules } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -16,9 +17,9 @@ import {
   DataCollectionRuleResource,
   DataCollectionRulesListByResourceGroupNextOptionalParams,
   DataCollectionRulesListByResourceGroupOptionalParams,
+  DataCollectionRulesListByResourceGroupResponse,
   DataCollectionRulesListBySubscriptionNextOptionalParams,
   DataCollectionRulesListBySubscriptionOptionalParams,
-  DataCollectionRulesListByResourceGroupResponse,
   DataCollectionRulesListBySubscriptionResponse,
   DataCollectionRulesGetOptionalParams,
   DataCollectionRulesGetResponse,
@@ -28,7 +29,7 @@ import {
   DataCollectionRulesUpdateResponse,
   DataCollectionRulesDeleteOptionalParams,
   DataCollectionRulesListByResourceGroupNextResponse,
-  DataCollectionRulesListBySubscriptionNextResponse
+  DataCollectionRulesListBySubscriptionNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -51,7 +52,7 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: DataCollectionRulesListByResourceGroupOptionalParams
+    options?: DataCollectionRulesListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<DataCollectionRuleResource> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -61,37 +62,53 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listByResourceGroupPagingPage(resourceGroupName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listByResourceGroupPagingPage(
+          resourceGroupName,
+          options,
+          settings,
+        );
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
-    options?: DataCollectionRulesListByResourceGroupOptionalParams
+    options?: DataCollectionRulesListByResourceGroupOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<DataCollectionRuleResource[]> {
-    let result = await this._listByResourceGroup(resourceGroupName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: DataCollectionRulesListByResourceGroupResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByResourceGroup(resourceGroupName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: DataCollectionRulesListByResourceGroupOptionalParams
+    options?: DataCollectionRulesListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<DataCollectionRuleResource> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -102,7 +119,7 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
    * @param options The options parameters.
    */
   public listBySubscription(
-    options?: DataCollectionRulesListBySubscriptionOptionalParams
+    options?: DataCollectionRulesListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<DataCollectionRuleResource> {
     const iter = this.listBySubscriptionPagingAll(options);
     return {
@@ -112,27 +129,39 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listBySubscriptionPagingPage(options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listBySubscriptionPagingPage(options, settings);
+      },
     };
   }
 
   private async *listBySubscriptionPagingPage(
-    options?: DataCollectionRulesListBySubscriptionOptionalParams
+    options?: DataCollectionRulesListBySubscriptionOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<DataCollectionRuleResource[]> {
-    let result = await this._listBySubscription(options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: DataCollectionRulesListBySubscriptionResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listBySubscription(options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listBySubscriptionNext(continuationToken, options);
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listBySubscriptionPagingAll(
-    options?: DataCollectionRulesListBySubscriptionOptionalParams
+    options?: DataCollectionRulesListBySubscriptionOptionalParams,
   ): AsyncIterableIterator<DataCollectionRuleResource> {
     for await (const page of this.listBySubscriptionPagingPage(options)) {
       yield* page;
@@ -146,11 +175,11 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: DataCollectionRulesListByResourceGroupOptionalParams
+    options?: DataCollectionRulesListByResourceGroupOptionalParams,
   ): Promise<DataCollectionRulesListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -159,11 +188,11 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
    * @param options The options parameters.
    */
   private _listBySubscription(
-    options?: DataCollectionRulesListBySubscriptionOptionalParams
+    options?: DataCollectionRulesListBySubscriptionOptionalParams,
   ): Promise<DataCollectionRulesListBySubscriptionResponse> {
     return this.client.sendOperationRequest(
       { options },
-      listBySubscriptionOperationSpec
+      listBySubscriptionOperationSpec,
     );
   }
 
@@ -176,11 +205,11 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
   get(
     resourceGroupName: string,
     dataCollectionRuleName: string,
-    options?: DataCollectionRulesGetOptionalParams
+    options?: DataCollectionRulesGetOptionalParams,
   ): Promise<DataCollectionRulesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, dataCollectionRuleName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -193,11 +222,11 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
   create(
     resourceGroupName: string,
     dataCollectionRuleName: string,
-    options?: DataCollectionRulesCreateOptionalParams
+    options?: DataCollectionRulesCreateOptionalParams,
   ): Promise<DataCollectionRulesCreateResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, dataCollectionRuleName, options },
-      createOperationSpec
+      createOperationSpec,
     );
   }
 
@@ -210,11 +239,11 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
   update(
     resourceGroupName: string,
     dataCollectionRuleName: string,
-    options?: DataCollectionRulesUpdateOptionalParams
+    options?: DataCollectionRulesUpdateOptionalParams,
   ): Promise<DataCollectionRulesUpdateResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, dataCollectionRuleName, options },
-      updateOperationSpec
+      updateOperationSpec,
     );
   }
 
@@ -227,11 +256,11 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
   delete(
     resourceGroupName: string,
     dataCollectionRuleName: string,
-    options?: DataCollectionRulesDeleteOptionalParams
+    options?: DataCollectionRulesDeleteOptionalParams,
   ): Promise<void> {
     return this.client.sendOperationRequest(
       { resourceGroupName, dataCollectionRuleName, options },
-      deleteOperationSpec
+      deleteOperationSpec,
     );
   }
 
@@ -244,11 +273,11 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: DataCollectionRulesListByResourceGroupNextOptionalParams
+    options?: DataCollectionRulesListByResourceGroupNextOptionalParams,
   ): Promise<DataCollectionRulesListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 
@@ -259,11 +288,11 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
    */
   private _listBySubscriptionNext(
     nextLink: string,
-    options?: DataCollectionRulesListBySubscriptionNextOptionalParams
+    options?: DataCollectionRulesListBySubscriptionNextOptionalParams,
   ): Promise<DataCollectionRulesListBySubscriptionNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listBySubscriptionNextOperationSpec
+      listBySubscriptionNextOperationSpec,
     );
   }
 }
@@ -271,175 +300,167 @@ export class DataCollectionRulesImpl implements DataCollectionRules {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataCollectionRuleResourceListResult
+      bodyMapper: Mappers.DataCollectionRuleResourceListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseCommonV2
-    }
+      bodyMapper: Mappers.ErrorResponseCommonV2,
+    },
   },
-  queryParameters: [Parameters.apiVersion13],
+  queryParameters: [Parameters.apiVersion14],
   urlParameters: [
     Parameters.$host,
+    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.subscriptionId
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/dataCollectionRules",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/dataCollectionRules",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataCollectionRuleResourceListResult
+      bodyMapper: Mappers.DataCollectionRuleResourceListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseCommonV2
-    }
+      bodyMapper: Mappers.ErrorResponseCommonV2,
+    },
   },
-  queryParameters: [Parameters.apiVersion13],
+  queryParameters: [Parameters.apiVersion14],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataCollectionRuleResource
+      bodyMapper: Mappers.DataCollectionRuleResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseCommonV2
-    }
+      bodyMapper: Mappers.ErrorResponseCommonV2,
+    },
   },
-  queryParameters: [Parameters.apiVersion13],
+  queryParameters: [Parameters.apiVersion14],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.dataCollectionRuleName
+    Parameters.resourceGroupName,
+    Parameters.dataCollectionRuleName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.DataCollectionRuleResource
+      bodyMapper: Mappers.DataCollectionRuleResource,
     },
     201: {
-      bodyMapper: Mappers.DataCollectionRuleResource
+      bodyMapper: Mappers.DataCollectionRuleResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseCommonV2
-    }
+      bodyMapper: Mappers.ErrorResponseCommonV2,
+    },
   },
-  requestBody: Parameters.body3,
-  queryParameters: [Parameters.apiVersion13],
+  requestBody: Parameters.body4,
+  queryParameters: [Parameters.apiVersion14],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.dataCollectionRuleName
+    Parameters.resourceGroupName,
+    Parameters.dataCollectionRuleName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.DataCollectionRuleResource
+      bodyMapper: Mappers.DataCollectionRuleResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseCommonV2
-    }
+      bodyMapper: Mappers.ErrorResponseCommonV2,
+    },
   },
-  requestBody: Parameters.body1,
-  queryParameters: [Parameters.apiVersion13],
+  requestBody: Parameters.body2,
+  queryParameters: [Parameters.apiVersion14],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.dataCollectionRuleName
+    Parameters.resourceGroupName,
+    Parameters.dataCollectionRuleName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponseCommonV2
-    }
+      bodyMapper: Mappers.ErrorResponseCommonV2,
+    },
   },
-  queryParameters: [Parameters.apiVersion13],
+  queryParameters: [Parameters.apiVersion14],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.dataCollectionRuleName
+    Parameters.resourceGroupName,
+    Parameters.dataCollectionRuleName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataCollectionRuleResourceListResult
+      bodyMapper: Mappers.DataCollectionRuleResourceListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseCommonV2
-    }
+      bodyMapper: Mappers.ErrorResponseCommonV2,
+    },
   },
-  queryParameters: [Parameters.apiVersion13],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.resourceGroupName,
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listBySubscriptionNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataCollectionRuleResourceListResult
+      bodyMapper: Mappers.DataCollectionRuleResourceListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseCommonV2
-    }
+      bodyMapper: Mappers.ErrorResponseCommonV2,
+    },
   },
-  queryParameters: [Parameters.apiVersion13],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -7,6 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   LogicalDatabaseTransparentDataEncryption,
   TransparentDataEncryptionsListByDatabaseOptionalParams,
@@ -14,7 +15,7 @@ import {
   TransparentDataEncryptionsGetOptionalParams,
   TransparentDataEncryptionsGetResponse,
   TransparentDataEncryptionsCreateOrUpdateOptionalParams,
-  TransparentDataEncryptionsCreateOrUpdateResponse
+  TransparentDataEncryptionsCreateOrUpdateResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -33,7 +34,7 @@ export interface TransparentDataEncryptions {
     resourceGroupName: string,
     serverName: string,
     databaseName: string,
-    options?: TransparentDataEncryptionsListByDatabaseOptionalParams
+    options?: TransparentDataEncryptionsListByDatabaseOptionalParams,
   ): PagedAsyncIterableIterator<LogicalDatabaseTransparentDataEncryption>;
   /**
    * Gets a logical database's transparent data encryption.
@@ -50,7 +51,7 @@ export interface TransparentDataEncryptions {
     serverName: string,
     databaseName: string,
     tdeName: TransparentDataEncryptionName,
-    options?: TransparentDataEncryptionsGetOptionalParams
+    options?: TransparentDataEncryptionsGetOptionalParams,
   ): Promise<TransparentDataEncryptionsGetResponse>;
   /**
    * Updates a logical database's transparent data encryption configuration.
@@ -62,12 +63,35 @@ export interface TransparentDataEncryptions {
    * @param parameters The database transparent data encryption.
    * @param options The options parameters.
    */
-  createOrUpdate(
+  beginCreateOrUpdate(
     resourceGroupName: string,
     serverName: string,
     databaseName: string,
     tdeName: TransparentDataEncryptionName,
     parameters: LogicalDatabaseTransparentDataEncryption,
-    options?: TransparentDataEncryptionsCreateOrUpdateOptionalParams
+    options?: TransparentDataEncryptionsCreateOrUpdateOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<TransparentDataEncryptionsCreateOrUpdateResponse>,
+      TransparentDataEncryptionsCreateOrUpdateResponse
+    >
+  >;
+  /**
+   * Updates a logical database's transparent data encryption configuration.
+   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
+   *                          this value from the Azure Resource Manager API or the portal.
+   * @param serverName The name of the server.
+   * @param databaseName The name of the logical database for which the security alert policy is defined.
+   * @param tdeName The name of the transparent data encryption configuration.
+   * @param parameters The database transparent data encryption.
+   * @param options The options parameters.
+   */
+  beginCreateOrUpdateAndWait(
+    resourceGroupName: string,
+    serverName: string,
+    databaseName: string,
+    tdeName: TransparentDataEncryptionName,
+    parameters: LogicalDatabaseTransparentDataEncryption,
+    options?: TransparentDataEncryptionsCreateOrUpdateOptionalParams,
   ): Promise<TransparentDataEncryptionsCreateOrUpdateResponse>;
 }

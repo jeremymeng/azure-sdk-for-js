@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   DataFlowResource,
   DataFlowGetDataFlowsByWorkspaceOptionalParams,
@@ -17,7 +17,7 @@ import {
   DataFlowGetDataFlowResponse,
   DataFlowDeleteDataFlowOptionalParams,
   ArtifactRenameRequest,
-  DataFlowRenameDataFlowOptionalParams
+  DataFlowRenameDataFlowOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -28,7 +28,7 @@ export interface DataFlowOperations {
    * @param options The options parameters.
    */
   listDataFlowsByWorkspace(
-    options?: DataFlowGetDataFlowsByWorkspaceOptionalParams
+    options?: DataFlowGetDataFlowsByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<DataFlowResource>;
   /**
    * Creates or updates a data flow.
@@ -39,10 +39,10 @@ export interface DataFlowOperations {
   beginCreateOrUpdateDataFlow(
     dataFlowName: string,
     dataFlow: DataFlowResource,
-    options?: DataFlowCreateOrUpdateDataFlowOptionalParams
+    options?: DataFlowCreateOrUpdateDataFlowOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DataFlowCreateOrUpdateDataFlowResponse>,
+    SimplePollerLike<
+      OperationState<DataFlowCreateOrUpdateDataFlowResponse>,
       DataFlowCreateOrUpdateDataFlowResponse
     >
   >;
@@ -55,7 +55,7 @@ export interface DataFlowOperations {
   beginCreateOrUpdateDataFlowAndWait(
     dataFlowName: string,
     dataFlow: DataFlowResource,
-    options?: DataFlowCreateOrUpdateDataFlowOptionalParams
+    options?: DataFlowCreateOrUpdateDataFlowOptionalParams,
   ): Promise<DataFlowCreateOrUpdateDataFlowResponse>;
   /**
    * Gets a data flow.
@@ -64,7 +64,7 @@ export interface DataFlowOperations {
    */
   getDataFlow(
     dataFlowName: string,
-    options?: DataFlowGetDataFlowOptionalParams
+    options?: DataFlowGetDataFlowOptionalParams,
   ): Promise<DataFlowGetDataFlowResponse>;
   /**
    * Deletes a data flow.
@@ -73,8 +73,8 @@ export interface DataFlowOperations {
    */
   beginDeleteDataFlow(
     dataFlowName: string,
-    options?: DataFlowDeleteDataFlowOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: DataFlowDeleteDataFlowOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a data flow.
    * @param dataFlowName The data flow name.
@@ -82,7 +82,7 @@ export interface DataFlowOperations {
    */
   beginDeleteDataFlowAndWait(
     dataFlowName: string,
-    options?: DataFlowDeleteDataFlowOptionalParams
+    options?: DataFlowDeleteDataFlowOptionalParams,
   ): Promise<void>;
   /**
    * Renames a dataflow.
@@ -93,8 +93,8 @@ export interface DataFlowOperations {
   beginRenameDataFlow(
     dataFlowName: string,
     request: ArtifactRenameRequest,
-    options?: DataFlowRenameDataFlowOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: DataFlowRenameDataFlowOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Renames a dataflow.
    * @param dataFlowName The data flow name.
@@ -104,6 +104,6 @@ export interface DataFlowOperations {
   beginRenameDataFlowAndWait(
     dataFlowName: string,
     request: ArtifactRenameRequest,
-    options?: DataFlowRenameDataFlowOptionalParams
+    options?: DataFlowRenameDataFlowOptionalParams,
   ): Promise<void>;
 }

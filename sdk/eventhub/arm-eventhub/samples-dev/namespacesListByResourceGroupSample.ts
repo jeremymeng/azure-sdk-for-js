@@ -10,25 +10,34 @@
 // Licensed under the MIT License.
 import { EventHubManagementClient } from "@azure/arm-eventhub";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Lists the available Namespaces within a resource group.
  *
  * @summary Lists the available Namespaces within a resource group.
- * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2021-11-01/examples/NameSpaces/EHNameSpaceListByResourceGroup.json
+ * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2024-01-01/examples/NameSpaces/EHNameSpaceListByResourceGroup.json
  */
 async function namespaceListByResourceGroup() {
-  const subscriptionId = "SampleSubscription";
-  const resourceGroupName = "ResurceGroupSample";
+  const subscriptionId =
+    process.env["EVENTHUB_SUBSCRIPTION_ID"] || "SampleSubscription";
+  const resourceGroupName =
+    process.env["EVENTHUB_RESOURCE_GROUP"] || "ResurceGroupSample";
   const credential = new DefaultAzureCredential();
   const client = new EventHubManagementClient(credential, subscriptionId);
   const resArray = new Array();
   for await (let item of client.namespaces.listByResourceGroup(
-    resourceGroupName
+    resourceGroupName,
   )) {
     resArray.push(item);
   }
   console.log(resArray);
 }
 
-namespaceListByResourceGroup().catch(console.error);
+async function main() {
+  namespaceListByResourceGroup();
+}
+
+main().catch(console.error);

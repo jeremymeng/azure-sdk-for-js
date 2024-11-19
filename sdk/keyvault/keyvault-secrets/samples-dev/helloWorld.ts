@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary Uses a SecretClient to create, read, and update a secret in various ways.
@@ -41,7 +41,7 @@ export async function main(): Promise<void> {
     result.properties.version!,
     {
       enabled: false,
-    }
+    },
   );
   console.log("updated secret: ", updatedSecret);
 

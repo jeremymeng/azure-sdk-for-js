@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -34,7 +34,7 @@ async function virtualMachineExtensionsDeleteMaximumSetGen() {
       subscriptionId,
       resourceGroupName,
       vmName,
-      vmExtensionName
+      vmExtensionName,
     )
     .delete(options);
   const poller = getLongRunningPoller(client, initialResponse);
@@ -65,7 +65,7 @@ async function virtualMachineExtensionsDeleteMinimumSetGen() {
       subscriptionId,
       resourceGroupName,
       vmName,
-      vmExtensionName
+      vmExtensionName,
     )
     .delete(options);
   const poller = getLongRunningPoller(client, initialResponse);

@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   EntityLinkingResult,
   TextDocumentBatchStatistics,
   TextDocumentInput,
 } from "./generated/models";
+import type { RecognizeLinkedEntitiesResult } from "./recognizeLinkedEntitiesResult";
 import {
-  RecognizeLinkedEntitiesResult,
   makeRecognizeLinkedEntitiesErrorResult,
   makeRecognizeLinkedEntitiesResult,
 } from "./recognizeLinkedEntitiesResult";
@@ -36,12 +36,12 @@ export interface RecognizeLinkedEntitiesResultArray extends Array<RecognizeLinke
  */
 export function makeRecognizeLinkedEntitiesResultArray(
   input: TextDocumentInput[],
-  response: EntityLinkingResult
+  response: EntityLinkingResult,
 ): RecognizeLinkedEntitiesResultArray {
   return combineSuccessfulAndErroneousDocumentsWithStatisticsAndModelVersion(
     input,
     response,
     makeRecognizeLinkedEntitiesResult,
-    makeRecognizeLinkedEntitiesErrorResult
+    makeRecognizeLinkedEntitiesErrorResult,
   );
 }

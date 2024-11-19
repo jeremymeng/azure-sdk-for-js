@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 import assert from "assert";
-import { Suite } from "mocha";
+import type { Suite } from "mocha";
 import { IndexingMode } from "../../../src";
 import { getTestDatabase, removeAllDatabases } from "../common/TestHelpers";
 
@@ -49,7 +49,7 @@ describe("Create And Read Validation", function (this: Suite) {
     assert.equal(
       testDoc.content,
       resultDoc.content,
-      "read document result is different from initial document"
+      "read document result is different from initial document",
     );
   });
 });

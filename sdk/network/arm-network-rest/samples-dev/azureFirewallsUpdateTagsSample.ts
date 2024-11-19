@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -33,7 +33,7 @@ async function updateAzureFirewallTags() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/azureFirewalls/{azureFirewallName}",
       subscriptionId,
       resourceGroupName,
-      azureFirewallName
+      azureFirewallName,
     )
     .patch(options);
   const poller = getLongRunningPoller(client, initialResponse);

@@ -10,9 +10,12 @@
 // Licensed under the MIT License.
 import {
   AdaptiveNetworkHardeningEnforceRequest,
-  SecurityCenter
+  SecurityCenter,
 } from "@azure/arm-security";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Enforces the given rules on the NSG(s) listed in the request
@@ -21,8 +24,10 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/stable/2020-01-01/examples/AdaptiveNetworkHardenings/EnforceAdaptiveNetworkHardeningRules_example.json
  */
 async function enforcesTheGivenRulesOnTheNsgSListedInTheRequest() {
-  const subscriptionId = "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
-  const resourceGroupName = "rg1";
+  const subscriptionId =
+    process.env["SECURITY_SUBSCRIPTION_ID"] ||
+    "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
+  const resourceGroupName = process.env["SECURITY_RESOURCE_GROUP"] || "rg1";
   const resourceNamespace = "Microsoft.Compute";
   const resourceType = "virtualMachines";
   const resourceName = "vm1";
@@ -30,7 +35,7 @@ async function enforcesTheGivenRulesOnTheNsgSListedInTheRequest() {
   const body: AdaptiveNetworkHardeningEnforceRequest = {
     networkSecurityGroups: [
       "/subscriptions/20ff7fc3-e762-44dd-bd96-b71116dcdc23/resourceGroups/rg1/providers/Microsoft.Network/networkSecurityGroups/nsg1",
-      "/subscriptions/20ff7fc3-e762-44dd-bd96-b71116dcdc23/resourceGroups/rg2/providers/Microsoft.Network/networkSecurityGroups/nsg2"
+      "/subscriptions/20ff7fc3-e762-44dd-bd96-b71116dcdc23/resourceGroups/rg2/providers/Microsoft.Network/networkSecurityGroups/nsg2",
     ],
     rules: [
       {
@@ -38,16 +43,16 @@ async function enforcesTheGivenRulesOnTheNsgSListedInTheRequest() {
         destinationPort: 3389,
         direction: "Inbound",
         ipAddresses: ["100.10.1.1", "200.20.2.2", "81.199.3.0/24"],
-        protocols: ["TCP"]
+        protocols: ["TCP"],
       },
       {
         name: "rule2",
         destinationPort: 22,
         direction: "Inbound",
         ipAddresses: [],
-        protocols: ["TCP"]
-      }
-    ]
+        protocols: ["TCP"],
+      },
+    ],
   };
   const credential = new DefaultAzureCredential();
   const client = new SecurityCenter(credential, subscriptionId);
@@ -57,9 +62,13 @@ async function enforcesTheGivenRulesOnTheNsgSListedInTheRequest() {
     resourceType,
     resourceName,
     adaptiveNetworkHardeningResourceName,
-    body
+    body,
   );
   console.log(result);
 }
 
-enforcesTheGivenRulesOnTheNsgSListedInTheRequest().catch(console.error);
+async function main() {
+  enforcesTheGivenRulesOnTheNsgSListedInTheRequest();
+}
+
+main().catch(console.error);

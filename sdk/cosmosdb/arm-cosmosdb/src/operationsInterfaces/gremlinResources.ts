@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   GremlinDatabaseGetResults,
   GremlinResourcesListGremlinDatabasesOptionalParams,
@@ -19,6 +19,7 @@ import {
   GremlinResourcesCreateUpdateGremlinDatabaseOptionalParams,
   GremlinResourcesCreateUpdateGremlinDatabaseResponse,
   GremlinResourcesDeleteGremlinDatabaseOptionalParams,
+  GremlinResourcesDeleteGremlinDatabaseResponse,
   GremlinResourcesGetGremlinDatabaseThroughputOptionalParams,
   GremlinResourcesGetGremlinDatabaseThroughputResponse,
   ThroughputSettingsUpdateParameters,
@@ -34,6 +35,7 @@ import {
   GremlinResourcesCreateUpdateGremlinGraphOptionalParams,
   GremlinResourcesCreateUpdateGremlinGraphResponse,
   GremlinResourcesDeleteGremlinGraphOptionalParams,
+  GremlinResourcesDeleteGremlinGraphResponse,
   GremlinResourcesGetGremlinGraphThroughputOptionalParams,
   GremlinResourcesGetGremlinGraphThroughputResponse,
   GremlinResourcesUpdateGremlinGraphThroughputOptionalParams,
@@ -44,7 +46,7 @@ import {
   GremlinResourcesMigrateGremlinGraphToManualThroughputResponse,
   ContinuousBackupRestoreLocation,
   GremlinResourcesRetrieveContinuousBackupInformationOptionalParams,
-  GremlinResourcesRetrieveContinuousBackupInformationResponse
+  GremlinResourcesRetrieveContinuousBackupInformationResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -59,7 +61,7 @@ export interface GremlinResources {
   listGremlinDatabases(
     resourceGroupName: string,
     accountName: string,
-    options?: GremlinResourcesListGremlinDatabasesOptionalParams
+    options?: GremlinResourcesListGremlinDatabasesOptionalParams,
   ): PagedAsyncIterableIterator<GremlinDatabaseGetResults>;
   /**
    * Lists the Gremlin graph under an existing Azure Cosmos DB database account.
@@ -72,7 +74,7 @@ export interface GremlinResources {
     resourceGroupName: string,
     accountName: string,
     databaseName: string,
-    options?: GremlinResourcesListGremlinGraphsOptionalParams
+    options?: GremlinResourcesListGremlinGraphsOptionalParams,
   ): PagedAsyncIterableIterator<GremlinGraphGetResults>;
   /**
    * Gets the Gremlin databases under an existing Azure Cosmos DB database account with the provided
@@ -86,7 +88,7 @@ export interface GremlinResources {
     resourceGroupName: string,
     accountName: string,
     databaseName: string,
-    options?: GremlinResourcesGetGremlinDatabaseOptionalParams
+    options?: GremlinResourcesGetGremlinDatabaseOptionalParams,
   ): Promise<GremlinResourcesGetGremlinDatabaseResponse>;
   /**
    * Create or update an Azure Cosmos DB Gremlin database
@@ -102,10 +104,10 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     createUpdateGremlinDatabaseParameters: GremlinDatabaseCreateUpdateParameters,
-    options?: GremlinResourcesCreateUpdateGremlinDatabaseOptionalParams
+    options?: GremlinResourcesCreateUpdateGremlinDatabaseOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<GremlinResourcesCreateUpdateGremlinDatabaseResponse>,
+    SimplePollerLike<
+      OperationState<GremlinResourcesCreateUpdateGremlinDatabaseResponse>,
       GremlinResourcesCreateUpdateGremlinDatabaseResponse
     >
   >;
@@ -123,7 +125,7 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     createUpdateGremlinDatabaseParameters: GremlinDatabaseCreateUpdateParameters,
-    options?: GremlinResourcesCreateUpdateGremlinDatabaseOptionalParams
+    options?: GremlinResourcesCreateUpdateGremlinDatabaseOptionalParams,
   ): Promise<GremlinResourcesCreateUpdateGremlinDatabaseResponse>;
   /**
    * Deletes an existing Azure Cosmos DB Gremlin database.
@@ -136,8 +138,13 @@ export interface GremlinResources {
     resourceGroupName: string,
     accountName: string,
     databaseName: string,
-    options?: GremlinResourcesDeleteGremlinDatabaseOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: GremlinResourcesDeleteGremlinDatabaseOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<GremlinResourcesDeleteGremlinDatabaseResponse>,
+      GremlinResourcesDeleteGremlinDatabaseResponse
+    >
+  >;
   /**
    * Deletes an existing Azure Cosmos DB Gremlin database.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -149,8 +156,8 @@ export interface GremlinResources {
     resourceGroupName: string,
     accountName: string,
     databaseName: string,
-    options?: GremlinResourcesDeleteGremlinDatabaseOptionalParams
-  ): Promise<void>;
+    options?: GremlinResourcesDeleteGremlinDatabaseOptionalParams,
+  ): Promise<GremlinResourcesDeleteGremlinDatabaseResponse>;
   /**
    * Gets the RUs per second of the Gremlin database under an existing Azure Cosmos DB database account
    * with the provided name.
@@ -163,7 +170,7 @@ export interface GremlinResources {
     resourceGroupName: string,
     accountName: string,
     databaseName: string,
-    options?: GremlinResourcesGetGremlinDatabaseThroughputOptionalParams
+    options?: GremlinResourcesGetGremlinDatabaseThroughputOptionalParams,
   ): Promise<GremlinResourcesGetGremlinDatabaseThroughputResponse>;
   /**
    * Update RUs per second of an Azure Cosmos DB Gremlin database
@@ -179,12 +186,10 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     updateThroughputParameters: ThroughputSettingsUpdateParameters,
-    options?: GremlinResourcesUpdateGremlinDatabaseThroughputOptionalParams
+    options?: GremlinResourcesUpdateGremlinDatabaseThroughputOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        GremlinResourcesUpdateGremlinDatabaseThroughputResponse
-      >,
+    SimplePollerLike<
+      OperationState<GremlinResourcesUpdateGremlinDatabaseThroughputResponse>,
       GremlinResourcesUpdateGremlinDatabaseThroughputResponse
     >
   >;
@@ -202,7 +207,7 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     updateThroughputParameters: ThroughputSettingsUpdateParameters,
-    options?: GremlinResourcesUpdateGremlinDatabaseThroughputOptionalParams
+    options?: GremlinResourcesUpdateGremlinDatabaseThroughputOptionalParams,
   ): Promise<GremlinResourcesUpdateGremlinDatabaseThroughputResponse>;
   /**
    * Migrate an Azure Cosmos DB Gremlin database from manual throughput to autoscale
@@ -215,12 +220,10 @@ export interface GremlinResources {
     resourceGroupName: string,
     accountName: string,
     databaseName: string,
-    options?: GremlinResourcesMigrateGremlinDatabaseToAutoscaleOptionalParams
+    options?: GremlinResourcesMigrateGremlinDatabaseToAutoscaleOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        GremlinResourcesMigrateGremlinDatabaseToAutoscaleResponse
-      >,
+    SimplePollerLike<
+      OperationState<GremlinResourcesMigrateGremlinDatabaseToAutoscaleResponse>,
       GremlinResourcesMigrateGremlinDatabaseToAutoscaleResponse
     >
   >;
@@ -235,7 +238,7 @@ export interface GremlinResources {
     resourceGroupName: string,
     accountName: string,
     databaseName: string,
-    options?: GremlinResourcesMigrateGremlinDatabaseToAutoscaleOptionalParams
+    options?: GremlinResourcesMigrateGremlinDatabaseToAutoscaleOptionalParams,
   ): Promise<GremlinResourcesMigrateGremlinDatabaseToAutoscaleResponse>;
   /**
    * Migrate an Azure Cosmos DB Gremlin database from autoscale to manual throughput
@@ -248,12 +251,10 @@ export interface GremlinResources {
     resourceGroupName: string,
     accountName: string,
     databaseName: string,
-    options?: GremlinResourcesMigrateGremlinDatabaseToManualThroughputOptionalParams
+    options?: GremlinResourcesMigrateGremlinDatabaseToManualThroughputOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        GremlinResourcesMigrateGremlinDatabaseToManualThroughputResponse
-      >,
+    SimplePollerLike<
+      OperationState<GremlinResourcesMigrateGremlinDatabaseToManualThroughputResponse>,
       GremlinResourcesMigrateGremlinDatabaseToManualThroughputResponse
     >
   >;
@@ -268,7 +269,7 @@ export interface GremlinResources {
     resourceGroupName: string,
     accountName: string,
     databaseName: string,
-    options?: GremlinResourcesMigrateGremlinDatabaseToManualThroughputOptionalParams
+    options?: GremlinResourcesMigrateGremlinDatabaseToManualThroughputOptionalParams,
   ): Promise<GremlinResourcesMigrateGremlinDatabaseToManualThroughputResponse>;
   /**
    * Gets the Gremlin graph under an existing Azure Cosmos DB database account.
@@ -283,7 +284,7 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     graphName: string,
-    options?: GremlinResourcesGetGremlinGraphOptionalParams
+    options?: GremlinResourcesGetGremlinGraphOptionalParams,
   ): Promise<GremlinResourcesGetGremlinGraphResponse>;
   /**
    * Create or update an Azure Cosmos DB Gremlin graph
@@ -300,10 +301,10 @@ export interface GremlinResources {
     databaseName: string,
     graphName: string,
     createUpdateGremlinGraphParameters: GremlinGraphCreateUpdateParameters,
-    options?: GremlinResourcesCreateUpdateGremlinGraphOptionalParams
+    options?: GremlinResourcesCreateUpdateGremlinGraphOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<GremlinResourcesCreateUpdateGremlinGraphResponse>,
+    SimplePollerLike<
+      OperationState<GremlinResourcesCreateUpdateGremlinGraphResponse>,
       GremlinResourcesCreateUpdateGremlinGraphResponse
     >
   >;
@@ -322,7 +323,7 @@ export interface GremlinResources {
     databaseName: string,
     graphName: string,
     createUpdateGremlinGraphParameters: GremlinGraphCreateUpdateParameters,
-    options?: GremlinResourcesCreateUpdateGremlinGraphOptionalParams
+    options?: GremlinResourcesCreateUpdateGremlinGraphOptionalParams,
   ): Promise<GremlinResourcesCreateUpdateGremlinGraphResponse>;
   /**
    * Deletes an existing Azure Cosmos DB Gremlin graph.
@@ -337,8 +338,13 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     graphName: string,
-    options?: GremlinResourcesDeleteGremlinGraphOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: GremlinResourcesDeleteGremlinGraphOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<GremlinResourcesDeleteGremlinGraphResponse>,
+      GremlinResourcesDeleteGremlinGraphResponse
+    >
+  >;
   /**
    * Deletes an existing Azure Cosmos DB Gremlin graph.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -352,8 +358,8 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     graphName: string,
-    options?: GremlinResourcesDeleteGremlinGraphOptionalParams
-  ): Promise<void>;
+    options?: GremlinResourcesDeleteGremlinGraphOptionalParams,
+  ): Promise<GremlinResourcesDeleteGremlinGraphResponse>;
   /**
    * Gets the Gremlin graph throughput under an existing Azure Cosmos DB database account with the
    * provided name.
@@ -368,7 +374,7 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     graphName: string,
-    options?: GremlinResourcesGetGremlinGraphThroughputOptionalParams
+    options?: GremlinResourcesGetGremlinGraphThroughputOptionalParams,
   ): Promise<GremlinResourcesGetGremlinGraphThroughputResponse>;
   /**
    * Update RUs per second of an Azure Cosmos DB Gremlin graph
@@ -386,10 +392,10 @@ export interface GremlinResources {
     databaseName: string,
     graphName: string,
     updateThroughputParameters: ThroughputSettingsUpdateParameters,
-    options?: GremlinResourcesUpdateGremlinGraphThroughputOptionalParams
+    options?: GremlinResourcesUpdateGremlinGraphThroughputOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<GremlinResourcesUpdateGremlinGraphThroughputResponse>,
+    SimplePollerLike<
+      OperationState<GremlinResourcesUpdateGremlinGraphThroughputResponse>,
       GremlinResourcesUpdateGremlinGraphThroughputResponse
     >
   >;
@@ -409,7 +415,7 @@ export interface GremlinResources {
     databaseName: string,
     graphName: string,
     updateThroughputParameters: ThroughputSettingsUpdateParameters,
-    options?: GremlinResourcesUpdateGremlinGraphThroughputOptionalParams
+    options?: GremlinResourcesUpdateGremlinGraphThroughputOptionalParams,
   ): Promise<GremlinResourcesUpdateGremlinGraphThroughputResponse>;
   /**
    * Migrate an Azure Cosmos DB Gremlin graph from manual throughput to autoscale
@@ -424,12 +430,10 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     graphName: string,
-    options?: GremlinResourcesMigrateGremlinGraphToAutoscaleOptionalParams
+    options?: GremlinResourcesMigrateGremlinGraphToAutoscaleOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        GremlinResourcesMigrateGremlinGraphToAutoscaleResponse
-      >,
+    SimplePollerLike<
+      OperationState<GremlinResourcesMigrateGremlinGraphToAutoscaleResponse>,
       GremlinResourcesMigrateGremlinGraphToAutoscaleResponse
     >
   >;
@@ -446,7 +450,7 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     graphName: string,
-    options?: GremlinResourcesMigrateGremlinGraphToAutoscaleOptionalParams
+    options?: GremlinResourcesMigrateGremlinGraphToAutoscaleOptionalParams,
   ): Promise<GremlinResourcesMigrateGremlinGraphToAutoscaleResponse>;
   /**
    * Migrate an Azure Cosmos DB Gremlin graph from autoscale to manual throughput
@@ -461,12 +465,10 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     graphName: string,
-    options?: GremlinResourcesMigrateGremlinGraphToManualThroughputOptionalParams
+    options?: GremlinResourcesMigrateGremlinGraphToManualThroughputOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        GremlinResourcesMigrateGremlinGraphToManualThroughputResponse
-      >,
+    SimplePollerLike<
+      OperationState<GremlinResourcesMigrateGremlinGraphToManualThroughputResponse>,
       GremlinResourcesMigrateGremlinGraphToManualThroughputResponse
     >
   >;
@@ -483,7 +485,7 @@ export interface GremlinResources {
     accountName: string,
     databaseName: string,
     graphName: string,
-    options?: GremlinResourcesMigrateGremlinGraphToManualThroughputOptionalParams
+    options?: GremlinResourcesMigrateGremlinGraphToManualThroughputOptionalParams,
   ): Promise<GremlinResourcesMigrateGremlinGraphToManualThroughputResponse>;
   /**
    * Retrieves continuous backup information for a gremlin graph.
@@ -500,12 +502,10 @@ export interface GremlinResources {
     databaseName: string,
     graphName: string,
     location: ContinuousBackupRestoreLocation,
-    options?: GremlinResourcesRetrieveContinuousBackupInformationOptionalParams
+    options?: GremlinResourcesRetrieveContinuousBackupInformationOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        GremlinResourcesRetrieveContinuousBackupInformationResponse
-      >,
+    SimplePollerLike<
+      OperationState<GremlinResourcesRetrieveContinuousBackupInformationResponse>,
       GremlinResourcesRetrieveContinuousBackupInformationResponse
     >
   >;
@@ -524,6 +524,6 @@ export interface GremlinResources {
     databaseName: string,
     graphName: string,
     location: ContinuousBackupRestoreLocation,
-    options?: GremlinResourcesRetrieveContinuousBackupInformationOptionalParams
+    options?: GremlinResourcesRetrieveContinuousBackupInformationOptionalParams,
   ): Promise<GremlinResourcesRetrieveContinuousBackupInformationResponse>;
 }

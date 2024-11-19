@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   RouteMap,
   RouteMapsListOptionalParams,
@@ -15,7 +15,7 @@ import {
   RouteMapsGetResponse,
   RouteMapsCreateOrUpdateOptionalParams,
   RouteMapsCreateOrUpdateResponse,
-  RouteMapsDeleteOptionalParams
+  RouteMapsDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface RouteMaps {
   list(
     resourceGroupName: string,
     virtualHubName: string,
-    options?: RouteMapsListOptionalParams
+    options?: RouteMapsListOptionalParams,
   ): PagedAsyncIterableIterator<RouteMap>;
   /**
    * Retrieves the details of a RouteMap.
@@ -43,7 +43,7 @@ export interface RouteMaps {
     resourceGroupName: string,
     virtualHubName: string,
     routeMapName: string,
-    options?: RouteMapsGetOptionalParams
+    options?: RouteMapsGetOptionalParams,
   ): Promise<RouteMapsGetResponse>;
   /**
    * Creates a RouteMap if it doesn't exist else updates the existing one.
@@ -58,10 +58,10 @@ export interface RouteMaps {
     virtualHubName: string,
     routeMapName: string,
     routeMapParameters: RouteMap,
-    options?: RouteMapsCreateOrUpdateOptionalParams
+    options?: RouteMapsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<RouteMapsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<RouteMapsCreateOrUpdateResponse>,
       RouteMapsCreateOrUpdateResponse
     >
   >;
@@ -78,7 +78,7 @@ export interface RouteMaps {
     virtualHubName: string,
     routeMapName: string,
     routeMapParameters: RouteMap,
-    options?: RouteMapsCreateOrUpdateOptionalParams
+    options?: RouteMapsCreateOrUpdateOptionalParams,
   ): Promise<RouteMapsCreateOrUpdateResponse>;
   /**
    * Deletes a RouteMap.
@@ -91,8 +91,8 @@ export interface RouteMaps {
     resourceGroupName: string,
     virtualHubName: string,
     routeMapName: string,
-    options?: RouteMapsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: RouteMapsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a RouteMap.
    * @param resourceGroupName The resource group name of the RouteMap's resource group.
@@ -104,6 +104,6 @@ export interface RouteMaps {
     resourceGroupName: string,
     virtualHubName: string,
     routeMapName: string,
-    options?: RouteMapsDeleteOptionalParams
+    options?: RouteMapsDeleteOptionalParams,
   ): Promise<void>;
 }

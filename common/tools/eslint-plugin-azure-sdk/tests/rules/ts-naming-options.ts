@@ -1,31 +1,29 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @file Testing the ts-naming-options rule.
- * @author Arpan Laha
+ *
  */
 
-import { RuleTester } from "eslint";
+import { createRuleTester } from "../ruleTester";
 import rule from "../../src/rules/ts-naming-options";
 
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
 
-const ruleTester = new RuleTester({
-  parser: require.resolve("@typescript-eslint/parser"),
-  parserOptions: {
-    createDefaultProgram: true,
-    project: "./tsconfig.json",
-  },
-});
+const ruleTester = createRuleTester();
 
 ruleTester.run("ts-naming-options", rule, {
   valid: [
     // single method
     {
       code: "class ExampleClient { createExample(options: CreateExampleOptions) {}; };",
+    },
+    // single method with default value
+    {
+      code: "class ExampleClient { createExample(options: CreateExampleOptions = {}) {}; };",
     },
     // multiple methods
     {
@@ -43,6 +41,14 @@ ruleTester.run("ts-naming-options", rule, {
   invalid: [
     {
       code: "class ExampleClient { createExample(options: Options) {}; };",
+      errors: [
+        {
+          message: "options parameter type is not prefixed with the method name",
+        },
+      ],
+    },
+    {
+      code: "class ExampleClient { createExample(options: Options = {}) {}; };",
       errors: [
         {
           message: "options parameter type is not prefixed with the method name",

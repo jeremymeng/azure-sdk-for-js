@@ -10,16 +10,18 @@
 // Licensed under the MIT License.
 const { MonitorClient } = require("@azure/arm-monitor");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Enable a receiver in an action group. This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
  *
  * @summary Enable a receiver in an action group. This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
- * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2022-06-01/examples/enableReceiver.json
+ * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2023-01-01/examples/enableReceiver.json
  */
 async function enableTheReceiver() {
-  const subscriptionId = "187f412d-1758-44d9-b052-169e2564721d";
-  const resourceGroupName = "Default-NotificationRules";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] || "187f412d-1758-44d9-b052-169e2564721d";
+  const resourceGroupName = process.env["MONITOR_RESOURCE_GROUP"] || "Default-NotificationRules";
   const actionGroupName = "SampleActionGroup";
   const enableRequest = { receiverName: "John Doe's mobile" };
   const credential = new DefaultAzureCredential();
@@ -27,9 +29,13 @@ async function enableTheReceiver() {
   const result = await client.actionGroups.enableReceiver(
     resourceGroupName,
     actionGroupName,
-    enableRequest
+    enableRequest,
   );
   console.log(result);
 }
 
-enableTheReceiver().catch(console.error);
+async function main() {
+  enableTheReceiver();
+}
+
+main().catch(console.error);

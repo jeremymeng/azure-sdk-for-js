@@ -1,10 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { CosmosClient, CosmosClientOptions } from "../../../src";
-import { RequestContext } from "../../../src";
-import { Plugin, Next, PluginConfig } from "../../../src";
+// Licensed under the MIT License.
+/* eslint-disable no-unused-expressions */
+import type { CosmosClientOptions } from "../../../src";
+import { CosmosClient } from "../../../src";
+import type { RequestContext } from "../../../src";
+import type { Plugin, Next, PluginConfig } from "../../../src";
 
 import * as assert from "assert";
+import type { DiagnosticNodeInternal } from "../../../src/diagnostics/DiagnosticNodeInternal";
+import { expect } from "chai";
+import { getEmptyCosmosDiagnostics } from "../../../src/utils/diagnostics";
 
 describe("Plugin", function () {
   it("should handle all requests", async function () {
@@ -14,10 +19,15 @@ describe("Plugin", function () {
       result: {
         message: "yay",
       },
+      diagnostics: getEmptyCosmosDiagnostics(),
     };
     let requestCount = 0;
     const FAILCOUNT = 2;
-    const sometimesThrow: Plugin<any> = async (context: RequestContext) => {
+    const sometimesThrow: Plugin<any> = async (
+      context: RequestContext,
+      diagNode: DiagnosticNodeInternal,
+    ) => {
+      expect(diagNode, "DiagnosticsNode should not be undefined or null").to.exist;
       requestCount++;
       if (context.path.includes("dbs") && requestCount <= FAILCOUNT) {
         throw {
@@ -55,6 +65,7 @@ describe("Plugin", function () {
       result: {
         message: "yay",
       },
+      diagnostics: getEmptyCosmosDiagnostics(),
     };
     let requestCount = 0;
     const alwaysSucceed: Plugin<any> = async () => {
@@ -97,6 +108,7 @@ describe("Plugin", function () {
       result: {
         message: "yay",
       },
+      diagnostics: getEmptyCosmosDiagnostics(),
     };
     let innerRequestCount = 0;
     const alwaysSucceed: Plugin<any> = async () => {
@@ -106,7 +118,8 @@ describe("Plugin", function () {
 
     let requestCount = 0;
     let responseCount = 0;
-    const counts: Plugin<any> = async (context: RequestContext, next: Next<any>) => {
+    const counts: Plugin<any> = async (context: RequestContext, diagNode, next: Next<any>) => {
+      expect(diagNode, "DiagnosticsNode should not be undefined or null").to.exist;
       requestCount++;
       const response = await next(context);
       responseCount++;

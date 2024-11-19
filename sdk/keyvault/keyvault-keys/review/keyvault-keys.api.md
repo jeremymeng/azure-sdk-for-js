@@ -4,16 +4,14 @@
 
 ```ts
 
-/// <reference lib="esnext.asynciterable" />
-
 import { AzureLogger } from '@azure/logger';
-import * as coreClient from '@azure/core-client';
-import { ExtendedCommonClientOptions } from '@azure/core-http-compat';
+import type * as coreClient from '@azure/core-client';
+import type { ExtendedCommonClientOptions } from '@azure/core-http-compat';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
 import { PageSettings } from '@azure/core-paging';
 import { PollerLike } from '@azure/core-lro';
 import { PollOperationState } from '@azure/core-lro';
-import { TokenCredential } from '@azure/core-auth';
+import type { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface AesCbcDecryptParameters {
@@ -85,10 +83,6 @@ export interface CreateKeyOptions extends coreClient.OperationOptions {
 
 // @public
 export interface CreateOctKeyOptions extends CreateKeyOptions {
-}
-
-// @public
-export interface CreateOkpKeyOptions extends CreateKeyOptions {
 }
 
 // @public
@@ -240,7 +234,6 @@ export class KeyClient {
     createEcKey(name: string, options?: CreateEcKeyOptions): Promise<KeyVaultKey>;
     createKey(name: string, keyType: KeyType_2, options?: CreateKeyOptions): Promise<KeyVaultKey>;
     createOctKey(name: string, options?: CreateOctKeyOptions): Promise<KeyVaultKey>;
-    createOkpKey(name: string, options?: CreateOkpKeyOptions): Promise<KeyVaultKey>;
     createRsaKey(name: string, options?: CreateRsaKeyOptions): Promise<KeyVaultKey>;
     getCryptographyClient(keyName: string, options?: GetCryptographyClientOptions): CryptographyClient;
     getDeletedKey(name: string, options?: GetDeletedKeyOptions): Promise<DeletedKey>;
@@ -288,6 +281,7 @@ export interface KeyProperties {
     enabled?: boolean;
     expiresOn?: Date;
     exportable?: boolean;
+    readonly hsmPlatform?: string;
     id?: string;
     readonly managed?: boolean;
     name: string;
@@ -390,7 +384,6 @@ export enum KnownEncryptionAlgorithms {
 
 // @public
 export enum KnownKeyCurveNames {
-    Ed25519 = "Ed25519",
     P256 = "P-256",
     P256K = "P-256K",
     P384 = "P-384",
@@ -421,15 +414,12 @@ export enum KnownKeyTypes {
     ECHSM = "EC-HSM",
     Oct = "oct",
     OctHSM = "oct-HSM",
-    OKP = "OKP",
-    OKPHSM = "OKP-HSM",
     RSA = "RSA",
     RSAHSM = "RSA-HSM"
 }
 
 // @public
 export enum KnownSignatureAlgorithms {
-    EdDSA = "EdDSA",
     ES256 = "ES256",
     ES256K = "ES256K",
     ES384 = "ES384",

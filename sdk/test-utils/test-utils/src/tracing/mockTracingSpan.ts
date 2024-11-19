@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import {
   TracingSpan,
@@ -76,7 +76,7 @@ export class MockTracingSpan implements TracingSpan {
     spanId: string,
     tracingContext?: TracingContext,
     spanOptions?: TracingSpanOptions,
-    enabled = true
+    enabled = true,
   ) {
     this.name = name;
     this.spanKind = spanOptions?.spanKind;

@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetworkManagementClient } from "../networkManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   VpnServerConfigurationPolicyGroup,
   ConfigurationPolicyGroupsListByVpnServerConfigurationNextOptionalParams,
@@ -25,13 +29,14 @@ import {
   ConfigurationPolicyGroupsDeleteOptionalParams,
   ConfigurationPolicyGroupsGetOptionalParams,
   ConfigurationPolicyGroupsGetResponse,
-  ConfigurationPolicyGroupsListByVpnServerConfigurationNextResponse
+  ConfigurationPolicyGroupsListByVpnServerConfigurationNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing ConfigurationPolicyGroups operations. */
 export class ConfigurationPolicyGroupsImpl
-  implements ConfigurationPolicyGroups {
+  implements ConfigurationPolicyGroups
+{
   private readonly client: NetworkManagementClient;
 
   /**
@@ -51,12 +56,12 @@ export class ConfigurationPolicyGroupsImpl
   public listByVpnServerConfiguration(
     resourceGroupName: string,
     vpnServerConfigurationName: string,
-    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams
+    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams,
   ): PagedAsyncIterableIterator<VpnServerConfigurationPolicyGroup> {
     const iter = this.listByVpnServerConfigurationPagingAll(
       resourceGroupName,
       vpnServerConfigurationName,
-      options
+      options,
     );
     return {
       next() {
@@ -73,9 +78,9 @@ export class ConfigurationPolicyGroupsImpl
           resourceGroupName,
           vpnServerConfigurationName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -83,7 +88,7 @@ export class ConfigurationPolicyGroupsImpl
     resourceGroupName: string,
     vpnServerConfigurationName: string,
     options?: ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<VpnServerConfigurationPolicyGroup[]> {
     let result: ConfigurationPolicyGroupsListByVpnServerConfigurationResponse;
     let continuationToken = settings?.continuationToken;
@@ -91,7 +96,7 @@ export class ConfigurationPolicyGroupsImpl
       result = await this._listByVpnServerConfiguration(
         resourceGroupName,
         vpnServerConfigurationName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -103,7 +108,7 @@ export class ConfigurationPolicyGroupsImpl
         resourceGroupName,
         vpnServerConfigurationName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -115,12 +120,12 @@ export class ConfigurationPolicyGroupsImpl
   private async *listByVpnServerConfigurationPagingAll(
     resourceGroupName: string,
     vpnServerConfigurationName: string,
-    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams
+    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams,
   ): AsyncIterableIterator<VpnServerConfigurationPolicyGroup> {
     for await (const page of this.listByVpnServerConfigurationPagingPage(
       resourceGroupName,
       vpnServerConfigurationName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -140,30 +145,29 @@ export class ConfigurationPolicyGroupsImpl
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
     vpnServerConfigurationPolicyGroupParameters: VpnServerConfigurationPolicyGroup,
-    options?: ConfigurationPolicyGroupsCreateOrUpdateOptionalParams
+    options?: ConfigurationPolicyGroupsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationPolicyGroupsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationPolicyGroupsCreateOrUpdateResponse>,
       ConfigurationPolicyGroupsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<ConfigurationPolicyGroupsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -172,8 +176,8 @@ export class ConfigurationPolicyGroupsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -181,26 +185,29 @@ export class ConfigurationPolicyGroupsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         vpnServerConfigurationName,
         configurationPolicyGroupName,
         vpnServerConfigurationPolicyGroupParameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      ConfigurationPolicyGroupsCreateOrUpdateResponse,
+      OperationState<ConfigurationPolicyGroupsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -220,14 +227,14 @@ export class ConfigurationPolicyGroupsImpl
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
     vpnServerConfigurationPolicyGroupParameters: VpnServerConfigurationPolicyGroup,
-    options?: ConfigurationPolicyGroupsCreateOrUpdateOptionalParams
+    options?: ConfigurationPolicyGroupsCreateOrUpdateOptionalParams,
   ): Promise<ConfigurationPolicyGroupsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       vpnServerConfigurationName,
       configurationPolicyGroupName,
       vpnServerConfigurationPolicyGroupParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -243,25 +250,24 @@ export class ConfigurationPolicyGroupsImpl
     resourceGroupName: string,
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
-    options?: ConfigurationPolicyGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: ConfigurationPolicyGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -270,8 +276,8 @@ export class ConfigurationPolicyGroupsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -279,25 +285,25 @@ export class ConfigurationPolicyGroupsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         vpnServerConfigurationName,
         configurationPolicyGroupName,
-        options
+        options,
       },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -314,13 +320,13 @@ export class ConfigurationPolicyGroupsImpl
     resourceGroupName: string,
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
-    options?: ConfigurationPolicyGroupsDeleteOptionalParams
+    options?: ConfigurationPolicyGroupsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       vpnServerConfigurationName,
       configurationPolicyGroupName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -336,16 +342,16 @@ export class ConfigurationPolicyGroupsImpl
     resourceGroupName: string,
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
-    options?: ConfigurationPolicyGroupsGetOptionalParams
+    options?: ConfigurationPolicyGroupsGetOptionalParams,
   ): Promise<ConfigurationPolicyGroupsGetResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         vpnServerConfigurationName,
         configurationPolicyGroupName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -358,11 +364,11 @@ export class ConfigurationPolicyGroupsImpl
   private _listByVpnServerConfiguration(
     resourceGroupName: string,
     vpnServerConfigurationName: string,
-    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams
+    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams,
   ): Promise<ConfigurationPolicyGroupsListByVpnServerConfigurationResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, vpnServerConfigurationName, options },
-      listByVpnServerConfigurationOperationSpec
+      listByVpnServerConfigurationOperationSpec,
     );
   }
 
@@ -378,13 +384,11 @@ export class ConfigurationPolicyGroupsImpl
     resourceGroupName: string,
     vpnServerConfigurationName: string,
     nextLink: string,
-    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationNextOptionalParams
-  ): Promise<
-    ConfigurationPolicyGroupsListByVpnServerConfigurationNextResponse
-  > {
+    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationNextOptionalParams,
+  ): Promise<ConfigurationPolicyGroupsListByVpnServerConfigurationNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, vpnServerConfigurationName, nextLink, options },
-      listByVpnServerConfigurationNextOperationSpec
+      listByVpnServerConfigurationNextOperationSpec,
     );
   }
 }
@@ -392,25 +396,24 @@ export class ConfigurationPolicyGroupsImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/vpnServerConfigurations/{vpnServerConfigurationName}/configurationPolicyGroups/{configurationPolicyGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/vpnServerConfigurations/{vpnServerConfigurationName}/configurationPolicyGroups/{configurationPolicyGroupName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup
+      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup,
     },
     201: {
-      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup
+      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup,
     },
     202: {
-      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup
+      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup,
     },
     204: {
-      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup
+      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.vpnServerConfigurationPolicyGroupParameters,
   queryParameters: [Parameters.apiVersion],
@@ -419,15 +422,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.vpnServerConfigurationName,
-    Parameters.configurationPolicyGroupName
+    Parameters.configurationPolicyGroupName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/vpnServerConfigurations/{vpnServerConfigurationName}/configurationPolicyGroups/{configurationPolicyGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/vpnServerConfigurations/{vpnServerConfigurationName}/configurationPolicyGroups/{configurationPolicyGroupName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -435,8 +437,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -444,22 +446,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.vpnServerConfigurationName,
-    Parameters.configurationPolicyGroupName
+    Parameters.configurationPolicyGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/vpnServerConfigurations/{vpnServerConfigurationName}/configurationPolicyGroups/{configurationPolicyGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/vpnServerConfigurations/{vpnServerConfigurationName}/configurationPolicyGroups/{configurationPolicyGroupName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup
+      bodyMapper: Mappers.VpnServerConfigurationPolicyGroup,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -467,52 +468,51 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.vpnServerConfigurationName,
-    Parameters.configurationPolicyGroupName
+    Parameters.configurationPolicyGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByVpnServerConfigurationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/vpnServerConfigurations/{vpnServerConfigurationName}/configurationPolicyGroups",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/vpnServerConfigurations/{vpnServerConfigurationName}/configurationPolicyGroups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ListVpnServerConfigurationPolicyGroupsResult
+      bodyMapper: Mappers.ListVpnServerConfigurationPolicyGroupsResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.vpnServerConfigurationName
+    Parameters.vpnServerConfigurationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
-const listByVpnServerConfigurationNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.ListVpnServerConfigurationPolicyGroupsResult
+const listByVpnServerConfigurationNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "{nextLink}",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.ListVpnServerConfigurationPolicyGroupsResult,
+      },
+      default: {
+        bodyMapper: Mappers.CloudError,
+      },
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.resourceGroupName,
-    Parameters.subscriptionId,
-    Parameters.nextLink,
-    Parameters.vpnServerConfigurationName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
+    urlParameters: [
+      Parameters.$host,
+      Parameters.resourceGroupName,
+      Parameters.subscriptionId,
+      Parameters.nextLink,
+      Parameters.vpnServerConfigurationName,
+    ],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };

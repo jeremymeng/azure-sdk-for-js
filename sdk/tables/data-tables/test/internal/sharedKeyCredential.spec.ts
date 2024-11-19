@@ -1,33 +1,28 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
-  PipelineRequest,
-  PipelineResponse,
-  SendRequest,
-  createHttpHeaders,
-  createPipelineRequest,
-} from "@azure/core-rest-pipeline";
+import type { PipelineRequest, PipelineResponse, SendRequest } from "@azure/core-rest-pipeline";
+import { createHttpHeaders, createPipelineRequest } from "@azure/core-rest-pipeline";
 import { AzureNamedKeyCredential } from "@azure/core-auth";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { assert } from "chai";
 import { expectedSharedKeyLiteHeader } from "./fakeTestSecrets";
-import { isNode } from "@azure/test-utils";
+import { isNodeLike } from "@azure/core-util";
 import { tablesNamedKeyCredentialPolicy } from "../../src/tablesNamedCredentialPolicy";
 
-describe("TablesSharedKeyCredential", () => {
+describe("TablesSharedKeyCredential", function () {
   let originalToUTCString: () => string;
-  beforeEach(() => {
+  beforeEach(function () {
     originalToUTCString = Date.prototype.toUTCString;
     Date.prototype.toUTCString = () => "Thu, 03 Sep 2020 18:50:45 GMT";
   });
 
-  afterEach(() => {
+  afterEach(function () {
     Date.prototype.toUTCString = originalToUTCString;
   });
 
   it("It should sign", async function (this: Context) {
-    if (!isNode) {
+    if (!isNodeLike) {
       // AzureNamedKeyCredential auth is not supported in Browser
       this.skip();
     }

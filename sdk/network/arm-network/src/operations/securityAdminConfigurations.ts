@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetworkManagementClient } from "../networkManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   SecurityAdminConfiguration,
   SecurityAdminConfigurationsListNextOptionalParams,
@@ -25,13 +29,14 @@ import {
   SecurityAdminConfigurationsCreateOrUpdateOptionalParams,
   SecurityAdminConfigurationsCreateOrUpdateResponse,
   SecurityAdminConfigurationsDeleteOptionalParams,
-  SecurityAdminConfigurationsListNextResponse
+  SecurityAdminConfigurationsListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing SecurityAdminConfigurations operations. */
 export class SecurityAdminConfigurationsImpl
-  implements SecurityAdminConfigurations {
+  implements SecurityAdminConfigurations
+{
   private readonly client: NetworkManagementClient;
 
   /**
@@ -52,12 +57,12 @@ export class SecurityAdminConfigurationsImpl
   public list(
     resourceGroupName: string,
     networkManagerName: string,
-    options?: SecurityAdminConfigurationsListOptionalParams
+    options?: SecurityAdminConfigurationsListOptionalParams,
   ): PagedAsyncIterableIterator<SecurityAdminConfiguration> {
     const iter = this.listPagingAll(
       resourceGroupName,
       networkManagerName,
-      options
+      options,
     );
     return {
       next() {
@@ -74,9 +79,9 @@ export class SecurityAdminConfigurationsImpl
           resourceGroupName,
           networkManagerName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -84,7 +89,7 @@ export class SecurityAdminConfigurationsImpl
     resourceGroupName: string,
     networkManagerName: string,
     options?: SecurityAdminConfigurationsListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<SecurityAdminConfiguration[]> {
     let result: SecurityAdminConfigurationsListResponse;
     let continuationToken = settings?.continuationToken;
@@ -100,7 +105,7 @@ export class SecurityAdminConfigurationsImpl
         resourceGroupName,
         networkManagerName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -112,12 +117,12 @@ export class SecurityAdminConfigurationsImpl
   private async *listPagingAll(
     resourceGroupName: string,
     networkManagerName: string,
-    options?: SecurityAdminConfigurationsListOptionalParams
+    options?: SecurityAdminConfigurationsListOptionalParams,
   ): AsyncIterableIterator<SecurityAdminConfiguration> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       networkManagerName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -133,11 +138,11 @@ export class SecurityAdminConfigurationsImpl
   private _list(
     resourceGroupName: string,
     networkManagerName: string,
-    options?: SecurityAdminConfigurationsListOptionalParams
+    options?: SecurityAdminConfigurationsListOptionalParams,
   ): Promise<SecurityAdminConfigurationsListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, networkManagerName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -152,11 +157,11 @@ export class SecurityAdminConfigurationsImpl
     resourceGroupName: string,
     networkManagerName: string,
     configurationName: string,
-    options?: SecurityAdminConfigurationsGetOptionalParams
+    options?: SecurityAdminConfigurationsGetOptionalParams,
   ): Promise<SecurityAdminConfigurationsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, networkManagerName, configurationName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -173,7 +178,7 @@ export class SecurityAdminConfigurationsImpl
     networkManagerName: string,
     configurationName: string,
     securityAdminConfiguration: SecurityAdminConfiguration,
-    options?: SecurityAdminConfigurationsCreateOrUpdateOptionalParams
+    options?: SecurityAdminConfigurationsCreateOrUpdateOptionalParams,
   ): Promise<SecurityAdminConfigurationsCreateOrUpdateResponse> {
     return this.client.sendOperationRequest(
       {
@@ -181,9 +186,9 @@ export class SecurityAdminConfigurationsImpl
         networkManagerName,
         configurationName,
         securityAdminConfiguration,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
+      createOrUpdateOperationSpec,
     );
   }
 
@@ -198,25 +203,24 @@ export class SecurityAdminConfigurationsImpl
     resourceGroupName: string,
     networkManagerName: string,
     configurationName: string,
-    options?: SecurityAdminConfigurationsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: SecurityAdminConfigurationsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -225,8 +229,8 @@ export class SecurityAdminConfigurationsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -234,20 +238,25 @@ export class SecurityAdminConfigurationsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, networkManagerName, configurationName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        networkManagerName,
+        configurationName,
+        options,
+      },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -264,13 +273,13 @@ export class SecurityAdminConfigurationsImpl
     resourceGroupName: string,
     networkManagerName: string,
     configurationName: string,
-    options?: SecurityAdminConfigurationsDeleteOptionalParams
+    options?: SecurityAdminConfigurationsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       networkManagerName,
       configurationName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -286,11 +295,11 @@ export class SecurityAdminConfigurationsImpl
     resourceGroupName: string,
     networkManagerName: string,
     nextLink: string,
-    options?: SecurityAdminConfigurationsListNextOptionalParams
+    options?: SecurityAdminConfigurationsListNextOptionalParams,
   ): Promise<SecurityAdminConfigurationsListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, networkManagerName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -298,42 +307,40 @@ export class SecurityAdminConfigurationsImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SecurityAdminConfigurationListResult
+      bodyMapper: Mappers.SecurityAdminConfigurationListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [
     Parameters.apiVersion,
     Parameters.top,
-    Parameters.skipToken
+    Parameters.skipToken,
   ],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.networkManagerName
+    Parameters.networkManagerName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations/{configurationName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations/{configurationName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SecurityAdminConfiguration
+      bodyMapper: Mappers.SecurityAdminConfiguration,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -341,25 +348,24 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.networkManagerName,
-    Parameters.configurationName
+    Parameters.configurationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations/{configurationName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations/{configurationName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.SecurityAdminConfiguration
+      bodyMapper: Mappers.SecurityAdminConfiguration,
     },
     201: {
-      bodyMapper: Mappers.SecurityAdminConfiguration
+      bodyMapper: Mappers.SecurityAdminConfiguration,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.securityAdminConfiguration,
   queryParameters: [Parameters.apiVersion],
@@ -368,15 +374,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.networkManagerName,
-    Parameters.configurationName
+    Parameters.configurationName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations/{configurationName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations/{configurationName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -384,8 +389,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.force],
   urlParameters: [
@@ -393,34 +398,29 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.networkManagerName,
-    Parameters.configurationName
+    Parameters.configurationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.SecurityAdminConfigurationListResult
+      bodyMapper: Mappers.SecurityAdminConfigurationListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [
-    Parameters.apiVersion,
-    Parameters.top,
-    Parameters.skipToken
-  ],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.networkManagerName
+    Parameters.networkManagerName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

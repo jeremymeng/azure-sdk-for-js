@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { NamedKeyCredential, isNamedKeyCredential } from "@azure/core-auth";
-import {
-  TableSasSignatureValues,
-  generateTableSasQueryParameters,
-} from "./tableSasSignatureValues";
+import type { NamedKeyCredential } from "@azure/core-auth";
+import { isNamedKeyCredential } from "@azure/core-auth";
+import type { TableSasSignatureValues } from "./tableSasSignatureValues";
+import { generateTableSasQueryParameters } from "./tableSasSignatureValues";
 import { tableSasPermissionsFromString } from "./tableSasPermisions";
 
 /**
@@ -20,13 +19,13 @@ import { tableSasPermissionsFromString } from "./tableSasPermisions";
 export function generateTableSas(
   tableName: string,
   credential: NamedKeyCredential,
-  options: TableSasSignatureValues = {}
+  options: TableSasSignatureValues = {},
 ): string {
   let { expiresOn, permissions } = options;
 
   if (!isNamedKeyCredential(credential)) {
     throw RangeError(
-      "Can only generate the account SAS when the client is initialized with a shared key credential"
+      "Can only generate the account SAS when the client is initialized with a shared key credential",
     );
   }
 

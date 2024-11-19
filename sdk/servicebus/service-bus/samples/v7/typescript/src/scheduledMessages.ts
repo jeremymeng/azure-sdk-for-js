@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT Licence.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 /**
  * This sample demonstrates how the scheduleMessages() function can be used to schedule messages to
@@ -18,13 +18,14 @@ import {
   ServiceBusMessage,
   ServiceBusReceivedMessage,
 } from "@azure/service-bus";
+import { DefaultAzureCredential } from "@azure/identity";
 
 // Load the .env file if it exists
 import * as dotenv from "dotenv";
 dotenv.config();
 
 // Define connection string and related Service Bus entity names here
-const connectionString = process.env.SERVICEBUS_CONNECTION_STRING || "<connection string>";
+const fqdn = process.env.SERVICEBUS_FQDN || "<your-servicebus-namespace>.servicebus.windows.net";
 const queueName = process.env.QUEUE_NAME || "<queue name>";
 
 const listOfScientists = [
@@ -41,7 +42,8 @@ const listOfScientists = [
 ];
 
 export async function main() {
-  const sbClient = new ServiceBusClient(connectionString);
+  const credential = new DefaultAzureCredential();
+  const sbClient = new ServiceBusClient(fqdn, credential);
   try {
     await sendScheduledMessages(sbClient);
 
@@ -60,14 +62,14 @@ async function sendScheduledMessages(sbClient: ServiceBusClient) {
     (scientist): ServiceBusMessage => ({
       body: `${scientist.firstName} ${scientist.lastName}`,
       subject: "Scientist",
-    })
+    }),
   );
 
   const timeNowUtc = new Date(Date.now());
   const scheduledEnqueueTimeUtc = new Date(Date.now() + 10000);
   console.log(`Time now in UTC: ${timeNowUtc}`);
   console.log(
-    `Messages will appear in Service Bus after 10 seconds at: ${scheduledEnqueueTimeUtc}`
+    `Messages will appear in Service Bus after 10 seconds at: ${scheduledEnqueueTimeUtc}`,
   );
 
   await sender.scheduleMessages(messages, scheduledEnqueueTimeUtc);

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import * as http from "http";
-import * as https from "https";
-import * as zlib from "zlib";
-import { Transform } from "stream";
-import { AbortController, AbortError } from "@azure/abort-controller";
-import {
+import * as http from "node:http";
+import * as https from "node:https";
+import * as zlib from "node:zlib";
+import { Transform } from "node:stream";
+import { AbortError } from "@azure/abort-controller";
+import type {
   HttpClient,
   HttpHeaders,
   PipelineRequest,
@@ -14,11 +14,11 @@ import {
   RequestBodyType,
   TlsSettings,
   TransferProgressEvent,
-} from "./interfaces";
-import { createHttpHeaders } from "./httpHeaders";
-import { RestError } from "./restError";
-import { IncomingMessage } from "http";
-import { logger } from "./log";
+} from "./interfaces.js";
+import { createHttpHeaders } from "./httpHeaders.js";
+import { RestError } from "./restError.js";
+import type { IncomingMessage } from "node:http";
+import { logger } from "./log.js";
 
 const DEFAULT_TLS_SETTINGS = {};
 
@@ -27,10 +27,21 @@ function isReadableStream(body: any): body is NodeJS.ReadableStream {
 }
 
 function isStreamComplete(stream: NodeJS.ReadableStream): Promise<void> {
+  if (stream.readable === false) {
+    return Promise.resolve();
+  }
+
   return new Promise((resolve) => {
-    stream.on("close", resolve);
-    stream.on("end", resolve);
-    stream.on("error", resolve);
+    const handler = (): void => {
+      resolve();
+      stream.removeListener("close", handler);
+      stream.removeListener("end", handler);
+      stream.removeListener("error", handler);
+    };
+
+    stream.on("close", handler);
+    stream.on("end", handler);
+    stream.on("error", handler);
   });
 }
 
@@ -42,7 +53,7 @@ class ReportTransform extends Transform {
   private loadedBytes = 0;
   private progressCallback: (progress: TransferProgressEvent) => void;
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   _transform(chunk: string | Buffer, _encoding: string, callback: Function): void {
     this.push(chunk);
     this.loadedBytes += chunk.length;
@@ -171,13 +182,12 @@ class NodeHttpClient implements HttpClient {
       if (request.abortSignal && abortListener) {
         let uploadStreamDone = Promise.resolve();
         if (isReadableStream(body)) {
-          uploadStreamDone = isStreamComplete(body as NodeJS.ReadableStream);
+          uploadStreamDone = isStreamComplete(body);
         }
         let downloadStreamDone = Promise.resolve();
         if (isReadableStream(responseStream)) {
           downloadStreamDone = isStreamComplete(responseStream);
         }
-
         Promise.all([uploadStreamDone, downloadStreamDone])
           .then(() => {
             // eslint-disable-next-line promise/always-return
@@ -195,7 +205,7 @@ class NodeHttpClient implements HttpClient {
   private makeRequest(
     request: PipelineRequest,
     abortController: AbortController,
-    body?: RequestBodyType
+    body?: RequestBodyType,
   ): Promise<http.IncomingMessage> {
     const url = new URL(request.url);
 
@@ -220,7 +230,7 @@ class NodeHttpClient implements HttpClient {
 
       req.once("error", (err: Error & { code?: string }) => {
         reject(
-          new RestError(err.message, { code: err.code ?? RestError.REQUEST_SEND_ERROR, request })
+          new RestError(err.message, { code: err.code ?? RestError.REQUEST_SEND_ERROR, request }),
         );
       });
 
@@ -311,7 +321,7 @@ function getResponseHeaders(res: IncomingMessage): HttpHeaders {
 
 function getDecodedResponseStream(
   stream: IncomingMessage,
-  headers: HttpHeaders
+  headers: HttpHeaders,
 ): NodeJS.ReadableStream {
   const contentEncoding = headers.get("Content-Encoding");
   if (contentEncoding === "gzip") {
@@ -348,7 +358,7 @@ function streamToText(stream: NodeJS.ReadableStream): Promise<string> {
         reject(
           new RestError(`Error reading response as text: ${e.message}`, {
             code: RestError.PARSE_ERROR,
-          })
+          }),
         );
       }
     });

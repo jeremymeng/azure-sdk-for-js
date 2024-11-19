@@ -16,7 +16,7 @@ require("dotenv").config();
  * This sample demonstrates how to List the operations for the provider
  *
  * @summary List the operations for the provider
- * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/cadl/examples/OperationsList.json
+ * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/preview/2024-05-01-preview/examples/OperationsList.json
  */
 async function getOperationsList() {
   const subscriptionId =

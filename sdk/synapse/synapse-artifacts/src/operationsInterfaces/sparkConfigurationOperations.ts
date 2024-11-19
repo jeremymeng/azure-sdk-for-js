@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   SparkConfigurationResource,
   SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams,
@@ -17,7 +17,7 @@ import {
   SparkConfigurationGetSparkConfigurationResponse,
   SparkConfigurationDeleteSparkConfigurationOptionalParams,
   ArtifactRenameRequest,
-  SparkConfigurationRenameSparkConfigurationOptionalParams
+  SparkConfigurationRenameSparkConfigurationOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -28,7 +28,7 @@ export interface SparkConfigurationOperations {
    * @param options The options parameters.
    */
   listSparkConfigurationsByWorkspace(
-    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams
+    options?: SparkConfigurationGetSparkConfigurationsByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<SparkConfigurationResource>;
   /**
    * Creates or updates a sparkconfiguration.
@@ -39,12 +39,10 @@ export interface SparkConfigurationOperations {
   beginCreateOrUpdateSparkConfiguration(
     sparkConfigurationName: string,
     sparkConfiguration: SparkConfigurationResource,
-    options?: SparkConfigurationCreateOrUpdateSparkConfigurationOptionalParams
+    options?: SparkConfigurationCreateOrUpdateSparkConfigurationOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        SparkConfigurationCreateOrUpdateSparkConfigurationResponse
-      >,
+    SimplePollerLike<
+      OperationState<SparkConfigurationCreateOrUpdateSparkConfigurationResponse>,
       SparkConfigurationCreateOrUpdateSparkConfigurationResponse
     >
   >;
@@ -57,7 +55,7 @@ export interface SparkConfigurationOperations {
   beginCreateOrUpdateSparkConfigurationAndWait(
     sparkConfigurationName: string,
     sparkConfiguration: SparkConfigurationResource,
-    options?: SparkConfigurationCreateOrUpdateSparkConfigurationOptionalParams
+    options?: SparkConfigurationCreateOrUpdateSparkConfigurationOptionalParams,
   ): Promise<SparkConfigurationCreateOrUpdateSparkConfigurationResponse>;
   /**
    * Gets a sparkConfiguration.
@@ -66,7 +64,7 @@ export interface SparkConfigurationOperations {
    */
   getSparkConfiguration(
     sparkConfigurationName: string,
-    options?: SparkConfigurationGetSparkConfigurationOptionalParams
+    options?: SparkConfigurationGetSparkConfigurationOptionalParams,
   ): Promise<SparkConfigurationGetSparkConfigurationResponse>;
   /**
    * Deletes a sparkConfiguration.
@@ -75,8 +73,8 @@ export interface SparkConfigurationOperations {
    */
   beginDeleteSparkConfiguration(
     sparkConfigurationName: string,
-    options?: SparkConfigurationDeleteSparkConfigurationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: SparkConfigurationDeleteSparkConfigurationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a sparkConfiguration.
    * @param sparkConfigurationName The spark Configuration name.
@@ -84,7 +82,7 @@ export interface SparkConfigurationOperations {
    */
   beginDeleteSparkConfigurationAndWait(
     sparkConfigurationName: string,
-    options?: SparkConfigurationDeleteSparkConfigurationOptionalParams
+    options?: SparkConfigurationDeleteSparkConfigurationOptionalParams,
   ): Promise<void>;
   /**
    * Renames a sparkConfiguration.
@@ -95,8 +93,8 @@ export interface SparkConfigurationOperations {
   beginRenameSparkConfiguration(
     sparkConfigurationName: string,
     request: ArtifactRenameRequest,
-    options?: SparkConfigurationRenameSparkConfigurationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: SparkConfigurationRenameSparkConfigurationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Renames a sparkConfiguration.
    * @param sparkConfigurationName The spark Configuration name.
@@ -106,6 +104,6 @@ export interface SparkConfigurationOperations {
   beginRenameSparkConfigurationAndWait(
     sparkConfigurationName: string,
     request: ArtifactRenameRequest,
-    options?: SparkConfigurationRenameSparkConfigurationOptionalParams
+    options?: SparkConfigurationRenameSparkConfigurationOptionalParams,
   ): Promise<void>;
 }

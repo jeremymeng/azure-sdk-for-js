@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ExpressRoutePortAuthorization,
   ExpressRoutePortAuthorizationsListOptionalParams,
@@ -15,7 +15,7 @@ import {
   ExpressRoutePortAuthorizationsGetOptionalParams,
   ExpressRoutePortAuthorizationsGetResponse,
   ExpressRoutePortAuthorizationsCreateOrUpdateOptionalParams,
-  ExpressRoutePortAuthorizationsCreateOrUpdateResponse
+  ExpressRoutePortAuthorizationsCreateOrUpdateResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface ExpressRoutePortAuthorizations {
   list(
     resourceGroupName: string,
     expressRoutePortName: string,
-    options?: ExpressRoutePortAuthorizationsListOptionalParams
+    options?: ExpressRoutePortAuthorizationsListOptionalParams,
   ): PagedAsyncIterableIterator<ExpressRoutePortAuthorization>;
   /**
    * Deletes the specified authorization from the specified express route port.
@@ -43,8 +43,8 @@ export interface ExpressRoutePortAuthorizations {
     resourceGroupName: string,
     expressRoutePortName: string,
     authorizationName: string,
-    options?: ExpressRoutePortAuthorizationsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: ExpressRoutePortAuthorizationsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes the specified authorization from the specified express route port.
    * @param resourceGroupName The name of the resource group.
@@ -56,7 +56,7 @@ export interface ExpressRoutePortAuthorizations {
     resourceGroupName: string,
     expressRoutePortName: string,
     authorizationName: string,
-    options?: ExpressRoutePortAuthorizationsDeleteOptionalParams
+    options?: ExpressRoutePortAuthorizationsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Gets the specified authorization from the specified express route port.
@@ -69,7 +69,7 @@ export interface ExpressRoutePortAuthorizations {
     resourceGroupName: string,
     expressRoutePortName: string,
     authorizationName: string,
-    options?: ExpressRoutePortAuthorizationsGetOptionalParams
+    options?: ExpressRoutePortAuthorizationsGetOptionalParams,
   ): Promise<ExpressRoutePortAuthorizationsGetResponse>;
   /**
    * Creates or updates an authorization in the specified express route port.
@@ -85,10 +85,10 @@ export interface ExpressRoutePortAuthorizations {
     expressRoutePortName: string,
     authorizationName: string,
     authorizationParameters: ExpressRoutePortAuthorization,
-    options?: ExpressRoutePortAuthorizationsCreateOrUpdateOptionalParams
+    options?: ExpressRoutePortAuthorizationsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ExpressRoutePortAuthorizationsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ExpressRoutePortAuthorizationsCreateOrUpdateResponse>,
       ExpressRoutePortAuthorizationsCreateOrUpdateResponse
     >
   >;
@@ -106,6 +106,6 @@ export interface ExpressRoutePortAuthorizations {
     expressRoutePortName: string,
     authorizationName: string,
     authorizationParameters: ExpressRoutePortAuthorization,
-    options?: ExpressRoutePortAuthorizationsCreateOrUpdateOptionalParams
+    options?: ExpressRoutePortAuthorizationsCreateOrUpdateOptionalParams,
   ): Promise<ExpressRoutePortAuthorizationsCreateOrUpdateResponse>;
 }

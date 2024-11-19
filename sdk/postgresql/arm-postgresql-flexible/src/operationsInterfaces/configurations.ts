@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   Configuration,
   ConfigurationsListByServerOptionalParams,
@@ -17,7 +17,7 @@ import {
   ConfigurationsUpdateOptionalParams,
   ConfigurationsUpdateResponse,
   ConfigurationsPutOptionalParams,
-  ConfigurationsPutResponse
+  ConfigurationsPutResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -32,7 +32,7 @@ export interface Configurations {
   listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: ConfigurationsListByServerOptionalParams
+    options?: ConfigurationsListByServerOptionalParams,
   ): PagedAsyncIterableIterator<Configuration>;
   /**
    * Gets information about a configuration of server.
@@ -45,7 +45,7 @@ export interface Configurations {
     resourceGroupName: string,
     serverName: string,
     configurationName: string,
-    options?: ConfigurationsGetOptionalParams
+    options?: ConfigurationsGetOptionalParams,
   ): Promise<ConfigurationsGetResponse>;
   /**
    * Updates a configuration of a server.
@@ -60,10 +60,10 @@ export interface Configurations {
     serverName: string,
     configurationName: string,
     parameters: ConfigurationForUpdate,
-    options?: ConfigurationsUpdateOptionalParams
+    options?: ConfigurationsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationsUpdateResponse>,
       ConfigurationsUpdateResponse
     >
   >;
@@ -80,7 +80,7 @@ export interface Configurations {
     serverName: string,
     configurationName: string,
     parameters: ConfigurationForUpdate,
-    options?: ConfigurationsUpdateOptionalParams
+    options?: ConfigurationsUpdateOptionalParams,
   ): Promise<ConfigurationsUpdateResponse>;
   /**
    * Updates a configuration of a server.
@@ -95,10 +95,10 @@ export interface Configurations {
     serverName: string,
     configurationName: string,
     parameters: Configuration,
-    options?: ConfigurationsPutOptionalParams
+    options?: ConfigurationsPutOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationsPutResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationsPutResponse>,
       ConfigurationsPutResponse
     >
   >;
@@ -115,6 +115,6 @@ export interface Configurations {
     serverName: string,
     configurationName: string,
     parameters: Configuration,
-    options?: ConfigurationsPutOptionalParams
+    options?: ConfigurationsPutOptionalParams,
   ): Promise<ConfigurationsPutResponse>;
 }

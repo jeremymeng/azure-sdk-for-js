@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary use custom HTTP pipeline options when connecting to the service
@@ -35,7 +35,7 @@ export async function main() {
   // List shares
   const serviceClient = new ShareServiceClient(
     `https://${account}.file.core.windows.net`,
-    pipeline
+    pipeline,
   );
 
   console.log("Shares:");

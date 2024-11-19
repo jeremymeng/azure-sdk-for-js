@@ -1,29 +1,24 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { RestError } from "@azure/core-rest-pipeline";
+import type { RestError } from "@azure/core-rest-pipeline";
+import type { ShortCodesClient, USProgramBrief } from "../../../src/index.js";
 import {
   CompanyInformationMapper,
   MessageDetailsMapper,
   ProgramDetailsMapper,
-  ShortCodesClient,
   TrafficDetailsMapper,
-  USProgramBrief,
-} from "../../../src";
-import { assert } from "chai";
-import { CompositeMapper } from "@azure/core-client";
+} from "../../../src/index.js";
+import type { CompositeMapper } from "@azure/core-client";
 import { isPlaybackMode } from "@azure-tools/test-recorder";
-import { v1 as uuid } from "uuid";
+import { randomUUID } from "@azure/core-util";
+import { assert } from "vitest";
 
 const TestCompanyName: string = "Contoso";
 const TestProgramBriefName: string = "Contoso Loyalty Program";
 
 export function getTestUSProgramBrief(): USProgramBrief {
-  let programBriefId = uuid();
-
-  if (isPlaybackMode()) {
-    programBriefId = "9d787bd6-07fc-4c7b-8e57-17f1fee41298";
-  }
+  const programBriefId = randomUUID();
 
   const testUSProgramBrief: USProgramBrief = {
     id: programBriefId,
@@ -98,7 +93,7 @@ export function getTestUSProgramBrief(): USProgramBrief {
 export function assertEditableFieldsAreEqual(
   expected: USProgramBrief,
   actual: USProgramBrief,
-  messageContext: string
+  messageContext: string,
 ): void {
   assert.equal(expected.id, actual.id, `Program brief Id is incorrect - ${messageContext}`);
 
@@ -123,8 +118,8 @@ function assertDeepEqualKnownFields(
   comparisons: [
     propertyToCompareExtractor: (object: any) => any,
     mapper: CompositeMapper,
-    errorMessage: string
-  ][]
+    errorMessage: string,
+  ][],
 ): void {
   for (const comparison of comparisons) {
     assertDeepEqualKnownFieldsInternal(
@@ -133,7 +128,7 @@ function assertDeepEqualKnownFields(
       comparison[1],
       comparison[0],
       comparison[2],
-      messageContext
+      messageContext,
     );
   }
 }
@@ -144,7 +139,7 @@ function assertDeepEqualKnownFieldsInternal(
   mapper: CompositeMapper,
   propertyToCompareExtractor: (object: any) => any,
   errorMessage: string,
-  messageContext: string
+  messageContext: string,
 ): void {
   const mappedActual = mapKnownFields(propertyToCompareExtractor(actual), mapper);
   const mappedExpected = mapKnownFields(propertyToCompareExtractor(expected), mapper);
@@ -165,7 +160,7 @@ function mapKnownFields<TMapper extends CompositeMapper>(object: any, mapper: TM
 
 export async function doesProgramBriefExist(
   client: ShortCodesClient,
-  id: string
+  id: string,
 ): Promise<boolean> {
   try {
     const programBrief = await client.getUSProgramBrief(id);
@@ -184,15 +179,17 @@ export async function doesProgramBriefExist(
 }
 
 export async function runTestCleaningLeftovers(
-  testProgramBriefId: string,
+  testProgramBriefIds: string[],
   client: ShortCodesClient,
-  testLogic: () => Promise<void>
+  testLogic: () => Promise<void>,
 ): Promise<void> {
   try {
     await tryDeleteLeftOversFromPreviousTests(client);
     await testLogic();
   } catch (error) {
-    await tryDeleteProgramBrief(testProgramBriefId, client);
+    for (let i = 0; i < testProgramBriefIds.length; i++) {
+      await tryDeleteProgramBrief(testProgramBriefIds[i], client);
+    }
     throw error;
   }
 }
@@ -242,7 +239,7 @@ function getDateDifferenceInDays(date: Date): number {
     now.getHours(),
     now.getMinutes(),
     now.getSeconds(),
-    now.getMilliseconds()
+    now.getMilliseconds(),
   );
   const utcOther = Date.UTC(
     date.getFullYear(),
@@ -251,7 +248,7 @@ function getDateDifferenceInDays(date: Date): number {
     date.getHours(),
     date.getMinutes(),
     date.getSeconds(),
-    date.getMilliseconds()
+    date.getMilliseconds(),
   );
 
   return (utcThis - utcOther) / 86400000;

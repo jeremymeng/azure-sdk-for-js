@@ -9,11 +9,16 @@
 import {
   OperationParameter,
   OperationURLParameter,
-  OperationQueryParameter
+  OperationQueryParameter,
 } from "@azure/core-client";
 import {
   CheckNameAvailabilityRequest as CheckNameAvailabilityRequestMapper,
-  ConfidentialLedger as ConfidentialLedgerMapper
+  ConfidentialLedger as ConfidentialLedgerMapper,
+  ConfidentialLedgerBackup as ConfidentialLedgerBackupMapper,
+  ConfidentialLedgerRestore as ConfidentialLedgerRestoreMapper,
+  ManagedCCF as ManagedCCFMapper,
+  ManagedCCFBackup as ManagedCCFBackupMapper,
+  ManagedCCFRestore as ManagedCCFRestoreMapper,
 } from "../models/mappers";
 
 export const accept: OperationParameter = {
@@ -23,9 +28,9 @@ export const accept: OperationParameter = {
     isConstant: true,
     serializedName: "Accept",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const $host: OperationURLParameter = {
@@ -34,22 +39,22 @@ export const $host: OperationURLParameter = {
     serializedName: "$host",
     required: true,
     type: {
-      name: "String"
-    }
+      name: "String",
+    },
   },
-  skipEncoding: true
+  skipEncoding: true,
 };
 
 export const apiVersion: OperationQueryParameter = {
   parameterPath: "apiVersion",
   mapper: {
-    defaultValue: "2022-05-13",
+    defaultValue: "2023-06-28-preview",
     isConstant: true,
     serializedName: "api-version",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const nextLink: OperationURLParameter = {
@@ -58,10 +63,10 @@ export const nextLink: OperationURLParameter = {
     serializedName: "nextLink",
     required: true,
     type: {
-      name: "String"
-    }
+      name: "String",
+    },
   },
-  skipEncoding: true
+  skipEncoding: true,
 };
 
 export const contentType: OperationParameter = {
@@ -71,25 +76,28 @@ export const contentType: OperationParameter = {
     isConstant: true,
     serializedName: "Content-Type",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const nameAvailabilityRequest: OperationParameter = {
   parameterPath: "nameAvailabilityRequest",
-  mapper: CheckNameAvailabilityRequestMapper
+  mapper: CheckNameAvailabilityRequestMapper,
 };
 
 export const subscriptionId: OperationURLParameter = {
   parameterPath: "subscriptionId",
   mapper: {
+    constraints: {
+      MinLength: 1,
+    },
     serializedName: "subscriptionId",
     required: true,
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const resourceGroupName: OperationURLParameter = {
@@ -97,33 +105,33 @@ export const resourceGroupName: OperationURLParameter = {
   mapper: {
     constraints: {
       MaxLength: 90,
-      MinLength: 3
+      MinLength: 1,
     },
     serializedName: "resourceGroupName",
     required: true,
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const ledgerName: OperationURLParameter = {
   parameterPath: "ledgerName",
   mapper: {
     constraints: {
-      Pattern: new RegExp("^[a-zA-Z0-9]")
+      Pattern: new RegExp("^[a-zA-Z0-9]"),
     },
     serializedName: "ledgerName",
     required: true,
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const confidentialLedger: OperationParameter = {
   parameterPath: "confidentialLedger",
-  mapper: ConfidentialLedgerMapper
+  mapper: ConfidentialLedgerMapper,
 };
 
 export const filter: OperationQueryParameter = {
@@ -131,7 +139,46 @@ export const filter: OperationQueryParameter = {
   mapper: {
     serializedName: "$filter",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
+};
+
+export const confidentialLedger1: OperationParameter = {
+  parameterPath: "confidentialLedger",
+  mapper: ConfidentialLedgerBackupMapper,
+};
+
+export const confidentialLedger2: OperationParameter = {
+  parameterPath: "confidentialLedger",
+  mapper: ConfidentialLedgerRestoreMapper,
+};
+
+export const appName: OperationURLParameter = {
+  parameterPath: "appName",
+  mapper: {
+    constraints: {
+      Pattern: new RegExp("^[a-zA-Z0-9]"),
+    },
+    serializedName: "appName",
+    required: true,
+    type: {
+      name: "String",
+    },
+  },
+};
+
+export const managedCCF: OperationParameter = {
+  parameterPath: "managedCCF",
+  mapper: ManagedCCFMapper,
+};
+
+export const managedCCF1: OperationParameter = {
+  parameterPath: "managedCCF",
+  mapper: ManagedCCFBackupMapper,
+};
+
+export const managedCCF2: OperationParameter = {
+  parameterPath: "managedCCF",
+  mapper: ManagedCCFRestoreMapper,
 };

@@ -14,8 +14,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ArtifactsClient } from "../artifactsClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   DatasetResource,
   DatasetGetDatasetsByWorkspaceNextOptionalParams,
@@ -28,7 +32,7 @@ import {
   DatasetDeleteDatasetOptionalParams,
   ArtifactRenameRequest,
   DatasetRenameDatasetOptionalParams,
-  DatasetGetDatasetsByWorkspaceNextResponse
+  DatasetGetDatasetsByWorkspaceNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -49,7 +53,7 @@ export class DatasetOperationsImpl implements DatasetOperations {
    * @param options The options parameters.
    */
   public listDatasetsByWorkspace(
-    options?: DatasetGetDatasetsByWorkspaceOptionalParams
+    options?: DatasetGetDatasetsByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<DatasetResource> {
     const iter = this.getDatasetsByWorkspacePagingAll(options);
     return {
@@ -64,13 +68,13 @@ export class DatasetOperationsImpl implements DatasetOperations {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.getDatasetsByWorkspacePagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *getDatasetsByWorkspacePagingPage(
     options?: DatasetGetDatasetsByWorkspaceOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<DatasetResource[]> {
     let result: DatasetGetDatasetsByWorkspaceResponse;
     let continuationToken = settings?.continuationToken;
@@ -84,7 +88,7 @@ export class DatasetOperationsImpl implements DatasetOperations {
     while (continuationToken) {
       result = await this._getDatasetsByWorkspaceNext(
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -94,7 +98,7 @@ export class DatasetOperationsImpl implements DatasetOperations {
   }
 
   private async *getDatasetsByWorkspacePagingAll(
-    options?: DatasetGetDatasetsByWorkspaceOptionalParams
+    options?: DatasetGetDatasetsByWorkspaceOptionalParams,
   ): AsyncIterableIterator<DatasetResource> {
     for await (const page of this.getDatasetsByWorkspacePagingPage(options)) {
       yield* page;
@@ -106,7 +110,7 @@ export class DatasetOperationsImpl implements DatasetOperations {
    * @param options The options parameters.
    */
   private async _getDatasetsByWorkspace(
-    options?: DatasetGetDatasetsByWorkspaceOptionalParams
+    options?: DatasetGetDatasetsByWorkspaceOptionalParams,
   ): Promise<DatasetGetDatasetsByWorkspaceResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient._getDatasetsByWorkspace",
@@ -114,9 +118,9 @@ export class DatasetOperationsImpl implements DatasetOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { options },
-          getDatasetsByWorkspaceOperationSpec
+          getDatasetsByWorkspaceOperationSpec,
         ) as Promise<DatasetGetDatasetsByWorkspaceResponse>;
-      }
+      },
     );
   }
 
@@ -129,38 +133,38 @@ export class DatasetOperationsImpl implements DatasetOperations {
   async beginCreateOrUpdateDataset(
     datasetName: string,
     dataset: DatasetResource,
-    options?: DatasetCreateOrUpdateDatasetOptionalParams
+    options?: DatasetCreateOrUpdateDatasetOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DatasetCreateOrUpdateDatasetResponse>,
+    SimplePollerLike<
+      OperationState<DatasetCreateOrUpdateDatasetResponse>,
       DatasetCreateOrUpdateDatasetResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<DatasetCreateOrUpdateDatasetResponse> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginCreateOrUpdateDataset",
         options ?? {},
         async () => {
-          return this.client.sendOperationRequest(args, spec) as Promise<
-            DatasetCreateOrUpdateDatasetResponse
-          >;
-        }
+          return this.client.sendOperationRequest(
+            args,
+            spec,
+          ) as Promise<DatasetCreateOrUpdateDatasetResponse>;
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -169,8 +173,8 @@ export class DatasetOperationsImpl implements DatasetOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -178,19 +182,22 @@ export class DatasetOperationsImpl implements DatasetOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { datasetName, dataset, options },
-      createOrUpdateDatasetOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { datasetName, dataset, options },
+      spec: createOrUpdateDatasetOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      DatasetCreateOrUpdateDatasetResponse,
+      OperationState<DatasetCreateOrUpdateDatasetResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -205,12 +212,12 @@ export class DatasetOperationsImpl implements DatasetOperations {
   async beginCreateOrUpdateDatasetAndWait(
     datasetName: string,
     dataset: DatasetResource,
-    options?: DatasetCreateOrUpdateDatasetOptionalParams
+    options?: DatasetCreateOrUpdateDatasetOptionalParams,
   ): Promise<DatasetCreateOrUpdateDatasetResponse> {
     const poller = await this.beginCreateOrUpdateDataset(
       datasetName,
       dataset,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -222,7 +229,7 @@ export class DatasetOperationsImpl implements DatasetOperations {
    */
   async getDataset(
     datasetName: string,
-    options?: DatasetGetDatasetOptionalParams
+    options?: DatasetGetDatasetOptionalParams,
   ): Promise<DatasetGetDatasetResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient.getDataset",
@@ -230,9 +237,9 @@ export class DatasetOperationsImpl implements DatasetOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { datasetName, options },
-          getDatasetOperationSpec
+          getDatasetOperationSpec,
         ) as Promise<DatasetGetDatasetResponse>;
-      }
+      },
     );
   }
 
@@ -243,31 +250,30 @@ export class DatasetOperationsImpl implements DatasetOperations {
    */
   async beginDeleteDataset(
     datasetName: string,
-    options?: DatasetDeleteDatasetOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: DatasetDeleteDatasetOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginDeleteDataset",
         options ?? {},
         async () => {
           return this.client.sendOperationRequest(args, spec) as Promise<void>;
-        }
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -276,8 +282,8 @@ export class DatasetOperationsImpl implements DatasetOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -285,19 +291,19 @@ export class DatasetOperationsImpl implements DatasetOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { datasetName, options },
-      deleteDatasetOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { datasetName, options },
+      spec: deleteDatasetOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -310,7 +316,7 @@ export class DatasetOperationsImpl implements DatasetOperations {
    */
   async beginDeleteDatasetAndWait(
     datasetName: string,
-    options?: DatasetDeleteDatasetOptionalParams
+    options?: DatasetDeleteDatasetOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDeleteDataset(datasetName, options);
     return poller.pollUntilDone();
@@ -325,31 +331,30 @@ export class DatasetOperationsImpl implements DatasetOperations {
   async beginRenameDataset(
     datasetName: string,
     request: ArtifactRenameRequest,
-    options?: DatasetRenameDatasetOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: DatasetRenameDatasetOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginRenameDataset",
         options ?? {},
         async () => {
           return this.client.sendOperationRequest(args, spec) as Promise<void>;
-        }
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -358,8 +363,8 @@ export class DatasetOperationsImpl implements DatasetOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -367,19 +372,19 @@ export class DatasetOperationsImpl implements DatasetOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { datasetName, request, options },
-      renameDatasetOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { datasetName, request, options },
+      spec: renameDatasetOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -394,7 +399,7 @@ export class DatasetOperationsImpl implements DatasetOperations {
   async beginRenameDatasetAndWait(
     datasetName: string,
     request: ArtifactRenameRequest,
-    options?: DatasetRenameDatasetOptionalParams
+    options?: DatasetRenameDatasetOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRenameDataset(datasetName, request, options);
     return poller.pollUntilDone();
@@ -407,7 +412,7 @@ export class DatasetOperationsImpl implements DatasetOperations {
    */
   private async _getDatasetsByWorkspaceNext(
     nextLink: string,
-    options?: DatasetGetDatasetsByWorkspaceNextOptionalParams
+    options?: DatasetGetDatasetsByWorkspaceNextOptionalParams,
   ): Promise<DatasetGetDatasetsByWorkspaceNextResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient._getDatasetsByWorkspaceNext",
@@ -415,9 +420,9 @@ export class DatasetOperationsImpl implements DatasetOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { nextLink, options },
-          getDatasetsByWorkspaceNextOperationSpec
+          getDatasetsByWorkspaceNextOperationSpec,
         ) as Promise<DatasetGetDatasetsByWorkspaceNextResponse>;
-      }
+      },
     );
   }
 }
@@ -429,64 +434,64 @@ const getDatasetsByWorkspaceOperationSpec: coreClient.OperationSpec = {
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DatasetListResponse
+      bodyMapper: Mappers.DatasetListResponse,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateDatasetOperationSpec: coreClient.OperationSpec = {
   path: "/datasets/{datasetName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.DatasetResource
+      bodyMapper: Mappers.DatasetResource,
     },
     201: {
-      bodyMapper: Mappers.DatasetResource
+      bodyMapper: Mappers.DatasetResource,
     },
     202: {
-      bodyMapper: Mappers.DatasetResource
+      bodyMapper: Mappers.DatasetResource,
     },
     204: {
-      bodyMapper: Mappers.DatasetResource
+      bodyMapper: Mappers.DatasetResource,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.dataset,
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.datasetName],
   headerParameters: [
     Parameters.accept,
     Parameters.contentType,
-    Parameters.ifMatch
+    Parameters.ifMatch,
   ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getDatasetOperationSpec: coreClient.OperationSpec = {
   path: "/datasets/{datasetName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DatasetResource
+      bodyMapper: Mappers.DatasetResource,
     },
     304: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.datasetName],
   headerParameters: [Parameters.accept, Parameters.ifNoneMatch],
-  serializer
+  serializer,
 };
 const deleteDatasetOperationSpec: coreClient.OperationSpec = {
   path: "/datasets/{datasetName}",
@@ -497,13 +502,13 @@ const deleteDatasetOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.datasetName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const renameDatasetOperationSpec: coreClient.OperationSpec = {
   path: "/datasets/{datasetName}/rename",
@@ -514,28 +519,28 @@ const renameDatasetOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.request,
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.datasetName],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getDatasetsByWorkspaceNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DatasetListResponse
+      bodyMapper: Mappers.DatasetListResponse,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -10,9 +10,12 @@
 // Licensed under the MIT License.
 import {
   TenantActivityLogsListOptionalParams,
-  MonitorClient
+  MonitorClient,
 } from "@azure/arm-monitor";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Gets the Activity Logs for the Tenant.<br>Everything that is applicable to the API to get the Activity Logs for the subscription is applicable to this API (the parameters, $filter, etc.).<br>One thing to point out here is that this API does *not* retrieve the logs at the individual subscription of the tenant but only surfaces the logs that were generated at the tenant level.
@@ -21,20 +24,17 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2015-04-01/examples/GetTenantActivityLogsFiltered.json
  */
 async function getTenantActivityLogsWithFilter() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
   const filter =
     "eventTimestamp ge '2015-01-21T20:00:00Z' and eventTimestamp le '2015-01-23T20:00:00Z' and resourceGroupName eq 'MSSupportGroup'";
   const options: TenantActivityLogsListOptionalParams = { filter };
   const credential = new DefaultAzureCredential();
-  const client = new MonitorClient(credential, subscriptionId);
+  const client = new MonitorClient(credential);
   const resArray = new Array();
   for await (let item of client.tenantActivityLogs.list(options)) {
     resArray.push(item);
   }
   console.log(resArray);
 }
-
-getTenantActivityLogsWithFilter().catch(console.error);
 
 /**
  * This sample demonstrates how to Gets the Activity Logs for the Tenant.<br>Everything that is applicable to the API to get the Activity Logs for the subscription is applicable to this API (the parameters, $filter, etc.).<br>One thing to point out here is that this API does *not* retrieve the logs at the individual subscription of the tenant but only surfaces the logs that were generated at the tenant level.
@@ -43,22 +43,19 @@ getTenantActivityLogsWithFilter().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2015-04-01/examples/GetTenantActivityLogsFilteredAndSelected.json
  */
 async function getTenantActivityLogsWithFilterAndSelect() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
   const filter =
     "eventTimestamp ge '2015-01-21T20:00:00Z' and eventTimestamp le '2015-01-23T20:00:00Z' and resourceGroupName eq 'MSSupportGroup'";
   const select =
     "eventName,id,resourceGroupName,resourceProviderName,operationName,status,eventTimestamp,correlationId,submissionTimestamp,level";
   const options: TenantActivityLogsListOptionalParams = { filter, select };
   const credential = new DefaultAzureCredential();
-  const client = new MonitorClient(credential, subscriptionId);
+  const client = new MonitorClient(credential);
   const resArray = new Array();
   for await (let item of client.tenantActivityLogs.list(options)) {
     resArray.push(item);
   }
   console.log(resArray);
 }
-
-getTenantActivityLogsWithFilterAndSelect().catch(console.error);
 
 /**
  * This sample demonstrates how to Gets the Activity Logs for the Tenant.<br>Everything that is applicable to the API to get the Activity Logs for the subscription is applicable to this API (the parameters, $filter, etc.).<br>One thing to point out here is that this API does *not* retrieve the logs at the individual subscription of the tenant but only surfaces the logs that were generated at the tenant level.
@@ -67,20 +64,17 @@ getTenantActivityLogsWithFilterAndSelect().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2015-04-01/examples/GetTenantActivityLogsSelected.json
  */
 async function getTenantActivityLogsWithSelect() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
   const select =
     "eventName,id,resourceGroupName,resourceProviderName,operationName,status,eventTimestamp,correlationId,submissionTimestamp,level";
   const options: TenantActivityLogsListOptionalParams = { select };
   const credential = new DefaultAzureCredential();
-  const client = new MonitorClient(credential, subscriptionId);
+  const client = new MonitorClient(credential);
   const resArray = new Array();
   for await (let item of client.tenantActivityLogs.list(options)) {
     resArray.push(item);
   }
   console.log(resArray);
 }
-
-getTenantActivityLogsWithSelect().catch(console.error);
 
 /**
  * This sample demonstrates how to Gets the Activity Logs for the Tenant.<br>Everything that is applicable to the API to get the Activity Logs for the subscription is applicable to this API (the parameters, $filter, etc.).<br>One thing to point out here is that this API does *not* retrieve the logs at the individual subscription of the tenant but only surfaces the logs that were generated at the tenant level.
@@ -89,9 +83,8 @@ getTenantActivityLogsWithSelect().catch(console.error);
  * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2015-04-01/examples/GetTenantActivityLogsNoParams.json
  */
 async function getTenantActivityLogsWithoutFilterOrSelect() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
   const credential = new DefaultAzureCredential();
-  const client = new MonitorClient(credential, subscriptionId);
+  const client = new MonitorClient(credential);
   const resArray = new Array();
   for await (let item of client.tenantActivityLogs.list()) {
     resArray.push(item);
@@ -99,4 +92,11 @@ async function getTenantActivityLogsWithoutFilterOrSelect() {
   console.log(resArray);
 }
 
-getTenantActivityLogsWithoutFilterOrSelect().catch(console.error);
+async function main() {
+  getTenantActivityLogsWithFilter();
+  getTenantActivityLogsWithFilterAndSelect();
+  getTenantActivityLogsWithSelect();
+  getTenantActivityLogsWithoutFilterOrSelect();
+}
+
+main().catch(console.error);

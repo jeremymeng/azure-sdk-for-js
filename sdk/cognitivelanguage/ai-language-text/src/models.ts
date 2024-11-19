@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   AbstractiveSummary,
   AssessmentSentiment,
   ClassificationCategory,
@@ -9,22 +9,17 @@ import {
   CustomMultiLabelClassificationAction,
   CustomSingleLabelClassificationAction,
   DetectedLanguage,
-  DocumentDetectedLanguage,
   DocumentSentimentLabel,
   DocumentWarning,
-  DynamicClassificationAction,
   Entity,
   EntityDataSource,
   EntityLinkingAction,
   EntityRecognitionAction,
-  EntityWithResolution,
   ExtractiveSummarizationAction,
   HealthcareAction,
   HealthcareAssertion,
   HealthcareEntityCategory,
   KeyPhraseExtractionAction,
-  KnownErrorCode,
-  KnownInnerErrorCode,
   LanguageDetectionAction,
   LinkedEntity,
   PiiEntityRecognitionAction,
@@ -39,9 +34,10 @@ import {
   TextDocumentStatistics,
   TokenSentimentLabel,
 } from "./generated";
-import { CommonClientOptions, OperationOptions } from "@azure/core-client";
-import { OperationState, SimplePollerLike } from "@azure/core-lro";
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { KnownErrorCode, KnownInnerErrorCode } from "./generated";
+import type { CommonClientOptions, OperationOptions } from "@azure/core-client";
+import type { OperationState, SimplePollerLike } from "@azure/core-lro";
+import type { PagedAsyncIterableIterator } from "@azure/core-paging";
 
 /**
  * Configuration options for {@link TextAnalysisClient}.
@@ -84,10 +80,6 @@ export interface BeginAnalyzeBatchOptions extends TextAnalysisOperationOptions {
    * The operation's display name.
    */
   displayName?: string;
-  /**
-   * Default language code to use for records requesting automatic language detection
-   */
-  defaultLanguage?: string;
 }
 
 /**
@@ -110,7 +102,6 @@ export const AnalyzeActionNames = {
   PiiEntityRecognition: "PiiEntityRecognition",
   LanguageDetection: "LanguageDetection",
   SentimentAnalysis: "SentimentAnalysis",
-  DynamicClassification: "DynamicClassification",
 } as const;
 
 /**
@@ -144,7 +135,6 @@ export type AnalyzeActionParameters<ActionName extends AnalyzeActionName> = {
   PiiEntityRecognition: PiiEntityRecognitionAction;
   KeyPhraseExtraction: KeyPhraseExtractionAction;
   SentimentAnalysis: SentimentAnalysisAction;
-  DynamicClassification: DynamicClassificationAction;
   LanguageDetection: LanguageDetectionAction;
 }[ActionName];
 
@@ -157,22 +147,13 @@ export type AnalyzeResult<ActionName extends AnalyzeActionName> = {
   PiiEntityRecognition: PiiEntityRecognitionResult[];
   KeyPhraseExtraction: KeyPhraseExtractionResult[];
   SentimentAnalysis: SentimentAnalysisResult[];
-  DynamicClassification: DynamicClassificationResult[];
   LanguageDetection: LanguageDetectionResult[];
 }[ActionName];
 
-/**
- * Known values of the {@link HealthcareAction.fhirVersion} parameter.
- */
-export enum KnownFhirVersion {
-  /** 4.0.1 */
-  "4.0.1" = "4.0.1",
-}
-
 /** Options for an Abstractive Summarization action. */
 export interface AbstractiveSummarizationAction {
-  /** The max number of sentences to be part of the summary. */
-  maxSentenceCount?: number;
+  /** The approximate number of sentences to be part of the summary. */
+  sentenceCount?: number;
   /**
    * Specifies the measurement unit used to calculate the offset and length properties. For a list of possible values, see {@link KnownStringIndexType}.
    *
@@ -261,7 +242,7 @@ export interface EntityRecognitionSuccessResult extends TextAnalysisSuccessResul
   /**
    * The collection of entities identified in the input document.
    */
-  readonly entities: EntityWithResolution[];
+  readonly entities: Entity[];
 }
 
 /**
@@ -475,29 +456,6 @@ export interface Opinion {
 }
 
 /**
- * The result of a language detection action on a single document.
- */
-export type DynamicClassificationResult =
-  | DynamicClassificationSuccessResult
-  | DynamicClassificationErrorResult;
-
-/**
- * The result of a language detection action on a single document,
- * containing a prediction of what language the document is written in.
- */
-export interface DynamicClassificationSuccessResult extends TextAnalysisSuccessResult {
-  /**
-   * The collection of classifications in the input document.
-   */
-  readonly classifications: ClassificationCategory[];
-}
-
-/**
- * An error result from a language detection action on a single document.
- */
-export type DynamicClassificationErrorResult = TextAnalysisErrorResult;
-
-/**
  * A healthcare entity represented as a node in a directed graph where the edges are
  * a particular type of relationship between the source and target nodes.
  */
@@ -598,11 +556,6 @@ export interface HealthcareSuccessResult extends TextAnalysisSuccessResult {
    * Relations between healthcare entities.
    */
   readonly entityRelations: HealthcareEntityRelation[];
-  /**
-   * JSON bundle containing a FHIR compatible object for consumption in other
-   * Healthcare tools. For additional information see {@link https://www.hl7.org/fhir/overview.html}.
-   */
-  readonly fhirBundle?: Record<string, any>;
 }
 
 /**
@@ -908,15 +861,6 @@ export interface CustomActionMetadata {
 }
 
 /**
- * Document results with potentially automatically detected language.
- */
-export type WithDetectedLanguage<T> = T &
-  DocumentDetectedLanguage & {
-    /** Indicates whether the default language hint was used */
-    isLanguageDefaulted?: boolean;
-  };
-
-/**
  * The state of a succeeded batched action.
  */
 export interface BatchActionSuccessResult<T, Kind extends AnalyzeBatchActionName>
@@ -924,7 +868,7 @@ export interface BatchActionSuccessResult<T, Kind extends AnalyzeBatchActionName
   /**
    * The list of document results.
    */
-  readonly results: WithDetectedLanguage<T>[];
+  readonly results: T[];
   /**
    * When this action was completed by the service.
    */

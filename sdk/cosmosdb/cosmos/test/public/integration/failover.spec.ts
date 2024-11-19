@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { CosmosClient, PluginOn, CosmosClientOptions, PluginConfig } from "../../../src";
+// Licensed under the MIT License.
+/* eslint-disable no-unused-expressions */
+import { expect } from "chai";
+import type { CosmosClientOptions, PluginConfig } from "../../../src";
+import { CosmosClient, PluginOn } from "../../../src";
 import { masterKey } from "../common/_fakeTestSecrets";
 import assert from "assert";
+import { getEmptyCosmosDiagnostics } from "../../../src/utils/diagnostics";
 
 const endpoint = "https://failovertest.documents.azure.com/";
 
@@ -13,6 +17,7 @@ const databaseAccountResponse = () => ({
     "content-location": "https://failovertest.documents.azure.com/",
     "content-type": "application/json",
   },
+  diagnostics: getEmptyCosmosDiagnostics(),
   result: {
     _self: "",
     id: "failovertest",
@@ -65,6 +70,7 @@ const databaseAccountResponse = () => ({
 
 const collectionResponse = {
   headers: {},
+  diagnostics: getEmptyCosmosDiagnostics(),
   result: {
     id: "RegionalFailover6198",
     indexingPolicy: {
@@ -108,6 +114,7 @@ const collectionResponse = {
 
 const readResponse = {
   headers: {},
+  diagnostics: getEmptyCosmosDiagnostics(),
   result: {
     id: "0",
     _rid: "kdY4AIn8g54BAAAAAAAAAA==",
@@ -121,6 +128,7 @@ const readResponse = {
 
 const DatabaseAccountNotFoundResponse = {
   code: 403,
+  diagnostics: getEmptyCosmosDiagnostics(),
   substatus: 1008,
   headers: {},
 };
@@ -128,6 +136,7 @@ const DatabaseAccountNotFoundResponse = {
 const WriteForbiddenResponse = {
   code: 403,
   substatus: 3,
+  diagnostics: getEmptyCosmosDiagnostics(),
   headers: {},
 };
 
@@ -149,7 +158,8 @@ describe("Region Failover", () => {
     const plugins: PluginConfig[] = [
       {
         on: PluginOn.request,
-        plugin: async (context) => {
+        plugin: async (context, diagNode) => {
+          expect(diagNode, "DiagnosticsNode should not be undefined or null").to.exist;
           const response = responses[requestIndex];
           lastEndpointCalled = context.endpoint;
           requestIndex++;
@@ -170,7 +180,7 @@ describe("Region Failover", () => {
     await containerRef.item("any", undefined).read();
     assert.strictEqual(
       lastEndpointCalled,
-      "https://failovertest-australiaeast.documents.azure.com:443/"
+      "https://failovertest-australiaeast.documents.azure.com:443/",
     );
     client.dispose();
   });
@@ -190,7 +200,8 @@ describe("Region Failover", () => {
     const plugins: PluginConfig[] = [
       {
         on: PluginOn.request,
-        plugin: async (context) => {
+        plugin: async (context, diagNode) => {
+          expect(diagNode, "DiagnosticsNode should not be undefined or null").to.exist;
           const response = responses[requestIndex];
           lastEndpointCalled = context.endpoint;
           requestIndex++;
@@ -211,7 +222,7 @@ describe("Region Failover", () => {
     await containerRef.item("any", undefined).read();
     assert.strictEqual(
       lastEndpointCalled,
-      "https://failovertest-australiaeast.documents.azure.com:443/"
+      "https://failovertest-australiaeast.documents.azure.com:443/",
     );
     client.dispose();
   });
@@ -233,7 +244,8 @@ describe("Region Failover", () => {
     const plugins: PluginConfig[] = [
       {
         on: PluginOn.request,
-        plugin: async (context) => {
+        plugin: async (context, diagNode) => {
+          expect(diagNode, "DiagnosticsNode should not be undefined or null").to.exist;
           const response = responses[requestIndex];
           lastEndpointCalled = context.endpoint;
           requestIndex++;

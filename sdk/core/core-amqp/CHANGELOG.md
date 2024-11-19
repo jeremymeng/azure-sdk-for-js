@@ -1,6 +1,6 @@
 # Release History
 
-## 3.2.2 (Unreleased)
+## 4.3.4 (Unreleased)
 
 ### Features Added
 
@@ -9,6 +9,93 @@
 ### Bugs Fixed
 
 ### Other Changes
+
+## 4.3.3 (2024-11-07)
+
+### Other Changes
+
+- Move the constant for the geographic replication feature to Event Hubs.
+- Remove request from `RequestResponseLink` logging.
+
+## 4.3.2 (2024-08-01)
+
+- Adding React-Native support at top level [PR #30521](https://github.com/Azure/azure-sdk-for-js/pull/30521)
+
+## 4.3.1 (2024-07-18)
+
+### Bugs Fixed
+
+- Address React-Native regression after ESM migration [Issue #30065](https://github.com/Azure/azure-sdk-for-js/issues/30065)
+
+## 4.4.0-beta.1 (2024-06-06)
+
+### Features Added
+
+- Exports a constant for the geographic replication feature.
+
+## 4.3.0 (2024-05-20)
+
+### Breaking Changes
+- Moved to ESM core with builds for ESM, CommonJS, React-Native and Browser.
+- Moved unit tests from mocha to vitest.
+
+### Other Changes
+
+- Adds support for connecting to the development emulator. The connection string for the development emulator should have the `";UseDevelopmentEmulator=true"` slug.
+
+## 4.2.2 (2024-05-02)
+
+### Bugs Fixed
+
+- Handle translation of ErrorEvent properly [PR #29297](https://github.com/Azure/azure-sdk-for-js/pull/29297)
+
+### Other Changes
+
+- Add support for the `deleteMessages` operation in @azure/service-bus.
+
+## 4.2.1 (2024-03-04)
+
+### Other Changes
+
+- Update the message of the error thrown from `retry` to include all errors occurred between retries.
+
+## 4.2.0 (2024-02-01)
+
+### Bugs Fixed
+
+- Correct timeToLive calculation to use absolute expiry time.
+
+### Other Changes
+
+- Upgrade dependency `@azure/abort-controller` version to `^2.0.0`.
+
+## 4.1.0 (2023-11-07)
+
+### Other Changes
+
+- Add a retryable client error that is thrown when the sender link is not ready.
+
+## 4.0.0 (2023-10-10)
+
+### Features Added
+
+- Changed `TokenProvider` to use native crypto libraries.  This changes the signature from `getToken` from being sync to async.
+
+### Breaking Changes
+
+- The `TokenProvider` and the `getToken` method has been changed to be async as it uses the underlying native crypto which is async.
+
+## 3.3.0 (2023-04-06)
+
+### Other Changes
+
+- upgrade dependency `rhea-promise` version to `^3.0.0`.
+
+## 3.2.2 (2023-02-02)
+
+### Other Changes
+
+- Remove unused dependency `url` [PR #24380](https://github.com/Azure/azure-sdk-for-js/pull/24380).
 
 ## 3.2.1 (2023-01-05)
 

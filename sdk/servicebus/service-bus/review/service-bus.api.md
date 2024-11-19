@@ -4,30 +4,29 @@
 
 ```ts
 
-/// <reference types="node" />
-
-import { AbortSignalLike } from '@azure/abort-controller';
+import type { AbortSignalLike } from '@azure/abort-controller';
 import { AmqpAnnotatedMessage } from '@azure/core-amqp';
-import { CommonClientOptions } from '@azure/core-client';
+import { Buffer as Buffer_2 } from 'buffer';
+import type { CommonClientOptions } from '@azure/core-client';
 import { delay } from '@azure/core-amqp';
 import { Delivery } from 'rhea-promise';
-import { HttpMethods } from '@azure/core-rest-pipeline';
+import type { HttpMethods } from '@azure/core-rest-pipeline';
 import Long from 'long';
 import { MessagingError } from '@azure/core-amqp';
-import { NamedKeyCredential } from '@azure/core-auth';
+import type { NamedKeyCredential } from '@azure/core-auth';
 import { OperationOptions } from '@azure/core-client';
-import { OperationTracingOptions } from '@azure/core-tracing';
-import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PageSettings } from '@azure/core-paging';
-import { ProxySettings } from '@azure/core-rest-pipeline';
+import type { OperationTracingOptions } from '@azure/core-tracing';
+import type { PagedAsyncIterableIterator } from '@azure/core-paging';
+import type { PageSettings } from '@azure/core-paging';
+import type { ProxySettings } from '@azure/core-rest-pipeline';
 import { RetryMode } from '@azure/core-amqp';
 import { RetryOptions } from '@azure/core-amqp';
-import { SASCredential } from '@azure/core-auth';
+import type { SASCredential } from '@azure/core-auth';
 import { ServiceClient } from '@azure/core-client';
 import { TokenCredential } from '@azure/core-auth';
 import { TokenType } from '@azure/core-amqp';
-import { TracingContext } from '@azure/core-tracing';
-import { UserAgentPolicyOptions } from '@azure/core-rest-pipeline';
+import type { TracingContext } from '@azure/core-tracing';
+import type { UserAgentPolicyOptions } from '@azure/core-rest-pipeline';
 import { WebSocketImpl } from 'rhea-promise';
 import { WebSocketOptions } from '@azure/core-amqp';
 
@@ -131,6 +130,12 @@ export interface DeadLetterOptions {
 
 export { delay }
 
+// @public
+export interface DeleteMessagesOptions extends OperationOptionsBase {
+    beforeEnqueueTime?: Date;
+    maxMessageCount: number;
+}
+
 export { Delivery }
 
 // @public
@@ -206,8 +211,6 @@ export function parseServiceBusConnectionString(connectionString: string): Servi
 // @public
 export interface PeekMessagesOptions extends OperationOptionsBase {
     fromSequenceNumber?: Long;
-    // @beta
-    omitMessageBody?: boolean;
 }
 
 // @public
@@ -217,6 +220,11 @@ export interface ProcessErrorArgs {
     errorSource: "abandon" | "complete" | "processMessageCallback" | "receive" | "renewLock";
     fullyQualifiedNamespace: string;
     identifier: string;
+}
+
+// @public
+export interface PurgeMessagesOptions extends OperationOptionsBase {
+    beforeEnqueueTime?: Date;
 }
 
 // @public
@@ -431,8 +439,8 @@ export interface ServiceBusMessage {
     };
     body: any;
     contentType?: string;
-    correlationId?: string | number | Buffer;
-    messageId?: string | number | Buffer;
+    correlationId?: string | number | Buffer_2;
+    messageId?: string | number | Buffer_2;
     partitionKey?: string;
     replyTo?: string;
     replyToSessionId?: string;
@@ -484,11 +492,13 @@ export interface ServiceBusReceiver {
     deferMessage(message: ServiceBusReceivedMessage, propertiesToModify?: {
         [key: string]: number | boolean | string | Date | null;
     }): Promise<void>;
+    deleteMessages(options: DeleteMessagesOptions): Promise<number>;
     entityPath: string;
     getMessageIterator(options?: GetMessageIteratorOptions): AsyncIterableIterator<ServiceBusReceivedMessage>;
     identifier: string;
     isClosed: boolean;
     peekMessages(maxMessageCount: number, options?: PeekMessagesOptions): Promise<ServiceBusReceivedMessage[]>;
+    purgeMessages(options?: PurgeMessagesOptions): Promise<number>;
     receiveDeferredMessages(sequenceNumbers: Long | Long[], options?: OperationOptionsBase): Promise<ServiceBusReceivedMessage[]>;
     receiveMessages(maxMessageCount: number, options?: ReceiveMessagesOptions): Promise<ServiceBusReceivedMessage[]>;
     receiveMode: "peekLock" | "receiveAndDelete";
@@ -503,6 +513,7 @@ export interface ServiceBusReceiverOptions {
     identifier?: string;
     maxAutoLockRenewalDurationInMs?: number;
     receiveMode?: "peekLock" | "receiveAndDelete";
+    skipConvertingDate?: boolean;
     skipParsingBodyAsJson?: boolean;
     subQueueType?: "deadLetter" | "transferDeadLetter";
 }
@@ -549,6 +560,7 @@ export interface ServiceBusSessionReceiverOptions extends OperationOptionsBase {
     identifier?: string;
     maxAutoLockRenewalDurationInMs?: number;
     receiveMode?: "peekLock" | "receiveAndDelete";
+    skipConvertingDate?: boolean;
     skipParsingBodyAsJson?: boolean;
 }
 

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { MessagingTestClient } from "./models";
-import { isLive } from "./../utils/isLive";
+import type { MessagingTestClient } from "./models.js";
+import { isLiveMode } from "@azure-tools/test-recorder";
 
 /**
  * Returns a mocked messaging client that can work in both live and playback modes.
@@ -10,9 +10,9 @@ import { isLive } from "./../utils/isLive";
  * @returns a client that can work in both live and playback modes
  */
 export function createMockedMessagingClient<MessageT>(
-  createLiveClient: () => MessagingTestClient<MessageT>
+  createLiveClient: () => MessagingTestClient<MessageT>,
 ): MessagingTestClient<MessageT> {
-  if (isLive) {
+  if (isLiveMode()) {
     return createLiveClient();
   }
   const messageBuffer: MessageT[] = [];

@@ -1,18 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
-  Container,
-  CosmosClient,
-  PatchOperationType,
-  RequestContext,
-  ResourceType,
-} from "../../../src";
+import type { Container, RequestContext } from "../../../src";
+import { CosmosClient, PatchOperationType, ResourceType } from "../../../src";
 import assert from "assert";
-import { Suite } from "mocha";
-import Sinon, { SinonSandbox, SinonSpy } from "sinon";
+import type { Suite } from "mocha";
+import type { SinonSandbox, SinonSpy } from "sinon";
+import Sinon from "sinon";
 import { getTestContainer } from "../../public/common/TestHelpers";
-import { AccessToken, TokenCredential } from "@azure/identity";
+import type { AccessToken, TokenCredential } from "@azure/identity";
 import nock from "nock";
 import { RequestHandler } from "../../../src/request/RequestHandler";
 import { masterKey } from "../../public/common/_fakeTestSecrets";
@@ -94,7 +90,7 @@ describe("Testing Credentials integration for Client", function (this: Suite) {
       client = new CosmosClient({
         endpoint: mockedEndpoint,
         aadCredentials: new MockCredential(
-          Promise.resolve({ token: aadToken, expiresOnTimestamp: 0 })
+          Promise.resolve({ token: aadToken, expiresOnTimestamp: 0 }),
         ),
       });
     });
@@ -112,8 +108,8 @@ describe("Testing Credentials integration for Client", function (this: Suite) {
         spy.calledWithMatch(
           Sinon.match(function (arg: RequestContext) {
             return !!arg?.pipeline;
-          })
-        )
+          }),
+        ),
       );
     });
     it("Test pipeline setup for items.read for aadCredentials", async function () {
@@ -126,8 +122,8 @@ describe("Testing Credentials integration for Client", function (this: Suite) {
         spy.calledWithMatch(
           Sinon.match(function (arg: RequestContext) {
             return !!arg?.pipeline;
-          })
-        )
+          }),
+        ),
       );
     });
     it("Test pipeline setup for items.patch", async function () {
@@ -140,8 +136,8 @@ describe("Testing Credentials integration for Client", function (this: Suite) {
         spy.calledWithMatch(
           Sinon.match(function (arg: RequestContext) {
             return !!arg?.pipeline;
-          })
-        )
+          }),
+        ),
       );
     });
     it("Test pipeline setup for items.replace", async function () {
@@ -155,8 +151,8 @@ describe("Testing Credentials integration for Client", function (this: Suite) {
         spy.calledWithMatch(
           Sinon.match(function (arg: RequestContext) {
             return !!arg?.pipeline;
-          })
-        )
+          }),
+        ),
       );
     });
     it("Test pipeline setup for items.upsert", async function () {
@@ -168,8 +164,8 @@ describe("Testing Credentials integration for Client", function (this: Suite) {
         spy.calledWithMatch(
           Sinon.match(function (arg: RequestContext) {
             return !!arg?.pipeline;
-          })
-        )
+          }),
+        ),
       );
     });
     it("Test pipeline setup for items.delete", async function () {
@@ -182,8 +178,8 @@ describe("Testing Credentials integration for Client", function (this: Suite) {
         spy.calledWithMatch(
           Sinon.match(function (arg: RequestContext) {
             return !!arg?.pipeline;
-          })
-        )
+          }),
+        ),
       );
     });
     it("Test pipeline setup for items.batch", async function () {
@@ -195,8 +191,8 @@ describe("Testing Credentials integration for Client", function (this: Suite) {
         spy.calledWithMatch(
           Sinon.match(function (arg: RequestContext) {
             return !!arg?.pipeline;
-          })
-        )
+          }),
+        ),
       );
     });
 
@@ -251,8 +247,8 @@ describe("Testing Credentials integration for Client", function (this: Suite) {
             const AUTH_PREFIX = `type%3Dmaster%26ver%3D1`;
             const authHeader: string = arg?.headers["authorization"]?.toString() || "";
             return authHeader.includes(AUTH_PREFIX);
-          })
-        )
+          }),
+        ),
       );
     });
   });

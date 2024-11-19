@@ -10,19 +10,25 @@
 // Licensed under the MIT License.
 import {
   DaprComponent,
-  ContainerAppsAPIClient
+  ContainerAppsAPIClient,
 } from "@azure/arm-appcontainers";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Creates or updates a Dapr Component in a connected environment.
  *
  * @summary Creates or updates a Dapr Component in a connected environment.
- * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2022-06-01-preview/examples/ConnectedEnvironmentsDaprComponents_CreateOrUpdate.json
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/ConnectedEnvironmentsDaprComponents_CreateOrUpdate.json
  */
 async function createOrUpdateDaprComponent() {
-  const subscriptionId = "8efdecc5-919e-44eb-b179-915dca89ebf9";
-  const resourceGroupName = "examplerg";
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] ||
+    "8efdecc5-919e-44eb-b179-915dca89ebf9";
+  const resourceGroupName =
+    process.env["APPCONTAINERS_RESOURCE_GROUP"] || "examplerg";
   const connectedEnvironmentName = "myenvironment";
   const componentName = "reddog";
   const daprComponentEnvelope: DaprComponent = {
@@ -33,21 +39,34 @@ async function createOrUpdateDaprComponent() {
       { name: "url", value: "<COSMOS-URL>" },
       { name: "database", value: "itemsDB" },
       { name: "collection", value: "items" },
-      { name: "masterkey", secretRef: "masterkey" }
+      { name: "masterkey", secretRef: "masterkey" },
     ],
     scopes: ["container-app-1", "container-app-2"],
     secrets: [{ name: "masterkey", value: "keyvalue" }],
-    version: "v1"
+    serviceComponentBind: [
+      {
+        name: "statestore",
+        metadata: { name: "daprcomponentBind", value: "redis-bind" },
+        serviceId:
+          "/subscriptions/9f7371f1-b593-4c3c-84e2-9167806ad358/resourceGroups/ca-syn2-group/providers/Microsoft.App/containerapps/cappredis",
+      },
+    ],
+    version: "v1",
   };
   const credential = new DefaultAzureCredential();
   const client = new ContainerAppsAPIClient(credential, subscriptionId);
-  const result = await client.connectedEnvironmentsDaprComponents.createOrUpdate(
-    resourceGroupName,
-    connectedEnvironmentName,
-    componentName,
-    daprComponentEnvelope
-  );
+  const result =
+    await client.connectedEnvironmentsDaprComponents.createOrUpdate(
+      resourceGroupName,
+      connectedEnvironmentName,
+      componentName,
+      daprComponentEnvelope,
+    );
   console.log(result);
 }
 
-createOrUpdateDaprComponent().catch(console.error);
+async function main() {
+  createOrUpdateDaprComponent();
+}
+
+main().catch(console.error);

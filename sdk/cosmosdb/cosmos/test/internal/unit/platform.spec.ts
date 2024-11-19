@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 import assert from "assert";
 import { Constants } from "../../../src/common/constants";
 import { getUserAgent } from "../../../src/common/platform";
@@ -28,7 +28,7 @@ describe("Version", function () {
     assert.equal(
       constantVersion,
       packageVersion,
-      "Package.json and Constants.SDKVersion don't match"
+      "Package.json and Constants.SDKVersion don't match",
     );
   });
 });

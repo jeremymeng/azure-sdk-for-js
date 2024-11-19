@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary authenticate using an account name and a static key
@@ -24,7 +24,7 @@ async function main() {
   // List containers
   const blobServiceClient = new BlobServiceClient(
     `https://${account}.blob.core.windows.net`,
-    sharedKeyCredential
+    sharedKeyCredential,
   );
 
   let i = 1;

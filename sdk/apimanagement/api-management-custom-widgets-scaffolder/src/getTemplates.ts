@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { ScaffoldTech } from "./scaffolding";
-import glob from "glob";
-import { join as pathJoin } from "path";
+import type { ScaffoldTech } from "./scaffolding.js";
+import { glob } from "glob";
+import { join as pathJoin } from "node:path";
+import { sourceDir } from "./sourceDir.js";
 
 export async function getTemplates(template: ScaffoldTech): Promise<string[]> {
   const sharedFiles = await getFiles(
-    pathJoin(__dirname, "templates", "_shared", "**", "**", "*.*")
+    pathJoin(sourceDir, "..", "templates", "_shared", "**", "**", "*.*"),
   );
   const templateFiles = await getFiles(
-    pathJoin(__dirname, "templates", template, "**", "**", "*.*")
+    pathJoin(sourceDir, "..", "templates", template, "**", "**", "*.*"),
   );
   return [...sharedFiles, ...templateFiles];
 }
@@ -20,12 +21,5 @@ async function getFiles(path: string): Promise<string[]> {
   // Glob pattern paths must use forward-slashes as path separators.
   // See https://github.com/isaacs/node-glob/blob/af57da21c7722bb6edb687ccd4ad3b99d3e7a333/changelog.md#80
   const normalizedPath = path.replace(/\\/g, "/");
-  return new Promise((resolve, reject) => {
-    glob(normalizedPath, { dot: true }, (error, matches) => {
-      if (error) {
-        reject(error);
-      }
-      resolve(matches);
-    });
-  });
+  return glob(normalizedPath, { dot: true });
 }

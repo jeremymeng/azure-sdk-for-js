@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ServiceResource,
   ServiceListOptionalParams,
@@ -16,7 +16,7 @@ import {
   ServiceCreateResponse,
   ServiceGetOptionalParams,
   ServiceGetResponse,
-  ServiceDeleteOptionalParams
+  ServiceDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -31,7 +31,7 @@ export interface Service {
   list(
     resourceGroupName: string,
     accountName: string,
-    options?: ServiceListOptionalParams
+    options?: ServiceListOptionalParams,
   ): PagedAsyncIterableIterator<ServiceResource>;
   /**
    * Creates a service.
@@ -46,9 +46,12 @@ export interface Service {
     accountName: string,
     serviceName: string,
     createUpdateParameters: ServiceResourceCreateUpdateParameters,
-    options?: ServiceCreateOptionalParams
+    options?: ServiceCreateOptionalParams,
   ): Promise<
-    PollerLike<PollOperationState<ServiceCreateResponse>, ServiceCreateResponse>
+    SimplePollerLike<
+      OperationState<ServiceCreateResponse>,
+      ServiceCreateResponse
+    >
   >;
   /**
    * Creates a service.
@@ -63,7 +66,7 @@ export interface Service {
     accountName: string,
     serviceName: string,
     createUpdateParameters: ServiceResourceCreateUpdateParameters,
-    options?: ServiceCreateOptionalParams
+    options?: ServiceCreateOptionalParams,
   ): Promise<ServiceCreateResponse>;
   /**
    * Gets the status of service.
@@ -76,7 +79,7 @@ export interface Service {
     resourceGroupName: string,
     accountName: string,
     serviceName: string,
-    options?: ServiceGetOptionalParams
+    options?: ServiceGetOptionalParams,
   ): Promise<ServiceGetResponse>;
   /**
    * Deletes service with the given serviceName.
@@ -89,8 +92,8 @@ export interface Service {
     resourceGroupName: string,
     accountName: string,
     serviceName: string,
-    options?: ServiceDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: ServiceDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes service with the given serviceName.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -102,6 +105,6 @@ export interface Service {
     resourceGroupName: string,
     accountName: string,
     serviceName: string,
-    options?: ServiceDeleteOptionalParams
+    options?: ServiceDeleteOptionalParams,
   ): Promise<void>;
 }

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary authenticate anonymously using a SAS-encoded URL
@@ -24,7 +24,7 @@ export async function main() {
   const serviceClient = new ShareServiceClient(
     // When using AnonymousCredential, following url should include a valid SAS
     `https://${account}.file.core.windows.net${accountSas}`,
-    anonymousCredential
+    anonymousCredential,
   );
 
   console.log("Shares:");

@@ -6,7 +6,8 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { TenantActivityLogs } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -17,7 +18,7 @@ import {
   TenantActivityLogsListNextOptionalParams,
   TenantActivityLogsListOptionalParams,
   TenantActivityLogsListResponse,
-  TenantActivityLogsListNextResponse
+  TenantActivityLogsListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -41,7 +42,7 @@ export class TenantActivityLogsImpl implements TenantActivityLogs {
    * @param options The options parameters.
    */
   public list(
-    options?: TenantActivityLogsListOptionalParams
+    options?: TenantActivityLogsListOptionalParams,
   ): PagedAsyncIterableIterator<EventData> {
     const iter = this.listPagingAll(options);
     return {
@@ -51,27 +52,39 @@ export class TenantActivityLogsImpl implements TenantActivityLogs {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(options, settings);
+      },
     };
   }
 
   private async *listPagingPage(
-    options?: TenantActivityLogsListOptionalParams
+    options?: TenantActivityLogsListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<EventData[]> {
-    let result = await this._list(options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: TenantActivityLogsListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(continuationToken, options);
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listPagingAll(
-    options?: TenantActivityLogsListOptionalParams
+    options?: TenantActivityLogsListOptionalParams,
   ): AsyncIterableIterator<EventData> {
     for await (const page of this.listPagingPage(options)) {
       yield* page;
@@ -86,7 +99,7 @@ export class TenantActivityLogsImpl implements TenantActivityLogs {
    * @param options The options parameters.
    */
   private _list(
-    options?: TenantActivityLogsListOptionalParams
+    options?: TenantActivityLogsListOptionalParams,
   ): Promise<TenantActivityLogsListResponse> {
     return this.client.sendOperationRequest({ options }, listOperationSpec);
   }
@@ -98,11 +111,11 @@ export class TenantActivityLogsImpl implements TenantActivityLogs {
    */
   private _listNext(
     nextLink: string,
-    options?: TenantActivityLogsListNextOptionalParams
+    options?: TenantActivityLogsListNextOptionalParams,
   ): Promise<TenantActivityLogsListNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -114,38 +127,33 @@ const listOperationSpec: coreClient.OperationSpec = {
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.EventDataCollection
+      bodyMapper: Mappers.EventDataCollection,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [
-    Parameters.apiVersion1,
+    Parameters.filter,
+    Parameters.apiVersion3,
     Parameters.select,
-    Parameters.filter1
   ],
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.EventDataCollection
+      bodyMapper: Mappers.EventDataCollection,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [
-    Parameters.apiVersion1,
-    Parameters.select,
-    Parameters.filter1
-  ],
   urlParameters: [Parameters.$host, Parameters.nextLink],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

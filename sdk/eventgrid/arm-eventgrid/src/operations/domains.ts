@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { EventGridManagementClient } from "../eventGridManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   Domain,
   DomainsListBySubscriptionNextOptionalParams,
@@ -36,7 +40,7 @@ import {
   DomainsRegenerateKeyOptionalParams,
   DomainsRegenerateKeyResponse,
   DomainsListBySubscriptionNextResponse,
-  DomainsListByResourceGroupNextResponse
+  DomainsListByResourceGroupNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -57,7 +61,7 @@ export class DomainsImpl implements Domains {
    * @param options The options parameters.
    */
   public listBySubscription(
-    options?: DomainsListBySubscriptionOptionalParams
+    options?: DomainsListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<Domain> {
     const iter = this.listBySubscriptionPagingAll(options);
     return {
@@ -72,13 +76,13 @@ export class DomainsImpl implements Domains {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listBySubscriptionPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listBySubscriptionPagingPage(
     options?: DomainsListBySubscriptionOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<Domain[]> {
     let result: DomainsListBySubscriptionResponse;
     let continuationToken = settings?.continuationToken;
@@ -99,7 +103,7 @@ export class DomainsImpl implements Domains {
   }
 
   private async *listBySubscriptionPagingAll(
-    options?: DomainsListBySubscriptionOptionalParams
+    options?: DomainsListBySubscriptionOptionalParams,
   ): AsyncIterableIterator<Domain> {
     for await (const page of this.listBySubscriptionPagingPage(options)) {
       yield* page;
@@ -113,7 +117,7 @@ export class DomainsImpl implements Domains {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: DomainsListByResourceGroupOptionalParams
+    options?: DomainsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<Domain> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -130,16 +134,16 @@ export class DomainsImpl implements Domains {
         return this.listByResourceGroupPagingPage(
           resourceGroupName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
     options?: DomainsListByResourceGroupOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<Domain[]> {
     let result: DomainsListByResourceGroupResponse;
     let continuationToken = settings?.continuationToken;
@@ -154,7 +158,7 @@ export class DomainsImpl implements Domains {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -165,11 +169,11 @@ export class DomainsImpl implements Domains {
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: DomainsListByResourceGroupOptionalParams
+    options?: DomainsListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<Domain> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -184,11 +188,11 @@ export class DomainsImpl implements Domains {
   get(
     resourceGroupName: string,
     domainName: string,
-    options?: DomainsGetOptionalParams
+    options?: DomainsGetOptionalParams,
   ): Promise<DomainsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, domainName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -203,30 +207,29 @@ export class DomainsImpl implements Domains {
     resourceGroupName: string,
     domainName: string,
     domainInfo: Domain,
-    options?: DomainsCreateOrUpdateOptionalParams
+    options?: DomainsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DomainsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<DomainsCreateOrUpdateResponse>,
       DomainsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<DomainsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -235,8 +238,8 @@ export class DomainsImpl implements Domains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -244,19 +247,22 @@ export class DomainsImpl implements Domains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, domainName, domainInfo, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, domainName, domainInfo, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      DomainsCreateOrUpdateResponse,
+      OperationState<DomainsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -273,13 +279,13 @@ export class DomainsImpl implements Domains {
     resourceGroupName: string,
     domainName: string,
     domainInfo: Domain,
-    options?: DomainsCreateOrUpdateOptionalParams
+    options?: DomainsCreateOrUpdateOptionalParams,
   ): Promise<DomainsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       domainName,
       domainInfo,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -293,25 +299,24 @@ export class DomainsImpl implements Domains {
   async beginDelete(
     resourceGroupName: string,
     domainName: string,
-    options?: DomainsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: DomainsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -320,8 +325,8 @@ export class DomainsImpl implements Domains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -329,19 +334,19 @@ export class DomainsImpl implements Domains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, domainName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, domainName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -356,12 +361,12 @@ export class DomainsImpl implements Domains {
   async beginDeleteAndWait(
     resourceGroupName: string,
     domainName: string,
-    options?: DomainsDeleteOptionalParams
+    options?: DomainsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       domainName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -377,25 +382,24 @@ export class DomainsImpl implements Domains {
     resourceGroupName: string,
     domainName: string,
     domainUpdateParameters: DomainUpdateParameters,
-    options?: DomainsUpdateOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: DomainsUpdateOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -404,8 +408,8 @@ export class DomainsImpl implements Domains {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -413,19 +417,19 @@ export class DomainsImpl implements Domains {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, domainName, domainUpdateParameters, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, domainName, domainUpdateParameters, options },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -442,13 +446,13 @@ export class DomainsImpl implements Domains {
     resourceGroupName: string,
     domainName: string,
     domainUpdateParameters: DomainUpdateParameters,
-    options?: DomainsUpdateOptionalParams
+    options?: DomainsUpdateOptionalParams,
   ): Promise<void> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       domainName,
       domainUpdateParameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -458,11 +462,11 @@ export class DomainsImpl implements Domains {
    * @param options The options parameters.
    */
   private _listBySubscription(
-    options?: DomainsListBySubscriptionOptionalParams
+    options?: DomainsListBySubscriptionOptionalParams,
   ): Promise<DomainsListBySubscriptionResponse> {
     return this.client.sendOperationRequest(
       { options },
-      listBySubscriptionOperationSpec
+      listBySubscriptionOperationSpec,
     );
   }
 
@@ -473,11 +477,11 @@ export class DomainsImpl implements Domains {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: DomainsListByResourceGroupOptionalParams
+    options?: DomainsListByResourceGroupOptionalParams,
   ): Promise<DomainsListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -490,11 +494,11 @@ export class DomainsImpl implements Domains {
   listSharedAccessKeys(
     resourceGroupName: string,
     domainName: string,
-    options?: DomainsListSharedAccessKeysOptionalParams
+    options?: DomainsListSharedAccessKeysOptionalParams,
   ): Promise<DomainsListSharedAccessKeysResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, domainName, options },
-      listSharedAccessKeysOperationSpec
+      listSharedAccessKeysOperationSpec,
     );
   }
 
@@ -509,11 +513,11 @@ export class DomainsImpl implements Domains {
     resourceGroupName: string,
     domainName: string,
     regenerateKeyRequest: DomainRegenerateKeyRequest,
-    options?: DomainsRegenerateKeyOptionalParams
+    options?: DomainsRegenerateKeyOptionalParams,
   ): Promise<DomainsRegenerateKeyResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, domainName, regenerateKeyRequest, options },
-      regenerateKeyOperationSpec
+      regenerateKeyOperationSpec,
     );
   }
 
@@ -524,11 +528,11 @@ export class DomainsImpl implements Domains {
    */
   private _listBySubscriptionNext(
     nextLink: string,
-    options?: DomainsListBySubscriptionNextOptionalParams
+    options?: DomainsListBySubscriptionNextOptionalParams,
   ): Promise<DomainsListBySubscriptionNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listBySubscriptionNextOperationSpec
+      listBySubscriptionNextOperationSpec,
     );
   }
 
@@ -541,11 +545,11 @@ export class DomainsImpl implements Domains {
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: DomainsListByResourceGroupNextOptionalParams
+    options?: DomainsListByResourceGroupNextOptionalParams,
   ): Promise<DomainsListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 }
@@ -553,43 +557,41 @@ export class DomainsImpl implements Domains {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.Domain
+      bodyMapper: Mappers.Domain,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Domain
+      bodyMapper: Mappers.Domain,
     },
     201: {
-      bodyMapper: Mappers.Domain
+      bodyMapper: Mappers.Domain,
     },
     202: {
-      bodyMapper: Mappers.Domain
+      bodyMapper: Mappers.Domain,
     },
     204: {
-      bodyMapper: Mappers.Domain
+      bodyMapper: Mappers.Domain,
     },
-    default: {}
+    default: {},
   },
   requestBody: Parameters.domainInfo,
   queryParameters: [Parameters.apiVersion],
@@ -597,15 +599,14 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
   httpMethod: "DELETE",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
   queryParameters: [Parameters.apiVersion],
@@ -613,13 +614,12 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
   httpMethod: "PATCH",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
   requestBody: Parameters.domainUpdateParameters,
@@ -628,74 +628,71 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
   path: "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/domains",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainsListResult
+      bodyMapper: Mappers.DomainsListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [Parameters.apiVersion, Parameters.filter, Parameters.top],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainsListResult
+      bodyMapper: Mappers.DomainsListResult,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [Parameters.apiVersion, Parameters.filter, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listSharedAccessKeysOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/listKeys",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/listKeys",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainSharedAccessKeys
+      bodyMapper: Mappers.DomainSharedAccessKeys,
     },
-    default: {}
+    default: {},
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const regenerateKeyOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/regenerateKey",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/regenerateKey",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainSharedAccessKeys
+      bodyMapper: Mappers.DomainSharedAccessKeys,
     },
-    default: {}
+    default: {},
   },
   requestBody: Parameters.regenerateKeyRequest,
   queryParameters: [Parameters.apiVersion],
@@ -703,44 +700,44 @@ const regenerateKeyOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.domainName
+    Parameters.domainName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listBySubscriptionNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainsListResult
+      bodyMapper: Mappers.DomainsListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DomainsListResult
+      bodyMapper: Mappers.DomainsListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

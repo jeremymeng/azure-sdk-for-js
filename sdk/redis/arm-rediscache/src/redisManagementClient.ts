@@ -11,7 +11,7 @@ import * as coreRestPipeline from "@azure/core-rest-pipeline";
 import {
   PipelineRequest,
   PipelineResponse,
-  SendRequest
+  SendRequest,
 } from "@azure/core-rest-pipeline";
 import * as coreAuth from "@azure/core-auth";
 import {
@@ -22,7 +22,9 @@ import {
   LinkedServerImpl,
   PrivateEndpointConnectionsImpl,
   PrivateLinkResourcesImpl,
-  AsyncOperationStatusImpl
+  AsyncOperationStatusImpl,
+  AccessPolicyImpl,
+  AccessPolicyAssignmentImpl,
 } from "./operations";
 import {
   Operations,
@@ -32,7 +34,9 @@ import {
   LinkedServer,
   PrivateEndpointConnections,
   PrivateLinkResources,
-  AsyncOperationStatus
+  AsyncOperationStatus,
+  AccessPolicy,
+  AccessPolicyAssignment,
 } from "./operationsInterfaces";
 import { RedisManagementClientOptionalParams } from "./models";
 
@@ -44,14 +48,13 @@ export class RedisManagementClient extends coreClient.ServiceClient {
   /**
    * Initializes a new instance of the RedisManagementClient class.
    * @param credentials Subscription credentials which uniquely identify client subscription.
-   * @param subscriptionId Gets subscription credentials which uniquely identify the Microsoft Azure
-   *                       subscription. The subscription ID forms part of the URI for every service call.
+   * @param subscriptionId The ID of the target subscription.
    * @param options The parameter options
    */
   constructor(
     credentials: coreAuth.TokenCredential,
     subscriptionId: string,
-    options?: RedisManagementClientOptionalParams
+    options?: RedisManagementClientOptionalParams,
   ) {
     if (credentials === undefined) {
       throw new Error("'credentials' cannot be null");
@@ -66,36 +69,34 @@ export class RedisManagementClient extends coreClient.ServiceClient {
     }
     const defaults: RedisManagementClientOptionalParams = {
       requestContentType: "application/json; charset=utf-8",
-      credential: credentials
+      credential: credentials,
     };
 
-    const packageDetails = `azsdk-js-arm-rediscache/7.1.1`;
+    const packageDetails = `azsdk-js-arm-rediscache/8.1.1`;
     const userAgentPrefix =
       options.userAgentOptions && options.userAgentOptions.userAgentPrefix
         ? `${options.userAgentOptions.userAgentPrefix} ${packageDetails}`
         : `${packageDetails}`;
 
-    if (!options.credentialScopes) {
-      options.credentialScopes = ["https://management.azure.com/.default"];
-    }
     const optionsWithDefaults = {
       ...defaults,
       ...options,
       userAgentOptions: {
-        userAgentPrefix
+        userAgentPrefix,
       },
-      baseUri:
-        options.endpoint ?? options.baseUri ?? "https://management.azure.com"
+      endpoint:
+        options.endpoint ?? options.baseUri ?? "https://management.azure.com",
     };
     super(optionsWithDefaults);
 
     let bearerTokenAuthenticationPolicyFound: boolean = false;
     if (options?.pipeline && options.pipeline.getOrderedPolicies().length > 0) {
-      const pipelinePolicies: coreRestPipeline.PipelinePolicy[] = options.pipeline.getOrderedPolicies();
+      const pipelinePolicies: coreRestPipeline.PipelinePolicy[] =
+        options.pipeline.getOrderedPolicies();
       bearerTokenAuthenticationPolicyFound = pipelinePolicies.some(
         (pipelinePolicy) =>
           pipelinePolicy.name ===
-          coreRestPipeline.bearerTokenAuthenticationPolicyName
+          coreRestPipeline.bearerTokenAuthenticationPolicyName,
       );
     }
     if (
@@ -105,17 +106,19 @@ export class RedisManagementClient extends coreClient.ServiceClient {
       !bearerTokenAuthenticationPolicyFound
     ) {
       this.pipeline.removePolicy({
-        name: coreRestPipeline.bearerTokenAuthenticationPolicyName
+        name: coreRestPipeline.bearerTokenAuthenticationPolicyName,
       });
       this.pipeline.addPolicy(
         coreRestPipeline.bearerTokenAuthenticationPolicy({
           credential: credentials,
-          scopes: `${optionsWithDefaults.credentialScopes}`,
+          scopes:
+            optionsWithDefaults.credentialScopes ??
+            `${optionsWithDefaults.endpoint}/.default`,
           challengeCallbacks: {
             authorizeRequestOnChallenge:
-              coreClient.authorizeRequestOnClaimChallenge
-          }
-        })
+              coreClient.authorizeRequestOnClaimChallenge,
+          },
+        }),
       );
     }
     // Parameter assignments
@@ -123,7 +126,7 @@ export class RedisManagementClient extends coreClient.ServiceClient {
 
     // Assigning values to Constant parameters
     this.$host = options.$host || "https://management.azure.com";
-    this.apiVersion = options.apiVersion || "2022-06-01";
+    this.apiVersion = options.apiVersion || "2024-03-01";
     this.operations = new OperationsImpl(this);
     this.redis = new RedisImpl(this);
     this.firewallRules = new FirewallRulesImpl(this);
@@ -132,6 +135,8 @@ export class RedisManagementClient extends coreClient.ServiceClient {
     this.privateEndpointConnections = new PrivateEndpointConnectionsImpl(this);
     this.privateLinkResources = new PrivateLinkResourcesImpl(this);
     this.asyncOperationStatus = new AsyncOperationStatusImpl(this);
+    this.accessPolicy = new AccessPolicyImpl(this);
+    this.accessPolicyAssignment = new AccessPolicyAssignmentImpl(this);
     this.addCustomApiVersionPolicy(options.apiVersion);
   }
 
@@ -144,7 +149,7 @@ export class RedisManagementClient extends coreClient.ServiceClient {
       name: "CustomApiVersionPolicy",
       async sendRequest(
         request: PipelineRequest,
-        next: SendRequest
+        next: SendRequest,
       ): Promise<PipelineResponse> {
         const param = request.url.split("?");
         if (param.length > 1) {
@@ -158,7 +163,7 @@ export class RedisManagementClient extends coreClient.ServiceClient {
           request.url = param[0] + "?" + newParams.join("&");
         }
         return next(request);
-      }
+      },
     };
     this.pipeline.addPolicy(apiVersionPolicy);
   }
@@ -171,4 +176,6 @@ export class RedisManagementClient extends coreClient.ServiceClient {
   privateEndpointConnections: PrivateEndpointConnections;
   privateLinkResources: PrivateLinkResources;
   asyncOperationStatus: AsyncOperationStatus;
+  accessPolicy: AccessPolicy;
+  accessPolicyAssignment: AccessPolicyAssignment;
 }

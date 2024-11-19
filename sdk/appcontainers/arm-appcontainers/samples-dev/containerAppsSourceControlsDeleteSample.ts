@@ -8,28 +8,50 @@
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { ContainerAppsAPIClient } from "@azure/arm-appcontainers";
+import {
+  ContainerAppsSourceControlsDeleteOptionalParams,
+  ContainerAppsAPIClient,
+} from "@azure/arm-appcontainers";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Delete a Container App SourceControl.
  *
  * @summary Delete a Container App SourceControl.
- * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2022-06-01-preview/examples/SourceControls_Delete.json
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/SourceControls_Delete.json
  */
 async function deleteContainerAppSourceControl() {
-  const subscriptionId = "651f8027-33e8-4ec4-97b4-f6e9f3dc8744";
-  const resourceGroupName = "workerapps-rg-xj";
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] ||
+    "651f8027-33e8-4ec4-97b4-f6e9f3dc8744";
+  const resourceGroupName =
+    process.env["APPCONTAINERS_RESOURCE_GROUP"] || "workerapps-rg-xj";
   const containerAppName = "testcanadacentral";
   const sourceControlName = "current";
+  const xMsGithubAuxiliary = "githubaccesstoken";
+  const ignoreWorkflowDeletionFailure = false;
+  const deleteWorkflow = false;
+  const options: ContainerAppsSourceControlsDeleteOptionalParams = {
+    xMsGithubAuxiliary,
+    ignoreWorkflowDeletionFailure,
+    deleteWorkflow,
+  };
   const credential = new DefaultAzureCredential();
   const client = new ContainerAppsAPIClient(credential, subscriptionId);
   const result = await client.containerAppsSourceControls.beginDeleteAndWait(
     resourceGroupName,
     containerAppName,
-    sourceControlName
+    sourceControlName,
+    options,
   );
   console.log(result);
 }
 
-deleteContainerAppSourceControl().catch(console.error);
+async function main() {
+  deleteContainerAppSourceControl();
+}
+
+main().catch(console.error);

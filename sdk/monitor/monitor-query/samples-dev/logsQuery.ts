@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary Demonstrates how to run a query against a Log Analytics workspace
@@ -45,7 +45,7 @@ export async function main() {
     // are available (like OneDay, OneHour, FoutyEightHours, etc..) but any properly formatted ISO8601
     // value is valid.
     { duration: Durations.oneHour },
-    queryLogsOptions
+    queryLogsOptions,
   );
   const executionTime =
     result.statistics && result.statistics.query && (result.statistics.query as any).executionTime;
@@ -53,7 +53,7 @@ export async function main() {
   console.log(
     `Results for query '${kustoQuery}', execution time: ${
       executionTime == null ? "unknown" : executionTime
-    }`
+    }`,
   );
 
   if (result.status === LogsQueryResultStatus.Success) {

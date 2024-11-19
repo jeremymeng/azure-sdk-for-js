@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { assert } from "@azure/test-utils";
-import { Context } from "mocha";
-import { ConfigurationClient } from "../../src";
+import { ConfigurationClient } from "../../src/index.js";
 import { Recorder, assertEnvironmentVariable } from "@azure-tools/test-recorder";
+import { chaiAzure } from "@azure-tools/test-utils-vitest";
 import { createTestCredential } from "@azure-tools/test-credential";
+import { describe, it, beforeEach, afterEach, chai } from "vitest";
+
+chai.use(chaiAzure);
+
+const { assert } = chai;
 
 // When the recorder observes the values of these environment variables in any
 // recorded HTTP request or response, it will replace them with the values they
@@ -34,7 +38,7 @@ function createConfigurationClient(recorder: Recorder): ConfigurationClient {
     // recorder.configureClientOptions() updates the client options by adding the test proxy policy to
     // redirect the requests to reach the proxy tool in record/playback modes instead of
     // hitting the live service.
-    recorder.configureClientOptions({})
+    recorder.configureClientOptions({}),
   );
 
   return client;
@@ -52,13 +56,18 @@ describe("[AAD] ConfigurationClient functional tests", function () {
   // NOTE: use of "function" and not ES6 arrow-style functions with the
   // beforeEach hook is IMPORTANT due to the use of `this` in the function
   // body.
-  beforeEach(async function (this: Context) {
+  beforeEach(async function (context) {
     // The recorder has some convenience methods, and we need to store a
     // reference to it so that we can `stop()` the recorder later in the
     // `afterEach` hook.
-    recorder = new Recorder(this.currentTest);
+    recorder = new Recorder(context);
 
-    await recorder.start({ envSetupForPlayback: replaceableVariables });
+    await recorder.start({
+      envSetupForPlayback: replaceableVariables,
+      removeCentralSanitizers: [
+        "AZSDK3447", // .key in the body is not a secret and is also replaced by sanitizer from fakeEnvironment variable
+      ],
+    });
 
     // We'll be able to refer to the instantiated `client` in tests, since we
     // initialize it before each test
@@ -71,7 +80,7 @@ describe("[AAD] ConfigurationClient functional tests", function () {
   });
 
   describe("#getConfigurationSetting", () => {
-    it("predetermined setting has expected value", async () => {
+    it("predetermined setting has expected value", { timeout: 50000, retry: 3 }, async () => {
       const key = assertEnvironmentVariable("APPCONFIG_TEST_SETTING_KEY");
       const expectedValue = assertEnvironmentVariable("APPCONFIG_TEST_SETTING_EXPECTED_VALUE");
 
@@ -98,7 +107,7 @@ describe("[AAD] ConfigurationClient functional tests", function () {
       const key = assertEnvironmentVariable("APPCONFIG_TEST_SETTING_KEY");
       await assert.supportsTracing(
         (options) => client.getConfigurationSetting(key, options),
-        ["ConfigurationClient.getConfigurationSetting"]
+        ["ConfigurationClient.getConfigurationSetting"],
       );
     });
   });

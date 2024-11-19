@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary authenticate using an account name and a static key
@@ -24,7 +24,7 @@ export async function main() {
   // List shares
   const serviceClient = new ShareServiceClient(
     `https://${account}.file.core.windows.net`,
-    sharedKeyCredential
+    sharedKeyCredential,
   );
 
   console.log("Shares:");

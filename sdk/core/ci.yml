@@ -48,8 +48,6 @@ extends:
         safeName: azurecoreclient
       - name: azure-rest-core-client
         safeName: azurerestcoreclient
-      - name: azure-core-http
-        safeName: azurecorehttp
       - name: azure-core-rest-pipeline
         safeName: azurecorerestpipeline
       - name: azure-core-lro
@@ -66,3 +64,7 @@ extends:
         safeName: azurelogger
       - name: azure-core-http-compat
         safeName: azurecorehttpcompat
+      - name: azure-core-sse
+        safeName: azurecoresse
+      - name: typespec-ts-http-runtime
+        safeName: typespectshttpruntime

@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   DataFlowDebugSessionInfo,
   DataFlowDebugSessionQueryDataFlowDebugSessionsByWorkspaceOptionalParams,
@@ -21,7 +21,7 @@ import {
   DataFlowDebugSessionDeleteDataFlowDebugSessionOptionalParams,
   DataFlowDebugCommandRequest,
   DataFlowDebugSessionExecuteCommandOptionalParams,
-  DataFlowDebugSessionExecuteCommandResponse
+  DataFlowDebugSessionExecuteCommandResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -32,7 +32,7 @@ export interface DataFlowDebugSession {
    * @param options The options parameters.
    */
   listQueryDataFlowDebugSessionsByWorkspace(
-    options?: DataFlowDebugSessionQueryDataFlowDebugSessionsByWorkspaceOptionalParams
+    options?: DataFlowDebugSessionQueryDataFlowDebugSessionsByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<DataFlowDebugSessionInfo>;
   /**
    * Creates a data flow debug session.
@@ -41,12 +41,10 @@ export interface DataFlowDebugSession {
    */
   beginCreateDataFlowDebugSession(
     request: CreateDataFlowDebugSessionRequest,
-    options?: DataFlowDebugSessionCreateDataFlowDebugSessionOptionalParams
+    options?: DataFlowDebugSessionCreateDataFlowDebugSessionOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        DataFlowDebugSessionCreateDataFlowDebugSessionResponse
-      >,
+    SimplePollerLike<
+      OperationState<DataFlowDebugSessionCreateDataFlowDebugSessionResponse>,
       DataFlowDebugSessionCreateDataFlowDebugSessionResponse
     >
   >;
@@ -57,7 +55,7 @@ export interface DataFlowDebugSession {
    */
   beginCreateDataFlowDebugSessionAndWait(
     request: CreateDataFlowDebugSessionRequest,
-    options?: DataFlowDebugSessionCreateDataFlowDebugSessionOptionalParams
+    options?: DataFlowDebugSessionCreateDataFlowDebugSessionOptionalParams,
   ): Promise<DataFlowDebugSessionCreateDataFlowDebugSessionResponse>;
   /**
    * Add a data flow into debug session.
@@ -66,7 +64,7 @@ export interface DataFlowDebugSession {
    */
   addDataFlow(
     request: DataFlowDebugPackage,
-    options?: DataFlowDebugSessionAddDataFlowOptionalParams
+    options?: DataFlowDebugSessionAddDataFlowOptionalParams,
   ): Promise<DataFlowDebugSessionAddDataFlowResponse>;
   /**
    * Deletes a data flow debug session.
@@ -75,7 +73,7 @@ export interface DataFlowDebugSession {
    */
   deleteDataFlowDebugSession(
     request: DeleteDataFlowDebugSessionRequest,
-    options?: DataFlowDebugSessionDeleteDataFlowDebugSessionOptionalParams
+    options?: DataFlowDebugSessionDeleteDataFlowDebugSessionOptionalParams,
   ): Promise<void>;
   /**
    * Execute a data flow debug command.
@@ -84,10 +82,10 @@ export interface DataFlowDebugSession {
    */
   beginExecuteCommand(
     request: DataFlowDebugCommandRequest,
-    options?: DataFlowDebugSessionExecuteCommandOptionalParams
+    options?: DataFlowDebugSessionExecuteCommandOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<DataFlowDebugSessionExecuteCommandResponse>,
+    SimplePollerLike<
+      OperationState<DataFlowDebugSessionExecuteCommandResponse>,
       DataFlowDebugSessionExecuteCommandResponse
     >
   >;
@@ -98,6 +96,6 @@ export interface DataFlowDebugSession {
    */
   beginExecuteCommandAndWait(
     request: DataFlowDebugCommandRequest,
-    options?: DataFlowDebugSessionExecuteCommandOptionalParams
+    options?: DataFlowDebugSessionExecuteCommandOptionalParams,
   ): Promise<DataFlowDebugSessionExecuteCommandResponse>;
 }

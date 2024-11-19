@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -35,7 +35,7 @@ async function getVirtualMachineScaleSetNetworkInterface() {
       resourceGroupName,
       virtualMachineScaleSetName,
       virtualmachineIndex,
-      networkInterfaceName
+      networkInterfaceName,
     )
     .get(options);
   console.log(result);

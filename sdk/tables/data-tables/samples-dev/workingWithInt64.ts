@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * This sample demonstrates how to create and consume Int64 values
@@ -23,7 +23,7 @@ async function workingWithInt64() {
   const client = new TableClient(
     tablesUrl,
     "testInt64",
-    new AzureNamedKeyCredential(accountName, accountKey)
+    new AzureNamedKeyCredential(accountName, accountKey),
   );
 
   await client.createTable();

@@ -28,7 +28,11 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -71,6 +75,14 @@ describe("ImageBuilder test", () => {
     await recorder.stop();
   });
 
+  it.only("operations list test", async function () {
+    const resArray = new Array();
+    for await (let item of client.operations.list()) {
+      resArray.push(item);
+    }
+    assert.notEqual(resArray.length, 0);
+  });
+
   it("create parameter for virtualMachineImageTemplates test", async function () {
     //create a userAssignedIdentities
     const msiCreate = await msi_client.userAssignedIdentities.createOrUpdate(resourceGroup, msiName, { location: location });
@@ -81,7 +93,7 @@ describe("ImageBuilder test", () => {
         createOption: "Empty"
       },
       diskSizeGB: 200
-    })
+    }, testPollingOptions)
     //create a snapshots
     const snapshotsCreate = await compute_client.snapshots.beginCreateOrUpdateAndWait(resourceGroup, snapshotName, {
       location: location,
@@ -89,7 +101,7 @@ describe("ImageBuilder test", () => {
         createOption: "Copy",
         sourceUri: "/subscriptions/" + subscriptionId + "/resourceGroups/" + resourceGroup + "/providers/Microsoft.Compute/disks/mydiskaaa",
       }
-    })
+    }, testPollingOptions)
     //create a images
     const imagesCreate = await compute_client.images.beginCreateOrUpdateAndWait(resourceGroup, imagesName, {
       location: location,
@@ -103,7 +115,7 @@ describe("ImageBuilder test", () => {
         }
       },
       hyperVGeneration: "V1"
-    })
+    }, testPollingOptions)
   });
 
   it("virtualMachineImageTemplates create test", async function () {
@@ -111,6 +123,7 @@ describe("ImageBuilder test", () => {
     if (isPlaybackMode()) {
       this.skip();
     }
+    const vmidentity = "/subscriptions/" + subscriptionId + "/resourcegroups/myjstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mymsiaaa";
     //before create ,we need add msi owner authority for images in portal
     const res = await client.virtualMachineImageTemplates.beginCreateOrUpdateAndWait(resourceGroup, imageTemplateName,
       {
@@ -122,7 +135,7 @@ describe("ImageBuilder test", () => {
         identity: {
           type: "UserAssigned",
           userAssignedIdentities: {
-            "/subscriptions/92f95d8f-3c67-4124-91c7-8cf07cdbf241/resourcegroups/myjstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mymsiaaa": {}
+            [vmidentity]: {}
           }
         },
         source: {
@@ -164,7 +177,7 @@ describe("ImageBuilder test", () => {
   });
 
   it("virtualMachineImageTemplates delete test", async function () {
-    const res = await client.virtualMachineImageTemplates.beginDeleteAndWait(resourceGroup, imageTemplateName);
+    const res = await client.virtualMachineImageTemplates.beginDeleteAndWait(resourceGroup, imageTemplateName, testPollingOptions);
     const resArray = new Array();
     for await (let item of client.virtualMachineImageTemplates.list()) {
       resArray.push(item);
@@ -173,9 +186,9 @@ describe("ImageBuilder test", () => {
   });
 
   it("delete parameter for virtualMachineImageTemplates test", async function () {
-    const imagesDelete = await compute_client.images.beginDeleteAndWait(resourceGroup, imagesName);
-    const snapshotsDelete = await compute_client.snapshots.beginDeleteAndWait(resourceGroup, snapshotName);
-    const diskDelete = await compute_client.disks.beginDeleteAndWait(resourceGroup, diskName);
+    const imagesDelete = await compute_client.images.beginDeleteAndWait(resourceGroup, imagesName, testPollingOptions);
+    const snapshotsDelete = await compute_client.snapshots.beginDeleteAndWait(resourceGroup, snapshotName, testPollingOptions);
+    const diskDelete = await compute_client.disks.beginDeleteAndWait(resourceGroup, diskName, testPollingOptions);
     const msiDelete = await msi_client.userAssignedIdentities.delete(resourceGroup, msiName);
   });
 });

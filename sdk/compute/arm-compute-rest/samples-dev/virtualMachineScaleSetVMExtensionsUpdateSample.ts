@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -45,7 +45,7 @@ async function updateVirtualMachineScaleSetVMExtension() {
       resourceGroupName,
       vmScaleSetName,
       instanceId,
-      vmExtensionName
+      vmExtensionName,
     )
     .patch(options);
   const poller = getLongRunningPoller(client, initialResponse);

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * This sample demonstrates how to create and consume Int64 values using bigint
@@ -23,7 +23,7 @@ async function workingWithBigint() {
   const client = new TableClient(
     tablesUrl,
     "testbigint",
-    new AzureNamedKeyCredential(accountName, accountKey)
+    new AzureNamedKeyCredential(accountName, accountKey),
   );
 
   await client.createTable();

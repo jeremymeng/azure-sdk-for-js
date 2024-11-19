@@ -4,17 +4,15 @@
 
 ```ts
 
-/// <reference lib="esnext.asynciterable" />
-
-import { AbortSignalLike } from '@azure/abort-controller';
+import type { AbortSignalLike } from '@azure/abort-controller';
 import { AzureLogger } from '@azure/logger';
-import { CancelOnProgress } from '@azure/core-lro';
-import * as coreClient from '@azure/core-client';
-import { ExtendedCommonClientOptions } from '@azure/core-http-compat';
-import { PagedAsyncIterableIterator } from '@azure/core-paging';
+import type { CancelOnProgress } from '@azure/core-lro';
+import type * as coreClient from '@azure/core-client';
+import type { ExtendedCommonClientOptions } from '@azure/core-http-compat';
+import type { PagedAsyncIterableIterator } from '@azure/core-paging';
 import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
-import { TokenCredential } from '@azure/core-auth';
+import type { PollOperationState } from '@azure/core-lro';
+import type { TokenCredential } from '@azure/core-auth';
 
 // @public
 export type ActionType = "EmailContacts" | "AutoRenew";
@@ -89,7 +87,7 @@ export class CertificateClient {
 // @public
 export interface CertificateClientOptions extends ExtendedCommonClientOptions {
     disableChallengeResourceVerification?: boolean;
-    serviceVersion?: "7.0" | "7.1" | "7.2" | "7.3" | "7.4-preview.1";
+    serviceVersion?: "7.0" | "7.1" | "7.2" | "7.3" | "7.4" | "7.5";
 }
 
 // @public
@@ -198,6 +196,7 @@ export interface CertificateProperties {
     readonly vaultUrl?: string;
     readonly version?: string;
     readonly x509Thumbprint?: Uint8Array;
+    readonly x509ThumbprintString?: string;
 }
 
 // @public

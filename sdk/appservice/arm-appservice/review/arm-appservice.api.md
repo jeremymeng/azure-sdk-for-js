@@ -4,13 +4,11 @@
 
 ```ts
 
-/// <reference types="node" />
-
 import * as coreAuth from '@azure/core-auth';
 import * as coreClient from '@azure/core-client';
+import { OperationState } from '@azure/core-lro';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
+import { SimplePollerLike } from '@azure/core-lro';
 
 // @public
 export interface AbnormalTimePeriod {
@@ -242,9 +240,9 @@ export interface AppServiceCertificateOrderPatchResource extends ProxyOnlyResour
 
 // @public
 export interface AppServiceCertificateOrders {
-    beginCreateOrUpdate(resourceGroupName: string, certificateOrderName: string, certificateDistinguishedName: AppServiceCertificateOrder, options?: AppServiceCertificateOrdersCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<AppServiceCertificateOrdersCreateOrUpdateResponse>, AppServiceCertificateOrdersCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, certificateOrderName: string, certificateDistinguishedName: AppServiceCertificateOrder, options?: AppServiceCertificateOrdersCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<AppServiceCertificateOrdersCreateOrUpdateResponse>, AppServiceCertificateOrdersCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, certificateOrderName: string, certificateDistinguishedName: AppServiceCertificateOrder, options?: AppServiceCertificateOrdersCreateOrUpdateOptionalParams): Promise<AppServiceCertificateOrdersCreateOrUpdateResponse>;
-    beginCreateOrUpdateCertificate(resourceGroupName: string, certificateOrderName: string, name: string, keyVaultCertificate: AppServiceCertificateResource, options?: AppServiceCertificateOrdersCreateOrUpdateCertificateOptionalParams): Promise<PollerLike<PollOperationState<AppServiceCertificateOrdersCreateOrUpdateCertificateResponse>, AppServiceCertificateOrdersCreateOrUpdateCertificateResponse>>;
+    beginCreateOrUpdateCertificate(resourceGroupName: string, certificateOrderName: string, name: string, keyVaultCertificate: AppServiceCertificateResource, options?: AppServiceCertificateOrdersCreateOrUpdateCertificateOptionalParams): Promise<SimplePollerLike<OperationState<AppServiceCertificateOrdersCreateOrUpdateCertificateResponse>, AppServiceCertificateOrdersCreateOrUpdateCertificateResponse>>;
     beginCreateOrUpdateCertificateAndWait(resourceGroupName: string, certificateOrderName: string, name: string, keyVaultCertificate: AppServiceCertificateResource, options?: AppServiceCertificateOrdersCreateOrUpdateCertificateOptionalParams): Promise<AppServiceCertificateOrdersCreateOrUpdateCertificateResponse>;
     delete(resourceGroupName: string, certificateOrderName: string, options?: AppServiceCertificateOrdersDeleteOptionalParams): Promise<void>;
     deleteCertificate(resourceGroupName: string, certificateOrderName: string, name: string, options?: AppServiceCertificateOrdersDeleteCertificateOptionalParams): Promise<void>;
@@ -501,22 +499,22 @@ export interface AppServiceEnvironmentResource extends Resource {
 
 // @public
 export interface AppServiceEnvironments {
-    beginApproveOrRejectPrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: PrivateLinkConnectionApprovalRequestResource, options?: AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<PollerLike<PollOperationState<AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionResponse>, AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionResponse>>;
-    beginApproveOrRejectPrivateEndpointConnectionAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: PrivateLinkConnectionApprovalRequestResource, options?: AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionResponse>;
-    beginCreateOrUpdate(resourceGroupName: string, name: string, hostingEnvironmentEnvelope: AppServiceEnvironmentResource, options?: AppServiceEnvironmentsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<AppServiceEnvironmentsCreateOrUpdateResponse>, AppServiceEnvironmentsCreateOrUpdateResponse>>;
+    beginApproveOrRejectPrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: RemotePrivateEndpointConnectionARMResource, options?: AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<SimplePollerLike<OperationState<AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionResponse>, AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionResponse>>;
+    beginApproveOrRejectPrivateEndpointConnectionAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: RemotePrivateEndpointConnectionARMResource, options?: AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<AppServiceEnvironmentsApproveOrRejectPrivateEndpointConnectionResponse>;
+    beginCreateOrUpdate(resourceGroupName: string, name: string, hostingEnvironmentEnvelope: AppServiceEnvironmentResource, options?: AppServiceEnvironmentsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<AppServiceEnvironmentsCreateOrUpdateResponse>, AppServiceEnvironmentsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, name: string, hostingEnvironmentEnvelope: AppServiceEnvironmentResource, options?: AppServiceEnvironmentsCreateOrUpdateOptionalParams): Promise<AppServiceEnvironmentsCreateOrUpdateResponse>;
-    beginCreateOrUpdateMultiRolePool(resourceGroupName: string, name: string, multiRolePoolEnvelope: WorkerPoolResource, options?: AppServiceEnvironmentsCreateOrUpdateMultiRolePoolOptionalParams): Promise<PollerLike<PollOperationState<AppServiceEnvironmentsCreateOrUpdateMultiRolePoolResponse>, AppServiceEnvironmentsCreateOrUpdateMultiRolePoolResponse>>;
+    beginCreateOrUpdateMultiRolePool(resourceGroupName: string, name: string, multiRolePoolEnvelope: WorkerPoolResource, options?: AppServiceEnvironmentsCreateOrUpdateMultiRolePoolOptionalParams): Promise<SimplePollerLike<OperationState<AppServiceEnvironmentsCreateOrUpdateMultiRolePoolResponse>, AppServiceEnvironmentsCreateOrUpdateMultiRolePoolResponse>>;
     beginCreateOrUpdateMultiRolePoolAndWait(resourceGroupName: string, name: string, multiRolePoolEnvelope: WorkerPoolResource, options?: AppServiceEnvironmentsCreateOrUpdateMultiRolePoolOptionalParams): Promise<AppServiceEnvironmentsCreateOrUpdateMultiRolePoolResponse>;
-    beginCreateOrUpdateWorkerPool(resourceGroupName: string, name: string, workerPoolName: string, workerPoolEnvelope: WorkerPoolResource, options?: AppServiceEnvironmentsCreateOrUpdateWorkerPoolOptionalParams): Promise<PollerLike<PollOperationState<AppServiceEnvironmentsCreateOrUpdateWorkerPoolResponse>, AppServiceEnvironmentsCreateOrUpdateWorkerPoolResponse>>;
+    beginCreateOrUpdateWorkerPool(resourceGroupName: string, name: string, workerPoolName: string, workerPoolEnvelope: WorkerPoolResource, options?: AppServiceEnvironmentsCreateOrUpdateWorkerPoolOptionalParams): Promise<SimplePollerLike<OperationState<AppServiceEnvironmentsCreateOrUpdateWorkerPoolResponse>, AppServiceEnvironmentsCreateOrUpdateWorkerPoolResponse>>;
     beginCreateOrUpdateWorkerPoolAndWait(resourceGroupName: string, name: string, workerPoolName: string, workerPoolEnvelope: WorkerPoolResource, options?: AppServiceEnvironmentsCreateOrUpdateWorkerPoolOptionalParams): Promise<AppServiceEnvironmentsCreateOrUpdateWorkerPoolResponse>;
-    beginDelete(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsDeleteOptionalParams): Promise<void>;
-    beginDeletePrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: AppServiceEnvironmentsDeletePrivateEndpointConnectionOptionalParams): Promise<PollerLike<PollOperationState<AppServiceEnvironmentsDeletePrivateEndpointConnectionResponse>, AppServiceEnvironmentsDeletePrivateEndpointConnectionResponse>>;
+    beginDeletePrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: AppServiceEnvironmentsDeletePrivateEndpointConnectionOptionalParams): Promise<SimplePollerLike<OperationState<AppServiceEnvironmentsDeletePrivateEndpointConnectionResponse>, AppServiceEnvironmentsDeletePrivateEndpointConnectionResponse>>;
     beginDeletePrivateEndpointConnectionAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: AppServiceEnvironmentsDeletePrivateEndpointConnectionOptionalParams): Promise<AppServiceEnvironmentsDeletePrivateEndpointConnectionResponse>;
     beginListChangeVnetAndWait(resourceGroupName: string, name: string, vnetInfo: VirtualNetworkProfile, options?: AppServiceEnvironmentsChangeVnetOptionalParams): PagedAsyncIterableIterator<Site>;
     beginListResumeAndWait(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsResumeOptionalParams): PagedAsyncIterableIterator<Site>;
     beginListSuspendAndWait(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsSuspendOptionalParams): PagedAsyncIterableIterator<Site>;
-    beginUpgrade(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsUpgradeOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginUpgrade(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsUpgradeOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginUpgradeAndWait(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsUpgradeOptionalParams): Promise<void>;
     deleteAseCustomDnsSuffixConfiguration(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsDeleteAseCustomDnsSuffixConfigurationOptionalParams): Promise<AppServiceEnvironmentsDeleteAseCustomDnsSuffixConfigurationResponse>;
     get(resourceGroupName: string, name: string, options?: AppServiceEnvironmentsGetOptionalParams): Promise<AppServiceEnvironmentsGetResponse>;
@@ -582,6 +580,11 @@ export interface AppServiceEnvironmentsChangeVnetOptionalParams extends coreClie
 
 // @public
 export type AppServiceEnvironmentsChangeVnetResponse = WebAppCollection;
+
+// @public
+export interface AppServiceEnvironmentsCreateOrUpdateHeaders {
+    location?: string;
+}
 
 // @public
 export interface AppServiceEnvironmentsCreateOrUpdateMultiRolePoolOptionalParams extends coreClient.OperationOptions {
@@ -880,7 +883,6 @@ export type AppServiceEnvironmentsListResponse = AppServiceEnvironmentCollection
 
 // @public
 export interface AppServiceEnvironmentsListUsagesNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
 }
 
 // @public
@@ -896,7 +898,6 @@ export type AppServiceEnvironmentsListUsagesResponse = CsmUsageQuotaCollection;
 
 // @public
 export interface AppServiceEnvironmentsListWebAppsNextOptionalParams extends coreClient.OperationOptions {
-    propertiesToInclude?: string;
 }
 
 // @public
@@ -1143,7 +1144,7 @@ export type AppServicePlanRestrictions = "None" | "Free" | "Shared" | "Basic" | 
 
 // @public
 export interface AppServicePlans {
-    beginCreateOrUpdate(resourceGroupName: string, name: string, appServicePlan: AppServicePlan, options?: AppServicePlansCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<AppServicePlansCreateOrUpdateResponse>, AppServicePlansCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, name: string, appServicePlan: AppServicePlan, options?: AppServicePlansCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<AppServicePlansCreateOrUpdateResponse>, AppServicePlansCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, name: string, appServicePlan: AppServicePlan, options?: AppServicePlansCreateOrUpdateOptionalParams): Promise<AppServicePlansCreateOrUpdateResponse>;
     createOrUpdateVnetRoute(resourceGroupName: string, name: string, vnetName: string, routeName: string, route: VnetRoute, options?: AppServicePlansCreateOrUpdateVnetRouteOptionalParams): Promise<AppServicePlansCreateOrUpdateVnetRouteResponse>;
     delete(resourceGroupName: string, name: string, options?: AppServicePlansDeleteOptionalParams): Promise<void>;
@@ -1294,7 +1295,6 @@ export type AppServicePlansListHybridConnectionsResponse = HybridConnectionColle
 
 // @public
 export interface AppServicePlansListNextOptionalParams extends coreClient.OperationOptions {
-    detailed?: boolean;
 }
 
 // @public
@@ -1317,7 +1317,6 @@ export type AppServicePlansListRoutesForVnetResponse = VnetRoute[];
 
 // @public
 export interface AppServicePlansListUsagesNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
 }
 
 // @public
@@ -1354,9 +1353,6 @@ export type AppServicePlansListWebAppsByHybridConnectionResponse = ResourceColle
 
 // @public
 export interface AppServicePlansListWebAppsNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
-    skipToken?: string;
-    top?: string;
 }
 
 // @public
@@ -1435,6 +1431,22 @@ export interface ArmPlan {
 }
 
 // @public
+export interface AseRegion extends ProxyOnlyResource {
+    availableOS?: string[];
+    availableSku?: string[];
+    readonly dedicatedHost?: boolean;
+    readonly displayName?: string;
+    readonly standard?: boolean;
+    readonly zoneRedundant?: boolean;
+}
+
+// @public
+export interface AseRegionCollection {
+    readonly nextLink?: string;
+    value: AseRegion[];
+}
+
+// @public
 export interface AseV3NetworkingConfiguration extends ProxyOnlyResource {
     allowNewPrivateEndpointConnections?: boolean;
     readonly externalInboundIpAddresses?: string[];
@@ -1447,11 +1459,17 @@ export interface AseV3NetworkingConfiguration extends ProxyOnlyResource {
 }
 
 // @public
+export type AuthenticationType = string;
+
+// @public
 export interface AuthPlatform {
     configFilePath?: string;
     enabled?: boolean;
     runtimeVersion?: string;
 }
+
+// @public
+export type AuthType = "Anonymous" | "UserCredentials" | "SystemIdentity" | "UserAssigned";
 
 // @public
 export interface AutoHealActions {
@@ -1556,6 +1574,7 @@ export interface AzureStorageInfoValue {
     accessKey?: string;
     accountName?: string;
     mountPath?: string;
+    protocol?: AzureStorageProtocol;
     shareName?: string;
     readonly state?: AzureStorageState;
     type?: AzureStorageType;
@@ -1567,6 +1586,9 @@ export interface AzureStoragePropertyDictionaryResource extends ProxyOnlyResourc
         [propertyName: string]: AzureStorageInfoValue;
     };
 }
+
+// @public
+export type AzureStorageProtocol = string;
 
 // @public
 export type AzureStorageState = "Ok" | "InvalidCredentials" | "InvalidShare" | "NotValidated";
@@ -1628,6 +1650,9 @@ export interface BackupSchedule {
     retentionPeriodInDays: number;
     startTime?: Date;
 }
+
+// @public
+export type BasicAuthName = string;
 
 // @public
 export interface BillingMeter extends ProxyOnlyResource {
@@ -1859,7 +1884,6 @@ export type CertificatesListByResourceGroupResponse = CertificateCollection;
 
 // @public
 export interface CertificatesListNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
 }
 
 // @public
@@ -1885,6 +1909,7 @@ export type Channels = "Notification" | "Api" | "Email" | "Webhook" | "All";
 
 // @public
 export interface CheckNameAvailabilityOptionalParams extends coreClient.OperationOptions {
+    environmentId?: string;
     isFqdn?: boolean;
 }
 
@@ -2001,9 +2026,9 @@ export type ContainerAppProvisioningState = string;
 
 // @public
 export interface ContainerApps {
-    beginCreateOrUpdate(resourceGroupName: string, name: string, containerAppEnvelope: ContainerApp, options?: ContainerAppsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<ContainerAppsCreateOrUpdateResponse>, ContainerAppsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, name: string, containerAppEnvelope: ContainerApp, options?: ContainerAppsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ContainerAppsCreateOrUpdateResponse>, ContainerAppsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, name: string, containerAppEnvelope: ContainerApp, options?: ContainerAppsCreateOrUpdateOptionalParams): Promise<ContainerAppsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, name: string, options?: ContainerAppsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, name: string, options?: ContainerAppsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, name: string, options?: ContainerAppsDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, name: string, options?: ContainerAppsGetOptionalParams): Promise<ContainerAppsGetResponse>;
     listByResourceGroup(resourceGroupName: string, options?: ContainerAppsListByResourceGroupOptionalParams): PagedAsyncIterableIterator<ContainerApp>;
@@ -2450,6 +2475,20 @@ export interface DaprComponent {
 }
 
 // @public
+export interface DaprConfig {
+    appId?: string;
+    appPort?: number;
+    enableApiLogging?: boolean;
+    enabled?: boolean;
+    httpMaxRequestSize?: number;
+    httpReadBufferSize?: number;
+    logLevel?: DaprLogLevel;
+}
+
+// @public
+export type DaprLogLevel = string;
+
+// @public
 export interface DaprMetadata {
     name?: string;
     secretRef?: string;
@@ -2463,6 +2502,38 @@ export interface DatabaseBackupSetting {
     databaseType: DatabaseType;
     // (undocumented)
     name?: string;
+}
+
+// @public
+export interface DatabaseConnection extends ProxyOnlyResource {
+    readonly configurationFiles?: StaticSiteDatabaseConnectionConfigurationFileOverview[];
+    connectionIdentity?: string;
+    connectionString?: string;
+    region?: string;
+    resourceId?: string;
+}
+
+// @public
+export interface DatabaseConnectionCollection {
+    readonly nextLink?: string;
+    value: DatabaseConnection[];
+}
+
+// @public
+export interface DatabaseConnectionOverview {
+    readonly configurationFiles?: StaticSiteDatabaseConnectionConfigurationFileOverview[];
+    readonly connectionIdentity?: string;
+    readonly name?: string;
+    readonly region?: string;
+    readonly resourceId?: string;
+}
+
+// @public
+export interface DatabaseConnectionPatchRequest {
+    connectionIdentity?: string;
+    connectionString?: string;
+    region?: string;
+    resourceId?: string;
 }
 
 // @public
@@ -2500,6 +2571,9 @@ export type DayOfWeek = "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursda
 
 // @public
 export type DaysOfWeek = "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday";
+
+// @public
+export type DefaultAction = string;
 
 // @public
 export interface DefaultAuthorizationPolicy {
@@ -2670,7 +2744,7 @@ export interface DetectorInfo {
 // @public
 export interface DetectorResponse extends ProxyOnlyResource {
     dataProvidersMetadata?: DataProviderMetadata[];
-    dataset?: DiagnosticData[];
+    dataset?: DiagnosticData_2[];
     metadata?: DetectorInfo;
     status?: Status;
     suggestedUtterances?: QueryUtterancesResults;
@@ -2712,10 +2786,11 @@ export interface DiagnosticCategoryCollection {
 }
 
 // @public
-export interface DiagnosticData {
+interface DiagnosticData_2 {
     renderingProperties?: Rendering;
     table?: DataTableResponseObject;
 }
+export { DiagnosticData_2 as DiagnosticData }
 
 // @public
 export interface DiagnosticDetectorCollection {
@@ -3152,7 +3227,7 @@ export type DomainRegistrationProviderListOperationsResponse = CsmOperationColle
 
 // @public
 export interface Domains {
-    beginCreateOrUpdate(resourceGroupName: string, domainName: string, domain: Domain, options?: DomainsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<DomainsCreateOrUpdateResponse>, DomainsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, domainName: string, domain: Domain, options?: DomainsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<DomainsCreateOrUpdateResponse>, DomainsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, domainName: string, domain: Domain, options?: DomainsCreateOrUpdateOptionalParams): Promise<DomainsCreateOrUpdateResponse>;
     checkAvailability(identifier: NameIdentifier, options?: DomainsCheckAvailabilityOptionalParams): Promise<DomainsCheckAvailabilityResponse>;
     createOrUpdateOwnershipIdentifier(resourceGroupName: string, domainName: string, name: string, domainOwnershipIdentifier: DomainOwnershipIdentifier, options?: DomainsCreateOrUpdateOwnershipIdentifierOptionalParams): Promise<DomainsCreateOrUpdateOwnershipIdentifierResponse>;
@@ -3334,28 +3409,16 @@ export interface EndpointDetail {
 export type EnterpriseGradeCdnStatus = string;
 
 // @public
-export type Enum14 = string;
-
-// @public
-export type Enum15 = string;
-
-// @public
-export type Enum16 = string;
-
-// @public
-export type Enum17 = string;
-
-// @public
-export type Enum18 = string;
-
-// @public
-export type Enum19 = string;
-
-// @public
 export interface EnvironmentVar {
     name?: string;
     secretRef?: string;
     value?: string;
+}
+
+// @public (undocumented)
+export interface EnvironmentVariable {
+    name: string;
+    value: string;
 }
 
 // @public
@@ -3495,6 +3558,13 @@ export type FrontEndServiceType = "NodePort" | "LoadBalancer";
 export type FtpsState = string;
 
 // @public
+export interface FunctionAppConfig {
+    deployment?: FunctionsDeployment;
+    runtime?: FunctionsRuntime;
+    scaleAndConcurrency?: FunctionsScaleAndConcurrency;
+}
+
+// @public
 export interface FunctionAppMajorVersion {
     readonly displayText?: string;
     readonly minorVersions?: FunctionAppMinorVersion[];
@@ -3575,9 +3645,61 @@ export interface FunctionEnvelopeCollection {
 }
 
 // @public
+export interface FunctionsAlwaysReadyConfig {
+    instanceCount?: number;
+    name?: string;
+}
+
+// @public
+export interface FunctionsDeployment {
+    storage?: FunctionsDeploymentStorage;
+}
+
+// @public
+export interface FunctionsDeploymentStorage {
+    authentication?: FunctionsDeploymentStorageAuthentication;
+    type?: FunctionsDeploymentStorageType;
+    value?: string;
+}
+
+// @public
+export interface FunctionsDeploymentStorageAuthentication {
+    storageAccountConnectionStringName?: string;
+    type?: AuthenticationType;
+    userAssignedIdentityResourceId?: string;
+}
+
+// @public
+export type FunctionsDeploymentStorageType = string;
+
+// @public
 export interface FunctionSecrets {
     key?: string;
     triggerUrl?: string;
+}
+
+// @public
+export interface FunctionsRuntime {
+    name?: RuntimeName;
+    version?: string;
+}
+
+// @public
+export interface FunctionsScaleAndConcurrency {
+    alwaysReady?: FunctionsAlwaysReadyConfig[];
+    instanceMemoryMB?: number;
+    maximumInstanceCount?: number;
+    triggers?: FunctionsScaleAndConcurrencyTriggers;
+}
+
+// @public
+export interface FunctionsScaleAndConcurrencyTriggers {
+    http?: FunctionsScaleAndConcurrencyTriggersHttp;
+}
+
+// @public
+export interface FunctionsScaleAndConcurrencyTriggersHttp {
+    perInstanceConcurrency?: number;
 }
 
 // @public
@@ -3616,6 +3738,25 @@ export interface GetSubscriptionDeploymentLocationsOptionalParams extends coreCl
 
 // @public
 export type GetSubscriptionDeploymentLocationsResponse = DeploymentLocations;
+
+// @public
+export interface GetUsagesInLocation {
+    list(location: string, options?: GetUsagesInLocationListOptionalParams): PagedAsyncIterableIterator<CsmUsageQuota>;
+}
+
+// @public
+export interface GetUsagesInLocationListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type GetUsagesInLocationListNextResponse = CsmUsageQuotaCollection;
+
+// @public
+export interface GetUsagesInLocationListOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type GetUsagesInLocationListResponse = CsmUsageQuotaCollection;
 
 // @public
 export interface GitHub {
@@ -3979,6 +4120,25 @@ export enum KnownActiveRevisionsMode {
 }
 
 // @public
+export enum KnownAuthenticationType {
+    StorageAccountConnectionString = "StorageAccountConnectionString",
+    SystemAssignedIdentity = "SystemAssignedIdentity",
+    UserAssignedIdentity = "UserAssignedIdentity"
+}
+
+// @public
+export enum KnownAzureStorageProtocol {
+    Http = "Http",
+    Nfs = "Nfs",
+    Smb = "Smb"
+}
+
+// @public
+export enum KnownBasicAuthName {
+    Default = "default"
+}
+
+// @public
 export enum KnownBuildStatus {
     Deleting = "Deleting",
     Deploying = "Deploying",
@@ -4021,11 +4181,25 @@ export enum KnownCustomDomainStatus {
 }
 
 // @public
+export enum KnownDaprLogLevel {
+    Debug = "debug",
+    Error = "error",
+    Info = "info",
+    Warn = "warn"
+}
+
+// @public
 export enum KnownDatabaseType {
     LocalMySql = "LocalMySql",
     MySql = "MySql",
     PostgreSql = "PostgreSql",
     SqlAzure = "SqlAzure"
+}
+
+// @public
+export enum KnownDefaultAction {
+    Allow = "Allow",
+    Deny = "Deny"
 }
 
 // @public
@@ -4054,56 +4228,15 @@ export enum KnownEnterpriseGradeCdnStatus {
 }
 
 // @public
-export enum KnownEnum14 {
-    All = "All",
-    Linux = "Linux",
-    LinuxFunctions = "LinuxFunctions",
-    Windows = "Windows",
-    WindowsFunctions = "WindowsFunctions"
-}
-
-// @public
-export enum KnownEnum15 {
-    All = "All",
-    Linux = "Linux",
-    Windows = "Windows"
-}
-
-// @public
-export enum KnownEnum16 {
-    All = "All",
-    Linux = "Linux",
-    Windows = "Windows"
-}
-
-// @public
-export enum KnownEnum17 {
-    All = "All",
-    Linux = "Linux",
-    Windows = "Windows"
-}
-
-// @public
-export enum KnownEnum18 {
-    All = "All",
-    Linux = "Linux",
-    Windows = "Windows"
-}
-
-// @public
-export enum KnownEnum19 {
-    All = "All",
-    Linux = "Linux",
-    LinuxFunctions = "LinuxFunctions",
-    Windows = "Windows",
-    WindowsFunctions = "WindowsFunctions"
-}
-
-// @public
 export enum KnownFtpsState {
     AllAllowed = "AllAllowed",
     Disabled = "Disabled",
     FtpsOnly = "FtpsOnly"
+}
+
+// @public
+export enum KnownFunctionsDeploymentStorageType {
+    BlobContainer = "blobContainer"
 }
 
 // @public
@@ -4166,6 +4299,22 @@ export enum KnownParameterType {
 }
 
 // @public
+export enum KnownProviderOsTypeSelected {
+    All = "All",
+    Linux = "Linux",
+    LinuxFunctions = "LinuxFunctions",
+    Windows = "Windows",
+    WindowsFunctions = "WindowsFunctions"
+}
+
+// @public
+export enum KnownProviderStackOsType {
+    All = "All",
+    Linux = "Linux",
+    Windows = "Windows"
+}
+
+// @public
 export enum KnownPublishingProfileFormat {
     FileZilla3 = "FileZilla3",
     Ftp = "Ftp",
@@ -4222,6 +4371,16 @@ export enum KnownRouteType {
 }
 
 // @public
+export enum KnownRuntimeName {
+    Custom = "custom",
+    DotnetIsolated = "dotnet-isolated",
+    Java = "java",
+    Node = "node",
+    Powershell = "powershell",
+    Python = "python"
+}
+
+// @public
 export enum KnownScmType {
     BitbucketGit = "BitbucketGit",
     BitbucketHg = "BitbucketHg",
@@ -4245,6 +4404,7 @@ export enum KnownSkuName {
     Dynamic = "Dynamic",
     ElasticIsolated = "ElasticIsolated",
     ElasticPremium = "ElasticPremium",
+    FlexConsumption = "FlexConsumption",
     Free = "Free",
     Isolated = "Isolated",
     IsolatedV2 = "IsolatedV2",
@@ -4260,7 +4420,29 @@ export enum KnownSkuName {
 export enum KnownSupportedTlsVersions {
     One0 = "1.0",
     One1 = "1.1",
-    One2 = "1.2"
+    One2 = "1.2",
+    One3 = "1.3"
+}
+
+// @public
+export enum KnownTlsCipherSuites {
+    TLSAES128GCMSHA256 = "TLS_AES_128_GCM_SHA256",
+    TLSAES256GCMSHA384 = "TLS_AES_256_GCM_SHA384",
+    TLSEcdheEcdsaWithAES128CBCSHA256 = "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+    TLSEcdheEcdsaWithAES128GCMSHA256 = "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+    TLSEcdheEcdsaWithAES256GCMSHA384 = "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+    TLSEcdheRSAWithAES128CBCSHA = "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+    TLSEcdheRSAWithAES128CBCSHA256 = "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+    TLSEcdheRSAWithAES128GCMSHA256 = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+    TLSEcdheRSAWithAES256CBCSHA = "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+    TLSEcdheRSAWithAES256CBCSHA384 = "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+    TLSEcdheRSAWithAES256GCMSHA384 = "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+    TLSRSAWithAES128CBCSHA = "TLS_RSA_WITH_AES_128_CBC_SHA",
+    TLSRSAWithAES128CBCSHA256 = "TLS_RSA_WITH_AES_128_CBC_SHA256",
+    TLSRSAWithAES128GCMSHA256 = "TLS_RSA_WITH_AES_128_GCM_SHA256",
+    TLSRSAWithAES256CBCSHA = "TLS_RSA_WITH_AES_256_CBC_SHA",
+    TLSRSAWithAES256CBCSHA256 = "TLS_RSA_WITH_AES_256_CBC_SHA256",
+    TLSRSAWithAES256GCMSHA384 = "TLS_RSA_WITH_AES_256_GCM_SHA384"
 }
 
 // @public
@@ -4423,9 +4605,9 @@ export type KubeEnvironmentProvisioningState = "Succeeded" | "Failed" | "Cancele
 
 // @public
 export interface KubeEnvironments {
-    beginCreateOrUpdate(resourceGroupName: string, name: string, kubeEnvironmentEnvelope: KubeEnvironment, options?: KubeEnvironmentsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<KubeEnvironmentsCreateOrUpdateResponse>, KubeEnvironmentsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, name: string, kubeEnvironmentEnvelope: KubeEnvironment, options?: KubeEnvironmentsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<KubeEnvironmentsCreateOrUpdateResponse>, KubeEnvironmentsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, name: string, kubeEnvironmentEnvelope: KubeEnvironment, options?: KubeEnvironmentsCreateOrUpdateOptionalParams): Promise<KubeEnvironmentsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, name: string, options?: KubeEnvironmentsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, name: string, options?: KubeEnvironmentsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, name: string, options?: KubeEnvironmentsDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, name: string, options?: KubeEnvironmentsGetOptionalParams): Promise<KubeEnvironmentsGetResponse>;
     listByResourceGroup(resourceGroupName: string, options?: KubeEnvironmentsListByResourceGroupOptionalParams): PagedAsyncIterableIterator<KubeEnvironment>;
@@ -4511,9 +4693,21 @@ export interface LinuxJavaContainerSettings {
 }
 
 // @public
+export interface ListAseRegionsNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ListAseRegionsNextResponse = AseRegionCollection;
+
+// @public
+export interface ListAseRegionsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ListAseRegionsResponse = AseRegionCollection;
+
+// @public
 export interface ListBillingMetersNextOptionalParams extends coreClient.OperationOptions {
-    billingLocation?: string;
-    osType?: string;
 }
 
 // @public
@@ -4530,7 +4724,6 @@ export type ListBillingMetersResponse = BillingMeterCollection;
 
 // @public
 export interface ListCustomHostNameSitesNextOptionalParams extends coreClient.OperationOptions {
-    hostname?: string;
 }
 
 // @public
@@ -4546,10 +4739,6 @@ export type ListCustomHostNameSitesResponse = CustomHostnameSitesCollection;
 
 // @public
 export interface ListGeoRegionsNextOptionalParams extends coreClient.OperationOptions {
-    linuxDynamicWorkersEnabled?: boolean;
-    linuxWorkersEnabled?: boolean;
-    sku?: SkuName;
-    xenonWorkersEnabled?: boolean;
 }
 
 // @public
@@ -5165,8 +5354,6 @@ export interface Provider {
 
 // @public
 export interface ProviderGetAvailableStacksNextOptionalParams extends coreClient.OperationOptions {
-    // (undocumented)
-    osTypeSelected?: Enum14;
 }
 
 // @public
@@ -5174,8 +5361,6 @@ export type ProviderGetAvailableStacksNextResponse = ApplicationStackCollection;
 
 // @public
 export interface ProviderGetAvailableStacksOnPremNextOptionalParams extends coreClient.OperationOptions {
-    // (undocumented)
-    osTypeSelected?: Enum19;
 }
 
 // @public
@@ -5184,7 +5369,7 @@ export type ProviderGetAvailableStacksOnPremNextResponse = ApplicationStackColle
 // @public
 export interface ProviderGetAvailableStacksOnPremOptionalParams extends coreClient.OperationOptions {
     // (undocumented)
-    osTypeSelected?: Enum19;
+    osTypeSelected?: ProviderOsTypeSelected;
 }
 
 // @public
@@ -5193,7 +5378,7 @@ export type ProviderGetAvailableStacksOnPremResponse = ApplicationStackCollectio
 // @public
 export interface ProviderGetAvailableStacksOptionalParams extends coreClient.OperationOptions {
     // (undocumented)
-    osTypeSelected?: Enum14;
+    osTypeSelected?: ProviderOsTypeSelected;
 }
 
 // @public
@@ -5201,7 +5386,6 @@ export type ProviderGetAvailableStacksResponse = ApplicationStackCollection;
 
 // @public
 export interface ProviderGetFunctionAppStacksForLocationNextOptionalParams extends coreClient.OperationOptions {
-    stackOsType?: Enum16;
 }
 
 // @public
@@ -5209,7 +5393,7 @@ export type ProviderGetFunctionAppStacksForLocationNextResponse = FunctionAppSta
 
 // @public
 export interface ProviderGetFunctionAppStacksForLocationOptionalParams extends coreClient.OperationOptions {
-    stackOsType?: Enum16;
+    stackOsType?: ProviderStackOsType;
 }
 
 // @public
@@ -5217,7 +5401,6 @@ export type ProviderGetFunctionAppStacksForLocationResponse = FunctionAppStackCo
 
 // @public
 export interface ProviderGetFunctionAppStacksNextOptionalParams extends coreClient.OperationOptions {
-    stackOsType?: Enum15;
 }
 
 // @public
@@ -5225,7 +5408,7 @@ export type ProviderGetFunctionAppStacksNextResponse = FunctionAppStackCollectio
 
 // @public
 export interface ProviderGetFunctionAppStacksOptionalParams extends coreClient.OperationOptions {
-    stackOsType?: Enum15;
+    stackOsType?: ProviderStackOsType;
 }
 
 // @public
@@ -5233,7 +5416,6 @@ export type ProviderGetFunctionAppStacksResponse = FunctionAppStackCollection;
 
 // @public
 export interface ProviderGetWebAppStacksForLocationNextOptionalParams extends coreClient.OperationOptions {
-    stackOsType?: Enum17;
 }
 
 // @public
@@ -5241,7 +5423,7 @@ export type ProviderGetWebAppStacksForLocationNextResponse = WebAppStackCollecti
 
 // @public
 export interface ProviderGetWebAppStacksForLocationOptionalParams extends coreClient.OperationOptions {
-    stackOsType?: Enum17;
+    stackOsType?: ProviderStackOsType;
 }
 
 // @public
@@ -5249,7 +5431,6 @@ export type ProviderGetWebAppStacksForLocationResponse = WebAppStackCollection;
 
 // @public
 export interface ProviderGetWebAppStacksNextOptionalParams extends coreClient.OperationOptions {
-    stackOsType?: Enum18;
 }
 
 // @public
@@ -5257,7 +5438,7 @@ export type ProviderGetWebAppStacksNextResponse = WebAppStackCollection;
 
 // @public
 export interface ProviderGetWebAppStacksOptionalParams extends coreClient.OperationOptions {
-    stackOsType?: Enum18;
+    stackOsType?: ProviderStackOsType;
 }
 
 // @public
@@ -5276,6 +5457,12 @@ export interface ProviderListOperationsOptionalParams extends coreClient.Operati
 
 // @public
 export type ProviderListOperationsResponse = CsmOperationCollection;
+
+// @public
+export type ProviderOsTypeSelected = string;
+
+// @public
+export type ProviderStackOsType = string;
 
 // @public
 export type ProvisioningState = "Succeeded" | "Failed" | "Canceled" | "InProgress" | "Deleting";
@@ -5461,8 +5648,6 @@ export type RecommendationsGetRuleDetailsByWebAppResponse = RecommendationRule;
 
 // @public
 export interface RecommendationsListHistoryForHostingEnvironmentNextOptionalParams extends coreClient.OperationOptions {
-    expiredOnly?: boolean;
-    filter?: string;
 }
 
 // @public
@@ -5479,8 +5664,6 @@ export type RecommendationsListHistoryForHostingEnvironmentResponse = Recommenda
 
 // @public
 export interface RecommendationsListHistoryForWebAppNextOptionalParams extends coreClient.OperationOptions {
-    expiredOnly?: boolean;
-    filter?: string;
 }
 
 // @public
@@ -5497,8 +5680,6 @@ export type RecommendationsListHistoryForWebAppResponse = RecommendationCollecti
 
 // @public
 export interface RecommendationsListNextOptionalParams extends coreClient.OperationOptions {
-    featured?: boolean;
-    filter?: string;
 }
 
 // @public
@@ -5512,8 +5693,6 @@ export interface RecommendationsListOptionalParams extends coreClient.OperationO
 
 // @public
 export interface RecommendationsListRecommendedRulesForHostingEnvironmentNextOptionalParams extends coreClient.OperationOptions {
-    featured?: boolean;
-    filter?: string;
 }
 
 // @public
@@ -5530,8 +5709,6 @@ export type RecommendationsListRecommendedRulesForHostingEnvironmentResponse = R
 
 // @public
 export interface RecommendationsListRecommendedRulesForWebAppNextOptionalParams extends coreClient.OperationOptions {
-    featured?: boolean;
-    filter?: string;
 }
 
 // @public
@@ -5714,6 +5891,12 @@ export interface ResourceCollection {
 }
 
 // @public
+export interface ResourceConfig {
+    cpu?: number;
+    memory?: string;
+}
+
+// @public
 export interface ResourceHealthMetadata extends ProxyOnlyResource {
     category?: string;
     signalAvailability?: boolean;
@@ -5837,6 +6020,7 @@ export interface ResourceNameAvailability {
 
 // @public
 export interface ResourceNameAvailabilityRequest {
+    environmentId?: string;
     isFqdn?: boolean;
     name: string;
     type: CheckNameResourceTypes;
@@ -5951,6 +6135,9 @@ export interface RunCorrelation {
 }
 
 // @public
+export type RuntimeName = string;
+
+// @public
 export interface SampleUtterance {
     links?: string[];
     qid?: string;
@@ -6011,10 +6198,13 @@ export interface Site extends Resource {
     containerSize?: number;
     customDomainVerificationId?: string;
     dailyMemoryTimeQuota?: number;
+    daprConfig?: DaprConfig;
     readonly defaultHostName?: string;
+    dnsConfiguration?: SiteDnsConfig;
     enabled?: boolean;
     readonly enabledHostNames?: string[];
     extendedLocation?: ExtendedLocation;
+    functionAppConfig?: FunctionAppConfig;
     hostingEnvironmentProfile?: HostingEnvironmentProfile;
     readonly hostNames?: string[];
     hostNamesDisabled?: boolean;
@@ -6027,6 +6217,7 @@ export interface Site extends Resource {
     isXenon?: boolean;
     keyVaultReferenceIdentity?: string;
     readonly lastModifiedTimeUtc?: Date;
+    managedEnvironmentId?: string;
     readonly maxNumberOfWorkers?: number;
     readonly outboundIpAddresses?: string;
     readonly possibleOutboundIpAddresses?: string;
@@ -6034,6 +6225,7 @@ export interface Site extends Resource {
     redundancyMode?: RedundancyMode;
     readonly repositorySiteName?: string;
     reserved?: boolean;
+    resourceConfig?: ResourceConfig;
     readonly resourceGroup?: string;
     scmSiteAlsoStopped?: boolean;
     serverFarmId?: string;
@@ -6046,9 +6238,11 @@ export interface Site extends Resource {
     readonly trafficManagerHostNames?: string[];
     readonly usageState?: UsageState;
     virtualNetworkSubnetId?: string;
+    vnetBackupRestoreEnabled?: boolean;
     vnetContentShareEnabled?: boolean;
     vnetImagePullEnabled?: boolean;
     vnetRouteAllEnabled?: boolean;
+    workloadProfileName?: string;
 }
 
 // @public
@@ -6139,6 +6333,7 @@ export interface SiteConfig {
     defaultDocuments?: string[];
     detailedErrorLoggingEnabled?: boolean;
     documentRoot?: string;
+    elasticWebAppScaleLimit?: number;
     experiments?: Experiments;
     ftpsState?: FtpsState;
     functionAppScaleLimit?: number;
@@ -6148,6 +6343,7 @@ export interface SiteConfig {
     http20Enabled?: boolean;
     httpLoggingEnabled?: boolean;
     ipSecurityRestrictions?: IpSecurityRestriction[];
+    ipSecurityRestrictionsDefaultAction?: DefaultAction;
     javaContainer?: string;
     javaContainerVersion?: string;
     javaVersion?: string;
@@ -6160,7 +6356,9 @@ export interface SiteConfig {
     readonly machineKey?: SiteMachineKey;
     managedPipelineMode?: ManagedPipelineMode;
     managedServiceIdentityId?: number;
+    metadata?: NameValuePair[];
     minimumElasticInstanceCount?: number;
+    minTlsCipherSuite?: TlsCipherSuites;
     minTlsVersion?: SupportedTlsVersions;
     netFrameworkVersion?: string;
     nodeVersion?: string;
@@ -6177,6 +6375,7 @@ export interface SiteConfig {
     requestTracingEnabled?: boolean;
     requestTracingExpirationTime?: Date;
     scmIpSecurityRestrictions?: IpSecurityRestriction[];
+    scmIpSecurityRestrictionsDefaultAction?: DefaultAction;
     scmIpSecurityRestrictionsUseMain?: boolean;
     scmMinTlsVersion?: SupportedTlsVersions;
     scmType?: ScmType;
@@ -6220,6 +6419,7 @@ export interface SiteConfigResource extends ProxyOnlyResource {
     defaultDocuments?: string[];
     detailedErrorLoggingEnabled?: boolean;
     documentRoot?: string;
+    elasticWebAppScaleLimit?: number;
     experiments?: Experiments;
     ftpsState?: FtpsState;
     functionAppScaleLimit?: number;
@@ -6229,6 +6429,7 @@ export interface SiteConfigResource extends ProxyOnlyResource {
     http20Enabled?: boolean;
     httpLoggingEnabled?: boolean;
     ipSecurityRestrictions?: IpSecurityRestriction[];
+    ipSecurityRestrictionsDefaultAction?: DefaultAction;
     javaContainer?: string;
     javaContainerVersion?: string;
     javaVersion?: string;
@@ -6241,7 +6442,9 @@ export interface SiteConfigResource extends ProxyOnlyResource {
     readonly machineKey?: SiteMachineKey;
     managedPipelineMode?: ManagedPipelineMode;
     managedServiceIdentityId?: number;
+    metadata?: NameValuePair[];
     minimumElasticInstanceCount?: number;
+    minTlsCipherSuite?: TlsCipherSuites;
     minTlsVersion?: SupportedTlsVersions;
     netFrameworkVersion?: string;
     nodeVersion?: string;
@@ -6258,6 +6461,7 @@ export interface SiteConfigResource extends ProxyOnlyResource {
     requestTracingEnabled?: boolean;
     requestTracingExpirationTime?: Date;
     scmIpSecurityRestrictions?: IpSecurityRestriction[];
+    scmIpSecurityRestrictionsDefaultAction?: DefaultAction;
     scmIpSecurityRestrictionsUseMain?: boolean;
     scmMinTlsVersion?: SupportedTlsVersions;
     scmType?: ScmType;
@@ -6289,6 +6493,38 @@ export interface SiteConfigurationSnapshotInfo extends ProxyOnlyResource {
 export interface SiteConfigurationSnapshotInfoCollection {
     readonly nextLink?: string;
     value: SiteConfigurationSnapshotInfo[];
+}
+
+// @public
+export interface SiteContainer extends ProxyOnlyResource {
+    authType?: AuthType;
+    readonly createdTime?: Date;
+    environmentVariables?: EnvironmentVariable[];
+    image?: string;
+    isMain?: boolean;
+    readonly lastModifiedTime?: Date;
+    passwordSecret?: string;
+    startUpCommand?: string;
+    targetPort?: string;
+    userManagedIdentityClientId?: string;
+    userName?: string;
+    volumeMounts?: VolumeMount[];
+}
+
+// @public
+export interface SiteContainerCollection {
+    readonly nextLink?: string;
+    value: SiteContainer[];
+}
+
+// @public (undocumented)
+export interface SiteDnsConfig {
+    dnsAltServer?: string;
+    readonly dnsLegacySortOrder?: boolean;
+    dnsMaxCacheTimeout?: number;
+    dnsRetryAttemptCount?: number;
+    dnsRetryAttemptTimeout?: number;
+    dnsServers?: string[];
 }
 
 // @public
@@ -6363,6 +6599,7 @@ export interface SitePatchResource extends ProxyOnlyResource {
     customDomainVerificationId?: string;
     dailyMemoryTimeQuota?: number;
     readonly defaultHostName?: string;
+    dnsConfiguration?: SiteDnsConfig;
     enabled?: boolean;
     readonly enabledHostNames?: string[];
     hostingEnvironmentProfile?: HostingEnvironmentProfile;
@@ -6630,6 +6867,7 @@ export interface StaticSiteARMResource extends Resource {
     buildProperties?: StaticSiteBuildProperties;
     readonly contentDistributionEndpoint?: string;
     readonly customDomains?: string[];
+    readonly databaseConnections?: DatabaseConnectionOverview[];
     readonly defaultHostname?: string;
     enterpriseGradeCdnStatus?: EnterpriseGradeCdnStatus;
     identity?: ManagedServiceIdentity;
@@ -6647,9 +6885,25 @@ export interface StaticSiteARMResource extends Resource {
 }
 
 // @public
+export interface StaticSiteBasicAuthPropertiesARMResource extends ProxyOnlyResource {
+    applicableEnvironmentsMode?: string;
+    environments?: string[];
+    password?: string;
+    readonly secretState?: string;
+    secretUrl?: string;
+}
+
+// @public
+export interface StaticSiteBasicAuthPropertiesCollection {
+    readonly nextLink?: string;
+    value: StaticSiteBasicAuthPropertiesARMResource[];
+}
+
+// @public
 export interface StaticSiteBuildARMResource extends ProxyOnlyResource {
     readonly buildId?: string;
     readonly createdTimeUtc?: Date;
+    readonly databaseConnections?: DatabaseConnectionOverview[];
     readonly hostname?: string;
     readonly lastUpdatedOn?: Date;
     readonly linkedBackends?: StaticSiteLinkedBackend[];
@@ -6704,6 +6958,13 @@ export interface StaticSiteCustomDomainRequestPropertiesARMResource extends Prox
 }
 
 // @public
+export interface StaticSiteDatabaseConnectionConfigurationFileOverview {
+    readonly contents?: string;
+    readonly fileName?: string;
+    readonly type?: string;
+}
+
+// @public
 export interface StaticSiteFunctionOverviewARMResource extends ProxyOnlyResource {
     readonly functionName?: string;
     readonly triggerType?: TriggerTypes;
@@ -6744,6 +7005,7 @@ export interface StaticSitePatchResource extends ProxyOnlyResource {
     buildProperties?: StaticSiteBuildProperties;
     readonly contentDistributionEndpoint?: string;
     readonly customDomains?: string[];
+    readonly databaseConnections?: DatabaseConnectionOverview[];
     readonly defaultHostname?: string;
     enterpriseGradeCdnStatus?: EnterpriseGradeCdnStatus;
     readonly keyVaultReferenceIdentity?: string;
@@ -6766,48 +7028,58 @@ export interface StaticSiteResetPropertiesARMResource extends ProxyOnlyResource 
 
 // @public
 export interface StaticSites {
-    beginApproveOrRejectPrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: PrivateLinkConnectionApprovalRequestResource, options?: StaticSitesApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<PollerLike<PollOperationState<StaticSitesApproveOrRejectPrivateEndpointConnectionResponse>, StaticSitesApproveOrRejectPrivateEndpointConnectionResponse>>;
-    beginApproveOrRejectPrivateEndpointConnectionAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: PrivateLinkConnectionApprovalRequestResource, options?: StaticSitesApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<StaticSitesApproveOrRejectPrivateEndpointConnectionResponse>;
-    beginCreateOrUpdateStaticSite(resourceGroupName: string, name: string, staticSiteEnvelope: StaticSiteARMResource, options?: StaticSitesCreateOrUpdateStaticSiteOptionalParams): Promise<PollerLike<PollOperationState<StaticSitesCreateOrUpdateStaticSiteResponse>, StaticSitesCreateOrUpdateStaticSiteResponse>>;
+    beginApproveOrRejectPrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: RemotePrivateEndpointConnectionARMResource, options?: StaticSitesApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<SimplePollerLike<OperationState<StaticSitesApproveOrRejectPrivateEndpointConnectionResponse>, StaticSitesApproveOrRejectPrivateEndpointConnectionResponse>>;
+    beginApproveOrRejectPrivateEndpointConnectionAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: RemotePrivateEndpointConnectionARMResource, options?: StaticSitesApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<StaticSitesApproveOrRejectPrivateEndpointConnectionResponse>;
+    beginCreateOrUpdateStaticSite(resourceGroupName: string, name: string, staticSiteEnvelope: StaticSiteARMResource, options?: StaticSitesCreateOrUpdateStaticSiteOptionalParams): Promise<SimplePollerLike<OperationState<StaticSitesCreateOrUpdateStaticSiteResponse>, StaticSitesCreateOrUpdateStaticSiteResponse>>;
     beginCreateOrUpdateStaticSiteAndWait(resourceGroupName: string, name: string, staticSiteEnvelope: StaticSiteARMResource, options?: StaticSitesCreateOrUpdateStaticSiteOptionalParams): Promise<StaticSitesCreateOrUpdateStaticSiteResponse>;
-    beginCreateOrUpdateStaticSiteCustomDomain(resourceGroupName: string, name: string, domainName: string, staticSiteCustomDomainRequestPropertiesEnvelope: StaticSiteCustomDomainRequestPropertiesARMResource, options?: StaticSitesCreateOrUpdateStaticSiteCustomDomainOptionalParams): Promise<PollerLike<PollOperationState<StaticSitesCreateOrUpdateStaticSiteCustomDomainResponse>, StaticSitesCreateOrUpdateStaticSiteCustomDomainResponse>>;
+    beginCreateOrUpdateStaticSiteCustomDomain(resourceGroupName: string, name: string, domainName: string, staticSiteCustomDomainRequestPropertiesEnvelope: StaticSiteCustomDomainRequestPropertiesARMResource, options?: StaticSitesCreateOrUpdateStaticSiteCustomDomainOptionalParams): Promise<SimplePollerLike<OperationState<StaticSitesCreateOrUpdateStaticSiteCustomDomainResponse>, StaticSitesCreateOrUpdateStaticSiteCustomDomainResponse>>;
     beginCreateOrUpdateStaticSiteCustomDomainAndWait(resourceGroupName: string, name: string, domainName: string, staticSiteCustomDomainRequestPropertiesEnvelope: StaticSiteCustomDomainRequestPropertiesARMResource, options?: StaticSitesCreateOrUpdateStaticSiteCustomDomainOptionalParams): Promise<StaticSitesCreateOrUpdateStaticSiteCustomDomainResponse>;
-    beginCreateZipDeploymentForStaticSite(resourceGroupName: string, name: string, staticSiteZipDeploymentEnvelope: StaticSiteZipDeploymentARMResource, options?: StaticSitesCreateZipDeploymentForStaticSiteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginCreateZipDeploymentForStaticSite(resourceGroupName: string, name: string, staticSiteZipDeploymentEnvelope: StaticSiteZipDeploymentARMResource, options?: StaticSitesCreateZipDeploymentForStaticSiteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginCreateZipDeploymentForStaticSiteAndWait(resourceGroupName: string, name: string, staticSiteZipDeploymentEnvelope: StaticSiteZipDeploymentARMResource, options?: StaticSitesCreateZipDeploymentForStaticSiteOptionalParams): Promise<void>;
-    beginCreateZipDeploymentForStaticSiteBuild(resourceGroupName: string, name: string, environmentName: string, staticSiteZipDeploymentEnvelope: StaticSiteZipDeploymentARMResource, options?: StaticSitesCreateZipDeploymentForStaticSiteBuildOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginCreateZipDeploymentForStaticSiteBuild(resourceGroupName: string, name: string, environmentName: string, staticSiteZipDeploymentEnvelope: StaticSiteZipDeploymentARMResource, options?: StaticSitesCreateZipDeploymentForStaticSiteBuildOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginCreateZipDeploymentForStaticSiteBuildAndWait(resourceGroupName: string, name: string, environmentName: string, staticSiteZipDeploymentEnvelope: StaticSiteZipDeploymentARMResource, options?: StaticSitesCreateZipDeploymentForStaticSiteBuildOptionalParams): Promise<void>;
-    beginDeletePrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: StaticSitesDeletePrivateEndpointConnectionOptionalParams): Promise<PollerLike<PollOperationState<StaticSitesDeletePrivateEndpointConnectionResponse>, StaticSitesDeletePrivateEndpointConnectionResponse>>;
+    beginDeletePrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: StaticSitesDeletePrivateEndpointConnectionOptionalParams): Promise<SimplePollerLike<OperationState<StaticSitesDeletePrivateEndpointConnectionResponse>, StaticSitesDeletePrivateEndpointConnectionResponse>>;
     beginDeletePrivateEndpointConnectionAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: StaticSitesDeletePrivateEndpointConnectionOptionalParams): Promise<StaticSitesDeletePrivateEndpointConnectionResponse>;
-    beginDeleteStaticSite(resourceGroupName: string, name: string, options?: StaticSitesDeleteStaticSiteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDeleteStaticSite(resourceGroupName: string, name: string, options?: StaticSitesDeleteStaticSiteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteStaticSiteAndWait(resourceGroupName: string, name: string, options?: StaticSitesDeleteStaticSiteOptionalParams): Promise<void>;
-    beginDeleteStaticSiteBuild(resourceGroupName: string, name: string, environmentName: string, options?: StaticSitesDeleteStaticSiteBuildOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDeleteStaticSiteBuild(resourceGroupName: string, name: string, environmentName: string, options?: StaticSitesDeleteStaticSiteBuildOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteStaticSiteBuildAndWait(resourceGroupName: string, name: string, environmentName: string, options?: StaticSitesDeleteStaticSiteBuildOptionalParams): Promise<void>;
-    beginDeleteStaticSiteCustomDomain(resourceGroupName: string, name: string, domainName: string, options?: StaticSitesDeleteStaticSiteCustomDomainOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDeleteStaticSiteCustomDomain(resourceGroupName: string, name: string, domainName: string, options?: StaticSitesDeleteStaticSiteCustomDomainOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteStaticSiteCustomDomainAndWait(resourceGroupName: string, name: string, domainName: string, options?: StaticSitesDeleteStaticSiteCustomDomainOptionalParams): Promise<void>;
-    beginDetachStaticSite(resourceGroupName: string, name: string, options?: StaticSitesDetachStaticSiteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDetachStaticSite(resourceGroupName: string, name: string, options?: StaticSitesDetachStaticSiteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDetachStaticSiteAndWait(resourceGroupName: string, name: string, options?: StaticSitesDetachStaticSiteOptionalParams): Promise<void>;
-    beginLinkBackend(resourceGroupName: string, name: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesLinkBackendOptionalParams): Promise<PollerLike<PollOperationState<StaticSitesLinkBackendResponse>, StaticSitesLinkBackendResponse>>;
+    beginLinkBackend(resourceGroupName: string, name: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesLinkBackendOptionalParams): Promise<SimplePollerLike<OperationState<StaticSitesLinkBackendResponse>, StaticSitesLinkBackendResponse>>;
     beginLinkBackendAndWait(resourceGroupName: string, name: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesLinkBackendOptionalParams): Promise<StaticSitesLinkBackendResponse>;
-    beginLinkBackendToBuild(resourceGroupName: string, name: string, environmentName: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesLinkBackendToBuildOptionalParams): Promise<PollerLike<PollOperationState<StaticSitesLinkBackendToBuildResponse>, StaticSitesLinkBackendToBuildResponse>>;
+    beginLinkBackendToBuild(resourceGroupName: string, name: string, environmentName: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesLinkBackendToBuildOptionalParams): Promise<SimplePollerLike<OperationState<StaticSitesLinkBackendToBuildResponse>, StaticSitesLinkBackendToBuildResponse>>;
     beginLinkBackendToBuildAndWait(resourceGroupName: string, name: string, environmentName: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesLinkBackendToBuildOptionalParams): Promise<StaticSitesLinkBackendToBuildResponse>;
-    beginRegisterUserProvidedFunctionAppWithStaticSite(resourceGroupName: string, name: string, functionAppName: string, staticSiteUserProvidedFunctionEnvelope: StaticSiteUserProvidedFunctionAppARMResource, options?: StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteOptionalParams): Promise<PollerLike<PollOperationState<StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteResponse>, StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteResponse>>;
+    beginRegisterUserProvidedFunctionAppWithStaticSite(resourceGroupName: string, name: string, functionAppName: string, staticSiteUserProvidedFunctionEnvelope: StaticSiteUserProvidedFunctionAppARMResource, options?: StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteOptionalParams): Promise<SimplePollerLike<OperationState<StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteResponse>, StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteResponse>>;
     beginRegisterUserProvidedFunctionAppWithStaticSiteAndWait(resourceGroupName: string, name: string, functionAppName: string, staticSiteUserProvidedFunctionEnvelope: StaticSiteUserProvidedFunctionAppARMResource, options?: StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteOptionalParams): Promise<StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteResponse>;
-    beginRegisterUserProvidedFunctionAppWithStaticSiteBuild(resourceGroupName: string, name: string, environmentName: string, functionAppName: string, staticSiteUserProvidedFunctionEnvelope: StaticSiteUserProvidedFunctionAppARMResource, options?: StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteBuildOptionalParams): Promise<PollerLike<PollOperationState<StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteBuildResponse>, StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteBuildResponse>>;
+    beginRegisterUserProvidedFunctionAppWithStaticSiteBuild(resourceGroupName: string, name: string, environmentName: string, functionAppName: string, staticSiteUserProvidedFunctionEnvelope: StaticSiteUserProvidedFunctionAppARMResource, options?: StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteBuildOptionalParams): Promise<SimplePollerLike<OperationState<StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteBuildResponse>, StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteBuildResponse>>;
     beginRegisterUserProvidedFunctionAppWithStaticSiteBuildAndWait(resourceGroupName: string, name: string, environmentName: string, functionAppName: string, staticSiteUserProvidedFunctionEnvelope: StaticSiteUserProvidedFunctionAppARMResource, options?: StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteBuildOptionalParams): Promise<StaticSitesRegisterUserProvidedFunctionAppWithStaticSiteBuildResponse>;
-    beginValidateBackend(resourceGroupName: string, name: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesValidateBackendOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginValidateBackend(resourceGroupName: string, name: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesValidateBackendOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginValidateBackendAndWait(resourceGroupName: string, name: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesValidateBackendOptionalParams): Promise<void>;
-    beginValidateBackendForBuild(resourceGroupName: string, name: string, environmentName: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesValidateBackendForBuildOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginValidateBackendForBuild(resourceGroupName: string, name: string, environmentName: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesValidateBackendForBuildOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginValidateBackendForBuildAndWait(resourceGroupName: string, name: string, environmentName: string, linkedBackendName: string, staticSiteLinkedBackendEnvelope: StaticSiteLinkedBackendARMResource, options?: StaticSitesValidateBackendForBuildOptionalParams): Promise<void>;
-    beginValidateCustomDomainCanBeAddedToStaticSite(resourceGroupName: string, name: string, domainName: string, staticSiteCustomDomainRequestPropertiesEnvelope: StaticSiteCustomDomainRequestPropertiesARMResource, options?: StaticSitesValidateCustomDomainCanBeAddedToStaticSiteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginValidateCustomDomainCanBeAddedToStaticSite(resourceGroupName: string, name: string, domainName: string, staticSiteCustomDomainRequestPropertiesEnvelope: StaticSiteCustomDomainRequestPropertiesARMResource, options?: StaticSitesValidateCustomDomainCanBeAddedToStaticSiteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginValidateCustomDomainCanBeAddedToStaticSiteAndWait(resourceGroupName: string, name: string, domainName: string, staticSiteCustomDomainRequestPropertiesEnvelope: StaticSiteCustomDomainRequestPropertiesARMResource, options?: StaticSitesValidateCustomDomainCanBeAddedToStaticSiteOptionalParams): Promise<void>;
+    createOrUpdateBasicAuth(resourceGroupName: string, name: string, basicAuthName: BasicAuthName, basicAuthEnvelope: StaticSiteBasicAuthPropertiesARMResource, options?: StaticSitesCreateOrUpdateBasicAuthOptionalParams): Promise<StaticSitesCreateOrUpdateBasicAuthResponse>;
+    createOrUpdateBuildDatabaseConnection(resourceGroupName: string, name: string, environmentName: string, databaseConnectionName: string, databaseConnectionRequestEnvelope: DatabaseConnection, options?: StaticSitesCreateOrUpdateBuildDatabaseConnectionOptionalParams): Promise<StaticSitesCreateOrUpdateBuildDatabaseConnectionResponse>;
+    createOrUpdateDatabaseConnection(resourceGroupName: string, name: string, databaseConnectionName: string, databaseConnectionRequestEnvelope: DatabaseConnection, options?: StaticSitesCreateOrUpdateDatabaseConnectionOptionalParams): Promise<StaticSitesCreateOrUpdateDatabaseConnectionResponse>;
     createOrUpdateStaticSiteAppSettings(resourceGroupName: string, name: string, appSettings: StringDictionary, options?: StaticSitesCreateOrUpdateStaticSiteAppSettingsOptionalParams): Promise<StaticSitesCreateOrUpdateStaticSiteAppSettingsResponse>;
     createOrUpdateStaticSiteBuildAppSettings(resourceGroupName: string, name: string, environmentName: string, appSettings: StringDictionary, options?: StaticSitesCreateOrUpdateStaticSiteBuildAppSettingsOptionalParams): Promise<StaticSitesCreateOrUpdateStaticSiteBuildAppSettingsResponse>;
     createOrUpdateStaticSiteBuildFunctionAppSettings(resourceGroupName: string, name: string, environmentName: string, appSettings: StringDictionary, options?: StaticSitesCreateOrUpdateStaticSiteBuildFunctionAppSettingsOptionalParams): Promise<StaticSitesCreateOrUpdateStaticSiteBuildFunctionAppSettingsResponse>;
     createOrUpdateStaticSiteFunctionAppSettings(resourceGroupName: string, name: string, appSettings: StringDictionary, options?: StaticSitesCreateOrUpdateStaticSiteFunctionAppSettingsOptionalParams): Promise<StaticSitesCreateOrUpdateStaticSiteFunctionAppSettingsResponse>;
     createUserRolesInvitationLink(resourceGroupName: string, name: string, staticSiteUserRolesInvitationEnvelope: StaticSiteUserInvitationRequestResource, options?: StaticSitesCreateUserRolesInvitationLinkOptionalParams): Promise<StaticSitesCreateUserRolesInvitationLinkResponse>;
+    deleteBuildDatabaseConnection(resourceGroupName: string, name: string, environmentName: string, databaseConnectionName: string, options?: StaticSitesDeleteBuildDatabaseConnectionOptionalParams): Promise<void>;
+    deleteDatabaseConnection(resourceGroupName: string, name: string, databaseConnectionName: string, options?: StaticSitesDeleteDatabaseConnectionOptionalParams): Promise<void>;
     deleteStaticSiteUser(resourceGroupName: string, name: string, authprovider: string, userid: string, options?: StaticSitesDeleteStaticSiteUserOptionalParams): Promise<void>;
     detachUserProvidedFunctionAppFromStaticSite(resourceGroupName: string, name: string, functionAppName: string, options?: StaticSitesDetachUserProvidedFunctionAppFromStaticSiteOptionalParams): Promise<void>;
     detachUserProvidedFunctionAppFromStaticSiteBuild(resourceGroupName: string, name: string, environmentName: string, functionAppName: string, options?: StaticSitesDetachUserProvidedFunctionAppFromStaticSiteBuildOptionalParams): Promise<void>;
+    getBasicAuth(resourceGroupName: string, name: string, basicAuthName: BasicAuthName, options?: StaticSitesGetBasicAuthOptionalParams): Promise<StaticSitesGetBasicAuthResponse>;
+    getBuildDatabaseConnection(resourceGroupName: string, name: string, environmentName: string, databaseConnectionName: string, options?: StaticSitesGetBuildDatabaseConnectionOptionalParams): Promise<StaticSitesGetBuildDatabaseConnectionResponse>;
+    getBuildDatabaseConnectionWithDetails(resourceGroupName: string, name: string, environmentName: string, databaseConnectionName: string, options?: StaticSitesGetBuildDatabaseConnectionWithDetailsOptionalParams): Promise<StaticSitesGetBuildDatabaseConnectionWithDetailsResponse>;
+    getDatabaseConnection(resourceGroupName: string, name: string, databaseConnectionName: string, options?: StaticSitesGetDatabaseConnectionOptionalParams): Promise<StaticSitesGetDatabaseConnectionResponse>;
+    getDatabaseConnectionWithDetails(resourceGroupName: string, name: string, databaseConnectionName: string, options?: StaticSitesGetDatabaseConnectionWithDetailsOptionalParams): Promise<StaticSitesGetDatabaseConnectionWithDetailsResponse>;
     getLinkedBackend(resourceGroupName: string, name: string, linkedBackendName: string, options?: StaticSitesGetLinkedBackendOptionalParams): Promise<StaticSitesGetLinkedBackendResponse>;
     getLinkedBackendForBuild(resourceGroupName: string, name: string, environmentName: string, linkedBackendName: string, options?: StaticSitesGetLinkedBackendForBuildOptionalParams): Promise<StaticSitesGetLinkedBackendForBuildResponse>;
     getPrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: StaticSitesGetPrivateEndpointConnectionOptionalParams): Promise<StaticSitesGetPrivateEndpointConnectionResponse>;
@@ -6818,6 +7090,11 @@ export interface StaticSites {
     getUserProvidedFunctionAppForStaticSite(resourceGroupName: string, name: string, functionAppName: string, options?: StaticSitesGetUserProvidedFunctionAppForStaticSiteOptionalParams): Promise<StaticSitesGetUserProvidedFunctionAppForStaticSiteResponse>;
     getUserProvidedFunctionAppForStaticSiteBuild(resourceGroupName: string, name: string, environmentName: string, functionAppName: string, options?: StaticSitesGetUserProvidedFunctionAppForStaticSiteBuildOptionalParams): Promise<StaticSitesGetUserProvidedFunctionAppForStaticSiteBuildResponse>;
     list(options?: StaticSitesListOptionalParams): PagedAsyncIterableIterator<StaticSiteARMResource>;
+    listBasicAuth(resourceGroupName: string, name: string, options?: StaticSitesListBasicAuthOptionalParams): PagedAsyncIterableIterator<StaticSiteBasicAuthPropertiesARMResource>;
+    listBuildDatabaseConnections(resourceGroupName: string, name: string, environmentName: string, options?: StaticSitesGetBuildDatabaseConnectionsOptionalParams): PagedAsyncIterableIterator<DatabaseConnection>;
+    listBuildDatabaseConnectionsWithDetails(resourceGroupName: string, name: string, environmentName: string, options?: StaticSitesGetBuildDatabaseConnectionsWithDetailsOptionalParams): PagedAsyncIterableIterator<DatabaseConnection>;
+    listDatabaseConnections(resourceGroupName: string, name: string, options?: StaticSitesGetDatabaseConnectionsOptionalParams): PagedAsyncIterableIterator<DatabaseConnection>;
+    listDatabaseConnectionsWithDetails(resourceGroupName: string, name: string, options?: StaticSitesGetDatabaseConnectionsWithDetailsOptionalParams): PagedAsyncIterableIterator<DatabaseConnection>;
     listLinkedBackends(resourceGroupName: string, name: string, options?: StaticSitesGetLinkedBackendsOptionalParams): PagedAsyncIterableIterator<StaticSiteLinkedBackendARMResource>;
     listLinkedBackendsForBuild(resourceGroupName: string, name: string, environmentName: string, options?: StaticSitesGetLinkedBackendsForBuildOptionalParams): PagedAsyncIterableIterator<StaticSiteLinkedBackendARMResource>;
     listPrivateEndpointConnectionList(resourceGroupName: string, name: string, options?: StaticSitesGetPrivateEndpointConnectionListOptionalParams): PagedAsyncIterableIterator<RemotePrivateEndpointConnectionARMResource>;
@@ -6839,6 +7116,8 @@ export interface StaticSites {
     resetStaticSiteApiKey(resourceGroupName: string, name: string, resetPropertiesEnvelope: StaticSiteResetPropertiesARMResource, options?: StaticSitesResetStaticSiteApiKeyOptionalParams): Promise<void>;
     unlinkBackend(resourceGroupName: string, name: string, linkedBackendName: string, options?: StaticSitesUnlinkBackendOptionalParams): Promise<void>;
     unlinkBackendFromBuild(resourceGroupName: string, name: string, environmentName: string, linkedBackendName: string, options?: StaticSitesUnlinkBackendFromBuildOptionalParams): Promise<void>;
+    updateBuildDatabaseConnection(resourceGroupName: string, name: string, environmentName: string, databaseConnectionName: string, databaseConnectionRequestEnvelope: DatabaseConnectionPatchRequest, options?: StaticSitesUpdateBuildDatabaseConnectionOptionalParams): Promise<StaticSitesUpdateBuildDatabaseConnectionResponse>;
+    updateDatabaseConnection(resourceGroupName: string, name: string, databaseConnectionName: string, databaseConnectionRequestEnvelope: DatabaseConnectionPatchRequest, options?: StaticSitesUpdateDatabaseConnectionOptionalParams): Promise<StaticSitesUpdateDatabaseConnectionResponse>;
     updateStaticSite(resourceGroupName: string, name: string, staticSiteEnvelope: StaticSitePatchResource, options?: StaticSitesUpdateStaticSiteOptionalParams): Promise<StaticSitesUpdateStaticSiteResponse>;
     updateStaticSiteUser(resourceGroupName: string, name: string, authprovider: string, userid: string, staticSiteUserEnvelope: StaticSiteUserARMResource, options?: StaticSitesUpdateStaticSiteUserOptionalParams): Promise<StaticSitesUpdateStaticSiteUserResponse>;
 }
@@ -6851,6 +7130,27 @@ export interface StaticSitesApproveOrRejectPrivateEndpointConnectionOptionalPara
 
 // @public
 export type StaticSitesApproveOrRejectPrivateEndpointConnectionResponse = RemotePrivateEndpointConnectionARMResource;
+
+// @public
+export interface StaticSitesCreateOrUpdateBasicAuthOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesCreateOrUpdateBasicAuthResponse = StaticSiteBasicAuthPropertiesARMResource;
+
+// @public
+export interface StaticSitesCreateOrUpdateBuildDatabaseConnectionOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesCreateOrUpdateBuildDatabaseConnectionResponse = DatabaseConnection;
+
+// @public
+export interface StaticSitesCreateOrUpdateDatabaseConnectionOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesCreateOrUpdateDatabaseConnectionResponse = DatabaseConnection;
 
 // @public
 export interface StaticSitesCreateOrUpdateStaticSiteAppSettingsOptionalParams extends coreClient.OperationOptions {
@@ -6918,6 +7218,14 @@ export interface StaticSitesCreateZipDeploymentForStaticSiteOptionalParams exten
 }
 
 // @public
+export interface StaticSitesDeleteBuildDatabaseConnectionOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export interface StaticSitesDeleteDatabaseConnectionOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
 export interface StaticSitesDeletePrivateEndpointConnectionOptionalParams extends coreClient.OperationOptions {
     resumeFrom?: string;
     updateIntervalInMs?: number;
@@ -6961,6 +7269,97 @@ export interface StaticSitesDetachUserProvidedFunctionAppFromStaticSiteBuildOpti
 // @public
 export interface StaticSitesDetachUserProvidedFunctionAppFromStaticSiteOptionalParams extends coreClient.OperationOptions {
 }
+
+// @public
+export interface StaticSitesGetBasicAuthOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetBasicAuthResponse = StaticSiteBasicAuthPropertiesARMResource;
+
+// @public
+export interface StaticSitesGetBuildDatabaseConnectionOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetBuildDatabaseConnectionResponse = DatabaseConnection;
+
+// @public
+export interface StaticSitesGetBuildDatabaseConnectionsNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetBuildDatabaseConnectionsNextResponse = DatabaseConnectionCollection;
+
+// @public
+export interface StaticSitesGetBuildDatabaseConnectionsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetBuildDatabaseConnectionsResponse = DatabaseConnectionCollection;
+
+// @public
+export interface StaticSitesGetBuildDatabaseConnectionsWithDetailsNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetBuildDatabaseConnectionsWithDetailsNextResponse = DatabaseConnectionCollection;
+
+// @public
+export interface StaticSitesGetBuildDatabaseConnectionsWithDetailsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetBuildDatabaseConnectionsWithDetailsResponse = DatabaseConnectionCollection;
+
+// @public
+export interface StaticSitesGetBuildDatabaseConnectionWithDetailsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetBuildDatabaseConnectionWithDetailsResponse = DatabaseConnection;
+
+// @public
+export interface StaticSitesGetDatabaseConnectionOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetDatabaseConnectionResponse = DatabaseConnection;
+
+// @public
+export interface StaticSitesGetDatabaseConnectionsNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetDatabaseConnectionsNextResponse = DatabaseConnectionCollection;
+
+// @public
+export interface StaticSitesGetDatabaseConnectionsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetDatabaseConnectionsResponse = DatabaseConnectionCollection;
+
+// @public
+export interface StaticSitesGetDatabaseConnectionsWithDetailsNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetDatabaseConnectionsWithDetailsNextResponse = DatabaseConnectionCollection;
+
+// @public
+export interface StaticSitesGetDatabaseConnectionsWithDetailsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetDatabaseConnectionsWithDetailsResponse = DatabaseConnectionCollection;
+
+// @public
+export interface StaticSitesGetDatabaseConnectionWithDetailsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesGetDatabaseConnectionWithDetailsResponse = DatabaseConnection;
 
 // @public
 export interface StaticSitesGetLinkedBackendForBuildOptionalParams extends coreClient.OperationOptions {
@@ -7142,6 +7541,20 @@ export interface StaticSitesLinkBackendToBuildOptionalParams extends coreClient.
 export type StaticSitesLinkBackendToBuildResponse = StaticSiteLinkedBackendARMResource;
 
 // @public
+export interface StaticSitesListBasicAuthNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesListBasicAuthNextResponse = StaticSiteBasicAuthPropertiesCollection;
+
+// @public
+export interface StaticSitesListBasicAuthOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesListBasicAuthResponse = StaticSiteBasicAuthPropertiesCollection;
+
+// @public
 export interface StaticSitesListNextOptionalParams extends coreClient.OperationOptions {
 }
 
@@ -7293,6 +7706,20 @@ export interface StaticSitesUnlinkBackendFromBuildOptionalParams extends coreCli
 export interface StaticSitesUnlinkBackendOptionalParams extends coreClient.OperationOptions {
     isCleaningAuthConfig?: boolean;
 }
+
+// @public
+export interface StaticSitesUpdateBuildDatabaseConnectionOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesUpdateBuildDatabaseConnectionResponse = DatabaseConnection;
+
+// @public
+export interface StaticSitesUpdateDatabaseConnectionOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type StaticSitesUpdateDatabaseConnectionResponse = DatabaseConnection;
 
 // @public
 export interface StaticSitesUpdateStaticSiteOptionalParams extends coreClient.OperationOptions {
@@ -7503,6 +7930,9 @@ export interface TldLegalAgreementCollection {
     readonly nextLink?: string;
     value: TldLegalAgreement[];
 }
+
+// @public
+export type TlsCipherSuites = string;
 
 // @public
 export interface TokenStore {
@@ -7850,6 +8280,14 @@ export interface VnetValidationTestFailure extends ProxyOnlyResource {
     testName?: string;
 }
 
+// @public (undocumented)
+export interface VolumeMount {
+    containerMountPath: string;
+    data?: string;
+    readOnly?: boolean;
+    volumeSubPath: string;
+}
+
 // @public
 export interface WebAppCollection {
     readonly nextLink?: string;
@@ -7908,77 +8346,77 @@ export interface WebApps {
     applySlotConfigurationSlot(resourceGroupName: string, name: string, slot: string, slotSwapEntity: CsmSlotEntity, options?: WebAppsApplySlotConfigurationSlotOptionalParams): Promise<void>;
     backup(resourceGroupName: string, name: string, request: BackupRequest, options?: WebAppsBackupOptionalParams): Promise<WebAppsBackupResponse>;
     backupSlot(resourceGroupName: string, name: string, slot: string, request: BackupRequest, options?: WebAppsBackupSlotOptionalParams): Promise<WebAppsBackupSlotResponse>;
-    beginApproveOrRejectPrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: PrivateLinkConnectionApprovalRequestResource, options?: WebAppsApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<PollerLike<PollOperationState<WebAppsApproveOrRejectPrivateEndpointConnectionResponse>, WebAppsApproveOrRejectPrivateEndpointConnectionResponse>>;
-    beginApproveOrRejectPrivateEndpointConnectionAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: PrivateLinkConnectionApprovalRequestResource, options?: WebAppsApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<WebAppsApproveOrRejectPrivateEndpointConnectionResponse>;
-    beginApproveOrRejectPrivateEndpointConnectionSlot(resourceGroupName: string, name: string, privateEndpointConnectionName: string, slot: string, privateEndpointWrapper: PrivateLinkConnectionApprovalRequestResource, options?: WebAppsApproveOrRejectPrivateEndpointConnectionSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsApproveOrRejectPrivateEndpointConnectionSlotResponse>, WebAppsApproveOrRejectPrivateEndpointConnectionSlotResponse>>;
-    beginApproveOrRejectPrivateEndpointConnectionSlotAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, slot: string, privateEndpointWrapper: PrivateLinkConnectionApprovalRequestResource, options?: WebAppsApproveOrRejectPrivateEndpointConnectionSlotOptionalParams): Promise<WebAppsApproveOrRejectPrivateEndpointConnectionSlotResponse>;
-    beginCreateFunction(resourceGroupName: string, name: string, functionName: string, functionEnvelope: FunctionEnvelope, options?: WebAppsCreateFunctionOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateFunctionResponse>, WebAppsCreateFunctionResponse>>;
+    beginApproveOrRejectPrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: RemotePrivateEndpointConnectionARMResource, options?: WebAppsApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsApproveOrRejectPrivateEndpointConnectionResponse>, WebAppsApproveOrRejectPrivateEndpointConnectionResponse>>;
+    beginApproveOrRejectPrivateEndpointConnectionAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, privateEndpointWrapper: RemotePrivateEndpointConnectionARMResource, options?: WebAppsApproveOrRejectPrivateEndpointConnectionOptionalParams): Promise<WebAppsApproveOrRejectPrivateEndpointConnectionResponse>;
+    beginApproveOrRejectPrivateEndpointConnectionSlot(resourceGroupName: string, name: string, privateEndpointConnectionName: string, slot: string, privateEndpointWrapper: RemotePrivateEndpointConnectionARMResource, options?: WebAppsApproveOrRejectPrivateEndpointConnectionSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsApproveOrRejectPrivateEndpointConnectionSlotResponse>, WebAppsApproveOrRejectPrivateEndpointConnectionSlotResponse>>;
+    beginApproveOrRejectPrivateEndpointConnectionSlotAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, slot: string, privateEndpointWrapper: RemotePrivateEndpointConnectionARMResource, options?: WebAppsApproveOrRejectPrivateEndpointConnectionSlotOptionalParams): Promise<WebAppsApproveOrRejectPrivateEndpointConnectionSlotResponse>;
+    beginCreateFunction(resourceGroupName: string, name: string, functionName: string, functionEnvelope: FunctionEnvelope, options?: WebAppsCreateFunctionOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateFunctionResponse>, WebAppsCreateFunctionResponse>>;
     beginCreateFunctionAndWait(resourceGroupName: string, name: string, functionName: string, functionEnvelope: FunctionEnvelope, options?: WebAppsCreateFunctionOptionalParams): Promise<WebAppsCreateFunctionResponse>;
-    beginCreateInstanceFunctionSlot(resourceGroupName: string, name: string, functionName: string, slot: string, functionEnvelope: FunctionEnvelope, options?: WebAppsCreateInstanceFunctionSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateInstanceFunctionSlotResponse>, WebAppsCreateInstanceFunctionSlotResponse>>;
+    beginCreateInstanceFunctionSlot(resourceGroupName: string, name: string, functionName: string, slot: string, functionEnvelope: FunctionEnvelope, options?: WebAppsCreateInstanceFunctionSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateInstanceFunctionSlotResponse>, WebAppsCreateInstanceFunctionSlotResponse>>;
     beginCreateInstanceFunctionSlotAndWait(resourceGroupName: string, name: string, functionName: string, slot: string, functionEnvelope: FunctionEnvelope, options?: WebAppsCreateInstanceFunctionSlotOptionalParams): Promise<WebAppsCreateInstanceFunctionSlotResponse>;
-    beginCreateInstanceMSDeployOperation(resourceGroupName: string, name: string, instanceId: string, mSDeploy: MSDeploy, options?: WebAppsCreateInstanceMSDeployOperationOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateInstanceMSDeployOperationResponse>, WebAppsCreateInstanceMSDeployOperationResponse>>;
+    beginCreateInstanceMSDeployOperation(resourceGroupName: string, name: string, instanceId: string, mSDeploy: MSDeploy, options?: WebAppsCreateInstanceMSDeployOperationOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateInstanceMSDeployOperationResponse>, WebAppsCreateInstanceMSDeployOperationResponse>>;
     beginCreateInstanceMSDeployOperationAndWait(resourceGroupName: string, name: string, instanceId: string, mSDeploy: MSDeploy, options?: WebAppsCreateInstanceMSDeployOperationOptionalParams): Promise<WebAppsCreateInstanceMSDeployOperationResponse>;
-    beginCreateInstanceMSDeployOperationSlot(resourceGroupName: string, name: string, slot: string, instanceId: string, mSDeploy: MSDeploy, options?: WebAppsCreateInstanceMSDeployOperationSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateInstanceMSDeployOperationSlotResponse>, WebAppsCreateInstanceMSDeployOperationSlotResponse>>;
+    beginCreateInstanceMSDeployOperationSlot(resourceGroupName: string, name: string, slot: string, instanceId: string, mSDeploy: MSDeploy, options?: WebAppsCreateInstanceMSDeployOperationSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateInstanceMSDeployOperationSlotResponse>, WebAppsCreateInstanceMSDeployOperationSlotResponse>>;
     beginCreateInstanceMSDeployOperationSlotAndWait(resourceGroupName: string, name: string, slot: string, instanceId: string, mSDeploy: MSDeploy, options?: WebAppsCreateInstanceMSDeployOperationSlotOptionalParams): Promise<WebAppsCreateInstanceMSDeployOperationSlotResponse>;
-    beginCreateMSDeployOperation(resourceGroupName: string, name: string, mSDeploy: MSDeploy, options?: WebAppsCreateMSDeployOperationOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateMSDeployOperationResponse>, WebAppsCreateMSDeployOperationResponse>>;
+    beginCreateMSDeployOperation(resourceGroupName: string, name: string, mSDeploy: MSDeploy, options?: WebAppsCreateMSDeployOperationOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateMSDeployOperationResponse>, WebAppsCreateMSDeployOperationResponse>>;
     beginCreateMSDeployOperationAndWait(resourceGroupName: string, name: string, mSDeploy: MSDeploy, options?: WebAppsCreateMSDeployOperationOptionalParams): Promise<WebAppsCreateMSDeployOperationResponse>;
-    beginCreateMSDeployOperationSlot(resourceGroupName: string, name: string, slot: string, mSDeploy: MSDeploy, options?: WebAppsCreateMSDeployOperationSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateMSDeployOperationSlotResponse>, WebAppsCreateMSDeployOperationSlotResponse>>;
+    beginCreateMSDeployOperationSlot(resourceGroupName: string, name: string, slot: string, mSDeploy: MSDeploy, options?: WebAppsCreateMSDeployOperationSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateMSDeployOperationSlotResponse>, WebAppsCreateMSDeployOperationSlotResponse>>;
     beginCreateMSDeployOperationSlotAndWait(resourceGroupName: string, name: string, slot: string, mSDeploy: MSDeploy, options?: WebAppsCreateMSDeployOperationSlotOptionalParams): Promise<WebAppsCreateMSDeployOperationSlotResponse>;
-    beginCreateOrUpdate(resourceGroupName: string, name: string, siteEnvelope: Site, options?: WebAppsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateOrUpdateResponse>, WebAppsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, name: string, siteEnvelope: Site, options?: WebAppsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateOrUpdateResponse>, WebAppsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, name: string, siteEnvelope: Site, options?: WebAppsCreateOrUpdateOptionalParams): Promise<WebAppsCreateOrUpdateResponse>;
-    beginCreateOrUpdateSlot(resourceGroupName: string, name: string, slot: string, siteEnvelope: Site, options?: WebAppsCreateOrUpdateSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateOrUpdateSlotResponse>, WebAppsCreateOrUpdateSlotResponse>>;
+    beginCreateOrUpdateSlot(resourceGroupName: string, name: string, slot: string, siteEnvelope: Site, options?: WebAppsCreateOrUpdateSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateOrUpdateSlotResponse>, WebAppsCreateOrUpdateSlotResponse>>;
     beginCreateOrUpdateSlotAndWait(resourceGroupName: string, name: string, slot: string, siteEnvelope: Site, options?: WebAppsCreateOrUpdateSlotOptionalParams): Promise<WebAppsCreateOrUpdateSlotResponse>;
-    beginCreateOrUpdateSourceControl(resourceGroupName: string, name: string, siteSourceControl: SiteSourceControl, options?: WebAppsCreateOrUpdateSourceControlOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateOrUpdateSourceControlResponse>, WebAppsCreateOrUpdateSourceControlResponse>>;
+    beginCreateOrUpdateSourceControl(resourceGroupName: string, name: string, siteSourceControl: SiteSourceControl, options?: WebAppsCreateOrUpdateSourceControlOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateOrUpdateSourceControlResponse>, WebAppsCreateOrUpdateSourceControlResponse>>;
     beginCreateOrUpdateSourceControlAndWait(resourceGroupName: string, name: string, siteSourceControl: SiteSourceControl, options?: WebAppsCreateOrUpdateSourceControlOptionalParams): Promise<WebAppsCreateOrUpdateSourceControlResponse>;
-    beginCreateOrUpdateSourceControlSlot(resourceGroupName: string, name: string, slot: string, siteSourceControl: SiteSourceControl, options?: WebAppsCreateOrUpdateSourceControlSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsCreateOrUpdateSourceControlSlotResponse>, WebAppsCreateOrUpdateSourceControlSlotResponse>>;
+    beginCreateOrUpdateSourceControlSlot(resourceGroupName: string, name: string, slot: string, siteSourceControl: SiteSourceControl, options?: WebAppsCreateOrUpdateSourceControlSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsCreateOrUpdateSourceControlSlotResponse>, WebAppsCreateOrUpdateSourceControlSlotResponse>>;
     beginCreateOrUpdateSourceControlSlotAndWait(resourceGroupName: string, name: string, slot: string, siteSourceControl: SiteSourceControl, options?: WebAppsCreateOrUpdateSourceControlSlotOptionalParams): Promise<WebAppsCreateOrUpdateSourceControlSlotResponse>;
-    beginDeletePrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: WebAppsDeletePrivateEndpointConnectionOptionalParams): Promise<PollerLike<PollOperationState<WebAppsDeletePrivateEndpointConnectionResponse>, WebAppsDeletePrivateEndpointConnectionResponse>>;
+    beginDeletePrivateEndpointConnection(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: WebAppsDeletePrivateEndpointConnectionOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsDeletePrivateEndpointConnectionResponse>, WebAppsDeletePrivateEndpointConnectionResponse>>;
     beginDeletePrivateEndpointConnectionAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, options?: WebAppsDeletePrivateEndpointConnectionOptionalParams): Promise<WebAppsDeletePrivateEndpointConnectionResponse>;
-    beginDeletePrivateEndpointConnectionSlot(resourceGroupName: string, name: string, privateEndpointConnectionName: string, slot: string, options?: WebAppsDeletePrivateEndpointConnectionSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsDeletePrivateEndpointConnectionSlotResponse>, WebAppsDeletePrivateEndpointConnectionSlotResponse>>;
+    beginDeletePrivateEndpointConnectionSlot(resourceGroupName: string, name: string, privateEndpointConnectionName: string, slot: string, options?: WebAppsDeletePrivateEndpointConnectionSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsDeletePrivateEndpointConnectionSlotResponse>, WebAppsDeletePrivateEndpointConnectionSlotResponse>>;
     beginDeletePrivateEndpointConnectionSlotAndWait(resourceGroupName: string, name: string, privateEndpointConnectionName: string, slot: string, options?: WebAppsDeletePrivateEndpointConnectionSlotOptionalParams): Promise<WebAppsDeletePrivateEndpointConnectionSlotResponse>;
-    beginGetProductionSiteDeploymentStatus(resourceGroupName: string, name: string, deploymentStatusId: string, options?: WebAppsGetProductionSiteDeploymentStatusOptionalParams): Promise<PollerLike<PollOperationState<WebAppsGetProductionSiteDeploymentStatusResponse>, WebAppsGetProductionSiteDeploymentStatusResponse>>;
+    beginGetProductionSiteDeploymentStatus(resourceGroupName: string, name: string, deploymentStatusId: string, options?: WebAppsGetProductionSiteDeploymentStatusOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsGetProductionSiteDeploymentStatusResponse>, WebAppsGetProductionSiteDeploymentStatusResponse>>;
     beginGetProductionSiteDeploymentStatusAndWait(resourceGroupName: string, name: string, deploymentStatusId: string, options?: WebAppsGetProductionSiteDeploymentStatusOptionalParams): Promise<WebAppsGetProductionSiteDeploymentStatusResponse>;
-    beginGetSlotSiteDeploymentStatusSlot(resourceGroupName: string, name: string, slot: string, deploymentStatusId: string, options?: WebAppsGetSlotSiteDeploymentStatusSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsGetSlotSiteDeploymentStatusSlotResponse>, WebAppsGetSlotSiteDeploymentStatusSlotResponse>>;
+    beginGetSlotSiteDeploymentStatusSlot(resourceGroupName: string, name: string, slot: string, deploymentStatusId: string, options?: WebAppsGetSlotSiteDeploymentStatusSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsGetSlotSiteDeploymentStatusSlotResponse>, WebAppsGetSlotSiteDeploymentStatusSlotResponse>>;
     beginGetSlotSiteDeploymentStatusSlotAndWait(resourceGroupName: string, name: string, slot: string, deploymentStatusId: string, options?: WebAppsGetSlotSiteDeploymentStatusSlotOptionalParams): Promise<WebAppsGetSlotSiteDeploymentStatusSlotResponse>;
-    beginInstallSiteExtension(resourceGroupName: string, name: string, siteExtensionId: string, options?: WebAppsInstallSiteExtensionOptionalParams): Promise<PollerLike<PollOperationState<WebAppsInstallSiteExtensionResponse>, WebAppsInstallSiteExtensionResponse>>;
+    beginInstallSiteExtension(resourceGroupName: string, name: string, siteExtensionId: string, options?: WebAppsInstallSiteExtensionOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsInstallSiteExtensionResponse>, WebAppsInstallSiteExtensionResponse>>;
     beginInstallSiteExtensionAndWait(resourceGroupName: string, name: string, siteExtensionId: string, options?: WebAppsInstallSiteExtensionOptionalParams): Promise<WebAppsInstallSiteExtensionResponse>;
-    beginInstallSiteExtensionSlot(resourceGroupName: string, name: string, siteExtensionId: string, slot: string, options?: WebAppsInstallSiteExtensionSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsInstallSiteExtensionSlotResponse>, WebAppsInstallSiteExtensionSlotResponse>>;
+    beginInstallSiteExtensionSlot(resourceGroupName: string, name: string, siteExtensionId: string, slot: string, options?: WebAppsInstallSiteExtensionSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsInstallSiteExtensionSlotResponse>, WebAppsInstallSiteExtensionSlotResponse>>;
     beginInstallSiteExtensionSlotAndWait(resourceGroupName: string, name: string, siteExtensionId: string, slot: string, options?: WebAppsInstallSiteExtensionSlotOptionalParams): Promise<WebAppsInstallSiteExtensionSlotResponse>;
-    beginListPublishingCredentials(resourceGroupName: string, name: string, options?: WebAppsListPublishingCredentialsOptionalParams): Promise<PollerLike<PollOperationState<WebAppsListPublishingCredentialsResponse>, WebAppsListPublishingCredentialsResponse>>;
+    beginListPublishingCredentials(resourceGroupName: string, name: string, options?: WebAppsListPublishingCredentialsOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsListPublishingCredentialsResponse>, WebAppsListPublishingCredentialsResponse>>;
     beginListPublishingCredentialsAndWait(resourceGroupName: string, name: string, options?: WebAppsListPublishingCredentialsOptionalParams): Promise<WebAppsListPublishingCredentialsResponse>;
-    beginListPublishingCredentialsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListPublishingCredentialsSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsListPublishingCredentialsSlotResponse>, WebAppsListPublishingCredentialsSlotResponse>>;
+    beginListPublishingCredentialsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListPublishingCredentialsSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsListPublishingCredentialsSlotResponse>, WebAppsListPublishingCredentialsSlotResponse>>;
     beginListPublishingCredentialsSlotAndWait(resourceGroupName: string, name: string, slot: string, options?: WebAppsListPublishingCredentialsSlotOptionalParams): Promise<WebAppsListPublishingCredentialsSlotResponse>;
-    beginMigrateMySql(resourceGroupName: string, name: string, migrationRequestEnvelope: MigrateMySqlRequest, options?: WebAppsMigrateMySqlOptionalParams): Promise<PollerLike<PollOperationState<WebAppsMigrateMySqlResponse>, WebAppsMigrateMySqlResponse>>;
+    beginMigrateMySql(resourceGroupName: string, name: string, migrationRequestEnvelope: MigrateMySqlRequest, options?: WebAppsMigrateMySqlOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsMigrateMySqlResponse>, WebAppsMigrateMySqlResponse>>;
     beginMigrateMySqlAndWait(resourceGroupName: string, name: string, migrationRequestEnvelope: MigrateMySqlRequest, options?: WebAppsMigrateMySqlOptionalParams): Promise<WebAppsMigrateMySqlResponse>;
-    beginMigrateStorage(subscriptionName: string, resourceGroupName: string, name: string, migrationOptions: StorageMigrationOptions, options?: WebAppsMigrateStorageOptionalParams): Promise<PollerLike<PollOperationState<WebAppsMigrateStorageResponse>, WebAppsMigrateStorageResponse>>;
+    beginMigrateStorage(subscriptionName: string, resourceGroupName: string, name: string, migrationOptions: StorageMigrationOptions, options?: WebAppsMigrateStorageOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsMigrateStorageResponse>, WebAppsMigrateStorageResponse>>;
     beginMigrateStorageAndWait(subscriptionName: string, resourceGroupName: string, name: string, migrationOptions: StorageMigrationOptions, options?: WebAppsMigrateStorageOptionalParams): Promise<WebAppsMigrateStorageResponse>;
-    beginRestore(resourceGroupName: string, name: string, backupId: string, request: RestoreRequest, options?: WebAppsRestoreOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRestore(resourceGroupName: string, name: string, backupId: string, request: RestoreRequest, options?: WebAppsRestoreOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRestoreAndWait(resourceGroupName: string, name: string, backupId: string, request: RestoreRequest, options?: WebAppsRestoreOptionalParams): Promise<void>;
-    beginRestoreFromBackupBlob(resourceGroupName: string, name: string, request: RestoreRequest, options?: WebAppsRestoreFromBackupBlobOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRestoreFromBackupBlob(resourceGroupName: string, name: string, request: RestoreRequest, options?: WebAppsRestoreFromBackupBlobOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRestoreFromBackupBlobAndWait(resourceGroupName: string, name: string, request: RestoreRequest, options?: WebAppsRestoreFromBackupBlobOptionalParams): Promise<void>;
-    beginRestoreFromBackupBlobSlot(resourceGroupName: string, name: string, slot: string, request: RestoreRequest, options?: WebAppsRestoreFromBackupBlobSlotOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRestoreFromBackupBlobSlot(resourceGroupName: string, name: string, slot: string, request: RestoreRequest, options?: WebAppsRestoreFromBackupBlobSlotOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRestoreFromBackupBlobSlotAndWait(resourceGroupName: string, name: string, slot: string, request: RestoreRequest, options?: WebAppsRestoreFromBackupBlobSlotOptionalParams): Promise<void>;
-    beginRestoreFromDeletedApp(resourceGroupName: string, name: string, restoreRequest: DeletedAppRestoreRequest, options?: WebAppsRestoreFromDeletedAppOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRestoreFromDeletedApp(resourceGroupName: string, name: string, restoreRequest: DeletedAppRestoreRequest, options?: WebAppsRestoreFromDeletedAppOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRestoreFromDeletedAppAndWait(resourceGroupName: string, name: string, restoreRequest: DeletedAppRestoreRequest, options?: WebAppsRestoreFromDeletedAppOptionalParams): Promise<void>;
-    beginRestoreFromDeletedAppSlot(resourceGroupName: string, name: string, slot: string, restoreRequest: DeletedAppRestoreRequest, options?: WebAppsRestoreFromDeletedAppSlotOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRestoreFromDeletedAppSlot(resourceGroupName: string, name: string, slot: string, restoreRequest: DeletedAppRestoreRequest, options?: WebAppsRestoreFromDeletedAppSlotOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRestoreFromDeletedAppSlotAndWait(resourceGroupName: string, name: string, slot: string, restoreRequest: DeletedAppRestoreRequest, options?: WebAppsRestoreFromDeletedAppSlotOptionalParams): Promise<void>;
-    beginRestoreSlot(resourceGroupName: string, name: string, backupId: string, slot: string, request: RestoreRequest, options?: WebAppsRestoreSlotOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRestoreSlot(resourceGroupName: string, name: string, backupId: string, slot: string, request: RestoreRequest, options?: WebAppsRestoreSlotOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRestoreSlotAndWait(resourceGroupName: string, name: string, backupId: string, slot: string, request: RestoreRequest, options?: WebAppsRestoreSlotOptionalParams): Promise<void>;
-    beginRestoreSnapshot(resourceGroupName: string, name: string, restoreRequest: SnapshotRestoreRequest, options?: WebAppsRestoreSnapshotOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRestoreSnapshot(resourceGroupName: string, name: string, restoreRequest: SnapshotRestoreRequest, options?: WebAppsRestoreSnapshotOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRestoreSnapshotAndWait(resourceGroupName: string, name: string, restoreRequest: SnapshotRestoreRequest, options?: WebAppsRestoreSnapshotOptionalParams): Promise<void>;
-    beginRestoreSnapshotSlot(resourceGroupName: string, name: string, slot: string, restoreRequest: SnapshotRestoreRequest, options?: WebAppsRestoreSnapshotSlotOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRestoreSnapshotSlot(resourceGroupName: string, name: string, slot: string, restoreRequest: SnapshotRestoreRequest, options?: WebAppsRestoreSnapshotSlotOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRestoreSnapshotSlotAndWait(resourceGroupName: string, name: string, slot: string, restoreRequest: SnapshotRestoreRequest, options?: WebAppsRestoreSnapshotSlotOptionalParams): Promise<void>;
-    beginStartNetworkTrace(resourceGroupName: string, name: string, options?: WebAppsStartNetworkTraceOptionalParams): Promise<PollerLike<PollOperationState<WebAppsStartNetworkTraceResponse>, WebAppsStartNetworkTraceResponse>>;
+    beginStartNetworkTrace(resourceGroupName: string, name: string, options?: WebAppsStartNetworkTraceOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsStartNetworkTraceResponse>, WebAppsStartNetworkTraceResponse>>;
     beginStartNetworkTraceAndWait(resourceGroupName: string, name: string, options?: WebAppsStartNetworkTraceOptionalParams): Promise<WebAppsStartNetworkTraceResponse>;
-    beginStartNetworkTraceSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsStartNetworkTraceSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsStartNetworkTraceSlotResponse>, WebAppsStartNetworkTraceSlotResponse>>;
+    beginStartNetworkTraceSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsStartNetworkTraceSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsStartNetworkTraceSlotResponse>, WebAppsStartNetworkTraceSlotResponse>>;
     beginStartNetworkTraceSlotAndWait(resourceGroupName: string, name: string, slot: string, options?: WebAppsStartNetworkTraceSlotOptionalParams): Promise<WebAppsStartNetworkTraceSlotResponse>;
-    beginStartWebSiteNetworkTraceOperation(resourceGroupName: string, name: string, options?: WebAppsStartWebSiteNetworkTraceOperationOptionalParams): Promise<PollerLike<PollOperationState<WebAppsStartWebSiteNetworkTraceOperationResponse>, WebAppsStartWebSiteNetworkTraceOperationResponse>>;
+    beginStartWebSiteNetworkTraceOperation(resourceGroupName: string, name: string, options?: WebAppsStartWebSiteNetworkTraceOperationOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsStartWebSiteNetworkTraceOperationResponse>, WebAppsStartWebSiteNetworkTraceOperationResponse>>;
     beginStartWebSiteNetworkTraceOperationAndWait(resourceGroupName: string, name: string, options?: WebAppsStartWebSiteNetworkTraceOperationOptionalParams): Promise<WebAppsStartWebSiteNetworkTraceOperationResponse>;
-    beginStartWebSiteNetworkTraceOperationSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsStartWebSiteNetworkTraceOperationSlotOptionalParams): Promise<PollerLike<PollOperationState<WebAppsStartWebSiteNetworkTraceOperationSlotResponse>, WebAppsStartWebSiteNetworkTraceOperationSlotResponse>>;
+    beginStartWebSiteNetworkTraceOperationSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsStartWebSiteNetworkTraceOperationSlotOptionalParams): Promise<SimplePollerLike<OperationState<WebAppsStartWebSiteNetworkTraceOperationSlotResponse>, WebAppsStartWebSiteNetworkTraceOperationSlotResponse>>;
     beginStartWebSiteNetworkTraceOperationSlotAndWait(resourceGroupName: string, name: string, slot: string, options?: WebAppsStartWebSiteNetworkTraceOperationSlotOptionalParams): Promise<WebAppsStartWebSiteNetworkTraceOperationSlotResponse>;
-    beginSwapSlot(resourceGroupName: string, name: string, slot: string, slotSwapEntity: CsmSlotEntity, options?: WebAppsSwapSlotOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginSwapSlot(resourceGroupName: string, name: string, slot: string, slotSwapEntity: CsmSlotEntity, options?: WebAppsSwapSlotOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginSwapSlotAndWait(resourceGroupName: string, name: string, slot: string, slotSwapEntity: CsmSlotEntity, options?: WebAppsSwapSlotOptionalParams): Promise<void>;
-    beginSwapSlotWithProduction(resourceGroupName: string, name: string, slotSwapEntity: CsmSlotEntity, options?: WebAppsSwapSlotWithProductionOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginSwapSlotWithProduction(resourceGroupName: string, name: string, slotSwapEntity: CsmSlotEntity, options?: WebAppsSwapSlotWithProductionOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginSwapSlotWithProductionAndWait(resourceGroupName: string, name: string, slotSwapEntity: CsmSlotEntity, options?: WebAppsSwapSlotWithProductionOptionalParams): Promise<void>;
     createDeployment(resourceGroupName: string, name: string, id: string, deployment: Deployment, options?: WebAppsCreateDeploymentOptionalParams): Promise<WebAppsCreateDeploymentResponse>;
     createDeploymentSlot(resourceGroupName: string, name: string, id: string, slot: string, deployment: Deployment, options?: WebAppsCreateDeploymentSlotOptionalParams): Promise<WebAppsCreateDeploymentSlotResponse>;
@@ -7999,6 +8437,8 @@ export interface WebApps {
     createOrUpdatePublicCertificateSlot(resourceGroupName: string, name: string, publicCertificateName: string, slot: string, publicCertificate: PublicCertificate, options?: WebAppsCreateOrUpdatePublicCertificateSlotOptionalParams): Promise<WebAppsCreateOrUpdatePublicCertificateSlotResponse>;
     createOrUpdateRelayServiceConnection(resourceGroupName: string, name: string, entityName: string, connectionEnvelope: RelayServiceConnectionEntity, options?: WebAppsCreateOrUpdateRelayServiceConnectionOptionalParams): Promise<WebAppsCreateOrUpdateRelayServiceConnectionResponse>;
     createOrUpdateRelayServiceConnectionSlot(resourceGroupName: string, name: string, entityName: string, slot: string, connectionEnvelope: RelayServiceConnectionEntity, options?: WebAppsCreateOrUpdateRelayServiceConnectionSlotOptionalParams): Promise<WebAppsCreateOrUpdateRelayServiceConnectionSlotResponse>;
+    createOrUpdateSiteContainer(resourceGroupName: string, name: string, containerName: string, request: SiteContainer, options?: WebAppsCreateOrUpdateSiteContainerOptionalParams): Promise<WebAppsCreateOrUpdateSiteContainerResponse>;
+    createOrUpdateSiteContainerSlot(resourceGroupName: string, name: string, slot: string, containerName: string, request: SiteContainer, options?: WebAppsCreateOrUpdateSiteContainerSlotOptionalParams): Promise<WebAppsCreateOrUpdateSiteContainerSlotResponse>;
     createOrUpdateSwiftVirtualNetworkConnectionWithCheck(resourceGroupName: string, name: string, connectionEnvelope: SwiftVirtualNetwork, options?: WebAppsCreateOrUpdateSwiftVirtualNetworkConnectionWithCheckOptionalParams): Promise<WebAppsCreateOrUpdateSwiftVirtualNetworkConnectionWithCheckResponse>;
     createOrUpdateSwiftVirtualNetworkConnectionWithCheckSlot(resourceGroupName: string, name: string, slot: string, connectionEnvelope: SwiftVirtualNetwork, options?: WebAppsCreateOrUpdateSwiftVirtualNetworkConnectionWithCheckSlotOptionalParams): Promise<WebAppsCreateOrUpdateSwiftVirtualNetworkConnectionWithCheckSlotResponse>;
     createOrUpdateVnetConnection(resourceGroupName: string, name: string, vnetName: string, connectionEnvelope: VnetInfoResource, options?: WebAppsCreateOrUpdateVnetConnectionOptionalParams): Promise<WebAppsCreateOrUpdateVnetConnectionResponse>;
@@ -8036,6 +8476,8 @@ export interface WebApps {
     deletePublicCertificateSlot(resourceGroupName: string, name: string, slot: string, publicCertificateName: string, options?: WebAppsDeletePublicCertificateSlotOptionalParams): Promise<void>;
     deleteRelayServiceConnection(resourceGroupName: string, name: string, entityName: string, options?: WebAppsDeleteRelayServiceConnectionOptionalParams): Promise<void>;
     deleteRelayServiceConnectionSlot(resourceGroupName: string, name: string, entityName: string, slot: string, options?: WebAppsDeleteRelayServiceConnectionSlotOptionalParams): Promise<void>;
+    deleteSiteContainer(resourceGroupName: string, name: string, containerName: string, options?: WebAppsDeleteSiteContainerOptionalParams): Promise<void>;
+    deleteSiteContainerSlot(resourceGroupName: string, name: string, slot: string, containerName: string, options?: WebAppsDeleteSiteContainerSlotOptionalParams): Promise<void>;
     deleteSiteExtension(resourceGroupName: string, name: string, siteExtensionId: string, options?: WebAppsDeleteSiteExtensionOptionalParams): Promise<void>;
     deleteSiteExtensionSlot(resourceGroupName: string, name: string, siteExtensionId: string, slot: string, options?: WebAppsDeleteSiteExtensionSlotOptionalParams): Promise<void>;
     deleteSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsDeleteSlotOptionalParams): Promise<void>;
@@ -8047,6 +8489,8 @@ export interface WebApps {
     deleteTriggeredWebJobSlot(resourceGroupName: string, name: string, webJobName: string, slot: string, options?: WebAppsDeleteTriggeredWebJobSlotOptionalParams): Promise<void>;
     deleteVnetConnection(resourceGroupName: string, name: string, vnetName: string, options?: WebAppsDeleteVnetConnectionOptionalParams): Promise<void>;
     deleteVnetConnectionSlot(resourceGroupName: string, name: string, vnetName: string, slot: string, options?: WebAppsDeleteVnetConnectionSlotOptionalParams): Promise<void>;
+    deployWorkflowArtifacts(resourceGroupName: string, name: string, options?: WebAppsDeployWorkflowArtifactsOptionalParams): Promise<void>;
+    deployWorkflowArtifactsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsDeployWorkflowArtifactsSlotOptionalParams): Promise<void>;
     discoverBackup(resourceGroupName: string, name: string, request: RestoreRequest, options?: WebAppsDiscoverBackupOptionalParams): Promise<WebAppsDiscoverBackupResponse>;
     discoverBackupSlot(resourceGroupName: string, name: string, slot: string, request: RestoreRequest, options?: WebAppsDiscoverBackupSlotOptionalParams): Promise<WebAppsDiscoverBackupSlotResponse>;
     generateNewSitePublishingPassword(resourceGroupName: string, name: string, options?: WebAppsGenerateNewSitePublishingPasswordOptionalParams): Promise<void>;
@@ -8100,6 +8544,7 @@ export interface WebApps {
     getInstanceProcessModule(resourceGroupName: string, name: string, processId: string, baseAddress: string, instanceId: string, options?: WebAppsGetInstanceProcessModuleOptionalParams): Promise<WebAppsGetInstanceProcessModuleResponse>;
     getInstanceProcessModuleSlot(resourceGroupName: string, name: string, processId: string, baseAddress: string, slot: string, instanceId: string, options?: WebAppsGetInstanceProcessModuleSlotOptionalParams): Promise<WebAppsGetInstanceProcessModuleSlotResponse>;
     getInstanceProcessSlot(resourceGroupName: string, name: string, processId: string, slot: string, instanceId: string, options?: WebAppsGetInstanceProcessSlotOptionalParams): Promise<WebAppsGetInstanceProcessSlotResponse>;
+    getInstanceWorkflowSlot(resourceGroupName: string, name: string, slot: string, workflowName: string, options?: WebAppsGetInstanceWorkflowSlotOptionalParams): Promise<WebAppsGetInstanceWorkflowSlotResponse>;
     getMigrateMySqlStatus(resourceGroupName: string, name: string, options?: WebAppsGetMigrateMySqlStatusOptionalParams): Promise<WebAppsGetMigrateMySqlStatusResponse>;
     getMigrateMySqlStatusSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsGetMigrateMySqlStatusSlotOptionalParams): Promise<WebAppsGetMigrateMySqlStatusSlotResponse>;
     getMSDeployLog(resourceGroupName: string, name: string, options?: WebAppsGetMSDeployLogOptionalParams): Promise<WebAppsGetMSDeployLogResponse>;
@@ -8137,6 +8582,8 @@ export interface WebApps {
     getScmAllowedSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsGetScmAllowedSlotOptionalParams): Promise<WebAppsGetScmAllowedSlotResponse>;
     getSiteConnectionStringKeyVaultReference(resourceGroupName: string, name: string, connectionStringKey: string, options?: WebAppsGetSiteConnectionStringKeyVaultReferenceOptionalParams): Promise<WebAppsGetSiteConnectionStringKeyVaultReferenceResponse>;
     getSiteConnectionStringKeyVaultReferenceSlot(resourceGroupName: string, name: string, connectionStringKey: string, slot: string, options?: WebAppsGetSiteConnectionStringKeyVaultReferenceSlotOptionalParams): Promise<WebAppsGetSiteConnectionStringKeyVaultReferenceSlotResponse>;
+    getSiteContainer(resourceGroupName: string, name: string, containerName: string, options?: WebAppsGetSiteContainerOptionalParams): Promise<WebAppsGetSiteContainerResponse>;
+    getSiteContainerSlot(resourceGroupName: string, name: string, slot: string, containerName: string, options?: WebAppsGetSiteContainerSlotOptionalParams): Promise<WebAppsGetSiteContainerSlotResponse>;
     getSiteExtension(resourceGroupName: string, name: string, siteExtensionId: string, options?: WebAppsGetSiteExtensionOptionalParams): Promise<WebAppsGetSiteExtensionResponse>;
     getSiteExtensionSlot(resourceGroupName: string, name: string, siteExtensionId: string, slot: string, options?: WebAppsGetSiteExtensionSlotOptionalParams): Promise<WebAppsGetSiteExtensionSlotResponse>;
     getSitePhpErrorLogFlag(resourceGroupName: string, name: string, options?: WebAppsGetSitePhpErrorLogFlagOptionalParams): Promise<WebAppsGetSitePhpErrorLogFlagResponse>;
@@ -8158,6 +8605,7 @@ export interface WebApps {
     getWebJobSlot(resourceGroupName: string, name: string, webJobName: string, slot: string, options?: WebAppsGetWebJobSlotOptionalParams): Promise<WebAppsGetWebJobSlotResponse>;
     getWebSiteContainerLogs(resourceGroupName: string, name: string, options?: WebAppsGetWebSiteContainerLogsOptionalParams): Promise<WebAppsGetWebSiteContainerLogsResponse>;
     getWebSiteContainerLogsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsGetWebSiteContainerLogsSlotOptionalParams): Promise<WebAppsGetWebSiteContainerLogsSlotResponse>;
+    getWorkflow(resourceGroupName: string, name: string, workflowName: string, options?: WebAppsGetWorkflowOptionalParams): Promise<WebAppsGetWorkflowResponse>;
     isCloneable(resourceGroupName: string, name: string, options?: WebAppsIsCloneableOptionalParams): Promise<WebAppsIsCloneableResponse>;
     isCloneableSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsIsCloneableSlotOptionalParams): Promise<WebAppsIsCloneableSlotResponse>;
     list(options?: WebAppsListOptionalParams): PagedAsyncIterableIterator<Site>;
@@ -8208,6 +8656,7 @@ export interface WebApps {
     listInstanceProcessModulesSlot(resourceGroupName: string, name: string, processId: string, slot: string, instanceId: string, options?: WebAppsListInstanceProcessModulesSlotOptionalParams): PagedAsyncIterableIterator<ProcessModuleInfo>;
     listInstanceProcessThreads(resourceGroupName: string, name: string, processId: string, instanceId: string, options?: WebAppsListInstanceProcessThreadsOptionalParams): PagedAsyncIterableIterator<ProcessThreadInfo>;
     listInstanceProcessThreadsSlot(resourceGroupName: string, name: string, processId: string, slot: string, instanceId: string, options?: WebAppsListInstanceProcessThreadsSlotOptionalParams): PagedAsyncIterableIterator<ProcessThreadInfo>;
+    listInstanceWorkflowsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListInstanceWorkflowsSlotOptionalParams): PagedAsyncIterableIterator<WorkflowEnvelope>;
     listMetadata(resourceGroupName: string, name: string, options?: WebAppsListMetadataOptionalParams): Promise<WebAppsListMetadataResponse>;
     listMetadataSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListMetadataSlotOptionalParams): Promise<WebAppsListMetadataSlotResponse>;
     listNetworkFeatures(resourceGroupName: string, name: string, view: string, options?: WebAppsListNetworkFeaturesOptionalParams): Promise<WebAppsListNetworkFeaturesResponse>;
@@ -8235,6 +8684,8 @@ export interface WebApps {
     listSiteBackupsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListSiteBackupsSlotOptionalParams): PagedAsyncIterableIterator<BackupItem>;
     listSiteConnectionStringKeyVaultReferences(resourceGroupName: string, name: string, options?: WebAppsGetSiteConnectionStringKeyVaultReferencesOptionalParams): PagedAsyncIterableIterator<ApiKVReference>;
     listSiteConnectionStringKeyVaultReferencesSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsGetSiteConnectionStringKeyVaultReferencesSlotOptionalParams): PagedAsyncIterableIterator<ApiKVReference>;
+    listSiteContainers(resourceGroupName: string, name: string, options?: WebAppsListSiteContainersOptionalParams): PagedAsyncIterableIterator<SiteContainer>;
+    listSiteContainersSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListSiteContainersSlotOptionalParams): PagedAsyncIterableIterator<SiteContainer>;
     listSiteExtensions(resourceGroupName: string, name: string, options?: WebAppsListSiteExtensionsOptionalParams): PagedAsyncIterableIterator<SiteExtensionInfo>;
     listSiteExtensionsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListSiteExtensionsSlotOptionalParams): PagedAsyncIterableIterator<SiteExtensionInfo>;
     listSitePushSettings(resourceGroupName: string, name: string, options?: WebAppsListSitePushSettingsOptionalParams): Promise<WebAppsListSitePushSettingsResponse>;
@@ -8262,6 +8713,9 @@ export interface WebApps {
     listVnetConnectionsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListVnetConnectionsSlotOptionalParams): Promise<WebAppsListVnetConnectionsSlotResponse>;
     listWebJobs(resourceGroupName: string, name: string, options?: WebAppsListWebJobsOptionalParams): PagedAsyncIterableIterator<WebJob>;
     listWebJobsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListWebJobsSlotOptionalParams): PagedAsyncIterableIterator<WebJob>;
+    listWorkflows(resourceGroupName: string, name: string, options?: WebAppsListWorkflowsOptionalParams): PagedAsyncIterableIterator<WorkflowEnvelope>;
+    listWorkflowsConnections(resourceGroupName: string, name: string, options?: WebAppsListWorkflowsConnectionsOptionalParams): Promise<WebAppsListWorkflowsConnectionsResponse>;
+    listWorkflowsConnectionsSlot(resourceGroupName: string, name: string, slot: string, options?: WebAppsListWorkflowsConnectionsSlotOptionalParams): Promise<WebAppsListWorkflowsConnectionsSlotResponse>;
     putPrivateAccessVnet(resourceGroupName: string, name: string, access: PrivateAccess, options?: WebAppsPutPrivateAccessVnetOptionalParams): Promise<WebAppsPutPrivateAccessVnetResponse>;
     putPrivateAccessVnetSlot(resourceGroupName: string, name: string, slot: string, access: PrivateAccess, options?: WebAppsPutPrivateAccessVnetSlotOptionalParams): Promise<WebAppsPutPrivateAccessVnetSlotResponse>;
     recoverSiteConfigurationSnapshot(resourceGroupName: string, name: string, snapshotId: string, options?: WebAppsRecoverSiteConfigurationSnapshotOptionalParams): Promise<void>;
@@ -8604,6 +9058,20 @@ export type WebAppsCreateOrUpdateRelayServiceConnectionSlotResponse = RelayServi
 export type WebAppsCreateOrUpdateResponse = Site;
 
 // @public
+export interface WebAppsCreateOrUpdateSiteContainerOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsCreateOrUpdateSiteContainerResponse = SiteContainer;
+
+// @public
+export interface WebAppsCreateOrUpdateSiteContainerSlotOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsCreateOrUpdateSiteContainerSlotResponse = SiteContainer;
+
+// @public
 export interface WebAppsCreateOrUpdateSlotOptionalParams extends coreClient.OperationOptions {
     resumeFrom?: string;
     updateIntervalInMs?: number;
@@ -8817,6 +9285,14 @@ export interface WebAppsDeleteRelayServiceConnectionSlotOptionalParams extends c
 }
 
 // @public
+export interface WebAppsDeleteSiteContainerOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export interface WebAppsDeleteSiteContainerSlotOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
 export interface WebAppsDeleteSiteExtensionOptionalParams extends coreClient.OperationOptions {
 }
 
@@ -8864,6 +9340,16 @@ export interface WebAppsDeleteVnetConnectionOptionalParams extends coreClient.Op
 
 // @public
 export interface WebAppsDeleteVnetConnectionSlotOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export interface WebAppsDeployWorkflowArtifactsOptionalParams extends coreClient.OperationOptions {
+    workflowArtifacts?: WorkflowArtifacts;
+}
+
+// @public
+export interface WebAppsDeployWorkflowArtifactsSlotOptionalParams extends coreClient.OperationOptions {
+    workflowArtifacts?: WorkflowArtifacts;
 }
 
 // @public
@@ -9269,6 +9755,13 @@ export interface WebAppsGetInstanceProcessSlotOptionalParams extends coreClient.
 export type WebAppsGetInstanceProcessSlotResponse = ProcessInfo;
 
 // @public
+export interface WebAppsGetInstanceWorkflowSlotOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsGetInstanceWorkflowSlotResponse = WorkflowEnvelope;
+
+// @public
 export interface WebAppsGetMigrateMySqlStatusOptionalParams extends coreClient.OperationOptions {
 }
 
@@ -9606,6 +10099,20 @@ export interface WebAppsGetSiteConnectionStringKeyVaultReferencesSlotOptionalPar
 export type WebAppsGetSiteConnectionStringKeyVaultReferencesSlotResponse = ApiKVReferenceCollection;
 
 // @public
+export interface WebAppsGetSiteContainerOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsGetSiteContainerResponse = SiteContainer;
+
+// @public
+export interface WebAppsGetSiteContainerSlotOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsGetSiteContainerSlotResponse = SiteContainer;
+
+// @public
 export interface WebAppsGetSiteExtensionOptionalParams extends coreClient.OperationOptions {
 }
 
@@ -9768,6 +10275,13 @@ export type WebAppsGetWebSiteContainerLogsSlotResponse = {
 };
 
 // @public
+export interface WebAppsGetWorkflowOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsGetWorkflowResponse = WorkflowEnvelope;
+
+// @public
 export interface WebAppsInstallSiteExtensionOptionalParams extends coreClient.OperationOptions {
     resumeFrom?: string;
     updateIntervalInMs?: number;
@@ -9899,7 +10413,6 @@ export type WebAppsListBasicPublishingCredentialsPoliciesSlotResponse = Publishi
 
 // @public
 export interface WebAppsListByResourceGroupNextOptionalParams extends coreClient.OperationOptions {
-    includeSlots?: boolean;
 }
 
 // @public
@@ -10306,6 +10819,20 @@ export interface WebAppsListInstanceProcessThreadsSlotOptionalParams extends cor
 export type WebAppsListInstanceProcessThreadsSlotResponse = ProcessThreadInfoCollection;
 
 // @public
+export interface WebAppsListInstanceWorkflowsSlotNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListInstanceWorkflowsSlotNextResponse = WorkflowEnvelopeCollection;
+
+// @public
+export interface WebAppsListInstanceWorkflowsSlotOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListInstanceWorkflowsSlotResponse = WorkflowEnvelopeCollection;
+
+// @public
 export interface WebAppsListMetadataOptionalParams extends coreClient.OperationOptions {
 }
 
@@ -10346,7 +10873,6 @@ export interface WebAppsListOptionalParams extends coreClient.OperationOptions {
 
 // @public
 export interface WebAppsListPerfMonCountersNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
 }
 
 // @public
@@ -10362,7 +10888,6 @@ export type WebAppsListPerfMonCountersResponse = PerfMonCounterCollection;
 
 // @public
 export interface WebAppsListPerfMonCountersSlotNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
 }
 
 // @public
@@ -10598,6 +11123,34 @@ export interface WebAppsListSiteBackupsSlotOptionalParams extends coreClient.Ope
 
 // @public
 export type WebAppsListSiteBackupsSlotResponse = BackupItemCollection;
+
+// @public
+export interface WebAppsListSiteContainersNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListSiteContainersNextResponse = SiteContainerCollection;
+
+// @public
+export interface WebAppsListSiteContainersOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListSiteContainersResponse = SiteContainerCollection;
+
+// @public
+export interface WebAppsListSiteContainersSlotNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListSiteContainersSlotNextResponse = SiteContainerCollection;
+
+// @public
+export interface WebAppsListSiteContainersSlotOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListSiteContainersSlotResponse = SiteContainerCollection;
 
 // @public
 export interface WebAppsListSiteExtensionsNextOptionalParams extends coreClient.OperationOptions {
@@ -10840,7 +11393,6 @@ export type WebAppsListTriggeredWebJobsSlotResponse = TriggeredWebJobCollection;
 
 // @public
 export interface WebAppsListUsagesNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
 }
 
 // @public
@@ -10856,7 +11408,6 @@ export type WebAppsListUsagesResponse = CsmUsageQuotaCollection;
 
 // @public
 export interface WebAppsListUsagesSlotNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
 }
 
 // @public
@@ -10911,6 +11462,34 @@ export interface WebAppsListWebJobsSlotOptionalParams extends coreClient.Operati
 
 // @public
 export type WebAppsListWebJobsSlotResponse = WebJobCollection;
+
+// @public
+export interface WebAppsListWorkflowsConnectionsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListWorkflowsConnectionsResponse = WorkflowEnvelope;
+
+// @public
+export interface WebAppsListWorkflowsConnectionsSlotOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListWorkflowsConnectionsSlotResponse = WorkflowEnvelope;
+
+// @public
+export interface WebAppsListWorkflowsNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListWorkflowsNextResponse = WorkflowEnvelopeCollection;
+
+// @public
+export interface WebAppsListWorkflowsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type WebAppsListWorkflowsResponse = WorkflowEnvelopeCollection;
 
 // @public
 export interface WebAppsMigrateMySqlOptionalParams extends coreClient.OperationOptions {
@@ -11540,6 +12119,7 @@ export class WebSiteManagementClient extends coreClient.ServiceClient {
     // (undocumented)
     $host: string;
     constructor(credentials: coreAuth.TokenCredential, subscriptionId: string, options?: WebSiteManagementClientOptionalParams);
+    constructor(credentials: coreAuth.TokenCredential, options?: WebSiteManagementClientOptionalParams);
     // (undocumented)
     apiVersion: string;
     // (undocumented)
@@ -11571,9 +12151,12 @@ export class WebSiteManagementClient extends coreClient.ServiceClient {
     getSourceControl(sourceControlType: string, options?: GetSourceControlOptionalParams): Promise<GetSourceControlResponse>;
     getSubscriptionDeploymentLocations(options?: GetSubscriptionDeploymentLocationsOptionalParams): Promise<GetSubscriptionDeploymentLocationsResponse>;
     // (undocumented)
+    getUsagesInLocation: GetUsagesInLocation;
+    // (undocumented)
     global: Global_2;
     // (undocumented)
     kubeEnvironments: KubeEnvironments;
+    listAseRegions(options?: ListAseRegionsOptionalParams): PagedAsyncIterableIterator<AseRegion>;
     listBillingMeters(options?: ListBillingMetersOptionalParams): PagedAsyncIterableIterator<BillingMeter>;
     listCustomHostNameSites(options?: ListCustomHostNameSitesOptionalParams): PagedAsyncIterableIterator<CustomHostnameSites>;
     listGeoRegions(options?: ListGeoRegionsOptionalParams): PagedAsyncIterableIterator<GeoRegion>;
@@ -11591,7 +12174,7 @@ export class WebSiteManagementClient extends coreClient.ServiceClient {
     // (undocumented)
     staticSites: StaticSites;
     // (undocumented)
-    subscriptionId: string;
+    subscriptionId?: string;
     // (undocumented)
     topLevelDomains: TopLevelDomains;
     updatePublishingUser(userDetails: User, options?: UpdatePublishingUserOptionalParams): Promise<UpdatePublishingUserResponse>;
@@ -11681,9 +12264,52 @@ export interface Workflow extends WorkflowResource {
 }
 
 // @public
+export interface WorkflowArtifacts {
+    appSettings?: Record<string, unknown>;
+    files?: {
+        [propertyName: string]: Record<string, unknown>;
+    };
+    filesToDelete?: string[];
+}
+
+// @public
+export interface WorkflowEnvelope {
+    readonly id?: string;
+    kind?: string;
+    location?: string;
+    readonly name?: string;
+    properties?: WorkflowEnvelopeProperties;
+    readonly type?: string;
+}
+
+// @public
+export interface WorkflowEnvelopeCollection {
+    readonly nextLink?: string;
+    value: WorkflowEnvelope[];
+}
+
+// @public
+export interface WorkflowEnvelopeProperties {
+    files?: {
+        [propertyName: string]: Record<string, unknown>;
+    };
+    flowState?: WorkflowState;
+    health?: WorkflowHealth;
+}
+
+// @public
 export interface WorkflowFilter {
     state?: WorkflowState;
 }
+
+// @public
+export interface WorkflowHealth {
+    error?: ErrorEntity;
+    state: WorkflowHealthState;
+}
+
+// @public
+export type WorkflowHealthState = "NotSpecified" | "Healthy" | "Unhealthy" | "Unknown";
 
 // @public
 export interface WorkflowListResult {
@@ -11924,8 +12550,6 @@ export type WorkflowRunActionsListExpressionTracesResponse = ExpressionTraces;
 
 // @public
 export interface WorkflowRunActionsListNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
-    top?: number;
 }
 
 // @public
@@ -11971,8 +12595,6 @@ export type WorkflowRunsGetResponse = WorkflowRun;
 
 // @public
 export interface WorkflowRunsListNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
-    top?: number;
 }
 
 // @public
@@ -12066,7 +12688,7 @@ export interface WorkflowTriggerFilter {
 
 // @public
 export interface WorkflowTriggerHistories {
-    beginResubmit(resourceGroupName: string, name: string, workflowName: string, triggerName: string, historyName: string, options?: WorkflowTriggerHistoriesResubmitOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginResubmit(resourceGroupName: string, name: string, workflowName: string, triggerName: string, historyName: string, options?: WorkflowTriggerHistoriesResubmitOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginResubmitAndWait(resourceGroupName: string, name: string, workflowName: string, triggerName: string, historyName: string, options?: WorkflowTriggerHistoriesResubmitOptionalParams): Promise<void>;
     get(resourceGroupName: string, name: string, workflowName: string, triggerName: string, historyName: string, options?: WorkflowTriggerHistoriesGetOptionalParams): Promise<WorkflowTriggerHistoriesGetResponse>;
     list(resourceGroupName: string, name: string, workflowName: string, triggerName: string, options?: WorkflowTriggerHistoriesListOptionalParams): PagedAsyncIterableIterator<WorkflowTriggerHistory>;
@@ -12081,8 +12703,6 @@ export type WorkflowTriggerHistoriesGetResponse = WorkflowTriggerHistory;
 
 // @public
 export interface WorkflowTriggerHistoriesListNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
-    top?: number;
 }
 
 // @public
@@ -12162,7 +12782,7 @@ export interface WorkflowTriggerRecurrence {
 
 // @public
 export interface WorkflowTriggers {
-    beginRun(resourceGroupName: string, name: string, workflowName: string, triggerName: string, options?: WorkflowTriggersRunOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRun(resourceGroupName: string, name: string, workflowName: string, triggerName: string, options?: WorkflowTriggersRunOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRunAndWait(resourceGroupName: string, name: string, workflowName: string, triggerName: string, options?: WorkflowTriggersRunOptionalParams): Promise<void>;
     get(resourceGroupName: string, name: string, workflowName: string, triggerName: string, options?: WorkflowTriggersGetOptionalParams): Promise<WorkflowTriggersGetResponse>;
     getSchemaJson(resourceGroupName: string, name: string, workflowName: string, triggerName: string, options?: WorkflowTriggersGetSchemaJsonOptionalParams): Promise<WorkflowTriggersGetSchemaJsonResponse>;
@@ -12193,8 +12813,6 @@ export type WorkflowTriggersListCallbackUrlResponse = WorkflowTriggerCallbackUrl
 
 // @public
 export interface WorkflowTriggersListNextOptionalParams extends coreClient.OperationOptions {
-    filter?: string;
-    top?: number;
 }
 
 // @public
@@ -12254,7 +12872,6 @@ export type WorkflowVersionsGetResponse = WorkflowVersion;
 
 // @public
 export interface WorkflowVersionsListNextOptionalParams extends coreClient.OperationOptions {
-    top?: number;
 }
 
 // @public

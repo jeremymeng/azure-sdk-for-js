@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT Licence.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 /**
  * This sample demonstrates how to use RuleManager to create, list, and delete subscription-level rules.
@@ -16,13 +16,16 @@ import {
   ServiceBusClient,
   SqlRuleFilter,
 } from "@azure/service-bus";
+import { DefaultAzureCredential } from "@azure/identity";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 
 async function main() {
   // Define connection string and related Service Bus entity names here
-  const connectionString = process.env.SERVICEBUS_CONNECTION_STRING || "<connection string>";
-  const serviceBusAdminClient = new ServiceBusAdministrationClient(connectionString);
+  const fqdn = process.env.SERVICEBUS_FQDN || "<your-servicebus-namespace>.servicebus.windows.net";
+  const credential = new DefaultAzureCredential();
+  const serviceBusAdminClient = new ServiceBusAdministrationClient(fqdn, credential);
   const topicName = "topic-rulemanager-sample" + new Date().getTime();
   const subscriptionName = "subscription-rule-manager";
   console.log("Creating topic and subscription...");
@@ -32,7 +35,7 @@ async function main() {
   // for simplicity of this sample, we are using the same connection string for the ServiceBusclient instance.
   // However, the connection string could be a different one, e.g., a SAS connection string with only
   // Listen claim for a specific topic.
-  const client = new ServiceBusClient(connectionString);
+  const client = new ServiceBusClient(fqdn, credential);
   const ruleManager = client.createRuleManager(topicName, subscriptionName);
 
   console.log("Listing all rules...");
@@ -76,7 +79,7 @@ async function main() {
     console.log("  page ", i++);
     console.log(
       "    ",
-      page.map((r) => r.name)
+      page.map((r) => r.name),
     );
   }
 

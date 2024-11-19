@@ -7,14 +7,14 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   AdaptiveNetworkHardening,
   AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams,
   AdaptiveNetworkHardeningsGetOptionalParams,
   AdaptiveNetworkHardeningsGetResponse,
   AdaptiveNetworkHardeningEnforceRequest,
-  AdaptiveNetworkHardeningsEnforceOptionalParams
+  AdaptiveNetworkHardeningsEnforceOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -34,7 +34,7 @@ export interface AdaptiveNetworkHardenings {
     resourceNamespace: string,
     resourceType: string,
     resourceName: string,
-    options?: AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams
+    options?: AdaptiveNetworkHardeningsListByExtendedResourceOptionalParams,
   ): PagedAsyncIterableIterator<AdaptiveNetworkHardening>;
   /**
    * Gets a single Adaptive Network Hardening resource
@@ -52,7 +52,7 @@ export interface AdaptiveNetworkHardenings {
     resourceType: string,
     resourceName: string,
     adaptiveNetworkHardeningResourceName: string,
-    options?: AdaptiveNetworkHardeningsGetOptionalParams
+    options?: AdaptiveNetworkHardeningsGetOptionalParams,
   ): Promise<AdaptiveNetworkHardeningsGetResponse>;
   /**
    * Enforces the given rules on the NSG(s) listed in the request
@@ -72,8 +72,8 @@ export interface AdaptiveNetworkHardenings {
     resourceName: string,
     adaptiveNetworkHardeningResourceName: string,
     body: AdaptiveNetworkHardeningEnforceRequest,
-    options?: AdaptiveNetworkHardeningsEnforceOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: AdaptiveNetworkHardeningsEnforceOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Enforces the given rules on the NSG(s) listed in the request
    * @param resourceGroupName The name of the resource group within the user's subscription. The name is
@@ -92,6 +92,6 @@ export interface AdaptiveNetworkHardenings {
     resourceName: string,
     adaptiveNetworkHardeningResourceName: string,
     body: AdaptiveNetworkHardeningEnforceRequest,
-    options?: AdaptiveNetworkHardeningsEnforceOptionalParams
+    options?: AdaptiveNetworkHardeningsEnforceOptionalParams,
   ): Promise<void>;
 }

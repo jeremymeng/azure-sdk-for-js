@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -40,7 +40,7 @@ async function createOrUpdateNetworkManagerScopeConnection() {
       subscriptionId,
       resourceGroupName,
       networkManagerName,
-      scopeConnectionName
+      scopeConnectionName,
     )
     .put(options);
   console.log(result);

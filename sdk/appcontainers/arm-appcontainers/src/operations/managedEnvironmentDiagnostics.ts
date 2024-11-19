@@ -15,12 +15,13 @@ import {
   ManagedEnvironmentDiagnosticsListDetectorsOptionalParams,
   ManagedEnvironmentDiagnosticsListDetectorsResponse,
   ManagedEnvironmentDiagnosticsGetDetectorOptionalParams,
-  ManagedEnvironmentDiagnosticsGetDetectorResponse
+  ManagedEnvironmentDiagnosticsGetDetectorResponse,
 } from "../models";
 
 /** Class containing ManagedEnvironmentDiagnostics operations. */
 export class ManagedEnvironmentDiagnosticsImpl
-  implements ManagedEnvironmentDiagnostics {
+  implements ManagedEnvironmentDiagnostics
+{
   private readonly client: ContainerAppsAPIClient;
 
   /**
@@ -40,11 +41,11 @@ export class ManagedEnvironmentDiagnosticsImpl
   listDetectors(
     resourceGroupName: string,
     environmentName: string,
-    options?: ManagedEnvironmentDiagnosticsListDetectorsOptionalParams
+    options?: ManagedEnvironmentDiagnosticsListDetectorsOptionalParams,
   ): Promise<ManagedEnvironmentDiagnosticsListDetectorsResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, environmentName, options },
-      listDetectorsOperationSpec
+      listDetectorsOperationSpec,
     );
   }
 
@@ -59,11 +60,11 @@ export class ManagedEnvironmentDiagnosticsImpl
     resourceGroupName: string,
     environmentName: string,
     detectorName: string,
-    options?: ManagedEnvironmentDiagnosticsGetDetectorOptionalParams
+    options?: ManagedEnvironmentDiagnosticsGetDetectorOptionalParams,
   ): Promise<ManagedEnvironmentDiagnosticsGetDetectorResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, environmentName, detectorName, options },
-      getDetectorOperationSpec
+      getDetectorOperationSpec,
     );
   }
 }
@@ -71,38 +72,15 @@ export class ManagedEnvironmentDiagnosticsImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listDetectorsOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/managedEnvironments/{environmentName}/detectors",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/managedEnvironments/{environmentName}/detectors",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DiagnosticsCollection
+      bodyMapper: Mappers.DiagnosticsCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.environmentName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getDetectorOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/managedEnvironments/{environmentName}/detectors/{detectorName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.Diagnostics
+      bodyMapper: Mappers.DefaultErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -110,8 +88,29 @@ const getDetectorOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.environmentName,
-    Parameters.detectorName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getDetectorOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/managedEnvironments/{environmentName}/detectors/{detectorName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.Diagnostics,
+    },
+    default: {
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.detectorName,
+    Parameters.environmentName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };

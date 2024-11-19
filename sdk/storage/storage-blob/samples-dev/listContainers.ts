@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary list containers in an account, showing options for paging, resuming paging, etc.
@@ -24,7 +24,7 @@ async function main() {
   // List containers
   const blobServiceClient = new BlobServiceClient(
     `https://${account}.blob.core.windows.net`,
-    sharedKeyCredential
+    sharedKeyCredential,
   );
 
   // Iterate over all containers in the account

@@ -98,6 +98,55 @@ export interface LogSpecification {
   displayName?: string;
 }
 
+/** Common error response for all Azure Resource Manager APIs to return error details for failed operations. (This also follows the OData error response format.). */
+export interface ErrorResponse {
+  /** The error object. */
+  error?: ErrorDetail;
+}
+
+/** The error detail. */
+export interface ErrorDetail {
+  /**
+   * The error code.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly code?: string;
+  /**
+   * The error message.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly message?: string;
+  /**
+   * The error target.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly target?: string;
+  /**
+   * The error details.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly details?: ErrorDetail[];
+  /**
+   * The error additional info.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly additionalInfo?: ErrorAdditionalInfo[];
+}
+
+/** The resource management error additional info. */
+export interface ErrorAdditionalInfo {
+  /**
+   * The additional info type.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly type?: string;
+  /**
+   * The additional info.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly info?: Record<string, unknown>;
+}
+
 /** Resource name availability request content. */
 export interface ResourceNameAvailabilityRequest {
   /** Resource name to verify. */
@@ -124,6 +173,8 @@ export interface FilePathAvailabilityRequest {
   name: string;
   /** The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes */
   subnetId: string;
+  /** The Azure Resource logical availability zone which is used within zone mapping lookup for the subscription and region. The lookup will retrieve the physical zone where volume is placed. */
+  availabilityZone?: string;
 }
 
 /** Quota availability request content. */
@@ -145,7 +196,7 @@ export interface SubscriptionQuotaItemList {
 /** Common fields that are returned in the response for all Azure Resource Manager resources */
 export interface Resource {
   /**
-   * Fully qualified resource ID for the resource. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}
+   * Fully qualified resource ID for the resource. E.g. "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}"
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly id?: string;
@@ -197,6 +248,64 @@ export interface RegionInfoAvailabilityZoneMappingsItem {
   isAvailable?: boolean;
 }
 
+/** List of regionInfo resources */
+export interface RegionInfosList {
+  /** A list of regionInfo resources */
+  value?: RegionInfoResource[];
+  /** URL to get the next set of results. */
+  nextLink?: string;
+}
+
+/** Network sibling set query. */
+export interface QueryNetworkSiblingSetRequest {
+  /** Network Sibling Set ID for a group of volumes sharing networking resources in a subnet. */
+  networkSiblingSetId: string;
+  /** The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes. Example /subscriptions/subscriptionId/resourceGroups/resourceGroup/providers/Microsoft.Network/virtualNetworks/testVnet/subnets/{mySubnet} */
+  subnetId: string;
+}
+
+/** Describes the contents of a network sibling set. */
+export interface NetworkSiblingSet {
+  /** Network Sibling Set ID for a group of volumes sharing networking resources in a subnet. */
+  networkSiblingSetId?: string;
+  /** The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes. Example /subscriptions/subscriptionId/resourceGroups/resourceGroup/providers/Microsoft.Network/virtualNetworks/testVnet/subnets/{mySubnet} */
+  subnetId?: string;
+  /** Network sibling set state Id identifying the current state of the sibling set. */
+  networkSiblingSetStateId?: string;
+  /** Network features available to the volume, or current state of update. */
+  networkFeatures?: NetworkFeatures;
+  /**
+   * Gets the status of the NetworkSiblingSet at the time the operation was called.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: NetworkSiblingSetProvisioningState;
+  /** List of NIC information */
+  nicInfoList?: NicInfo[];
+}
+
+/** NIC information and list of volumes for which the NIC has the primary mount ip address. */
+export interface NicInfo {
+  /**
+   * ipAddress
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly ipAddress?: string;
+  /** Volume resource Ids */
+  volumeResourceIds?: string[];
+}
+
+/** Network sibling set update. */
+export interface UpdateNetworkSiblingSetRequest {
+  /** Network Sibling Set ID for a group of volumes sharing networking resources in a subnet. */
+  networkSiblingSetId: string;
+  /** The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes. Example /subscriptions/subscriptionId/resourceGroups/resourceGroup/providers/Microsoft.Network/virtualNetworks/testVnet/subnets/{mySubnet} */
+  subnetId: string;
+  /** Network sibling set state Id identifying the current state of the sibling set. */
+  networkSiblingSetStateId: string;
+  /** Network features available to the volume. */
+  networkFeatures: NetworkFeatures;
+}
+
 /** List of NetApp account resources */
 export interface NetAppAccountList {
   /** Multiple NetApp accounts */
@@ -209,7 +318,7 @@ export interface NetAppAccountList {
 export interface ActiveDirectory {
   /** Id of the Active Directory */
   activeDirectoryId?: string;
-  /** Username of Active Directory domain administrator */
+  /** A domain user account with permission to create machine accounts */
   username?: string;
   /** Plain text password of Active Directory domain administrator, value is masked in the response */
   password?: string;
@@ -237,7 +346,7 @@ export interface ActiveDirectory {
   backupOperators?: string[];
   /** Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier */
   administrators?: string[];
-  /** kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume. */
+  /** kdc server IP address for the active directory machine. This optional parameter is used only while creating kerberos volume. */
   kdcIP?: string;
   /** Name of the active directory machine. This optional parameter is used only while creating kerberos volume */
   adName?: string;
@@ -257,6 +366,8 @@ export interface ActiveDirectory {
   encryptDCConnections?: boolean;
   /** LDAP Search scope options */
   ldapSearchScope?: LdapSearchScopeOpt;
+  /** Comma separated list of IPv4 addresses of preferred servers for LDAP client. At most two comma separated IPv4 addresses can be passed. */
+  preferredServersForLdapClient?: string;
 }
 
 /** LDAP search scope */
@@ -291,7 +402,7 @@ export interface KeyVaultProperties {
   /** The name of KeyVault key. */
   keyName: string;
   /** The resource ID of KeyVault. */
-  keyVaultResourceId: string;
+  keyVaultResourceId?: string;
   /**
    * Status of the KeyVault connection.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -310,33 +421,35 @@ export interface EncryptionIdentity {
   userAssignedIdentity?: string;
 }
 
-/** Identity for the resource. */
-export interface Identity {
+/** Managed service identity (system assigned and/or user assigned identities) */
+export interface ManagedServiceIdentity {
   /**
-   * The principal ID of resource identity.
+   * The service principal ID of the system assigned identity. This property will only be provided for a system assigned identity.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly principalId?: string;
   /**
-   * The tenant ID of resource.
+   * The tenant ID of the system assigned identity. This property will only be provided for a system assigned identity.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly tenantId?: string;
-  /** The identity type. */
-  type: IdentityType;
-  /** Gets or sets a list of key value pairs that describe the set of User Assigned identities that will be used with this storage account. The key is the ARM resource identifier of the identity. Only 1 User Assigned identity is permitted here. */
-  userAssignedIdentities?: { [propertyName: string]: UserAssignedIdentity };
+  /** Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed). */
+  type: ManagedServiceIdentityType;
+  /** The set of user assigned identities associated with the resource. The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}. The dictionary values can be empty objects ({}) in requests. */
+  userAssignedIdentities?: {
+    [propertyName: string]: UserAssignedIdentity | null;
+  };
 }
 
-/** UserAssignedIdentity for the resource. */
+/** User assigned identity properties */
 export interface UserAssignedIdentity {
   /**
-   * The principal ID of the identity.
+   * The principal ID of the assigned identity.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly principalId?: string;
   /**
-   * The client ID of the identity.
+   * The client ID of the assigned identity.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly clientId?: string;
@@ -363,6 +476,8 @@ export interface NetAppAccountPatch {
   readonly type?: string;
   /** Resource tags */
   tags?: { [propertyName: string]: string };
+  /** The identity used for the resource. */
+  identity?: ManagedServiceIdentity;
   /**
    * Azure lifecycle management
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -377,20 +492,6 @@ export interface NetAppAccountPatch {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly disableShowmount?: boolean;
-}
-
-/** An error response from the service. */
-export interface CloudError {
-  /** Cloud error body. */
-  error?: CloudErrorBody;
-}
-
-/** An error response from the service. */
-export interface CloudErrorBody {
-  /** An identifier for the error. Codes are invariant and are intended to be consumed programmatically. */
-  code?: string;
-  /** A message describing the error, intended to be suitable for display in a user interface. */
-  message?: string;
 }
 
 /** List of capacity pool resources */
@@ -422,7 +523,7 @@ export interface CapacityPoolPatch {
   readonly type?: string;
   /** Resource tags */
   tags?: { [propertyName: string]: string };
-  /** Provisioned size of the pool (in bytes). Allowed values are in 1TiB chunks (value must be multiply of 4398046511104). */
+  /** Provisioned size of the pool (in bytes). Allowed values are in 1TiB chunks (value must be multiple of 1099511627776). */
   size?: number;
   /** The qos type of the pool */
   qosType?: QosType;
@@ -504,6 +605,8 @@ export interface VolumePropertiesDataProtection {
   replication?: ReplicationObject;
   /** Snapshot properties. */
   snapshot?: VolumeSnapshotProperties;
+  /** VolumeRelocation properties */
+  volumeRelocation?: VolumeRelocationProperties;
 }
 
 /** Volume Backup Properties */
@@ -512,30 +615,54 @@ export interface VolumeBackupProperties {
   backupPolicyId?: string;
   /** Policy Enforced */
   policyEnforced?: boolean;
-  /** Vault Resource ID */
-  vaultId?: string;
-  /** Backup Enabled */
-  backupEnabled?: boolean;
+  /** Backup Vault Resource ID */
+  backupVaultId?: string;
 }
 
 /** Replication properties */
 export interface ReplicationObject {
-  /** Id */
-  replicationId?: string;
+  /**
+   * Id
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly replicationId?: string;
   /** Indicates whether the local volume is the source or destination for the Volume Replication */
   endpointType?: EndpointType;
   /** Schedule */
   replicationSchedule?: ReplicationSchedule;
-  /** The resource ID of the remote volume. */
-  remoteVolumeResourceId: string;
+  /** The resource ID of the remote volume. Required for cross region and cross zone replication */
+  remoteVolumeResourceId?: string;
+  /** The full path to a volume that is to be migrated into ANF. Required for Migration volumes */
+  remotePath?: RemotePath;
   /** The remote region for the other end of the Volume Replication. */
   remoteVolumeRegion?: string;
+}
+
+/** The full path to a volume that is to be migrated into ANF. Required for Migration volumes */
+export interface RemotePath {
+  /** The Path to a ONTAP Host */
+  externalHostName: string;
+  /** The name of a server on the ONTAP Host */
+  serverName: string;
+  /** The name of a volume on the server */
+  volumeName: string;
 }
 
 /** Volume Snapshot Properties */
 export interface VolumeSnapshotProperties {
   /** Snapshot Policy ResourceId */
   snapshotPolicyId?: string;
+}
+
+/** Volume relocation properties */
+export interface VolumeRelocationProperties {
+  /** Has relocation been requested for this volume */
+  relocationRequested?: boolean;
+  /**
+   * Has relocation finished and is ready to be cleaned up
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly readyToBeFinalized?: boolean;
 }
 
 /** Application specific parameters for the placement of volumes in the volume group */
@@ -569,11 +696,13 @@ export interface VolumePatch {
   tags?: { [propertyName: string]: string };
   /** The service level of the file system */
   serviceLevel?: ServiceLevel;
-  /** Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. Minimum size is 100 GiB. Upper limit is 100TiB, 500Tib for LargeVolume. Specified in bytes. */
+  /** Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. For regular volumes, valid values are in the range 50GiB to 100TiB. For large volumes, valid values are in the range 100TiB to 500TiB, and on an exceptional basis, from to 2400GiB to 2400TiB. Values expressed in bytes as multiples of 1 GiB. */
   usageThreshold?: number;
   /** Set of export policy rules */
   exportPolicy?: VolumePatchPropertiesExportPolicy;
-  /** Maximum throughput in Mibps that can be achieved by this volume and this will be accepted as input only for manual qosType volume */
+  /** Set of protocol types, default NFSv3, CIFS for SMB protocol */
+  protocolTypes?: string[];
+  /** Maximum throughput in MiB/s that can be achieved by this volume and this will be accepted as input only for manual qosType volume */
   throughputMibps?: number;
   /** DataProtection type volumes include an object containing details of the replication */
   dataProtection?: VolumePatchPropertiesDataProtection;
@@ -589,6 +718,19 @@ export interface VolumePatch {
   coolAccess?: boolean;
   /** Specifies the number of days after which data that is not accessed by clients will be tiered. */
   coolnessPeriod?: number;
+  /**
+   * coolAccessRetrievalPolicy determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. The possible values for this field are:
+   *  Default - Data will be pulled from cool tier to standard storage on random reads. This policy is the default.
+   *  OnRead - All client-driven data read is pulled from cool tier to standard storage on both sequential and random reads.
+   *  Never - No client-driven data is pulled from cool tier to standard storage.
+   */
+  coolAccessRetrievalPolicy?: CoolAccessRetrievalPolicy;
+  /** If enabled (true) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots. */
+  snapshotDirectoryVisible?: boolean;
+  /** Enables access-based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume */
+  smbAccessBasedEnumeration?: SmbAccessBasedEnumeration;
+  /** Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume */
+  smbNonBrowsable?: SmbNonBrowsable;
 }
 
 /** Set of export policy rules */
@@ -609,6 +751,26 @@ export interface VolumePatchPropertiesDataProtection {
 export interface VolumeRevert {
   /** Resource id of the snapshot */
   snapshotId?: string;
+}
+
+/** Break file locks request */
+export interface BreakFileLocksRequest {
+  /** To clear file locks on a volume for a particular client */
+  clientIp?: string;
+  /** Break File locks could be a disruptive operation for application as locks on the volume will be broken, if want to process, set to true. */
+  confirmRunningDisruptiveOperation?: boolean;
+}
+
+/** Get group Id list for LDAP User request */
+export interface GetGroupIdListForLdapUserRequest {
+  /** username is required to fetch the group to which user is part of */
+  username: string;
+}
+
+/** Group Id list for Ldap user */
+export interface GetGroupIdListForLdapUserResponse {
+  /** Group Id list */
+  groupIdsForLdapUser?: string[];
 }
 
 /** Break replication request */
@@ -645,6 +807,11 @@ export interface ListReplications {
 
 /** Replication properties */
 export interface Replication {
+  /**
+   * UUID v4 used to identify the replication.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly replicationId?: string;
   /** Indicates whether the local volume is the source or destination for the Volume Replication */
   endpointType?: EndpointType;
   /** Schedule */
@@ -659,6 +826,24 @@ export interface Replication {
 export interface AuthorizeRequest {
   /** Resource id of the remote volume */
   remoteVolumeResourceId?: string;
+}
+
+/** Source Cluster properties for a cluster peer request */
+export interface PeerClusterForVolumeMigrationRequest {
+  /** A list of IC-LIF IPs that can be used to connect to the On-prem cluster */
+  peerIpAddresses: string[];
+}
+
+/** Information about cluster peering process */
+export interface ClusterPeerCommandResponse {
+  /** A command that needs to be run on the external ONTAP to accept cluster peering.  Will only be present if <code>clusterPeeringStatus</code> is <code>pending</code> */
+  peerAcceptCommand?: string;
+}
+
+/** Information about svm peering process */
+export interface SvmPeerCommandResponse {
+  /** A command that needs to be run on the external ONTAP to accept svm peering.  Will only be present if <code>svmPeeringStatus</code> is <code>pending</code> */
+  svmPeeringCommand?: string;
 }
 
 /** Pool change request */
@@ -677,42 +862,6 @@ export interface RelocateVolumeRequest {
 export interface SnapshotsList {
   /** A list of Snapshots */
   value?: Snapshot[];
-}
-
-/** Snapshot of a Volume */
-export interface Snapshot {
-  /** Resource location */
-  location: string;
-  /**
-   * Resource Id
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly id?: string;
-  /**
-   * Resource name
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly name?: string;
-  /**
-   * Resource type
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly type?: string;
-  /**
-   * UUID v4 used to identify the Snapshot
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly snapshotId?: string;
-  /**
-   * The creation date of the snapshot
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly created?: Date;
-  /**
-   * Azure lifecycle management
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly provisioningState?: string;
 }
 
 /** Restore payload for Single File Snapshot Restore */
@@ -823,195 +972,6 @@ export interface SnapshotPolicyVolumeList {
   value?: Volume[];
 }
 
-/** Backup status */
-export interface BackupStatus {
-  /**
-   * Backup health status
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly healthy?: boolean;
-  /**
-   * Status of the backup mirror relationship
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly relationshipStatus?: RelationshipStatus;
-  /**
-   * The status of the backup
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly mirrorState?: MirrorState;
-  /**
-   * Reason for the unhealthy backup relationship
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly unhealthyReason?: string;
-  /**
-   * Displays error message if the backup is in an error state
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly errorMessage?: string;
-  /**
-   * Displays the last transfer size
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly lastTransferSize?: number;
-  /**
-   * Displays the last transfer type
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly lastTransferType?: string;
-  /**
-   * Displays the total bytes transferred
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly totalTransferBytes?: number;
-}
-
-/** Restore status */
-export interface RestoreStatus {
-  /**
-   * Restore health status
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly healthy?: boolean;
-  /**
-   * Status of the restore SnapMirror relationship
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly relationshipStatus?: RelationshipStatus;
-  /**
-   * The status of the restore
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly mirrorState?: MirrorState;
-  /**
-   * Reason for the unhealthy restore relationship
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly unhealthyReason?: string;
-  /**
-   * Displays error message if the restore is in an error state
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly errorMessage?: string;
-  /**
-   * Displays the total bytes transferred
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly totalTransferBytes?: number;
-}
-
-/** List of Backups */
-export interface BackupsList {
-  /** A list of Backups */
-  value?: Backup[];
-}
-
-/** Backup of a Volume */
-export interface Backup {
-  /** Resource location */
-  location: string;
-  /**
-   * Resource Id
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly id?: string;
-  /**
-   * Resource name
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly name?: string;
-  /**
-   * Resource type
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly type?: string;
-  /**
-   * UUID v4 used to identify the Backup
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly backupId?: string;
-  /**
-   * The creation date of the backup
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly creationDate?: Date;
-  /**
-   * Azure lifecycle management
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly provisioningState?: string;
-  /**
-   * Size of backup
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly size?: number;
-  /** Label for backup */
-  label?: string;
-  /**
-   * Type of backup Manual or Scheduled
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly backupType?: BackupType;
-  /**
-   * Failure reason
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly failureReason?: string;
-  /**
-   * Volume name
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly volumeName?: string;
-  /** Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups */
-  useExistingSnapshot?: boolean;
-}
-
-/** Backup patch */
-export interface BackupPatch {
-  /** Resource tags */
-  tags?: { [propertyName: string]: string };
-  /**
-   * UUID v4 used to identify the Backup
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly backupId?: string;
-  /**
-   * The creation date of the backup
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly creationDate?: Date;
-  /**
-   * Azure lifecycle management
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly provisioningState?: string;
-  /**
-   * Size of backup
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly size?: number;
-  /** Label for backup */
-  label?: string;
-  /**
-   * Type of backup Manual or Scheduled
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly backupType?: BackupType;
-  /**
-   * Failure reason
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly failureReason?: string;
-  /**
-   * Volume name
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly volumeName?: string;
-  /** Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups */
-  useExistingSnapshot?: boolean;
-}
-
 /** List of Backup Policies */
 export interface BackupPoliciesList {
   /** A list of backup policies */
@@ -1022,6 +982,8 @@ export interface BackupPoliciesList {
 export interface VolumeBackups {
   /** Volume name */
   volumeName?: string;
+  /** ResourceId used to identify the Volume */
+  volumeResourceId?: string;
   /** Total count of backups for volume */
   backupsCount?: number;
   /** Policy enabled */
@@ -1050,7 +1012,7 @@ export interface BackupPolicyPatch {
   /** Resource tags */
   tags?: { [propertyName: string]: string };
   /**
-   * Backup Policy Resource ID
+   * Backup Policy GUID ID
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly backupPolicyId?: string;
@@ -1087,6 +1049,8 @@ export interface VolumeQuotaRulesList {
 
 /** Patchable Quota Rule of a Volume */
 export interface VolumeQuotaRulePatch {
+  /** Resource tags */
+  tags?: { [propertyName: string]: string };
   /**
    * Gets the status of the VolumeQuotaRule at the time the operation was called.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -1098,33 +1062,6 @@ export interface VolumeQuotaRulePatch {
   quotaType?: Type;
   /** UserID/GroupID/SID based on the quota target type. UserID and groupID can be found by running ‘id’ or ‘getent’ command for the user or group and SID can be found by running <wmic useraccount where name='user-name' get sid> */
   quotaTarget?: string;
-}
-
-/** List of Vaults */
-export interface VaultList {
-  /** A list of vaults */
-  value?: Vault[];
-}
-
-/** Vault information */
-export interface Vault {
-  /**
-   * Resource Id
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly id?: string;
-  /**
-   * Resource name
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly name?: string;
-  /**
-   * Resource type
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly type?: string;
-  /** Vault Name */
-  vaultName?: string;
 }
 
 /** List of volume group resources */
@@ -1171,8 +1108,6 @@ export interface VolumeGroupMetaData {
   applicationIdentifier?: string;
   /** Application specific placement rules for the volume group */
   globalPlacementRules?: PlacementKeyValuePairs[];
-  /** Application specific identifier of deployment rules for the volume group */
-  deploymentSpecId?: string;
   /**
    * Number of volumes in volume group
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -1226,6 +1161,8 @@ export interface VolumeGroupVolumeProperties {
   readonly type?: string;
   /** Resource tags */
   tags?: { [propertyName: string]: string };
+  /** Availability Zone */
+  zones?: string[];
   /**
    * Unique FileSystem Identifier.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -1235,7 +1172,7 @@ export interface VolumeGroupVolumeProperties {
   creationToken: string;
   /** The service level of the file system */
   serviceLevel?: ServiceLevel;
-  /** Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. Minimum size is 500 GiB. Upper limit is 100TiB, 500Tib for LargeVolume. Specified in bytes. */
+  /** Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. For regular volumes, valid values are in the range 50GiB to 100TiB. For large volumes, valid values are in the range 100TiB to 500TiB, and on an exceptional basis, from to 2400GiB to 2400TiB. Values expressed in bytes as multiples of 1 GiB. */
   usageThreshold: number;
   /** Set of export policy rules */
   exportPolicy?: VolumePropertiesExportPolicy;
@@ -1246,11 +1183,11 @@ export interface VolumeGroupVolumeProperties {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly provisioningState?: string;
-  /** UUID v4 or resource identifier used to identify the Snapshot. */
+  /** Resource identifier used to identify the Snapshot. */
   snapshotId?: string;
   /** If enabled (true) the snapshot the volume was created from will be automatically deleted after the volume create operation has finished.  Defaults to false */
   deleteBaseSnapshot?: boolean;
-  /** UUID v4 or resource identifier used to identify the Backup. */
+  /** Resource identifier used to identify the Backup. */
   backupId?: string;
   /**
    * Unique Baremetal Tenant Identifier.
@@ -1259,8 +1196,13 @@ export interface VolumeGroupVolumeProperties {
   readonly baremetalTenantId?: string;
   /** The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes */
   subnetId: string;
-  /** Basic network, or Standard features available to the volume. */
+  /** The original value of the network features type available to the volume at the time it was created. */
   networkFeatures?: NetworkFeatures;
+  /**
+   * The effective value of the network features type available to the volume, or current effective state of update.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly effectiveNetworkFeatures?: NetworkFeatures;
   /**
    * Network Sibling Set ID for the the group of volumes sharing networking resources.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -1282,7 +1224,7 @@ export interface VolumeGroupVolumeProperties {
   dataProtection?: VolumePropertiesDataProtection;
   /** Restoring */
   isRestoring?: boolean;
-  /** If enabled (true) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots (default to true). */
+  /** If enabled (true) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots (defaults to true). */
   snapshotDirectoryVisible?: boolean;
   /** Describe if a volume is KerberosEnabled. To be use with swagger version 2020-05-01 or later */
   kerberosEnabled?: boolean;
@@ -1290,14 +1232,19 @@ export interface VolumeGroupVolumeProperties {
   securityStyle?: SecurityStyle;
   /** Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later */
   smbEncryption?: boolean;
-  /** Enables access based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume */
+  /** Enables access-based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume */
   smbAccessBasedEnumeration?: SmbAccessBasedEnumeration;
-  /** Enables non browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume */
+  /** Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume */
   smbNonBrowsable?: SmbNonBrowsable;
   /** Enables continuously available share property for smb volume. Only applicable for SMB volume */
   smbContinuouslyAvailable?: boolean;
   /** Maximum throughput in MiB/s that can be achieved by this volume and this will be accepted as input only for manual qosType volume */
   throughputMibps?: number;
+  /**
+   * Actual throughput in MiB/s for auto qosType volumes calculated based on size and serviceLevel
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly actualThroughputMibps?: number;
   /** Source of key used to encrypt data in volume. Applicable if NetApp account has encryption.keySource = 'Microsoft.KeyVault'. Possible values (case-insensitive) are: 'Microsoft.NetApp, Microsoft.KeyVault' */
   encryptionKeySource?: EncryptionKeySource;
   /** The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'. */
@@ -1308,6 +1255,13 @@ export interface VolumeGroupVolumeProperties {
   coolAccess?: boolean;
   /** Specifies the number of days after which data that is not accessed by clients will be tiered. */
   coolnessPeriod?: number;
+  /**
+   * coolAccessRetrievalPolicy determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. The possible values for this field are:
+   *  Default - Data will be pulled from cool tier to standard storage on random reads. This policy is the default.
+   *  OnRead - All client-driven data read is pulled from cool tier to standard storage on both sequential and random reads.
+   *  Never - No client-driven data is pulled from cool tier to standard storage.
+   */
+  coolAccessRetrievalPolicy?: CoolAccessRetrievalPolicy;
   /** UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file: read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users. */
   unixPermissions?: string;
   /**
@@ -1315,8 +1269,18 @@ export interface VolumeGroupVolumeProperties {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly cloneProgress?: number;
+  /**
+   * Flag indicating whether file access logs are enabled for the volume, based on active diagnostic settings present on the volume.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly fileAccessLogs?: FileAccessLogs;
   /** Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purpose */
   avsDataStore?: AvsDataStore;
+  /**
+   * Data store resource unique identifier
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly dataStoreResourceId?: string[];
   /** Specifies if default quota is enabled for the volume. */
   isDefaultQuotaEnabled?: boolean;
   /** Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies . */
@@ -1353,6 +1317,18 @@ export interface VolumeGroupVolumeProperties {
   placementRules?: PlacementKeyValuePairs[];
   /** Flag indicating whether subvolume operations are enabled on the volume */
   enableSubvolumes?: EnableSubvolumes;
+  /**
+   * The availability zone where the volume is provisioned. This refers to the logical availability zone where the volume resides.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisionedAvailabilityZone?: string;
+  /** Specifies whether volume is a Large Volume or Regular Volume. */
+  isLargeVolume?: boolean;
+  /**
+   * Id of the snapshot or backup that the volume is restored from.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly originatingResourceId?: string;
 }
 
 /** List of Subvolumes */
@@ -1410,6 +1386,133 @@ export interface SubvolumeModel {
   provisioningState?: string;
 }
 
+/** Backup status */
+export interface BackupStatus {
+  /**
+   * Backup health status
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly healthy?: boolean;
+  /**
+   * Status of the backup mirror relationship
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly relationshipStatus?: RelationshipStatus;
+  /**
+   * The status of the backup
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly mirrorState?: MirrorState;
+  /**
+   * Reason for the unhealthy backup relationship
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly unhealthyReason?: string;
+  /**
+   * Displays error message if the backup is in an error state
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly errorMessage?: string;
+  /**
+   * Displays the last transfer size
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly lastTransferSize?: number;
+  /**
+   * Displays the last transfer type
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly lastTransferType?: string;
+  /**
+   * Displays the total bytes transferred
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly totalTransferBytes?: number;
+  /**
+   * Displays the total number of bytes transferred for the ongoing operation
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly transferProgressBytes?: number;
+}
+
+/** Restore status */
+export interface RestoreStatus {
+  /**
+   * Restore health status
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly healthy?: boolean;
+  /**
+   * Status of the restore SnapMirror relationship
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly relationshipStatus?: RelationshipStatus;
+  /**
+   * The status of the restore
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly mirrorState?: MirrorState;
+  /**
+   * Reason for the unhealthy restore relationship
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly unhealthyReason?: string;
+  /**
+   * Displays error message if the restore is in an error state
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly errorMessage?: string;
+  /**
+   * Displays the total bytes transferred
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly totalTransferBytes?: number;
+}
+
+/** List of Backups */
+export interface BackupsList {
+  /** A list of Backups */
+  value?: Backup[];
+  /** URL to get the next set of results. */
+  nextLink?: string;
+}
+
+/** Backup patch */
+export interface BackupPatch {
+  /** Label for backup */
+  label?: string;
+}
+
+/** List of Backup Vaults */
+export interface BackupVaultsList {
+  /** A list of Backup Vaults */
+  value?: BackupVault[];
+  /** URL to get the next set of results. */
+  nextLink?: string;
+}
+
+/** Backup Vault information */
+export interface BackupVaultPatch {
+  /** Resource tags */
+  tags?: { [propertyName: string]: string };
+}
+
+/** Restore payload for Single File Backup Restore */
+export interface BackupRestoreFiles {
+  /** List of files to be restored */
+  fileList: string[];
+  /** Destination folder where the files will be restored. The path name should start with a forward slash. If it is omitted from request then restore is done at the root folder of the destination volume by default */
+  restoreFilePath?: string;
+  /** Resource Id of the destination volume on which the files need to be restored */
+  destinationVolumeId: string;
+}
+
+/** Migrate Backups Request */
+export interface BackupsMigrationRequest {
+  /** The ResourceId of the Backup Vault */
+  backupVaultId: string;
+}
+
 /** Identity for the resource. */
 export interface ResourceIdentity {
   /**
@@ -1424,16 +1527,6 @@ export interface ResourceIdentity {
   readonly tenantId?: string;
   /** Type of Identity. Supported values are: 'None', 'SystemAssigned' */
   type?: string;
-}
-
-/** Volume relocation properties */
-export interface VolumeRelocationProperties {
-  /** The id of the old volume that is being relocated */
-  oldVolumeId?: string;
-  /** The id of the bare metal tenant owned by the existing volume */
-  oldBareMetalTenantId?: string;
-  /** Has relocation been requested for this volume */
-  relocationRequested?: boolean;
 }
 
 /** Mount Target */
@@ -1511,59 +1604,22 @@ export interface SnapshotPolicyDetails {
   readonly provisioningState?: string;
 }
 
-/** Backup policy properties */
-export interface BackupPolicyDetails {
-  /** Resource location */
-  location?: string;
-  /**
-   * Resource Id
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly id?: string;
-  /**
-   * Resource name
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly name?: string;
-  /**
-   * Resource type
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly type?: string;
-  /** Resource tags */
-  tags?: { [propertyName: string]: string };
-  /**
-   * Backup Policy Resource ID
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly backupPolicyId?: string;
-  /**
-   * Azure lifecycle management
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly provisioningState?: string;
-  /** Daily backups count to keep */
-  dailyBackupsToKeep?: number;
-  /** Weekly backups count to keep */
-  weeklyBackupsToKeep?: number;
-  /** Monthly backups count to keep */
-  monthlyBackupsToKeep?: number;
-  /**
-   * Volumes using current backup policy
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly volumesAssigned?: number;
-  /** The property to decide policy is enabled or not */
-  enabled?: boolean;
-  /**
-   * A list of volumes assigned to this policy
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly volumeBackups?: VolumeBackups[];
+/** An error response from the service. */
+export interface CloudError {
+  /** Cloud error body. */
+  error?: CloudErrorBody;
+}
+
+/** An error response from the service. */
+export interface CloudErrorBody {
+  /** An identifier for the error. Codes are invariant and are intended to be consumed programmatically. */
+  code?: string;
+  /** A message describing the error, intended to be suitable for display in a user interface. */
+  message?: string;
 }
 
 /** The resource model definition for a Azure Resource Manager proxy resource. It will not have tags and a location */
-export interface ProxyResource extends Resource {}
+export interface ProxyResource extends Resource { }
 
 /** The resource model definition for an Azure Resource Manager tracked top level resource which has 'tags' and a 'location' */
 export interface TrackedResource extends Resource {
@@ -1587,6 +1643,35 @@ export interface SubscriptionQuotaItem extends ProxyResource {
   readonly default?: number;
 }
 
+/** Information regarding regionInfo Item. */
+export interface RegionInfoResource extends ProxyResource {
+  /** Provides storage to network proximity information in the region. */
+  storageToNetworkProximity?: RegionStorageToNetworkProximity;
+  /** Provides logical availability zone mappings for the subscription for a region. */
+  availabilityZoneMappings?: RegionInfoAvailabilityZoneMappingsItem[];
+}
+
+/** Snapshot of a Volume */
+export interface Snapshot extends ProxyResource {
+  /** Resource location */
+  location: string;
+  /**
+   * UUID v4 used to identify the Snapshot
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly snapshotId?: string;
+  /**
+   * The creation date of the snapshot
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly created?: Date;
+  /**
+   * Azure lifecycle management
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: string;
+}
+
 /** Subvolume Information properties */
 export interface SubvolumeInfo extends ProxyResource {
   /** Path to the subvolume */
@@ -1602,6 +1687,53 @@ export interface SubvolumeInfo extends ProxyResource {
   readonly provisioningState?: string;
 }
 
+/** Backup under a Backup Vault */
+export interface Backup extends ProxyResource {
+  /**
+   * UUID v4 used to identify the Backup
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly backupId?: string;
+  /**
+   * The creation date of the backup
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly creationDate?: Date;
+  /**
+   * Azure lifecycle management
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: string;
+  /**
+   * Size of backup in bytes
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly size?: number;
+  /** Label for backup */
+  label?: string;
+  /**
+   * Type of backup Manual or Scheduled
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly backupType?: BackupType;
+  /**
+   * Failure reason
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly failureReason?: string;
+  /** ResourceId used to identify the Volume */
+  volumeResourceId: string;
+  /** Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups */
+  useExistingSnapshot?: boolean;
+  /** The name of the snapshot */
+  snapshotName?: string;
+  /**
+   * ResourceId used to identify the backup policy
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly backupPolicyResourceId?: string;
+}
+
 /** NetApp account resource */
 export interface NetAppAccount extends TrackedResource {
   /**
@@ -1609,8 +1741,8 @@ export interface NetAppAccount extends TrackedResource {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly etag?: string;
-  /** The identity of the resource. */
-  identity?: Identity;
+  /** The identity used for the resource. */
+  identity?: ManagedServiceIdentity;
   /**
    * Azure lifecycle management
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -1639,7 +1771,7 @@ export interface CapacityPool extends TrackedResource {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly poolId?: string;
-  /** Provisioned size of the pool (in bytes). Allowed values are in 1TiB chunks (value must be multiply of 4398046511104). */
+  /** Provisioned size of the pool (in bytes). Allowed values are in 1TiB chunks (value must be multiple of 1099511627776). */
   size: number;
   /** The service level of the file system */
   serviceLevel: ServiceLevel;
@@ -1684,7 +1816,7 @@ export interface Volume extends TrackedResource {
   creationToken: string;
   /** The service level of the file system */
   serviceLevel?: ServiceLevel;
-  /** Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. Minimum size is 500 GiB. Upper limit is 100TiB, 500Tib for LargeVolume. Specified in bytes. */
+  /** Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. For regular volumes, valid values are in the range 50GiB to 100TiB. For large volumes, valid values are in the range 100TiB to 500TiB, and on an exceptional basis, from to 2400GiB to 2400TiB. Values expressed in bytes as multiples of 1 GiB. */
   usageThreshold: number;
   /** Set of export policy rules */
   exportPolicy?: VolumePropertiesExportPolicy;
@@ -1695,11 +1827,11 @@ export interface Volume extends TrackedResource {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly provisioningState?: string;
-  /** UUID v4 or resource identifier used to identify the Snapshot. */
+  /** Resource identifier used to identify the Snapshot. */
   snapshotId?: string;
   /** If enabled (true) the snapshot the volume was created from will be automatically deleted after the volume create operation has finished.  Defaults to false */
   deleteBaseSnapshot?: boolean;
-  /** UUID v4 or resource identifier used to identify the Backup. */
+  /** Resource identifier used to identify the Backup. */
   backupId?: string;
   /**
    * Unique Baremetal Tenant Identifier.
@@ -1708,8 +1840,13 @@ export interface Volume extends TrackedResource {
   readonly baremetalTenantId?: string;
   /** The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes */
   subnetId: string;
-  /** Basic network, or Standard features available to the volume. */
+  /** The original value of the network features type available to the volume at the time it was created. */
   networkFeatures?: NetworkFeatures;
+  /**
+   * The effective value of the network features type available to the volume, or current effective state of update.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly effectiveNetworkFeatures?: NetworkFeatures;
   /**
    * Network Sibling Set ID for the the group of volumes sharing networking resources.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -1731,7 +1868,7 @@ export interface Volume extends TrackedResource {
   dataProtection?: VolumePropertiesDataProtection;
   /** Restoring */
   isRestoring?: boolean;
-  /** If enabled (true) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots (default to true). */
+  /** If enabled (true) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots (defaults to true). */
   snapshotDirectoryVisible?: boolean;
   /** Describe if a volume is KerberosEnabled. To be use with swagger version 2020-05-01 or later */
   kerberosEnabled?: boolean;
@@ -1739,14 +1876,19 @@ export interface Volume extends TrackedResource {
   securityStyle?: SecurityStyle;
   /** Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later */
   smbEncryption?: boolean;
-  /** Enables access based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume */
+  /** Enables access-based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume */
   smbAccessBasedEnumeration?: SmbAccessBasedEnumeration;
-  /** Enables non browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume */
+  /** Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume */
   smbNonBrowsable?: SmbNonBrowsable;
   /** Enables continuously available share property for smb volume. Only applicable for SMB volume */
   smbContinuouslyAvailable?: boolean;
   /** Maximum throughput in MiB/s that can be achieved by this volume and this will be accepted as input only for manual qosType volume */
   throughputMibps?: number;
+  /**
+   * Actual throughput in MiB/s for auto qosType volumes calculated based on size and serviceLevel
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly actualThroughputMibps?: number;
   /** Source of key used to encrypt data in volume. Applicable if NetApp account has encryption.keySource = 'Microsoft.KeyVault'. Possible values (case-insensitive) are: 'Microsoft.NetApp, Microsoft.KeyVault' */
   encryptionKeySource?: EncryptionKeySource;
   /** The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'. */
@@ -1757,6 +1899,13 @@ export interface Volume extends TrackedResource {
   coolAccess?: boolean;
   /** Specifies the number of days after which data that is not accessed by clients will be tiered. */
   coolnessPeriod?: number;
+  /**
+   * coolAccessRetrievalPolicy determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. The possible values for this field are:
+   *  Default - Data will be pulled from cool tier to standard storage on random reads. This policy is the default.
+   *  OnRead - All client-driven data read is pulled from cool tier to standard storage on both sequential and random reads.
+   *  Never - No client-driven data is pulled from cool tier to standard storage.
+   */
+  coolAccessRetrievalPolicy?: CoolAccessRetrievalPolicy;
   /** UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file: read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users. */
   unixPermissions?: string;
   /**
@@ -1764,8 +1913,18 @@ export interface Volume extends TrackedResource {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly cloneProgress?: number;
+  /**
+   * Flag indicating whether file access logs are enabled for the volume, based on active diagnostic settings present on the volume.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly fileAccessLogs?: FileAccessLogs;
   /** Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purpose */
   avsDataStore?: AvsDataStore;
+  /**
+   * Data store resource unique identifier
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly dataStoreResourceId?: string[];
   /** Specifies if default quota is enabled for the volume. */
   isDefaultQuotaEnabled?: boolean;
   /** Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies . */
@@ -1802,6 +1961,18 @@ export interface Volume extends TrackedResource {
   placementRules?: PlacementKeyValuePairs[];
   /** Flag indicating whether subvolume operations are enabled on the volume */
   enableSubvolumes?: EnableSubvolumes;
+  /**
+   * The availability zone where the volume is provisioned. This refers to the logical availability zone where the volume resides.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisionedAvailabilityZone?: string;
+  /** Specifies whether volume is a Large Volume or Regular Volume. */
+  isLargeVolume?: boolean;
+  /**
+   * Id of the snapshot or backup that the volume is restored from.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly originatingResourceId?: string;
 }
 
 /** Snapshot policy information */
@@ -1836,7 +2007,7 @@ export interface BackupPolicy extends TrackedResource {
    */
   readonly etag?: string;
   /**
-   * Backup Policy Resource ID
+   * Backup Policy GUID ID
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly backupPolicyId?: string;
@@ -1880,10 +2051,99 @@ export interface VolumeQuotaRule extends TrackedResource {
   quotaTarget?: string;
 }
 
+/** Backup Vault information */
+export interface BackupVault extends TrackedResource {
+  /**
+   * Azure lifecycle management
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: string;
+}
+
+/** Defines headers for NetAppResource_updateNetworkSiblingSet operation. */
+export interface NetAppResourceUpdateNetworkSiblingSetHeaders {
+  location?: string;
+}
+
+/** Defines headers for Volumes_populateAvailabilityZone operation. */
+export interface VolumesPopulateAvailabilityZoneHeaders {
+  location?: string;
+}
+
+/** Defines headers for Volumes_resetCifsPassword operation. */
+export interface VolumesResetCifsPasswordHeaders {
+  location?: string;
+}
+
+/** Defines headers for Volumes_breakFileLocks operation. */
+export interface VolumesBreakFileLocksHeaders {
+  location?: string;
+}
+
+/** Defines headers for Volumes_listGetGroupIdListForLdapUser operation. */
+export interface VolumesListGetGroupIdListForLdapUserHeaders {
+  location?: string;
+}
+
+/** Defines headers for Volumes_peerExternalCluster operation. */
+export interface VolumesPeerExternalClusterHeaders {
+  location?: string;
+}
+
+/** Defines headers for Volumes_authorizeExternalReplication operation. */
+export interface VolumesAuthorizeExternalReplicationHeaders {
+  location?: string;
+}
+
+/** Defines headers for Volumes_finalizeExternalReplication operation. */
+export interface VolumesFinalizeExternalReplicationHeaders {
+  location?: string;
+}
+
+/** Defines headers for Volumes_performReplicationTransfer operation. */
+export interface VolumesPerformReplicationTransferHeaders {
+  location?: string;
+}
+
+/** Defines headers for Backups_update operation. */
+export interface BackupsUpdateHeaders {
+  location?: string;
+}
+
+/** Defines headers for Backups_delete operation. */
+export interface BackupsDeleteHeaders {
+  location?: string;
+}
+
+/** Defines headers for BackupVaults_update operation. */
+export interface BackupVaultsUpdateHeaders {
+  location?: string;
+}
+
+/** Defines headers for BackupVaults_delete operation. */
+export interface BackupVaultsDeleteHeaders {
+  location?: string;
+}
+
+/** Defines headers for BackupsUnderBackupVault_restoreFiles operation. */
+export interface BackupsUnderBackupVaultRestoreFilesHeaders {
+  location?: string;
+}
+
+/** Defines headers for BackupsUnderVolume_migrateBackups operation. */
+export interface BackupsUnderVolumeMigrateBackupsHeaders {
+  location?: string;
+}
+
+/** Defines headers for BackupsUnderAccount_migrateBackups operation. */
+export interface BackupsUnderAccountMigrateBackupsHeaders {
+  location?: string;
+}
+
 /** Known values of {@link MetricAggregationType} that the service accepts. */
 export enum KnownMetricAggregationType {
   /** Average */
-  Average = "Average"
+  Average = "Average",
 }
 
 /**
@@ -1904,7 +2164,7 @@ export enum KnownCheckNameResourceTypes {
   /** MicrosoftNetAppNetAppAccountsCapacityPoolsVolumes */
   MicrosoftNetAppNetAppAccountsCapacityPoolsVolumes = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes",
   /** MicrosoftNetAppNetAppAccountsCapacityPoolsVolumesSnapshots */
-  MicrosoftNetAppNetAppAccountsCapacityPoolsVolumesSnapshots = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots"
+  MicrosoftNetAppNetAppAccountsCapacityPoolsVolumesSnapshots = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots",
 }
 
 /**
@@ -1924,7 +2184,7 @@ export enum KnownInAvailabilityReasonType {
   /** Invalid */
   Invalid = "Invalid",
   /** AlreadyExists */
-  AlreadyExists = "AlreadyExists"
+  AlreadyExists = "AlreadyExists",
 }
 
 /**
@@ -1946,7 +2206,7 @@ export enum KnownCheckQuotaNameResourceTypes {
   /** MicrosoftNetAppNetAppAccountsCapacityPoolsVolumes */
   MicrosoftNetAppNetAppAccountsCapacityPoolsVolumes = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes",
   /** MicrosoftNetAppNetAppAccountsCapacityPoolsVolumesSnapshots */
-  MicrosoftNetAppNetAppAccountsCapacityPoolsVolumesSnapshots = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots"
+  MicrosoftNetAppNetAppAccountsCapacityPoolsVolumesSnapshots = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots",
 }
 
 /**
@@ -1970,7 +2230,7 @@ export enum KnownCreatedByType {
   /** ManagedIdentity */
   ManagedIdentity = "ManagedIdentity",
   /** Key */
-  Key = "Key"
+  Key = "Key",
 }
 
 /**
@@ -1993,8 +2253,16 @@ export enum KnownRegionStorageToNetworkProximity {
   T1 = "T1",
   /** Standard T2 network connectivity. */
   T2 = "T2",
+  /** Standard AcrossT2 network connectivity. */
+  AcrossT2 = "AcrossT2",
   /** Standard T1 and T2 network connectivity. */
-  T1AndT2 = "T1AndT2"
+  T1AndT2 = "T1AndT2",
+  /** Standard T1 and AcrossT2 network connectivity. */
+  T1AndAcrossT2 = "T1AndAcrossT2",
+  /** Standard T2 and AcrossT2 network connectivity. */
+  T2AndAcrossT2 = "T2AndAcrossT2",
+  /** Standard T1, T2 and AcrossT2 network connectivity. */
+  T1AndT2AndAcrossT2 = "T1AndT2AndAcrossT2",
 }
 
 /**
@@ -2005,9 +2273,61 @@ export enum KnownRegionStorageToNetworkProximity {
  * **Default**: Basic network connectivity. \
  * **T1**: Standard T1 network connectivity. \
  * **T2**: Standard T2 network connectivity. \
- * **T1AndT2**: Standard T1 and T2 network connectivity.
+ * **AcrossT2**: Standard AcrossT2 network connectivity. \
+ * **T1AndT2**: Standard T1 and T2 network connectivity. \
+ * **T1AndAcrossT2**: Standard T1 and AcrossT2 network connectivity. \
+ * **T2AndAcrossT2**: Standard T2 and AcrossT2 network connectivity. \
+ * **T1AndT2AndAcrossT2**: Standard T1, T2 and AcrossT2 network connectivity.
  */
 export type RegionStorageToNetworkProximity = string;
+
+/** Known values of {@link NetworkFeatures} that the service accepts. */
+export enum KnownNetworkFeatures {
+  /** Basic network features. */
+  Basic = "Basic",
+  /** Standard network features. */
+  Standard = "Standard",
+  /** Updating from Basic to Standard network features. */
+  BasicStandard = "Basic_Standard",
+  /** Updating from Standard to Basic network features. */
+  StandardBasic = "Standard_Basic",
+}
+
+/**
+ * Defines values for NetworkFeatures. \
+ * {@link KnownNetworkFeatures} can be used interchangeably with NetworkFeatures,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Basic**: Basic network features. \
+ * **Standard**: Standard network features. \
+ * **Basic_Standard**: Updating from Basic to Standard network features. \
+ * **Standard_Basic**: Updating from Standard to Basic network features.
+ */
+export type NetworkFeatures = string;
+
+/** Known values of {@link NetworkSiblingSetProvisioningState} that the service accepts. */
+export enum KnownNetworkSiblingSetProvisioningState {
+  /** Succeeded */
+  Succeeded = "Succeeded",
+  /** Failed */
+  Failed = "Failed",
+  /** Canceled */
+  Canceled = "Canceled",
+  /** Updating */
+  Updating = "Updating",
+}
+
+/**
+ * Defines values for NetworkSiblingSetProvisioningState. \
+ * {@link KnownNetworkSiblingSetProvisioningState} can be used interchangeably with NetworkSiblingSetProvisioningState,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Succeeded** \
+ * **Failed** \
+ * **Canceled** \
+ * **Updating**
+ */
+export type NetworkSiblingSetProvisioningState = string;
 
 /** Known values of {@link ActiveDirectoryStatus} that the service accepts. */
 export enum KnownActiveDirectoryStatus {
@@ -2020,7 +2340,7 @@ export enum KnownActiveDirectoryStatus {
   /** Error with the Active Directory */
   Error = "Error",
   /** Active Directory Updating */
-  Updating = "Updating"
+  Updating = "Updating",
 }
 
 /**
@@ -2041,7 +2361,7 @@ export enum KnownKeySource {
   /** Microsoft-managed key encryption */
   MicrosoftNetApp = "Microsoft.NetApp",
   /** Customer-managed key encryption */
-  MicrosoftKeyVault = "Microsoft.KeyVault"
+  MicrosoftKeyVault = "Microsoft.KeyVault",
 }
 
 /**
@@ -2065,7 +2385,7 @@ export enum KnownKeyVaultStatus {
   /** Error with the KeyVault connection */
   Error = "Error",
   /** KeyVault connection Updating */
-  Updating = "Updating"
+  Updating = "Updating",
 }
 
 /**
@@ -2081,8 +2401,8 @@ export enum KnownKeyVaultStatus {
  */
 export type KeyVaultStatus = string;
 
-/** Known values of {@link IdentityType} that the service accepts. */
-export enum KnownIdentityType {
+/** Known values of {@link ManagedServiceIdentityType} that the service accepts. */
+export enum KnownManagedServiceIdentityType {
   /** None */
   None = "None",
   /** SystemAssigned */
@@ -2090,12 +2410,12 @@ export enum KnownIdentityType {
   /** UserAssigned */
   UserAssigned = "UserAssigned",
   /** SystemAssignedUserAssigned */
-  SystemAssignedUserAssigned = "SystemAssigned,UserAssigned"
+  SystemAssignedUserAssigned = "SystemAssigned,UserAssigned",
 }
 
 /**
- * Defines values for IdentityType. \
- * {@link KnownIdentityType} can be used interchangeably with IdentityType,
+ * Defines values for ManagedServiceIdentityType. \
+ * {@link KnownManagedServiceIdentityType} can be used interchangeably with ManagedServiceIdentityType,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
  * **None** \
@@ -2103,7 +2423,7 @@ export enum KnownIdentityType {
  * **UserAssigned** \
  * **SystemAssigned,UserAssigned**
  */
-export type IdentityType = string;
+export type ManagedServiceIdentityType = string;
 
 /** Known values of {@link ServiceLevel} that the service accepts. */
 export enum KnownServiceLevel {
@@ -2114,7 +2434,7 @@ export enum KnownServiceLevel {
   /** Ultra service level */
   Ultra = "Ultra",
   /** Zone redundant storage service level */
-  StandardZRS = "StandardZRS"
+  StandardZRS = "StandardZRS",
 }
 
 /**
@@ -2134,7 +2454,7 @@ export enum KnownQosType {
   /** qos type Auto */
   Auto = "Auto",
   /** qos type Manual */
-  Manual = "Manual"
+  Manual = "Manual",
 }
 
 /**
@@ -2152,7 +2472,7 @@ export enum KnownEncryptionType {
   /** EncryptionType Single, volumes will use single encryption at rest */
   Single = "Single",
   /** EncryptionType Double, volumes will use double encryption at rest */
-  Double = "Double"
+  Double = "Double",
 }
 
 /**
@@ -2170,7 +2490,7 @@ export enum KnownChownMode {
   /** Restricted */
   Restricted = "Restricted",
   /** Unrestricted */
-  Unrestricted = "Unrestricted"
+  Unrestricted = "Unrestricted",
 }
 
 /**
@@ -2183,24 +2503,6 @@ export enum KnownChownMode {
  */
 export type ChownMode = string;
 
-/** Known values of {@link NetworkFeatures} that the service accepts. */
-export enum KnownNetworkFeatures {
-  /** Basic network feature. */
-  Basic = "Basic",
-  /** Standard network feature. */
-  Standard = "Standard"
-}
-
-/**
- * Defines values for NetworkFeatures. \
- * {@link KnownNetworkFeatures} can be used interchangeably with NetworkFeatures,
- *  this enum contains the known values that the service supports.
- * ### Known values supported by the service
- * **Basic**: Basic network feature. \
- * **Standard**: Standard network feature.
- */
-export type NetworkFeatures = string;
-
 /** Known values of {@link VolumeStorageToNetworkProximity} that the service accepts. */
 export enum KnownVolumeStorageToNetworkProximity {
   /** Basic storage to network connectivity. */
@@ -2208,7 +2510,9 @@ export enum KnownVolumeStorageToNetworkProximity {
   /** Standard T1 storage to network connectivity. */
   T1 = "T1",
   /** Standard T2 storage to network connectivity. */
-  T2 = "T2"
+  T2 = "T2",
+  /** Standard AcrossT2 storage to network connectivity. */
+  AcrossT2 = "AcrossT2",
 }
 
 /**
@@ -2218,7 +2522,8 @@ export enum KnownVolumeStorageToNetworkProximity {
  * ### Known values supported by the service
  * **Default**: Basic storage to network connectivity. \
  * **T1**: Standard T1 storage to network connectivity. \
- * **T2**: Standard T2 storage to network connectivity.
+ * **T2**: Standard T2 storage to network connectivity. \
+ * **AcrossT2**: Standard AcrossT2 storage to network connectivity.
  */
 export type VolumeStorageToNetworkProximity = string;
 
@@ -2227,7 +2532,7 @@ export enum KnownEndpointType {
   /** Src */
   Src = "src",
   /** Dst */
-  Dst = "dst"
+  Dst = "dst",
 }
 
 /**
@@ -2247,7 +2552,7 @@ export enum KnownReplicationSchedule {
   /** Hourly */
   Hourly = "hourly",
   /** Daily */
-  Daily = "daily"
+  Daily = "daily",
 }
 
 /**
@@ -2266,7 +2571,7 @@ export enum KnownSecurityStyle {
   /** Ntfs */
   Ntfs = "ntfs",
   /** Unix */
-  Unix = "unix"
+  Unix = "unix",
 }
 
 /**
@@ -2284,7 +2589,7 @@ export enum KnownSmbAccessBasedEnumeration {
   /** smbAccessBasedEnumeration share setting is disabled */
   Disabled = "Disabled",
   /** smbAccessBasedEnumeration share setting is enabled */
-  Enabled = "Enabled"
+  Enabled = "Enabled",
 }
 
 /**
@@ -2302,7 +2607,7 @@ export enum KnownSmbNonBrowsable {
   /** smbNonBrowsable share setting is disabled */
   Disabled = "Disabled",
   /** smbNonBrowsable share setting is enabled */
-  Enabled = "Enabled"
+  Enabled = "Enabled",
 }
 
 /**
@@ -2320,7 +2625,7 @@ export enum KnownEncryptionKeySource {
   /** Microsoft-managed key encryption */
   MicrosoftNetApp = "Microsoft.NetApp",
   /** Customer-managed key encryption */
-  MicrosoftKeyVault = "Microsoft.KeyVault"
+  MicrosoftKeyVault = "Microsoft.KeyVault",
 }
 
 /**
@@ -2333,12 +2638,51 @@ export enum KnownEncryptionKeySource {
  */
 export type EncryptionKeySource = string;
 
+/** Known values of {@link CoolAccessRetrievalPolicy} that the service accepts. */
+export enum KnownCoolAccessRetrievalPolicy {
+  /** Default */
+  Default = "Default",
+  /** OnRead */
+  OnRead = "OnRead",
+  /** Never */
+  Never = "Never",
+}
+
+/**
+ * Defines values for CoolAccessRetrievalPolicy. \
+ * {@link KnownCoolAccessRetrievalPolicy} can be used interchangeably with CoolAccessRetrievalPolicy,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Default** \
+ * **OnRead** \
+ * **Never**
+ */
+export type CoolAccessRetrievalPolicy = string;
+
+/** Known values of {@link FileAccessLogs} that the service accepts. */
+export enum KnownFileAccessLogs {
+  /** fileAccessLogs are enabled */
+  Enabled = "Enabled",
+  /** fileAccessLogs are not enabled */
+  Disabled = "Disabled",
+}
+
+/**
+ * Defines values for FileAccessLogs. \
+ * {@link KnownFileAccessLogs} can be used interchangeably with FileAccessLogs,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Enabled**: fileAccessLogs are enabled \
+ * **Disabled**: fileAccessLogs are not enabled
+ */
+export type FileAccessLogs = string;
+
 /** Known values of {@link AvsDataStore} that the service accepts. */
 export enum KnownAvsDataStore {
   /** avsDataStore is enabled */
   Enabled = "Enabled",
   /** avsDataStore is disabled */
-  Disabled = "Disabled"
+  Disabled = "Disabled",
 }
 
 /**
@@ -2356,7 +2700,7 @@ export enum KnownEnableSubvolumes {
   /** subvolumes are enabled */
   Enabled = "Enabled",
   /** subvolumes are not enabled */
-  Disabled = "Disabled"
+  Disabled = "Disabled",
 }
 
 /**
@@ -2374,7 +2718,11 @@ export enum KnownRelationshipStatus {
   /** Idle */
   Idle = "Idle",
   /** Transferring */
-  Transferring = "Transferring"
+  Transferring = "Transferring",
+  /** Failed */
+  Failed = "Failed",
+  /** Unknown */
+  Unknown = "Unknown",
 }
 
 /**
@@ -2383,7 +2731,9 @@ export enum KnownRelationshipStatus {
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
  * **Idle** \
- * **Transferring**
+ * **Transferring** \
+ * **Failed** \
+ * **Unknown**
  */
 export type RelationshipStatus = string;
 
@@ -2394,7 +2744,7 @@ export enum KnownMirrorState {
   /** Mirrored */
   Mirrored = "Mirrored",
   /** Broken */
-  Broken = "Broken"
+  Broken = "Broken",
 }
 
 /**
@@ -2408,24 +2758,6 @@ export enum KnownMirrorState {
  */
 export type MirrorState = string;
 
-/** Known values of {@link BackupType} that the service accepts. */
-export enum KnownBackupType {
-  /** Manual backup */
-  Manual = "Manual",
-  /** Scheduled backup */
-  Scheduled = "Scheduled"
-}
-
-/**
- * Defines values for BackupType. \
- * {@link KnownBackupType} can be used interchangeably with BackupType,
- *  this enum contains the known values that the service supports.
- * ### Known values supported by the service
- * **Manual**: Manual backup \
- * **Scheduled**: Scheduled backup
- */
-export type BackupType = string;
-
 /** Known values of {@link Type} that the service accepts. */
 export enum KnownType {
   /** Default user quota */
@@ -2435,7 +2767,7 @@ export enum KnownType {
   /** Individual user quota */
   IndividualUserQuota = "IndividualUserQuota",
   /** Individual group quota */
-  IndividualGroupQuota = "IndividualGroupQuota"
+  IndividualGroupQuota = "IndividualGroupQuota",
 }
 
 /**
@@ -2453,7 +2785,9 @@ export type Type = string;
 /** Known values of {@link ApplicationType} that the service accepts. */
 export enum KnownApplicationType {
   /** SAPHana */
-  SAPHana = "SAP-HANA"
+  SAPHana = "SAP-HANA",
+  /** Oracle */
+  Oracle = "ORACLE",
 }
 
 /**
@@ -2461,9 +2795,28 @@ export enum KnownApplicationType {
  * {@link KnownApplicationType} can be used interchangeably with ApplicationType,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **SAP-HANA**
+ * **SAP-HANA** \
+ * **ORACLE**
  */
 export type ApplicationType = string;
+
+/** Known values of {@link BackupType} that the service accepts. */
+export enum KnownBackupType {
+  /** Manual backup */
+  Manual = "Manual",
+  /** Scheduled backup */
+  Scheduled = "Scheduled",
+}
+
+/**
+ * Defines values for BackupType. \
+ * {@link KnownBackupType} can be used interchangeably with BackupType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Manual**: Manual backup \
+ * **Scheduled**: Scheduled backup
+ */
+export type BackupType = string;
 /** Defines values for ProvisioningState. */
 export type ProvisioningState =
   | "Accepted"
@@ -2476,70 +2829,116 @@ export type ProvisioningState =
 
 /** Optional parameters. */
 export interface OperationsListOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the list operation. */
 export type OperationsListResponse = OperationListResult;
 
 /** Optional parameters. */
 export interface NetAppResourceCheckNameAvailabilityOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the checkNameAvailability operation. */
-export type NetAppResourceCheckNameAvailabilityResponse = CheckAvailabilityResponse;
+export type NetAppResourceCheckNameAvailabilityResponse =
+  CheckAvailabilityResponse;
 
 /** Optional parameters. */
 export interface NetAppResourceCheckFilePathAvailabilityOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions {
+  /** The Azure Resource logical availability zone which is used within zone mapping lookup for the subscription and region. The lookup will retrieve the physical zone where volume is placed. */
+  availabilityZone?: string;
+}
 
 /** Contains response data for the checkFilePathAvailability operation. */
-export type NetAppResourceCheckFilePathAvailabilityResponse = CheckAvailabilityResponse;
+export type NetAppResourceCheckFilePathAvailabilityResponse =
+  CheckAvailabilityResponse;
 
 /** Optional parameters. */
 export interface NetAppResourceCheckQuotaAvailabilityOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the checkQuotaAvailability operation. */
-export type NetAppResourceCheckQuotaAvailabilityResponse = CheckAvailabilityResponse;
+export type NetAppResourceCheckQuotaAvailabilityResponse =
+  CheckAvailabilityResponse;
 
 /** Optional parameters. */
 export interface NetAppResourceQueryRegionInfoOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the queryRegionInfo operation. */
 export type NetAppResourceQueryRegionInfoResponse = RegionInfo;
 
 /** Optional parameters. */
+export interface NetAppResourceQueryNetworkSiblingSetOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the queryNetworkSiblingSet operation. */
+export type NetAppResourceQueryNetworkSiblingSetResponse = NetworkSiblingSet;
+
+/** Optional parameters. */
+export interface NetAppResourceUpdateNetworkSiblingSetOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the updateNetworkSiblingSet operation. */
+export type NetAppResourceUpdateNetworkSiblingSetResponse = NetworkSiblingSet;
+
+/** Optional parameters. */
 export interface NetAppResourceQuotaLimitsListOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the list operation. */
 export type NetAppResourceQuotaLimitsListResponse = SubscriptionQuotaItemList;
 
 /** Optional parameters. */
 export interface NetAppResourceQuotaLimitsGetOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type NetAppResourceQuotaLimitsGetResponse = SubscriptionQuotaItem;
 
 /** Optional parameters. */
+export interface NetAppResourceRegionInfosListOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the list operation. */
+export type NetAppResourceRegionInfosListResponse = RegionInfosList;
+
+/** Optional parameters. */
+export interface NetAppResourceRegionInfosGetOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the get operation. */
+export type NetAppResourceRegionInfosGetResponse = RegionInfoResource;
+
+/** Optional parameters. */
+export interface NetAppResourceRegionInfosListNextOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the listNext operation. */
+export type NetAppResourceRegionInfosListNextResponse = RegionInfosList;
+
+/** Optional parameters. */
 export interface AccountsListBySubscriptionOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listBySubscription operation. */
 export type AccountsListBySubscriptionResponse = NetAppAccountList;
 
 /** Optional parameters. */
 export interface AccountsListOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the list operation. */
 export type AccountsListResponse = NetAppAccountList;
 
 /** Optional parameters. */
 export interface AccountsGetOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type AccountsGetResponse = NetAppAccount;
@@ -2588,26 +2987,26 @@ export interface AccountsRenewCredentialsOptionalParams
 
 /** Optional parameters. */
 export interface AccountsListBySubscriptionNextOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listBySubscriptionNext operation. */
 export type AccountsListBySubscriptionNextResponse = NetAppAccountList;
 
 /** Optional parameters. */
 export interface AccountsListNextOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listNext operation. */
 export type AccountsListNextResponse = NetAppAccountList;
 
 /** Optional parameters. */
-export interface PoolsListOptionalParams extends coreClient.OperationOptions {}
+export interface PoolsListOptionalParams extends coreClient.OperationOptions { }
 
 /** Contains response data for the list operation. */
 export type PoolsListResponse = CapacityPoolList;
 
 /** Optional parameters. */
-export interface PoolsGetOptionalParams extends coreClient.OperationOptions {}
+export interface PoolsGetOptionalParams extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type PoolsGetResponse = CapacityPool;
@@ -2645,20 +3044,20 @@ export interface PoolsDeleteOptionalParams extends coreClient.OperationOptions {
 
 /** Optional parameters. */
 export interface PoolsListNextOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listNext operation. */
 export type PoolsListNextResponse = CapacityPoolList;
 
 /** Optional parameters. */
 export interface VolumesListOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the list operation. */
 export type VolumesListResponse = VolumeList;
 
 /** Optional parameters. */
-export interface VolumesGetOptionalParams extends coreClient.OperationOptions {}
+export interface VolumesGetOptionalParams extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type VolumesGetResponse = Volume;
@@ -2699,6 +3098,18 @@ export interface VolumesDeleteOptionalParams
 }
 
 /** Optional parameters. */
+export interface VolumesPopulateAvailabilityZoneOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the populateAvailabilityZone operation. */
+export type VolumesPopulateAvailabilityZoneResponse = Volume;
+
+/** Optional parameters. */
 export interface VolumesRevertOptionalParams
   extends coreClient.OperationOptions {
   /** Delay to wait until next poll, in milliseconds. */
@@ -2715,6 +3126,33 @@ export interface VolumesResetCifsPasswordOptionalParams
   /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
   resumeFrom?: string;
 }
+
+/** Contains response data for the resetCifsPassword operation. */
+export type VolumesResetCifsPasswordResponse = VolumesResetCifsPasswordHeaders;
+
+/** Optional parameters. */
+export interface VolumesBreakFileLocksOptionalParams
+  extends coreClient.OperationOptions {
+  /** Optional body to provide the ability to clear file locks with selected options */
+  body?: BreakFileLocksRequest;
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Optional parameters. */
+export interface VolumesListGetGroupIdListForLdapUserOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the listGetGroupIdListForLdapUser operation. */
+export type VolumesListGetGroupIdListForLdapUserResponse =
+  GetGroupIdListForLdapUserResponse;
 
 /** Optional parameters. */
 export interface VolumesBreakReplicationOptionalParams
@@ -2738,14 +3176,14 @@ export interface VolumesReestablishReplicationOptionalParams
 
 /** Optional parameters. */
 export interface VolumesReplicationStatusOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the replicationStatus operation. */
 export type VolumesReplicationStatusResponse = ReplicationStatus;
 
 /** Optional parameters. */
 export interface VolumesListReplicationsOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listReplications operation. */
 export type VolumesListReplicationsResponse = ListReplications;
@@ -2787,6 +3225,57 @@ export interface VolumesReInitializeReplicationOptionalParams
 }
 
 /** Optional parameters. */
+export interface VolumesPeerExternalClusterOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the peerExternalCluster operation. */
+export type VolumesPeerExternalClusterResponse = ClusterPeerCommandResponse;
+
+/** Optional parameters. */
+export interface VolumesAuthorizeExternalReplicationOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the authorizeExternalReplication operation. */
+export type VolumesAuthorizeExternalReplicationResponse =
+  SvmPeerCommandResponse;
+
+/** Optional parameters. */
+export interface VolumesFinalizeExternalReplicationOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the finalizeExternalReplication operation. */
+export type VolumesFinalizeExternalReplicationResponse =
+  VolumesFinalizeExternalReplicationHeaders;
+
+/** Optional parameters. */
+export interface VolumesPerformReplicationTransferOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the performReplicationTransfer operation. */
+export type VolumesPerformReplicationTransferResponse =
+  VolumesPerformReplicationTransferHeaders;
+
+/** Optional parameters. */
 export interface VolumesPoolChangeOptionalParams
   extends coreClient.OperationOptions {
   /** Delay to wait until next poll, in milliseconds. */
@@ -2826,21 +3315,21 @@ export interface VolumesRevertRelocationOptionalParams
 
 /** Optional parameters. */
 export interface VolumesListNextOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listNext operation. */
 export type VolumesListNextResponse = VolumeList;
 
 /** Optional parameters. */
 export interface SnapshotsListOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the list operation. */
 export type SnapshotsListResponse = SnapshotsList;
 
 /** Optional parameters. */
 export interface SnapshotsGetOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type SnapshotsGetResponse = Snapshot;
@@ -2889,21 +3378,21 @@ export interface SnapshotsRestoreFilesOptionalParams
 
 /** Optional parameters. */
 export interface SnapshotPoliciesListOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the list operation. */
 export type SnapshotPoliciesListResponse = SnapshotPoliciesList;
 
 /** Optional parameters. */
 export interface SnapshotPoliciesGetOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type SnapshotPoliciesGetResponse = SnapshotPolicy;
 
 /** Optional parameters. */
 export interface SnapshotPoliciesCreateOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the create operation. */
 export type SnapshotPoliciesCreateResponse = SnapshotPolicy;
@@ -2931,106 +3420,21 @@ export interface SnapshotPoliciesDeleteOptionalParams
 
 /** Optional parameters. */
 export interface SnapshotPoliciesListVolumesOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listVolumes operation. */
 export type SnapshotPoliciesListVolumesResponse = SnapshotPolicyVolumeList;
 
 /** Optional parameters. */
-export interface BackupsGetStatusOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the getStatus operation. */
-export type BackupsGetStatusResponse = BackupStatus;
-
-/** Optional parameters. */
-export interface BackupsGetVolumeRestoreStatusOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the getVolumeRestoreStatus operation. */
-export type BackupsGetVolumeRestoreStatusResponse = RestoreStatus;
-
-/** Optional parameters. */
-export interface BackupsListOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the list operation. */
-export type BackupsListResponse = BackupsList;
-
-/** Optional parameters. */
-export interface BackupsGetOptionalParams extends coreClient.OperationOptions {}
-
-/** Contains response data for the get operation. */
-export type BackupsGetResponse = Backup;
-
-/** Optional parameters. */
-export interface BackupsCreateOptionalParams
-  extends coreClient.OperationOptions {
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
-  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
-  resumeFrom?: string;
-}
-
-/** Contains response data for the create operation. */
-export type BackupsCreateResponse = Backup;
-
-/** Optional parameters. */
-export interface BackupsUpdateOptionalParams
-  extends coreClient.OperationOptions {
-  /** Backup object supplied in the body of the operation. */
-  body?: BackupPatch;
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
-  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
-  resumeFrom?: string;
-}
-
-/** Contains response data for the update operation. */
-export type BackupsUpdateResponse = Backup;
-
-/** Optional parameters. */
-export interface BackupsDeleteOptionalParams
-  extends coreClient.OperationOptions {
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
-  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
-  resumeFrom?: string;
-}
-
-/** Optional parameters. */
-export interface AccountBackupsListOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the list operation. */
-export type AccountBackupsListResponse = BackupsList;
-
-/** Optional parameters. */
-export interface AccountBackupsGetOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the get operation. */
-export type AccountBackupsGetResponse = Backup;
-
-/** Optional parameters. */
-export interface AccountBackupsDeleteOptionalParams
-  extends coreClient.OperationOptions {
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
-  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
-  resumeFrom?: string;
-}
-
-/** Optional parameters. */
 export interface BackupPoliciesListOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the list operation. */
 export type BackupPoliciesListResponse = BackupPoliciesList;
 
 /** Optional parameters. */
 export interface BackupPoliciesGetOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type BackupPoliciesGetResponse = BackupPolicy;
@@ -3070,14 +3474,14 @@ export interface BackupPoliciesDeleteOptionalParams
 
 /** Optional parameters. */
 export interface VolumeQuotaRulesListByVolumeOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listByVolume operation. */
 export type VolumeQuotaRulesListByVolumeResponse = VolumeQuotaRulesList;
 
 /** Optional parameters. */
 export interface VolumeQuotaRulesGetOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type VolumeQuotaRulesGetResponse = VolumeQuotaRule;
@@ -3116,21 +3520,15 @@ export interface VolumeQuotaRulesDeleteOptionalParams
 }
 
 /** Optional parameters. */
-export interface VaultsListOptionalParams extends coreClient.OperationOptions {}
-
-/** Contains response data for the list operation. */
-export type VaultsListResponse = VaultList;
-
-/** Optional parameters. */
 export interface VolumeGroupsListByNetAppAccountOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listByNetAppAccount operation. */
 export type VolumeGroupsListByNetAppAccountResponse = VolumeGroupList;
 
 /** Optional parameters. */
 export interface VolumeGroupsGetOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type VolumeGroupsGetResponse = VolumeGroupDetails;
@@ -3158,14 +3556,14 @@ export interface VolumeGroupsDeleteOptionalParams
 
 /** Optional parameters. */
 export interface SubvolumesListByVolumeOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listByVolume operation. */
 export type SubvolumesListByVolumeResponse = SubvolumesList;
 
 /** Optional parameters. */
 export interface SubvolumesGetOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the get operation. */
 export type SubvolumesGetResponse = SubvolumeInfo;
@@ -3217,10 +3615,181 @@ export type SubvolumesGetMetadataResponse = SubvolumeModel;
 
 /** Optional parameters. */
 export interface SubvolumesListByVolumeNextOptionalParams
-  extends coreClient.OperationOptions {}
+  extends coreClient.OperationOptions { }
 
 /** Contains response data for the listByVolumeNext operation. */
 export type SubvolumesListByVolumeNextResponse = SubvolumesList;
+
+/** Optional parameters. */
+export interface BackupsGetLatestStatusOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the getLatestStatus operation. */
+export type BackupsGetLatestStatusResponse = BackupStatus;
+
+/** Optional parameters. */
+export interface BackupsGetVolumeLatestRestoreStatusOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the getVolumeLatestRestoreStatus operation. */
+export type BackupsGetVolumeLatestRestoreStatusResponse = RestoreStatus;
+
+/** Optional parameters. */
+export interface BackupsListByVaultOptionalParams
+  extends coreClient.OperationOptions {
+  /** An option to specify the VolumeResourceId. If present, then only returns the backups under the specified volume */
+  filter?: string;
+}
+
+/** Contains response data for the listByVault operation. */
+export type BackupsListByVaultResponse = BackupsList;
+
+/** Optional parameters. */
+export interface BackupsGetOptionalParams extends coreClient.OperationOptions { }
+
+/** Contains response data for the get operation. */
+export type BackupsGetResponse = Backup;
+
+/** Optional parameters. */
+export interface BackupsCreateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the create operation. */
+export type BackupsCreateResponse = Backup;
+
+/** Optional parameters. */
+export interface BackupsUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Backup object supplied in the body of the operation. */
+  body?: BackupPatch;
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the update operation. */
+export type BackupsUpdateResponse = Backup;
+
+/** Optional parameters. */
+export interface BackupsDeleteOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the delete operation. */
+export type BackupsDeleteResponse = BackupsDeleteHeaders;
+
+/** Optional parameters. */
+export interface BackupsListByVaultNextOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the listByVaultNext operation. */
+export type BackupsListByVaultNextResponse = BackupsList;
+
+/** Optional parameters. */
+export interface BackupVaultsListByNetAppAccountOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the listByNetAppAccount operation. */
+export type BackupVaultsListByNetAppAccountResponse = BackupVaultsList;
+
+/** Optional parameters. */
+export interface BackupVaultsGetOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the get operation. */
+export type BackupVaultsGetResponse = BackupVault;
+
+/** Optional parameters. */
+export interface BackupVaultsCreateOrUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the createOrUpdate operation. */
+export type BackupVaultsCreateOrUpdateResponse = BackupVault;
+
+/** Optional parameters. */
+export interface BackupVaultsUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the update operation. */
+export type BackupVaultsUpdateResponse = BackupVault;
+
+/** Optional parameters. */
+export interface BackupVaultsDeleteOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the delete operation. */
+export type BackupVaultsDeleteResponse = BackupVaultsDeleteHeaders;
+
+/** Optional parameters. */
+export interface BackupVaultsListByNetAppAccountNextOptionalParams
+  extends coreClient.OperationOptions { }
+
+/** Contains response data for the listByNetAppAccountNext operation. */
+export type BackupVaultsListByNetAppAccountNextResponse = BackupVaultsList;
+
+/** Optional parameters. */
+export interface BackupsUnderBackupVaultRestoreFilesOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the restoreFiles operation. */
+export type BackupsUnderBackupVaultRestoreFilesResponse =
+  BackupsUnderBackupVaultRestoreFilesHeaders;
+
+/** Optional parameters. */
+export interface BackupsUnderVolumeMigrateBackupsOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the migrateBackups operation. */
+export type BackupsUnderVolumeMigrateBackupsResponse =
+  BackupsUnderVolumeMigrateBackupsHeaders;
+
+/** Optional parameters. */
+export interface BackupsUnderAccountMigrateBackupsOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the migrateBackups operation. */
+export type BackupsUnderAccountMigrateBackupsResponse =
+  BackupsUnderAccountMigrateBackupsHeaders;
 
 /** Optional parameters. */
 export interface NetAppManagementClientOptionalParams

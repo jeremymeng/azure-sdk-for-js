@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { PrivateDnsManagementClient } from "../privateDnsManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   PrivateZone,
   PrivateZonesListNextOptionalParams,
@@ -31,7 +35,7 @@ import {
   PrivateZonesGetOptionalParams,
   PrivateZonesGetResponse,
   PrivateZonesListNextResponse,
-  PrivateZonesListByResourceGroupNextResponse
+  PrivateZonesListByResourceGroupNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -52,7 +56,7 @@ export class PrivateZonesImpl implements PrivateZones {
    * @param options The options parameters.
    */
   public list(
-    options?: PrivateZonesListOptionalParams
+    options?: PrivateZonesListOptionalParams,
   ): PagedAsyncIterableIterator<PrivateZone> {
     const iter = this.listPagingAll(options);
     return {
@@ -67,13 +71,13 @@ export class PrivateZonesImpl implements PrivateZones {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listPagingPage(
     options?: PrivateZonesListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<PrivateZone[]> {
     let result: PrivateZonesListResponse;
     let continuationToken = settings?.continuationToken;
@@ -94,7 +98,7 @@ export class PrivateZonesImpl implements PrivateZones {
   }
 
   private async *listPagingAll(
-    options?: PrivateZonesListOptionalParams
+    options?: PrivateZonesListOptionalParams,
   ): AsyncIterableIterator<PrivateZone> {
     for await (const page of this.listPagingPage(options)) {
       yield* page;
@@ -108,7 +112,7 @@ export class PrivateZonesImpl implements PrivateZones {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: PrivateZonesListByResourceGroupOptionalParams
+    options?: PrivateZonesListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<PrivateZone> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -125,16 +129,16 @@ export class PrivateZonesImpl implements PrivateZones {
         return this.listByResourceGroupPagingPage(
           resourceGroupName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
     options?: PrivateZonesListByResourceGroupOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<PrivateZone[]> {
     let result: PrivateZonesListByResourceGroupResponse;
     let continuationToken = settings?.continuationToken;
@@ -149,7 +153,7 @@ export class PrivateZonesImpl implements PrivateZones {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -160,11 +164,11 @@ export class PrivateZonesImpl implements PrivateZones {
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: PrivateZonesListByResourceGroupOptionalParams
+    options?: PrivateZonesListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<PrivateZone> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -182,30 +186,29 @@ export class PrivateZonesImpl implements PrivateZones {
     resourceGroupName: string,
     privateZoneName: string,
     parameters: PrivateZone,
-    options?: PrivateZonesCreateOrUpdateOptionalParams
+    options?: PrivateZonesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<PrivateZonesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<PrivateZonesCreateOrUpdateResponse>,
       PrivateZonesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<PrivateZonesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -214,8 +217,8 @@ export class PrivateZonesImpl implements PrivateZones {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -223,19 +226,22 @@ export class PrivateZonesImpl implements PrivateZones {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, privateZoneName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, privateZoneName, parameters, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PrivateZonesCreateOrUpdateResponse,
+      OperationState<PrivateZonesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -253,13 +259,13 @@ export class PrivateZonesImpl implements PrivateZones {
     resourceGroupName: string,
     privateZoneName: string,
     parameters: PrivateZone,
-    options?: PrivateZonesCreateOrUpdateOptionalParams
+    options?: PrivateZonesCreateOrUpdateOptionalParams,
   ): Promise<PrivateZonesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       privateZoneName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -275,30 +281,29 @@ export class PrivateZonesImpl implements PrivateZones {
     resourceGroupName: string,
     privateZoneName: string,
     parameters: PrivateZone,
-    options?: PrivateZonesUpdateOptionalParams
+    options?: PrivateZonesUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<PrivateZonesUpdateResponse>,
+    SimplePollerLike<
+      OperationState<PrivateZonesUpdateResponse>,
       PrivateZonesUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<PrivateZonesUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -307,8 +312,8 @@ export class PrivateZonesImpl implements PrivateZones {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -316,19 +321,22 @@ export class PrivateZonesImpl implements PrivateZones {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, privateZoneName, parameters, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, privateZoneName, parameters, options },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PrivateZonesUpdateResponse,
+      OperationState<PrivateZonesUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -345,13 +353,13 @@ export class PrivateZonesImpl implements PrivateZones {
     resourceGroupName: string,
     privateZoneName: string,
     parameters: PrivateZone,
-    options?: PrivateZonesUpdateOptionalParams
+    options?: PrivateZonesUpdateOptionalParams,
   ): Promise<PrivateZonesUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       privateZoneName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -367,25 +375,24 @@ export class PrivateZonesImpl implements PrivateZones {
   async beginDelete(
     resourceGroupName: string,
     privateZoneName: string,
-    options?: PrivateZonesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: PrivateZonesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -394,8 +401,8 @@ export class PrivateZonesImpl implements PrivateZones {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -403,19 +410,19 @@ export class PrivateZonesImpl implements PrivateZones {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, privateZoneName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, privateZoneName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -432,12 +439,12 @@ export class PrivateZonesImpl implements PrivateZones {
   async beginDeleteAndWait(
     resourceGroupName: string,
     privateZoneName: string,
-    options?: PrivateZonesDeleteOptionalParams
+    options?: PrivateZonesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       privateZoneName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -452,11 +459,11 @@ export class PrivateZonesImpl implements PrivateZones {
   get(
     resourceGroupName: string,
     privateZoneName: string,
-    options?: PrivateZonesGetOptionalParams
+    options?: PrivateZonesGetOptionalParams,
   ): Promise<PrivateZonesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateZoneName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -465,7 +472,7 @@ export class PrivateZonesImpl implements PrivateZones {
    * @param options The options parameters.
    */
   private _list(
-    options?: PrivateZonesListOptionalParams
+    options?: PrivateZonesListOptionalParams,
   ): Promise<PrivateZonesListResponse> {
     return this.client.sendOperationRequest({ options }, listOperationSpec);
   }
@@ -477,11 +484,11 @@ export class PrivateZonesImpl implements PrivateZones {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: PrivateZonesListByResourceGroupOptionalParams
+    options?: PrivateZonesListByResourceGroupOptionalParams,
   ): Promise<PrivateZonesListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -492,11 +499,11 @@ export class PrivateZonesImpl implements PrivateZones {
    */
   private _listNext(
     nextLink: string,
-    options?: PrivateZonesListNextOptionalParams
+    options?: PrivateZonesListNextOptionalParams,
   ): Promise<PrivateZonesListNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 
@@ -509,11 +516,11 @@ export class PrivateZonesImpl implements PrivateZones {
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: PrivateZonesListByResourceGroupNextOptionalParams
+    options?: PrivateZonesListByResourceGroupNextOptionalParams,
   ): Promise<PrivateZonesListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 }
@@ -521,25 +528,24 @@ export class PrivateZonesImpl implements PrivateZones {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.PrivateZone
+      bodyMapper: Mappers.PrivateZone,
     },
     201: {
-      bodyMapper: Mappers.PrivateZone
+      bodyMapper: Mappers.PrivateZone,
     },
     202: {
-      bodyMapper: Mappers.PrivateZone
+      bodyMapper: Mappers.PrivateZone,
     },
     204: {
-      bodyMapper: Mappers.PrivateZone
+      bodyMapper: Mappers.PrivateZone,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters,
   queryParameters: [Parameters.apiVersion],
@@ -547,37 +553,36 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [
     Parameters.contentType,
     Parameters.accept,
     Parameters.ifMatch,
-    Parameters.ifNoneMatch
+    Parameters.ifNoneMatch,
   ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.PrivateZone
+      bodyMapper: Mappers.PrivateZone,
     },
     201: {
-      bodyMapper: Mappers.PrivateZone
+      bodyMapper: Mappers.PrivateZone,
     },
     202: {
-      bodyMapper: Mappers.PrivateZone
+      bodyMapper: Mappers.PrivateZone,
     },
     204: {
-      bodyMapper: Mappers.PrivateZone
+      bodyMapper: Mappers.PrivateZone,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters,
   queryParameters: [Parameters.apiVersion],
@@ -585,19 +590,18 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [
     Parameters.contentType,
     Parameters.accept,
-    Parameters.ifMatch
+    Parameters.ifMatch,
   ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -605,117 +609,112 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [Parameters.accept, Parameters.ifMatch],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones/{privateZoneName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PrivateZone
+      bodyMapper: Mappers.PrivateZone,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.privateZoneName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Network/privateDnsZones",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/privateDnsZones",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PrivateZoneListResult
+      bodyMapper: Mappers.PrivateZoneListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateDnsZones",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PrivateZoneListResult
+      bodyMapper: Mappers.PrivateZoneListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PrivateZoneListResult
+      bodyMapper: Mappers.PrivateZoneListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PrivateZoneListResult
+      bodyMapper: Mappers.PrivateZoneListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

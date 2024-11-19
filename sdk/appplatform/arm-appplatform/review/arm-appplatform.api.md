@@ -6,9 +6,50 @@
 
 import * as coreAuth from '@azure/core-auth';
 import * as coreClient from '@azure/core-client';
+import { OperationState } from '@azure/core-lro';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
+import { SimplePollerLike } from '@azure/core-lro';
+
+// @public
+export interface AcceleratorAuthSetting {
+    authType: "Public" | "BasicAuth" | "SSH";
+}
+
+// @public (undocumented)
+export type AcceleratorAuthSettingUnion = AcceleratorAuthSetting | AcceleratorPublicSetting | AcceleratorBasicAuthSetting | AcceleratorSshSetting;
+
+// @public
+export interface AcceleratorBasicAuthSetting extends AcceleratorAuthSetting {
+    authType: "BasicAuth";
+    caCertResourceId?: string;
+    password?: string;
+    username: string;
+}
+
+// @public (undocumented)
+export interface AcceleratorGitRepository {
+    authSetting: AcceleratorAuthSettingUnion;
+    branch?: string;
+    commit?: string;
+    gitTag?: string;
+    intervalInSeconds?: number;
+    subPath?: string;
+    url: string;
+}
+
+// @public
+export interface AcceleratorPublicSetting extends AcceleratorAuthSetting {
+    authType: "Public";
+    caCertResourceId?: string;
+}
+
+// @public
+export interface AcceleratorSshSetting extends AcceleratorAuthSetting {
+    authType: "SSH";
+    hostKey?: string;
+    hostKeyAlgorithm?: string;
+    privateKey?: string;
+}
 
 // @public
 export type ActionType = string;
@@ -17,6 +58,9 @@ export type ActionType = string;
 export interface ActiveDeploymentCollection {
     activeDeploymentNames?: string[];
 }
+
+// @public
+export type ApiPortalApiTryOutEnabledState = string;
 
 // @public
 export interface ApiPortalCustomDomainProperties {
@@ -36,9 +80,9 @@ export interface ApiPortalCustomDomainResourceCollection {
 
 // @public
 export interface ApiPortalCustomDomains {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, apiPortalName: string, domainName: string, apiPortalCustomDomainResource: ApiPortalCustomDomainResource, options?: ApiPortalCustomDomainsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<ApiPortalCustomDomainsCreateOrUpdateResponse>, ApiPortalCustomDomainsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, apiPortalName: string, domainName: string, apiPortalCustomDomainResource: ApiPortalCustomDomainResource, options?: ApiPortalCustomDomainsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ApiPortalCustomDomainsCreateOrUpdateResponse>, ApiPortalCustomDomainsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, apiPortalName: string, domainName: string, apiPortalCustomDomainResource: ApiPortalCustomDomainResource, options?: ApiPortalCustomDomainsCreateOrUpdateOptionalParams): Promise<ApiPortalCustomDomainsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, apiPortalName: string, domainName: string, options?: ApiPortalCustomDomainsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, apiPortalName: string, domainName: string, options?: ApiPortalCustomDomainsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, apiPortalName: string, domainName: string, options?: ApiPortalCustomDomainsDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, apiPortalName: string, domainName: string, options?: ApiPortalCustomDomainsGetOptionalParams): Promise<ApiPortalCustomDomainsGetResponse>;
     list(resourceGroupName: string, serviceName: string, apiPortalName: string, options?: ApiPortalCustomDomainsListOptionalParams): PagedAsyncIterableIterator<ApiPortalCustomDomainResource>;
@@ -88,6 +132,7 @@ export interface ApiPortalInstance {
 
 // @public
 export interface ApiPortalProperties {
+    apiTryOutEnabledState?: ApiPortalApiTryOutEnabledState;
     gatewayIds?: string[];
     httpsOnly?: boolean;
     readonly instances?: ApiPortalInstance[];
@@ -122,9 +167,9 @@ export interface ApiPortalResourceRequests {
 
 // @public
 export interface ApiPortals {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, apiPortalName: string, apiPortalResource: ApiPortalResource, options?: ApiPortalsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<ApiPortalsCreateOrUpdateResponse>, ApiPortalsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, apiPortalName: string, apiPortalResource: ApiPortalResource, options?: ApiPortalsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ApiPortalsCreateOrUpdateResponse>, ApiPortalsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, apiPortalName: string, apiPortalResource: ApiPortalResource, options?: ApiPortalsCreateOrUpdateOptionalParams): Promise<ApiPortalsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, apiPortalName: string, options?: ApiPortalsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, apiPortalName: string, options?: ApiPortalsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, apiPortalName: string, options?: ApiPortalsDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, apiPortalName: string, options?: ApiPortalsGetOptionalParams): Promise<ApiPortalsGetResponse>;
     list(resourceGroupName: string, serviceName: string, options?: ApiPortalsListOptionalParams): PagedAsyncIterableIterator<ApiPortalResource>;
@@ -175,21 +220,319 @@ export interface ApiPortalsValidateDomainOptionalParams extends coreClient.Opera
 export type ApiPortalsValidateDomainResponse = CustomDomainValidateResult;
 
 // @public
+export interface ApmProperties {
+    properties?: {
+        [propertyName: string]: string;
+    };
+    readonly provisioningState?: ApmProvisioningState;
+    secrets?: {
+        [propertyName: string]: string;
+    };
+    type: string;
+}
+
+// @public
+export type ApmProvisioningState = string;
+
+// @public
+export interface ApmReference {
+    resourceId: string;
+}
+
+// @public
+export interface ApmResource extends ProxyResource {
+    properties?: ApmProperties;
+}
+
+// @public
+export interface ApmResourceCollection {
+    nextLink?: string;
+    value?: ApmResource[];
+}
+
+// @public
+export interface Apms {
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, apmName: string, apmResource: ApmResource, options?: ApmsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ApmsCreateOrUpdateResponse>, ApmsCreateOrUpdateResponse>>;
+    beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, apmName: string, apmResource: ApmResource, options?: ApmsCreateOrUpdateOptionalParams): Promise<ApmsCreateOrUpdateResponse>;
+    beginDelete(resourceGroupName: string, serviceName: string, apmName: string, options?: ApmsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<ApmsDeleteResponse>, ApmsDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, serviceName: string, apmName: string, options?: ApmsDeleteOptionalParams): Promise<ApmsDeleteResponse>;
+    get(resourceGroupName: string, serviceName: string, apmName: string, options?: ApmsGetOptionalParams): Promise<ApmsGetResponse>;
+    list(resourceGroupName: string, serviceName: string, options?: ApmsListOptionalParams): PagedAsyncIterableIterator<ApmResource>;
+    listSecretKeys(resourceGroupName: string, serviceName: string, apmName: string, options?: ApmsListSecretKeysOptionalParams): Promise<ApmsListSecretKeysResponse>;
+}
+
+// @public
+export interface ApmsCreateOrUpdateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ApmsCreateOrUpdateResponse = ApmResource;
+
+// @public
+export interface ApmsDeleteHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface ApmsDeleteOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ApmsDeleteResponse = ApmsDeleteHeaders;
+
+// @public
+export interface ApmSecretKeys {
+    value?: string[];
+}
+
+// @public
+export interface ApmsGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApmsGetResponse = ApmResource;
+
+// @public
+export interface ApmsListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApmsListNextResponse = ApmResourceCollection;
+
+// @public
+export interface ApmsListOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApmsListResponse = ApmResourceCollection;
+
+// @public
+export interface ApmsListSecretKeysOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApmsListSecretKeysResponse = ApmSecretKeys;
+
+// @public (undocumented)
+export interface ApplicationAcceleratorComponent {
+    readonly instances?: ApplicationAcceleratorInstance[];
+    readonly name?: string;
+    // (undocumented)
+    resourceRequests?: ApplicationAcceleratorResourceRequests;
+}
+
+// @public (undocumented)
+export interface ApplicationAcceleratorInstance {
+    readonly name?: string;
+    readonly status?: string;
+}
+
+// @public
+export interface ApplicationAcceleratorProperties {
+    readonly components?: ApplicationAcceleratorComponent[];
+    readonly provisioningState?: ApplicationAcceleratorProvisioningState;
+}
+
+// @public
+export type ApplicationAcceleratorProvisioningState = string;
+
+// @public
+export interface ApplicationAcceleratorResource extends ProxyResource {
+    properties?: ApplicationAcceleratorProperties;
+    sku?: Sku;
+}
+
+// @public
+export interface ApplicationAcceleratorResourceCollection {
+    nextLink?: string;
+    value?: ApplicationAcceleratorResource[];
+}
+
+// @public (undocumented)
+export interface ApplicationAcceleratorResourceRequests {
+    readonly cpu?: string;
+    readonly instanceCount?: number;
+    readonly memory?: string;
+}
+
+// @public
+export interface ApplicationAccelerators {
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, applicationAcceleratorResource: ApplicationAcceleratorResource, options?: ApplicationAcceleratorsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ApplicationAcceleratorsCreateOrUpdateResponse>, ApplicationAcceleratorsCreateOrUpdateResponse>>;
+    beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, applicationAcceleratorResource: ApplicationAcceleratorResource, options?: ApplicationAcceleratorsCreateOrUpdateOptionalParams): Promise<ApplicationAcceleratorsCreateOrUpdateResponse>;
+    beginDelete(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, options?: ApplicationAcceleratorsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<ApplicationAcceleratorsDeleteResponse>, ApplicationAcceleratorsDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, options?: ApplicationAcceleratorsDeleteOptionalParams): Promise<ApplicationAcceleratorsDeleteResponse>;
+    get(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, options?: ApplicationAcceleratorsGetOptionalParams): Promise<ApplicationAcceleratorsGetResponse>;
+    list(resourceGroupName: string, serviceName: string, options?: ApplicationAcceleratorsListOptionalParams): PagedAsyncIterableIterator<ApplicationAcceleratorResource>;
+}
+
+// @public
+export interface ApplicationAcceleratorsCreateOrUpdateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ApplicationAcceleratorsCreateOrUpdateResponse = ApplicationAcceleratorResource;
+
+// @public
+export interface ApplicationAcceleratorsDeleteHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface ApplicationAcceleratorsDeleteOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ApplicationAcceleratorsDeleteResponse = ApplicationAcceleratorsDeleteHeaders;
+
+// @public
+export interface ApplicationAcceleratorsGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApplicationAcceleratorsGetResponse = ApplicationAcceleratorResource;
+
+// @public
+export interface ApplicationAcceleratorsListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApplicationAcceleratorsListNextResponse = ApplicationAcceleratorResourceCollection;
+
+// @public
+export interface ApplicationAcceleratorsListOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApplicationAcceleratorsListResponse = ApplicationAcceleratorResourceCollection;
+
+// @public
 export interface ApplicationInsightsAgentVersions {
     readonly java?: string;
 }
+
+// @public
+export interface ApplicationLiveViewComponent {
+    readonly instances?: ApplicationLiveViewInstance[];
+    readonly name?: any;
+    readonly resourceRequests?: ApplicationLiveViewResourceRequests;
+}
+
+// @public
+export interface ApplicationLiveViewInstance {
+    readonly name?: string;
+    readonly status?: string;
+}
+
+// @public
+export interface ApplicationLiveViewProperties {
+    readonly components?: ApplicationLiveViewComponent[];
+    readonly provisioningState?: ApplicationLiveViewProvisioningState;
+}
+
+// @public
+export type ApplicationLiveViewProvisioningState = string;
+
+// @public
+export interface ApplicationLiveViewResource extends ProxyResource {
+    properties?: ApplicationLiveViewProperties;
+}
+
+// @public
+export interface ApplicationLiveViewResourceCollection {
+    nextLink?: string;
+    value?: ApplicationLiveViewResource[];
+}
+
+// @public
+export interface ApplicationLiveViewResourceRequests {
+    readonly cpu?: string;
+    readonly instanceCount?: number;
+    readonly memory?: string;
+}
+
+// @public
+export interface ApplicationLiveViews {
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, applicationLiveViewName: string, applicationLiveViewResource: ApplicationLiveViewResource, options?: ApplicationLiveViewsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ApplicationLiveViewsCreateOrUpdateResponse>, ApplicationLiveViewsCreateOrUpdateResponse>>;
+    beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, applicationLiveViewName: string, applicationLiveViewResource: ApplicationLiveViewResource, options?: ApplicationLiveViewsCreateOrUpdateOptionalParams): Promise<ApplicationLiveViewsCreateOrUpdateResponse>;
+    beginDelete(resourceGroupName: string, serviceName: string, applicationLiveViewName: string, options?: ApplicationLiveViewsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<ApplicationLiveViewsDeleteResponse>, ApplicationLiveViewsDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, serviceName: string, applicationLiveViewName: string, options?: ApplicationLiveViewsDeleteOptionalParams): Promise<ApplicationLiveViewsDeleteResponse>;
+    get(resourceGroupName: string, serviceName: string, applicationLiveViewName: string, options?: ApplicationLiveViewsGetOptionalParams): Promise<ApplicationLiveViewsGetResponse>;
+    list(resourceGroupName: string, serviceName: string, options?: ApplicationLiveViewsListOptionalParams): PagedAsyncIterableIterator<ApplicationLiveViewResource>;
+}
+
+// @public
+export interface ApplicationLiveViewsCreateOrUpdateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ApplicationLiveViewsCreateOrUpdateResponse = ApplicationLiveViewResource;
+
+// @public
+export interface ApplicationLiveViewsDeleteHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface ApplicationLiveViewsDeleteOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ApplicationLiveViewsDeleteResponse = ApplicationLiveViewsDeleteHeaders;
+
+// @public
+export interface ApplicationLiveViewsGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApplicationLiveViewsGetResponse = ApplicationLiveViewResource;
+
+// @public
+export interface ApplicationLiveViewsListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApplicationLiveViewsListNextResponse = ApplicationLiveViewResourceCollection;
+
+// @public
+export interface ApplicationLiveViewsListOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ApplicationLiveViewsListResponse = ApplicationLiveViewResourceCollection;
 
 // @public (undocumented)
 export class AppPlatformManagementClient extends coreClient.ServiceClient {
     // (undocumented)
     $host: string;
     constructor(credentials: coreAuth.TokenCredential, subscriptionId: string, options?: AppPlatformManagementClientOptionalParams);
+    constructor(credentials: coreAuth.TokenCredential, options?: AppPlatformManagementClientOptionalParams);
     // (undocumented)
     apiPortalCustomDomains: ApiPortalCustomDomains;
     // (undocumented)
     apiPortals: ApiPortals;
     // (undocumented)
     apiVersion: string;
+    // (undocumented)
+    apms: Apms;
+    // (undocumented)
+    applicationAccelerators: ApplicationAccelerators;
+    // (undocumented)
+    applicationLiveViews: ApplicationLiveViews;
     // (undocumented)
     apps: Apps;
     // (undocumented)
@@ -209,9 +552,15 @@ export class AppPlatformManagementClient extends coreClient.ServiceClient {
     // (undocumented)
     configurationServices: ConfigurationServices;
     // (undocumented)
+    containerRegistries: ContainerRegistries;
+    // (undocumented)
     customDomains: CustomDomains;
     // (undocumented)
+    customizedAccelerators: CustomizedAccelerators;
+    // (undocumented)
     deployments: Deployments;
+    // (undocumented)
+    devToolPortals: DevToolPortals;
     // (undocumented)
     gatewayCustomDomains: GatewayCustomDomains;
     // (undocumented)
@@ -223,6 +572,8 @@ export class AppPlatformManagementClient extends coreClient.ServiceClient {
     // (undocumented)
     operations: Operations;
     // (undocumented)
+    predefinedAccelerators: PredefinedAccelerators;
+    // (undocumented)
     runtimeVersions: RuntimeVersions;
     // (undocumented)
     serviceRegistries: ServiceRegistries;
@@ -233,7 +584,7 @@ export class AppPlatformManagementClient extends coreClient.ServiceClient {
     // (undocumented)
     storages: Storages;
     // (undocumented)
-    subscriptionId: string;
+    subscriptionId?: string;
 }
 
 // @public
@@ -259,9 +610,7 @@ export interface AppResourceCollection {
 // @public
 export interface AppResourceProperties {
     addonConfigs?: {
-        [propertyName: string]: {
-            [propertyName: string]: Record<string, unknown>;
-        };
+        [propertyName: string]: Record<string, unknown>;
     };
     customPersistentDisks?: CustomPersistentDiskResource[];
     enableEndToEndTLS?: boolean;
@@ -282,13 +631,13 @@ export type AppResourceProvisioningState = string;
 
 // @public
 export interface Apps {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, appName: string, appResource: AppResource, options?: AppsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<AppsCreateOrUpdateResponse>, AppsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, appName: string, appResource: AppResource, options?: AppsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<AppsCreateOrUpdateResponse>, AppsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, appName: string, appResource: AppResource, options?: AppsCreateOrUpdateOptionalParams): Promise<AppsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, appName: string, options?: AppsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, appName: string, options?: AppsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, appName: string, options?: AppsDeleteOptionalParams): Promise<void>;
-    beginSetActiveDeployments(resourceGroupName: string, serviceName: string, appName: string, activeDeploymentCollection: ActiveDeploymentCollection, options?: AppsSetActiveDeploymentsOptionalParams): Promise<PollerLike<PollOperationState<AppsSetActiveDeploymentsResponse>, AppsSetActiveDeploymentsResponse>>;
+    beginSetActiveDeployments(resourceGroupName: string, serviceName: string, appName: string, activeDeploymentCollection: ActiveDeploymentCollection, options?: AppsSetActiveDeploymentsOptionalParams): Promise<SimplePollerLike<OperationState<AppsSetActiveDeploymentsResponse>, AppsSetActiveDeploymentsResponse>>;
     beginSetActiveDeploymentsAndWait(resourceGroupName: string, serviceName: string, appName: string, activeDeploymentCollection: ActiveDeploymentCollection, options?: AppsSetActiveDeploymentsOptionalParams): Promise<AppsSetActiveDeploymentsResponse>;
-    beginUpdate(resourceGroupName: string, serviceName: string, appName: string, appResource: AppResource, options?: AppsUpdateOptionalParams): Promise<PollerLike<PollOperationState<AppsUpdateResponse>, AppsUpdateResponse>>;
+    beginUpdate(resourceGroupName: string, serviceName: string, appName: string, appResource: AppResource, options?: AppsUpdateOptionalParams): Promise<SimplePollerLike<OperationState<AppsUpdateResponse>, AppsUpdateResponse>>;
     beginUpdateAndWait(resourceGroupName: string, serviceName: string, appName: string, appResource: AppResource, options?: AppsUpdateOptionalParams): Promise<AppsUpdateResponse>;
     get(resourceGroupName: string, serviceName: string, appName: string, options?: AppsGetOptionalParams): Promise<AppsGetResponse>;
     getResourceUploadUrl(resourceGroupName: string, serviceName: string, appName: string, options?: AppsGetResourceUploadUrlOptionalParams): Promise<AppsGetResourceUploadUrlResponse>;
@@ -384,7 +733,7 @@ export interface AvailableRuntimeVersions {
 
 // @public
 export interface AzureFileVolume extends CustomPersistentDiskProperties {
-    shareName: string;
+    shareName?: string;
     type: "AzureFileVolume";
 }
 
@@ -405,7 +754,7 @@ export interface BindingResourceCollection {
 // @public
 export interface BindingResourceProperties {
     bindingParameters?: {
-        [propertyName: string]: Record<string, unknown>;
+        [propertyName: string]: string;
     };
     readonly createdAt?: string;
     readonly generatedProperties?: string;
@@ -418,11 +767,11 @@ export interface BindingResourceProperties {
 
 // @public
 export interface Bindings {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, bindingResource: BindingResource, options?: BindingsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<BindingsCreateOrUpdateResponse>, BindingsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, bindingResource: BindingResource, options?: BindingsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<BindingsCreateOrUpdateResponse>, BindingsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, bindingResource: BindingResource, options?: BindingsCreateOrUpdateOptionalParams): Promise<BindingsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, options?: BindingsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, options?: BindingsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, options?: BindingsDeleteOptionalParams): Promise<void>;
-    beginUpdate(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, bindingResource: BindingResource, options?: BindingsUpdateOptionalParams): Promise<PollerLike<PollOperationState<BindingsUpdateResponse>, BindingsUpdateResponse>>;
+    beginUpdate(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, bindingResource: BindingResource, options?: BindingsUpdateOptionalParams): Promise<SimplePollerLike<OperationState<BindingsUpdateResponse>, BindingsUpdateResponse>>;
     beginUpdateAndWait(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, bindingResource: BindingResource, options?: BindingsUpdateOptionalParams): Promise<BindingsUpdateResponse>;
     get(resourceGroupName: string, serviceName: string, appName: string, bindingName: string, options?: BindingsGetOptionalParams): Promise<BindingsGetResponse>;
     list(resourceGroupName: string, serviceName: string, appName: string, options?: BindingsListOptionalParams): PagedAsyncIterableIterator<BindingResource>;
@@ -510,12 +859,13 @@ export interface BuilderResourceCollection {
 
 // @public
 export interface BuildpackBinding {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, buildpackBindingName: string, buildpackBinding: BuildpackBindingResource, options?: BuildpackBindingCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<BuildpackBindingCreateOrUpdateResponse>, BuildpackBindingCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, buildpackBindingName: string, buildpackBinding: BuildpackBindingResource, options?: BuildpackBindingCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<BuildpackBindingCreateOrUpdateResponse>, BuildpackBindingCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, buildpackBindingName: string, buildpackBinding: BuildpackBindingResource, options?: BuildpackBindingCreateOrUpdateOptionalParams): Promise<BuildpackBindingCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, buildpackBindingName: string, options?: BuildpackBindingDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, buildpackBindingName: string, options?: BuildpackBindingDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, buildpackBindingName: string, options?: BuildpackBindingDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, buildpackBindingName: string, options?: BuildpackBindingGetOptionalParams): Promise<BuildpackBindingGetResponse>;
     list(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, options?: BuildpackBindingListOptionalParams): PagedAsyncIterableIterator<BuildpackBindingResource>;
+    listForCluster(resourceGroupName: string, serviceName: string, options?: BuildpackBindingListForClusterOptionalParams): PagedAsyncIterableIterator<BuildpackBindingResource>;
 }
 
 // @public
@@ -549,6 +899,20 @@ export interface BuildpackBindingLaunchProperties {
         [propertyName: string]: string;
     };
 }
+
+// @public
+export interface BuildpackBindingListForClusterNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type BuildpackBindingListForClusterNextResponse = BuildpackBindingResourceCollection;
+
+// @public
+export interface BuildpackBindingListForClusterOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type BuildpackBindingListForClusterResponse = BuildpackBindingResourceCollection;
 
 // @public
 export interface BuildpackBindingListNextOptionalParams extends coreClient.OperationOptions {
@@ -599,7 +963,9 @@ export interface BuildpacksGroupProperties {
 // @public
 export interface BuildProperties {
     agentPool?: string;
+    apms?: ApmReference[];
     builder?: string;
+    certificates?: CertificateReference[];
     env?: {
         [propertyName: string]: string;
     };
@@ -638,6 +1004,8 @@ export interface BuildResultLog {
 export interface BuildResultProperties {
     buildPodName?: string;
     readonly buildStages?: BuildStageProperties[];
+    error?: ErrorModel;
+    readonly image?: string;
     name?: string;
     readonly provisioningState?: BuildResultProvisioningState;
 }
@@ -658,7 +1026,7 @@ export interface BuildService extends ProxyResource {
 
 // @public
 export interface BuildServiceAgentPool {
-    beginUpdatePut(resourceGroupName: string, serviceName: string, buildServiceName: string, agentPoolName: string, agentPoolResource: BuildServiceAgentPoolResource, options?: BuildServiceAgentPoolUpdatePutOptionalParams): Promise<PollerLike<PollOperationState<BuildServiceAgentPoolUpdatePutResponse>, BuildServiceAgentPoolUpdatePutResponse>>;
+    beginUpdatePut(resourceGroupName: string, serviceName: string, buildServiceName: string, agentPoolName: string, agentPoolResource: BuildServiceAgentPoolResource, options?: BuildServiceAgentPoolUpdatePutOptionalParams): Promise<SimplePollerLike<OperationState<BuildServiceAgentPoolUpdatePutResponse>, BuildServiceAgentPoolUpdatePutResponse>>;
     beginUpdatePutAndWait(resourceGroupName: string, serviceName: string, buildServiceName: string, agentPoolName: string, agentPoolResource: BuildServiceAgentPoolResource, options?: BuildServiceAgentPoolUpdatePutOptionalParams): Promise<BuildServiceAgentPoolUpdatePutResponse>;
     get(resourceGroupName: string, serviceName: string, buildServiceName: string, agentPoolName: string, options?: BuildServiceAgentPoolGetOptionalParams): Promise<BuildServiceAgentPoolGetResponse>;
     list(resourceGroupName: string, serviceName: string, buildServiceName: string, options?: BuildServiceAgentPoolListOptionalParams): PagedAsyncIterableIterator<BuildServiceAgentPoolResource>;
@@ -720,9 +1088,9 @@ export type BuildServiceAgentPoolUpdatePutResponse = BuildServiceAgentPoolResour
 
 // @public
 export interface BuildServiceBuilder {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, builderResource: BuilderResource, options?: BuildServiceBuilderCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<BuildServiceBuilderCreateOrUpdateResponse>, BuildServiceBuilderCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, builderResource: BuilderResource, options?: BuildServiceBuilderCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<BuildServiceBuilderCreateOrUpdateResponse>, BuildServiceBuilderCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, builderResource: BuilderResource, options?: BuildServiceBuilderCreateOrUpdateOptionalParams): Promise<BuildServiceBuilderCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, options?: BuildServiceBuilderDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, options?: BuildServiceBuilderDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, options?: BuildServiceBuilderDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, buildServiceName: string, builderName: string, options?: BuildServiceBuilderGetOptionalParams): Promise<BuildServiceBuilderGetResponse>;
     list(resourceGroupName: string, serviceName: string, buildServiceName: string, options?: BuildServiceBuilderListOptionalParams): PagedAsyncIterableIterator<BuilderResource>;
@@ -784,6 +1152,30 @@ export interface BuildServiceCreateOrUpdateBuildOptionalParams extends coreClien
 
 // @public
 export type BuildServiceCreateOrUpdateBuildResponse = Build;
+
+// @public
+export interface BuildServiceCreateOrUpdateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type BuildServiceCreateOrUpdateResponse = BuildService;
+
+// @public
+export interface BuildServiceDeleteBuildHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface BuildServiceDeleteBuildOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type BuildServiceDeleteBuildResponse = BuildServiceDeleteBuildHeaders;
 
 // @public
 export interface BuildServiceGetBuildOptionalParams extends coreClient.OperationOptions {
@@ -892,6 +1284,10 @@ export type BuildServiceListSupportedStacksResponse = SupportedStacksCollection;
 
 // @public
 export interface BuildServiceOperations {
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, buildServiceName: string, buildService: BuildService, options?: BuildServiceCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<BuildServiceCreateOrUpdateResponse>, BuildServiceCreateOrUpdateResponse>>;
+    beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, buildServiceName: string, buildService: BuildService, options?: BuildServiceCreateOrUpdateOptionalParams): Promise<BuildServiceCreateOrUpdateResponse>;
+    beginDeleteBuild(resourceGroupName: string, serviceName: string, buildServiceName: string, buildName: string, options?: BuildServiceDeleteBuildOptionalParams): Promise<SimplePollerLike<OperationState<BuildServiceDeleteBuildResponse>, BuildServiceDeleteBuildResponse>>;
+    beginDeleteBuildAndWait(resourceGroupName: string, serviceName: string, buildServiceName: string, buildName: string, options?: BuildServiceDeleteBuildOptionalParams): Promise<BuildServiceDeleteBuildResponse>;
     createOrUpdateBuild(resourceGroupName: string, serviceName: string, buildServiceName: string, buildName: string, build: Build, options?: BuildServiceCreateOrUpdateBuildOptionalParams): Promise<BuildServiceCreateOrUpdateBuildResponse>;
     getBuild(resourceGroupName: string, serviceName: string, buildServiceName: string, buildName: string, options?: BuildServiceGetBuildOptionalParams): Promise<BuildServiceGetBuildResponse>;
     getBuildResult(resourceGroupName: string, serviceName: string, buildServiceName: string, buildName: string, buildResultName: string, options?: BuildServiceGetBuildResultOptionalParams): Promise<BuildServiceGetBuildResultResponse>;
@@ -909,7 +1305,8 @@ export interface BuildServiceOperations {
 
 // @public
 export interface BuildServiceProperties {
-    kPackVersion?: string;
+    containerRegistry?: string;
+    readonly kPackVersion?: string;
     readonly provisioningState?: BuildServiceProvisioningState;
     resourceRequests?: BuildServicePropertiesResourceRequests;
 }
@@ -925,7 +1322,9 @@ export type BuildServiceProvisioningState = string;
 
 // @public
 export interface BuildStageProperties {
+    readonly exitCode?: string;
     readonly name?: string;
+    readonly reason?: string;
     readonly status?: KPackBuildStageProvisioningState;
 }
 
@@ -946,6 +1345,11 @@ export interface CertificateProperties {
 export type CertificatePropertiesUnion = CertificateProperties | KeyVaultCertificateProperties | ContentCertificateProperties;
 
 // @public
+export interface CertificateReference {
+    resourceId: string;
+}
+
+// @public
 export interface CertificateResource extends ProxyResource {
     properties?: CertificatePropertiesUnion;
 }
@@ -961,9 +1365,9 @@ export type CertificateResourceProvisioningState = string;
 
 // @public
 export interface Certificates {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, certificateName: string, certificateResource: CertificateResource, options?: CertificatesCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<CertificatesCreateOrUpdateResponse>, CertificatesCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, certificateName: string, certificateResource: CertificateResource, options?: CertificatesCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<CertificatesCreateOrUpdateResponse>, CertificatesCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, certificateName: string, certificateResource: CertificateResource, options?: CertificatesCreateOrUpdateOptionalParams): Promise<CertificatesCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, certificateName: string, options?: CertificatesDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, certificateName: string, options?: CertificatesDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, certificateName: string, options?: CertificatesDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, certificateName: string, options?: CertificatesGetOptionalParams): Promise<CertificatesGetResponse>;
     list(resourceGroupName: string, serviceName: string, options?: CertificatesListOptionalParams): PagedAsyncIterableIterator<CertificateResource>;
@@ -1060,11 +1464,11 @@ export interface ConfigServerResource extends ProxyResource {
 
 // @public
 export interface ConfigServers {
-    beginUpdatePatch(resourceGroupName: string, serviceName: string, configServerResource: ConfigServerResource, options?: ConfigServersUpdatePatchOptionalParams): Promise<PollerLike<PollOperationState<ConfigServersUpdatePatchResponse>, ConfigServersUpdatePatchResponse>>;
+    beginUpdatePatch(resourceGroupName: string, serviceName: string, configServerResource: ConfigServerResource, options?: ConfigServersUpdatePatchOptionalParams): Promise<SimplePollerLike<OperationState<ConfigServersUpdatePatchResponse>, ConfigServersUpdatePatchResponse>>;
     beginUpdatePatchAndWait(resourceGroupName: string, serviceName: string, configServerResource: ConfigServerResource, options?: ConfigServersUpdatePatchOptionalParams): Promise<ConfigServersUpdatePatchResponse>;
-    beginUpdatePut(resourceGroupName: string, serviceName: string, configServerResource: ConfigServerResource, options?: ConfigServersUpdatePutOptionalParams): Promise<PollerLike<PollOperationState<ConfigServersUpdatePutResponse>, ConfigServersUpdatePutResponse>>;
+    beginUpdatePut(resourceGroupName: string, serviceName: string, configServerResource: ConfigServerResource, options?: ConfigServersUpdatePutOptionalParams): Promise<SimplePollerLike<OperationState<ConfigServersUpdatePutResponse>, ConfigServersUpdatePutResponse>>;
     beginUpdatePutAndWait(resourceGroupName: string, serviceName: string, configServerResource: ConfigServerResource, options?: ConfigServersUpdatePutOptionalParams): Promise<ConfigServersUpdatePutResponse>;
-    beginValidate(resourceGroupName: string, serviceName: string, configServerSettings: ConfigServerSettings, options?: ConfigServersValidateOptionalParams): Promise<PollerLike<PollOperationState<ConfigServersValidateResponse>, ConfigServersValidateResponse>>;
+    beginValidate(resourceGroupName: string, serviceName: string, configServerSettings: ConfigServerSettings, options?: ConfigServersValidateOptionalParams): Promise<SimplePollerLike<OperationState<ConfigServersValidateResponse>, ConfigServersValidateResponse>>;
     beginValidateAndWait(resourceGroupName: string, serviceName: string, configServerSettings: ConfigServerSettings, options?: ConfigServersValidateOptionalParams): Promise<ConfigServersValidateResponse>;
     get(resourceGroupName: string, serviceName: string, options?: ConfigServersGetOptionalParams): Promise<ConfigServersGetResponse>;
 }
@@ -1125,6 +1529,9 @@ export interface ConfigServersValidateOptionalParams extends coreClient.Operatio
 export type ConfigServersValidateResponse = ConfigServerSettingsValidateResult;
 
 // @public
+export type ConfigurationServiceGeneration = string;
+
+// @public
 export interface ConfigurationServiceGitProperty {
     repositories?: ConfigurationServiceGitRepository[];
 }
@@ -1137,6 +1544,8 @@ export interface ConfigurationServiceGitPropertyValidateResult {
 
 // @public
 export interface ConfigurationServiceGitRepository {
+    caCertResourceId?: string;
+    gitImplementation?: GitImplementation;
     hostKey?: string;
     hostKeyAlgorithm?: string;
     label: string;
@@ -1158,6 +1567,7 @@ export interface ConfigurationServiceInstance {
 
 // @public
 export interface ConfigurationServiceProperties {
+    generation?: ConfigurationServiceGeneration;
     readonly instances?: ConfigurationServiceInstance[];
     readonly provisioningState?: ConfigurationServiceProvisioningState;
     readonly resourceRequests?: ConfigurationServiceResourceRequests;
@@ -1187,12 +1597,14 @@ export interface ConfigurationServiceResourceRequests {
 
 // @public
 export interface ConfigurationServices {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, configurationServiceName: string, configurationServiceResource: ConfigurationServiceResource, options?: ConfigurationServicesCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<ConfigurationServicesCreateOrUpdateResponse>, ConfigurationServicesCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, configurationServiceName: string, configurationServiceResource: ConfigurationServiceResource, options?: ConfigurationServicesCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ConfigurationServicesCreateOrUpdateResponse>, ConfigurationServicesCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, configurationServiceName: string, configurationServiceResource: ConfigurationServiceResource, options?: ConfigurationServicesCreateOrUpdateOptionalParams): Promise<ConfigurationServicesCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, configurationServiceName: string, options?: ConfigurationServicesDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, configurationServiceName: string, options?: ConfigurationServicesDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, configurationServiceName: string, options?: ConfigurationServicesDeleteOptionalParams): Promise<void>;
-    beginValidate(resourceGroupName: string, serviceName: string, configurationServiceName: string, settings: ConfigurationServiceSettings, options?: ConfigurationServicesValidateOptionalParams): Promise<PollerLike<PollOperationState<ConfigurationServicesValidateResponse>, ConfigurationServicesValidateResponse>>;
+    beginValidate(resourceGroupName: string, serviceName: string, configurationServiceName: string, settings: ConfigurationServiceSettings, options?: ConfigurationServicesValidateOptionalParams): Promise<SimplePollerLike<OperationState<ConfigurationServicesValidateResponse>, ConfigurationServicesValidateResponse>>;
     beginValidateAndWait(resourceGroupName: string, serviceName: string, configurationServiceName: string, settings: ConfigurationServiceSettings, options?: ConfigurationServicesValidateOptionalParams): Promise<ConfigurationServicesValidateResponse>;
+    beginValidateResource(resourceGroupName: string, serviceName: string, configurationServiceName: string, configurationServiceResource: ConfigurationServiceResource, options?: ConfigurationServicesValidateResourceOptionalParams): Promise<SimplePollerLike<OperationState<ConfigurationServicesValidateResourceResponse>, ConfigurationServicesValidateResourceResponse>>;
+    beginValidateResourceAndWait(resourceGroupName: string, serviceName: string, configurationServiceName: string, configurationServiceResource: ConfigurationServiceResource, options?: ConfigurationServicesValidateResourceOptionalParams): Promise<ConfigurationServicesValidateResourceResponse>;
     get(resourceGroupName: string, serviceName: string, configurationServiceName: string, options?: ConfigurationServicesGetOptionalParams): Promise<ConfigurationServicesGetResponse>;
     list(resourceGroupName: string, serviceName: string, options?: ConfigurationServicesListOptionalParams): PagedAsyncIterableIterator<ConfigurationServiceResource>;
 }
@@ -1250,11 +1662,140 @@ export interface ConfigurationServicesValidateOptionalParams extends coreClient.
 }
 
 // @public
+export interface ConfigurationServicesValidateResourceHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface ConfigurationServicesValidateResourceOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ConfigurationServicesValidateResourceResponse = ConfigurationServiceSettingsValidateResult;
+
+// @public
 export type ConfigurationServicesValidateResponse = ConfigurationServiceSettingsValidateResult;
 
 // @public
 export interface ContainerProbeSettings {
     disableProbe?: boolean;
+}
+
+// @public
+export interface ContainerRegistries {
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, containerRegistryName: string, containerRegistryResource: ContainerRegistryResource, options?: ContainerRegistriesCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ContainerRegistriesCreateOrUpdateResponse>, ContainerRegistriesCreateOrUpdateResponse>>;
+    beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, containerRegistryName: string, containerRegistryResource: ContainerRegistryResource, options?: ContainerRegistriesCreateOrUpdateOptionalParams): Promise<ContainerRegistriesCreateOrUpdateResponse>;
+    beginDelete(resourceGroupName: string, serviceName: string, containerRegistryName: string, options?: ContainerRegistriesDeleteOptionalParams): Promise<SimplePollerLike<OperationState<ContainerRegistriesDeleteResponse>, ContainerRegistriesDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, serviceName: string, containerRegistryName: string, options?: ContainerRegistriesDeleteOptionalParams): Promise<ContainerRegistriesDeleteResponse>;
+    beginValidate(resourceGroupName: string, serviceName: string, containerRegistryName: string, containerRegistryProperties: ContainerRegistryProperties, options?: ContainerRegistriesValidateOptionalParams): Promise<SimplePollerLike<OperationState<ContainerRegistriesValidateResponse>, ContainerRegistriesValidateResponse>>;
+    beginValidateAndWait(resourceGroupName: string, serviceName: string, containerRegistryName: string, containerRegistryProperties: ContainerRegistryProperties, options?: ContainerRegistriesValidateOptionalParams): Promise<ContainerRegistriesValidateResponse>;
+    get(resourceGroupName: string, serviceName: string, containerRegistryName: string, options?: ContainerRegistriesGetOptionalParams): Promise<ContainerRegistriesGetResponse>;
+    list(resourceGroupName: string, serviceName: string, options?: ContainerRegistriesListOptionalParams): PagedAsyncIterableIterator<ContainerRegistryResource>;
+}
+
+// @public
+export interface ContainerRegistriesCreateOrUpdateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ContainerRegistriesCreateOrUpdateResponse = ContainerRegistryResource;
+
+// @public
+export interface ContainerRegistriesDeleteHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface ContainerRegistriesDeleteOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ContainerRegistriesDeleteResponse = ContainerRegistriesDeleteHeaders;
+
+// @public
+export interface ContainerRegistriesGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ContainerRegistriesGetResponse = ContainerRegistryResource;
+
+// @public
+export interface ContainerRegistriesListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ContainerRegistriesListNextResponse = ContainerRegistryResourceCollection;
+
+// @public
+export interface ContainerRegistriesListOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ContainerRegistriesListResponse = ContainerRegistryResourceCollection;
+
+// @public
+export interface ContainerRegistriesValidateHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface ContainerRegistriesValidateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ContainerRegistriesValidateResponse = ContainerRegistryValidateResult;
+
+// @public
+export interface ContainerRegistryBasicCredentials extends ContainerRegistryCredentials {
+    password: string;
+    server: string;
+    type: "BasicAuth";
+    username: string;
+}
+
+// @public
+export interface ContainerRegistryCredentials {
+    type: "BasicAuth";
+}
+
+// @public (undocumented)
+export type ContainerRegistryCredentialsUnion = ContainerRegistryCredentials | ContainerRegistryBasicCredentials;
+
+// @public
+export interface ContainerRegistryProperties {
+    credentials: ContainerRegistryCredentialsUnion;
+    readonly provisioningState?: ContainerRegistryProvisioningState;
+}
+
+// @public
+export type ContainerRegistryProvisioningState = string;
+
+// @public
+export interface ContainerRegistryResource extends ProxyResource {
+    properties?: ContainerRegistryProperties;
+}
+
+// @public
+export interface ContainerRegistryResourceCollection {
+    nextLink?: string;
+    value?: ContainerRegistryResource[];
+}
+
+// @public
+export interface ContainerRegistryValidateResult {
+    isValid?: boolean;
+    message?: string;
 }
 
 // @public
@@ -1306,11 +1847,11 @@ export type CustomDomainResourceProvisioningState = string;
 
 // @public
 export interface CustomDomains {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, appName: string, domainName: string, domainResource: CustomDomainResource, options?: CustomDomainsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<CustomDomainsCreateOrUpdateResponse>, CustomDomainsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, appName: string, domainName: string, domainResource: CustomDomainResource, options?: CustomDomainsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<CustomDomainsCreateOrUpdateResponse>, CustomDomainsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, appName: string, domainName: string, domainResource: CustomDomainResource, options?: CustomDomainsCreateOrUpdateOptionalParams): Promise<CustomDomainsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, appName: string, domainName: string, options?: CustomDomainsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, appName: string, domainName: string, options?: CustomDomainsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, appName: string, domainName: string, options?: CustomDomainsDeleteOptionalParams): Promise<void>;
-    beginUpdate(resourceGroupName: string, serviceName: string, appName: string, domainName: string, domainResource: CustomDomainResource, options?: CustomDomainsUpdateOptionalParams): Promise<PollerLike<PollOperationState<CustomDomainsUpdateResponse>, CustomDomainsUpdateResponse>>;
+    beginUpdate(resourceGroupName: string, serviceName: string, appName: string, domainName: string, domainResource: CustomDomainResource, options?: CustomDomainsUpdateOptionalParams): Promise<SimplePollerLike<OperationState<CustomDomainsUpdateResponse>, CustomDomainsUpdateResponse>>;
     beginUpdateAndWait(resourceGroupName: string, serviceName: string, appName: string, domainName: string, domainResource: CustomDomainResource, options?: CustomDomainsUpdateOptionalParams): Promise<CustomDomainsUpdateResponse>;
     get(resourceGroupName: string, serviceName: string, appName: string, domainName: string, options?: CustomDomainsGetOptionalParams): Promise<CustomDomainsGetResponse>;
     list(resourceGroupName: string, serviceName: string, appName: string, options?: CustomDomainsListOptionalParams): PagedAsyncIterableIterator<CustomDomainResource>;
@@ -1373,7 +1914,126 @@ export interface CustomDomainValidateResult {
 }
 
 // @public
+export interface CustomizedAcceleratorProperties {
+    // (undocumented)
+    acceleratorTags?: string[];
+    acceleratorType?: CustomizedAcceleratorType;
+    // (undocumented)
+    description?: string;
+    // (undocumented)
+    displayName?: string;
+    // (undocumented)
+    gitRepository: AcceleratorGitRepository;
+    // (undocumented)
+    iconUrl?: string;
+    readonly imports?: string[];
+    readonly provisioningState?: CustomizedAcceleratorProvisioningState;
+}
+
+// @public
+export type CustomizedAcceleratorProvisioningState = string;
+
+// @public
+export interface CustomizedAcceleratorResource extends ProxyResource {
+    properties?: CustomizedAcceleratorProperties;
+    sku?: Sku;
+}
+
+// @public (undocumented)
+export interface CustomizedAcceleratorResourceCollection {
+    // (undocumented)
+    nextLink?: string;
+    // (undocumented)
+    value?: CustomizedAcceleratorResource[];
+}
+
+// @public
+export interface CustomizedAccelerators {
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, customizedAcceleratorName: string, customizedAcceleratorResource: CustomizedAcceleratorResource, options?: CustomizedAcceleratorsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<CustomizedAcceleratorsCreateOrUpdateResponse>, CustomizedAcceleratorsCreateOrUpdateResponse>>;
+    beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, customizedAcceleratorName: string, customizedAcceleratorResource: CustomizedAcceleratorResource, options?: CustomizedAcceleratorsCreateOrUpdateOptionalParams): Promise<CustomizedAcceleratorsCreateOrUpdateResponse>;
+    beginDelete(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, customizedAcceleratorName: string, options?: CustomizedAcceleratorsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<CustomizedAcceleratorsDeleteResponse>, CustomizedAcceleratorsDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, customizedAcceleratorName: string, options?: CustomizedAcceleratorsDeleteOptionalParams): Promise<CustomizedAcceleratorsDeleteResponse>;
+    beginValidate(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, customizedAcceleratorName: string, properties: CustomizedAcceleratorProperties, options?: CustomizedAcceleratorsValidateOptionalParams): Promise<SimplePollerLike<OperationState<CustomizedAcceleratorsValidateResponse>, CustomizedAcceleratorsValidateResponse>>;
+    beginValidateAndWait(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, customizedAcceleratorName: string, properties: CustomizedAcceleratorProperties, options?: CustomizedAcceleratorsValidateOptionalParams): Promise<CustomizedAcceleratorsValidateResponse>;
+    get(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, customizedAcceleratorName: string, options?: CustomizedAcceleratorsGetOptionalParams): Promise<CustomizedAcceleratorsGetResponse>;
+    list(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, options?: CustomizedAcceleratorsListOptionalParams): PagedAsyncIterableIterator<CustomizedAcceleratorResource>;
+}
+
+// @public
+export interface CustomizedAcceleratorsCreateOrUpdateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type CustomizedAcceleratorsCreateOrUpdateResponse = CustomizedAcceleratorResource;
+
+// @public
+export interface CustomizedAcceleratorsDeleteHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface CustomizedAcceleratorsDeleteOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type CustomizedAcceleratorsDeleteResponse = CustomizedAcceleratorsDeleteHeaders;
+
+// @public
+export interface CustomizedAcceleratorsGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CustomizedAcceleratorsGetResponse = CustomizedAcceleratorResource;
+
+// @public
+export interface CustomizedAcceleratorsListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CustomizedAcceleratorsListNextResponse = CustomizedAcceleratorResourceCollection;
+
+// @public
+export interface CustomizedAcceleratorsListOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type CustomizedAcceleratorsListResponse = CustomizedAcceleratorResourceCollection;
+
+// @public
+export interface CustomizedAcceleratorsValidateHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface CustomizedAcceleratorsValidateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type CustomizedAcceleratorsValidateResponse = CustomizedAcceleratorValidateResult;
+
+// @public
+export type CustomizedAcceleratorType = string;
+
+// @public
+export interface CustomizedAcceleratorValidateResult {
+    errorMessage?: string;
+    state?: CustomizedAcceleratorValidateResultState;
+}
+
+// @public
+export type CustomizedAcceleratorValidateResultState = string;
+
+// @public
 export interface CustomPersistentDiskProperties {
+    enableSubPath?: boolean;
     mountOptions?: string[];
     mountPath: string;
     readOnly?: boolean;
@@ -1434,27 +2094,27 @@ export type DeploymentResourceStatus = string;
 
 // @public
 export interface Deployments {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, deploymentResource: DeploymentResource, options?: DeploymentsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<DeploymentsCreateOrUpdateResponse>, DeploymentsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, deploymentResource: DeploymentResource, options?: DeploymentsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<DeploymentsCreateOrUpdateResponse>, DeploymentsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, deploymentResource: DeploymentResource, options?: DeploymentsCreateOrUpdateOptionalParams): Promise<DeploymentsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsDeleteOptionalParams): Promise<void>;
-    beginDisableRemoteDebugging(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsDisableRemoteDebuggingOptionalParams): Promise<PollerLike<PollOperationState<DeploymentsDisableRemoteDebuggingResponse>, DeploymentsDisableRemoteDebuggingResponse>>;
+    beginDisableRemoteDebugging(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsDisableRemoteDebuggingOptionalParams): Promise<SimplePollerLike<OperationState<DeploymentsDisableRemoteDebuggingResponse>, DeploymentsDisableRemoteDebuggingResponse>>;
     beginDisableRemoteDebuggingAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsDisableRemoteDebuggingOptionalParams): Promise<DeploymentsDisableRemoteDebuggingResponse>;
-    beginEnableRemoteDebugging(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsEnableRemoteDebuggingOptionalParams): Promise<PollerLike<PollOperationState<DeploymentsEnableRemoteDebuggingResponse>, DeploymentsEnableRemoteDebuggingResponse>>;
+    beginEnableRemoteDebugging(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsEnableRemoteDebuggingOptionalParams): Promise<SimplePollerLike<OperationState<DeploymentsEnableRemoteDebuggingResponse>, DeploymentsEnableRemoteDebuggingResponse>>;
     beginEnableRemoteDebuggingAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsEnableRemoteDebuggingOptionalParams): Promise<DeploymentsEnableRemoteDebuggingResponse>;
-    beginGenerateHeapDump(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, diagnosticParameters: DiagnosticParameters, options?: DeploymentsGenerateHeapDumpOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginGenerateHeapDump(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, diagnosticParameters: DiagnosticParameters, options?: DeploymentsGenerateHeapDumpOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginGenerateHeapDumpAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, diagnosticParameters: DiagnosticParameters, options?: DeploymentsGenerateHeapDumpOptionalParams): Promise<void>;
-    beginGenerateThreadDump(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, diagnosticParameters: DiagnosticParameters, options?: DeploymentsGenerateThreadDumpOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginGenerateThreadDump(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, diagnosticParameters: DiagnosticParameters, options?: DeploymentsGenerateThreadDumpOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginGenerateThreadDumpAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, diagnosticParameters: DiagnosticParameters, options?: DeploymentsGenerateThreadDumpOptionalParams): Promise<void>;
-    beginRestart(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsRestartOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginRestart(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsRestartOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginRestartAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsRestartOptionalParams): Promise<void>;
-    beginStart(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsStartOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginStart(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsStartOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginStartAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsStartOptionalParams): Promise<void>;
-    beginStartJFR(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, diagnosticParameters: DiagnosticParameters, options?: DeploymentsStartJFROptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginStartJFR(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, diagnosticParameters: DiagnosticParameters, options?: DeploymentsStartJFROptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginStartJFRAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, diagnosticParameters: DiagnosticParameters, options?: DeploymentsStartJFROptionalParams): Promise<void>;
-    beginStop(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsStopOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginStop(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsStopOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginStopAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsStopOptionalParams): Promise<void>;
-    beginUpdate(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, deploymentResource: DeploymentResource, options?: DeploymentsUpdateOptionalParams): Promise<PollerLike<PollOperationState<DeploymentsUpdateResponse>, DeploymentsUpdateResponse>>;
+    beginUpdate(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, deploymentResource: DeploymentResource, options?: DeploymentsUpdateOptionalParams): Promise<SimplePollerLike<OperationState<DeploymentsUpdateResponse>, DeploymentsUpdateResponse>>;
     beginUpdateAndWait(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, deploymentResource: DeploymentResource, options?: DeploymentsUpdateOptionalParams): Promise<DeploymentsUpdateResponse>;
     get(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsGetOptionalParams): Promise<DeploymentsGetResponse>;
     getLogFileUrl(resourceGroupName: string, serviceName: string, appName: string, deploymentName: string, options?: DeploymentsGetLogFileUrlOptionalParams): Promise<DeploymentsGetLogFileUrlResponse>;
@@ -1500,10 +2160,9 @@ export type DeploymentsEnableRemoteDebuggingResponse = RemoteDebugging;
 // @public
 export interface DeploymentSettings {
     addonConfigs?: {
-        [propertyName: string]: {
-            [propertyName: string]: Record<string, unknown>;
-        };
+        [propertyName: string]: Record<string, unknown>;
     };
+    apms?: ApmReference[];
     containerProbeSettings?: ContainerProbeSettings;
     environmentVariables?: {
         [propertyName: string]: string;
@@ -1550,7 +2209,6 @@ export type DeploymentsGetResponse = DeploymentResource;
 
 // @public
 export interface DeploymentsListForClusterNextOptionalParams extends coreClient.OperationOptions {
-    version?: string[];
 }
 
 // @public
@@ -1558,6 +2216,7 @@ export type DeploymentsListForClusterNextResponse = DeploymentResourceCollection
 
 // @public
 export interface DeploymentsListForClusterOptionalParams extends coreClient.OperationOptions {
+    expand?: string;
     version?: string[];
 }
 
@@ -1566,7 +2225,6 @@ export type DeploymentsListForClusterResponse = DeploymentResourceCollection;
 
 // @public
 export interface DeploymentsListNextOptionalParams extends coreClient.OperationOptions {
-    version?: string[];
 }
 
 // @public
@@ -1613,6 +2271,128 @@ export interface DeploymentsUpdateOptionalParams extends coreClient.OperationOpt
 // @public
 export type DeploymentsUpdateResponse = DeploymentResource;
 
+// @public (undocumented)
+export interface DevToolPortalComponent {
+    readonly instances?: DevToolPortalInstance[];
+    readonly name?: string;
+    readonly resourceRequests?: DevToolPortalResourceRequests;
+}
+
+// @public
+export interface DevToolPortalFeatureDetail {
+    readonly route?: string;
+    state?: DevToolPortalFeatureState;
+}
+
+// @public
+export interface DevToolPortalFeatureSettings {
+    applicationAccelerator?: DevToolPortalFeatureDetail;
+    applicationLiveView?: DevToolPortalFeatureDetail;
+}
+
+// @public
+export type DevToolPortalFeatureState = string;
+
+// @public
+export interface DevToolPortalInstance {
+    readonly name?: string;
+    readonly status?: string;
+}
+
+// @public
+export interface DevToolPortalProperties {
+    readonly components?: DevToolPortalComponent[];
+    features?: DevToolPortalFeatureSettings;
+    readonly provisioningState?: DevToolPortalProvisioningState;
+    public?: boolean;
+    ssoProperties?: DevToolPortalSsoProperties;
+    readonly url?: string;
+}
+
+// @public
+export type DevToolPortalProvisioningState = string;
+
+// @public
+export interface DevToolPortalResource extends ProxyResource {
+    properties?: DevToolPortalProperties;
+}
+
+// @public
+export interface DevToolPortalResourceCollection {
+    nextLink?: string;
+    value?: DevToolPortalResource[];
+}
+
+// @public
+export interface DevToolPortalResourceRequests {
+    readonly cpu?: string;
+    readonly instanceCount?: number;
+    readonly memory?: string;
+}
+
+// @public
+export interface DevToolPortals {
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, devToolPortalName: string, devToolPortalResource: DevToolPortalResource, options?: DevToolPortalsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<DevToolPortalsCreateOrUpdateResponse>, DevToolPortalsCreateOrUpdateResponse>>;
+    beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, devToolPortalName: string, devToolPortalResource: DevToolPortalResource, options?: DevToolPortalsCreateOrUpdateOptionalParams): Promise<DevToolPortalsCreateOrUpdateResponse>;
+    beginDelete(resourceGroupName: string, serviceName: string, devToolPortalName: string, options?: DevToolPortalsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<DevToolPortalsDeleteResponse>, DevToolPortalsDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, serviceName: string, devToolPortalName: string, options?: DevToolPortalsDeleteOptionalParams): Promise<DevToolPortalsDeleteResponse>;
+    get(resourceGroupName: string, serviceName: string, devToolPortalName: string, options?: DevToolPortalsGetOptionalParams): Promise<DevToolPortalsGetResponse>;
+    list(resourceGroupName: string, serviceName: string, options?: DevToolPortalsListOptionalParams): PagedAsyncIterableIterator<DevToolPortalResource>;
+}
+
+// @public
+export interface DevToolPortalsCreateOrUpdateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type DevToolPortalsCreateOrUpdateResponse = DevToolPortalResource;
+
+// @public
+export interface DevToolPortalsDeleteHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface DevToolPortalsDeleteOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type DevToolPortalsDeleteResponse = DevToolPortalsDeleteHeaders;
+
+// @public
+export interface DevToolPortalsGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type DevToolPortalsGetResponse = DevToolPortalResource;
+
+// @public
+export interface DevToolPortalsListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type DevToolPortalsListNextResponse = DevToolPortalResourceCollection;
+
+// @public
+export interface DevToolPortalsListOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type DevToolPortalsListResponse = DevToolPortalResourceCollection;
+
+// @public
+export interface DevToolPortalSsoProperties {
+    clientId?: string;
+    clientSecret?: string;
+    metadataUrl?: string;
+    scopes?: string[];
+}
+
 // @public
 export interface DiagnosticParameters {
     appInstance?: string;
@@ -1655,10 +2435,14 @@ export interface GatewayApiRoute {
 }
 
 // @public
+export type GatewayCertificateVerification = string;
+
+// @public
 export interface GatewayCorsProperties {
     allowCredentials?: boolean;
     allowedHeaders?: string[];
     allowedMethods?: string[];
+    allowedOriginPatterns?: string[];
     allowedOrigins?: string[];
     exposedHeaders?: string[];
     maxAge?: number;
@@ -1682,9 +2466,9 @@ export interface GatewayCustomDomainResourceCollection {
 
 // @public
 export interface GatewayCustomDomains {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, gatewayName: string, domainName: string, gatewayCustomDomainResource: GatewayCustomDomainResource, options?: GatewayCustomDomainsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<GatewayCustomDomainsCreateOrUpdateResponse>, GatewayCustomDomainsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, gatewayName: string, domainName: string, gatewayCustomDomainResource: GatewayCustomDomainResource, options?: GatewayCustomDomainsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<GatewayCustomDomainsCreateOrUpdateResponse>, GatewayCustomDomainsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, gatewayName: string, domainName: string, gatewayCustomDomainResource: GatewayCustomDomainResource, options?: GatewayCustomDomainsCreateOrUpdateOptionalParams): Promise<GatewayCustomDomainsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, gatewayName: string, domainName: string, options?: GatewayCustomDomainsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, gatewayName: string, domainName: string, options?: GatewayCustomDomainsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, gatewayName: string, domainName: string, options?: GatewayCustomDomainsDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, gatewayName: string, domainName: string, options?: GatewayCustomDomainsGetOptionalParams): Promise<GatewayCustomDomainsGetResponse>;
     list(resourceGroupName: string, serviceName: string, gatewayName: string, options?: GatewayCustomDomainsListOptionalParams): PagedAsyncIterableIterator<GatewayCustomDomainResource>;
@@ -1748,7 +2532,10 @@ export interface GatewayOperatorResourceRequests {
 // @public
 export interface GatewayProperties {
     apiMetadataProperties?: GatewayApiMetadataProperties;
+    apms?: ApmReference[];
+    clientAuth?: GatewayPropertiesClientAuth;
     corsProperties?: GatewayCorsProperties;
+    environmentVariables?: GatewayPropertiesEnvironmentVariables;
     httpsOnly?: boolean;
     readonly instances?: GatewayInstance[];
     readonly operatorProperties?: GatewayOperatorProperties;
@@ -1757,6 +2544,22 @@ export interface GatewayProperties {
     resourceRequests?: GatewayResourceRequests;
     ssoProperties?: SsoProperties;
     readonly url?: string;
+}
+
+// @public
+export interface GatewayPropertiesClientAuth {
+    certificates?: string[];
+    certificateVerification?: GatewayCertificateVerification;
+}
+
+// @public
+export interface GatewayPropertiesEnvironmentVariables {
+    properties?: {
+        [propertyName: string]: string;
+    };
+    secrets?: {
+        [propertyName: string]: string;
+    };
 }
 
 // @public
@@ -1788,10 +2591,13 @@ export interface GatewayRouteConfigOpenApiProperties {
 // @public
 export interface GatewayRouteConfigProperties {
     appResourceId?: string;
+    filters?: string[];
     openApi?: GatewayRouteConfigOpenApiProperties;
+    predicates?: string[];
     protocol?: GatewayRouteConfigProtocol;
     readonly provisioningState?: GatewayProvisioningState;
     routes?: GatewayApiRoute[];
+    ssoEnabled?: boolean;
 }
 
 // @public
@@ -1810,9 +2616,9 @@ export interface GatewayRouteConfigResourceCollection {
 
 // @public
 export interface GatewayRouteConfigs {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, gatewayName: string, routeConfigName: string, gatewayRouteConfigResource: GatewayRouteConfigResource, options?: GatewayRouteConfigsCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<GatewayRouteConfigsCreateOrUpdateResponse>, GatewayRouteConfigsCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, gatewayName: string, routeConfigName: string, gatewayRouteConfigResource: GatewayRouteConfigResource, options?: GatewayRouteConfigsCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<GatewayRouteConfigsCreateOrUpdateResponse>, GatewayRouteConfigsCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, gatewayName: string, routeConfigName: string, gatewayRouteConfigResource: GatewayRouteConfigResource, options?: GatewayRouteConfigsCreateOrUpdateOptionalParams): Promise<GatewayRouteConfigsCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, gatewayName: string, routeConfigName: string, options?: GatewayRouteConfigsDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, gatewayName: string, routeConfigName: string, options?: GatewayRouteConfigsDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, gatewayName: string, routeConfigName: string, options?: GatewayRouteConfigsDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, gatewayName: string, routeConfigName: string, options?: GatewayRouteConfigsGetOptionalParams): Promise<GatewayRouteConfigsGetResponse>;
     list(resourceGroupName: string, serviceName: string, gatewayName: string, options?: GatewayRouteConfigsListOptionalParams): PagedAsyncIterableIterator<GatewayRouteConfigResource>;
@@ -1856,12 +2662,15 @@ export type GatewayRouteConfigsListResponse = GatewayRouteConfigResourceCollecti
 
 // @public
 export interface Gateways {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, gatewayName: string, gatewayResource: GatewayResource, options?: GatewaysCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<GatewaysCreateOrUpdateResponse>, GatewaysCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, gatewayName: string, gatewayResource: GatewayResource, options?: GatewaysCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<GatewaysCreateOrUpdateResponse>, GatewaysCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, gatewayName: string, gatewayResource: GatewayResource, options?: GatewaysCreateOrUpdateOptionalParams): Promise<GatewaysCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, gatewayName: string, options?: GatewaysDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, gatewayName: string, options?: GatewaysDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, gatewayName: string, options?: GatewaysDeleteOptionalParams): Promise<void>;
+    beginRestart(resourceGroupName: string, serviceName: string, gatewayName: string, options?: GatewaysRestartOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
+    beginRestartAndWait(resourceGroupName: string, serviceName: string, gatewayName: string, options?: GatewaysRestartOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, gatewayName: string, options?: GatewaysGetOptionalParams): Promise<GatewaysGetResponse>;
     list(resourceGroupName: string, serviceName: string, options?: GatewaysListOptionalParams): PagedAsyncIterableIterator<GatewayResource>;
+    listEnvSecrets(resourceGroupName: string, serviceName: string, gatewayName: string, options?: GatewaysListEnvSecretsOptionalParams): Promise<GatewaysListEnvSecretsResponse>;
     validateDomain(resourceGroupName: string, serviceName: string, gatewayName: string, validatePayload: CustomDomainValidatePayload, options?: GatewaysValidateDomainOptionalParams): Promise<GatewaysValidateDomainResponse>;
 }
 
@@ -1888,6 +2697,15 @@ export interface GatewaysGetOptionalParams extends coreClient.OperationOptions {
 export type GatewaysGetResponse = GatewayResource;
 
 // @public
+export interface GatewaysListEnvSecretsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type GatewaysListEnvSecretsResponse = {
+    [propertyName: string]: string;
+};
+
+// @public
 export interface GatewaysListNextOptionalParams extends coreClient.OperationOptions {
 }
 
@@ -1902,6 +2720,18 @@ export interface GatewaysListOptionalParams extends coreClient.OperationOptions 
 export type GatewaysListResponse = GatewayResourceCollection;
 
 // @public
+export interface GatewaysRestartHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface GatewaysRestartOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
 export interface GatewaysValidateDomainOptionalParams extends coreClient.OperationOptions {
 }
 
@@ -1910,6 +2740,9 @@ export type GatewaysValidateDomainResponse = CustomDomainValidateResult;
 
 // @public
 export function getContinuationToken(page: unknown): string | undefined;
+
+// @public
+export type GitImplementation = string;
 
 // @public
 export interface GitPatternRepository {
@@ -1924,6 +2757,11 @@ export interface GitPatternRepository {
     strictHostKeyChecking?: boolean;
     uri: string;
     username?: string;
+}
+
+// @public
+export interface GloballyEnabledApms {
+    value?: string[];
 }
 
 // @public
@@ -1970,7 +2808,11 @@ export interface JarUploadedUserSourceInfo extends UploadedUserSourceInfo {
 }
 
 // @public
+export type KeyVaultCertificateAutoSync = string;
+
+// @public
 export interface KeyVaultCertificateProperties extends CertificateProperties {
+    autoSync?: KeyVaultCertificateAutoSync;
     certVersion?: string;
     excludePrivateKey?: boolean;
     keyVaultCertName: string;
@@ -1984,7 +2826,43 @@ export enum KnownActionType {
 }
 
 // @public
+export enum KnownApiPortalApiTryOutEnabledState {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
+}
+
+// @public
 export enum KnownApiPortalProvisioningState {
+    Creating = "Creating",
+    Deleting = "Deleting",
+    Failed = "Failed",
+    Succeeded = "Succeeded",
+    Updating = "Updating"
+}
+
+// @public
+export enum KnownApmProvisioningState {
+    Canceled = "Canceled",
+    Creating = "Creating",
+    Deleting = "Deleting",
+    Failed = "Failed",
+    Succeeded = "Succeeded",
+    Updating = "Updating"
+}
+
+// @public
+export enum KnownApplicationAcceleratorProvisioningState {
+    Canceled = "Canceled",
+    Creating = "Creating",
+    Deleting = "Deleting",
+    Failed = "Failed",
+    Succeeded = "Succeeded",
+    Updating = "Updating"
+}
+
+// @public
+export enum KnownApplicationLiveViewProvisioningState {
+    Canceled = "Canceled",
     Creating = "Creating",
     Deleting = "Deleting",
     Failed = "Failed",
@@ -2081,7 +2959,23 @@ export enum KnownConfigServerState {
 }
 
 // @public
+export enum KnownConfigurationServiceGeneration {
+    Gen1 = "Gen1",
+    Gen2 = "Gen2"
+}
+
+// @public
 export enum KnownConfigurationServiceProvisioningState {
+    Creating = "Creating",
+    Deleting = "Deleting",
+    Failed = "Failed",
+    Succeeded = "Succeeded",
+    Updating = "Updating"
+}
+
+// @public
+export enum KnownContainerRegistryProvisioningState {
+    Canceled = "Canceled",
     Creating = "Creating",
     Deleting = "Deleting",
     Failed = "Failed",
@@ -2107,6 +3001,28 @@ export enum KnownCustomDomainResourceProvisioningState {
 }
 
 // @public
+export enum KnownCustomizedAcceleratorProvisioningState {
+    Canceled = "Canceled",
+    Creating = "Creating",
+    Deleting = "Deleting",
+    Failed = "Failed",
+    Succeeded = "Succeeded",
+    Updating = "Updating"
+}
+
+// @public
+export enum KnownCustomizedAcceleratorType {
+    Accelerator = "Accelerator",
+    Fragment = "Fragment"
+}
+
+// @public
+export enum KnownCustomizedAcceleratorValidateResultState {
+    Invalid = "Invalid",
+    Valid = "Valid"
+}
+
+// @public
 export enum KnownDeploymentResourceProvisioningState {
     Creating = "Creating",
     Failed = "Failed",
@@ -2118,6 +3034,28 @@ export enum KnownDeploymentResourceProvisioningState {
 export enum KnownDeploymentResourceStatus {
     Running = "Running",
     Stopped = "Stopped"
+}
+
+// @public
+export enum KnownDevToolPortalFeatureState {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
+}
+
+// @public
+export enum KnownDevToolPortalProvisioningState {
+    Canceled = "Canceled",
+    Creating = "Creating",
+    Deleting = "Deleting",
+    Failed = "Failed",
+    Succeeded = "Succeeded",
+    Updating = "Updating"
+}
+
+// @public
+export enum KnownGatewayCertificateVerification {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
 }
 
 // @public
@@ -2136,9 +3074,21 @@ export enum KnownGatewayRouteConfigProtocol {
 }
 
 // @public
+export enum KnownGitImplementation {
+    GoGit = "go-git",
+    Libgit2 = "libgit2"
+}
+
+// @public
 export enum KnownHttpSchemeType {
     Http = "HTTP",
     Https = "HTTPS"
+}
+
+// @public
+export enum KnownKeyVaultCertificateAutoSync {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
 }
 
 // @public
@@ -2177,6 +3127,21 @@ export enum KnownMonitoringSettingState {
 export enum KnownPowerState {
     Running = "Running",
     Stopped = "Stopped"
+}
+
+// @public
+export enum KnownPredefinedAcceleratorProvisioningState {
+    Canceled = "Canceled",
+    Creating = "Creating",
+    Failed = "Failed",
+    Succeeded = "Succeeded",
+    Updating = "Updating"
+}
+
+// @public
+export enum KnownPredefinedAcceleratorState {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
 }
 
 // @public
@@ -2267,6 +3232,16 @@ export enum KnownTrafficDirection {
 }
 
 // @public
+export enum KnownTriggeredBuildResultProvisioningState {
+    Building = "Building",
+    Canceled = "Canceled",
+    Deleting = "Deleting",
+    Failed = "Failed",
+    Queuing = "Queuing",
+    Succeeded = "Succeeded"
+}
+
+// @public
 export enum KnownType {
     AzureFileVolume = "AzureFileVolume"
 }
@@ -2354,9 +3329,9 @@ export interface MonitoringSettingResource extends ProxyResource {
 
 // @public
 export interface MonitoringSettings {
-    beginUpdatePatch(resourceGroupName: string, serviceName: string, monitoringSettingResource: MonitoringSettingResource, options?: MonitoringSettingsUpdatePatchOptionalParams): Promise<PollerLike<PollOperationState<MonitoringSettingsUpdatePatchResponse>, MonitoringSettingsUpdatePatchResponse>>;
+    beginUpdatePatch(resourceGroupName: string, serviceName: string, monitoringSettingResource: MonitoringSettingResource, options?: MonitoringSettingsUpdatePatchOptionalParams): Promise<SimplePollerLike<OperationState<MonitoringSettingsUpdatePatchResponse>, MonitoringSettingsUpdatePatchResponse>>;
     beginUpdatePatchAndWait(resourceGroupName: string, serviceName: string, monitoringSettingResource: MonitoringSettingResource, options?: MonitoringSettingsUpdatePatchOptionalParams): Promise<MonitoringSettingsUpdatePatchResponse>;
-    beginUpdatePut(resourceGroupName: string, serviceName: string, monitoringSettingResource: MonitoringSettingResource, options?: MonitoringSettingsUpdatePutOptionalParams): Promise<PollerLike<PollOperationState<MonitoringSettingsUpdatePutResponse>, MonitoringSettingsUpdatePutResponse>>;
+    beginUpdatePut(resourceGroupName: string, serviceName: string, monitoringSettingResource: MonitoringSettingResource, options?: MonitoringSettingsUpdatePutOptionalParams): Promise<SimplePollerLike<OperationState<MonitoringSettingsUpdatePutResponse>, MonitoringSettingsUpdatePutResponse>>;
     beginUpdatePutAndWait(resourceGroupName: string, serviceName: string, monitoringSettingResource: MonitoringSettingResource, options?: MonitoringSettingsUpdatePutOptionalParams): Promise<MonitoringSettingsUpdatePutResponse>;
     get(resourceGroupName: string, serviceName: string, options?: MonitoringSettingsGetOptionalParams): Promise<MonitoringSettingsGetResponse>;
 }
@@ -2478,6 +3453,91 @@ export interface PersistentDisk {
 
 // @public
 export type PowerState = string;
+
+// @public
+export interface PredefinedAcceleratorProperties {
+    readonly acceleratorTags?: string[];
+    readonly description?: string;
+    readonly displayName?: string;
+    readonly iconUrl?: string;
+    readonly provisioningState?: PredefinedAcceleratorProvisioningState;
+    state?: PredefinedAcceleratorState;
+}
+
+// @public
+export type PredefinedAcceleratorProvisioningState = string;
+
+// @public
+export interface PredefinedAcceleratorResource extends ProxyResource {
+    properties?: PredefinedAcceleratorProperties;
+    sku?: Sku;
+}
+
+// @public (undocumented)
+export interface PredefinedAcceleratorResourceCollection {
+    // (undocumented)
+    nextLink?: string;
+    // (undocumented)
+    value?: PredefinedAcceleratorResource[];
+}
+
+// @public
+export interface PredefinedAccelerators {
+    beginDisable(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, predefinedAcceleratorName: string, options?: PredefinedAcceleratorsDisableOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
+    beginDisableAndWait(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, predefinedAcceleratorName: string, options?: PredefinedAcceleratorsDisableOptionalParams): Promise<void>;
+    beginEnable(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, predefinedAcceleratorName: string, options?: PredefinedAcceleratorsEnableOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
+    beginEnableAndWait(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, predefinedAcceleratorName: string, options?: PredefinedAcceleratorsEnableOptionalParams): Promise<void>;
+    get(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, predefinedAcceleratorName: string, options?: PredefinedAcceleratorsGetOptionalParams): Promise<PredefinedAcceleratorsGetResponse>;
+    list(resourceGroupName: string, serviceName: string, applicationAcceleratorName: string, options?: PredefinedAcceleratorsListOptionalParams): PagedAsyncIterableIterator<PredefinedAcceleratorResource>;
+}
+
+// @public
+export interface PredefinedAcceleratorsDisableHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface PredefinedAcceleratorsDisableOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export interface PredefinedAcceleratorsEnableHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface PredefinedAcceleratorsEnableOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export interface PredefinedAcceleratorsGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type PredefinedAcceleratorsGetResponse = PredefinedAcceleratorResource;
+
+// @public
+export interface PredefinedAcceleratorsListNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type PredefinedAcceleratorsListNextResponse = PredefinedAcceleratorResourceCollection;
+
+// @public
+export interface PredefinedAcceleratorsListOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type PredefinedAcceleratorsListResponse = PredefinedAcceleratorResourceCollection;
+
+// @public
+export type PredefinedAcceleratorState = string;
 
 // @public
 export interface Probe {
@@ -2623,9 +3683,9 @@ export type RuntimeVersionsListRuntimeVersionsResponse = AvailableRuntimeVersion
 
 // @public
 export interface ServiceRegistries {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, serviceRegistryName: string, options?: ServiceRegistriesCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<ServiceRegistriesCreateOrUpdateResponse>, ServiceRegistriesCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, serviceRegistryName: string, options?: ServiceRegistriesCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ServiceRegistriesCreateOrUpdateResponse>, ServiceRegistriesCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, serviceRegistryName: string, options?: ServiceRegistriesCreateOrUpdateOptionalParams): Promise<ServiceRegistriesCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, serviceRegistryName: string, options?: ServiceRegistriesDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, serviceRegistryName: string, options?: ServiceRegistriesDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, serviceRegistryName: string, options?: ServiceRegistriesDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, serviceRegistryName: string, options?: ServiceRegistriesGetOptionalParams): Promise<ServiceRegistriesGetResponse>;
     list(resourceGroupName: string, serviceName: string, options?: ServiceRegistriesListOptionalParams): PagedAsyncIterableIterator<ServiceRegistryResource>;
@@ -2715,15 +3775,21 @@ export interface ServiceResourceList {
 
 // @public
 export interface Services {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, resource: ServiceResource, options?: ServicesCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<ServicesCreateOrUpdateResponse>, ServicesCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, resource: ServiceResource, options?: ServicesCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ServicesCreateOrUpdateResponse>, ServicesCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, resource: ServiceResource, options?: ServicesCreateOrUpdateOptionalParams): Promise<ServicesCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, options?: ServicesDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, options?: ServicesDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, options?: ServicesDeleteOptionalParams): Promise<void>;
-    beginStart(resourceGroupName: string, serviceName: string, options?: ServicesStartOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDisableApmGlobally(resourceGroupName: string, serviceName: string, apm: ApmReference, options?: ServicesDisableApmGloballyOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
+    beginDisableApmGloballyAndWait(resourceGroupName: string, serviceName: string, apm: ApmReference, options?: ServicesDisableApmGloballyOptionalParams): Promise<void>;
+    beginEnableApmGlobally(resourceGroupName: string, serviceName: string, apm: ApmReference, options?: ServicesEnableApmGloballyOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
+    beginEnableApmGloballyAndWait(resourceGroupName: string, serviceName: string, apm: ApmReference, options?: ServicesEnableApmGloballyOptionalParams): Promise<void>;
+    beginFlushVnetDnsSetting(resourceGroupName: string, serviceName: string, options?: ServicesFlushVnetDnsSettingOptionalParams): Promise<SimplePollerLike<OperationState<ServicesFlushVnetDnsSettingResponse>, ServicesFlushVnetDnsSettingResponse>>;
+    beginFlushVnetDnsSettingAndWait(resourceGroupName: string, serviceName: string, options?: ServicesFlushVnetDnsSettingOptionalParams): Promise<ServicesFlushVnetDnsSettingResponse>;
+    beginStart(resourceGroupName: string, serviceName: string, options?: ServicesStartOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginStartAndWait(resourceGroupName: string, serviceName: string, options?: ServicesStartOptionalParams): Promise<void>;
-    beginStop(resourceGroupName: string, serviceName: string, options?: ServicesStopOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginStop(resourceGroupName: string, serviceName: string, options?: ServicesStopOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginStopAndWait(resourceGroupName: string, serviceName: string, options?: ServicesStopOptionalParams): Promise<void>;
-    beginUpdate(resourceGroupName: string, serviceName: string, resource: ServiceResource, options?: ServicesUpdateOptionalParams): Promise<PollerLike<PollOperationState<ServicesUpdateResponse>, ServicesUpdateResponse>>;
+    beginUpdate(resourceGroupName: string, serviceName: string, resource: ServiceResource, options?: ServicesUpdateOptionalParams): Promise<SimplePollerLike<OperationState<ServicesUpdateResponse>, ServicesUpdateResponse>>;
     beginUpdateAndWait(resourceGroupName: string, serviceName: string, resource: ServiceResource, options?: ServicesUpdateOptionalParams): Promise<ServicesUpdateResponse>;
     checkNameAvailability(location: string, availabilityParameters: NameAvailabilityParameters, options?: ServicesCheckNameAvailabilityOptionalParams): Promise<ServicesCheckNameAvailabilityResponse>;
     disableTestEndpoint(resourceGroupName: string, serviceName: string, options?: ServicesDisableTestEndpointOptionalParams): Promise<void>;
@@ -2731,6 +3797,9 @@ export interface Services {
     get(resourceGroupName: string, serviceName: string, options?: ServicesGetOptionalParams): Promise<ServicesGetResponse>;
     list(resourceGroupName: string, options?: ServicesListOptionalParams): PagedAsyncIterableIterator<ServiceResource>;
     listBySubscription(options?: ServicesListBySubscriptionOptionalParams): PagedAsyncIterableIterator<ServiceResource>;
+    listGloballyEnabledApms(resourceGroupName: string, serviceName: string, options?: ServicesListGloballyEnabledApmsOptionalParams): Promise<ServicesListGloballyEnabledApmsResponse>;
+    listSupportedApmTypes(resourceGroupName: string, serviceName: string, options?: ServicesListSupportedApmTypesOptionalParams): PagedAsyncIterableIterator<SupportedApmType>;
+    listSupportedServerVersions(resourceGroupName: string, serviceName: string, options?: ServicesListSupportedServerVersionsOptionalParams): PagedAsyncIterableIterator<SupportedServerVersion>;
     listTestKeys(resourceGroupName: string, serviceName: string, options?: ServicesListTestKeysOptionalParams): Promise<ServicesListTestKeysResponse>;
     regenerateTestKey(resourceGroupName: string, serviceName: string, regenerateTestKeyRequest: RegenerateTestKeyRequestPayload, options?: ServicesRegenerateTestKeyOptionalParams): Promise<ServicesRegenerateTestKeyResponse>;
 }
@@ -2758,7 +3827,31 @@ export interface ServicesDeleteOptionalParams extends coreClient.OperationOption
 }
 
 // @public
+export interface ServicesDisableApmGloballyHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface ServicesDisableApmGloballyOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
 export interface ServicesDisableTestEndpointOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export interface ServicesEnableApmGloballyHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface ServicesEnableApmGloballyOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
 }
 
 // @public
@@ -2767,6 +3860,21 @@ export interface ServicesEnableTestEndpointOptionalParams extends coreClient.Ope
 
 // @public
 export type ServicesEnableTestEndpointResponse = TestKeys;
+
+// @public
+export interface ServicesFlushVnetDnsSettingHeaders {
+    // (undocumented)
+    location?: string;
+}
+
+// @public
+export interface ServicesFlushVnetDnsSettingOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type ServicesFlushVnetDnsSettingResponse = ServicesFlushVnetDnsSettingHeaders;
 
 // @public
 export interface ServicesGetOptionalParams extends coreClient.OperationOptions {
@@ -2790,6 +3898,13 @@ export interface ServicesListBySubscriptionOptionalParams extends coreClient.Ope
 export type ServicesListBySubscriptionResponse = ServiceResourceList;
 
 // @public
+export interface ServicesListGloballyEnabledApmsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ServicesListGloballyEnabledApmsResponse = GloballyEnabledApms;
+
+// @public
 export interface ServicesListNextOptionalParams extends coreClient.OperationOptions {
 }
 
@@ -2802,6 +3917,34 @@ export interface ServicesListOptionalParams extends coreClient.OperationOptions 
 
 // @public
 export type ServicesListResponse = ServiceResourceList;
+
+// @public
+export interface ServicesListSupportedApmTypesNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ServicesListSupportedApmTypesNextResponse = SupportedApmTypes;
+
+// @public
+export interface ServicesListSupportedApmTypesOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ServicesListSupportedApmTypesResponse = SupportedApmTypes;
+
+// @public
+export interface ServicesListSupportedServerVersionsNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ServicesListSupportedServerVersionsNextResponse = SupportedServerVersions;
+
+// @public
+export interface ServicesListSupportedServerVersionsOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type ServicesListSupportedServerVersionsResponse = SupportedServerVersions;
 
 // @public
 export interface ServicesListTestKeysOptionalParams extends coreClient.OperationOptions {
@@ -2846,6 +3989,7 @@ export type ServicesUpdateResponse = ServiceResource;
 
 // @public
 export interface ServiceVNetAddons {
+    dataPlanePublicEndpoint?: boolean;
     logStreamPublicEndpoint?: boolean;
 }
 
@@ -2865,6 +4009,11 @@ export interface SkuCapacity {
     maximum?: number;
     minimum: number;
     scaleType?: SkuScaleType;
+}
+
+// @public
+export interface SkuObject {
+    sku?: Sku;
 }
 
 // @public
@@ -2938,9 +4087,9 @@ export interface StorageResourceCollection {
 
 // @public
 export interface Storages {
-    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, storageName: string, storageResource: StorageResource, options?: StoragesCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<StoragesCreateOrUpdateResponse>, StoragesCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, serviceName: string, storageName: string, storageResource: StorageResource, options?: StoragesCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<StoragesCreateOrUpdateResponse>, StoragesCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, serviceName: string, storageName: string, storageResource: StorageResource, options?: StoragesCreateOrUpdateOptionalParams): Promise<StoragesCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, serviceName: string, storageName: string, options?: StoragesDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, serviceName: string, storageName: string, options?: StoragesDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, serviceName: string, storageName: string, options?: StoragesDeleteOptionalParams): Promise<void>;
     get(resourceGroupName: string, serviceName: string, storageName: string, options?: StoragesGetOptionalParams): Promise<StoragesGetResponse>;
     list(resourceGroupName: string, serviceName: string, options?: StoragesListOptionalParams): PagedAsyncIterableIterator<StorageResource>;
@@ -2986,6 +4135,17 @@ export type StoragesListResponse = StorageResourceCollection;
 export type StorageType = string;
 
 // @public
+export interface SupportedApmType {
+    name?: string;
+}
+
+// @public
+export interface SupportedApmTypes {
+    nextLink?: string;
+    value?: SupportedApmType[];
+}
+
+// @public
 export interface SupportedBuildpackResource extends ProxyResource {
     properties?: SupportedBuildpackResourceProperties;
 }
@@ -3012,6 +4172,19 @@ export interface SupportedRuntimeVersion {
     platform?: SupportedRuntimePlatform;
     value?: SupportedRuntimeValue;
     version?: string;
+}
+
+// @public
+export interface SupportedServerVersion {
+    server?: string;
+    value?: string;
+    version?: string;
+}
+
+// @public
+export interface SupportedServerVersions {
+    nextLink?: string;
+    value?: SupportedServerVersion[];
 }
 
 // @public
@@ -3078,7 +4251,15 @@ export type TrafficDirection = string;
 // @public
 export interface TriggeredBuildResult {
     id?: string;
+    image?: string;
+    lastTransitionReason?: string;
+    lastTransitionStatus?: string;
+    lastTransitionTime?: Date;
+    readonly provisioningState?: TriggeredBuildResultProvisioningState;
 }
+
+// @public
+export type TriggeredBuildResultProvisioningState = string;
 
 // @public
 export type Type = string;
@@ -3086,11 +4267,11 @@ export type Type = string;
 // @public
 export interface UploadedUserSourceInfo extends UserSourceInfo {
     relativePath?: string;
-    type: "UploadedUserSourceInfo" | "Jar" | "Source" | "NetCoreZip";
+    type: "UploadedUserSourceInfo" | "Jar" | "War" | "Source" | "NetCoreZip";
 }
 
 // @public (undocumented)
-export type UploadedUserSourceInfoUnion = UploadedUserSourceInfo | JarUploadedUserSourceInfo | SourceUploadedUserSourceInfo | NetCoreZipUploadedUserSourceInfo;
+export type UploadedUserSourceInfoUnion = UploadedUserSourceInfo | JarUploadedUserSourceInfo | WarUploadedUserSourceInfo | SourceUploadedUserSourceInfo | NetCoreZipUploadedUserSourceInfo;
 
 // @public
 export interface UserAssignedManagedIdentity {
@@ -3100,7 +4281,7 @@ export interface UserAssignedManagedIdentity {
 
 // @public
 export interface UserSourceInfo {
-    type: "UploadedUserSourceInfo" | "Jar" | "Source" | "NetCoreZip" | "BuildResult" | "Container";
+    type: "UploadedUserSourceInfo" | "Jar" | "War" | "Source" | "NetCoreZip" | "BuildResult" | "Container";
     version?: string;
 }
 
@@ -3111,6 +4292,14 @@ export type UserSourceInfoUnion = UserSourceInfo | UploadedUserSourceInfoUnion |
 export interface ValidationMessages {
     messages?: string[];
     name?: string;
+}
+
+// @public
+export interface WarUploadedUserSourceInfo extends UploadedUserSourceInfo {
+    jvmOptions?: string;
+    runtimeVersion?: string;
+    serverVersion?: string;
+    type: "War";
 }
 
 // (No @packageDocumentation comment for this package)

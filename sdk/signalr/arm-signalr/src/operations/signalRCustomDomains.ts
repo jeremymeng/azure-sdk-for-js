@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SignalRManagementClient } from "../signalRManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   CustomDomain,
   SignalRCustomDomainsListNextOptionalParams,
@@ -43,8 +47,7 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
 
   /**
    * List all custom domains.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param options The options parameters.
    */
@@ -120,8 +123,7 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
 
   /**
    * List all custom domains.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param options The options parameters.
    */
@@ -138,8 +140,7 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
 
   /**
    * Get a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param options The options parameters.
@@ -158,8 +159,7 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
 
   /**
    * Create or update a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param parameters A custom domain
@@ -172,8 +172,8 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
     parameters: CustomDomain,
     options?: SignalRCustomDomainsCreateOrUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<SignalRCustomDomainsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<SignalRCustomDomainsCreateOrUpdateResponse>,
       SignalRCustomDomainsCreateOrUpdateResponse
     >
   > {
@@ -183,7 +183,7 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
     ): Promise<SignalRCustomDomainsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -216,14 +216,18 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, name, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, name, parameters, options },
+      spec: createOrUpdateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      SignalRCustomDomainsCreateOrUpdateResponse,
+      OperationState<SignalRCustomDomainsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "azure-async-operation"
     });
     await poller.poll();
     return poller;
@@ -231,8 +235,7 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
 
   /**
    * Create or update a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param parameters A custom domain
@@ -257,8 +260,7 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
 
   /**
    * Delete a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param options The options parameters.
@@ -268,14 +270,14 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
     resourceName: string,
     name: string,
     options?: SignalRCustomDomainsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -308,15 +310,15 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, name, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, name, options },
+      spec: deleteOperationSpec
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location"
     });
     await poller.poll();
     return poller;
@@ -324,8 +326,7 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
 
   /**
    * Delete a custom domain.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param name Custom domain name.
    * @param options The options parameters.
@@ -347,8 +348,7 @@ export class SignalRCustomDomainsImpl implements SignalRCustomDomains {
 
   /**
    * ListNext
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param nextLink The nextLink from the previous successful call to the List method.
    * @param options The options parameters.
@@ -482,7 +482,6 @@ const listNextOperationSpec: coreClient.OperationSpec = {
       bodyMapper: Mappers.ErrorResponse
     }
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,

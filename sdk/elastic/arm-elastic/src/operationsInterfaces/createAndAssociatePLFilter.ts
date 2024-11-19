@@ -6,31 +6,31 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import { CreateAndAssociatePLFilterCreateOptionalParams } from "../models";
 
 /** Interface representing a CreateAndAssociatePLFilter. */
 export interface CreateAndAssociatePLFilter {
   /**
    * Create and Associate private link traffic filter for the given deployment.
-   * @param resourceGroupName The name of the resource group to which the Elastic resource belongs.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param monitorName Monitor resource name
    * @param options The options parameters.
    */
   beginCreate(
     resourceGroupName: string,
     monitorName: string,
-    options?: CreateAndAssociatePLFilterCreateOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: CreateAndAssociatePLFilterCreateOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Create and Associate private link traffic filter for the given deployment.
-   * @param resourceGroupName The name of the resource group to which the Elastic resource belongs.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param monitorName Monitor resource name
    * @param options The options parameters.
    */
   beginCreateAndWait(
     resourceGroupName: string,
     monitorName: string,
-    options?: CreateAndAssociatePLFilterCreateOptionalParams
+    options?: CreateAndAssociatePLFilterCreateOptionalParams,
   ): Promise<void>;
 }

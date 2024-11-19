@@ -1,36 +1,49 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { assert } from "@azure/test-utils";
-import { PipelinePolicy, createEmptyPipeline, createHttpHeaders } from "@azure/core-rest-pipeline";
-import {
+import { describe, it, assert } from "vitest";
+import type { PipelinePolicy } from "@azure/core-rest-pipeline";
+import { createEmptyPipeline, createHttpHeaders } from "@azure/core-rest-pipeline";
+import type {
   DictionaryMapper,
   OperationArguments,
   OperationRequest,
   OperationSpec,
-  createSerializer,
-  serializationPolicy,
 } from "@azure/core-client";
-import { ExtendedServiceClient, disableKeepAlivePolicyName } from "../src/index";
+import { createSerializer, serializationPolicy } from "@azure/core-client";
+import { ExtendedServiceClient, disableKeepAlivePolicyName } from "../src/index.js";
+import {
+  pipelineContainsDisableKeepAlivePolicy,
+  createDisableKeepAlivePolicy,
+} from "../src/policies/disableKeepAlivePolicy.js";
 
 describe("Extended Client", () => {
   it("should add the disable keep alive policy", () => {
-    const extendedClient: ExtendedServiceClient = new ExtendedServiceClient({
+    const extendedClient = new ExtendedServiceClient({
       keepAliveOptions: {
         enable: false,
       },
     });
 
-    const pipelinePolicies: PipelinePolicy[] = extendedClient.pipeline.getOrderedPolicies();
-    let disableKeepAlivePolicyFound: boolean = false;
+    const disableKeepAlivePolicyFound = pipelineContainsDisableKeepAlivePolicy(
+      extendedClient.pipeline,
+    );
 
-    for (const pipelinePolicy of pipelinePolicies) {
-      if (pipelinePolicy.name === disableKeepAlivePolicyName) {
-        disableKeepAlivePolicyFound = true;
-      }
-    }
+    assert.isTrue(disableKeepAlivePolicyFound);
+  });
 
-    assert.deepStrictEqual(disableKeepAlivePolicyFound, true);
+  it("should not add the disable keep alive policy twice", () => {
+    const pipeline = createEmptyPipeline();
+    pipeline.addPolicy(createDisableKeepAlivePolicy());
+    assert.doesNotThrow(() => {
+      const extendedClient = new ExtendedServiceClient({
+        keepAliveOptions: {
+          enable: false,
+        },
+        pipeline,
+      });
+      extendedClient.pipeline.getOrderedPolicies();
+    });
   });
 
   it("should remove the redirect policy", () => {
@@ -108,7 +121,7 @@ describe("Extended Client", () => {
         responses: {
           200: {},
         },
-      }
+      },
     );
 
     assert.isNotNull(result._response.headers);
@@ -133,7 +146,7 @@ describe("Extended Client", () => {
 
     let counter = 0;
 
-    function onResponse() {
+    function onResponse(): void {
       counter++;
     }
 

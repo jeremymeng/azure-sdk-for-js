@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import "@azure/core-paging";
-
-import {
+import type {
   CreateTableEntityResponse,
   DeleteTableEntityOptions,
   GetAccessPolicyResponse,
@@ -21,28 +19,24 @@ import {
   UpdateMode,
   UpdateTableEntityOptions,
 } from "./models";
-import {
+import type {
   DeleteTableEntityResponse,
   SetAccessPolicyResponse,
   UpdateEntityResponse,
   UpsertEntityResponse,
 } from "./generatedModels";
-import {
+import type {
   FullOperationResponse,
   InternalClientPipelineOptions,
   OperationOptions,
   ServiceClient,
+  ServiceClientOptions,
 } from "@azure/core-client";
-import { GeneratedClient, TableDeleteEntityOptionalParams } from "./generated";
-import {
-  NamedKeyCredential,
-  SASCredential,
-  TokenCredential,
-  isNamedKeyCredential,
-  isSASCredential,
-  isTokenCredential,
-} from "@azure/core-auth";
-import { STORAGE_SCOPE, TablesLoggingAllowedHeaderNames } from "./utils/constants";
+import type { TableDeleteEntityOptionalParams } from "./generated";
+import { GeneratedClient } from "./generated";
+import type { NamedKeyCredential, SASCredential, TokenCredential } from "@azure/core-auth";
+import { isNamedKeyCredential, isSASCredential, isTokenCredential } from "@azure/core-auth";
+import { COSMOS_SCOPE, STORAGE_SCOPE, TablesLoggingAllowedHeaderNames } from "./utils/constants";
 import { decodeContinuationToken, encodeContinuationToken } from "./utils/continuationToken";
 import {
   deserialize,
@@ -55,11 +49,11 @@ import {
 import { parseXML, stringifyXML } from "@azure/core-xml";
 
 import { InternalTableTransaction } from "./TableTransaction";
-import { ListEntitiesResponse } from "./utils/internalModels";
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { Pipeline } from "@azure/core-rest-pipeline";
-import { Table } from "./generated/operationsInterfaces";
-import { TableQueryEntitiesOptionalParams } from "./generated/models";
+import type { ListEntitiesResponse } from "./utils/internalModels";
+import type { PagedAsyncIterableIterator } from "@azure/core-paging";
+import type { Pipeline } from "@azure/core-rest-pipeline";
+import type { Table } from "./generated/operationsInterfaces";
+import type { TableQueryEntitiesOptionalParams } from "./generated/models";
 import { Uuid } from "./utils/uuid";
 import { apiVersionPolicy } from "./utils/apiVersionPolicy";
 import { cosmosPatchPolicy } from "./cosmosPathPolicy";
@@ -128,7 +122,7 @@ export class TableClient {
     url: string,
     tableName: string,
     credential: NamedKeyCredential,
-    options?: TableClientOptions
+    options?: TableClientOptions,
   );
   /**
    * Creates a new instance of the TableClient class.
@@ -159,7 +153,7 @@ export class TableClient {
     url: string,
     tableName: string,
     credential: SASCredential,
-    options?: TableClientOptions
+    options?: TableClientOptions,
   );
   /**
    * Creates a new instance of the TableClient class.
@@ -191,7 +185,7 @@ export class TableClient {
     url: string,
     tableName: string,
     credential: TokenCredential,
-    options?: TableClientOptions
+    options?: TableClientOptions,
   );
   /**
    * Creates an instance of TableClient.
@@ -221,10 +215,11 @@ export class TableClient {
     url: string,
     tableName: string,
     credentialOrOptions?: NamedKeyCredential | SASCredential | TableClientOptions | TokenCredential,
-    options: TableClientOptions = {}
+    options: TableClientOptions = {},
   ) {
     this.url = url;
     this.tableName = tableName;
+    const isCosmos = isCosmosEndpoint(this.url);
 
     const credential = isCredential(credentialOrOptions) ? credentialOrOptions : undefined;
     this.credential = credential;
@@ -232,10 +227,10 @@ export class TableClient {
     this.clientOptions = (!isCredential(credentialOrOptions) ? credentialOrOptions : options) || {};
 
     this.allowInsecureConnection = this.clientOptions.allowInsecureConnection ?? false;
-    this.clientOptions.endpoint = this.clientOptions.endpoint || this.url;
 
-    const internalPipelineOptions: InternalClientPipelineOptions = {
+    const internalPipelineOptions: ServiceClientOptions & InternalClientPipelineOptions = {
       ...this.clientOptions,
+      endpoint: this.clientOptions.endpoint || this.url,
       loggingOptions: {
         logger: logger.info,
         additionalAllowedHeaderNames: [...TablesLoggingAllowedHeaderNames],
@@ -256,10 +251,11 @@ export class TableClient {
     }
 
     if (isTokenCredential(credential)) {
-      setTokenChallengeAuthenticationPolicy(generatedClient.pipeline, credential, STORAGE_SCOPE);
+      const scope = isCosmos ? COSMOS_SCOPE : STORAGE_SCOPE;
+      setTokenChallengeAuthenticationPolicy(generatedClient.pipeline, credential, scope);
     }
 
-    if (isCosmosEndpoint(this.url)) {
+    if (isCosmos) {
       generatedClient.pipeline.addPolicy(cosmosPatchPolicy());
     }
 
@@ -378,7 +374,7 @@ export class TableClient {
     partitionKey: string,
     rowKey: string,
     // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
-    options: GetTableEntityOptions = {}
+    options: GetTableEntityOptions = {},
   ): Promise<GetTableEntityResponse<TableEntityResult<T>>> {
     return tracingClient.withSpan("TableClient.getEntity", options, async (updatedOptions) => {
       let parsedBody: any;
@@ -397,11 +393,11 @@ export class TableClient {
           ...getEntityOptions,
           queryOptions: serializeQueryOptions(queryOptions || {}),
           onResponse,
-        }
+        },
       );
       const tableEntity = deserialize<TableEntityResult<T>>(
         parsedBody,
-        disableTypeConversion ?? false
+        disableTypeConversion ?? false,
       );
 
       return tableEntity;
@@ -440,7 +436,7 @@ export class TableClient {
    */
   public listEntities<T extends object = Record<string, unknown>>(
     // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
-    options: ListTableEntitiesOptions = {}
+    options: ListTableEntitiesOptions = {},
   ): PagedAsyncIterableIterator<TableEntityResult<T>, TableEntityResultPage<T>> {
     const tableName = this.tableName;
     const iter = this.listEntitiesAll<T>(tableName, options);
@@ -469,7 +465,7 @@ export class TableClient {
 
   private async *listEntitiesAll<T extends object>(
     tableName: string,
-    options?: InternalListTableEntitiesOptions
+    options?: InternalListTableEntitiesOptions,
   ): AsyncIterableIterator<TableEntityResult<T>> {
     const firstPage = await this._listEntities<T>(tableName, options);
     yield* firstPage;
@@ -486,12 +482,12 @@ export class TableClient {
 
   private async *listEntitiesPage<T extends object>(
     tableName: string,
-    options: InternalListTableEntitiesOptions = {}
+    options: InternalListTableEntitiesOptions = {},
   ): AsyncIterableIterator<ListEntitiesResponse<TableEntityResult<T>>> {
     let result = await tracingClient.withSpan(
       "TableClient.listEntitiesPage",
       options,
-      (updatedOptions) => this._listEntities<T>(tableName, updatedOptions)
+      (updatedOptions) => this._listEntities<T>(tableName, updatedOptions),
     );
 
     yield result;
@@ -508,7 +504,7 @@ export class TableClient {
         (updatedOptions, span) => {
           span.setAttribute("continuationToken", result.continuationToken);
           return this._listEntities<T>(tableName, updatedOptions);
-        }
+        },
       );
       yield result;
     }
@@ -516,7 +512,7 @@ export class TableClient {
 
   private async _listEntities<T extends object>(
     tableName: string,
-    options: InternalListTableEntitiesOptions = {}
+    options: InternalListTableEntitiesOptions = {},
   ): Promise<TableEntityResultPage<T>> {
     const { disableTypeConversion = false } = options;
     const queryOptions = serializeQueryOptions(options.queryOptions || {});
@@ -540,7 +536,7 @@ export class TableClient {
 
     const tableEntities = deserializeObjectsArray<TableEntityResult<T>>(
       value ?? [],
-      disableTypeConversion
+      disableTypeConversion,
     );
 
     // Encode nextPartitionKey and nextRowKey as a single continuation token and add it as a
@@ -580,7 +576,7 @@ export class TableClient {
   public createEntity<T extends object>(
     entity: TableEntity<T>,
     // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
-    options: OperationOptions = {}
+    options: OperationOptions = {},
   ): Promise<CreateTableEntityResponse> {
     return tracingClient.withSpan("TableClient.createEntity", options, (updatedOptions) => {
       const { ...createTableEntity } = updatedOptions || {};
@@ -621,7 +617,7 @@ export class TableClient {
     partitionKey: string,
     rowKey: string,
     // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
-    options: DeleteTableEntityOptions = {}
+    options: DeleteTableEntityOptions = {},
   ): Promise<DeleteTableEntityResponse> {
     return tracingClient.withSpan("TableClient.deleteEntity", options, (updatedOptions) => {
       const { etag = "*", ...rest } = updatedOptions;
@@ -633,7 +629,7 @@ export class TableClient {
         escapeQuotes(partitionKey),
         escapeQuotes(rowKey),
         etag,
-        deleteOptions
+        deleteOptions,
       );
     });
   }
@@ -681,7 +677,7 @@ export class TableClient {
     entity: TableEntity<T>,
     mode: UpdateMode = "Merge",
     // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
-    options: UpdateTableEntityOptions = {}
+    options: UpdateTableEntityOptions = {},
   ): Promise<UpdateEntityResponse> {
     return tracingClient.withSpan(
       "TableClient.updateEntity",
@@ -712,7 +708,7 @@ export class TableClient {
         spanAttributes: {
           updateEntityMode: mode,
         },
-      }
+      },
     );
   }
 
@@ -755,7 +751,7 @@ export class TableClient {
     entity: TableEntity<T>,
     mode: UpdateMode = "Merge",
     // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
-    options: OperationOptions = {}
+    options: OperationOptions = {},
   ): Promise<UpsertEntityResponse> {
     return tracingClient.withSpan(
       "TableClient.upsertEntity",
@@ -783,7 +779,7 @@ export class TableClient {
         spanAttributes: {
           upsertEntityMode: mode,
         },
-      }
+      },
     );
   }
 
@@ -792,6 +788,7 @@ export class TableClient {
    * Shared Access Signatures.
    * @param options - The options parameters.
    */
+  // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
   public getAccessPolicy(options: OperationOptions = {}): Promise<GetAccessPolicyResponse> {
     return tracingClient.withSpan(
       "TableClient.getAccessPolicy",
@@ -799,7 +796,7 @@ export class TableClient {
       async (updatedOptions) => {
         const signedIdentifiers = await this.table.getAccessPolicy(this.tableName, updatedOptions);
         return deserializeSignedIdentifier(signedIdentifiers);
-      }
+      },
     );
   }
 
@@ -810,7 +807,8 @@ export class TableClient {
    */
   public setAccessPolicy(
     tableAcl: SignedIdentifier[],
-    options: OperationOptions = {}
+    // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
+    options: OperationOptions = {},
   ): Promise<SetAccessPolicyResponse> {
     return tracingClient.withSpan("TableClient.setAccessPolicy", options, (updatedOptions) => {
       const serlializedAcl = serializeSignedIdentifiers(tableAcl);
@@ -870,7 +868,7 @@ export class TableClient {
       this.generatedClient,
       new TableClient(this.url, this.tableName),
       this.credential,
-      this.allowInsecureConnection
+      this.allowInsecureConnection,
     );
 
     for (const item of actions) {
@@ -910,7 +908,7 @@ export class TableClient {
     connectionString: string,
     tableName: string,
     // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
-    options?: TableClientOptions
+    options?: TableClientOptions,
   ): TableClient {
     const {
       url,

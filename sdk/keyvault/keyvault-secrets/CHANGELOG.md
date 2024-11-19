@@ -1,6 +1,6 @@
 # Release History
 
-## 4.7.0-beta.1 (Unreleased)
+## 4.9.1 (Unreleased)
 
 ### Features Added
 
@@ -10,7 +10,33 @@
 
 ### Other Changes
 
-- Updated `SecretClient` to support service version 7.4-preview.1 by default.
+## 4.9.0 (2024-10-16)
+
+### Features Added
+
+- Add support for Continuous Access Evaluation (CAE). [#31140](https://github.com/Azure/azure-sdk-for-js/pull/31140)
+
+### Other Changes
+
+- Native ESM support has been added, and this package will now emit both CommonJS and ESM. [#31254](https://github.com/Azure/azure-sdk-for-js/pull/31254)
+
+## 4.8.0 (2024-02-14)
+
+### Other Changes
+
+- The default service version is now `7.5`.
+
+## 4.8.0-beta.1 (2023-11-08)
+
+### Other Changes
+
+- The default service version is now `7.5-preview.1`.
+
+## 4.7.0 (2023-03-09)
+
+### Other Changes
+
+- Updated `SecretClient` to support service version 7.4 by default.
 
 ## 4.6.0 (2022-09-20)
 

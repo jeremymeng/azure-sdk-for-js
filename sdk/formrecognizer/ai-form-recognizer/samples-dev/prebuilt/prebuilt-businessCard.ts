@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @azsdk-util
+ * @azsdk-skip-javascript
  */
 
 // Model:       prebuilt-businessCard
 // Description: Extract key information from business cards.
-// API Version: 2022-08-31
-// Created:     Tue Aug 23 2022
+// API Version: 2023-07-31
+// Created:     Wed Aug 02 2023
 
 import * as fr from "@azure/ai-form-recognizer";
 
@@ -16,7 +17,7 @@ import * as fr from "@azure/ai-form-recognizer";
  * Extract key information from business cards.
  */
 export const PrebuiltBusinessCardModel = fr.createModelFromSchema(
-  modelInfo()
+  modelInfo(),
 ) as fr.DocumentModel<PrebuiltBusinessCardResult>;
 
 export interface PrebuiltBusinessCardResult extends fr.AnalyzeResultCommon {
@@ -138,8 +139,8 @@ function modelInfo() {
   return {
     modelId: "prebuilt-businessCard",
     description: "Extract key information from business cards.",
-    createdOn: "2022-08-31T00:00:00.000Z",
-    apiVersion: "2022-08-31",
+    createdOn: "2023-07-31T00:00:00.000Z",
+    apiVersion: "2023-07-31",
     docTypes: {
       businessCard: {
         buildMode: "template",

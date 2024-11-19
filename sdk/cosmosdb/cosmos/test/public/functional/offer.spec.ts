@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 import assert from "assert";
-import { Context } from "mocha";
-import { Suite } from "mocha";
+import type { Context } from "mocha";
+import type { Suite } from "mocha";
 import { Constants, CosmosClient } from "../../../src";
 import { endpoint } from "../common/_testConfig";
 import { masterKey } from "../common/_fakeTestSecrets";
@@ -48,7 +48,7 @@ describe("NodeJS CRUD Tests", function (this: Suite) {
             const items = obj.split("=");
             map[items[0]] = items[1];
             return map;
-          }, {}).collectionSize
+          }, {}).collectionSize,
       );
       assert.equal(collectionSize, 10 * mbInBytes, "Collection size is unexpected");
 
@@ -58,7 +58,7 @@ describe("NodeJS CRUD Tests", function (this: Suite) {
       assert.equal(
         expectedOffer.content.offerThroughput,
         offerThroughput,
-        "Expected offerThroughput to be " + offerThroughput
+        "Expected offerThroughput to be " + offerThroughput,
       );
       validateOfferResponseBody(expectedOffer);
 

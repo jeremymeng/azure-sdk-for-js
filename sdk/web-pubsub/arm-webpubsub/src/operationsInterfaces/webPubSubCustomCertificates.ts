@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   CustomCertificate,
   WebPubSubCustomCertificatesListOptionalParams,
@@ -15,7 +15,7 @@ import {
   WebPubSubCustomCertificatesGetResponse,
   WebPubSubCustomCertificatesCreateOrUpdateOptionalParams,
   WebPubSubCustomCertificatesCreateOrUpdateResponse,
-  WebPubSubCustomCertificatesDeleteOptionalParams
+  WebPubSubCustomCertificatesDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -23,20 +23,18 @@ import {
 export interface WebPubSubCustomCertificates {
   /**
    * List all custom certificates.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param options The options parameters.
    */
   list(
     resourceGroupName: string,
     resourceName: string,
-    options?: WebPubSubCustomCertificatesListOptionalParams
+    options?: WebPubSubCustomCertificatesListOptionalParams,
   ): PagedAsyncIterableIterator<CustomCertificate>;
   /**
    * Get a custom certificate.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param certificateName Custom certificate name
    * @param options The options parameters.
@@ -45,12 +43,11 @@ export interface WebPubSubCustomCertificates {
     resourceGroupName: string,
     resourceName: string,
     certificateName: string,
-    options?: WebPubSubCustomCertificatesGetOptionalParams
+    options?: WebPubSubCustomCertificatesGetOptionalParams,
   ): Promise<WebPubSubCustomCertificatesGetResponse>;
   /**
    * Create or update a custom certificate.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param certificateName Custom certificate name
    * @param parameters A custom certificate.
@@ -61,17 +58,16 @@ export interface WebPubSubCustomCertificates {
     resourceName: string,
     certificateName: string,
     parameters: CustomCertificate,
-    options?: WebPubSubCustomCertificatesCreateOrUpdateOptionalParams
+    options?: WebPubSubCustomCertificatesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<WebPubSubCustomCertificatesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<WebPubSubCustomCertificatesCreateOrUpdateResponse>,
       WebPubSubCustomCertificatesCreateOrUpdateResponse
     >
   >;
   /**
    * Create or update a custom certificate.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param certificateName Custom certificate name
    * @param parameters A custom certificate.
@@ -82,12 +78,11 @@ export interface WebPubSubCustomCertificates {
     resourceName: string,
     certificateName: string,
     parameters: CustomCertificate,
-    options?: WebPubSubCustomCertificatesCreateOrUpdateOptionalParams
+    options?: WebPubSubCustomCertificatesCreateOrUpdateOptionalParams,
   ): Promise<WebPubSubCustomCertificatesCreateOrUpdateResponse>;
   /**
    * Delete a custom certificate.
-   * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
-   *                          this value from the Azure Resource Manager API or the portal.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param resourceName The name of the resource.
    * @param certificateName Custom certificate name
    * @param options The options parameters.
@@ -96,6 +91,6 @@ export interface WebPubSubCustomCertificates {
     resourceGroupName: string,
     resourceName: string,
     certificateName: string,
-    options?: WebPubSubCustomCertificatesDeleteOptionalParams
+    options?: WebPubSubCustomCertificatesDeleteOptionalParams,
   ): Promise<void>;
 }

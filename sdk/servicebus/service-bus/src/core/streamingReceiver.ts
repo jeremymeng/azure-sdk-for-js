@@ -1,35 +1,32 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { MessageReceiver, OnAmqpEventAsPromise, ReceiveOptions } from "./messageReceiver";
-import { ConnectionContext } from "../connectionContext";
+import type { OnAmqpEventAsPromise, ReceiveOptions } from "./messageReceiver.js";
+import { MessageReceiver } from "./messageReceiver.js";
+import type { ConnectionContext } from "../connectionContext.js";
 
-import { ReceiverHelper } from "./receiverHelper";
+import { ReceiverHelper } from "./receiverHelper.js";
 
-import { throwErrorIfConnectionClosed } from "../util/errors";
-import {
-  RetryOperationType,
-  MessagingError,
-  RetryOptions,
-  ConditionErrorNameMapper,
-} from "@azure/core-amqp";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
-import { receiverLogger as logger } from "../log";
-import { AmqpError, EventContext, OnAmqpEvent } from "rhea-promise";
-import { ServiceBusMessageImpl } from "../serviceBusMessage";
-import { translateServiceBusError } from "../serviceBusError";
-import { abandonMessage, completeMessage, retryForever } from "../receivers/receiverCommon";
-import { ReceiverHandlers } from "./shared";
-import {
+import { throwErrorIfConnectionClosed } from "../util/errors.js";
+import type { MessagingError, RetryOptions } from "@azure/core-amqp";
+import { RetryOperationType, ConditionErrorNameMapper } from "@azure/core-amqp";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs.js";
+import { receiverLogger as logger } from "../log.js";
+import type { AmqpError, EventContext, OnAmqpEvent } from "rhea-promise";
+import { ServiceBusMessageImpl } from "../serviceBusMessage.js";
+import { translateServiceBusError } from "../serviceBusError.js";
+import { abandonMessage, completeMessage, retryForever } from "../receivers/receiverCommon.js";
+import type { ReceiverHandlers } from "./shared.js";
+import type {
   InternalMessageHandlers,
   InternalProcessErrorArgs,
   MessageHandlers,
   ProcessErrorArgs,
   SubscribeOptions,
-} from "../models";
-import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage";
+} from "../models.js";
+import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage.js";
 import { AbortError } from "@azure/abort-controller";
-import { tracingClient } from "../diagnostics/tracing";
+import { tracingClient } from "../diagnostics/tracing.js";
 
 /**
  * @internal
@@ -137,7 +134,7 @@ export class StreamingReceiver extends MessageReceiver {
     identifier: string,
     connectionContext: ConnectionContext,
     entityPath: string,
-    options: ReceiveOptions
+    options: ReceiveOptions,
   ) {
     super(identifier, connectionContext, entityPath, "streaming", options);
 
@@ -158,7 +155,7 @@ export class StreamingReceiver extends MessageReceiver {
 
       logger.logError(
         receiverError,
-        `${this.logPrefix} 'receiver_close' event occurred. The associated error is`
+        `${this.logPrefix} 'receiver_close' event occurred. The associated error is`,
       );
 
       this._lockRenewer?.stopAll(this);
@@ -172,7 +169,7 @@ export class StreamingReceiver extends MessageReceiver {
             "() handler.",
           this.logPrefix,
           this.name,
-          this.address
+          this.address,
         );
       }
     };
@@ -183,7 +180,7 @@ export class StreamingReceiver extends MessageReceiver {
 
       logger.logError(
         sessionError,
-        `${this.logPrefix} 'session_close' event occurred. The associated error is`
+        `${this.logPrefix} 'session_close' event occurred. The associated error is`,
       );
 
       this._lockRenewer?.stopAll(this);
@@ -197,7 +194,7 @@ export class StreamingReceiver extends MessageReceiver {
             "() handler.",
           this.logPrefix,
           this.name,
-          this.address
+          this.address,
         );
       }
     };
@@ -208,7 +205,7 @@ export class StreamingReceiver extends MessageReceiver {
         const sbError = translateServiceBusError(receiverError) as MessagingError;
         logger.logError(
           sbError,
-          `${this.logPrefix} 'receiver_error' event occurred. The associated error is`
+          `${this.logPrefix} 'receiver_error' event occurred. The associated error is`,
         );
         this._messageHandlers().processError({
           error: sbError,
@@ -226,7 +223,7 @@ export class StreamingReceiver extends MessageReceiver {
         const sbError = translateServiceBusError(sessionError) as MessagingError;
         logger.logError(
           sbError,
-          `${this.logPrefix} 'session_error' event occurred. The associated error is`
+          `${this.logPrefix} 'session_error' event occurred. The associated error is`,
         );
         this._messageHandlers().processError({
           error: sbError,
@@ -245,7 +242,7 @@ export class StreamingReceiver extends MessageReceiver {
         logger.verbose(
           "%s Not calling the user's message handler for the current message " +
             "as the receiver is closed",
-          this.logPrefix
+          this.logPrefix,
         );
         return;
       }
@@ -255,7 +252,8 @@ export class StreamingReceiver extends MessageReceiver {
         context.delivery!,
         true,
         this.receiveMode,
-        options.skipParsingBodyAsJson ?? false
+        options.skipParsingBodyAsJson ?? false,
+        options.skipConvertingDate ?? false,
       );
 
       this._lockRenewer?.start(this, bMessage, (err) => {
@@ -277,7 +275,7 @@ export class StreamingReceiver extends MessageReceiver {
             "with id '%s' on the receiver '%s'",
           this.logPrefix,
           bMessage.messageId,
-          this.name
+          this.name,
         );
 
         // Do not want renewLock to happen unnecessarily, while abandoning the message. Hence,
@@ -299,14 +297,14 @@ export class StreamingReceiver extends MessageReceiver {
               this.logPrefix,
               bMessage.messageId,
               this.name,
-              error
+              error,
             );
             await abandonMessage(
               bMessage,
               this._context,
               entityPath,
               undefined,
-              this._retryOptions
+              this._retryOptions,
             );
           } catch (abandonError: any) {
             const translatedError = translateServiceBusError(abandonError);
@@ -316,7 +314,7 @@ export class StreamingReceiver extends MessageReceiver {
                 "receiver '%s'",
               this.logPrefix,
               bMessage.messageId,
-              this.name
+              this.name,
             );
             this._messageHandlers().processError({
               error: translatedError,
@@ -337,7 +335,7 @@ export class StreamingReceiver extends MessageReceiver {
           if (err.name !== "AbortError") {
             logger.logError(
               err,
-              `[${this.logPrefix}] Failed to add credit after receiving message`
+              `[${this.logPrefix}] Failed to add credit after receiving message`,
             );
             await this._reportInternalError(err);
           }
@@ -355,7 +353,7 @@ export class StreamingReceiver extends MessageReceiver {
           logger.verbose(
             "%s Auto completing the message with id '%s' on " + "the receiver.",
             this.logPrefix,
-            bMessage.messageId
+            bMessage.messageId,
           );
           await completeMessage(bMessage, this._context, entityPath, this._retryOptions);
         } catch (completeError: any) {
@@ -366,7 +364,7 @@ export class StreamingReceiver extends MessageReceiver {
               "receiver '%s'",
             this.logPrefix,
             bMessage.messageId,
-            this.name
+            this.name,
           );
           this._messageHandlers().processError({
             error: translatedError,
@@ -443,7 +441,7 @@ export class StreamingReceiver extends MessageReceiver {
    */
   async subscribe(
     messageHandlers: InternalMessageHandlers,
-    subscribeOptions: SubscribeOptions | undefined
+    subscribeOptions: SubscribeOptions | undefined,
   ): Promise<void> {
     // these options and message handlers will be re-used if/when onDetach is called.
     this._subscribeOptions = subscribeOptions;
@@ -484,7 +482,7 @@ export class StreamingReceiver extends MessageReceiver {
    */
   private _setMessageHandlers(
     userHandlers: InternalMessageHandlers,
-    operationOptions: OperationOptionsBase | undefined
+    operationOptions: OperationOptionsBase | undefined,
   ): void {
     const messageHandlers = {
       processError: async (args: ProcessErrorArgs) => {
@@ -502,7 +500,7 @@ export class StreamingReceiver extends MessageReceiver {
             "StreamReceiver.process",
             operationOptions ?? {},
             () => userHandlers.processMessage(message),
-            toProcessingSpanOptions(message, this, this._context.config)
+            toProcessingSpanOptions(message, this, this._context.config, "process"),
           );
         } catch (err: any) {
           this._messageHandlers().processError({
@@ -527,7 +525,7 @@ export class StreamingReceiver extends MessageReceiver {
             entityPath: this.entityPath,
             fullyQualifiedNamespace: this._context.config.host,
             identifier: this.identifier,
-          })
+          }),
         );
       },
       preInitialize: async () => {
@@ -542,7 +540,7 @@ export class StreamingReceiver extends MessageReceiver {
             entityPath: this.entityPath,
             fullyQualifiedNamespace: this._context.config.host,
             identifier: this.identifier,
-          })
+          }),
         );
       },
       forwardInternalErrors: userHandlers.forwardInternalErrors ?? false,
@@ -617,7 +615,7 @@ export class StreamingReceiver extends MessageReceiver {
     }
     await this._init(
       this._createReceiverOptions(caller === "detach", this._getHandlers()),
-      this._subscribeOptions?.abortSignal
+      this._subscribeOptions?.abortSignal,
     );
 
     try {
@@ -651,7 +649,7 @@ export class StreamingReceiver extends MessageReceiver {
       // and we can exit early.
       if (this.wasClosedPermanently) {
         logger.verbose(
-          `${this.logPrefix} onDetached: link has been closed permanently, not reinitializing. `
+          `${this.logPrefix} onDetached: link has been closed permanently, not reinitializing. `,
         );
         return;
       }
@@ -666,7 +664,7 @@ export class StreamingReceiver extends MessageReceiver {
         // These should be ignored until the already running `onDetached` completes
         // its retry attempts or errors.
         logger.verbose(
-          `${this.logPrefix} onDetached: Call to detached on streaming receiver '${this.name}' is already in progress.`
+          `${this.logPrefix} onDetached: Call to detached on streaming receiver '${this.name}' is already in progress.`,
         );
         return;
       }
@@ -678,7 +676,7 @@ export class StreamingReceiver extends MessageReceiver {
         : receiverError;
       logger.logError(
         translatedError,
-        `${this.logPrefix} onDetached: Reinitializing receiver because of error`
+        `${this.logPrefix} onDetached: Reinitializing receiver because of error`,
       );
 
       // Clears the token renewal timer. Closes the link and its session if they are open.
@@ -687,7 +685,7 @@ export class StreamingReceiver extends MessageReceiver {
     } catch (err: any) {
       logger.verbose(
         `${this.logPrefix} onDetached: Encountered an error when closing the previous link: `,
-        err
+        err,
       );
     }
 

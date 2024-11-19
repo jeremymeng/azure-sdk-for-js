@@ -8,78 +8,36 @@
 
 import * as coreClient from "@azure/core-client";
 
-/** Billing information related properties of a server. */
-export interface Sku {
-  /** The name of the sku, e.g. Standard_D32s_v3. */
-  name: string;
-  /** The tier of the particular SKU, e.g. GeneralPurpose. */
-  tier: SkuTier;
-}
+export type BackupStoreDetailsUnion =
+  | BackupStoreDetails
+  | FullBackupStoreDetails;
+export type OperationProgressResponseTypeUnion =
+  | OperationProgressResponseType
+  | BackupAndExportResponseType
+  | ImportFromStorageResponseType;
 
-/** Storage Profile properties of a server */
-export interface Storage {
-  /** Max storage size allowed for a server. */
-  storageSizeGB?: number;
-  /** Storage IOPS for a server. */
-  iops?: number;
-  /** Enable Storage Auto Grow or not. */
-  autoGrow?: EnableStatusEnum;
+/** Common fields that are returned in the response for all Azure Resource Manager resources */
+export interface Resource {
   /**
-   * The sku name of the server storage.
+   * Fully qualified resource ID for the resource. E.g. "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}"
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly storageSku?: string;
-}
-
-/** Storage Profile properties of a server */
-export interface Backup {
-  /** Backup retention days for the server. */
-  backupRetentionDays?: number;
-  /** Whether or not geo redundant backup is enabled. */
-  geoRedundantBackup?: EnableStatusEnum;
+  readonly id?: string;
   /**
-   * Earliest restore point creation time (ISO8601 format)
+   * The name of the resource
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly earliestRestoreDate?: Date;
-}
-
-/** Network related properties of a server */
-export interface HighAvailability {
-  /** High availability mode for a server. */
-  mode?: HighAvailabilityMode;
+  readonly name?: string;
   /**
-   * The state of server high availability.
+   * The type of the resource. E.g. "Microsoft.Compute/virtualMachines" or "Microsoft.Storage/storageAccounts"
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly state?: HighAvailabilityState;
-  /** Availability zone of the standby server. */
-  standbyAvailabilityZone?: string;
-}
-
-/** Network related properties of a server */
-export interface Network {
+  readonly type?: string;
   /**
-   * Whether or not public network access is allowed for this server. Value is 'Disabled' when server has VNet integration.
+   * Azure Resource Manager metadata containing createdBy and modifiedBy information.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly publicNetworkAccess?: EnableStatusEnum;
-  /** Delegated subnet resource id used to setup vnet for a server. */
-  delegatedSubnetResourceId?: string;
-  /** Private DNS zone resource id. */
-  privateDnsZoneResourceId?: string;
-}
-
-/** Maintenance window of a server. */
-export interface MaintenanceWindow {
-  /** indicates whether custom window is enabled or disabled */
-  customWindow?: string;
-  /** start hour for maintenance window */
-  startHour?: number;
-  /** start minute for maintenance window */
-  startMinute?: number;
-  /** day of week for maintenance window */
-  dayOfWeek?: number;
+  readonly systemData?: SystemData;
 }
 
 /** Metadata pertaining to creation and last modification of the resource. */
@@ -98,33 +56,14 @@ export interface SystemData {
   lastModifiedAt?: Date;
 }
 
-/** Common fields that are returned in the response for all Azure Resource Manager resources */
-export interface Resource {
-  /**
-   * Fully qualified resource ID for the resource. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly id?: string;
-  /**
-   * The name of the resource
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly name?: string;
-  /**
-   * The type of the resource. E.g. "Microsoft.Compute/virtualMachines" or "Microsoft.Storage/storageAccounts"
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly type?: string;
-}
-
-/** An error response from the Batch service. */
-export interface CloudError {
-  /** The resource management error response. */
-  error?: ErrorResponse;
-}
-
-/** Common error response for all Azure Resource Manager APIs to return error details for failed operations. (This also follows the OData error response format.) */
+/** Common error response for all Azure Resource Manager APIs to return error details for failed operations. (This also follows the OData error response format.). */
 export interface ErrorResponse {
+  /** The error object. */
+  error?: ErrorDetail;
+}
+
+/** The error detail. */
+export interface ErrorDetail {
   /**
    * The error code.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -144,7 +83,7 @@ export interface ErrorResponse {
    * The error details.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly details?: ErrorResponse[];
+  readonly details?: ErrorDetail[];
   /**
    * The error additional info.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -166,43 +105,12 @@ export interface ErrorAdditionalInfo {
   readonly info?: Record<string, unknown>;
 }
 
-/** Parameters allowed to update for a server. */
-export interface ServerForUpdate {
-  /** The SKU (pricing tier) of the server. */
-  sku?: Sku;
-  /** Application-specific metadata in the form of key-value pairs. */
-  tags?: { [propertyName: string]: string };
-  /**
-   * The password of the administrator login.
-   * This value contains a credential. Consider obscuring before showing to users
-   */
-  administratorLoginPassword?: string;
-  /** Storage related properties of a server. */
-  storage?: Storage;
-  /** Backup related properties of a server. */
-  backup?: Backup;
-  /** High availability related properties of a server. */
-  highAvailability?: HighAvailability;
-  /** Maintenance window of a server. */
-  maintenanceWindow?: MaintenanceWindow;
-  /** The replication role of the server. */
-  replicationRole?: ReplicationRole;
-}
-
-/** A list of servers. */
-export interface ServerListResult {
-  /** The list of servers */
-  value?: Server[];
+/** A List of azure ad administrators. */
+export interface AdministratorListResult {
+  /** The list of azure ad administrator of a server */
+  value?: AzureADAdministrator[];
   /** The link used to get the next page of operations. */
   nextLink?: string;
-}
-
-/** Server restart parameters. */
-export interface ServerRestartParameter {
-  /** Whether or not failover to standby server when restarting a server with high availability enabled. */
-  restartWithFailover?: EnableStatusEnum;
-  /** The maximum allowed failover time in seconds. */
-  maxFailoverSeconds?: number;
 }
 
 /** A list of server backups. */
@@ -213,18 +121,36 @@ export interface ServerBackupListResult {
   nextLink?: string;
 }
 
-/** A list of firewall rules. */
-export interface FirewallRuleListResult {
-  /** The list of firewall rules in a server. */
-  value?: FirewallRule[];
-  /** The link used to get the next page of operations. */
-  nextLink?: string;
+/** Details about the target where the backup content will be stored. */
+export interface BackupStoreDetails {
+  /** Polymorphic discriminator, which specifies the different types this object can be */
+  objectType: "FullBackupStoreDetails";
 }
 
-/** A List of databases. */
-export interface DatabaseListResult {
-  /** The list of databases housed in a server */
-  value?: Database[];
+/** BackupRequestBase is the base for all backup request. */
+export interface BackupRequestBase {
+  /** Backup Settings */
+  backupSettings: BackupSettings;
+}
+
+/** Backup Settings */
+export interface BackupSettings {
+  /** The name of the backup. */
+  backupName: string;
+  /** Backup Format for the current backup. (CollatedFormat is INTERNAL – DO NOT USE) */
+  backupFormat?: BackupFormat;
+}
+
+/** Represents ValidateBackup API Response */
+export interface ValidateBackupResponse {
+  /** Estimated no of storage containers required for resource data to be backed up. */
+  numberOfContainers?: number;
+}
+
+/** A list of server backups. */
+export interface ServerBackupV2ListResult {
+  /** The list of backups of a server. */
+  value?: ServerBackupV2[];
   /** The link used to get the next page of operations. */
   nextLink?: string;
 }
@@ -233,6 +159,8 @@ export interface DatabaseListResult {
 export interface ConfigurationListForBatchUpdate {
   /** The list of server configurations. */
   value?: ConfigurationForBatchUpdate[];
+  /** Whether to reset all server parameters to default. */
+  resetAllToDefault?: ResetAllToDefault;
 }
 
 /** Represents a Configuration. */
@@ -249,6 +177,259 @@ export interface ConfigurationForBatchUpdate {
 export interface ConfigurationListResult {
   /** The list of server configurations. */
   value?: Configuration[];
+  /** The link used to get the next page of operations. */
+  nextLink?: string;
+}
+
+/** A List of databases. */
+export interface DatabaseListResult {
+  /** The list of databases housed in a server */
+  value?: Database[];
+  /** The link used to get the next page of operations. */
+  nextLink?: string;
+}
+
+/** A list of firewall rules. */
+export interface FirewallRuleListResult {
+  /** The list of firewall rules in a server. */
+  value?: FirewallRule[];
+  /** The link used to get the next page of operations. */
+  nextLink?: string;
+}
+
+/** Properties to configure Identity for Bring your Own Keys */
+export interface MySQLServerIdentity {
+  /**
+   * ObjectId from the KeyVault
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly principalId?: string;
+  /**
+   * TenantId from the KeyVault
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly tenantId?: string;
+  /** Type of managed service identity. */
+  type?: ManagedServiceIdentityType;
+  /** Metadata of user assigned identity. */
+  userAssignedIdentities?: { [propertyName: string]: Record<string, unknown> };
+}
+
+/** Billing information related properties of a server. */
+export interface MySQLServerSku {
+  /** The name of the sku, e.g. Standard_D32s_v3. */
+  name: string;
+  /** The tier of the particular SKU, e.g. GeneralPurpose. */
+  tier: ServerSkuTier;
+}
+
+/** The date encryption for cmk. */
+export interface DataEncryption {
+  /** Primary user identity resource id */
+  primaryUserAssignedIdentityId?: string;
+  /** Primary key uri */
+  primaryKeyURI?: string;
+  /** Geo backup user identity resource id as identity can't cross region, need identity in same region as geo backup */
+  geoBackupUserAssignedIdentityId?: string;
+  /** Geo backup key uri as key vault can't cross region, need cmk in same region as geo backup */
+  geoBackupKeyURI?: string;
+  /** The key type, AzureKeyVault for enable cmk, SystemManaged for disable cmk. */
+  type?: DataEncryptionType;
+}
+
+/** Storage Profile properties of a server */
+export interface Storage {
+  /** Max storage size allowed for a server. */
+  storageSizeGB?: number;
+  /** Storage IOPS for a server. */
+  iops?: number;
+  /** Enable Storage Auto Grow or not. */
+  autoGrow?: EnableStatusEnum;
+  /** Enable Log On Disk or not. */
+  logOnDisk?: EnableStatusEnum;
+  /**
+   * The sku name of the server storage.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly storageSku?: string;
+  /** Enable IO Auto Scaling or not. */
+  autoIoScaling?: EnableStatusEnum;
+}
+
+/** Storage Profile properties of a server */
+export interface Backup {
+  /** Backup retention days for the server. */
+  backupRetentionDays?: number;
+  /** Backup interval hours for the server. */
+  backupIntervalHours?: number;
+  /** Whether or not geo redundant backup is enabled. */
+  geoRedundantBackup?: EnableStatusEnum;
+  /**
+   * Earliest restore point creation time (ISO8601 format)
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly earliestRestoreDate?: Date;
+}
+
+/** High availability properties of a server */
+export interface HighAvailability {
+  /** High availability mode for a server. */
+  mode?: HighAvailabilityMode;
+  /**
+   * The state of server high availability.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly state?: HighAvailabilityState;
+  /** Availability zone of the standby server. */
+  standbyAvailabilityZone?: string;
+}
+
+/** Network related properties of a server */
+export interface Network {
+  /** Whether or not public network access is allowed for this server. Value is 'Disabled' when server has VNet integration. */
+  publicNetworkAccess?: EnableStatusEnum;
+  /** Delegated subnet resource id used to setup vnet for a server. */
+  delegatedSubnetResourceId?: string;
+  /** Private DNS zone resource id. */
+  privateDnsZoneResourceId?: string;
+}
+
+/** The private endpoint resource. */
+export interface PrivateEndpoint {
+  /**
+   * The ARM identifier for private endpoint.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly id?: string;
+}
+
+/** A collection of information about the state of the connection between service consumer and provider. */
+export interface PrivateLinkServiceConnectionState {
+  /** Indicates whether the connection has been Approved/Rejected/Removed by the owner of the service. */
+  status?: PrivateEndpointServiceConnectionStatus;
+  /** The reason for approval/rejection of the connection. */
+  description?: string;
+  /** A message indicating if changes on the service provider require any updates on the consumer. */
+  actionsRequired?: string;
+}
+
+/** Maintenance window of a server. */
+export interface MaintenanceWindow {
+  /** indicates whether custom window is enabled or disabled */
+  customWindow?: string;
+  /** start hour for maintenance window */
+  startHour?: number;
+  /** start minute for maintenance window */
+  startMinute?: number;
+  /** day of week for maintenance window */
+  dayOfWeek?: number;
+}
+
+/** Import source related properties. */
+export interface ImportSourceProperties {
+  /** Storage type of import source. */
+  storageType?: ImportSourceStorageType;
+  /** Uri of the import source storage. */
+  storageUrl?: string;
+  /** Sas token for accessing source storage. Read and list permissions are required for sas token. */
+  sasToken?: string;
+  /** Relative path of data directory in storage. */
+  dataDirPath?: string;
+}
+
+/** Parameters allowed to update for a server. */
+export interface ServerForUpdate {
+  /** The cmk identity for the server. */
+  identity?: MySQLServerIdentity;
+  /** The SKU (pricing tier) of the server. */
+  sku?: MySQLServerSku;
+  /** Application-specific metadata in the form of key-value pairs. */
+  tags?: { [propertyName: string]: string };
+  /**
+   * The password of the administrator login.
+   * This value contains a credential. Consider obscuring before showing to users
+   */
+  administratorLoginPassword?: string;
+  /** Server version. */
+  version?: ServerVersion;
+  /** Storage related properties of a server. */
+  storage?: Storage;
+  /** Backup related properties of a server. */
+  backup?: Backup;
+  /** High availability related properties of a server. */
+  highAvailability?: HighAvailability;
+  /** Maintenance window of a server. */
+  maintenanceWindow?: MaintenanceWindow;
+  /** The replication role of the server. */
+  replicationRole?: ReplicationRole;
+  /** The Data Encryption for CMK. */
+  dataEncryption?: DataEncryption;
+  /** Network related properties of a server */
+  network?: Network;
+}
+
+/** A list of servers. */
+export interface ServerListResult {
+  /** The list of servers */
+  value?: Server[];
+  /** The link used to get the next page of operations. */
+  nextLink?: string;
+}
+
+/** High availability validation properties of a server */
+export interface HighAvailabilityValidationEstimation {
+  /**
+   * Estimated seconds of downtime for the deployment.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly estimatedDowntime?: number;
+  /**
+   * Scheduled Availability zone of the standby server.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly scheduledStandbyAvailabilityZone?: string;
+  /** Expected Availability zone of the standby server. */
+  expectedStandbyAvailabilityZone?: string;
+}
+
+/** Server restart parameters. */
+export interface ServerRestartParameter {
+  /** Whether or not failover to standby server when restarting a server with high availability enabled. */
+  restartWithFailover?: EnableStatusEnum;
+  /** The maximum allowed failover time in seconds. */
+  maxFailoverSeconds?: number;
+}
+
+/** Server Gtid set parameters. */
+export interface ServerGtidSetParameter {
+  /** The Gtid set of server. */
+  gtidSet?: string;
+}
+
+/** Parameters allowed to update advanced threat protection for a server. */
+export interface AdvancedThreatProtectionForUpdate {
+  /** Specifies the state of the Advanced Threat Protection, whether it is enabled or disabled or a state has not been applied yet on the specific database or server. */
+  state?: AdvancedThreatProtectionState;
+}
+
+/** A list of the server's Advanced Threat Protection configurations. */
+export interface AdvancedThreatProtectionListResult {
+  /**
+   * Array of results.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly value?: AdvancedThreatProtection[];
+  /**
+   * Link to retrieve next page of results.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly nextLink?: string;
+}
+
+/** A List of logFiles. */
+export interface LogFileListResult {
+  /** The list of logFiles in a server */
+  value?: LogFile[];
   /** The link used to get the next page of operations. */
   nextLink?: string;
 }
@@ -337,6 +518,16 @@ export interface StorageEditionCapability {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly maxBackupRetentionDays?: number;
+  /**
+   * Minimal backup interval hours
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly minBackupIntervalHours?: number;
+  /**
+   * Maximum backup interval hours
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maxBackupIntervalHours?: number;
 }
 
 /** Server version capabilities. */
@@ -377,6 +568,92 @@ export interface SkuCapability {
   readonly supportedMemoryPerVCoreMB?: number;
 }
 
+/** location capability set */
+export interface CapabilitySetsList {
+  /**
+   * A list of supported capability sets.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly value?: Capability[];
+  /**
+   * Link to retrieve next page of results.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly nextLink?: string;
+}
+
+/** Server edition capabilities. */
+export interface ServerEditionCapabilityV2 {
+  /**
+   * Server edition name
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly name?: string;
+  /**
+   * Default Sku name
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly defaultSku?: string;
+  /**
+   * Default storage size
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly defaultStorageSize?: number;
+  /**
+   * A list of supported storage editions
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly supportedStorageEditions?: StorageEditionCapability[];
+  /**
+   * A list of supported Skus
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly supportedSkus?: SkuCapabilityV2[];
+}
+
+/** Sku capability */
+export interface SkuCapabilityV2 {
+  /**
+   * vCore name
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly name?: string;
+  /**
+   * supported vCores
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly vCores?: number;
+  /**
+   * supported IOPS
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly supportedIops?: number;
+  /**
+   * supported memory per vCore in MB
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly supportedMemoryPerVCoreMB?: number;
+  /**
+   * Supported zones
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly supportedZones?: string[];
+  /**
+   * Supported high availability mode
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly supportedHAMode?: string[];
+}
+
+/** Server version capabilities. */
+export interface ServerVersionCapabilityV2 {
+  /**
+   * server version
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly name?: string;
+}
+
 /** Virtual network subnet usage parameter */
 export interface VirtualNetworkSubnetUsageParameter {
   /** Virtual network resource id. */
@@ -385,6 +662,16 @@ export interface VirtualNetworkSubnetUsageParameter {
 
 /** Virtual network subnet usage data. */
 export interface VirtualNetworkSubnetUsageResult {
+  /**
+   * The location name.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly location?: string;
+  /**
+   * The subscription id.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly subscriptionId?: string;
   /**
    * A list of delegated subnet usage
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -422,6 +709,37 @@ export interface NameAvailability {
   nameAvailable?: boolean;
   /** Reason for name being unavailable. */
   reason?: string;
+}
+
+/** The current status of an async operation. */
+export interface OperationStatusResult {
+  /** Fully qualified ID for the async operation. */
+  id?: string;
+  /**
+   * Fully qualified ID of the resource against which the original async operation was started.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly resourceId?: string;
+  /** Name of the async operation. */
+  name?: string;
+  /** Operation status. */
+  status: string;
+  /** Percent of the operation that is complete. */
+  percentComplete?: number;
+  /** The start time of the operation. */
+  startTime?: Date;
+  /** The end time of the operation. */
+  endTime?: Date;
+  /** The operations list. */
+  operations?: OperationStatusResult[];
+  /** If present, details of the operation error. */
+  error?: ErrorDetail;
+}
+
+/** Represents the response properties specific to the operation */
+export interface OperationProgressResponseType {
+  /** Polymorphic discriminator, which specifies the different types this object can be */
+  objectType: "BackupAndExportResponse" | "ImportFromStorageResponse";
 }
 
 /** The response of get private dns zone suffix. */
@@ -462,6 +780,55 @@ export interface OperationDisplay {
   description?: string;
 }
 
+/** Represents a maintenance update parameter. */
+export interface MaintenanceUpdate {
+  /** The start time for a maintenance. */
+  maintenanceStartTime?: Date;
+}
+
+/** A list of maintenances. */
+export interface MaintenanceListResult {
+  /** The list of maintenances in a server. */
+  value?: Maintenance[];
+  /** The link used to get the next page of operations. */
+  nextLink?: string;
+}
+
+/** Metadata of user assigned identity. */
+export interface UserAssignedIdentity {
+  /**
+   * Principal Id of user assigned identity
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly principalId?: string;
+  /**
+   * Client Id of user assigned identity
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly clientId?: string;
+}
+
+/** The resource model definition for a Azure Resource Manager proxy resource. It will not have tags and a location */
+export interface ProxyResource extends Resource {}
+
+/** The private endpoint connection resource. */
+export interface PrivateEndpointConnection extends Resource {
+  /**
+   * The group ids for the private endpoint resource.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly groupIds?: string[];
+  /** The private endpoint resource. */
+  privateEndpoint?: PrivateEndpoint;
+  /** A collection of information about the state of the connection between service consumer and provider. */
+  privateLinkServiceConnectionState?: PrivateLinkServiceConnectionState;
+  /**
+   * The provisioning state of the private endpoint connection resource.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: PrivateEndpointConnectionProvisioningState;
+}
+
 /** The resource model definition for an Azure Resource Manager tracked top level resource which has 'tags' and a 'location' */
 export interface TrackedResource extends Resource {
   /** Resource tags. */
@@ -470,71 +837,88 @@ export interface TrackedResource extends Resource {
   location: string;
 }
 
-/** The resource model definition for a Azure Resource Manager proxy resource. It will not have tags and a location */
-export interface ProxyResource extends Resource {}
+/** Represents BackupAndExport API Response */
+export interface BackupAndExportResponse extends ProxyResource, ErrorResponse {
+  /** The operation status */
+  status?: OperationStatus;
+  /** Start time */
+  startTime?: Date;
+  /** End time */
+  endTime?: Date;
+  /** Operation progress (0-100). */
+  percentComplete?: number;
+  /** Size of datasource in bytes */
+  datasourceSizeInBytes?: number;
+  /** Data transferred in bytes */
+  dataTransferredInBytes?: number;
+  /** Metadata related to backup to be stored for restoring resource in key-value pairs. */
+  backupMetadata?: string;
+}
 
-/** Represents a server. */
-export interface Server extends TrackedResource {
-  /** The SKU (pricing tier) of the server. */
-  sku?: Sku;
-  /**
-   * The system metadata relating to this resource.
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly systemData?: SystemData;
-  /** The administrator's login name of a server. Can only be specified when the server is being created (and is required for creation). */
-  administratorLogin?: string;
-  /**
-   * The password of the administrator login (required for server creation).
-   * This value contains a credential. Consider obscuring before showing to users
-   */
-  administratorLoginPassword?: string;
-  /** Server version. */
-  version?: ServerVersion;
-  /** availability Zone information of the server. */
-  availabilityZone?: string;
-  /** The mode to create a new MySQL server. */
-  createMode?: CreateMode;
-  /** The source MySQL server id. */
-  sourceServerResourceId?: string;
-  /** Restore point creation time (ISO8601 format), specifying the time to restore from. */
-  restorePointInTime?: Date;
-  /** The replication role. */
-  replicationRole?: ReplicationRole;
-  /**
-   * The maximum number of replicas that a primary server can have.
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly replicaCapacity?: number;
-  /**
-   * The state of a server.
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly state?: ServerState;
-  /**
-   * The fully qualified domain name of a server.
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly fullyQualifiedDomainName?: string;
-  /** Storage related properties of a server. */
-  storage?: Storage;
-  /** Backup related properties of a server. */
-  backup?: Backup;
-  /** High availability related properties of a server. */
-  highAvailability?: HighAvailability;
-  /** Network related properties of a server. */
-  network?: Network;
-  /** Maintenance window of a server. */
-  maintenanceWindow?: MaintenanceWindow;
+/** FullBackupStoreDetails is used for scenarios where backup data is streamed/copied over to a storage destination. */
+export interface FullBackupStoreDetails extends BackupStoreDetails {
+  /** Polymorphic discriminator, which specifies the different types this object can be */
+  objectType: "FullBackupStoreDetails";
+  /** SASUriList of storage containers where backup data is to be streamed/copied. */
+  sasUriList: string[];
+}
+
+/** BackupAndExport API Request */
+export interface BackupAndExportRequest extends BackupRequestBase {
+  /** Backup Target Store Details */
+  targetDetails: BackupStoreDetailsUnion;
+}
+
+/** Represents Operation Results API Response */
+export interface OperationStatusExtendedResult extends OperationStatusResult {
+  /** The extended properties of Operation Results */
+  properties?: { [propertyName: string]: any };
+}
+
+/** Represents Operation Results API Response */
+export interface OperationProgressResult extends OperationStatusResult {
+  /** Identifies the type of source operation */
+  objectType?: ObjectType;
+}
+
+/** BackupAndExport Response Properties */
+export interface BackupAndExportResponseType
+  extends OperationProgressResponseType {
+  /** Polymorphic discriminator, which specifies the different types this object can be */
+  objectType: "BackupAndExportResponse";
+  /** Size of datasource in bytes */
+  datasourceSizeInBytes?: number;
+  /** Data transferred in bytes */
+  dataTransferredInBytes?: number;
+  /** Metadata related to backup to be stored for restoring resource in key-value pairs. */
+  backupMetadata?: string;
+}
+
+/** ImportFromStorage Response Properties */
+export interface ImportFromStorageResponseType
+  extends OperationProgressResponseType {
+  /** Polymorphic discriminator, which specifies the different types this object can be */
+  objectType: "ImportFromStorageResponse";
+  /** The estimated time of operation completion. */
+  estimatedCompletionTime?: Date;
+}
+
+/** Represents a Administrator. */
+export interface AzureADAdministrator extends ProxyResource {
+  /** Type of the sever administrator. */
+  administratorType?: AdministratorType;
+  /** Login name of the server administrator. */
+  login?: string;
+  /** SID (object ID) of the server administrator. */
+  sid?: string;
+  /** Tenant ID of the administrator. */
+  tenantId?: string;
+  /** The resource id of the identity used for AAD Authentication. */
+  identityResourceId?: string;
 }
 
 /** Server backup properties */
 export interface ServerBackup extends ProxyResource {
-  /**
-   * The system metadata relating to this resource.
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly systemData?: SystemData;
   /** Backup type. */
   backupType?: string;
   /** Backup completed time (ISO8601 format). */
@@ -543,46 +927,38 @@ export interface ServerBackup extends ProxyResource {
   source?: string;
 }
 
-/** Represents a server firewall rule. */
-export interface FirewallRule extends ProxyResource {
+/** Server backup properties */
+export interface ServerBackupV2 extends ProxyResource {
+  /** Backup name */
+  backupNameV2?: string;
+  backupType?: BackupType;
+  /** Backup completed time (ISO8601 format). */
+  completedTime?: Date;
+  /** Backup source */
+  source?: string;
   /**
-   * The system metadata relating to this resource.
+   * The provisioning state of backup resource.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
-  readonly systemData?: SystemData;
-  /** The start IP address of the server firewall rule. Must be IPv4 format. */
-  startIpAddress: string;
-  /** The end IP address of the server firewall rule. Must be IPv4 format. */
-  endIpAddress: string;
-}
-
-/** Represents a Database. */
-export interface Database extends ProxyResource {
-  /**
-   * The system metadata relating to this resource.
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly systemData?: SystemData;
-  /** The charset of the database. */
-  charset?: string;
-  /** The collation of the database. */
-  collation?: string;
+  readonly provisioningState?: ProvisioningState;
 }
 
 /** Represents a Configuration. */
 export interface Configuration extends ProxyResource {
-  /**
-   * The system metadata relating to this resource.
-   * NOTE: This property will not be serialized. It can only be populated by the server.
-   */
-  readonly systemData?: SystemData;
   /** Value of the configuration. */
   value?: string;
+  /** Current value of the configuration. */
+  currentValue?: string;
   /**
    * Description of the configuration.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly description?: string;
+  /**
+   * The link used to get the document from community or Azure site.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly documentationLink?: string;
   /**
    * Default value of the configuration.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -617,33 +993,533 @@ export interface Configuration extends ProxyResource {
   readonly isDynamicConfig?: IsDynamicConfig;
 }
 
-/** Known values of {@link SkuTier} that the service accepts. */
-export enum KnownSkuTier {
+/** Represents a Database. */
+export interface Database extends ProxyResource {
+  /** The charset of the database. */
+  charset?: string;
+  /** The collation of the database. */
+  collation?: string;
+}
+
+/** Represents a server firewall rule. */
+export interface FirewallRule extends ProxyResource {
+  /** The start IP address of the server firewall rule. Must be IPv4 format. */
+  startIpAddress: string;
+  /** The end IP address of the server firewall rule. Must be IPv4 format. */
+  endIpAddress: string;
+}
+
+/** A server's Advanced Threat Protection. */
+export interface AdvancedThreatProtection extends ProxyResource {
+  /**
+   * Specifies the UTC creation time of the policy.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly creationTime?: Date;
+  /** Specifies the state of the Advanced Threat Protection, whether it is enabled or disabled or a state has not been applied yet on the specific database or server. */
+  state?: AdvancedThreatProtectionState;
+  /**
+   * Provisioning state of the Threat Protection.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: AdvancedThreatProtectionProvisioningState;
+}
+
+/** Represents a logFile. */
+export interface LogFile extends ProxyResource {
+  /** The size in kb of the logFile. */
+  sizeInKB?: number;
+  /** Creation timestamp of the log file. */
+  createdTime?: Date;
+  /** Type of the log file. */
+  typePropertiesType?: string;
+  /** Last modified timestamp of the log file. */
+  lastModifiedTime?: Date;
+  /** The url to download the log file from. */
+  url?: string;
+}
+
+/** Represents a location capability set. */
+export interface Capability extends ProxyResource {
+  /**
+   * supported geo backup regions
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly supportedGeoBackupRegions?: string[];
+  /**
+   * A list of supported flexible server editions.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly supportedFlexibleServerEditions?: ServerEditionCapabilityV2[];
+  /**
+   * A list of supported server versions.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly supportedServerVersions?: ServerVersionCapabilityV2[];
+}
+
+/** Represents a maintenance. */
+export interface Maintenance extends ProxyResource {
+  /**
+   * A string defines maintenance type.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maintenanceType?: MaintenanceType;
+  /**
+   * A string describes the maintenance status
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maintenanceState?: MaintenanceState;
+  /** The start time for a maintenance. */
+  maintenanceStartTime?: Date;
+  /**
+   * The end time for a maintenance.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maintenanceEndTime?: Date;
+  /**
+   * The start time for a maintenance execution.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maintenanceExecutionStartTime?: Date;
+  /**
+   * The end time for a maintenance execution.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maintenanceExecutionEndTime?: Date;
+  /**
+   * The min time the maintenance can be rescheduled.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maintenanceAvailableScheduleMinTime?: Date;
+  /**
+   * The max time the maintenance can be rescheduled.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maintenanceAvailableScheduleMaxTime?: Date;
+  /**
+   * The maintenance title.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maintenanceTitle?: string;
+  /**
+   * The maintenance description.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly maintenanceDescription?: string;
+  /**
+   * Provisioning state of the Maintenance.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: MaintenanceProvisioningState;
+}
+
+/** Server backup properties */
+export interface Provisioning extends ProxyResource {
+  /**
+   * The provisioning state of backup resource.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: ProvisioningState;
+}
+
+/** Represents a server. */
+export interface Server extends TrackedResource {
+  /** The cmk identity for the server. */
+  identity?: MySQLServerIdentity;
+  /** The SKU (pricing tier) of the server. */
+  sku?: MySQLServerSku;
+  /** The administrator's login name of a server. Can only be specified when the server is being created (and is required for creation). */
+  administratorLogin?: string;
+  /**
+   * The password of the administrator login (required for server creation).
+   * This value contains a credential. Consider obscuring before showing to users
+   */
+  administratorLoginPassword?: string;
+  /** Server version. */
+  version?: ServerVersion;
+  /** availability Zone information of the server. */
+  availabilityZone?: string;
+  /** The mode to create a new MySQL server. */
+  createMode?: CreateMode;
+  /** The source MySQL server id. */
+  sourceServerResourceId?: string;
+  /** Restore point creation time (ISO8601 format), specifying the time to restore from. */
+  restorePointInTime?: Date;
+  /** The replication role. */
+  replicationRole?: ReplicationRole;
+  /**
+   * The maximum number of replicas that a primary server can have.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly replicaCapacity?: number;
+  /** The Data Encryption for CMK. */
+  dataEncryption?: DataEncryption;
+  /**
+   * The state of a server.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly state?: ServerState;
+  /**
+   * The fully qualified domain name of a server.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly fullyQualifiedDomainName?: string;
+  /** Storage related properties of a server. */
+  storage?: Storage;
+  /** Backup related properties of a server. */
+  backup?: Backup;
+  /** High availability related properties of a server. */
+  highAvailability?: HighAvailability;
+  /** Network related properties of a server. */
+  network?: Network;
+  /**
+   * PrivateEndpointConnections related properties of a server.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly privateEndpointConnections?: PrivateEndpointConnection[];
+  /** Maintenance window of a server. */
+  maintenanceWindow?: MaintenanceWindow;
+  /** Source properties for import from storage. */
+  importSourceProperties?: ImportSourceProperties;
+}
+
+/** Defines headers for BackupAndExport_create operation. */
+export interface BackupAndExportCreateHeaders {
+  /** URL to retrieve the final result after operation completes. */
+  location?: string;
+  /** URL to query for status of the operation. */
+  azureAsyncOperation?: string;
+}
+
+/** Defines headers for LongRunningBackup_create operation. */
+export interface LongRunningBackupCreateHeaders {
+  /** URL to retrieve the final result after operation completes. */
+  location?: string;
+  /** URL to query for status of the operation. */
+  azureAsyncOperation?: string;
+}
+
+/** Defines headers for Configurations_createOrUpdate operation. */
+export interface ConfigurationsCreateOrUpdateHeaders {
+  location?: string;
+}
+
+/** Defines headers for Servers_create operation. */
+export interface ServersCreateHeaders {
+  location?: string;
+}
+
+/** Defines headers for Servers_update operation. */
+export interface ServersUpdateHeaders {
+  location?: string;
+}
+
+/** Defines headers for Servers_delete operation. */
+export interface ServersDeleteHeaders {
+  location?: string;
+}
+
+/** Defines headers for Servers_failover operation. */
+export interface ServersFailoverHeaders {
+  location?: string;
+}
+
+/** Defines headers for Servers_restart operation. */
+export interface ServersRestartHeaders {
+  location?: string;
+}
+
+/** Defines headers for Servers_start operation. */
+export interface ServersStartHeaders {
+  location?: string;
+}
+
+/** Defines headers for Servers_stop operation. */
+export interface ServersStopHeaders {
+  location?: string;
+}
+
+/** Defines headers for Servers_resetGtid operation. */
+export interface ServersResetGtidHeaders {
+  location?: string;
+}
+
+/** Defines headers for ServersMigration_cutoverMigration operation. */
+export interface ServersMigrationCutoverMigrationHeaders {
+  /** URL to retrieve the final result after operation completes. */
+  location?: string;
+  /** URL to query for status of the operation. */
+  azureAsyncOperation?: string;
+}
+
+/** Defines headers for AdvancedThreatProtectionSettings_update operation. */
+export interface AdvancedThreatProtectionSettingsUpdateHeaders {
+  /** URL to retrieve the final result after operation completes. */
+  location?: string;
+  /** URL to query for status of the operation. */
+  azureAsyncOperation?: string;
+}
+
+/** Defines headers for AdvancedThreatProtectionSettings_updatePut operation. */
+export interface AdvancedThreatProtectionSettingsUpdatePutHeaders {
+  /** URL to retrieve the final result after operation completes. */
+  location?: string;
+  /** URL to query for status of the operation. */
+  azureAsyncOperation?: string;
+}
+
+/** Defines headers for Maintenances_update operation. */
+export interface MaintenancesUpdateHeaders {
+  location?: string;
+}
+
+/** Known values of {@link AdministratorName} that the service accepts. */
+export enum KnownAdministratorName {
+  /** ActiveDirectory */
+  ActiveDirectory = "ActiveDirectory",
+}
+
+/**
+ * Defines values for AdministratorName. \
+ * {@link KnownAdministratorName} can be used interchangeably with AdministratorName,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **ActiveDirectory**
+ */
+export type AdministratorName = string;
+
+/** Known values of {@link AdministratorType} that the service accepts. */
+export enum KnownAdministratorType {
+  /** ActiveDirectory */
+  ActiveDirectory = "ActiveDirectory",
+}
+
+/**
+ * Defines values for AdministratorType. \
+ * {@link KnownAdministratorType} can be used interchangeably with AdministratorType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **ActiveDirectory**
+ */
+export type AdministratorType = string;
+
+/** Known values of {@link CreatedByType} that the service accepts. */
+export enum KnownCreatedByType {
+  /** User */
+  User = "User",
+  /** Application */
+  Application = "Application",
+  /** ManagedIdentity */
+  ManagedIdentity = "ManagedIdentity",
+  /** Key */
+  Key = "Key",
+}
+
+/**
+ * Defines values for CreatedByType. \
+ * {@link KnownCreatedByType} can be used interchangeably with CreatedByType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **User** \
+ * **Application** \
+ * **ManagedIdentity** \
+ * **Key**
+ */
+export type CreatedByType = string;
+
+/** Known values of {@link BackupFormat} that the service accepts. */
+export enum KnownBackupFormat {
+  /** CollatedFormat */
+  CollatedFormat = "CollatedFormat",
+  /** Raw */
+  Raw = "Raw",
+}
+
+/**
+ * Defines values for BackupFormat. \
+ * {@link KnownBackupFormat} can be used interchangeably with BackupFormat,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **CollatedFormat** \
+ * **Raw**
+ */
+export type BackupFormat = string;
+
+/** Known values of {@link BackupType} that the service accepts. */
+export enum KnownBackupType {
+  /** Full */
+  Full = "FULL",
+}
+
+/**
+ * Defines values for BackupType. \
+ * {@link KnownBackupType} can be used interchangeably with BackupType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **FULL**
+ */
+export type BackupType = string;
+
+/** Known values of {@link ProvisioningState} that the service accepts. */
+export enum KnownProvisioningState {
+  /** Succeeded */
+  Succeeded = "Succeeded",
+  /** Creating */
+  Creating = "Creating",
+  /** Deleting */
+  Deleting = "Deleting",
+  /** Failed */
+  Failed = "Failed",
+  /** Canceled */
+  Canceled = "Canceled",
+}
+
+/**
+ * Defines values for ProvisioningState. \
+ * {@link KnownProvisioningState} can be used interchangeably with ProvisioningState,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Succeeded** \
+ * **Creating** \
+ * **Deleting** \
+ * **Failed** \
+ * **Canceled**
+ */
+export type ProvisioningState = string;
+
+/** Known values of {@link ConfigurationSource} that the service accepts. */
+export enum KnownConfigurationSource {
+  /** SystemDefault */
+  SystemDefault = "system-default",
+  /** UserOverride */
+  UserOverride = "user-override",
+}
+
+/**
+ * Defines values for ConfigurationSource. \
+ * {@link KnownConfigurationSource} can be used interchangeably with ConfigurationSource,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **system-default** \
+ * **user-override**
+ */
+export type ConfigurationSource = string;
+
+/** Known values of {@link IsReadOnly} that the service accepts. */
+export enum KnownIsReadOnly {
+  /** True */
+  True = "True",
+  /** False */
+  False = "False",
+}
+
+/**
+ * Defines values for IsReadOnly. \
+ * {@link KnownIsReadOnly} can be used interchangeably with IsReadOnly,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **True** \
+ * **False**
+ */
+export type IsReadOnly = string;
+
+/** Known values of {@link IsConfigPendingRestart} that the service accepts. */
+export enum KnownIsConfigPendingRestart {
+  /** True */
+  True = "True",
+  /** False */
+  False = "False",
+}
+
+/**
+ * Defines values for IsConfigPendingRestart. \
+ * {@link KnownIsConfigPendingRestart} can be used interchangeably with IsConfigPendingRestart,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **True** \
+ * **False**
+ */
+export type IsConfigPendingRestart = string;
+
+/** Known values of {@link IsDynamicConfig} that the service accepts. */
+export enum KnownIsDynamicConfig {
+  /** True */
+  True = "True",
+  /** False */
+  False = "False",
+}
+
+/**
+ * Defines values for IsDynamicConfig. \
+ * {@link KnownIsDynamicConfig} can be used interchangeably with IsDynamicConfig,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **True** \
+ * **False**
+ */
+export type IsDynamicConfig = string;
+
+/** Known values of {@link ResetAllToDefault} that the service accepts. */
+export enum KnownResetAllToDefault {
+  /** True */
+  True = "True",
+  /** False */
+  False = "False",
+}
+
+/**
+ * Defines values for ResetAllToDefault. \
+ * {@link KnownResetAllToDefault} can be used interchangeably with ResetAllToDefault,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **True** \
+ * **False**
+ */
+export type ResetAllToDefault = string;
+
+/** Known values of {@link ManagedServiceIdentityType} that the service accepts. */
+export enum KnownManagedServiceIdentityType {
+  /** UserAssigned */
+  UserAssigned = "UserAssigned",
+}
+
+/**
+ * Defines values for ManagedServiceIdentityType. \
+ * {@link KnownManagedServiceIdentityType} can be used interchangeably with ManagedServiceIdentityType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **UserAssigned**
+ */
+export type ManagedServiceIdentityType = string;
+
+/** Known values of {@link ServerSkuTier} that the service accepts. */
+export enum KnownServerSkuTier {
   /** Burstable */
   Burstable = "Burstable",
   /** GeneralPurpose */
   GeneralPurpose = "GeneralPurpose",
   /** MemoryOptimized */
-  MemoryOptimized = "MemoryOptimized"
+  MemoryOptimized = "MemoryOptimized",
 }
 
 /**
- * Defines values for SkuTier. \
- * {@link KnownSkuTier} can be used interchangeably with SkuTier,
+ * Defines values for ServerSkuTier. \
+ * {@link KnownServerSkuTier} can be used interchangeably with ServerSkuTier,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
  * **Burstable** \
  * **GeneralPurpose** \
  * **MemoryOptimized**
  */
-export type SkuTier = string;
+export type ServerSkuTier = string;
 
 /** Known values of {@link ServerVersion} that the service accepts. */
 export enum KnownServerVersion {
   /** Five7 */
   Five7 = "5.7",
   /** Eight021 */
-  Eight021 = "8.0.21"
+  Eight021 = "8.0.21",
 }
 
 /**
@@ -665,7 +1541,7 @@ export enum KnownCreateMode {
   /** Replica */
   Replica = "Replica",
   /** GeoRestore */
-  GeoRestore = "GeoRestore"
+  GeoRestore = "GeoRestore",
 }
 
 /**
@@ -687,7 +1563,7 @@ export enum KnownReplicationRole {
   /** Source */
   Source = "Source",
   /** Replica */
-  Replica = "Replica"
+  Replica = "Replica",
 }
 
 /**
@@ -716,7 +1592,7 @@ export enum KnownServerState {
   /** Stopped */
   Stopped = "Stopped",
   /** Updating */
-  Updating = "Updating"
+  Updating = "Updating",
 }
 
 /**
@@ -739,7 +1615,7 @@ export enum KnownEnableStatusEnum {
   /** Enabled */
   Enabled = "Enabled",
   /** Disabled */
-  Disabled = "Disabled"
+  Disabled = "Disabled",
 }
 
 /**
@@ -759,7 +1635,7 @@ export enum KnownHighAvailabilityMode {
   /** ZoneRedundant */
   ZoneRedundant = "ZoneRedundant",
   /** SameZone */
-  SameZone = "SameZone"
+  SameZone = "SameZone",
 }
 
 /**
@@ -784,7 +1660,7 @@ export enum KnownHighAvailabilityState {
   /** FailingOver */
   FailingOver = "FailingOver",
   /** RemovingStandby */
-  RemovingStandby = "RemovingStandby"
+  RemovingStandby = "RemovingStandby",
 }
 
 /**
@@ -800,101 +1676,501 @@ export enum KnownHighAvailabilityState {
  */
 export type HighAvailabilityState = string;
 
-/** Known values of {@link CreatedByType} that the service accepts. */
-export enum KnownCreatedByType {
-  /** User */
-  User = "User",
-  /** Application */
-  Application = "Application",
-  /** ManagedIdentity */
-  ManagedIdentity = "ManagedIdentity",
-  /** Key */
-  Key = "Key"
+/** Known values of {@link PrivateEndpointServiceConnectionStatus} that the service accepts. */
+export enum KnownPrivateEndpointServiceConnectionStatus {
+  /** Pending */
+  Pending = "Pending",
+  /** Approved */
+  Approved = "Approved",
+  /** Rejected */
+  Rejected = "Rejected",
 }
 
 /**
- * Defines values for CreatedByType. \
- * {@link KnownCreatedByType} can be used interchangeably with CreatedByType,
+ * Defines values for PrivateEndpointServiceConnectionStatus. \
+ * {@link KnownPrivateEndpointServiceConnectionStatus} can be used interchangeably with PrivateEndpointServiceConnectionStatus,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **User** \
- * **Application** \
- * **ManagedIdentity** \
- * **Key**
+ * **Pending** \
+ * **Approved** \
+ * **Rejected**
  */
-export type CreatedByType = string;
+export type PrivateEndpointServiceConnectionStatus = string;
 
-/** Known values of {@link ConfigurationSource} that the service accepts. */
-export enum KnownConfigurationSource {
-  /** SystemDefault */
-  SystemDefault = "system-default",
-  /** UserOverride */
-  UserOverride = "user-override"
+/** Known values of {@link PrivateEndpointConnectionProvisioningState} that the service accepts. */
+export enum KnownPrivateEndpointConnectionProvisioningState {
+  /** Succeeded */
+  Succeeded = "Succeeded",
+  /** Creating */
+  Creating = "Creating",
+  /** Deleting */
+  Deleting = "Deleting",
+  /** Failed */
+  Failed = "Failed",
 }
 
 /**
- * Defines values for ConfigurationSource. \
- * {@link KnownConfigurationSource} can be used interchangeably with ConfigurationSource,
+ * Defines values for PrivateEndpointConnectionProvisioningState. \
+ * {@link KnownPrivateEndpointConnectionProvisioningState} can be used interchangeably with PrivateEndpointConnectionProvisioningState,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **system-default** \
- * **user-override**
+ * **Succeeded** \
+ * **Creating** \
+ * **Deleting** \
+ * **Failed**
  */
-export type ConfigurationSource = string;
+export type PrivateEndpointConnectionProvisioningState = string;
 
-/** Known values of {@link IsReadOnly} that the service accepts. */
-export enum KnownIsReadOnly {
-  /** True */
-  True = "True",
-  /** False */
-  False = "False"
+/** Known values of {@link ImportSourceStorageType} that the service accepts. */
+export enum KnownImportSourceStorageType {
+  /** AzureBlob */
+  AzureBlob = "AzureBlob",
 }
 
 /**
- * Defines values for IsReadOnly. \
- * {@link KnownIsReadOnly} can be used interchangeably with IsReadOnly,
+ * Defines values for ImportSourceStorageType. \
+ * {@link KnownImportSourceStorageType} can be used interchangeably with ImportSourceStorageType,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **True** \
- * **False**
+ * **AzureBlob**
  */
-export type IsReadOnly = string;
+export type ImportSourceStorageType = string;
 
-/** Known values of {@link IsConfigPendingRestart} that the service accepts. */
-export enum KnownIsConfigPendingRestart {
-  /** True */
-  True = "True",
-  /** False */
-  False = "False"
+/** Known values of {@link AdvancedThreatProtectionName} that the service accepts. */
+export enum KnownAdvancedThreatProtectionName {
+  /** Default */
+  Default = "Default",
 }
 
 /**
- * Defines values for IsConfigPendingRestart. \
- * {@link KnownIsConfigPendingRestart} can be used interchangeably with IsConfigPendingRestart,
+ * Defines values for AdvancedThreatProtectionName. \
+ * {@link KnownAdvancedThreatProtectionName} can be used interchangeably with AdvancedThreatProtectionName,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **True** \
- * **False**
+ * **Default**
  */
-export type IsConfigPendingRestart = string;
+export type AdvancedThreatProtectionName = string;
 
-/** Known values of {@link IsDynamicConfig} that the service accepts. */
-export enum KnownIsDynamicConfig {
-  /** True */
-  True = "True",
-  /** False */
-  False = "False"
+/** Known values of {@link AdvancedThreatProtectionState} that the service accepts. */
+export enum KnownAdvancedThreatProtectionState {
+  /** Enabled */
+  Enabled = "Enabled",
+  /** Disabled */
+  Disabled = "Disabled",
 }
 
 /**
- * Defines values for IsDynamicConfig. \
- * {@link KnownIsDynamicConfig} can be used interchangeably with IsDynamicConfig,
+ * Defines values for AdvancedThreatProtectionState. \
+ * {@link KnownAdvancedThreatProtectionState} can be used interchangeably with AdvancedThreatProtectionState,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **True** \
- * **False**
+ * **Enabled** \
+ * **Disabled**
  */
-export type IsDynamicConfig = string;
+export type AdvancedThreatProtectionState = string;
+
+/** Known values of {@link AdvancedThreatProtectionProvisioningState} that the service accepts. */
+export enum KnownAdvancedThreatProtectionProvisioningState {
+  /** Succeeded */
+  Succeeded = "Succeeded",
+  /** Updating */
+  Updating = "Updating",
+  /** Canceled */
+  Canceled = "Canceled",
+  /** Failed */
+  Failed = "Failed",
+}
+
+/**
+ * Defines values for AdvancedThreatProtectionProvisioningState. \
+ * {@link KnownAdvancedThreatProtectionProvisioningState} can be used interchangeably with AdvancedThreatProtectionProvisioningState,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Succeeded** \
+ * **Updating** \
+ * **Canceled** \
+ * **Failed**
+ */
+export type AdvancedThreatProtectionProvisioningState = string;
+
+/** Known values of {@link ObjectType} that the service accepts. */
+export enum KnownObjectType {
+  /** BackupAndExportResponse */
+  BackupAndExportResponse = "BackupAndExportResponse",
+  /** ImportFromStorageResponse */
+  ImportFromStorageResponse = "ImportFromStorageResponse",
+}
+
+/**
+ * Defines values for ObjectType. \
+ * {@link KnownObjectType} can be used interchangeably with ObjectType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **BackupAndExportResponse** \
+ * **ImportFromStorageResponse**
+ */
+export type ObjectType = string;
+
+/** Known values of {@link MaintenanceType} that the service accepts. */
+export enum KnownMaintenanceType {
+  /** RoutineMaintenance */
+  RoutineMaintenance = "RoutineMaintenance",
+  /** MinorVersionUpgrade */
+  MinorVersionUpgrade = "MinorVersionUpgrade",
+  /** SecurityPatches */
+  SecurityPatches = "SecurityPatches",
+  /** HotFixes */
+  HotFixes = "HotFixes",
+}
+
+/**
+ * Defines values for MaintenanceType. \
+ * {@link KnownMaintenanceType} can be used interchangeably with MaintenanceType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **RoutineMaintenance** \
+ * **MinorVersionUpgrade** \
+ * **SecurityPatches** \
+ * **HotFixes**
+ */
+export type MaintenanceType = string;
+
+/** Known values of {@link MaintenanceState} that the service accepts. */
+export enum KnownMaintenanceState {
+  /** Scheduled */
+  Scheduled = "Scheduled",
+  /** ReScheduled */
+  ReScheduled = "ReScheduled",
+  /** InPreparation */
+  InPreparation = "InPreparation",
+  /** Processing */
+  Processing = "Processing",
+  /** Completed */
+  Completed = "Completed",
+  /** Canceled */
+  Canceled = "Canceled",
+}
+
+/**
+ * Defines values for MaintenanceState. \
+ * {@link KnownMaintenanceState} can be used interchangeably with MaintenanceState,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Scheduled** \
+ * **ReScheduled** \
+ * **InPreparation** \
+ * **Processing** \
+ * **Completed** \
+ * **Canceled**
+ */
+export type MaintenanceState = string;
+
+/** Known values of {@link MaintenanceProvisioningState} that the service accepts. */
+export enum KnownMaintenanceProvisioningState {
+  /** Succeeded */
+  Succeeded = "Succeeded",
+  /** Creating */
+  Creating = "Creating",
+  /** Deleting */
+  Deleting = "Deleting",
+  /** Failed */
+  Failed = "Failed",
+}
+
+/**
+ * Defines values for MaintenanceProvisioningState. \
+ * {@link KnownMaintenanceProvisioningState} can be used interchangeably with MaintenanceProvisioningState,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Succeeded** \
+ * **Creating** \
+ * **Deleting** \
+ * **Failed**
+ */
+export type MaintenanceProvisioningState = string;
+/** Defines values for OperationStatus. */
+export type OperationStatus =
+  | "Pending"
+  | "InProgress"
+  | "Succeeded"
+  | "Failed"
+  | "CancelInProgress"
+  | "Canceled";
+/** Defines values for DataEncryptionType. */
+export type DataEncryptionType = "AzureKeyVault" | "SystemManaged";
+
+/** Optional parameters. */
+export interface AzureADAdministratorsCreateOrUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the createOrUpdate operation. */
+export type AzureADAdministratorsCreateOrUpdateResponse = AzureADAdministrator;
+
+/** Optional parameters. */
+export interface AzureADAdministratorsDeleteOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Optional parameters. */
+export interface AzureADAdministratorsGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type AzureADAdministratorsGetResponse = AzureADAdministrator;
+
+/** Optional parameters. */
+export interface AzureADAdministratorsListByServerOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByServer operation. */
+export type AzureADAdministratorsListByServerResponse = AdministratorListResult;
+
+/** Optional parameters. */
+export interface AzureADAdministratorsListByServerNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByServerNext operation. */
+export type AzureADAdministratorsListByServerNextResponse =
+  AdministratorListResult;
+
+/** Optional parameters. */
+export interface BackupsPutOptionalParams extends coreClient.OperationOptions {}
+
+/** Contains response data for the put operation. */
+export type BackupsPutResponse = ServerBackup;
+
+/** Optional parameters. */
+export interface BackupsGetOptionalParams extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type BackupsGetResponse = ServerBackup;
+
+/** Optional parameters. */
+export interface BackupsListByServerOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByServer operation. */
+export type BackupsListByServerResponse = ServerBackupListResult;
+
+/** Optional parameters. */
+export interface BackupsListByServerNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByServerNext operation. */
+export type BackupsListByServerNextResponse = ServerBackupListResult;
+
+/** Optional parameters. */
+export interface BackupAndExportCreateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the create operation. */
+export type BackupAndExportCreateResponse = BackupAndExportResponse;
+
+/** Optional parameters. */
+export interface BackupAndExportValidateBackupOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the validateBackup operation. */
+export type BackupAndExportValidateBackupResponse = ValidateBackupResponse;
+
+/** Optional parameters. */
+export interface LongRunningBackupCreateOptionalParams
+  extends coreClient.OperationOptions {
+  /** The required parameters for creating and exporting backup of the given server. */
+  parameters?: ServerBackupV2;
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the create operation. */
+export type LongRunningBackupCreateResponse = ServerBackupV2;
+
+/** Optional parameters. */
+export interface LongRunningBackupsGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type LongRunningBackupsGetResponse = ServerBackupV2;
+
+/** Optional parameters. */
+export interface LongRunningBackupsListOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the list operation. */
+export type LongRunningBackupsListResponse = ServerBackupV2ListResult;
+
+/** Optional parameters. */
+export interface LongRunningBackupsListNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listNext operation. */
+export type LongRunningBackupsListNextResponse = ServerBackupV2ListResult;
+
+/** Optional parameters. */
+export interface ConfigurationsCreateOrUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the createOrUpdate operation. */
+export type ConfigurationsCreateOrUpdateResponse = Configuration;
+
+/** Optional parameters. */
+export interface ConfigurationsUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the update operation. */
+export type ConfigurationsUpdateResponse = Configuration;
+
+/** Optional parameters. */
+export interface ConfigurationsGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type ConfigurationsGetResponse = Configuration;
+
+/** Optional parameters. */
+export interface ConfigurationsBatchUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the batchUpdate operation. */
+export type ConfigurationsBatchUpdateResponse = ConfigurationListResult;
+
+/** Optional parameters. */
+export interface ConfigurationsListByServerOptionalParams
+  extends coreClient.OperationOptions {
+  /** The tags of the server configuration. */
+  tags?: string;
+  /** The keyword of the server configuration. */
+  keyword?: string;
+  /** The page of the server configuration. */
+  page?: number;
+  /** The pageSize of the server configuration. */
+  pageSize?: number;
+}
+
+/** Contains response data for the listByServer operation. */
+export type ConfigurationsListByServerResponse = ConfigurationListResult;
+
+/** Optional parameters. */
+export interface ConfigurationsListByServerNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByServerNext operation. */
+export type ConfigurationsListByServerNextResponse = ConfigurationListResult;
+
+/** Optional parameters. */
+export interface DatabasesCreateOrUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the createOrUpdate operation. */
+export type DatabasesCreateOrUpdateResponse = Database;
+
+/** Optional parameters. */
+export interface DatabasesDeleteOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Optional parameters. */
+export interface DatabasesGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type DatabasesGetResponse = Database;
+
+/** Optional parameters. */
+export interface DatabasesListByServerOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByServer operation. */
+export type DatabasesListByServerResponse = DatabaseListResult;
+
+/** Optional parameters. */
+export interface DatabasesListByServerNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByServerNext operation. */
+export type DatabasesListByServerNextResponse = DatabaseListResult;
+
+/** Optional parameters. */
+export interface FirewallRulesCreateOrUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the createOrUpdate operation. */
+export type FirewallRulesCreateOrUpdateResponse = FirewallRule;
+
+/** Optional parameters. */
+export interface FirewallRulesDeleteOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Optional parameters. */
+export interface FirewallRulesGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type FirewallRulesGetResponse = FirewallRule;
+
+/** Optional parameters. */
+export interface FirewallRulesListByServerOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByServer operation. */
+export type FirewallRulesListByServerResponse = FirewallRuleListResult;
+
+/** Optional parameters. */
+export interface FirewallRulesListByServerNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listByServerNext operation. */
+export type FirewallRulesListByServerNextResponse = FirewallRuleListResult;
 
 /** Optional parameters. */
 export interface ServersCreateOptionalParams
@@ -959,6 +2235,14 @@ export interface ServersFailoverOptionalParams
 }
 
 /** Optional parameters. */
+export interface ServersValidateEstimateHighAvailabilityOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the validateEstimateHighAvailability operation. */
+export type ServersValidateEstimateHighAvailabilityResponse =
+  HighAvailabilityValidationEstimation;
+
+/** Optional parameters. */
 export interface ServersRestartOptionalParams
   extends coreClient.OperationOptions {
   /** Delay to wait until next poll, in milliseconds. */
@@ -978,6 +2262,15 @@ export interface ServersStartOptionalParams
 
 /** Optional parameters. */
 export interface ServersStopOptionalParams extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Optional parameters. */
+export interface ServersResetGtidOptionalParams
+  extends coreClient.OperationOptions {
   /** Delay to wait until next poll, in milliseconds. */
   updateIntervalInMs?: number;
   /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
@@ -1013,27 +2306,7 @@ export interface ReplicasListByServerNextOptionalParams
 export type ReplicasListByServerNextResponse = ServerListResult;
 
 /** Optional parameters. */
-export interface BackupsGetOptionalParams extends coreClient.OperationOptions {}
-
-/** Contains response data for the get operation. */
-export type BackupsGetResponse = ServerBackup;
-
-/** Optional parameters. */
-export interface BackupsListByServerOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the listByServer operation. */
-export type BackupsListByServerResponse = ServerBackupListResult;
-
-/** Optional parameters. */
-export interface BackupsListByServerNextOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the listByServerNext operation. */
-export type BackupsListByServerNextResponse = ServerBackupListResult;
-
-/** Optional parameters. */
-export interface FirewallRulesCreateOrUpdateOptionalParams
+export interface ServersMigrationCutoverMigrationOptionalParams
   extends coreClient.OperationOptions {
   /** Delay to wait until next poll, in milliseconds. */
   updateIntervalInMs?: number;
@@ -1041,83 +2314,19 @@ export interface FirewallRulesCreateOrUpdateOptionalParams
   resumeFrom?: string;
 }
 
-/** Contains response data for the createOrUpdate operation. */
-export type FirewallRulesCreateOrUpdateResponse = FirewallRule;
+/** Contains response data for the cutoverMigration operation. */
+export type ServersMigrationCutoverMigrationResponse = Server;
 
 /** Optional parameters. */
-export interface FirewallRulesDeleteOptionalParams
-  extends coreClient.OperationOptions {
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
-  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
-  resumeFrom?: string;
-}
-
-/** Optional parameters. */
-export interface FirewallRulesGetOptionalParams
+export interface AdvancedThreatProtectionSettingsGetOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the get operation. */
-export type FirewallRulesGetResponse = FirewallRule;
+export type AdvancedThreatProtectionSettingsGetResponse =
+  AdvancedThreatProtection;
 
 /** Optional parameters. */
-export interface FirewallRulesListByServerOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the listByServer operation. */
-export type FirewallRulesListByServerResponse = FirewallRuleListResult;
-
-/** Optional parameters. */
-export interface FirewallRulesListByServerNextOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the listByServerNext operation. */
-export type FirewallRulesListByServerNextResponse = FirewallRuleListResult;
-
-/** Optional parameters. */
-export interface DatabasesCreateOrUpdateOptionalParams
-  extends coreClient.OperationOptions {
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
-  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
-  resumeFrom?: string;
-}
-
-/** Contains response data for the createOrUpdate operation. */
-export type DatabasesCreateOrUpdateResponse = Database;
-
-/** Optional parameters. */
-export interface DatabasesDeleteOptionalParams
-  extends coreClient.OperationOptions {
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
-  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
-  resumeFrom?: string;
-}
-
-/** Optional parameters. */
-export interface DatabasesGetOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the get operation. */
-export type DatabasesGetResponse = Database;
-
-/** Optional parameters. */
-export interface DatabasesListByServerOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the listByServer operation. */
-export type DatabasesListByServerResponse = DatabaseListResult;
-
-/** Optional parameters. */
-export interface DatabasesListByServerNextOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the listByServerNext operation. */
-export type DatabasesListByServerNextResponse = DatabaseListResult;
-
-/** Optional parameters. */
-export interface ConfigurationsUpdateOptionalParams
+export interface AdvancedThreatProtectionSettingsUpdateOptionalParams
   extends coreClient.OperationOptions {
   /** Delay to wait until next poll, in milliseconds. */
   updateIntervalInMs?: number;
@@ -1126,17 +2335,11 @@ export interface ConfigurationsUpdateOptionalParams
 }
 
 /** Contains response data for the update operation. */
-export type ConfigurationsUpdateResponse = Configuration;
+export type AdvancedThreatProtectionSettingsUpdateResponse =
+  AdvancedThreatProtection;
 
 /** Optional parameters. */
-export interface ConfigurationsGetOptionalParams
-  extends coreClient.OperationOptions {}
-
-/** Contains response data for the get operation. */
-export type ConfigurationsGetResponse = Configuration;
-
-/** Optional parameters. */
-export interface ConfigurationsBatchUpdateOptionalParams
+export interface AdvancedThreatProtectionSettingsUpdatePutOptionalParams
   extends coreClient.OperationOptions {
   /** Delay to wait until next poll, in milliseconds. */
   updateIntervalInMs?: number;
@@ -1144,22 +2347,39 @@ export interface ConfigurationsBatchUpdateOptionalParams
   resumeFrom?: string;
 }
 
-/** Contains response data for the batchUpdate operation. */
-export type ConfigurationsBatchUpdateResponse = ConfigurationListResult;
+/** Contains response data for the updatePut operation. */
+export type AdvancedThreatProtectionSettingsUpdatePutResponse =
+  AdvancedThreatProtection;
 
 /** Optional parameters. */
-export interface ConfigurationsListByServerOptionalParams
+export interface AdvancedThreatProtectionSettingsListOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the list operation. */
+export type AdvancedThreatProtectionSettingsListResponse =
+  AdvancedThreatProtectionListResult;
+
+/** Optional parameters. */
+export interface AdvancedThreatProtectionSettingsListNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listNext operation. */
+export type AdvancedThreatProtectionSettingsListNextResponse =
+  AdvancedThreatProtectionListResult;
+
+/** Optional parameters. */
+export interface LogFilesListByServerOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByServer operation. */
-export type ConfigurationsListByServerResponse = ConfigurationListResult;
+export type LogFilesListByServerResponse = LogFileListResult;
 
 /** Optional parameters. */
-export interface ConfigurationsListByServerNextOptionalParams
+export interface LogFilesListByServerNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByServerNext operation. */
-export type ConfigurationsListByServerNextResponse = ConfigurationListResult;
+export type LogFilesListByServerNextResponse = LogFileListResult;
 
 /** Optional parameters. */
 export interface LocationBasedCapabilitiesListOptionalParams
@@ -1176,11 +2396,33 @@ export interface LocationBasedCapabilitiesListNextOptionalParams
 export type LocationBasedCapabilitiesListNextResponse = CapabilitiesListResult;
 
 /** Optional parameters. */
+export interface LocationBasedCapabilitySetListOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the list operation. */
+export type LocationBasedCapabilitySetListResponse = CapabilitySetsList;
+
+/** Optional parameters. */
+export interface LocationBasedCapabilitySetGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type LocationBasedCapabilitySetGetResponse = Capability;
+
+/** Optional parameters. */
+export interface LocationBasedCapabilitySetListNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listNext operation. */
+export type LocationBasedCapabilitySetListNextResponse = CapabilitySetsList;
+
+/** Optional parameters. */
 export interface CheckVirtualNetworkSubnetUsageExecuteOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the execute operation. */
-export type CheckVirtualNetworkSubnetUsageExecuteResponse = VirtualNetworkSubnetUsageResult;
+export type CheckVirtualNetworkSubnetUsageExecuteResponse =
+  VirtualNetworkSubnetUsageResult;
 
 /** Optional parameters. */
 export interface CheckNameAvailabilityExecuteOptionalParams
@@ -1190,11 +2432,34 @@ export interface CheckNameAvailabilityExecuteOptionalParams
 export type CheckNameAvailabilityExecuteResponse = NameAvailability;
 
 /** Optional parameters. */
+export interface CheckNameAvailabilityWithoutLocationExecuteOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the execute operation. */
+export type CheckNameAvailabilityWithoutLocationExecuteResponse =
+  NameAvailability;
+
+/** Optional parameters. */
+export interface OperationResultsGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type OperationResultsGetResponse = OperationStatusExtendedResult;
+
+/** Optional parameters. */
+export interface OperationProgressGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type OperationProgressGetResponse = OperationProgressResult;
+
+/** Optional parameters. */
 export interface GetPrivateDnsZoneSuffixExecuteOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the execute operation. */
-export type GetPrivateDnsZoneSuffixExecuteResponse = GetPrivateDnsZoneSuffixResponse;
+export type GetPrivateDnsZoneSuffixExecuteResponse =
+  GetPrivateDnsZoneSuffixResponse;
 
 /** Optional parameters. */
 export interface OperationsListOptionalParams
@@ -1211,12 +2476,45 @@ export interface OperationsListNextOptionalParams
 export type OperationsListNextResponse = OperationListResult;
 
 /** Optional parameters. */
+export interface MaintenancesReadOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the read operation. */
+export type MaintenancesReadResponse = Maintenance;
+
+/** Optional parameters. */
+export interface MaintenancesUpdateOptionalParams
+  extends coreClient.OperationOptions {
+  /** The required parameters for update maintenance on a server. */
+  parameters?: MaintenanceUpdate;
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the update operation. */
+export type MaintenancesUpdateResponse = Maintenance;
+
+/** Optional parameters. */
+export interface MaintenancesListOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the list operation. */
+export type MaintenancesListResponse = MaintenanceListResult;
+
+/** Optional parameters. */
+export interface MaintenancesListNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listNext operation. */
+export type MaintenancesListNextResponse = MaintenanceListResult;
+
+/** Optional parameters. */
 export interface MySQLManagementFlexibleServerClientOptionalParams
   extends coreClient.ServiceClientOptions {
   /** server parameter */
   $host?: string;
-  /** Api Version */
-  apiVersion?: string;
   /** Overrides client endpoint. */
   endpoint?: string;
 }

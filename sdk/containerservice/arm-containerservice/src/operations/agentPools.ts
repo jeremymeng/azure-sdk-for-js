@@ -13,13 +13,19 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ContainerServiceClient } from "../containerServiceClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   AgentPool,
   AgentPoolsListNextOptionalParams,
   AgentPoolsListOptionalParams,
   AgentPoolsListResponse,
+  AgentPoolsAbortLatestOperationOptionalParams,
+  AgentPoolsAbortLatestOperationResponse,
   AgentPoolsGetOptionalParams,
   AgentPoolsGetResponse,
   AgentPoolsCreateOrUpdateOptionalParams,
@@ -28,10 +34,13 @@ import {
   AgentPoolsDeleteResponse,
   AgentPoolsGetUpgradeProfileOptionalParams,
   AgentPoolsGetUpgradeProfileResponse,
+  AgentPoolDeleteMachinesParameter,
+  AgentPoolsDeleteMachinesOptionalParams,
+  AgentPoolsDeleteMachinesResponse,
   AgentPoolsGetAvailableAgentPoolVersionsOptionalParams,
   AgentPoolsGetAvailableAgentPoolVersionsResponse,
   AgentPoolsUpgradeNodeImageVersionOptionalParams,
-  AgentPoolsListNextResponse
+  AgentPoolsListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -56,7 +65,7 @@ export class AgentPoolsImpl implements AgentPools {
   public list(
     resourceGroupName: string,
     resourceName: string,
-    options?: AgentPoolsListOptionalParams
+    options?: AgentPoolsListOptionalParams,
   ): PagedAsyncIterableIterator<AgentPool> {
     const iter = this.listPagingAll(resourceGroupName, resourceName, options);
     return {
@@ -74,9 +83,9 @@ export class AgentPoolsImpl implements AgentPools {
           resourceGroupName,
           resourceName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -84,7 +93,7 @@ export class AgentPoolsImpl implements AgentPools {
     resourceGroupName: string,
     resourceName: string,
     options?: AgentPoolsListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<AgentPool[]> {
     let result: AgentPoolsListResponse;
     let continuationToken = settings?.continuationToken;
@@ -100,7 +109,7 @@ export class AgentPoolsImpl implements AgentPools {
         resourceGroupName,
         resourceName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -112,15 +121,114 @@ export class AgentPoolsImpl implements AgentPools {
   private async *listPagingAll(
     resourceGroupName: string,
     resourceName: string,
-    options?: AgentPoolsListOptionalParams
+    options?: AgentPoolsListOptionalParams,
   ): AsyncIterableIterator<AgentPool> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       resourceName,
-      options
+      options,
     )) {
       yield* page;
     }
+  }
+
+  /**
+   * Aborts the currently running operation on the agent pool. The Agent Pool will be moved to a
+   * Canceling state and eventually to a Canceled state when cancellation finishes. If the operation
+   * completes before cancellation can take place, a 409 error code is returned.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param resourceName The name of the managed cluster resource.
+   * @param agentPoolName The name of the agent pool.
+   * @param options The options parameters.
+   */
+  async beginAbortLatestOperation(
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    options?: AgentPoolsAbortLatestOperationOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<AgentPoolsAbortLatestOperationResponse>,
+      AgentPoolsAbortLatestOperationResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<AgentPoolsAbortLatestOperationResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, agentPoolName, options },
+      spec: abortLatestOperationOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      AgentPoolsAbortLatestOperationResponse,
+      OperationState<AgentPoolsAbortLatestOperationResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Aborts the currently running operation on the agent pool. The Agent Pool will be moved to a
+   * Canceling state and eventually to a Canceled state when cancellation finishes. If the operation
+   * completes before cancellation can take place, a 409 error code is returned.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param resourceName The name of the managed cluster resource.
+   * @param agentPoolName The name of the agent pool.
+   * @param options The options parameters.
+   */
+  async beginAbortLatestOperationAndWait(
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    options?: AgentPoolsAbortLatestOperationOptionalParams,
+  ): Promise<AgentPoolsAbortLatestOperationResponse> {
+    const poller = await this.beginAbortLatestOperation(
+      resourceGroupName,
+      resourceName,
+      agentPoolName,
+      options,
+    );
+    return poller.pollUntilDone();
   }
 
   /**
@@ -132,11 +240,11 @@ export class AgentPoolsImpl implements AgentPools {
   private _list(
     resourceGroupName: string,
     resourceName: string,
-    options?: AgentPoolsListOptionalParams
+    options?: AgentPoolsListOptionalParams,
   ): Promise<AgentPoolsListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, resourceName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -151,11 +259,11 @@ export class AgentPoolsImpl implements AgentPools {
     resourceGroupName: string,
     resourceName: string,
     agentPoolName: string,
-    options?: AgentPoolsGetOptionalParams
+    options?: AgentPoolsGetOptionalParams,
   ): Promise<AgentPoolsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, resourceName, agentPoolName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -172,30 +280,29 @@ export class AgentPoolsImpl implements AgentPools {
     resourceName: string,
     agentPoolName: string,
     parameters: AgentPool,
-    options?: AgentPoolsCreateOrUpdateOptionalParams
+    options?: AgentPoolsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<AgentPoolsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<AgentPoolsCreateOrUpdateResponse>,
       AgentPoolsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<AgentPoolsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -204,8 +311,8 @@ export class AgentPoolsImpl implements AgentPools {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -213,19 +320,28 @@ export class AgentPoolsImpl implements AgentPools {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, agentPoolName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        resourceName,
+        agentPoolName,
+        parameters,
+        options,
+      },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      AgentPoolsCreateOrUpdateResponse,
+      OperationState<AgentPoolsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -244,14 +360,14 @@ export class AgentPoolsImpl implements AgentPools {
     resourceName: string,
     agentPoolName: string,
     parameters: AgentPool,
-    options?: AgentPoolsCreateOrUpdateOptionalParams
+    options?: AgentPoolsCreateOrUpdateOptionalParams,
   ): Promise<AgentPoolsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       resourceName,
       agentPoolName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -267,30 +383,29 @@ export class AgentPoolsImpl implements AgentPools {
     resourceGroupName: string,
     resourceName: string,
     agentPoolName: string,
-    options?: AgentPoolsDeleteOptionalParams
+    options?: AgentPoolsDeleteOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<AgentPoolsDeleteResponse>,
+    SimplePollerLike<
+      OperationState<AgentPoolsDeleteResponse>,
       AgentPoolsDeleteResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<AgentPoolsDeleteResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -299,8 +414,8 @@ export class AgentPoolsImpl implements AgentPools {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -308,19 +423,22 @@ export class AgentPoolsImpl implements AgentPools {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, agentPoolName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, agentPoolName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      AgentPoolsDeleteResponse,
+      OperationState<AgentPoolsDeleteResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -337,13 +455,13 @@ export class AgentPoolsImpl implements AgentPools {
     resourceGroupName: string,
     resourceName: string,
     agentPoolName: string,
-    options?: AgentPoolsDeleteOptionalParams
+    options?: AgentPoolsDeleteOptionalParams,
   ): Promise<AgentPoolsDeleteResponse> {
     const poller = await this.beginDelete(
       resourceGroupName,
       resourceName,
       agentPoolName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -359,12 +477,117 @@ export class AgentPoolsImpl implements AgentPools {
     resourceGroupName: string,
     resourceName: string,
     agentPoolName: string,
-    options?: AgentPoolsGetUpgradeProfileOptionalParams
+    options?: AgentPoolsGetUpgradeProfileOptionalParams,
   ): Promise<AgentPoolsGetUpgradeProfileResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, resourceName, agentPoolName, options },
-      getUpgradeProfileOperationSpec
+      getUpgradeProfileOperationSpec,
     );
+  }
+
+  /**
+   * Deletes specific machines in an agent pool.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param resourceName The name of the managed cluster resource.
+   * @param agentPoolName The name of the agent pool.
+   * @param machines A list of machines from the agent pool to be deleted.
+   * @param options The options parameters.
+   */
+  async beginDeleteMachines(
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    machines: AgentPoolDeleteMachinesParameter,
+    options?: AgentPoolsDeleteMachinesOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<AgentPoolsDeleteMachinesResponse>,
+      AgentPoolsDeleteMachinesResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<AgentPoolsDeleteMachinesResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        resourceName,
+        agentPoolName,
+        machines,
+        options,
+      },
+      spec: deleteMachinesOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      AgentPoolsDeleteMachinesResponse,
+      OperationState<AgentPoolsDeleteMachinesResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Deletes specific machines in an agent pool.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param resourceName The name of the managed cluster resource.
+   * @param agentPoolName The name of the agent pool.
+   * @param machines A list of machines from the agent pool to be deleted.
+   * @param options The options parameters.
+   */
+  async beginDeleteMachinesAndWait(
+    resourceGroupName: string,
+    resourceName: string,
+    agentPoolName: string,
+    machines: AgentPoolDeleteMachinesParameter,
+    options?: AgentPoolsDeleteMachinesOptionalParams,
+  ): Promise<AgentPoolsDeleteMachinesResponse> {
+    const poller = await this.beginDeleteMachines(
+      resourceGroupName,
+      resourceName,
+      agentPoolName,
+      machines,
+      options,
+    );
+    return poller.pollUntilDone();
   }
 
   /**
@@ -378,11 +601,11 @@ export class AgentPoolsImpl implements AgentPools {
   getAvailableAgentPoolVersions(
     resourceGroupName: string,
     resourceName: string,
-    options?: AgentPoolsGetAvailableAgentPoolVersionsOptionalParams
+    options?: AgentPoolsGetAvailableAgentPoolVersionsOptionalParams,
   ): Promise<AgentPoolsGetAvailableAgentPoolVersionsResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, resourceName, options },
-      getAvailableAgentPoolVersionsOperationSpec
+      getAvailableAgentPoolVersionsOperationSpec,
     );
   }
 
@@ -399,25 +622,24 @@ export class AgentPoolsImpl implements AgentPools {
     resourceGroupName: string,
     resourceName: string,
     agentPoolName: string,
-    options?: AgentPoolsUpgradeNodeImageVersionOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: AgentPoolsUpgradeNodeImageVersionOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -426,8 +648,8 @@ export class AgentPoolsImpl implements AgentPools {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -435,20 +657,20 @@ export class AgentPoolsImpl implements AgentPools {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, agentPoolName, options },
-      upgradeNodeImageVersionOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, agentPoolName, options },
+      spec: upgradeNodeImageVersionOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -467,13 +689,13 @@ export class AgentPoolsImpl implements AgentPools {
     resourceGroupName: string,
     resourceName: string,
     agentPoolName: string,
-    options?: AgentPoolsUpgradeNodeImageVersionOptionalParams
+    options?: AgentPoolsUpgradeNodeImageVersionOptionalParams,
   ): Promise<void> {
     const poller = await this.beginUpgradeNodeImageVersion(
       resourceGroupName,
       resourceName,
       agentPoolName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -489,50 +711,36 @@ export class AgentPoolsImpl implements AgentPools {
     resourceGroupName: string,
     resourceName: string,
     nextLink: string,
-    options?: AgentPoolsListNextOptionalParams
+    options?: AgentPoolsListNextOptionalParams,
   ): Promise<AgentPoolsListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, resourceName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
 // Operation Specifications
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
-const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools",
-  httpMethod: "GET",
+const abortLatestOperationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedclusters/{resourceName}/agentPools/{agentPoolName}/abort",
+  httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.AgentPoolListResult
+      headersMapper: Mappers.AgentPoolsAbortLatestOperationHeaders,
+    },
+    201: {
+      headersMapper: Mappers.AgentPoolsAbortLatestOperationHeaders,
+    },
+    202: {
+      headersMapper: Mappers.AgentPoolsAbortLatestOperationHeaders,
+    },
+    204: {
+      headersMapper: Mappers.AgentPoolsAbortLatestOperationHeaders,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.resourceName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AgentPool
+      bodyMapper: Mappers.CloudError,
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -540,31 +748,73 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.resourceName,
-    Parameters.agentPoolName
+    Parameters.agentPoolName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const listOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.AgentPoolListResult,
+    },
+    default: {
+      bodyMapper: Mappers.CloudError,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.resourceName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.AgentPool,
+    },
+    default: {
+      bodyMapper: Mappers.CloudError,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.resourceName,
+    Parameters.agentPoolName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.AgentPool
+      bodyMapper: Mappers.AgentPool,
     },
     201: {
-      bodyMapper: Mappers.AgentPool
+      bodyMapper: Mappers.AgentPool,
     },
     202: {
-      bodyMapper: Mappers.AgentPool
+      bodyMapper: Mappers.AgentPool,
     },
     204: {
-      bodyMapper: Mappers.AgentPool
+      bodyMapper: Mappers.AgentPool,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters5,
   queryParameters: [Parameters.apiVersion],
@@ -573,55 +823,56 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.resourceName,
-    Parameters.agentPoolName1
+    Parameters.agentPoolName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
   httpMethod: "DELETE",
   responses: {
     200: {
-      headersMapper: Mappers.AgentPoolsDeleteHeaders
+      headersMapper: Mappers.AgentPoolsDeleteHeaders,
     },
     201: {
-      headersMapper: Mappers.AgentPoolsDeleteHeaders
+      headersMapper: Mappers.AgentPoolsDeleteHeaders,
     },
     202: {
-      headersMapper: Mappers.AgentPoolsDeleteHeaders
+      headersMapper: Mappers.AgentPoolsDeleteHeaders,
     },
     204: {
-      headersMapper: Mappers.AgentPoolsDeleteHeaders
+      headersMapper: Mappers.AgentPoolsDeleteHeaders,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
+  queryParameters: [
+    Parameters.apiVersion,
+    Parameters.ignorePodDisruptionBudget,
+  ],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.resourceName,
-    Parameters.agentPoolName1
+    Parameters.agentPoolName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getUpgradeProfileOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}/upgradeProfiles/default",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}/upgradeProfiles/default",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AgentPoolUpgradeProfile
+      bodyMapper: Mappers.AgentPoolUpgradeProfile,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -629,36 +880,67 @@ const getUpgradeProfileOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.resourceName,
-    Parameters.agentPoolName
+    Parameters.agentPoolName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const deleteMachinesOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}/deleteMachines",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      headersMapper: Mappers.AgentPoolsDeleteMachinesHeaders,
+    },
+    201: {
+      headersMapper: Mappers.AgentPoolsDeleteMachinesHeaders,
+    },
+    202: {
+      headersMapper: Mappers.AgentPoolsDeleteMachinesHeaders,
+    },
+    204: {
+      headersMapper: Mappers.AgentPoolsDeleteMachinesHeaders,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.machines,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.resourceName,
+    Parameters.agentPoolName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
 };
 const getAvailableAgentPoolVersionsOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/availableAgentPoolVersions",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/availableAgentPoolVersions",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AgentPoolAvailableVersions
+      bodyMapper: Mappers.AgentPoolAvailableVersions,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.resourceName
+    Parameters.resourceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const upgradeNodeImageVersionOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}/upgradeNodeImageVersion",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}/upgradeNodeImageVersion",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -666,8 +948,8 @@ const upgradeNodeImageVersionOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -675,29 +957,29 @@ const upgradeNodeImageVersionOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.resourceName,
-    Parameters.agentPoolName
+    Parameters.agentPoolName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AgentPoolListResult
+      bodyMapper: Mappers.AgentPoolListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.resourceName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

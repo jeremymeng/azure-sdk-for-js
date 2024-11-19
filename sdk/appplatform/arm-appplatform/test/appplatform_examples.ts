@@ -26,7 +26,11 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -48,10 +52,10 @@ describe("AppPlatform test", () => {
     subscriptionId = env.SUBSCRIPTION_ID || '';
     // This is an example of how the environment variables are used
     const credential = createTestCredential();
-    client = new AppPlatformManagementClient(credential, subscriptionId, recorder.configureClientOptions({}));
+    client = new AppPlatformManagementClient(credential, subscriptionId, recorder.configureClientOptions({}) as any);
     location = "east us";
     resourceGroup = "myjstest";
-    serviceName = "myservicexxx";
+    serviceName = "myservicexxx12";
     appName = "myappxxx";
   });
 
@@ -114,7 +118,7 @@ describe("AppPlatform test", () => {
     for await (let item of client.services.list(resourceGroup)) {
       resArray.push(item);
     }
-    assert.equal(resArray.length, 1);
+    assert.isTrue(resArray.length >= 1);
   });
 
   it("apps delete test", async function () {

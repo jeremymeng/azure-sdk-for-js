@@ -1,14 +1,89 @@
 # Release History
 
-## 7.7.4 (Unreleased)
+## 7.10.0 (Unreleased)
 
 ### Features Added
+
+- Adds `deleteMessages` which deletes messages from the queue.
+- Add the experimental diagnostic feature `omitMessageBody` via `PeekMessagesOptions` under `./experimental` subpath export.
 
 ### Breaking Changes
 
 ### Bugs Fixed
 
 ### Other Changes
+
+- upgrade dependency `@azure/abort-controller` version to `^2.1.2`.
+
+## 7.9.5 (2024-06-11)
+
+### Bugs Fixed
+
+- Fix an issue where `rhea-promise` receivers are not properly closed in `MessageSession.createRheaLink()` [PR #29954](https://github.com/Azure/azure-sdk-for-js/pull/29954)
+
+### Other Changes
+
+- Wait up to max wait time for draining credit when receiving messages [PR #28604](https://github.com/Azure/azure-sdk-for-js/pull/28604)
+
+## 7.9.4 (2024-02-06)
+
+### Bugs Fixed
+
+- Wait for user error handler to finish when possible in session receivers. [PR #27716](https://github.com/Azure/azure-sdk-for-js/pull/27716)
+- Complete message before requesting the next one in session receivers [PR #27634](https://github.com/Azure/azure-sdk-for-js/pull/27634)
+- Correct timeToLive calculation to use absolute expiry time.
+
+## 7.9.3 (2023-11-07)
+
+### Bugs Fixed
+
+- Throw a retryable error when sending message and link is detached [PR #27557](https://github.com/Azure/azure-sdk-for-js/pull/27557)
+
+### Other Changes
+
+- Add check to ensure argument to `scheduledEnqueueTimeUtc` of `scheduleMessages()` method is an instance of `Date` [PR #27396](https://github.com/Azure/azure-sdk-for-js/pull/27396)
+
+## 7.9.2 (2023-10-10)
+
+### Bugs Fixed
+
+- Fix an INTERNAL ERROR due to timing [PR #27308](https://github.com/Azure/azure-sdk-for-js/pull/27308)
+
+## 7.9.1 (2023-09-12)
+
+### Other Changes
+
+- Check whether we can send messages before making management requests. [PR #26927](https://github.com/Azure/azure-sdk-for-js/pull/26927)
+
+## 7.9.0 (2023-04-11)
+
+### Bugs Fixed
+
+- Fix an issue of over-adding credits when receiving messages in a batch [PR #25185](https://github.com/Azure/azure-sdk-for-js/pull/25185)
+- Fix a race condition in initializing management links [PR #25279](https://github.com/Azure/azure-sdk-for-js/pull/25279)
+- `Uint8Array` payload is converted into JSON before being sent. This PR fixes it so that `Uint8Array` is being treated the same as a Buffer.
+- Fix an issue where closing receiver could be blocked indefinitely when we don't receive a drain credit response.
+- Fix an edge case issue where `receiveMessages()` may never resolve indefinitely. [PR #25355](https://github.com/Azure/azure-sdk-for-js/pull/25355)
+
+### Other Changes
+
+- upgrade dependency `rhea-promise` version to `^3.0.0`.
+
+## 7.8.1 (2023-03-07)
+
+### Bugs Fixed
+
+- Pass `skipParsingBodyAsJson` and `skipConvertingDate` options to peek operations. (PR #24950)[https://github.com/Azure/azure-sdk-for-js/pull/24950]
+
+## 7.8.0 (2023-02-07)
+
+### Features Added
+
+- Add an option to skip converting Date type into UNIX epoch number for properties in message annotations or application properties. (PR #24539)[https://github.com/Azure/azure-sdk-for-js/pull/24539]
+
+### Bugs Fixed
+
+- Ensure unique `replyTo` when new link is needed in ManagementClient. (PR #24509)[https://github.com/Azure/azure-sdk-for-js/pull/24509]
 
 ## 7.7.3 (2022-11-08)
 
@@ -350,8 +425,8 @@ If migrating from version 1.1.10 or lower, look at our [migration guide to move 
 
   ```typescript
   // this same method will work with subscriptions as well.
-  serviceBusClient.createReceiver(<queue>, {
-    subQueue: "deadLetter"
+  serviceBusClient.createReceiver("<queue name>", {
+    subQueue: "deadLetter",
   });
   ```
 

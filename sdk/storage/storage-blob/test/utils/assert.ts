@@ -1,14 +1,11 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
+import { isTokenCredential } from "@azure/core-auth";
 import { assert } from "chai";
-import { StorageClient } from "../../src/StorageClient";
+import type { StorageClient } from "../../src/StorageClient";
 
 export function assertClientUsesTokenCredential(client: StorageClient): void {
-  const factories = (client as any).pipeline.factories;
-  const authPolicy = factories[factories.length - 1].create();
-  assert.strictEqual(
-    authPolicy.constructor.name,
-    "StorageBearerTokenChallengeAuthenticationPolicy"
-  );
+  const credential = (client as any).credential;
+  assert.isTrue(isTokenCredential(credential));
 }

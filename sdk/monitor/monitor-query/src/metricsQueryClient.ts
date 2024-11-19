@@ -1,41 +1,40 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { TokenCredential } from "@azure/core-auth";
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { CommonClientOptions } from "@azure/core-client";
-import { tracingClient } from "./tracing";
+// Licensed under the MIT License.
+import type { TokenCredential } from "@azure/core-auth";
+import type { PagedAsyncIterableIterator } from "@azure/core-paging";
+import type { CommonClientOptions } from "@azure/core-client";
+import { tracingClient } from "./tracing.js";
 
-import {
+import type {
   ListMetricDefinitionsOptions,
   ListMetricNamespacesOptions,
   MetricDefinition,
   MetricNamespace,
   MetricsQueryOptions,
   MetricsQueryResult,
-} from "./models/publicMetricsModels";
+} from "./models/publicMetricsModels.js";
 
 import {
   MonitorManagementClient as GeneratedMetricsClient,
-  KnownApiVersion201801 as MetricsApiVersion,
-} from "./generated/metrics/src";
+  KnownApiVersion20240201 as MetricsApiVersion,
+} from "./generated/metrics/src/index.js";
 import {
   MonitorManagementClient as GeneratedMetricsDefinitionsClient,
-  KnownApiVersion201801 as MetricDefinitionsApiVersion,
-} from "./generated/metricsdefinitions/src";
+  KnownApiVersion20240201 as MetricDefinitionsApiVersion,
+} from "./generated/metricsdefinitions/src/index.js";
+import type { MetricNamespacesListOptionalParams } from "./generated/metricsnamespaces/src/index.js";
 import {
   MonitorManagementClient as GeneratedMetricsNamespacesClient,
-  KnownApiVersion20171201Preview as MetricNamespacesApiVersion,
-  MetricNamespacesListOptionalParams,
-} from "./generated/metricsnamespaces/src";
+  KnownApiVersion20240201 as MetricNamespacesApiVersion,
+} from "./generated/metricsnamespaces/src/index.js";
 import {
   convertRequestForMetrics,
   convertRequestOptionsForMetricsDefinitions,
   convertResponseForMetricNamespaces,
   convertResponseForMetrics,
   convertResponseForMetricsDefinitions,
-} from "./internal/modelConverters";
-import { SDK_VERSION } from "./constants";
-const defaultMetricsScope = "https://management.azure.com/.default";
+} from "./internal/modelConverters.js";
+import { SDK_VERSION, KnownMonitorMetricsQueryAudience } from "./constants.js";
 
 /**
  * Options for the MetricsQueryClient.
@@ -43,6 +42,13 @@ const defaultMetricsScope = "https://management.azure.com/.default";
 export interface MetricsQueryClientOptions extends CommonClientOptions {
   /** Overrides client endpoint. */
   endpoint?: string;
+
+  /**
+   * The Audience to use for authentication with Microsoft Entra ID. The
+   * audience is not considered when using a shared key.
+   * {@link KnownMonitorMetricsQueryAudience} can be used interchangeably with audience
+   */
+  audience?: string;
 }
 
 /**
@@ -59,13 +65,10 @@ export class MetricsQueryClient {
    * @param options - Options for the client like controlling request retries.
    */
   constructor(tokenCredential: TokenCredential, options?: MetricsQueryClientOptions) {
-    let scope;
-    if (options?.endpoint) {
-      scope = `${options?.endpoint}/.default`;
-    }
-    const credentialOptions = {
-      credentialScopes: scope,
-    };
+    const scope: string = options?.audience
+      ? `${options.audience}/.default`
+      : `${KnownMonitorMetricsQueryAudience.AzurePublicCloud}/.default`;
+
     const packageDetails = `azsdk-js-monitor-query/${SDK_VERSION}`;
     const userAgentPrefix =
       options?.userAgentOptions && options?.userAgentOptions.userAgentPrefix
@@ -75,7 +78,7 @@ export class MetricsQueryClient {
       ...options,
       $host: options?.endpoint,
       endpoint: options?.endpoint,
-      credentialScopes: credentialOptions?.credentialScopes ?? defaultMetricsScope,
+      credentialScopes: scope,
       credential: tokenCredential,
       userAgentOptions: {
         userAgentPrefix,
@@ -83,18 +86,18 @@ export class MetricsQueryClient {
     };
 
     this._metricsClient = new GeneratedMetricsClient(
-      MetricsApiVersion.TwoThousandEighteen0101,
-      serviceClientOptions
+      MetricsApiVersion.TwoThousandTwentyFour0201,
+      serviceClientOptions,
     );
 
     this._definitionsClient = new GeneratedMetricsDefinitionsClient(
-      MetricDefinitionsApiVersion.TwoThousandEighteen0101,
-      serviceClientOptions
+      MetricDefinitionsApiVersion.TwoThousandTwentyFour0201,
+      serviceClientOptions,
     );
 
     this._namespacesClient = new GeneratedMetricsNamespacesClient(
-      MetricNamespacesApiVersion.TwoThousandSeventeen1201Preview,
-      serviceClientOptions
+      MetricNamespacesApiVersion.TwoThousandTwentyFour0201,
+      serviceClientOptions,
     );
   }
 
@@ -108,7 +111,7 @@ export class MetricsQueryClient {
   async queryResource(
     resourceUri: string,
     metricNames: string[],
-    options: MetricsQueryOptions = {} // eslint-disable-line @azure/azure-sdk/ts-naming-options
+    options: MetricsQueryOptions = {}, // eslint-disable-line @azure/azure-sdk/ts-naming-options
   ): Promise<MetricsQueryResult> {
     return tracingClient.withSpan(
       "MetricsQueryClient.queryResource",
@@ -116,11 +119,11 @@ export class MetricsQueryClient {
       async (updatedOptions) => {
         const response = await this._metricsClient.metrics.list(
           resourceUri,
-          convertRequestForMetrics(metricNames, updatedOptions)
+          convertRequestForMetrics(metricNames, updatedOptions),
         );
 
         return convertResponseForMetrics(response);
-      }
+      },
     );
   }
 
@@ -129,7 +132,7 @@ export class MetricsQueryClient {
    */
   private async *listSegmentOfMetricDefinitions(
     resourceUri: string,
-    options: ListMetricDefinitionsOptions = {}
+    options: ListMetricDefinitionsOptions = {},
   ): AsyncIterableIterator<Array<MetricDefinition>> {
     const segmentResponse = await tracingClient.withSpan(
       "MetricsQueryClient.listSegmentOfMetricDefinitions",
@@ -137,8 +140,8 @@ export class MetricsQueryClient {
       async (updatedOptions) =>
         this._definitionsClient.metricDefinitions.list(
           resourceUri,
-          convertRequestOptionsForMetricsDefinitions(updatedOptions)
-        )
+          convertRequestOptionsForMetricsDefinitions(updatedOptions),
+        ),
     );
     yield convertResponseForMetricsDefinitions(segmentResponse.value);
   }
@@ -148,7 +151,7 @@ export class MetricsQueryClient {
    */
   private async *listItemsOfMetricDefinitions(
     resourceUri: string,
-    options?: ListMetricDefinitionsOptions
+    options?: ListMetricDefinitionsOptions,
   ): AsyncIterableIterator<MetricDefinition> {
     for await (const segment of this.listSegmentOfMetricDefinitions(resourceUri, options)) {
       if (segment) {
@@ -192,7 +195,7 @@ export class MetricsQueryClient {
    */
   listMetricDefinitions(
     resourceUri: string,
-    options?: ListMetricDefinitionsOptions
+    options?: ListMetricDefinitionsOptions,
   ): PagedAsyncIterableIterator<MetricDefinition> {
     const iter = this.listItemsOfMetricDefinitions(resourceUri, options);
     return {
@@ -222,13 +225,13 @@ export class MetricsQueryClient {
    */
   private async *listSegmentOfMetricNamespaces(
     resourceUri: string,
-    options: ListMetricNamespacesOptions = {}
+    options: ListMetricNamespacesOptions = {},
   ): AsyncIterableIterator<Array<MetricNamespace>> {
     const segmentResponse = await tracingClient.withSpan(
       "MetricsQueryClient.listSegmentOfMetricNamespaces",
       options,
       async (updatedOptions: MetricNamespacesListOptionalParams | undefined) =>
-        this._namespacesClient.metricNamespaces.list(resourceUri, updatedOptions)
+        this._namespacesClient.metricNamespaces.list(resourceUri, updatedOptions),
     );
     yield convertResponseForMetricNamespaces(segmentResponse.value);
   }
@@ -237,7 +240,7 @@ export class MetricsQueryClient {
    */
   private async *listItemsOfMetricNamespaces(
     resourceUri: string,
-    options?: ListMetricNamespacesOptions
+    options?: ListMetricNamespacesOptions,
   ): AsyncIterableIterator<MetricNamespace> {
     for await (const segment of this.listSegmentOfMetricNamespaces(resourceUri, options)) {
       if (segment) {
@@ -278,7 +281,7 @@ export class MetricsQueryClient {
    */
   listMetricNamespaces(
     resourceUri: string,
-    options?: ListMetricNamespacesOptions
+    options?: ListMetricNamespacesOptions,
   ): PagedAsyncIterableIterator<MetricNamespace> {
     const iter = this.listItemsOfMetricNamespaces(resourceUri, options);
     return {

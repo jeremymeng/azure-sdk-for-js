@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -31,7 +31,7 @@ async function vpnSiteGet() {
       subscriptionId,
       resourceGroupName,
       vpnSiteName,
-      vpnSiteLinkName
+      vpnSiteLinkName,
     )
     .get(options);
   console.log(result);

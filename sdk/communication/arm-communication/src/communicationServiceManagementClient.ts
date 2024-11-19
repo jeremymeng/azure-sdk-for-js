@@ -11,20 +11,22 @@ import * as coreRestPipeline from "@azure/core-rest-pipeline";
 import {
   PipelineRequest,
   PipelineResponse,
-  SendRequest
+  SendRequest,
 } from "@azure/core-rest-pipeline";
 import * as coreAuth from "@azure/core-auth";
 import {
   OperationsImpl,
   CommunicationServicesImpl,
   DomainsImpl,
-  EmailServicesImpl
+  EmailServicesImpl,
+  SenderUsernamesImpl,
 } from "./operations";
 import {
   Operations,
   CommunicationServices,
   Domains,
-  EmailServices
+  EmailServices,
+  SenderUsernames,
 } from "./operationsInterfaces";
 import { CommunicationServiceManagementClientOptionalParams } from "./models";
 
@@ -36,13 +38,13 @@ export class CommunicationServiceManagementClient extends coreClient.ServiceClie
   /**
    * Initializes a new instance of the CommunicationServiceManagementClient class.
    * @param credentials Subscription credentials which uniquely identify client subscription.
-   * @param subscriptionId The ID of the target subscription.
+   * @param subscriptionId The ID of the target subscription. The value must be an UUID.
    * @param options The parameter options
    */
   constructor(
     credentials: coreAuth.TokenCredential,
     subscriptionId: string,
-    options?: CommunicationServiceManagementClientOptionalParams
+    options?: CommunicationServiceManagementClientOptionalParams,
   ) {
     if (credentials === undefined) {
       throw new Error("'credentials' cannot be null");
@@ -57,36 +59,34 @@ export class CommunicationServiceManagementClient extends coreClient.ServiceClie
     }
     const defaults: CommunicationServiceManagementClientOptionalParams = {
       requestContentType: "application/json; charset=utf-8",
-      credential: credentials
+      credential: credentials,
     };
 
-    const packageDetails = `azsdk-js-arm-communication/4.0.0-beta.3`;
+    const packageDetails = `azsdk-js-arm-communication/4.1.1`;
     const userAgentPrefix =
       options.userAgentOptions && options.userAgentOptions.userAgentPrefix
         ? `${options.userAgentOptions.userAgentPrefix} ${packageDetails}`
         : `${packageDetails}`;
 
-    if (!options.credentialScopes) {
-      options.credentialScopes = ["https://management.azure.com/.default"];
-    }
     const optionsWithDefaults = {
       ...defaults,
       ...options,
       userAgentOptions: {
-        userAgentPrefix
+        userAgentPrefix,
       },
-      baseUri:
-        options.endpoint ?? options.baseUri ?? "https://management.azure.com"
+      endpoint:
+        options.endpoint ?? options.baseUri ?? "https://management.azure.com",
     };
     super(optionsWithDefaults);
 
     let bearerTokenAuthenticationPolicyFound: boolean = false;
     if (options?.pipeline && options.pipeline.getOrderedPolicies().length > 0) {
-      const pipelinePolicies: coreRestPipeline.PipelinePolicy[] = options.pipeline.getOrderedPolicies();
+      const pipelinePolicies: coreRestPipeline.PipelinePolicy[] =
+        options.pipeline.getOrderedPolicies();
       bearerTokenAuthenticationPolicyFound = pipelinePolicies.some(
         (pipelinePolicy) =>
           pipelinePolicy.name ===
-          coreRestPipeline.bearerTokenAuthenticationPolicyName
+          coreRestPipeline.bearerTokenAuthenticationPolicyName,
       );
     }
     if (
@@ -96,17 +96,19 @@ export class CommunicationServiceManagementClient extends coreClient.ServiceClie
       !bearerTokenAuthenticationPolicyFound
     ) {
       this.pipeline.removePolicy({
-        name: coreRestPipeline.bearerTokenAuthenticationPolicyName
+        name: coreRestPipeline.bearerTokenAuthenticationPolicyName,
       });
       this.pipeline.addPolicy(
         coreRestPipeline.bearerTokenAuthenticationPolicy({
           credential: credentials,
-          scopes: `${optionsWithDefaults.credentialScopes}`,
+          scopes:
+            optionsWithDefaults.credentialScopes ??
+            `${optionsWithDefaults.endpoint}/.default`,
           challengeCallbacks: {
             authorizeRequestOnChallenge:
-              coreClient.authorizeRequestOnClaimChallenge
-          }
-        })
+              coreClient.authorizeRequestOnClaimChallenge,
+          },
+        }),
       );
     }
     // Parameter assignments
@@ -114,11 +116,12 @@ export class CommunicationServiceManagementClient extends coreClient.ServiceClie
 
     // Assigning values to Constant parameters
     this.$host = options.$host || "https://management.azure.com";
-    this.apiVersion = options.apiVersion || "2022-07-01-preview";
+    this.apiVersion = options.apiVersion || "2023-04-01";
     this.operations = new OperationsImpl(this);
     this.communicationServices = new CommunicationServicesImpl(this);
     this.domains = new DomainsImpl(this);
     this.emailServices = new EmailServicesImpl(this);
+    this.senderUsernames = new SenderUsernamesImpl(this);
     this.addCustomApiVersionPolicy(options.apiVersion);
   }
 
@@ -131,7 +134,7 @@ export class CommunicationServiceManagementClient extends coreClient.ServiceClie
       name: "CustomApiVersionPolicy",
       async sendRequest(
         request: PipelineRequest,
-        next: SendRequest
+        next: SendRequest,
       ): Promise<PipelineResponse> {
         const param = request.url.split("?");
         if (param.length > 1) {
@@ -145,7 +148,7 @@ export class CommunicationServiceManagementClient extends coreClient.ServiceClie
           request.url = param[0] + "?" + newParams.join("&");
         }
         return next(request);
-      }
+      },
     };
     this.pipeline.addPolicy(apiVersionPolicy);
   }
@@ -154,4 +157,5 @@ export class CommunicationServiceManagementClient extends coreClient.ServiceClie
   communicationServices: CommunicationServices;
   domains: Domains;
   emailServices: EmailServices;
+  senderUsernames: SenderUsernames;
 }

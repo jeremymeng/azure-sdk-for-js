@@ -10,7 +10,7 @@
 // Licensed under the MIT License.
 import {
   FrontendUpdate,
-  ServiceNetworkingManagementClient
+  ServiceNetworkingManagementClient,
 } from "@azure/arm-servicenetworking";
 import { DefaultAzureCredential } from "@azure/identity";
 import * as dotenv from "dotenv";
@@ -18,35 +18,29 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 /**
- * This sample demonstrates how to Update a Traffic Controller Frontend
+ * This sample demonstrates how to Update a Frontend
  *
- * @summary Update a Traffic Controller Frontend
- * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/cadl/examples/FrontendPatch.json
+ * @summary Update a Frontend
+ * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/preview/2024-05-01-preview/examples/FrontendPatch.json
  */
 async function updateFrontend() {
   const subscriptionId =
     process.env["SERVICENETWORKING_SUBSCRIPTION_ID"] || "subid";
   const resourceGroupName =
     process.env["SERVICENETWORKING_RESOURCE_GROUP"] || "rg1";
-  const trafficControllerName = "TC1";
-  const frontendName = "publicIp1";
-  const properties: FrontendUpdate = {
-    properties: {
-      ipAddressVersion: "IPv4",
-      mode: "public",
-      publicIPAddress: { id: "resourceUriAsString" }
-    }
-  };
+  const trafficControllerName = "tc1";
+  const frontendName = "fe1";
+  const properties: FrontendUpdate = {};
   const credential = new DefaultAzureCredential();
   const client = new ServiceNetworkingManagementClient(
     credential,
-    subscriptionId
+    subscriptionId,
   );
   const result = await client.frontendsInterface.update(
     resourceGroupName,
     trafficControllerName,
     frontendName,
-    properties
+    properties,
   );
   console.log(result);
 }

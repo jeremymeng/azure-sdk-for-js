@@ -109,6 +109,14 @@ export interface PrivateLinkServiceConnectionState {
   readonly actionsRequired?: ActionsRequired;
 }
 
+/** The data plane proxy settings for a configuration store. */
+export interface DataPlaneProxyProperties {
+  /** The data plane proxy authentication mode. This property manages the authentication mode of request to the data plane resources. */
+  authenticationMode?: AuthenticationMode;
+  /** The data plane proxy private link delegation. This property manages if a request from delegated Azure Resource Manager (ARM) private link is allowed when the data plane resource requires private link. */
+  privateLinkDelegation?: PrivateLinkDelegation;
+}
+
 /** Describes a configuration store SKU. */
 export interface Sku {
   /** The SKU name of the configuration store. */
@@ -205,6 +213,8 @@ export interface ConfigurationStoreUpdateParameters {
   publicNetworkAccess?: PublicNetworkAccess;
   /** Property specifying whether protection against purge is enabled for this configuration store. */
   enablePurgeProtection?: boolean;
+  /** Property specifying the configuration of data plane proxy for Azure Resource Manager (ARM). */
+  dataPlaneProxy?: DataPlaneProxyProperties;
 }
 
 /** Parameters used for checking whether a resource name is available. */
@@ -451,14 +461,6 @@ export interface PrivateLinkResource {
   readonly requiredZoneNames?: string[];
 }
 
-/** The result of a request to list key-values. */
-export interface KeyValueListResult {
-  /** The collection value. */
-  value?: KeyValue[];
-  /** The URI that can be used to request the next set of paged results. */
-  nextLink?: string;
-}
-
 /** The key-value resource along with all resource properties. */
 export interface KeyValue {
   /**
@@ -572,6 +574,163 @@ export interface DeletedConfigurationStore {
   readonly purgeProtectionEnabled?: boolean;
 }
 
+/** The result of a request to list replicas. */
+export interface ReplicaListResult {
+  /** The collection value. */
+  value?: Replica[];
+  /** The URI that can be used to request the next set of paged results. */
+  nextLink?: string;
+}
+
+/** The replica resource. */
+export interface Replica {
+  /**
+   * The resource ID.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly id?: string;
+  /**
+   * The name of the replica.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly name?: string;
+  /**
+   * The type of the resource.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly type?: string;
+  /** The location of the replica. */
+  location?: string;
+  /**
+   * Resource system metadata.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly systemData?: SystemData;
+  /**
+   * The URI of the replica where the replica API will be available.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly endpoint?: string;
+  /**
+   * The provisioning state of the replica.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: ReplicaProvisioningState;
+}
+
+/** The snapshot resource. */
+export interface Snapshot {
+  /**
+   * The resource ID.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly id?: string;
+  /**
+   * The name of the snapshot.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly name?: string;
+  /**
+   * The type of the resource.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly type?: string;
+  /**
+   * The provisioning state of the snapshot.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: ProvisioningState;
+  /**
+   * The current status of the snapshot.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly status?: SnapshotStatus;
+  /** A list of filters used to filter the key-values included in the snapshot. */
+  filters?: KeyValueFilter[];
+  /** The composition type describes how the key-values within the snapshot are composed. The 'key' composition type ensures there are no two key-values containing the same key. The 'key_label' composition type ensures there are no two key-values containing the same key and label. */
+  compositionType?: CompositionType;
+  /**
+   * The time that the snapshot was created.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly created?: Date;
+  /**
+   * The time that the snapshot will expire.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly expires?: Date;
+  /** The amount of time, in seconds, that a snapshot will remain in the archived state before expiring. This property is only writable during the creation of a snapshot. If not specified, the default lifetime of key-value revisions will be used. */
+  retentionPeriod?: number;
+  /**
+   * The size in bytes of the snapshot.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly size?: number;
+  /**
+   * The amount of key-values in the snapshot.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly itemsCount?: number;
+  /** The tags of the snapshot. NOTE: These are data plane tags, not Azure Resource Manager (ARM) tags. */
+  tags?: { [propertyName: string]: string };
+  /**
+   * A value representing the current state of the snapshot.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly etag?: string;
+}
+
+/** Enables filtering of key-values. */
+export interface KeyValueFilter {
+  /** Filters key-values by their key field. */
+  key: string;
+  /** Filters key-values by their label field. */
+  label?: string;
+}
+
+/** Common error response for all Azure Resource Manager APIs to return error details for failed operations. (This also follows the OData error response format.). */
+export interface ErrorResponseAutoGenerated {
+  /** The error object. */
+  error?: ErrorDetail;
+}
+
+/** The error detail. */
+export interface ErrorDetail {
+  /**
+   * The error code.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly code?: string;
+  /**
+   * The error message.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly message?: string;
+  /**
+   * The error target.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly target?: string;
+  /**
+   * The error details.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly details?: ErrorDetail[];
+  /**
+   * The error additional info.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly additionalInfo?: ErrorAdditionalInfo[];
+}
+
+/** The result of a request to list key-values. */
+export interface KeyValueListResult {
+  /** The collection value. */
+  value?: KeyValue[];
+  /** The URI that can be used to request the next set of paged results. */
+  nextLink?: string;
+}
+
 /** The resource model definition for an Azure Resource Manager tracked top level resource which has 'tags' and a 'location' */
 export interface TrackedResource extends Resource {
   /** Resource tags. */
@@ -621,8 +780,16 @@ export interface ConfigurationStore extends TrackedResource {
   softDeleteRetentionInDays?: number;
   /** Property specifying whether protection against purge is enabled for this configuration store. */
   enablePurgeProtection?: boolean;
+  /** Property specifying the configuration of data plane proxy for Azure Resource Manager (ARM). */
+  dataPlaneProxy?: DataPlaneProxyProperties;
   /** Indicates whether the configuration store need to be recovered. */
   createMode?: CreateMode;
+}
+
+/** Defines headers for Replicas_delete operation. */
+export interface ReplicasDeleteHeaders {
+  /** URL to query for status of the operation. */
+  azureAsyncOperation?: string;
 }
 
 /** Known values of {@link IdentityType} that the service accepts. */
@@ -634,7 +801,7 @@ export enum KnownIdentityType {
   /** UserAssigned */
   UserAssigned = "UserAssigned",
   /** SystemAssignedUserAssigned */
-  SystemAssignedUserAssigned = "SystemAssigned, UserAssigned"
+  SystemAssignedUserAssigned = "SystemAssigned, UserAssigned",
 }
 
 /**
@@ -662,7 +829,7 @@ export enum KnownProvisioningState {
   /** Failed */
   Failed = "Failed",
   /** Canceled */
-  Canceled = "Canceled"
+  Canceled = "Canceled",
 }
 
 /**
@@ -688,7 +855,7 @@ export enum KnownConnectionStatus {
   /** Rejected */
   Rejected = "Rejected",
   /** Disconnected */
-  Disconnected = "Disconnected"
+  Disconnected = "Disconnected",
 }
 
 /**
@@ -708,7 +875,7 @@ export enum KnownActionsRequired {
   /** None */
   None = "None",
   /** Recreate */
-  Recreate = "Recreate"
+  Recreate = "Recreate",
 }
 
 /**
@@ -726,7 +893,7 @@ export enum KnownPublicNetworkAccess {
   /** Enabled */
   Enabled = "Enabled",
   /** Disabled */
-  Disabled = "Disabled"
+  Disabled = "Disabled",
 }
 
 /**
@@ -739,6 +906,42 @@ export enum KnownPublicNetworkAccess {
  */
 export type PublicNetworkAccess = string;
 
+/** Known values of {@link AuthenticationMode} that the service accepts. */
+export enum KnownAuthenticationMode {
+  /** The local authentication mode. Users are not required to have data plane permissions if local authentication is not disabled. */
+  Local = "Local",
+  /** The pass-through authentication mode. User identity will be passed through from Azure Resource Manager (ARM), requiring user to have data plane action permissions (Available via App Configuration Data Owner\/ App Configuration Data Reader). */
+  PassThrough = "Pass-through",
+}
+
+/**
+ * Defines values for AuthenticationMode. \
+ * {@link KnownAuthenticationMode} can be used interchangeably with AuthenticationMode,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Local**: The local authentication mode. Users are not required to have data plane permissions if local authentication is not disabled. \
+ * **Pass-through**: The pass-through authentication mode. User identity will be passed through from Azure Resource Manager (ARM), requiring user to have data plane action permissions (Available via App Configuration Data Owner\/ App Configuration Data Reader).
+ */
+export type AuthenticationMode = string;
+
+/** Known values of {@link PrivateLinkDelegation} that the service accepts. */
+export enum KnownPrivateLinkDelegation {
+  /** Azure Resource Manager (ARM) private endpoint is required if the resource requires private link. */
+  Enabled = "Enabled",
+  /** Request is denied if the resource requires private link. */
+  Disabled = "Disabled",
+}
+
+/**
+ * Defines values for PrivateLinkDelegation. \
+ * {@link KnownPrivateLinkDelegation} can be used interchangeably with PrivateLinkDelegation,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Enabled**: Azure Resource Manager (ARM) private endpoint is required if the resource requires private link. \
+ * **Disabled**: Request is denied if the resource requires private link.
+ */
+export type PrivateLinkDelegation = string;
+
 /** Known values of {@link CreatedByType} that the service accepts. */
 export enum KnownCreatedByType {
   /** User */
@@ -748,7 +951,7 @@ export enum KnownCreatedByType {
   /** ManagedIdentity */
   ManagedIdentity = "ManagedIdentity",
   /** Key */
-  Key = "Key"
+  Key = "Key",
 }
 
 /**
@@ -766,7 +969,7 @@ export type CreatedByType = string;
 /** Known values of {@link ConfigurationResourceType} that the service accepts. */
 export enum KnownConfigurationResourceType {
   /** MicrosoftAppConfigurationConfigurationStores */
-  MicrosoftAppConfigurationConfigurationStores = "Microsoft.AppConfiguration/configurationStores"
+  MicrosoftAppConfigurationConfigurationStores = "Microsoft.AppConfiguration/configurationStores",
 }
 
 /**
@@ -777,6 +980,75 @@ export enum KnownConfigurationResourceType {
  * **Microsoft.AppConfiguration\/configurationStores**
  */
 export type ConfigurationResourceType = string;
+
+/** Known values of {@link ReplicaProvisioningState} that the service accepts. */
+export enum KnownReplicaProvisioningState {
+  /** Creating */
+  Creating = "Creating",
+  /** Succeeded */
+  Succeeded = "Succeeded",
+  /** Deleting */
+  Deleting = "Deleting",
+  /** Failed */
+  Failed = "Failed",
+  /** Canceled */
+  Canceled = "Canceled",
+}
+
+/**
+ * Defines values for ReplicaProvisioningState. \
+ * {@link KnownReplicaProvisioningState} can be used interchangeably with ReplicaProvisioningState,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Creating** \
+ * **Succeeded** \
+ * **Deleting** \
+ * **Failed** \
+ * **Canceled**
+ */
+export type ReplicaProvisioningState = string;
+
+/** Known values of {@link SnapshotStatus} that the service accepts. */
+export enum KnownSnapshotStatus {
+  /** Provisioning */
+  Provisioning = "Provisioning",
+  /** Ready */
+  Ready = "Ready",
+  /** Archived */
+  Archived = "Archived",
+  /** Failed */
+  Failed = "Failed",
+}
+
+/**
+ * Defines values for SnapshotStatus. \
+ * {@link KnownSnapshotStatus} can be used interchangeably with SnapshotStatus,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Provisioning** \
+ * **Ready** \
+ * **Archived** \
+ * **Failed**
+ */
+export type SnapshotStatus = string;
+
+/** Known values of {@link CompositionType} that the service accepts. */
+export enum KnownCompositionType {
+  /** Key */
+  Key = "Key",
+  /** KeyLabel */
+  KeyLabel = "Key_Label",
+}
+
+/**
+ * Defines values for CompositionType. \
+ * {@link KnownCompositionType} can be used interchangeably with CompositionType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Key** \
+ * **Key_Label**
+ */
+export type CompositionType = string;
 /** Defines values for CreateMode. */
 export type CreateMode = "Recover" | "Default";
 
@@ -798,7 +1070,8 @@ export interface ConfigurationStoresListByResourceGroupOptionalParams
 }
 
 /** Contains response data for the listByResourceGroup operation. */
-export type ConfigurationStoresListByResourceGroupResponse = ConfigurationStoreListResult;
+export type ConfigurationStoresListByResourceGroupResponse =
+  ConfigurationStoreListResult;
 
 /** Optional parameters. */
 export interface ConfigurationStoresGetOptionalParams
@@ -862,7 +1135,8 @@ export interface ConfigurationStoresListDeletedOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listDeleted operation. */
-export type ConfigurationStoresListDeletedResponse = DeletedConfigurationStoreListResult;
+export type ConfigurationStoresListDeletedResponse =
+  DeletedConfigurationStoreListResult;
 
 /** Optional parameters. */
 export interface ConfigurationStoresGetDeletedOptionalParams
@@ -882,30 +1156,22 @@ export interface ConfigurationStoresPurgeDeletedOptionalParams
 
 /** Optional parameters. */
 export interface ConfigurationStoresListNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls. */
-  skipToken?: string;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the listNext operation. */
 export type ConfigurationStoresListNextResponse = ConfigurationStoreListResult;
 
 /** Optional parameters. */
 export interface ConfigurationStoresListByResourceGroupNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls. */
-  skipToken?: string;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByResourceGroupNext operation. */
-export type ConfigurationStoresListByResourceGroupNextResponse = ConfigurationStoreListResult;
+export type ConfigurationStoresListByResourceGroupNextResponse =
+  ConfigurationStoreListResult;
 
 /** Optional parameters. */
 export interface ConfigurationStoresListKeysNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls. */
-  skipToken?: string;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the listKeysNext operation. */
 export type ConfigurationStoresListKeysNextResponse = ApiKeyListResult;
@@ -915,7 +1181,8 @@ export interface ConfigurationStoresListDeletedNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listDeletedNext operation. */
-export type ConfigurationStoresListDeletedNextResponse = DeletedConfigurationStoreListResult;
+export type ConfigurationStoresListDeletedNextResponse =
+  DeletedConfigurationStoreListResult;
 
 /** Optional parameters. */
 export interface OperationsCheckNameAvailabilityOptionalParams
@@ -939,14 +1206,12 @@ export interface OperationsRegionalCheckNameAvailabilityOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the regionalCheckNameAvailability operation. */
-export type OperationsRegionalCheckNameAvailabilityResponse = NameAvailabilityStatus;
+export type OperationsRegionalCheckNameAvailabilityResponse =
+  NameAvailabilityStatus;
 
 /** Optional parameters. */
 export interface OperationsListNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls. */
-  skipToken?: string;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the listNext operation. */
 export type OperationsListNextResponse = OperationDefinitionListResult;
@@ -956,7 +1221,8 @@ export interface PrivateEndpointConnectionsListByConfigurationStoreOptionalParam
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByConfigurationStore operation. */
-export type PrivateEndpointConnectionsListByConfigurationStoreResponse = PrivateEndpointConnectionListResult;
+export type PrivateEndpointConnectionsListByConfigurationStoreResponse =
+  PrivateEndpointConnectionListResult;
 
 /** Optional parameters. */
 export interface PrivateEndpointConnectionsGetOptionalParams
@@ -975,7 +1241,8 @@ export interface PrivateEndpointConnectionsCreateOrUpdateOptionalParams
 }
 
 /** Contains response data for the createOrUpdate operation. */
-export type PrivateEndpointConnectionsCreateOrUpdateResponse = PrivateEndpointConnection;
+export type PrivateEndpointConnectionsCreateOrUpdateResponse =
+  PrivateEndpointConnection;
 
 /** Optional parameters. */
 export interface PrivateEndpointConnectionsDeleteOptionalParams
@@ -991,14 +1258,16 @@ export interface PrivateEndpointConnectionsListByConfigurationStoreNextOptionalP
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByConfigurationStoreNext operation. */
-export type PrivateEndpointConnectionsListByConfigurationStoreNextResponse = PrivateEndpointConnectionListResult;
+export type PrivateEndpointConnectionsListByConfigurationStoreNextResponse =
+  PrivateEndpointConnectionListResult;
 
 /** Optional parameters. */
 export interface PrivateLinkResourcesListByConfigurationStoreOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByConfigurationStore operation. */
-export type PrivateLinkResourcesListByConfigurationStoreResponse = PrivateLinkResourceListResult;
+export type PrivateLinkResourcesListByConfigurationStoreResponse =
+  PrivateLinkResourceListResult;
 
 /** Optional parameters. */
 export interface PrivateLinkResourcesGetOptionalParams
@@ -1012,17 +1281,8 @@ export interface PrivateLinkResourcesListByConfigurationStoreNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listByConfigurationStoreNext operation. */
-export type PrivateLinkResourcesListByConfigurationStoreNextResponse = PrivateLinkResourceListResult;
-
-/** Optional parameters. */
-export interface KeyValuesListByConfigurationStoreOptionalParams
-  extends coreClient.OperationOptions {
-  /** A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls. */
-  skipToken?: string;
-}
-
-/** Contains response data for the listByConfigurationStore operation. */
-export type KeyValuesListByConfigurationStoreResponse = KeyValueListResult;
+export type PrivateLinkResourcesListByConfigurationStoreNextResponse =
+  PrivateLinkResourceListResult;
 
 /** Optional parameters. */
 export interface KeyValuesGetOptionalParams
@@ -1051,14 +1311,68 @@ export interface KeyValuesDeleteOptionalParams
 }
 
 /** Optional parameters. */
-export interface KeyValuesListByConfigurationStoreNextOptionalParams
+export interface ReplicasListByConfigurationStoreOptionalParams
   extends coreClient.OperationOptions {
   /** A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls. */
   skipToken?: string;
 }
 
+/** Contains response data for the listByConfigurationStore operation. */
+export type ReplicasListByConfigurationStoreResponse = ReplicaListResult;
+
+/** Optional parameters. */
+export interface ReplicasGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type ReplicasGetResponse = Replica;
+
+/** Optional parameters. */
+export interface ReplicasCreateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the create operation. */
+export type ReplicasCreateResponse = Replica;
+
+/** Optional parameters. */
+export interface ReplicasDeleteOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Optional parameters. */
+export interface ReplicasListByConfigurationStoreNextOptionalParams
+  extends coreClient.OperationOptions {}
+
 /** Contains response data for the listByConfigurationStoreNext operation. */
-export type KeyValuesListByConfigurationStoreNextResponse = KeyValueListResult;
+export type ReplicasListByConfigurationStoreNextResponse = ReplicaListResult;
+
+/** Optional parameters. */
+export interface SnapshotsGetOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the get operation. */
+export type SnapshotsGetResponse = Snapshot;
+
+/** Optional parameters. */
+export interface SnapshotsCreateOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the create operation. */
+export type SnapshotsCreateResponse = Snapshot;
 
 /** Optional parameters. */
 export interface AppConfigurationManagementClientOptionalParams

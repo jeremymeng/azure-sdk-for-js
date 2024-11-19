@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { assert } from "chai";
 import {
@@ -9,9 +9,9 @@ import {
   BlockBlobClient,
   PageBlobClient,
 } from "../../src";
-import { getBSU, getConnectionStringFromEnvironment, bodyToString, getUniqueName } from "../utils";
+import { getConnectionStringFromEnvironment, bodyToString, getUniqueName } from "../utils";
 import { env } from "@azure-tools/test-recorder";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 
 // Expected environment variable to run this test-suite
 // STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true
@@ -25,10 +25,12 @@ describe("Emulator Tests", () => {
   const content = "Hello World";
 
   beforeEach(async function (this: Context) {
-    if (!env.STORAGE_CONNECTION_STRING.startsWith("UseDevelopmentStorage=true")) {
+    if (!env.STORAGE_CONNECTION_STRING?.startsWith("UseDevelopmentStorage=true")) {
       this.skip();
     }
-    blobServiceClient = getBSU();
+    blobServiceClient = BlobServiceClient.fromConnectionString(
+      getConnectionStringFromEnvironment(),
+    );
     containerName = getUniqueName("container");
     blobName = getUniqueName("blob");
     containerClient = blobServiceClient.getContainerClient(containerName);
@@ -39,12 +41,12 @@ describe("Emulator Tests", () => {
   });
 
   afterEach(async function (this: Context) {
-    if (!this.currentTest?.isPending()) {
+    if (containerClient) {
       await containerClient.delete();
     }
   });
 
-  it("BlobClient can be created with a connection string", async () => {
+  it("BlobClient can be created with a connection string", async function () {
     const newClient = new BlobClient(getConnectionStringFromEnvironment(), containerName, blobName);
     const metadata = {
       a: "a",
@@ -54,14 +56,14 @@ describe("Emulator Tests", () => {
     assert.equal(
       containerName,
       newClient.containerName,
-      "Container name didn't match with the provided one."
+      "Container name didn't match with the provided one.",
     );
     assert.equal(newClient.name, blobName, "Blob name didn't match with the provided one.");
     const result = await newClient.getProperties();
     assert.deepStrictEqual(result.metadata, metadata);
   });
 
-  it("BlobServiceClient can be created from a connection string", async () => {
+  it("BlobServiceClient can be created from a connection string", async function () {
     const newClient = BlobServiceClient.fromConnectionString(getConnectionStringFromEnvironment());
 
     const result = await newClient.getProperties();
@@ -70,17 +72,17 @@ describe("Emulator Tests", () => {
     assert.ok(result.requestId!.length > 0);
   });
 
-  it("BlockBlobClient can be created with a connection string", async () => {
+  it("BlockBlobClient can be created with a connection string", async function () {
     const newClient = new BlockBlobClient(
       getConnectionStringFromEnvironment(),
       containerName,
-      blobName
+      blobName,
     );
 
     assert.equal(
       newClient.containerName,
       containerName,
-      "Container name didn't match with the provided one."
+      "Container name didn't match with the provided one.",
     );
     assert.equal(newClient.name, blobName, "Blob name didn't match with the provided one.");
     const body: string = "randomstring";
@@ -89,7 +91,7 @@ describe("Emulator Tests", () => {
     assert.deepStrictEqual(await bodyToString(result, body.length), body);
   });
 
-  it("ContainerClient can be created with a connection string and a container name and an option bag", async () => {
+  it("ContainerClient can be created with a connection string and a container name and an option bag", async function () {
     const newClient = new ContainerClient(getConnectionStringFromEnvironment(), containerName, {
       retryOptions: {
         maxTries: 5,
@@ -101,7 +103,7 @@ describe("Emulator Tests", () => {
     assert.equal(
       newClient.containerName,
       containerName,
-      "Container name didn't match with the provided one."
+      "Container name didn't match with the provided one.",
     );
     assert.ok(result.etag!.length > 0);
     assert.ok(result.lastModified);
@@ -122,24 +124,24 @@ describe("Emulator Tests", () => {
     assert.equal(
       newClient.containerName,
       containerName,
-      "Container name didn't match with the provided one."
+      "Container name didn't match with the provided one.",
     );
     assert.ok(result.etag!.length > 0);
     assert.ok(result.lastModified);
     assert.ok(result.requestId);
   });
 
-  it("PageBlobClient can be created with a connection string", async () => {
+  it("PageBlobClient can be created with a connection string", async function () {
     const newClient = new PageBlobClient(
       getConnectionStringFromEnvironment(),
       containerName,
-      blobName
+      blobName,
     );
 
     assert.equal(
       newClient.containerName,
       containerName,
-      "Container name didn't match with the provided one."
+      "Container name didn't match with the provided one.",
     );
     assert.equal(newClient.name, blobName, "Blob name didn't match with the provided one.");
     await newClient.create(512);

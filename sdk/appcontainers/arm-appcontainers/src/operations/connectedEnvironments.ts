@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ContainerAppsAPIClient } from "../containerAppsAPIClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ConnectedEnvironment,
   ConnectedEnvironmentsListBySubscriptionNextOptionalParams,
@@ -34,7 +38,7 @@ import {
   ConnectedEnvironmentsCheckNameAvailabilityOptionalParams,
   ConnectedEnvironmentsCheckNameAvailabilityResponse,
   ConnectedEnvironmentsListBySubscriptionNextResponse,
-  ConnectedEnvironmentsListByResourceGroupNextResponse
+  ConnectedEnvironmentsListByResourceGroupNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -55,7 +59,7 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
    * @param options The options parameters.
    */
   public listBySubscription(
-    options?: ConnectedEnvironmentsListBySubscriptionOptionalParams
+    options?: ConnectedEnvironmentsListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<ConnectedEnvironment> {
     const iter = this.listBySubscriptionPagingAll(options);
     return {
@@ -70,13 +74,13 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listBySubscriptionPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listBySubscriptionPagingPage(
     options?: ConnectedEnvironmentsListBySubscriptionOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ConnectedEnvironment[]> {
     let result: ConnectedEnvironmentsListBySubscriptionResponse;
     let continuationToken = settings?.continuationToken;
@@ -97,7 +101,7 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
   }
 
   private async *listBySubscriptionPagingAll(
-    options?: ConnectedEnvironmentsListBySubscriptionOptionalParams
+    options?: ConnectedEnvironmentsListBySubscriptionOptionalParams,
   ): AsyncIterableIterator<ConnectedEnvironment> {
     for await (const page of this.listBySubscriptionPagingPage(options)) {
       yield* page;
@@ -111,7 +115,7 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: ConnectedEnvironmentsListByResourceGroupOptionalParams
+    options?: ConnectedEnvironmentsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<ConnectedEnvironment> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -128,16 +132,16 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
         return this.listByResourceGroupPagingPage(
           resourceGroupName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
     options?: ConnectedEnvironmentsListByResourceGroupOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ConnectedEnvironment[]> {
     let result: ConnectedEnvironmentsListByResourceGroupResponse;
     let continuationToken = settings?.continuationToken;
@@ -152,7 +156,7 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -163,11 +167,11 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: ConnectedEnvironmentsListByResourceGroupOptionalParams
+    options?: ConnectedEnvironmentsListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<ConnectedEnvironment> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -178,11 +182,11 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
    * @param options The options parameters.
    */
   private _listBySubscription(
-    options?: ConnectedEnvironmentsListBySubscriptionOptionalParams
+    options?: ConnectedEnvironmentsListBySubscriptionOptionalParams,
   ): Promise<ConnectedEnvironmentsListBySubscriptionResponse> {
     return this.client.sendOperationRequest(
       { options },
-      listBySubscriptionOperationSpec
+      listBySubscriptionOperationSpec,
     );
   }
 
@@ -193,11 +197,11 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: ConnectedEnvironmentsListByResourceGroupOptionalParams
+    options?: ConnectedEnvironmentsListByResourceGroupOptionalParams,
   ): Promise<ConnectedEnvironmentsListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -210,11 +214,11 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
   get(
     resourceGroupName: string,
     connectedEnvironmentName: string,
-    options?: ConnectedEnvironmentsGetOptionalParams
+    options?: ConnectedEnvironmentsGetOptionalParams,
   ): Promise<ConnectedEnvironmentsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, connectedEnvironmentName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -229,30 +233,29 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
     resourceGroupName: string,
     connectedEnvironmentName: string,
     environmentEnvelope: ConnectedEnvironment,
-    options?: ConnectedEnvironmentsCreateOrUpdateOptionalParams
+    options?: ConnectedEnvironmentsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ConnectedEnvironmentsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ConnectedEnvironmentsCreateOrUpdateResponse>,
       ConnectedEnvironmentsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<ConnectedEnvironmentsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -261,8 +264,8 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -270,24 +273,28 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         connectedEnvironmentName,
         environmentEnvelope,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      ConnectedEnvironmentsCreateOrUpdateResponse,
+      OperationState<ConnectedEnvironmentsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -304,13 +311,13 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
     resourceGroupName: string,
     connectedEnvironmentName: string,
     environmentEnvelope: ConnectedEnvironment,
-    options?: ConnectedEnvironmentsCreateOrUpdateOptionalParams
+    options?: ConnectedEnvironmentsCreateOrUpdateOptionalParams,
   ): Promise<ConnectedEnvironmentsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       connectedEnvironmentName,
       environmentEnvelope,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -324,25 +331,24 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
   async beginDelete(
     resourceGroupName: string,
     connectedEnvironmentName: string,
-    options?: ConnectedEnvironmentsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: ConnectedEnvironmentsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -351,8 +357,8 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -360,19 +366,20 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, connectedEnvironmentName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, connectedEnvironmentName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -387,12 +394,12 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
   async beginDeleteAndWait(
     resourceGroupName: string,
     connectedEnvironmentName: string,
-    options?: ConnectedEnvironmentsDeleteOptionalParams
+    options?: ConnectedEnvironmentsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       connectedEnvironmentName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -406,11 +413,11 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
   update(
     resourceGroupName: string,
     connectedEnvironmentName: string,
-    options?: ConnectedEnvironmentsUpdateOptionalParams
+    options?: ConnectedEnvironmentsUpdateOptionalParams,
   ): Promise<ConnectedEnvironmentsUpdateResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, connectedEnvironmentName, options },
-      updateOperationSpec
+      updateOperationSpec,
     );
   }
 
@@ -425,16 +432,16 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
     resourceGroupName: string,
     connectedEnvironmentName: string,
     checkNameAvailabilityRequest: CheckNameAvailabilityRequest,
-    options?: ConnectedEnvironmentsCheckNameAvailabilityOptionalParams
+    options?: ConnectedEnvironmentsCheckNameAvailabilityOptionalParams,
   ): Promise<ConnectedEnvironmentsCheckNameAvailabilityResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         connectedEnvironmentName,
         checkNameAvailabilityRequest,
-        options
+        options,
       },
-      checkNameAvailabilityOperationSpec
+      checkNameAvailabilityOperationSpec,
     );
   }
 
@@ -445,11 +452,11 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
    */
   private _listBySubscriptionNext(
     nextLink: string,
-    options?: ConnectedEnvironmentsListBySubscriptionNextOptionalParams
+    options?: ConnectedEnvironmentsListBySubscriptionNextOptionalParams,
   ): Promise<ConnectedEnvironmentsListBySubscriptionNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listBySubscriptionNextOperationSpec
+      listBySubscriptionNextOperationSpec,
     );
   }
 
@@ -462,11 +469,11 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: ConnectedEnvironmentsListByResourceGroupNextOptionalParams
+    options?: ConnectedEnvironmentsListByResourceGroupNextOptionalParams,
   ): Promise<ConnectedEnvironmentsListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 }
@@ -474,101 +481,96 @@ export class ConnectedEnvironmentsImpl implements ConnectedEnvironments {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.App/connectedEnvironments",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.App/connectedEnvironments",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ConnectedEnvironmentCollection
+      bodyMapper: Mappers.ConnectedEnvironmentCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ConnectedEnvironmentCollection
+      bodyMapper: Mappers.ConnectedEnvironmentCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.ConnectedEnvironment
+      bodyMapper: Mappers.DefaultErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.connectedEnvironmentName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ConnectedEnvironment,
+    },
+    default: {
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.connectedEnvironmentName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ConnectedEnvironment
+      bodyMapper: Mappers.ConnectedEnvironment,
     },
     201: {
-      bodyMapper: Mappers.ConnectedEnvironment
+      bodyMapper: Mappers.ConnectedEnvironment,
     },
     202: {
-      bodyMapper: Mappers.ConnectedEnvironment
+      bodyMapper: Mappers.ConnectedEnvironment,
     },
     204: {
-      bodyMapper: Mappers.ConnectedEnvironment
+      bodyMapper: Mappers.ConnectedEnvironment,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
-  requestBody: Parameters.environmentEnvelope1,
+  requestBody: Parameters.environmentEnvelope,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.connectedEnvironmentName
+    Parameters.connectedEnvironmentName,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -576,52 +578,50 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.connectedEnvironmentName
+    Parameters.connectedEnvironmentName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.ConnectedEnvironment
+      bodyMapper: Mappers.ConnectedEnvironment,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.connectedEnvironmentName
+    Parameters.connectedEnvironmentName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const checkNameAvailabilityOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}/checkNameAvailability",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.App/connectedEnvironments/{connectedEnvironmentName}/checkNameAvailability",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.CheckNameAvailabilityResponse
+      bodyMapper: Mappers.CheckNameAvailabilityResponse,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
   requestBody: Parameters.checkNameAvailabilityRequest,
   queryParameters: [Parameters.apiVersion],
@@ -629,50 +629,48 @@ const checkNameAvailabilityOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.connectedEnvironmentName
+    Parameters.connectedEnvironmentName,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listBySubscriptionNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ConnectedEnvironmentCollection
+      bodyMapper: Mappers.ConnectedEnvironmentCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ConnectedEnvironmentCollection
+      bodyMapper: Mappers.ConnectedEnvironmentCollection,
     },
     default: {
-      bodyMapper: Mappers.DefaultErrorResponse
-    }
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   Catalog,
   CatalogsListByDevCenterOptionalParams,
@@ -19,7 +19,13 @@ import {
   CatalogsUpdateOptionalParams,
   CatalogsUpdateResponse,
   CatalogsDeleteOptionalParams,
-  CatalogsSyncOptionalParams
+  CatalogsDeleteResponse,
+  CatalogsGetSyncErrorDetailsOptionalParams,
+  CatalogsGetSyncErrorDetailsResponse,
+  CatalogsSyncOptionalParams,
+  CatalogsSyncResponse,
+  CatalogsConnectOptionalParams,
+  CatalogsConnectResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -34,7 +40,7 @@ export interface Catalogs {
   listByDevCenter(
     resourceGroupName: string,
     devCenterName: string,
-    options?: CatalogsListByDevCenterOptionalParams
+    options?: CatalogsListByDevCenterOptionalParams,
   ): PagedAsyncIterableIterator<Catalog>;
   /**
    * Gets a catalog
@@ -47,7 +53,7 @@ export interface Catalogs {
     resourceGroupName: string,
     devCenterName: string,
     catalogName: string,
-    options?: CatalogsGetOptionalParams
+    options?: CatalogsGetOptionalParams,
   ): Promise<CatalogsGetResponse>;
   /**
    * Creates or updates a catalog.
@@ -62,10 +68,10 @@ export interface Catalogs {
     devCenterName: string,
     catalogName: string,
     body: Catalog,
-    options?: CatalogsCreateOrUpdateOptionalParams
+    options?: CatalogsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CatalogsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<CatalogsCreateOrUpdateResponse>,
       CatalogsCreateOrUpdateResponse
     >
   >;
@@ -82,7 +88,7 @@ export interface Catalogs {
     devCenterName: string,
     catalogName: string,
     body: Catalog,
-    options?: CatalogsCreateOrUpdateOptionalParams
+    options?: CatalogsCreateOrUpdateOptionalParams,
   ): Promise<CatalogsCreateOrUpdateResponse>;
   /**
    * Partially updates a catalog.
@@ -97,10 +103,10 @@ export interface Catalogs {
     devCenterName: string,
     catalogName: string,
     body: CatalogUpdate,
-    options?: CatalogsUpdateOptionalParams
+    options?: CatalogsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CatalogsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<CatalogsUpdateResponse>,
       CatalogsUpdateResponse
     >
   >;
@@ -117,7 +123,7 @@ export interface Catalogs {
     devCenterName: string,
     catalogName: string,
     body: CatalogUpdate,
-    options?: CatalogsUpdateOptionalParams
+    options?: CatalogsUpdateOptionalParams,
   ): Promise<CatalogsUpdateResponse>;
   /**
    * Deletes a catalog resource.
@@ -130,8 +136,13 @@ export interface Catalogs {
     resourceGroupName: string,
     devCenterName: string,
     catalogName: string,
-    options?: CatalogsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: CatalogsDeleteOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<CatalogsDeleteResponse>,
+      CatalogsDeleteResponse
+    >
+  >;
   /**
    * Deletes a catalog resource.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -143,8 +154,21 @@ export interface Catalogs {
     resourceGroupName: string,
     devCenterName: string,
     catalogName: string,
-    options?: CatalogsDeleteOptionalParams
-  ): Promise<void>;
+    options?: CatalogsDeleteOptionalParams,
+  ): Promise<CatalogsDeleteResponse>;
+  /**
+   * Gets catalog synchronization error details
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param devCenterName The name of the devcenter.
+   * @param catalogName The name of the Catalog.
+   * @param options The options parameters.
+   */
+  getSyncErrorDetails(
+    resourceGroupName: string,
+    devCenterName: string,
+    catalogName: string,
+    options?: CatalogsGetSyncErrorDetailsOptionalParams,
+  ): Promise<CatalogsGetSyncErrorDetailsResponse>;
   /**
    * Syncs templates for a template source.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -156,8 +180,10 @@ export interface Catalogs {
     resourceGroupName: string,
     devCenterName: string,
     catalogName: string,
-    options?: CatalogsSyncOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: CatalogsSyncOptionalParams,
+  ): Promise<
+    SimplePollerLike<OperationState<CatalogsSyncResponse>, CatalogsSyncResponse>
+  >;
   /**
    * Syncs templates for a template source.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -169,6 +195,37 @@ export interface Catalogs {
     resourceGroupName: string,
     devCenterName: string,
     catalogName: string,
-    options?: CatalogsSyncOptionalParams
-  ): Promise<void>;
+    options?: CatalogsSyncOptionalParams,
+  ): Promise<CatalogsSyncResponse>;
+  /**
+   * Connects a catalog to enable syncing.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param devCenterName The name of the devcenter.
+   * @param catalogName The name of the Catalog.
+   * @param options The options parameters.
+   */
+  beginConnect(
+    resourceGroupName: string,
+    devCenterName: string,
+    catalogName: string,
+    options?: CatalogsConnectOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<CatalogsConnectResponse>,
+      CatalogsConnectResponse
+    >
+  >;
+  /**
+   * Connects a catalog to enable syncing.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param devCenterName The name of the devcenter.
+   * @param catalogName The name of the Catalog.
+   * @param options The options parameters.
+   */
+  beginConnectAndWait(
+    resourceGroupName: string,
+    devCenterName: string,
+    catalogName: string,
+    options?: CatalogsConnectOptionalParams,
+  ): Promise<CatalogsConnectResponse>;
 }

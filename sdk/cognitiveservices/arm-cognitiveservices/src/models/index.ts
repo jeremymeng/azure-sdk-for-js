@@ -154,6 +154,18 @@ export interface AccountProperties {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly scheduledPurgeDate?: string;
+  /** The multiregion settings of Cognitive Services account. */
+  locations?: MultiRegionSettings;
+  /**
+   * The commitment plan associations of Cognitive Services account.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly commitmentPlanAssociations?: CommitmentPlanAssociation[];
+  /**
+   * The abuse penalty.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly abusePenalty?: AbusePenalty;
 }
 
 /** SkuCapability indicates the capability of a certain feature. */
@@ -334,6 +346,41 @@ export interface QuotaLimit {
   rules?: ThrottlingRule[];
 }
 
+/** The multiregion settings Cognitive Services account. */
+export interface MultiRegionSettings {
+  /** Multiregion routing methods. */
+  routingMethod?: RoutingMethods;
+  regions?: RegionSetting[];
+}
+
+/** The call rate limit Cognitive Services account. */
+export interface RegionSetting {
+  /** Name of the region. */
+  name?: string;
+  /** A value for priority or weighted routing methods. */
+  value?: number;
+  /** Maps the region to the regional custom subdomain. */
+  customsubdomain?: string;
+}
+
+/** The commitment plan association. */
+export interface CommitmentPlanAssociation {
+  /** The Azure resource id of the commitment plan. */
+  commitmentPlanId?: string;
+  /** The location of of the commitment plan. */
+  commitmentPlanLocation?: string;
+}
+
+/** The abuse penalty. */
+export interface AbusePenalty {
+  /** The action of AbusePenalty. */
+  action?: AbusePenaltyAction;
+  /** The percentage of rate limit. */
+  rateLimitPercentage?: number;
+  /** The datetime of expiration of the AbusePenalty. */
+  expiration?: Date;
+}
+
 /** Common error response for all Azure Resource Manager APIs to return error details for failed operations. (This also follows the OData error response format.). */
 export interface ErrorResponse {
   /** The error object. */
@@ -467,6 +514,8 @@ export interface AccountSku {
 
 /** The response to a list usage request. */
 export interface UsageListResult {
+  /** The link used to get the next page of Usages. */
+  nextLink?: string;
   /** The list of usages for Cognitive Service account. */
   value?: Usage[];
 }
@@ -511,13 +560,41 @@ export interface DeploymentModel {
   format?: string;
   /** Deployment model name. */
   name?: string;
-  /** Deployment model version. */
+  /** Optional. Deployment model version. If version is not specified, a default version will be assigned. The default version is different for different models and might change when there is new version available for a model. Default version for a model could be found from list models API. */
   version?: string;
+  /** Optional. Deployment model source ARM resource ID. */
+  source?: string;
   /**
    * The call rate limit Cognitive Services account.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly callRateLimit?: CallRateLimit;
+}
+
+/** Describes an available Cognitive Services Model SKU. */
+export interface ModelSku {
+  /** The name of the model SKU. */
+  name?: string;
+  /** The usage name of the model SKU. */
+  usageName?: string;
+  /** The datetime of deprecation of the model SKU. */
+  deprecationDate?: Date;
+  /** The capacity configuration. */
+  capacity?: CapacityConfig;
+  /** The list of rateLimit. */
+  rateLimits?: CallRateLimit[];
+}
+
+/** The capacity configuration. */
+export interface CapacityConfig {
+  /** The minimum capacity. */
+  minimum?: number;
+  /** The maximum capacity. */
+  maximum?: number;
+  /** The minimal incremental between allowed values for capacity. */
+  step?: number;
+  /** The default capacity. */
+  default?: number;
 }
 
 /** Cognitive Services account ModelDeprecationInfo. */
@@ -671,6 +748,24 @@ export interface CommitmentCost {
   overageMeterId?: string;
 }
 
+/** The list of cognitive services models. */
+export interface ModelListResult {
+  /** The link used to get the next page of Model. */
+  nextLink?: string;
+  /** Gets the list of Cognitive Services accounts Model and their properties. */
+  value?: Model[];
+}
+
+/** Cognitive Services Model. */
+export interface Model {
+  /** Model Metadata. */
+  model?: AccountModel;
+  /** The Kind of the Model. */
+  kind?: string;
+  /** The SKU of the Model. */
+  skuName?: string;
+}
+
 /** Check Domain availability parameter. */
 export interface CheckDomainAvailabilityParameter {
   /** The subdomain name to use. */
@@ -762,6 +857,10 @@ export interface DeploymentProperties {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly callRateLimit?: CallRateLimit;
+  /** NOTE: This property will not be serialized. It can only be populated by the server. */
+  readonly rateLimits?: ThrottlingRule[];
+  /** Deployment model version upgrade option. */
+  versionUpgradeOption?: DeploymentModelVersionUpgradeOption;
 }
 
 /** Properties of Cognitive Services account deployment model. */
@@ -790,6 +889,13 @@ export interface CommitmentPlanListResult {
 
 /** Properties of Cognitive Services account commitment plan. */
 export interface CommitmentPlanProperties {
+  /**
+   * Gets the status of the resource at the time the operation was called.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningState?: CommitmentPlanProvisioningState;
+  /** Commitment plan guid. */
+  commitmentPlanGuid?: string;
   /** Account hosting model. */
   hostingModel?: HostingModel;
   /** Commitment plan type. */
@@ -805,6 +911,11 @@ export interface CommitmentPlanProperties {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly last?: CommitmentPeriod;
+  /**
+   * The list of ProvisioningIssue.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly provisioningIssues?: string[];
 }
 
 /** Cognitive Services account commitment period. */
@@ -830,6 +941,23 @@ export interface CommitmentPeriod {
   readonly endDate?: string;
 }
 
+/** The object being used to update tags of a resource, in general used for PATCH operations. */
+export interface PatchResourceTags {
+  /** Resource tags. */
+  tags?: { [propertyName: string]: string };
+}
+
+/** The list of cognitive services Commitment Plan Account Association operation response. */
+export interface CommitmentPlanAccountAssociationListResult {
+  /** The link used to get the next page of Commitment Plan Account Association. */
+  nextLink?: string;
+  /**
+   * Gets the list of Cognitive Services Commitment Plan Account Association and their properties.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly value?: CommitmentPlanAccountAssociation[];
+}
+
 /** The resource model definition for an Azure Resource Manager resource with an etag. */
 export interface AzureEntityResource extends Resource {
   /**
@@ -852,17 +980,31 @@ export interface ProxyResource extends Resource {}
 export interface AccountModel extends DeploymentModel {
   /** Base Model Identifier. */
   baseModel?: DeploymentModel;
+  /** If the model is default version. */
+  isDefaultVersion?: boolean;
+  /** The list of Model Sku. */
+  skus?: ModelSku[];
   /** The max capacity. */
   maxCapacity?: number;
   /** The capabilities. */
   capabilities?: { [propertyName: string]: string };
+  /** The capabilities for finetune models. */
+  finetuneCapabilities?: { [propertyName: string]: string };
   /** Cognitive Services account ModelDeprecationInfo. */
   deprecation?: ModelDeprecationInfo;
+  /** Model lifecycle status. */
+  lifecycleStatus?: ModelLifecycleStatus;
   /**
    * Metadata pertaining to creation and last modification of the resource.
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly systemData?: SystemData;
+}
+
+/** The object being used to update tags and sku of a resource, in general used for PATCH operations. */
+export interface PatchResourceTagsAndSku extends PatchResourceTags {
+  /** The resource model definition representing SKU */
+  sku?: Sku;
 }
 
 /** The Private Endpoint Connection resource. */
@@ -901,6 +1043,8 @@ export interface Account extends AzureEntityResource {
 
 /** Cognitive Services account deployment. */
 export interface Deployment extends ProxyResource {
+  /** The resource model definition representing SKU */
+  sku?: Sku;
   /**
    * Metadata pertaining to creation and last modification of the resource.
    * NOTE: This property will not be serialized. It can only be populated by the server.
@@ -927,8 +1071,47 @@ export interface CommitmentPlan extends ProxyResource {
    * NOTE: This property will not be serialized. It can only be populated by the server.
    */
   readonly etag?: string;
+  /** The Kind of the resource. */
+  kind?: string;
+  /** The resource model definition representing SKU */
+  sku?: Sku;
+  /** Resource tags. */
+  tags?: { [propertyName: string]: string };
+  /** The geo-location where the resource lives */
+  location?: string;
   /** Properties of Cognitive Services account commitment plan. */
   properties?: CommitmentPlanProperties;
+}
+
+/** The commitment plan association. */
+export interface CommitmentPlanAccountAssociation extends ProxyResource {
+  /**
+   * Metadata pertaining to creation and last modification of the resource.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly systemData?: SystemData;
+  /**
+   * Resource Etag.
+   * NOTE: This property will not be serialized. It can only be populated by the server.
+   */
+  readonly etag?: string;
+  /** The Azure resource id of the account. */
+  accountId?: string;
+}
+
+/** Defines headers for CommitmentPlans_updatePlan operation. */
+export interface CommitmentPlansUpdatePlanHeaders {
+  location?: string;
+}
+
+/** Defines headers for CommitmentPlans_deletePlan operation. */
+export interface CommitmentPlansDeletePlanHeaders {
+  location?: string;
+}
+
+/** Defines headers for CommitmentPlans_deleteAssociation operation. */
+export interface CommitmentPlansDeleteAssociationHeaders {
+  location?: string;
 }
 
 /** Known values of {@link SkuTier} that the service accepts. */
@@ -1114,6 +1297,45 @@ export enum KnownPublicNetworkAccess {
  */
 export type PublicNetworkAccess = string;
 
+/** Known values of {@link RoutingMethods} that the service accepts. */
+export enum KnownRoutingMethods {
+  /** Priority */
+  Priority = "Priority",
+  /** Weighted */
+  Weighted = "Weighted",
+  /** Performance */
+  Performance = "Performance"
+}
+
+/**
+ * Defines values for RoutingMethods. \
+ * {@link KnownRoutingMethods} can be used interchangeably with RoutingMethods,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Priority** \
+ * **Weighted** \
+ * **Performance**
+ */
+export type RoutingMethods = string;
+
+/** Known values of {@link AbusePenaltyAction} that the service accepts. */
+export enum KnownAbusePenaltyAction {
+  /** Throttle */
+  Throttle = "Throttle",
+  /** Block */
+  Block = "Block"
+}
+
+/**
+ * Defines values for AbusePenaltyAction. \
+ * {@link KnownAbusePenaltyAction} can be used interchangeably with AbusePenaltyAction,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Throttle** \
+ * **Block**
+ */
+export type AbusePenaltyAction = string;
+
 /** Known values of {@link ResourceSkuRestrictionsReasonCode} that the service accepts. */
 export enum KnownResourceSkuRestrictionsReasonCode {
   /** QuotaId */
@@ -1189,6 +1411,24 @@ export enum KnownQuotaUsageStatus {
  */
 export type QuotaUsageStatus = string;
 
+/** Known values of {@link ModelLifecycleStatus} that the service accepts. */
+export enum KnownModelLifecycleStatus {
+  /** GenerallyAvailable */
+  GenerallyAvailable = "GenerallyAvailable",
+  /** Preview */
+  Preview = "Preview"
+}
+
+/**
+ * Defines values for ModelLifecycleStatus. \
+ * {@link KnownModelLifecycleStatus} can be used interchangeably with ModelLifecycleStatus,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **GenerallyAvailable** \
+ * **Preview**
+ */
+export type ModelLifecycleStatus = string;
+
 /** Known values of {@link Origin} that the service accepts. */
 export enum KnownOrigin {
   /** User */
@@ -1232,7 +1472,9 @@ export enum KnownHostingModel {
   /** ConnectedContainer */
   ConnectedContainer = "ConnectedContainer",
   /** DisconnectedContainer */
-  DisconnectedContainer = "DisconnectedContainer"
+  DisconnectedContainer = "DisconnectedContainer",
+  /** ProvisionedWeb */
+  ProvisionedWeb = "ProvisionedWeb"
 }
 
 /**
@@ -1242,7 +1484,8 @@ export enum KnownHostingModel {
  * ### Known values supported by the service
  * **Web** \
  * **ConnectedContainer** \
- * **DisconnectedContainer**
+ * **DisconnectedContainer** \
+ * **ProvisionedWeb**
  */
 export type HostingModel = string;
 
@@ -1259,7 +1502,11 @@ export enum KnownDeploymentProvisioningState {
   /** Failed */
   Failed = "Failed",
   /** Succeeded */
-  Succeeded = "Succeeded"
+  Succeeded = "Succeeded",
+  /** Disabled */
+  Disabled = "Disabled",
+  /** Canceled */
+  Canceled = "Canceled"
 }
 
 /**
@@ -1272,7 +1519,9 @@ export enum KnownDeploymentProvisioningState {
  * **Deleting** \
  * **Moving** \
  * **Failed** \
- * **Succeeded**
+ * **Succeeded** \
+ * **Disabled** \
+ * **Canceled**
  */
 export type DeploymentProvisioningState = string;
 
@@ -1293,6 +1542,60 @@ export enum KnownDeploymentScaleType {
  * **Manual**
  */
 export type DeploymentScaleType = string;
+
+/** Known values of {@link DeploymentModelVersionUpgradeOption} that the service accepts. */
+export enum KnownDeploymentModelVersionUpgradeOption {
+  /** OnceNewDefaultVersionAvailable */
+  OnceNewDefaultVersionAvailable = "OnceNewDefaultVersionAvailable",
+  /** OnceCurrentVersionExpired */
+  OnceCurrentVersionExpired = "OnceCurrentVersionExpired",
+  /** NoAutoUpgrade */
+  NoAutoUpgrade = "NoAutoUpgrade"
+}
+
+/**
+ * Defines values for DeploymentModelVersionUpgradeOption. \
+ * {@link KnownDeploymentModelVersionUpgradeOption} can be used interchangeably with DeploymentModelVersionUpgradeOption,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **OnceNewDefaultVersionAvailable** \
+ * **OnceCurrentVersionExpired** \
+ * **NoAutoUpgrade**
+ */
+export type DeploymentModelVersionUpgradeOption = string;
+
+/** Known values of {@link CommitmentPlanProvisioningState} that the service accepts. */
+export enum KnownCommitmentPlanProvisioningState {
+  /** Accepted */
+  Accepted = "Accepted",
+  /** Creating */
+  Creating = "Creating",
+  /** Deleting */
+  Deleting = "Deleting",
+  /** Moving */
+  Moving = "Moving",
+  /** Failed */
+  Failed = "Failed",
+  /** Succeeded */
+  Succeeded = "Succeeded",
+  /** Canceled */
+  Canceled = "Canceled"
+}
+
+/**
+ * Defines values for CommitmentPlanProvisioningState. \
+ * {@link KnownCommitmentPlanProvisioningState} can be used interchangeably with CommitmentPlanProvisioningState,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Accepted** \
+ * **Creating** \
+ * **Deleting** \
+ * **Moving** \
+ * **Failed** \
+ * **Succeeded** \
+ * **Canceled**
+ */
+export type CommitmentPlanProvisioningState = string;
 /** Defines values for ResourceIdentityType. */
 export type ResourceIdentityType =
   | "None"
@@ -1462,6 +1765,22 @@ export interface ResourceSkusListNextOptionalParams
 export type ResourceSkusListNextResponse = ResourceSkuListResult;
 
 /** Optional parameters. */
+export interface UsagesListOptionalParams extends coreClient.OperationOptions {
+  /** An OData filter expression that describes a subset of usages to return. The supported parameter is name.value (name of the metric, can have an or of multiple names). */
+  filter?: string;
+}
+
+/** Contains response data for the list operation. */
+export type UsagesListResponse = UsageListResult;
+
+/** Optional parameters. */
+export interface UsagesListNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listNext operation. */
+export type UsagesListNextResponse = UsageListResult;
+
+/** Optional parameters. */
 export interface OperationsListOptionalParams
   extends coreClient.OperationOptions {}
 
@@ -1505,6 +1824,19 @@ export interface CommitmentTiersListNextOptionalParams
 
 /** Contains response data for the listNext operation. */
 export type CommitmentTiersListNextResponse = CommitmentTierListResult;
+
+/** Optional parameters. */
+export interface ModelsListOptionalParams extends coreClient.OperationOptions {}
+
+/** Contains response data for the list operation. */
+export type ModelsListResponse = ModelListResult;
+
+/** Optional parameters. */
+export interface ModelsListNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listNext operation. */
+export type ModelsListNextResponse = ModelListResult;
 
 /** Optional parameters. */
 export interface PrivateEndpointConnectionsListOptionalParams
@@ -1621,11 +1953,121 @@ export interface CommitmentPlansDeleteOptionalParams
 }
 
 /** Optional parameters. */
+export interface CommitmentPlansCreateOrUpdatePlanOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the createOrUpdatePlan operation. */
+export type CommitmentPlansCreateOrUpdatePlanResponse = CommitmentPlan;
+
+/** Optional parameters. */
+export interface CommitmentPlansUpdatePlanOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the updatePlan operation. */
+export type CommitmentPlansUpdatePlanResponse = CommitmentPlan;
+
+/** Optional parameters. */
+export interface CommitmentPlansDeletePlanOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Optional parameters. */
+export interface CommitmentPlansGetPlanOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the getPlan operation. */
+export type CommitmentPlansGetPlanResponse = CommitmentPlan;
+
+/** Optional parameters. */
+export interface CommitmentPlansListPlansByResourceGroupOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listPlansByResourceGroup operation. */
+export type CommitmentPlansListPlansByResourceGroupResponse = CommitmentPlanListResult;
+
+/** Optional parameters. */
+export interface CommitmentPlansListPlansBySubscriptionOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listPlansBySubscription operation. */
+export type CommitmentPlansListPlansBySubscriptionResponse = CommitmentPlanListResult;
+
+/** Optional parameters. */
+export interface CommitmentPlansListAssociationsOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listAssociations operation. */
+export type CommitmentPlansListAssociationsResponse = CommitmentPlanAccountAssociationListResult;
+
+/** Optional parameters. */
+export interface CommitmentPlansGetAssociationOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the getAssociation operation. */
+export type CommitmentPlansGetAssociationResponse = CommitmentPlanAccountAssociation;
+
+/** Optional parameters. */
+export interface CommitmentPlansCreateOrUpdateAssociationOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Contains response data for the createOrUpdateAssociation operation. */
+export type CommitmentPlansCreateOrUpdateAssociationResponse = CommitmentPlanAccountAssociation;
+
+/** Optional parameters. */
+export interface CommitmentPlansDeleteAssociationOptionalParams
+  extends coreClient.OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
+  resumeFrom?: string;
+}
+
+/** Optional parameters. */
 export interface CommitmentPlansListNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the listNext operation. */
 export type CommitmentPlansListNextResponse = CommitmentPlanListResult;
+
+/** Optional parameters. */
+export interface CommitmentPlansListPlansByResourceGroupNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listPlansByResourceGroupNext operation. */
+export type CommitmentPlansListPlansByResourceGroupNextResponse = CommitmentPlanListResult;
+
+/** Optional parameters. */
+export interface CommitmentPlansListPlansBySubscriptionNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listPlansBySubscriptionNext operation. */
+export type CommitmentPlansListPlansBySubscriptionNextResponse = CommitmentPlanListResult;
+
+/** Optional parameters. */
+export interface CommitmentPlansListAssociationsNextOptionalParams
+  extends coreClient.OperationOptions {}
+
+/** Contains response data for the listAssociationsNext operation. */
+export type CommitmentPlansListAssociationsNextResponse = CommitmentPlanAccountAssociationListResult;
 
 /** Optional parameters. */
 export interface CognitiveServicesManagementClientOptionalParams

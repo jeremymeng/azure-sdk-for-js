@@ -1,28 +1,34 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import { describe, it, assert } from "vitest";
+import type {
   CompositeMapper,
   DictionaryMapper,
   FullOperationResponse,
   Mapper,
-  MapperTypeNames,
   OperationArguments,
   OperationQueryParameter,
   OperationRequest,
   OperationSpec,
   ParameterPath,
   QueryCollectionFormat,
+} from "../src/index.js";
+import {
+  MapperTypeNames,
   ServiceClient,
   createSerializer,
   serializationPolicy,
-} from "../src";
-import {
+} from "../src/index.js";
+import type {
   HttpClient,
   PipelinePolicy,
   PipelineRequest,
+  PipelineResponse,
   RestError,
   SendRequest,
+} from "@azure/core-rest-pipeline";
+import {
   createEmptyPipeline,
   createHttpHeaders,
   createPipelineRequest,
@@ -30,12 +36,11 @@ import {
 import {
   getOperationArgumentValueFromParameter,
   getOperationRequestInfo,
-} from "../src/operationHelpers";
-import { TokenCredential } from "@azure/core-auth";
-import { assert } from "chai";
-import { assertServiceClientResponse } from "./utils/serviceClient";
-import { deserializationPolicy } from "../src/deserializationPolicy";
-import { getCachedDefaultHttpClient } from "../src/httpClientCache";
+} from "../src/operationHelpers.js";
+import type { TokenCredential } from "@azure/core-auth";
+import { assertServiceClientResponse } from "./utils/serviceClient.js";
+import { deserializationPolicy } from "../src/deserializationPolicy.js";
+import { getCachedDefaultHttpClient } from "../src/httpClientCache.js";
 
 describe("ServiceClient", function () {
   describe("Auth scopes", () => {
@@ -81,32 +86,6 @@ describe("ServiceClient", function () {
       },
     };
 
-    it("should throw if scopes contain an invalid url", async function () {
-      const credential: TokenCredential = {
-        getToken: async (_scopes) => {
-          return { token: "testToken", expiresOnTimestamp: 11111 };
-        },
-      };
-      try {
-        let request: OperationRequest;
-        const client = new ServiceClient({
-          httpClient: {
-            sendRequest: (req) => {
-              request = req;
-              return Promise.resolve({ request, status: 200, headers: createHttpHeaders() });
-            },
-          },
-          credential,
-          credentialScopes: ["https://microsoft.com", "lalala"],
-        });
-
-        await client.sendOperationRequest(testOperationArgs, testOperationSpec);
-        assert.fail();
-      } catch (error: any) {
-        assert.include(error.message, `Invalid URL`);
-      }
-    });
-
     it("should throw is no scope or endpoint are defined", async function () {
       const credential: TokenCredential = {
         getToken: async (_scopes) => {
@@ -130,7 +109,7 @@ describe("ServiceClient", function () {
       } catch (error: any) {
         assert.equal(
           error.message,
-          `When using credentials, the ServiceClientOptions must contain either a endpoint or a credentialScopes. Unable to create a bearerTokenAuthenticationPolicy`
+          `When using credentials, the ServiceClientOptions must contain either a endpoint or a credentialScopes. Unable to create a bearerTokenAuthenticationPolicy`,
         );
       }
     });
@@ -278,7 +257,7 @@ describe("ServiceClient", function () {
         responses: {
           200: {},
         },
-      }
+      },
     );
 
     assert(request!);
@@ -313,7 +292,7 @@ describe("ServiceClient", function () {
         responses: {
           200: {},
         },
-      }
+      },
     );
 
     assert(request!);
@@ -367,7 +346,7 @@ describe("ServiceClient", function () {
           responses: {
             200: {},
           },
-        }
+        },
       );
     } catch (e: any) {
       caughtError = e;
@@ -467,7 +446,7 @@ describe("ServiceClient", function () {
             },
           },
         },
-      }
+      },
     );
 
     assert.strictEqual(rawResponse?.status, 200);
@@ -492,7 +471,7 @@ describe("ServiceClient", function () {
           },
         },
       },
-      null
+      null,
     );
   });
 
@@ -514,7 +493,7 @@ describe("ServiceClient", function () {
           },
         },
       },
-      []
+      [],
     );
   });
 
@@ -536,7 +515,7 @@ describe("ServiceClient", function () {
           },
         },
       },
-      null
+      null,
     );
   });
 
@@ -558,7 +537,7 @@ describe("ServiceClient", function () {
           },
         },
       },
-      {}
+      {},
     );
   });
 
@@ -582,7 +561,7 @@ describe("ServiceClient", function () {
           },
         },
       },
-      null
+      null,
     );
   });
 
@@ -606,7 +585,7 @@ describe("ServiceClient", function () {
           },
         },
       },
-      {}
+      {},
     );
   });
 
@@ -625,7 +604,7 @@ describe("ServiceClient", function () {
       },
       {
         body: null,
-      }
+      },
     );
   });
 
@@ -644,7 +623,7 @@ describe("ServiceClient", function () {
       },
       {
         body: undefined,
-      }
+      },
     );
   });
 
@@ -664,7 +643,7 @@ describe("ServiceClient", function () {
       },
       {
         body: undefined,
-      }
+      },
     );
   });
 
@@ -782,7 +761,7 @@ describe("ServiceClient", function () {
           mapper: parameterMapper,
         },
 
-        serviceClient
+        serviceClient,
       );
       assert.strictEqual(parameterValue, 21);
     });
@@ -807,7 +786,7 @@ describe("ServiceClient", function () {
           mapper: parameterMapper,
         },
 
-        serviceClient
+        serviceClient,
       );
       assert.strictEqual(parameterValue, 22);
     });
@@ -855,7 +834,7 @@ describe("ServiceClient", function () {
           parameterPath,
           mapper: parameterMapper,
         },
-        serviceClient
+        serviceClient,
       );
       assert.strictEqual(parameterValue, 4);
     });
@@ -877,7 +856,7 @@ describe("ServiceClient", function () {
           parameterPath,
           mapper: parameterMapper,
         },
-        serviceClient
+        serviceClient,
       );
       assert.strictEqual(parameterValue, undefined);
     });
@@ -900,7 +879,7 @@ describe("ServiceClient", function () {
           parameterPath,
           mapper: parameterMapper,
         },
-        serviceClient
+        serviceClient,
       );
       assert.strictEqual(parameterValue, 21);
     });
@@ -1020,7 +999,7 @@ describe("ServiceClient", function () {
           parameterPath,
           mapper: parameterMapper,
         },
-        serviceClient
+        serviceClient,
       );
 
       assert.strictEqual(parameterValue, 5);
@@ -1255,7 +1234,7 @@ describe("ServiceClient", function () {
     });
     await client.sendOperationRequest(
       { options: { requestOptions: { allowInsecureConnection: true } } },
-      operationSpec
+      operationSpec,
     );
   });
 
@@ -1362,7 +1341,7 @@ describe("ServiceClient", function () {
         {
           options: undefined,
         },
-        operationSpec
+        operationSpec,
       );
       assert.fail("Expected client to throw");
     } catch (error: any) {
@@ -1446,7 +1425,7 @@ describe("ServiceClient", function () {
         {
           options: undefined,
         },
-        operationSpec
+        operationSpec,
       );
       assert.fail("Expected client to throw");
     } catch (error: any) {
@@ -1515,7 +1494,8 @@ describe("ServiceClient", function () {
 
   it("should insert policies in the correct pipeline position", async function () {
     const pipeline = createEmptyPipeline();
-    const sendRequest = (request: PipelineRequest, next: SendRequest) => next(request);
+    const sendRequest = (request: PipelineRequest, next: SendRequest): Promise<PipelineResponse> =>
+      next(request);
     const retryPolicy: PipelinePolicy = {
       name: "retry",
       sendRequest,
@@ -1548,7 +1528,7 @@ async function testSendOperationRequest(
   queryValue: any,
   queryCollectionFormat: QueryCollectionFormat,
   skipEncodingParameter: boolean,
-  expected: string
+  expected: string,
 ): Promise<void> {
   let request: OperationRequest;
   const client = new ServiceClient({
@@ -1591,7 +1571,7 @@ async function testSendOperationRequest(
       responses: {
         200: {},
       },
-    }
+    },
   );
 
   assert(request!);

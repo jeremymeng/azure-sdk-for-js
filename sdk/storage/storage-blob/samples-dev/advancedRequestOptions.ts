@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary use advanced HTTP pipeline and request options for several methods
@@ -8,7 +8,6 @@
 
 import * as fs from "fs";
 
-import { AbortController } from "@azure/abort-controller";
 import { AnonymousCredential, BlobServiceClient, newPipeline } from "@azure/storage-blob";
 
 // Load the .env file if it exists
@@ -40,7 +39,7 @@ async function main() {
 
   const blobServiceClient = new BlobServiceClient(
     `https://${account}.blob.core.windows.net${accountSas}`,
-    pipeline
+    pipeline,
   );
 
   // Create a container
@@ -50,7 +49,7 @@ async function main() {
     await containerClient.create();
   } catch (err: any) {
     console.log(
-      `Creating a container failed, requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`
+      `Creating a container failed, requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`,
     );
   }
 
@@ -69,7 +68,7 @@ async function main() {
     console.log("Successfully uploaded file:", blockBlobClient.name);
   } catch (err: any) {
     console.log(
-      `uploadFile failed, requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`
+      `uploadFile failed, requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`,
     );
   }
 
@@ -77,13 +76,13 @@ async function main() {
   // BlockBlobClient.uploadStream() is only available in Node.js
   try {
     await blockBlobClient.uploadStream(fs.createReadStream(localFilePath), 4 * 1024 * 1024, 20, {
-      abortSignal: AbortController.timeout(30 * 60 * 1000), // Abort uploading with timeout in 30mins
+      abortSignal: AbortSignal.timeout(30 * 60 * 1000), // Abort uploading with timeout in 30mins
       onProgress: (ev) => console.log(ev),
     });
     console.log("uploadStream succeeds");
   } catch (err: any) {
     console.log(
-      `uploadStream failed, requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`
+      `uploadStream failed, requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`,
     );
   }
 
@@ -104,7 +103,7 @@ async function main() {
   const buffer = Buffer.alloc(fileSize);
   try {
     await blockBlobClient.downloadToBuffer(buffer, 0, undefined, {
-      abortSignal: AbortController.timeout(30 * 60 * 1000), // Abort uploading with timeout in 30mins
+      abortSignal: AbortSignal.timeout(30 * 60 * 1000), // Abort uploading with timeout in 30mins
       blockSize: 4 * 1024 * 1024, // 4MB block size
       concurrency: 20, // 20 concurrency
       onProgress: (ev) => console.log(ev),
@@ -112,7 +111,7 @@ async function main() {
     console.log("downloadToBuffer succeeds");
   } catch (err: any) {
     console.log(
-      `downloadToBuffer failed, requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`
+      `downloadToBuffer failed, requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`,
     );
   }
 
@@ -125,7 +124,7 @@ async function main() {
   } catch (err: any) {
     // BlobArchived	Conflict (409)	This operation is not permitted on an archived blob.
     console.log(
-      `requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`
+      `requestId - ${err.request.requestId}, statusCode - ${err.statusCode}, errorCode - ${err.details.errorCode}`,
     );
     console.log(`error message - ${err.details.message}\n`);
   }

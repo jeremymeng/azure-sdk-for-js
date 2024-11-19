@@ -14,8 +14,12 @@ import {
   SendRequest
 } from "@azure/core-rest-pipeline";
 import * as coreAuth from "@azure/core-auth";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "./lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller
+} from "@azure/core-lro";
+import { createLroSpec } from "./lroImpl";
 import {
   ApiImpl,
   ApiRevisionImpl,
@@ -23,6 +27,8 @@ import {
   ApiOperationImpl,
   ApiOperationPolicyImpl,
   TagImpl,
+  GraphQLApiResolverImpl,
+  GraphQLApiResolverPolicyImpl,
   ApiProductImpl,
   ApiPolicyImpl,
   ApiSchemaImpl,
@@ -32,9 +38,15 @@ import {
   ApiIssueAttachmentImpl,
   ApiTagDescriptionImpl,
   OperationOperationsImpl,
+  ApiWikiImpl,
+  ApiWikisImpl,
   ApiExportImpl,
   ApiVersionSetImpl,
   AuthorizationServerImpl,
+  AuthorizationProviderImpl,
+  AuthorizationImpl,
+  AuthorizationLoginLinksImpl,
+  AuthorizationAccessPolicyImpl,
   BackendImpl,
   CacheImpl,
   CertificateImpl,
@@ -64,6 +76,8 @@ import {
   OutboundNetworkDependenciesEndpointsImpl,
   PolicyImpl,
   PolicyDescriptionImpl,
+  PolicyFragmentImpl,
+  PortalConfigImpl,
   PortalRevisionImpl,
   PortalSettingsImpl,
   SignInSettingsImpl,
@@ -75,10 +89,13 @@ import {
   ProductGroupImpl,
   ProductSubscriptionsImpl,
   ProductPolicyImpl,
+  ProductWikiImpl,
+  ProductWikisImpl,
   QuotaByCounterKeysImpl,
   QuotaByPeriodKeysImpl,
   RegionImpl,
   ReportsImpl,
+  GlobalSchemaImpl,
   TenantSettingsImpl,
   ApiManagementSkusImpl,
   SubscriptionImpl,
@@ -90,7 +107,8 @@ import {
   UserGroupImpl,
   UserSubscriptionImpl,
   UserIdentitiesImpl,
-  UserConfirmationPasswordImpl
+  UserConfirmationPasswordImpl,
+  DocumentationImpl
 } from "./operations";
 import {
   Api,
@@ -99,6 +117,8 @@ import {
   ApiOperation,
   ApiOperationPolicy,
   Tag,
+  GraphQLApiResolver,
+  GraphQLApiResolverPolicy,
   ApiProduct,
   ApiPolicy,
   ApiSchema,
@@ -108,9 +128,15 @@ import {
   ApiIssueAttachment,
   ApiTagDescription,
   OperationOperations,
+  ApiWiki,
+  ApiWikis,
   ApiExport,
   ApiVersionSet,
   AuthorizationServer,
+  AuthorizationProvider,
+  Authorization,
+  AuthorizationLoginLinks,
+  AuthorizationAccessPolicy,
   Backend,
   Cache,
   Certificate,
@@ -140,6 +166,8 @@ import {
   OutboundNetworkDependenciesEndpoints,
   Policy,
   PolicyDescription,
+  PolicyFragment,
+  PortalConfig,
   PortalRevision,
   PortalSettings,
   SignInSettings,
@@ -151,10 +179,13 @@ import {
   ProductGroup,
   ProductSubscriptions,
   ProductPolicy,
+  ProductWiki,
+  ProductWikis,
   QuotaByCounterKeys,
   QuotaByPeriodKeys,
   Region,
   Reports,
+  GlobalSchema,
   TenantSettings,
   ApiManagementSkus,
   Subscription,
@@ -166,7 +197,8 @@ import {
   UserGroup,
   UserSubscription,
   UserIdentities,
-  UserConfirmationPassword
+  UserConfirmationPassword,
+  Documentation
 } from "./operationsInterfaces";
 import * as Parameters from "./models/parameters";
 import * as Mappers from "./models/mappers";
@@ -180,25 +212,38 @@ import {
 export class ApiManagementClient extends coreClient.ServiceClient {
   $host: string;
   apiVersion: string;
-  subscriptionId: string;
+  subscriptionId?: string;
 
   /**
    * Initializes a new instance of the ApiManagementClient class.
    * @param credentials Subscription credentials which uniquely identify client subscription.
-   * @param subscriptionId Subscription credentials which uniquely identify Microsoft Azure subscription.
-   *                       The subscription ID forms part of the URI for every service call.
+   * @param subscriptionId The ID of the target subscription.
    * @param options The parameter options
    */
   constructor(
     credentials: coreAuth.TokenCredential,
     subscriptionId: string,
     options?: ApiManagementClientOptionalParams
+  );
+  constructor(
+    credentials: coreAuth.TokenCredential,
+    options?: ApiManagementClientOptionalParams
+  );
+  constructor(
+    credentials: coreAuth.TokenCredential,
+    subscriptionIdOrOptions?: ApiManagementClientOptionalParams | string,
+    options?: ApiManagementClientOptionalParams
   ) {
     if (credentials === undefined) {
       throw new Error("'credentials' cannot be null");
     }
-    if (subscriptionId === undefined) {
-      throw new Error("'subscriptionId' cannot be null");
+
+    let subscriptionId: string | undefined;
+
+    if (typeof subscriptionIdOrOptions === "string") {
+      subscriptionId = subscriptionIdOrOptions;
+    } else if (typeof subscriptionIdOrOptions === "object") {
+      options = subscriptionIdOrOptions;
     }
 
     // Initializing default values for options
@@ -210,7 +255,7 @@ export class ApiManagementClient extends coreClient.ServiceClient {
       credential: credentials
     };
 
-    const packageDetails = `azsdk-js-arm-apimanagement/8.1.3`;
+    const packageDetails = `azsdk-js-arm-apimanagement/9.1.0`;
     const userAgentPrefix =
       options.userAgentOptions && options.userAgentOptions.userAgentPrefix
         ? `${options.userAgentOptions.userAgentPrefix} ${packageDetails}`
@@ -263,13 +308,15 @@ export class ApiManagementClient extends coreClient.ServiceClient {
 
     // Assigning values to Constant parameters
     this.$host = options.$host || "https://management.azure.com";
-    this.apiVersion = options.apiVersion || "2021-08-01";
+    this.apiVersion = options.apiVersion || "2022-08-01";
     this.api = new ApiImpl(this);
     this.apiRevision = new ApiRevisionImpl(this);
     this.apiRelease = new ApiReleaseImpl(this);
     this.apiOperation = new ApiOperationImpl(this);
     this.apiOperationPolicy = new ApiOperationPolicyImpl(this);
     this.tag = new TagImpl(this);
+    this.graphQLApiResolver = new GraphQLApiResolverImpl(this);
+    this.graphQLApiResolverPolicy = new GraphQLApiResolverPolicyImpl(this);
     this.apiProduct = new ApiProductImpl(this);
     this.apiPolicy = new ApiPolicyImpl(this);
     this.apiSchema = new ApiSchemaImpl(this);
@@ -279,9 +326,15 @@ export class ApiManagementClient extends coreClient.ServiceClient {
     this.apiIssueAttachment = new ApiIssueAttachmentImpl(this);
     this.apiTagDescription = new ApiTagDescriptionImpl(this);
     this.operationOperations = new OperationOperationsImpl(this);
+    this.apiWiki = new ApiWikiImpl(this);
+    this.apiWikis = new ApiWikisImpl(this);
     this.apiExport = new ApiExportImpl(this);
     this.apiVersionSet = new ApiVersionSetImpl(this);
     this.authorizationServer = new AuthorizationServerImpl(this);
+    this.authorizationProvider = new AuthorizationProviderImpl(this);
+    this.authorization = new AuthorizationImpl(this);
+    this.authorizationLoginLinks = new AuthorizationLoginLinksImpl(this);
+    this.authorizationAccessPolicy = new AuthorizationAccessPolicyImpl(this);
     this.backend = new BackendImpl(this);
     this.cache = new CacheImpl(this);
     this.certificate = new CertificateImpl(this);
@@ -317,6 +370,8 @@ export class ApiManagementClient extends coreClient.ServiceClient {
     );
     this.policy = new PolicyImpl(this);
     this.policyDescription = new PolicyDescriptionImpl(this);
+    this.policyFragment = new PolicyFragmentImpl(this);
+    this.portalConfig = new PortalConfigImpl(this);
     this.portalRevision = new PortalRevisionImpl(this);
     this.portalSettings = new PortalSettingsImpl(this);
     this.signInSettings = new SignInSettingsImpl(this);
@@ -330,10 +385,13 @@ export class ApiManagementClient extends coreClient.ServiceClient {
     this.productGroup = new ProductGroupImpl(this);
     this.productSubscriptions = new ProductSubscriptionsImpl(this);
     this.productPolicy = new ProductPolicyImpl(this);
+    this.productWiki = new ProductWikiImpl(this);
+    this.productWikis = new ProductWikisImpl(this);
     this.quotaByCounterKeys = new QuotaByCounterKeysImpl(this);
     this.quotaByPeriodKeys = new QuotaByPeriodKeysImpl(this);
     this.region = new RegionImpl(this);
     this.reports = new ReportsImpl(this);
+    this.globalSchema = new GlobalSchemaImpl(this);
     this.tenantSettings = new TenantSettingsImpl(this);
     this.apiManagementSkus = new ApiManagementSkusImpl(this);
     this.subscription = new SubscriptionImpl(this);
@@ -346,6 +404,7 @@ export class ApiManagementClient extends coreClient.ServiceClient {
     this.userSubscription = new UserSubscriptionImpl(this);
     this.userIdentities = new UserIdentitiesImpl(this);
     this.userConfirmationPassword = new UserConfirmationPasswordImpl(this);
+    this.documentation = new DocumentationImpl(this);
     this.addCustomApiVersionPolicy(options.apiVersion);
   }
 
@@ -380,7 +439,7 @@ export class ApiManagementClient extends coreClient.ServiceClient {
   /**
    * Performs a connectivity check between the API Management service and a given destination, and
    * returns metrics for the connection, as well as errors encountered while trying to establish it.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param connectivityCheckRequestParams Connectivity Check request parameters.
    * @param options The options parameters.
@@ -391,8 +450,8 @@ export class ApiManagementClient extends coreClient.ServiceClient {
     connectivityCheckRequestParams: ConnectivityCheckRequest,
     options?: PerformConnectivityCheckAsyncOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<PerformConnectivityCheckAsyncResponse>,
+    SimplePollerLike<
+      OperationState<PerformConnectivityCheckAsyncResponse>,
       PerformConnectivityCheckAsyncResponse
     >
   > {
@@ -402,7 +461,7 @@ export class ApiManagementClient extends coreClient.ServiceClient {
     ): Promise<PerformConnectivityCheckAsyncResponse> => {
       return this.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -435,20 +494,23 @@ export class ApiManagementClient extends coreClient.ServiceClient {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         serviceName,
         connectivityCheckRequestParams,
         options
       },
-      performConnectivityCheckAsyncOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+      spec: performConnectivityCheckAsyncOperationSpec
+    });
+    const poller = await createHttpPoller<
+      PerformConnectivityCheckAsyncResponse,
+      OperationState<PerformConnectivityCheckAsyncResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location"
     });
     await poller.poll();
     return poller;
@@ -457,7 +519,7 @@ export class ApiManagementClient extends coreClient.ServiceClient {
   /**
    * Performs a connectivity check between the API Management service and a given destination, and
    * returns metrics for the connection, as well as errors encountered while trying to establish it.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param serviceName The name of the API Management service.
    * @param connectivityCheckRequestParams Connectivity Check request parameters.
    * @param options The options parameters.
@@ -483,6 +545,8 @@ export class ApiManagementClient extends coreClient.ServiceClient {
   apiOperation: ApiOperation;
   apiOperationPolicy: ApiOperationPolicy;
   tag: Tag;
+  graphQLApiResolver: GraphQLApiResolver;
+  graphQLApiResolverPolicy: GraphQLApiResolverPolicy;
   apiProduct: ApiProduct;
   apiPolicy: ApiPolicy;
   apiSchema: ApiSchema;
@@ -492,9 +556,15 @@ export class ApiManagementClient extends coreClient.ServiceClient {
   apiIssueAttachment: ApiIssueAttachment;
   apiTagDescription: ApiTagDescription;
   operationOperations: OperationOperations;
+  apiWiki: ApiWiki;
+  apiWikis: ApiWikis;
   apiExport: ApiExport;
   apiVersionSet: ApiVersionSet;
   authorizationServer: AuthorizationServer;
+  authorizationProvider: AuthorizationProvider;
+  authorization: Authorization;
+  authorizationLoginLinks: AuthorizationLoginLinks;
+  authorizationAccessPolicy: AuthorizationAccessPolicy;
   backend: Backend;
   cache: Cache;
   certificate: Certificate;
@@ -524,6 +594,8 @@ export class ApiManagementClient extends coreClient.ServiceClient {
   outboundNetworkDependenciesEndpoints: OutboundNetworkDependenciesEndpoints;
   policy: Policy;
   policyDescription: PolicyDescription;
+  policyFragment: PolicyFragment;
+  portalConfig: PortalConfig;
   portalRevision: PortalRevision;
   portalSettings: PortalSettings;
   signInSettings: SignInSettings;
@@ -535,10 +607,13 @@ export class ApiManagementClient extends coreClient.ServiceClient {
   productGroup: ProductGroup;
   productSubscriptions: ProductSubscriptions;
   productPolicy: ProductPolicy;
+  productWiki: ProductWiki;
+  productWikis: ProductWikis;
   quotaByCounterKeys: QuotaByCounterKeys;
   quotaByPeriodKeys: QuotaByPeriodKeys;
   region: Region;
   reports: Reports;
+  globalSchema: GlobalSchema;
   tenantSettings: TenantSettings;
   apiManagementSkus: ApiManagementSkus;
   subscription: Subscription;
@@ -551,6 +626,7 @@ export class ApiManagementClient extends coreClient.ServiceClient {
   userSubscription: UserSubscription;
   userIdentities: UserIdentities;
   userConfirmationPassword: UserConfirmationPassword;
+  documentation: Documentation;
 }
 // Operation Specifications
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);

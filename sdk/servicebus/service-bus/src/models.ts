@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { OperationOptionsBase } from "./modelsToBeSharedWithEventHubs";
-import Long from "long";
-import { ServiceBusReceivedMessage } from "./serviceBusMessage";
-import { ServiceBusError } from "./serviceBusError";
+import type { OperationOptionsBase } from "./modelsToBeSharedWithEventHubs.js";
+import type Long from "long";
+import type { ServiceBusReceivedMessage } from "./serviceBusMessage.js";
+import type { ServiceBusError } from "./serviceBusError.js";
 
 /**
  * Arguments to the `processError` callback.
@@ -166,6 +166,13 @@ export interface ServiceBusReceiverOptions {
    */
   skipParsingBodyAsJson?: boolean;
   /**
+   * Whether to skip converting Date type on properties of message annotations
+   * or application properties into numbers when receiving the message. By
+   * default, properties of Date type is converted into UNIX epoch number for
+   * compatibility.
+   */
+  skipConvertingDate?: boolean;
+  /**
    * Sets the name to identify the receiver. This can be used to correlate logs and exceptions.
    * If not specified or empty, a random unique one will be used.
    */
@@ -240,7 +247,7 @@ export interface SubscribeOptions extends OperationOptionsBase {
   /**
    * The maximum number of concurrent calls that the library
    * can make to the user's message handler. Once this limit has been reached, more messages will
-   * not be received until atleast one of the calls to the user's message handler has completed.
+   * not be received until at least one of the calls to the user's message handler has completed.
    * - **Default**: `1`.
    */
   maxConcurrentCalls?: number;
@@ -292,6 +299,13 @@ export interface ServiceBusSessionReceiverOptions extends OperationOptionsBase {
    */
   skipParsingBodyAsJson?: boolean;
   /**
+   * Whether to skip converting Date type on properties of message annotations
+   * or application properties into numbers when receiving the message. By
+   * default, properties of Date type is converted into UNIX epoch number for
+   * compatibility.
+   */
+  skipConvertingDate?: boolean;
+  /**
    * Sets the name to identify the session receiver. This can be used to correlate logs and exceptions.
    * If not specified or empty, a random unique one will be used.
    */
@@ -306,9 +320,28 @@ export interface PeekMessagesOptions extends OperationOptionsBase {
    * The sequence number to start peeking messages from (inclusive).
    */
   fromSequenceNumber?: Long;
+}
+
+/**
+ * Options to configure messages deletion.
+ */
+export interface DeleteMessagesOptions extends OperationOptionsBase {
   /**
-   * @beta
-   * (Experimental for diagnostic purpose) Specifies whether to omit the body when peeking messages. Default  value `false`.
+   * If specified, only messages enqueued before this time are deleted.
    */
-  omitMessageBody?: boolean;
+  beforeEnqueueTime?: Date;
+  /**
+   * Up to `maxMessageCount` messages will be deleted.
+   */
+  maxMessageCount: number;
+}
+
+/**
+ * Options to configure deletion of all messages in an entity.
+ */
+export interface PurgeMessagesOptions extends OperationOptionsBase {
+  /**
+   * If specified, only messages enqueued before this time are deleted.
+   */
+  beforeEnqueueTime?: Date;
 }

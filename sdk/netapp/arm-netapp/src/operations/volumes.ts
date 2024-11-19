@@ -6,21 +6,27 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { Volumes } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetAppManagementClient } from "../netAppManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   Volume,
   VolumesListNextOptionalParams,
   VolumesListOptionalParams,
+  VolumesListResponse,
   Replication,
   VolumesListReplicationsOptionalParams,
-  VolumesListResponse,
+  VolumesListReplicationsResponse,
   VolumesGetOptionalParams,
   VolumesGetResponse,
   VolumesCreateOrUpdateOptionalParams,
@@ -29,26 +35,41 @@ import {
   VolumesUpdateOptionalParams,
   VolumesUpdateResponse,
   VolumesDeleteOptionalParams,
+  VolumesPopulateAvailabilityZoneOptionalParams,
+  VolumesPopulateAvailabilityZoneResponse,
   VolumeRevert,
   VolumesRevertOptionalParams,
   VolumesResetCifsPasswordOptionalParams,
+  VolumesResetCifsPasswordResponse,
+  VolumesBreakFileLocksOptionalParams,
+  GetGroupIdListForLdapUserRequest,
+  VolumesListGetGroupIdListForLdapUserOptionalParams,
+  VolumesListGetGroupIdListForLdapUserResponse,
   VolumesBreakReplicationOptionalParams,
   ReestablishReplicationRequest,
   VolumesReestablishReplicationOptionalParams,
   VolumesReplicationStatusOptionalParams,
   VolumesReplicationStatusResponse,
-  VolumesListReplicationsResponse,
   VolumesResyncReplicationOptionalParams,
   VolumesDeleteReplicationOptionalParams,
   AuthorizeRequest,
   VolumesAuthorizeReplicationOptionalParams,
   VolumesReInitializeReplicationOptionalParams,
+  PeerClusterForVolumeMigrationRequest,
+  VolumesPeerExternalClusterOptionalParams,
+  VolumesPeerExternalClusterResponse,
+  VolumesAuthorizeExternalReplicationOptionalParams,
+  VolumesAuthorizeExternalReplicationResponse,
+  VolumesFinalizeExternalReplicationOptionalParams,
+  VolumesFinalizeExternalReplicationResponse,
+  VolumesPerformReplicationTransferOptionalParams,
+  VolumesPerformReplicationTransferResponse,
   PoolChangeRequest,
   VolumesPoolChangeOptionalParams,
   VolumesRelocateOptionalParams,
   VolumesFinalizeRelocationOptionalParams,
   VolumesRevertRelocationOptionalParams,
-  VolumesListNextResponse
+  VolumesListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -66,7 +87,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * List all volumes within the capacity pool
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param options The options parameters.
@@ -75,13 +96,13 @@ export class VolumesImpl implements Volumes {
     resourceGroupName: string,
     accountName: string,
     poolName: string,
-    options?: VolumesListOptionalParams
+    options?: VolumesListOptionalParams,
   ): PagedAsyncIterableIterator<Volume> {
     const iter = this.listPagingAll(
       resourceGroupName,
       accountName,
       poolName,
-      options
+      options,
     );
     return {
       next() {
@@ -90,14 +111,18 @@ export class VolumesImpl implements Volumes {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listPagingPage(
           resourceGroupName,
           accountName,
           poolName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -105,26 +130,35 @@ export class VolumesImpl implements Volumes {
     resourceGroupName: string,
     accountName: string,
     poolName: string,
-    options?: VolumesListOptionalParams
+    options?: VolumesListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<Volume[]> {
-    let result = await this._list(
-      resourceGroupName,
-      accountName,
-      poolName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: VolumesListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(
+        resourceGroupName,
+        accountName,
+        poolName,
+        options,
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(
         resourceGroupName,
         accountName,
         poolName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -132,13 +166,13 @@ export class VolumesImpl implements Volumes {
     resourceGroupName: string,
     accountName: string,
     poolName: string,
-    options?: VolumesListOptionalParams
+    options?: VolumesListOptionalParams,
   ): AsyncIterableIterator<Volume> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       accountName,
       poolName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -146,7 +180,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * List all replications for a specified volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -157,14 +191,14 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesListReplicationsOptionalParams
+    options?: VolumesListReplicationsOptionalParams,
   ): PagedAsyncIterableIterator<Replication> {
     const iter = this.listReplicationsPagingAll(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     return {
       next() {
@@ -173,15 +207,19 @@ export class VolumesImpl implements Volumes {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listReplicationsPagingPage(
           resourceGroupName,
           accountName,
           poolName,
           volumeName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -190,14 +228,16 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesListReplicationsOptionalParams
+    options?: VolumesListReplicationsOptionalParams,
+    _settings?: PageSettings,
   ): AsyncIterableIterator<Replication[]> {
-    let result = await this._listReplications(
+    let result: VolumesListReplicationsResponse;
+    result = await this._listReplications(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     yield result.value || [];
   }
@@ -207,14 +247,14 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesListReplicationsOptionalParams
+    options?: VolumesListReplicationsOptionalParams,
   ): AsyncIterableIterator<Replication> {
     for await (const page of this.listReplicationsPagingPage(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -222,7 +262,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * List all volumes within the capacity pool
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param options The options parameters.
@@ -231,17 +271,17 @@ export class VolumesImpl implements Volumes {
     resourceGroupName: string,
     accountName: string,
     poolName: string,
-    options?: VolumesListOptionalParams
+    options?: VolumesListOptionalParams,
   ): Promise<VolumesListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, poolName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
   /**
    * Get the details of the specified volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -252,17 +292,17 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesGetOptionalParams
+    options?: VolumesGetOptionalParams,
   ): Promise<VolumesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, poolName, volumeName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
   /**
    * Create or update the specified volume within the capacity pool
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -275,30 +315,29 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: Volume,
-    options?: VolumesCreateOrUpdateOptionalParams
+    options?: VolumesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VolumesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VolumesCreateOrUpdateResponse>,
       VolumesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VolumesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -307,8 +346,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -316,20 +355,30 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, body, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        accountName,
+        poolName,
+        volumeName,
+        body,
+        options,
+      },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumesCreateOrUpdateResponse,
+      OperationState<VolumesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -337,7 +386,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Create or update the specified volume within the capacity pool
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -350,7 +399,7 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: Volume,
-    options?: VolumesCreateOrUpdateOptionalParams
+    options?: VolumesCreateOrUpdateOptionalParams,
   ): Promise<VolumesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
@@ -358,14 +407,14 @@ export class VolumesImpl implements Volumes {
       poolName,
       volumeName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Patch the specified volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -378,27 +427,29 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: VolumePatch,
-    options?: VolumesUpdateOptionalParams
+    options?: VolumesUpdateOptionalParams,
   ): Promise<
-    PollerLike<PollOperationState<VolumesUpdateResponse>, VolumesUpdateResponse>
+    SimplePollerLike<
+      OperationState<VolumesUpdateResponse>,
+      VolumesUpdateResponse
+    >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VolumesUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -407,8 +458,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -416,20 +467,30 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, body, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        accountName,
+        poolName,
+        volumeName,
+        body,
+        options,
+      },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumesUpdateResponse,
+      OperationState<VolumesUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -437,7 +498,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Patch the specified volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -450,7 +511,7 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: VolumePatch,
-    options?: VolumesUpdateOptionalParams
+    options?: VolumesUpdateOptionalParams,
   ): Promise<VolumesUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
@@ -458,14 +519,14 @@ export class VolumesImpl implements Volumes {
       poolName,
       volumeName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Delete the specified volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -476,25 +537,24 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -503,8 +563,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -512,20 +572,20 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -533,7 +593,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Delete the specified volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -544,21 +604,121 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesDeleteOptionalParams
+    options?: VolumesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * This operation will populate availability zone information for a volume
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginPopulateAvailabilityZone(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesPopulateAvailabilityZoneOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VolumesPopulateAvailabilityZoneResponse>,
+      VolumesPopulateAvailabilityZoneResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<VolumesPopulateAvailabilityZoneResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: populateAvailabilityZoneOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumesPopulateAvailabilityZoneResponse,
+      OperationState<VolumesPopulateAvailabilityZoneResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * This operation will populate availability zone information for a volume
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginPopulateAvailabilityZoneAndWait(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesPopulateAvailabilityZoneOptionalParams,
+  ): Promise<VolumesPopulateAvailabilityZoneResponse> {
+    const poller = await this.beginPopulateAvailabilityZone(
+      resourceGroupName,
+      accountName,
+      poolName,
+      volumeName,
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Revert a volume to the snapshot specified in the body
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -571,25 +731,24 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: VolumeRevert,
-    options?: VolumesRevertOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesRevertOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -598,8 +757,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -607,20 +766,27 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, body, options },
-      revertOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        accountName,
+        poolName,
+        volumeName,
+        body,
+        options,
+      },
+      spec: revertOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -628,7 +794,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Revert a volume to the snapshot specified in the body
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -641,7 +807,7 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: VolumeRevert,
-    options?: VolumesRevertOptionalParams
+    options?: VolumesRevertOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRevert(
       resourceGroupName,
@@ -649,14 +815,14 @@ export class VolumesImpl implements Volumes {
       poolName,
       volumeName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Reset cifs password from volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -667,25 +833,29 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesResetCifsPasswordOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesResetCifsPasswordOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VolumesResetCifsPasswordResponse>,
+      VolumesResetCifsPasswordResponse
+    >
+  > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<void> => {
+      spec: coreClient.OperationSpec,
+    ): Promise<VolumesResetCifsPasswordResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -694,8 +864,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -703,19 +873,22 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, options },
-      resetCifsPasswordOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: resetCifsPasswordOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumesResetCifsPasswordResponse,
+      OperationState<VolumesResetCifsPasswordResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -723,7 +896,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Reset cifs password from volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -734,21 +907,225 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesResetCifsPasswordOptionalParams
-  ): Promise<void> {
+    options?: VolumesResetCifsPasswordOptionalParams,
+  ): Promise<VolumesResetCifsPasswordResponse> {
     const poller = await this.beginResetCifsPassword(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Break all the file locks on a volume
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginBreakFileLocks(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesBreakFileLocksOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<void> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: breakFileLocksOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Break all the file locks on a volume
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginBreakFileLocksAndWait(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesBreakFileLocksOptionalParams,
+  ): Promise<void> {
+    const poller = await this.beginBreakFileLocks(
+      resourceGroupName,
+      accountName,
+      poolName,
+      volumeName,
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Returns the list of group Ids for a specific LDAP User
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param body Returns group Id list for a specific LDAP user
+   * @param options The options parameters.
+   */
+  async beginListGetGroupIdListForLdapUser(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    body: GetGroupIdListForLdapUserRequest,
+    options?: VolumesListGetGroupIdListForLdapUserOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VolumesListGetGroupIdListForLdapUserResponse>,
+      VolumesListGetGroupIdListForLdapUserResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<VolumesListGetGroupIdListForLdapUserResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        accountName,
+        poolName,
+        volumeName,
+        body,
+        options,
+      },
+      spec: listGetGroupIdListForLdapUserOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumesListGetGroupIdListForLdapUserResponse,
+      OperationState<VolumesListGetGroupIdListForLdapUserResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Returns the list of group Ids for a specific LDAP User
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param body Returns group Id list for a specific LDAP user
+   * @param options The options parameters.
+   */
+  async beginListGetGroupIdListForLdapUserAndWait(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    body: GetGroupIdListForLdapUserRequest,
+    options?: VolumesListGetGroupIdListForLdapUserOptionalParams,
+  ): Promise<VolumesListGetGroupIdListForLdapUserResponse> {
+    const poller = await this.beginListGetGroupIdListForLdapUser(
+      resourceGroupName,
+      accountName,
+      poolName,
+      volumeName,
+      body,
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Break the replication connection on the destination volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -759,25 +1136,24 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesBreakReplicationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesBreakReplicationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -786,8 +1162,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -795,20 +1171,20 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, options },
-      breakReplicationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: breakReplicationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -816,7 +1192,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Break the replication connection on the destination volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -827,14 +1203,14 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesBreakReplicationOptionalParams
+    options?: VolumesBreakReplicationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginBreakReplication(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -842,7 +1218,7 @@ export class VolumesImpl implements Volumes {
   /**
    * Re-establish a previously deleted replication between 2 volumes that have a common ad-hoc or
    * policy-based snapshots
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -855,25 +1231,24 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: ReestablishReplicationRequest,
-    options?: VolumesReestablishReplicationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesReestablishReplicationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -882,8 +1257,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -891,20 +1266,27 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, body, options },
-      reestablishReplicationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        accountName,
+        poolName,
+        volumeName,
+        body,
+        options,
+      },
+      spec: reestablishReplicationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -913,7 +1295,7 @@ export class VolumesImpl implements Volumes {
   /**
    * Re-establish a previously deleted replication between 2 volumes that have a common ad-hoc or
    * policy-based snapshots
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -926,7 +1308,7 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: ReestablishReplicationRequest,
-    options?: VolumesReestablishReplicationOptionalParams
+    options?: VolumesReestablishReplicationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginReestablishReplication(
       resourceGroupName,
@@ -934,14 +1316,14 @@ export class VolumesImpl implements Volumes {
       poolName,
       volumeName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Get the status of the replication
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -952,17 +1334,17 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesReplicationStatusOptionalParams
+    options?: VolumesReplicationStatusOptionalParams,
   ): Promise<VolumesReplicationStatusResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, poolName, volumeName, options },
-      replicationStatusOperationSpec
+      replicationStatusOperationSpec,
     );
   }
 
   /**
    * List all replications for a specified volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -973,18 +1355,18 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesListReplicationsOptionalParams
+    options?: VolumesListReplicationsOptionalParams,
   ): Promise<VolumesListReplicationsResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, poolName, volumeName, options },
-      listReplicationsOperationSpec
+      listReplicationsOperationSpec,
     );
   }
 
   /**
    * Resync the connection on the destination volume. If the operation is ran on the source volume it
    * will reverse-resync the connection and sync from destination to source.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -995,25 +1377,24 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesResyncReplicationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesResyncReplicationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1022,8 +1403,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1031,20 +1412,20 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, options },
-      resyncReplicationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: resyncReplicationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -1053,7 +1434,7 @@ export class VolumesImpl implements Volumes {
   /**
    * Resync the connection on the destination volume. If the operation is ran on the source volume it
    * will reverse-resync the connection and sync from destination to source.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1064,14 +1445,14 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesResyncReplicationOptionalParams
+    options?: VolumesResyncReplicationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginResyncReplication(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -1079,7 +1460,7 @@ export class VolumesImpl implements Volumes {
   /**
    * Delete the replication connection on the destination volume, and send release to the source
    * replication
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1090,25 +1471,24 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesDeleteReplicationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesDeleteReplicationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1117,8 +1497,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1126,20 +1506,20 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, options },
-      deleteReplicationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: deleteReplicationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -1148,7 +1528,7 @@ export class VolumesImpl implements Volumes {
   /**
    * Delete the replication connection on the destination volume, and send release to the source
    * replication
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1159,21 +1539,21 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesDeleteReplicationOptionalParams
+    options?: VolumesDeleteReplicationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDeleteReplication(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Authorize the replication connection on the source volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1186,25 +1566,24 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: AuthorizeRequest,
-    options?: VolumesAuthorizeReplicationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesAuthorizeReplicationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1213,8 +1592,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1222,20 +1601,27 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, body, options },
-      authorizeReplicationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        accountName,
+        poolName,
+        volumeName,
+        body,
+        options,
+      },
+      spec: authorizeReplicationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -1243,7 +1629,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Authorize the replication connection on the source volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1256,7 +1642,7 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: AuthorizeRequest,
-    options?: VolumesAuthorizeReplicationOptionalParams
+    options?: VolumesAuthorizeReplicationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginAuthorizeReplication(
       resourceGroupName,
@@ -1264,14 +1650,14 @@ export class VolumesImpl implements Volumes {
       poolName,
       volumeName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Re-Initializes the replication connection on the destination volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1282,25 +1668,24 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesReInitializeReplicationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesReInitializeReplicationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1309,8 +1694,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1318,20 +1703,20 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, options },
-      reInitializeReplicationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: reInitializeReplicationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -1339,7 +1724,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Re-Initializes the replication connection on the destination volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1350,21 +1735,437 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesReInitializeReplicationOptionalParams
+    options?: VolumesReInitializeReplicationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginReInitializeReplication(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Starts peering the external cluster for this migration volume
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param body Cluster peer request object supplied in the body of the operation.
+   * @param options The options parameters.
+   */
+  async beginPeerExternalCluster(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    body: PeerClusterForVolumeMigrationRequest,
+    options?: VolumesPeerExternalClusterOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VolumesPeerExternalClusterResponse>,
+      VolumesPeerExternalClusterResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<VolumesPeerExternalClusterResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        accountName,
+        poolName,
+        volumeName,
+        body,
+        options,
+      },
+      spec: peerExternalClusterOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumesPeerExternalClusterResponse,
+      OperationState<VolumesPeerExternalClusterResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Starts peering the external cluster for this migration volume
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param body Cluster peer request object supplied in the body of the operation.
+   * @param options The options parameters.
+   */
+  async beginPeerExternalClusterAndWait(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    body: PeerClusterForVolumeMigrationRequest,
+    options?: VolumesPeerExternalClusterOptionalParams,
+  ): Promise<VolumesPeerExternalClusterResponse> {
+    const poller = await this.beginPeerExternalCluster(
+      resourceGroupName,
+      accountName,
+      poolName,
+      volumeName,
+      body,
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Starts SVM peering and returns a command to be run on the external ONTAP to accept it.  Once the SVM
+   * have been peered a SnapMirror will be created
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginAuthorizeExternalReplication(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesAuthorizeExternalReplicationOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VolumesAuthorizeExternalReplicationResponse>,
+      VolumesAuthorizeExternalReplicationResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<VolumesAuthorizeExternalReplicationResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: authorizeExternalReplicationOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumesAuthorizeExternalReplicationResponse,
+      OperationState<VolumesAuthorizeExternalReplicationResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Starts SVM peering and returns a command to be run on the external ONTAP to accept it.  Once the SVM
+   * have been peered a SnapMirror will be created
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginAuthorizeExternalReplicationAndWait(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesAuthorizeExternalReplicationOptionalParams,
+  ): Promise<VolumesAuthorizeExternalReplicationResponse> {
+    const poller = await this.beginAuthorizeExternalReplication(
+      resourceGroupName,
+      accountName,
+      poolName,
+      volumeName,
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Finalizes the migration of an external volume by releasing the replication and breaking the external
+   * cluster peering if no other migration is active.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginFinalizeExternalReplication(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesFinalizeExternalReplicationOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VolumesFinalizeExternalReplicationResponse>,
+      VolumesFinalizeExternalReplicationResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<VolumesFinalizeExternalReplicationResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: finalizeExternalReplicationOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumesFinalizeExternalReplicationResponse,
+      OperationState<VolumesFinalizeExternalReplicationResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Finalizes the migration of an external volume by releasing the replication and breaking the external
+   * cluster peering if no other migration is active.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginFinalizeExternalReplicationAndWait(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesFinalizeExternalReplicationOptionalParams,
+  ): Promise<VolumesFinalizeExternalReplicationResponse> {
+    const poller = await this.beginFinalizeExternalReplication(
+      resourceGroupName,
+      accountName,
+      poolName,
+      volumeName,
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Performs an adhoc replication transfer on a volume with volumeType Migration
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginPerformReplicationTransfer(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesPerformReplicationTransferOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VolumesPerformReplicationTransferResponse>,
+      VolumesPerformReplicationTransferResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<VolumesPerformReplicationTransferResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: performReplicationTransferOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VolumesPerformReplicationTransferResponse,
+      OperationState<VolumesPerformReplicationTransferResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Performs an adhoc replication transfer on a volume with volumeType Migration
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param accountName The name of the NetApp account
+   * @param poolName The name of the capacity pool
+   * @param volumeName The name of the volume
+   * @param options The options parameters.
+   */
+  async beginPerformReplicationTransferAndWait(
+    resourceGroupName: string,
+    accountName: string,
+    poolName: string,
+    volumeName: string,
+    options?: VolumesPerformReplicationTransferOptionalParams,
+  ): Promise<VolumesPerformReplicationTransferResponse> {
+    const poller = await this.beginPerformReplicationTransfer(
+      resourceGroupName,
+      accountName,
+      poolName,
+      volumeName,
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Moves volume to another pool
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1377,25 +2178,24 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: PoolChangeRequest,
-    options?: VolumesPoolChangeOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesPoolChangeOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1404,8 +2204,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1413,20 +2213,27 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, body, options },
-      poolChangeOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        accountName,
+        poolName,
+        volumeName,
+        body,
+        options,
+      },
+      spec: poolChangeOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -1434,7 +2241,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Moves volume to another pool
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1447,7 +2254,7 @@ export class VolumesImpl implements Volumes {
     poolName: string,
     volumeName: string,
     body: PoolChangeRequest,
-    options?: VolumesPoolChangeOptionalParams
+    options?: VolumesPoolChangeOptionalParams,
   ): Promise<void> {
     const poller = await this.beginPoolChange(
       resourceGroupName,
@@ -1455,14 +2262,14 @@ export class VolumesImpl implements Volumes {
       poolName,
       volumeName,
       body,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Relocates volume to a new stamp
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1473,25 +2280,24 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesRelocateOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesRelocateOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1500,8 +2306,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1509,19 +2315,19 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, options },
-      relocateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: relocateOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -1529,7 +2335,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Relocates volume to a new stamp
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1540,21 +2346,21 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesRelocateOptionalParams
+    options?: VolumesRelocateOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRelocate(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * Finalizes the relocation of the volume and cleans up the old volume.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1565,25 +2371,24 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesFinalizeRelocationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesFinalizeRelocationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1592,8 +2397,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1601,19 +2406,19 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, options },
-      finalizeRelocationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: finalizeRelocationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -1621,7 +2426,7 @@ export class VolumesImpl implements Volumes {
 
   /**
    * Finalizes the relocation of the volume and cleans up the old volume.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1632,14 +2437,14 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesFinalizeRelocationOptionalParams
+    options?: VolumesFinalizeRelocationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginFinalizeRelocation(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -1647,7 +2452,7 @@ export class VolumesImpl implements Volumes {
   /**
    * Reverts the volume relocation process, cleans up the new volume and starts using the former-existing
    * volume.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1658,25 +2463,24 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesRevertRelocationOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VolumesRevertRelocationOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -1685,8 +2489,8 @@ export class VolumesImpl implements Volumes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -1694,19 +2498,19 @@ export class VolumesImpl implements Volumes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, accountName, poolName, volumeName, options },
-      revertRelocationOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, accountName, poolName, volumeName, options },
+      spec: revertRelocationOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -1715,7 +2519,7 @@ export class VolumesImpl implements Volumes {
   /**
    * Reverts the volume relocation process, cleans up the new volume and starts using the former-existing
    * volume.
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -1726,21 +2530,21 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumesRevertRelocationOptionalParams
+    options?: VolumesRevertRelocationOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRevertRelocation(
       resourceGroupName,
       accountName,
       poolName,
       volumeName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
 
   /**
    * ListNext
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param nextLink The nextLink from the previous successful call to the List method.
@@ -1751,11 +2555,11 @@ export class VolumesImpl implements Volumes {
     accountName: string,
     poolName: string,
     nextLink: string,
-    options?: VolumesListNextOptionalParams
+    options?: VolumesListNextOptionalParams,
   ): Promise<VolumesListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, accountName, poolName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -1763,35 +2567,15 @@ export class VolumesImpl implements Volumes {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VolumeList
+      bodyMapper: Mappers.VolumeList,
     },
-    default: {}
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.Volume
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {}
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -1800,100 +2584,53 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.accountName,
     Parameters.poolName,
-    Parameters.volumeName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.Volume,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Volume
+      bodyMapper: Mappers.Volume,
     },
     201: {
-      bodyMapper: Mappers.Volume
+      bodyMapper: Mappers.Volume,
     },
     202: {
-      bodyMapper: Mappers.Volume
+      bodyMapper: Mappers.Volume,
     },
     204: {
-      bodyMapper: Mappers.Volume
-    },
-    default: {}
-  },
-  requestBody: Parameters.body7,
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
-const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
-  httpMethod: "PATCH",
-  responses: {
-    200: {
-      bodyMapper: Mappers.Volume
-    },
-    201: {
-      bodyMapper: Mappers.Volume
-    },
-    202: {
-      bodyMapper: Mappers.Volume
-    },
-    204: {
-      bodyMapper: Mappers.Volume
+      bodyMapper: Mappers.Volume,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  requestBody: Parameters.body8,
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
-const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
-  httpMethod: "DELETE",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion, Parameters.forceDelete],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  serializer
-};
-const revertOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/revert",
-  httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
   requestBody: Parameters.body9,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -1902,33 +2639,32 @@ const revertOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.accountName,
     Parameters.poolName,
-    Parameters.volumeName
+    Parameters.volumeName,
   ],
-  headerParameters: [Parameters.contentType],
+  headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const resetCifsPasswordOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/resetCifsPassword",
-  httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  serializer
-};
-const breakReplicationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/breakReplication",
-  httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
+const updateOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
+  httpMethod: "PATCH",
+  responses: {
+    200: {
+      bodyMapper: Mappers.Volume,
+    },
+    201: {
+      bodyMapper: Mappers.Volume,
+    },
+    202: {
+      bodyMapper: Mappers.Volume,
+    },
+    204: {
+      bodyMapper: Mappers.Volume,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
   requestBody: Parameters.body10,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -1937,17 +2673,80 @@ const breakReplicationOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.accountName,
     Parameters.poolName,
-    Parameters.volumeName
+    Parameters.volumeName,
   ],
-  headerParameters: [Parameters.contentType],
+  headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const reestablishReplicationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/reestablishReplication",
+const deleteOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
+  httpMethod: "DELETE",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion, Parameters.forceDelete],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const populateAvailabilityZoneOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/populateAvailabilityZone",
   httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
+  responses: {
+    200: {
+      bodyMapper: Mappers.Volume,
+    },
+    201: {
+      bodyMapper: Mappers.Volume,
+    },
+    202: {
+      bodyMapper: Mappers.Volume,
+    },
+    204: {
+      bodyMapper: Mappers.Volume,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const revertOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/revert",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
   requestBody: Parameters.body11,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -1956,21 +2755,31 @@ const reestablishReplicationOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.accountName,
     Parameters.poolName,
-    Parameters.volumeName
+    Parameters.volumeName,
   ],
-  headerParameters: [Parameters.contentType],
+  headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const replicationStatusOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/replicationStatus",
-  httpMethod: "GET",
+const resetCifsPasswordOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/resetCifsPassword",
+  httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.ReplicationStatus
+      headersMapper: Mappers.VolumesResetCifsPasswordHeaders,
     },
-    default: {}
+    201: {
+      headersMapper: Mappers.VolumesResetCifsPasswordHeaders,
+    },
+    202: {
+      headersMapper: Mappers.VolumesResetCifsPasswordHeaders,
+    },
+    204: {
+      headersMapper: Mappers.VolumesResetCifsPasswordHeaders,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -1979,70 +2788,23 @@ const replicationStatusOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.accountName,
     Parameters.poolName,
-    Parameters.volumeName
+    Parameters.volumeName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
-const listReplicationsOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/listReplications",
+const breakFileLocksOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/breakFileLocks",
   httpMethod: "POST",
   responses: {
-    200: {
-      bodyMapper: Mappers.ListReplications
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {}
   },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const resyncReplicationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/resyncReplication",
-  httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  serializer
-};
-const deleteReplicationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/deleteReplication",
-  httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  serializer
-};
-const authorizeReplicationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/authorizeReplication",
-  httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
   requestBody: Parameters.body12,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -2051,33 +2813,32 @@ const authorizeReplicationOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.accountName,
     Parameters.poolName,
-    Parameters.volumeName
+    Parameters.volumeName,
   ],
-  headerParameters: [Parameters.contentType],
+  headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const reInitializeReplicationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/reinitializeReplication",
+const listGetGroupIdListForLdapUserOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/getGroupIdListForLdapUser",
   httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  serializer
-};
-const poolChangeOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/poolChange",
-  httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
+  responses: {
+    200: {
+      bodyMapper: Mappers.GetGroupIdListForLdapUserResponse,
+    },
+    201: {
+      bodyMapper: Mappers.GetGroupIdListForLdapUserResponse,
+    },
+    202: {
+      bodyMapper: Mappers.GetGroupIdListForLdapUserResponse,
+    },
+    204: {
+      bodyMapper: Mappers.GetGroupIdListForLdapUserResponse,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
   requestBody: Parameters.body13,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -2086,17 +2847,24 @@ const poolChangeOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.accountName,
     Parameters.poolName,
-    Parameters.volumeName
+    Parameters.volumeName,
   ],
-  headerParameters: [Parameters.contentType],
+  headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const relocateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/relocate",
+const breakReplicationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/breakReplication",
   httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
   requestBody: Parameters.body14,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -2105,17 +2873,25 @@ const relocateOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.accountName,
     Parameters.poolName,
-    Parameters.volumeName
+    Parameters.volumeName,
   ],
-  headerParameters: [Parameters.contentType],
+  headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const finalizeRelocationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/finalizeRelocation",
+const reestablishReplicationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/reestablishReplication",
   httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.body15,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
@@ -2123,34 +2899,22 @@ const finalizeRelocationOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.accountName,
     Parameters.poolName,
-    Parameters.volumeName
+    Parameters.volumeName,
   ],
-  serializer
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
 };
-const revertRelocationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/revertRelocation",
-  httpMethod: "POST",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.accountName,
-    Parameters.poolName,
-    Parameters.volumeName
-  ],
-  serializer
-};
-const listNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
+const replicationStatusOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/replicationStatus",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VolumeList
+      bodyMapper: Mappers.ReplicationStatus,
     },
-    default: {}
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -2158,9 +2922,382 @@ const listNextOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.accountName,
-    Parameters.nextLink,
-    Parameters.poolName
+    Parameters.poolName,
+    Parameters.volumeName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const listReplicationsOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/listReplications",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ListReplications,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const resyncReplicationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/resyncReplication",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const deleteReplicationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/deleteReplication",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const authorizeReplicationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/authorizeReplication",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.body16,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
+};
+const reInitializeReplicationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/reinitializeReplication",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const peerExternalClusterOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/peerExternalCluster",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      bodyMapper: Mappers.ClusterPeerCommandResponse,
+    },
+    201: {
+      bodyMapper: Mappers.ClusterPeerCommandResponse,
+    },
+    202: {
+      bodyMapper: Mappers.ClusterPeerCommandResponse,
+    },
+    204: {
+      bodyMapper: Mappers.ClusterPeerCommandResponse,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.body17,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
+};
+const authorizeExternalReplicationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/authorizeExternalReplication",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      bodyMapper: Mappers.SvmPeerCommandResponse,
+    },
+    201: {
+      bodyMapper: Mappers.SvmPeerCommandResponse,
+    },
+    202: {
+      bodyMapper: Mappers.SvmPeerCommandResponse,
+    },
+    204: {
+      bodyMapper: Mappers.SvmPeerCommandResponse,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const finalizeExternalReplicationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/finalizeExternalReplication",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      headersMapper: Mappers.VolumesFinalizeExternalReplicationHeaders,
+    },
+    201: {
+      headersMapper: Mappers.VolumesFinalizeExternalReplicationHeaders,
+    },
+    202: {
+      headersMapper: Mappers.VolumesFinalizeExternalReplicationHeaders,
+    },
+    204: {
+      headersMapper: Mappers.VolumesFinalizeExternalReplicationHeaders,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const performReplicationTransferOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/performReplicationTransfer",
+  httpMethod: "POST",
+  responses: {
+    200: {
+      headersMapper: Mappers.VolumesPerformReplicationTransferHeaders,
+    },
+    201: {
+      headersMapper: Mappers.VolumesPerformReplicationTransferHeaders,
+    },
+    202: {
+      headersMapper: Mappers.VolumesPerformReplicationTransferHeaders,
+    },
+    204: {
+      headersMapper: Mappers.VolumesPerformReplicationTransferHeaders,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const poolChangeOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/poolChange",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.body18,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
+};
+const relocateOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/relocate",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.body19,
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
+};
+const finalizeRelocationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/finalizeRelocation",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const revertRelocationOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/revertRelocation",
+  httpMethod: "POST",
+  responses: {
+    200: {},
+    201: {},
+    202: {},
+    204: {},
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+    Parameters.volumeName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const listNextOperationSpec: coreClient.OperationSpec = {
+  path: "{nextLink}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.VolumeList,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.nextLink,
+    Parameters.resourceGroupName,
+    Parameters.accountName,
+    Parameters.poolName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };

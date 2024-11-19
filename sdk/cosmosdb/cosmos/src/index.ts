@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 export { DEFAULT_PARTITION_KEY_PATH } from "./common/partitionKeys";
 export { StatusCodes, StatusCodesType, PartitionKeyRangePropertiesNames } from "./common";
-export { extractPartitionKey } from "./extractPartitionKey";
 export { setAuthorizationTokenHeaderUsingMasterKey } from "./auth";
 export {
   Operation,
@@ -17,6 +16,7 @@ export {
   OperationWithItem,
   OperationInput,
   BulkOperationType,
+  BulkOperationResponse,
   CreateOperationInput,
   UpsertOperationInput,
   ReplaceOperationInput,
@@ -48,11 +48,29 @@ export {
   IndexKind,
   Location,
   PartitionKey,
+  PrimitivePartitionKeyValue,
+  NullPartitionKeyType,
+  NonePartitionKeyType,
+  PartitionKeyKind,
   PartitionKeyDefinition,
+  PartitionKeyDefinitionVersion,
+  PartitionKeyBuilder,
   PermissionMode,
+  PriorityLevel,
   TriggerOperation,
   TriggerType,
   UserDefinedFunctionType,
+  CompositePath,
+  ComputedProperty,
+  VectorEmbeddingPolicy,
+  VectorIndex,
+  VectorEmbedding,
+  VectorEmbeddingDataType,
+  VectorEmbeddingDistanceFunction,
+  VectorIndexType,
+  FullTextIndex,
+  FullTextPolicy,
+  FullTextPath,
 } from "./documents";
 
 export { UniqueKeyPolicy, UniqueKey } from "./client/Container/UniqueKeyPolicy";
@@ -60,6 +78,12 @@ export { ContainerRequest } from "./client/Container/ContainerRequest";
 export { Constants, OperationType, ResourceType, HTTPMethod } from "./common";
 export { RetryOptions } from "./retry";
 export * from "./request";
+
+export {
+  DiagnosticNodeInternal,
+  DiagnosticDataValue,
+  DiagnosticNodeType,
+} from "./diagnostics/DiagnosticNodeInternal";
 
 export {
   CosmosHeaders,
@@ -82,6 +106,32 @@ export { ChangeFeedIterator } from "./ChangeFeedIterator";
 export { ChangeFeedOptions } from "./ChangeFeedOptions";
 export { ChangeFeedResponse } from "./ChangeFeedResponse";
 export { ClientContext } from "./ClientContext";
+
+export {
+  CosmosDiagnostics,
+  MetadataLookUpDiagnostic,
+  MetadataLookUpDiagnostics,
+  MetadataLookUpType,
+  RetryDiagnostics,
+  FailedRequestAttemptDiagnostic,
+  GatewayStatistics,
+  ClientSideRequestStatistics,
+  ClientConfigDiagnostic,
+  DiagnosticNode,
+} from "./CosmosDiagnostics";
+
+export {
+  ChangeFeedPullModelIterator,
+  ChangeFeedIteratorOptions,
+  ChangeFeedIteratorResponse,
+  ChangeFeedStartFrom,
+  FeedRange,
+  ChangeFeedMode,
+  ChangeFeedPolicy,
+  ChangeFeedRetentionTimeSpan,
+} from "./client/ChangeFeed";
+export { CosmosDbDiagnosticLevel } from "./diagnostics/CosmosDbDiagnosticLevel";
+
 export { GlobalEndpointManager } from "./globalEndpointManager";
 export { SasTokenPermissionKind } from "./common/constants";
 export { createAuthorizationSasToken } from "./utils/SasToken";

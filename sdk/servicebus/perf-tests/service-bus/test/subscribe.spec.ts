@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import {
   ProcessErrorArgs,
   ServiceBusReceivedMessage,
   ServiceBusReceiver,
 } from "@azure/service-bus";
-import { PerfOptionDictionary, EventPerfTest } from "@azure/test-utils-perf";
+import { PerfOptionDictionary, EventPerfTest } from "@azure-tools/test-perf";
 import { sendMessages } from "./receiveBatch.spec";
 import { ServiceBusTest } from "./sbBase.spec";
 
@@ -32,7 +32,7 @@ export class SubscribeTest extends EventPerfTest<ReceiverOptions> {
       required: true,
       description: "Size of each message body in bytes",
       shortName: "size",
-      longName: "size-in-bytes",
+      longName: "message-size",
       defaultValue: 2000,
     },
     "max-concurrent-calls": {
@@ -64,6 +64,7 @@ export class SubscribeTest extends EventPerfTest<ReceiverOptions> {
     } = this.parsedOptions;
 
     await sendMessages(sender, numberOfMessages, messageBodySize);
+    await sender.close();
   }
 
   setup() {
@@ -77,12 +78,12 @@ export class SubscribeTest extends EventPerfTest<ReceiverOptions> {
           this.errorRaised(args.error);
         },
       },
-      { maxConcurrentCalls: this.parsedOptions["max-concurrent-calls"].value }
+      { maxConcurrentCalls: this.parsedOptions["max-concurrent-calls"].value },
     );
   }
 
   async cleanup() {
-    this.subscriber && (await this.subscriber.close());
+    await this.subscriber?.close();
     await this.receiver.close();
   }
 

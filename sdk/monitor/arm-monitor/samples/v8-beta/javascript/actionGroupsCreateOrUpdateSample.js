@@ -10,16 +10,18 @@
 // Licensed under the MIT License.
 const { MonitorClient } = require("@azure/arm-monitor");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Create a new action group or update an existing one.
  *
  * @summary Create a new action group or update an existing one.
- * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2022-06-01/examples/createOrUpdateActionGroup.json
+ * x-ms-original-file: specification/monitor/resource-manager/Microsoft.Insights/stable/2023-01-01/examples/createOrUpdateActionGroup.json
  */
 async function createOrUpdateAnActionGroup() {
-  const subscriptionId = "187f412d-1758-44d9-b052-169e2564721d";
-  const resourceGroupName = "Default-NotificationRules";
+  const subscriptionId =
+    process.env["MONITOR_SUBSCRIPTION_ID"] || "187f412d-1758-44d9-b052-169e2564721d";
+  const resourceGroupName = process.env["MONITOR_RESOURCE_GROUP"] || "Default-NotificationRules";
   const actionGroupName = "SampleActionGroup";
   const actionGroup = {
     armRoleReceivers: [
@@ -133,9 +135,13 @@ async function createOrUpdateAnActionGroup() {
   const result = await client.actionGroups.createOrUpdate(
     resourceGroupName,
     actionGroupName,
-    actionGroup
+    actionGroup,
   );
   console.log(result);
 }
 
-createOrUpdateAnActionGroup().catch(console.error);
+async function main() {
+  createOrUpdateAnActionGroup();
+}
+
+main().catch(console.error);

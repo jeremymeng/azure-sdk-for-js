@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -50,7 +50,7 @@ async function createPacketCapture() {
       subscriptionId,
       resourceGroupName,
       networkWatcherName,
-      packetCaptureName
+      packetCaptureName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -35,7 +35,7 @@ async function updateExpressRouteCrossConnection() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCrossConnections/{crossConnectionName}",
       subscriptionId,
       resourceGroupName,
-      crossConnectionName
+      crossConnectionName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);

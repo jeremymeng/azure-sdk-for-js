@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * This sample shows how to extract elements of a business card from a URL to a file using the prebuilt business card
@@ -29,8 +29,8 @@ async function main() {
 
   const poller = await client.beginAnalyzeDocumentFromUrl(
     PrebuiltBusinessCardModel,
-    // The form recognizer service will access the following URL to a business card image and extract data from it
-    "https://raw.githubusercontent.com/Azure/azure-sdk-for-js/main/sdk/formrecognizer/ai-form-recognizer/assets/businessCard/business-card-english.jpg"
+    // The Document Intelligence service will access the following URL to a business card image and extract data from it
+    "https://raw.githubusercontent.com/Azure/azure-sdk-for-js/main/sdk/formrecognizer/ai-form-recognizer/assets/businessCard/business-card-english.jpg",
   );
 
   const { documents } = await poller.pollUntilDone();

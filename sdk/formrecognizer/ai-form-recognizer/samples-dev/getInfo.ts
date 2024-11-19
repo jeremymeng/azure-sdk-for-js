@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * This sample shows how to programmatically retrieve metadata about the number of custom models in the Form Recognizer
@@ -22,7 +22,7 @@ async function main() {
   const info = await client.getResourceDetails();
 
   console.log(
-    `Custom document models: ${info.customDocumentModels.count} of ${info.customDocumentModels.limit}`
+    `Custom document models: ${info.customDocumentModels.count} of ${info.customDocumentModels.limit}`,
   );
 }
 

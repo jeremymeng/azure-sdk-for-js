@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { IotHubClient } from "../iotHubClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   IotHubDescription,
   IotHubResourceListBySubscriptionNextOptionalParams,
@@ -757,7 +761,8 @@ export class IotHubResourceImpl implements IotHubResource {
   /**
    * Create or update the metadata of an Iot hub. The usual pattern to modify a property is to retrieve
    * the IoT hub metadata and security metadata, and then combine them with the modified values in a new
-   * body to update the IoT hub.
+   * body to update the IoT hub. If certain properties are missing in the JSON, updating IoT Hub may
+   * cause these values to fallback to default, which may lead to unexpected behavior.
    * @param resourceGroupName The name of the resource group that contains the IoT hub.
    * @param resourceName The name of the IoT hub.
    * @param iotHubDescription The IoT hub metadata and security metadata.
@@ -769,8 +774,8 @@ export class IotHubResourceImpl implements IotHubResource {
     iotHubDescription: IotHubDescription,
     options?: IotHubResourceCreateOrUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<IotHubResourceCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<IotHubResourceCreateOrUpdateResponse>,
       IotHubResourceCreateOrUpdateResponse
     >
   > {
@@ -780,7 +785,7 @@ export class IotHubResourceImpl implements IotHubResource {
     ): Promise<IotHubResourceCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -813,13 +818,16 @@ export class IotHubResourceImpl implements IotHubResource {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, iotHubDescription, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, iotHubDescription, options },
+      spec: createOrUpdateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      IotHubResourceCreateOrUpdateResponse,
+      OperationState<IotHubResourceCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -829,7 +837,8 @@ export class IotHubResourceImpl implements IotHubResource {
   /**
    * Create or update the metadata of an Iot hub. The usual pattern to modify a property is to retrieve
    * the IoT hub metadata and security metadata, and then combine them with the modified values in a new
-   * body to update the IoT hub.
+   * body to update the IoT hub. If certain properties are missing in the JSON, updating IoT Hub may
+   * cause these values to fallback to default, which may lead to unexpected behavior.
    * @param resourceGroupName The name of the resource group that contains the IoT hub.
    * @param resourceName The name of the IoT hub.
    * @param iotHubDescription The IoT hub metadata and security metadata.
@@ -863,8 +872,8 @@ export class IotHubResourceImpl implements IotHubResource {
     iotHubTags: TagsResource,
     options?: IotHubResourceUpdateOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<IotHubResourceUpdateResponse>,
+    SimplePollerLike<
+      OperationState<IotHubResourceUpdateResponse>,
       IotHubResourceUpdateResponse
     >
   > {
@@ -874,7 +883,7 @@ export class IotHubResourceImpl implements IotHubResource {
     ): Promise<IotHubResourceUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -907,13 +916,16 @@ export class IotHubResourceImpl implements IotHubResource {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, iotHubTags, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, iotHubTags, options },
+      spec: updateOperationSpec
+    });
+    const poller = await createHttpPoller<
+      IotHubResourceUpdateResponse,
+      OperationState<IotHubResourceUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -953,8 +965,8 @@ export class IotHubResourceImpl implements IotHubResource {
     resourceName: string,
     options?: IotHubResourceDeleteOptionalParams
   ): Promise<
-    PollerLike<
-      PollOperationState<IotHubResourceDeleteResponse>,
+    SimplePollerLike<
+      OperationState<IotHubResourceDeleteResponse>,
       IotHubResourceDeleteResponse
     >
   > {
@@ -964,7 +976,7 @@ export class IotHubResourceImpl implements IotHubResource {
     ): Promise<IotHubResourceDeleteResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
       spec: coreClient.OperationSpec
     ) => {
@@ -997,13 +1009,16 @@ export class IotHubResourceImpl implements IotHubResource {
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, resourceName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, resourceName, options },
+      spec: deleteOperationSpec
+    });
+    const poller = await createHttpPoller<
+      IotHubResourceDeleteResponse,
+      OperationState<IotHubResourceDeleteResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs
     });
     await poller.poll();
@@ -1612,20 +1627,16 @@ const updateOperationSpec: coreClient.OperationSpec = {
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.IotHubDescription,
-      headersMapper: Mappers.IotHubResourceUpdateHeaders
+      bodyMapper: Mappers.IotHubDescription
     },
     201: {
-      bodyMapper: Mappers.IotHubDescription,
-      headersMapper: Mappers.IotHubResourceUpdateHeaders
+      bodyMapper: Mappers.IotHubDescription
     },
     202: {
-      bodyMapper: Mappers.IotHubDescription,
-      headersMapper: Mappers.IotHubResourceUpdateHeaders
+      bodyMapper: Mappers.IotHubDescription
     },
     204: {
-      bodyMapper: Mappers.IotHubDescription,
-      headersMapper: Mappers.IotHubResourceUpdateHeaders
+      bodyMapper: Mappers.IotHubDescription
     }
   },
   requestBody: Parameters.iotHubTags,

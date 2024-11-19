@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { ServiceBusReceiver, ServiceBusSender } from "@azure/service-bus";
-import { PerfOptionDictionary } from "@azure/test-utils-perf";
+import { PerfOptionDictionary } from "@azure-tools/test-perf";
 import { ServiceBusTest } from "./sbBase.spec";
 
 interface ReceiverOptions {
@@ -24,13 +24,14 @@ export class BatchReceiveTest extends ServiceBusTest<ReceiverOptions> {
       required: true,
       description: "Size of each message body in bytes",
       shortName: "size",
-      longName: "size-in-bytes",
+      longName: "message-size",
       defaultValue: 2000,
     },
     "max-message-count": {
       required: true,
       description: "Max number of messages to receive",
       shortName: "max-receive",
+      longName: "max-message-count",
       defaultValue: 50,
     },
   };
@@ -60,7 +61,7 @@ export class BatchReceiveTest extends ServiceBusTest<ReceiverOptions> {
   public async runBatch(): Promise<number> {
     const messages = await this.receiver.receiveMessages(
       this.parsedOptions["max-message-count"].value,
-      { maxWaitTimeInMs: 500 }
+      { maxWaitTimeInMs: 500 },
     );
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -75,7 +76,7 @@ export class BatchReceiveTest extends ServiceBusTest<ReceiverOptions> {
 export async function sendMessages(
   sender: ServiceBusSender,
   numberOfMessages: number,
-  messageBodySize: number
+  messageBodySize: number,
 ) {
   let count = 0;
   while (count <= numberOfMessages) {
@@ -86,6 +87,5 @@ export async function sendMessages(
     );
     await sender.sendMessages(currentBatch);
     count = count + currentBatch.count;
-    console.log(`${count} messages sent so far`);
   }
 }

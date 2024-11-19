@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { URLBuilder, AbortSignalLike } from "@azure/core-http";
-import { ContainerClient, CommonOptions } from "@azure/storage-blob";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { ContainerClient, CommonOptions } from "@azure/storage-blob";
 import { CHANGE_FEED_SEGMENT_PREFIX, CHANGE_FEED_INITIALIZATION_SEGMENT } from "./constants";
-import { createSpan } from "./tracing";
-import { SpanStatusCode } from "@azure/core-tracing";
-import { BlobChangeFeedEvent, UpdatedBlobProperties } from "../models/BlobChangeFeedEvent";
+import { tracingClient } from "./tracing";
+import type { BlobChangeFeedEvent, UpdatedBlobProperties } from "../models/BlobChangeFeedEvent";
 
 const millisecondsInAnHour = 60 * 60 * 1000;
 export function ceilToNearestHour(date: Date | undefined): Date | undefined {
@@ -29,28 +28,8 @@ export function floorToNearestHour(date: Date | undefined): Date | undefined {
  * @param url - Source URL string
  */
 export function getHost(url: string): string | undefined {
-  const urlParsed = URLBuilder.parse(url);
-  return urlParsed.getHost();
-}
-
-/**
- * Get URI from an URL string.
- *
- * @param url - Source URL string
- */
-export function getURI(url: string): string {
-  const urlParsed = URLBuilder.parse(url);
-  return `${urlParsed.getHost()}${urlParsed.getPort()}${urlParsed.getPath()}`;
-}
-
-// s[0]*31^(n - 1) + s[1]*31^(n - 2) + ... + s[n - 1]
-export function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0; // Bit operation converts operands to 32-bit integers
-  }
-  return hash;
+  const urlParsed = new URL(url);
+  return urlParsed.hostname;
 }
 
 /**
@@ -66,10 +45,9 @@ export interface GetYearsPathsOptions extends CommonOptions {
 
 export async function getYearsPaths(
   containerClient: ContainerClient,
-  options: GetYearsPathsOptions = {}
+  options: GetYearsPathsOptions = {},
 ): Promise<number[]> {
-  const { span, updatedOptions } = createSpan("getYearsPaths", options);
-  try {
+  return tracingClient.withSpan("getYearsPaths", options, async (updatedOptions) => {
     const years: number[] = [];
     for await (const item of containerClient.listBlobsByHierarchy("/", {
       abortSignal: options.abortSignal,
@@ -82,15 +60,7 @@ export async function getYearsPaths(
       }
     }
     return years.sort((a, b) => a - b);
-  } catch (e: any) {
-    span.setStatus({
-      code: SpanStatusCode.ERROR,
-      message: e.message,
-    });
-    throw e;
-  } finally {
-    span.end();
-  }
+  });
 }
 
 /**
@@ -109,11 +79,9 @@ export async function getSegmentsInYear(
   year: number,
   startTime?: Date,
   endTime?: Date,
-  options: GetSegmentsInYearOptions = {}
+  options: GetSegmentsInYearOptions = {},
 ): Promise<string[]> {
-  const { span, updatedOptions } = createSpan("getSegmentsInYear", options);
-
-  try {
+  return tracingClient.withSpan("getSegmentsInYear", options, async (updatedOptions) => {
     const segments: string[] = [];
     const yearBeginTime = new Date(Date.UTC(year, 0));
     if (endTime && yearBeginTime >= endTime) {
@@ -133,15 +101,7 @@ export async function getSegmentsInYear(
       segments.push(item.name);
     }
     return segments;
-  } catch (e: any) {
-    span.setStatus({
-      code: SpanStatusCode.ERROR,
-      message: e.message,
-    });
-    throw e;
-  } finally {
-    span.end();
-  }
+  });
 }
 
 export function parseDateFromSegmentPath(segmentPath: string): Date {

@@ -4,15 +4,14 @@
 
 ```ts
 
-/// <reference types="node" />
-
-import { AbortSignalLike } from '@azure/abort-controller';
-import { AccessToken } from '@azure/core-auth';
+import type { AbortSignalLike } from '@azure/abort-controller';
+import type { AccessToken } from '@azure/core-auth';
 import { AzureLogger } from '@azure/logger';
-import { Debugger } from '@azure/logger';
-import { GetTokenOptions } from '@azure/core-auth';
-import { OperationTracingOptions } from '@azure/core-tracing';
-import { TokenCredential } from '@azure/core-auth';
+import type { Debugger } from '@azure/logger';
+import type { GetTokenOptions } from '@azure/core-auth';
+import { HttpMethods } from '@azure/core-util';
+import type { OperationTracingOptions } from '@azure/core-tracing';
+import type { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface AddPipelineOptions {
@@ -49,6 +48,19 @@ export interface AuthorizeRequestOptions {
 }
 
 // @public
+export function auxiliaryAuthenticationHeaderPolicy(options: AuxiliaryAuthenticationHeaderPolicyOptions): PipelinePolicy;
+
+// @public
+export const auxiliaryAuthenticationHeaderPolicyName = "auxiliaryAuthenticationHeaderPolicy";
+
+// @public
+export interface AuxiliaryAuthenticationHeaderPolicyOptions {
+    credentials?: TokenCredential[];
+    logger?: AzureLogger;
+    scopes: string | string[];
+}
+
+// @public
 export function bearerTokenAuthenticationPolicy(options: BearerTokenAuthenticationPolicyOptions): PipelinePolicy;
 
 // @public
@@ -63,6 +75,12 @@ export interface BearerTokenAuthenticationPolicyOptions {
 }
 
 // @public
+export interface BodyPart {
+    body: ((() => ReadableStream<Uint8Array>) | (() => NodeJS.ReadableStream)) | ReadableStream<Uint8Array> | NodeJS.ReadableStream | Uint8Array | Blob;
+    headers: HttpHeaders;
+}
+
+// @public
 export interface ChallengeCallbacks {
     authorizeRequest?(options: AuthorizeRequestOptions): Promise<void>;
     authorizeRequestOnChallenge?(options: AuthorizeRequestOnChallengeOptions): Promise<boolean>;
@@ -73,6 +91,24 @@ export function createDefaultHttpClient(): HttpClient;
 
 // @public
 export function createEmptyPipeline(): Pipeline;
+
+// @public
+export function createFile(content: Uint8Array, name: string, options?: CreateFileOptions): File;
+
+// @public
+export function createFileFromStream(stream: () => ReadableStream<Uint8Array> | NodeJS.ReadableStream, name: string, options?: CreateFileFromStreamOptions): File;
+
+// @public
+export interface CreateFileFromStreamOptions extends CreateFileOptions {
+    size?: number;
+}
+
+// @public
+export interface CreateFileOptions {
+    lastModified?: number;
+    type?: string;
+    webkitRelativePath?: string;
+}
 
 // @public
 export function createHttpHeaders(rawHeaders?: RawHttpHeadersInput): HttpHeaders;
@@ -121,9 +157,9 @@ export function formDataPolicy(): PipelinePolicy;
 export const formDataPolicyName = "formDataPolicy";
 
 // @public
-export type FormDataValue = string | Blob;
+export type FormDataValue = string | Blob | File;
 
-// @public
+// @public @deprecated
 export function getDefaultProxySettings(proxyUrl?: string): ProxySettings | undefined;
 
 // @public
@@ -142,8 +178,7 @@ export interface HttpHeaders extends Iterable<[string, string]> {
     }): RawHttpHeaders;
 }
 
-// @public
-export type HttpMethods = "GET" | "PUT" | "POST" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS" | "TRACE";
+export { HttpMethods }
 
 // @public
 export interface InternalPipelineOptions extends PipelineOptions {
@@ -173,6 +208,18 @@ export interface LogPolicyOptions {
 }
 
 // @public
+export function multipartPolicy(): PipelinePolicy;
+
+// @public
+export const multipartPolicyName = "multipartPolicy";
+
+// @public
+export interface MultipartRequestBody {
+    boundary?: string;
+    parts: BodyPart[];
+}
+
+// @public
 export function ndJsonPolicy(): PipelinePolicy;
 
 // @public
@@ -195,6 +242,7 @@ export interface PipelineOptions {
     proxyOptions?: ProxySettings;
     redirectOptions?: RedirectPolicyOptions;
     retryOptions?: PipelineRetryOptions;
+    telemetryOptions?: TelemetryOptions;
     tlsOptions?: TlsSettings;
     userAgentOptions?: UserAgentPolicyOptions;
 }
@@ -219,6 +267,7 @@ export interface PipelineRequest {
     formData?: FormDataMap;
     headers: HttpHeaders;
     method: HttpMethods;
+    multipartBody?: MultipartRequestBody;
     onDownloadProgress?: (progress: TransferProgressEvent) => void;
     onUploadProgress?: (progress: TransferProgressEvent) => void;
     proxySettings?: ProxySettings;
@@ -241,6 +290,7 @@ export interface PipelineRequestOptions {
     formData?: FormDataMap;
     headers?: HttpHeaders;
     method?: HttpMethods;
+    multipartBody?: MultipartRequestBody;
     onDownloadProgress?: (progress: TransferProgressEvent) => void;
     onUploadProgress?: (progress: TransferProgressEvent) => void;
     proxySettings?: ProxySettings;
@@ -271,7 +321,7 @@ export interface PipelineRetryOptions {
 }
 
 // @public
-export function proxyPolicy(proxySettings?: ProxySettings | undefined, options?: {
+export function proxyPolicy(proxySettings?: ProxySettings, options?: {
     customNoProxyList?: string[];
 }): PipelinePolicy;
 
@@ -388,6 +438,11 @@ export interface SystemErrorRetryPolicyOptions {
 }
 
 // @public
+export interface TelemetryOptions {
+    clientRequestIdHeaderName?: string;
+}
+
+// @public
 export function throttlingRetryPolicy(options?: ThrottlingRetryPolicyOptions): PipelinePolicy;
 
 // @public
@@ -421,6 +476,7 @@ export const tracingPolicyName = "tracingPolicy";
 
 // @public
 export interface TracingPolicyOptions {
+    additionalAllowedQueryParameters?: string[];
     userAgentPrefix?: string;
 }
 

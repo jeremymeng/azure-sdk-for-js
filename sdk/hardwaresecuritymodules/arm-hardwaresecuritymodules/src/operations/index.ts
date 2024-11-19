@@ -6,5 +6,11 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-export * from "./operations";
+export * from "./cloudHsmClusters";
+export * from "./cloudHsmClusterPrivateLinkResources";
+export * from "./cloudHsmClusterPrivateEndpointConnections";
+export * from "./privateEndpointConnections";
+export * from "./cloudHsmClusterBackupStatus";
+export * from "./cloudHsmClusterRestoreStatus";
 export * from "./dedicatedHsmOperations";
+export * from "./operations";

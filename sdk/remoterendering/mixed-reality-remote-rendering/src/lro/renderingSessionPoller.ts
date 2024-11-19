@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { PollOperationState, Poller, PollOperation, CancelOnProgress } from "@azure/core-lro";
+import type { PollOperationState, PollOperation, CancelOnProgress } from "@azure/core-lro";
+import { Poller } from "@azure/core-lro";
 import { KnownRenderingSessionStatus, KnownRenderingServerSize } from "../generated/models/index";
 import { getSessionInternal, endSessionInternal } from "../internal/commonQueries";
-import { AbortSignalLike } from "@azure/abort-controller";
-import { RemoteRendering } from "../generated/operationsInterfaces";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { RemoteRendering } from "../generated/operationsInterfaces";
 import { delay } from "@azure/core-util";
-import { RenderingSession } from "../internal/renderingSession";
+import type { RenderingSession } from "../internal/renderingSession";
 
 /**
  * Abstract representation of a poller, intended to expose just the minimal API that the user needs to work with.
@@ -130,7 +131,7 @@ class RenderingSessionOperation
   constructor(
     accountId: string,
     operations: RemoteRendering,
-    state: RenderingSessionOperationState
+    state: RenderingSessionOperationState,
   ) {
     this.accountId = accountId;
     this.operations = operations;
@@ -145,7 +146,7 @@ class RenderingSessionOperation
       this.accountId,
       this.operations,
       this.state.latestResponse.sessionId,
-      "RenderingSessionOperation-Update"
+      "RenderingSessionOperation-Update",
     );
     return this;
   }
@@ -165,7 +166,7 @@ class RenderingSessionOperation
       this.operations,
       this.state.latestResponse.sessionId,
       "RenderingSessionOperation-Cancel",
-      options
+      options,
     );
     return this;
   }
@@ -195,14 +196,14 @@ export class RenderingSessionPoller extends Poller<
     accountId: string,
     operations: RemoteRendering,
     renderingSession: RenderingSession,
-    options: RenderingSessionPollerOptions
+    options: RenderingSessionPollerOptions,
   ) {
     super(
       new RenderingSessionOperation(
         accountId,
         operations,
-        new RenderingSessionOperationStateImpl(renderingSession)
-      )
+        new RenderingSessionOperationStateImpl(renderingSession),
+      ),
     );
     if (options.intervalInMs) {
       this.intervalInMs = options.intervalInMs;

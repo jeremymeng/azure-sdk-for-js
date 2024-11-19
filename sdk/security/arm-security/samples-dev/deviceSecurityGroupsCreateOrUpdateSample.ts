@@ -10,6 +10,9 @@
 // Licensed under the MIT License.
 import { DeviceSecurityGroup, SecurityCenter } from "@azure/arm-security";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Use this method to creates or updates the device security group on a specified IoT Hub resource.
@@ -18,7 +21,6 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/stable/2019-08-01/examples/DeviceSecurityGroups/PutDeviceSecurityGroups_example.json
  */
 async function createOrUpdateADeviceSecurityGroupForTheSpecifiedIoTHubResource() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
   const resourceId =
     "subscriptions/20ff7fc3-e762-44dd-bd96-b71116dcdc23/resourceGroups/SampleRG/providers/Microsoft.Devices/iotHubs/sampleiothub";
   const deviceSecurityGroupName = "samplesecuritygroup";
@@ -29,20 +31,22 @@ async function createOrUpdateADeviceSecurityGroupForTheSpecifiedIoTHubResource()
         maxThreshold: 30,
         minThreshold: 0,
         ruleType: "ActiveConnectionsNotInAllowedRange",
-        timeWindowSize: "PT05M"
-      }
-    ]
+        timeWindowSize: "PT05M",
+      },
+    ],
   };
   const credential = new DefaultAzureCredential();
-  const client = new SecurityCenter(credential, subscriptionId);
+  const client = new SecurityCenter(credential);
   const result = await client.deviceSecurityGroups.createOrUpdate(
     resourceId,
     deviceSecurityGroupName,
-    deviceSecurityGroup
+    deviceSecurityGroup,
   );
   console.log(result);
 }
 
-createOrUpdateADeviceSecurityGroupForTheSpecifiedIoTHubResource().catch(
-  console.error
-);
+async function main() {
+  createOrUpdateADeviceSecurityGroupForTheSpecifiedIoTHubResource();
+}
+
+main().catch(console.error);

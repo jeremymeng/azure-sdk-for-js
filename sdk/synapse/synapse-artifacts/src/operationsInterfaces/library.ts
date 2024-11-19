@@ -8,7 +8,7 @@
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
 import * as coreRestPipeline from "@azure/core-rest-pipeline";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   LibraryResource,
   LibraryListOptionalParams,
@@ -19,7 +19,7 @@ import {
   LibraryGetOptionalParams,
   LibraryGetResponse,
   LibraryCreateOptionalParams,
-  LibraryAppendOptionalParams
+  LibraryAppendOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface Library {
    * @param options The options parameters.
    */
   list(
-    options?: LibraryListOptionalParams
+    options?: LibraryListOptionalParams,
   ): PagedAsyncIterableIterator<LibraryResource>;
   /**
    * Flush Library
@@ -40,8 +40,8 @@ export interface Library {
    */
   beginFlush(
     libraryName: string,
-    options?: LibraryFlushOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: LibraryFlushOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Flush Library
    * @param libraryName file name to upload. Minimum length of the filename should be 1 excluding the
@@ -50,7 +50,7 @@ export interface Library {
    */
   beginFlushAndWait(
     libraryName: string,
-    options?: LibraryFlushOptionalParams
+    options?: LibraryFlushOptionalParams,
   ): Promise<void>;
   /**
    * Get Operation result for Library
@@ -59,7 +59,7 @@ export interface Library {
    */
   getOperationResult(
     operationId: string,
-    options?: LibraryGetOperationResultOptionalParams
+    options?: LibraryGetOperationResultOptionalParams,
   ): Promise<LibraryGetOperationResultResponse>;
   /**
    * Delete Library
@@ -69,8 +69,8 @@ export interface Library {
    */
   beginDelete(
     libraryName: string,
-    options?: LibraryDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: LibraryDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Delete Library
    * @param libraryName file name to upload. Minimum length of the filename should be 1 excluding the
@@ -79,7 +79,7 @@ export interface Library {
    */
   beginDeleteAndWait(
     libraryName: string,
-    options?: LibraryDeleteOptionalParams
+    options?: LibraryDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Get Library
@@ -89,7 +89,7 @@ export interface Library {
    */
   get(
     libraryName: string,
-    options?: LibraryGetOptionalParams
+    options?: LibraryGetOptionalParams,
   ): Promise<LibraryGetResponse>;
   /**
    * Creates a library with the library name.
@@ -99,8 +99,8 @@ export interface Library {
    */
   beginCreate(
     libraryName: string,
-    options?: LibraryCreateOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: LibraryCreateOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Creates a library with the library name.
    * @param libraryName file name to upload. Minimum length of the filename should be 1 excluding the
@@ -109,7 +109,7 @@ export interface Library {
    */
   beginCreateAndWait(
     libraryName: string,
-    options?: LibraryCreateOptionalParams
+    options?: LibraryCreateOptionalParams,
   ): Promise<void>;
   /**
    * Append the content to the library resource created using the create operation. The maximum content
@@ -122,6 +122,6 @@ export interface Library {
   append(
     libraryName: string,
     content: coreRestPipeline.RequestBodyType,
-    options?: LibraryAppendOptionalParams
+    options?: LibraryAppendOptionalParams,
   ): Promise<void>;
 }

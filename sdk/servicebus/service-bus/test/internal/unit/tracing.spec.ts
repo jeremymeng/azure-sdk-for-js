@@ -1,30 +1,28 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import {
-  MockInstrumenter,
-  MockTracingSpan,
-  assert,
-  createMockTracingContext,
-} from "@azure/test-utils";
+// Licensed under the MIT License.
+import type { MockTracingSpan } from "@azure-tools/test-utils-vitest";
+import { MockInstrumenter, createMockTracingContext } from "@azure-tools/test-utils-vitest";
 import {
   TRACEPARENT_PROPERTY,
   instrumentMessage,
   toProcessingSpanOptions,
-} from "../../../src/diagnostics/instrumentServiceBusMessage";
-import { toSpanOptions, tracingClient } from "../../../src/diagnostics/tracing";
-
-import Sinon from "sinon";
-import { TracingContext } from "@azure/core-tracing";
+} from "../../../src/diagnostics/instrumentServiceBusMessage.js";
+import { toSpanOptions, tracingClient } from "../../../src/diagnostics/tracing.js";
+import type { TracingContext } from "@azure/core-tracing";
 import Long from "long";
-import { ServiceBusReceivedMessage } from "../../../src/serviceBusMessage";
+import type { ServiceBusReceivedMessage } from "../../../src/serviceBusMessage.js";
+import { describe, it, vi, afterEach } from "vitest";
+import { assert, expect } from "../../public/utils/chai.js";
 
 describe("tracing", () => {
   describe("#getAdditionalSpanOptions", () => {
     it("returns the initial set of attributes", () => {
-      assert.deepEqual(toSpanOptions({ entityPath: "testPath", host: "testHost" }), {
+      assert.deepEqual(toSpanOptions({ entityPath: "testPath", host: "testHost" }, "receive"), {
         spanAttributes: {
-          "message_bus.destination": "testPath",
-          "peer.address": "testHost",
+          "messaging.operation": "receive",
+          "messaging.source.name": "testPath",
+          "messaging.system": "servicebus",
+          "net.peer.name": "testHost",
         },
       });
     });
@@ -32,19 +30,19 @@ describe("tracing", () => {
     it("sets the spanKind if provided", () => {
       const expectedSpanKind = "client";
       assert.equal(
-        toSpanOptions({ entityPath: "", host: "" }, expectedSpanKind).spanKind,
-        expectedSpanKind
+        toSpanOptions({ entityPath: "", host: "" }, "receive", expectedSpanKind).spanKind,
+        expectedSpanKind,
       );
     });
   });
 
   describe("#instrumentMessage", () => {
     afterEach(() => {
-      Sinon.restore();
+      vi.restoreAllMocks();
     });
 
     it("is idempotent", () => {
-      const tracingClientSpy = Sinon.spy(tracingClient, "startSpan");
+      const tracingClientSpy = vi.spyOn(tracingClient, "startSpan");
       const instrumentedMessage = {
         body: "test",
         applicationProperties: {
@@ -55,11 +53,12 @@ describe("tracing", () => {
         instrumentedMessage,
         {},
         "testPath",
-        "testHost"
+        "testHost",
+        "receive",
       );
       assert.notExists(spanContext);
       assert.equal(message.applicationProperties?.[TRACEPARENT_PROPERTY], "exists");
-      assert.equal(tracingClientSpy.callCount, 0);
+      expect(tracingClientSpy).not.toHaveBeenCalled();
     });
 
     it("returns early if the span is not recording", () => {
@@ -67,7 +66,7 @@ describe("tracing", () => {
       const { span: nonRecordingSpan } = instrumenter.startSpan("test");
       (nonRecordingSpan as MockTracingSpan).setIsRecording(false);
       // Setup our tracingClient to ensure we reach the happy path.
-      Sinon.stub(tracingClient, "startSpan").returns({
+      vi.spyOn(tracingClient, "startSpan").mockReturnValue({
         span: nonRecordingSpan,
         updatedOptions: { tracingOptions: { tracingContext: createMockTracingContext() } },
       });
@@ -75,7 +74,8 @@ describe("tracing", () => {
         { body: "", applicationProperties: undefined },
         {},
         "testPath",
-        "testHost"
+        "testHost",
+        "receive",
       );
       assert.notExists(spanContext); // was not instrumented
       assert.notExists(message.applicationProperties?.[TRACEPARENT_PROPERTY]);
@@ -88,11 +88,11 @@ describe("tracing", () => {
         (recordingSpan as MockTracingSpan).setIsRecording(true);
 
         // Setup our tracingClient to ensure we reach the happy path.
-        Sinon.stub(tracingClient, "startSpan").returns({
+        vi.spyOn(tracingClient, "startSpan").mockReturnValue({
           span: recordingSpan,
           updatedOptions: { tracingOptions: { tracingContext: createMockTracingContext() } },
         });
-        Sinon.stub(tracingClient, "createRequestHeaders").returns({
+        vi.spyOn(tracingClient, "createRequestHeaders").mockReturnValue({
           traceparent: "fake-traceparent-header",
         });
 
@@ -100,12 +100,13 @@ describe("tracing", () => {
           { body: "test", applicationProperties: undefined },
           {},
           "testPath",
-          "testHost"
+          "testHost",
+          "receive",
         );
 
         assert.equal(
           message.applicationProperties?.[TRACEPARENT_PROPERTY],
-          "fake-traceparent-header"
+          "fake-traceparent-header",
         );
       });
     });
@@ -119,12 +120,15 @@ describe("tracing", () => {
           },
           {
             host: "testHost",
-          }
+          },
+          "receive",
         );
         assert.equal(processingSpanOptions.spanKind, "consumer");
         assert.deepEqual(processingSpanOptions.spanAttributes, {
-          "message_bus.destination": "testPath",
-          "peer.address": "testHost",
+          "messaging.operation": "receive",
+          "messaging.source.name": "testPath",
+          "messaging.system": "servicebus",
+          "net.peer.name": "testHost",
         });
       });
 
@@ -144,7 +148,7 @@ describe("tracing", () => {
           },
         };
         const fakeContext = {} as TracingContext;
-        Sinon.stub(tracingClient, "parseTraceparentHeader").returns(fakeContext);
+        vi.spyOn(tracingClient, "parseTraceparentHeader").mockReturnValue(fakeContext);
 
         const processingSpanOptions = toProcessingSpanOptions(
           [requiredMessageProperties],
@@ -153,7 +157,8 @@ describe("tracing", () => {
           },
           {
             host: "testHost",
-          }
+          },
+          "receive",
         );
 
         assert.lengthOf(processingSpanOptions.spanLinks!, 1);
@@ -172,16 +177,22 @@ describe("tracing", () => {
         },
       };
 
-      const { message, spanContext } = instrumentMessage(alreadyInstrumentedMessage, {}, "", "");
+      const { message, spanContext } = instrumentMessage(
+        alreadyInstrumentedMessage,
+        {},
+        "",
+        "",
+        "receive",
+      );
 
       assert.equal(
         message,
         alreadyInstrumentedMessage,
-        "Messages that are already instrumented do not get copied"
+        "Messages that are already instrumented do not get copied",
       );
       assert.isUndefined(
         spanContext,
-        "Messages that are already instrumented do not get a new Span (or SpanContext)"
+        "Messages that are already instrumented do not get a new Span (or SpanContext)",
       );
     });
   });

@@ -6,10 +6,10 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   PurgeParameters,
-  EndpointsPurgeContentOptionalParams
+  EndpointsPurgeContentOptionalParams,
 } from "../models";
 
 /** Interface representing a Endpoints. */
@@ -27,8 +27,8 @@ export interface Endpoints {
     resourceGroupName: string,
     frontDoorName: string,
     contentFilePaths: PurgeParameters,
-    options?: EndpointsPurgeContentOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: EndpointsPurgeContentOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Removes a content from Front Door.
    * @param resourceGroupName Name of the Resource group within the Azure subscription.
@@ -42,6 +42,6 @@ export interface Endpoints {
     resourceGroupName: string,
     frontDoorName: string,
     contentFilePaths: PurgeParameters,
-    options?: EndpointsPurgeContentOptionalParams
+    options?: EndpointsPurgeContentOptionalParams,
   ): Promise<void>;
 }

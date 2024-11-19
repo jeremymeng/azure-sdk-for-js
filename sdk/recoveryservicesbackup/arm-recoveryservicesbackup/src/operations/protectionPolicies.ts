@@ -11,15 +11,19 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { RecoveryServicesBackupClient } from "../recoveryServicesBackupClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ProtectionPoliciesGetOptionalParams,
   ProtectionPoliciesGetResponse,
   ProtectionPolicyResource,
   ProtectionPoliciesCreateOrUpdateOptionalParams,
   ProtectionPoliciesCreateOrUpdateResponse,
-  ProtectionPoliciesDeleteOptionalParams
+  ProtectionPoliciesDeleteOptionalParams,
 } from "../models";
 
 /** Class containing ProtectionPolicies operations. */
@@ -48,11 +52,11 @@ export class ProtectionPoliciesImpl implements ProtectionPolicies {
     vaultName: string,
     resourceGroupName: string,
     policyName: string,
-    options?: ProtectionPoliciesGetOptionalParams
+    options?: ProtectionPoliciesGetOptionalParams,
   ): Promise<ProtectionPoliciesGetResponse> {
     return this.client.sendOperationRequest(
       { vaultName, resourceGroupName, policyName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -72,11 +76,11 @@ export class ProtectionPoliciesImpl implements ProtectionPolicies {
     resourceGroupName: string,
     policyName: string,
     parameters: ProtectionPolicyResource,
-    options?: ProtectionPoliciesCreateOrUpdateOptionalParams
+    options?: ProtectionPoliciesCreateOrUpdateOptionalParams,
   ): Promise<ProtectionPoliciesCreateOrUpdateResponse> {
     return this.client.sendOperationRequest(
       { vaultName, resourceGroupName, policyName, parameters, options },
-      createOrUpdateOperationSpec
+      createOrUpdateOperationSpec,
     );
   }
 
@@ -94,25 +98,24 @@ export class ProtectionPoliciesImpl implements ProtectionPolicies {
     vaultName: string,
     resourceGroupName: string,
     policyName: string,
-    options?: ProtectionPoliciesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: ProtectionPoliciesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -121,8 +124,8 @@ export class ProtectionPoliciesImpl implements ProtectionPolicies {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -130,19 +133,19 @@ export class ProtectionPoliciesImpl implements ProtectionPolicies {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { vaultName, resourceGroupName, policyName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { vaultName, resourceGroupName, policyName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -162,13 +165,13 @@ export class ProtectionPoliciesImpl implements ProtectionPolicies {
     vaultName: string,
     resourceGroupName: string,
     policyName: string,
-    options?: ProtectionPoliciesDeleteOptionalParams
+    options?: ProtectionPoliciesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       vaultName,
       resourceGroupName,
       policyName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -177,16 +180,15 @@ export class ProtectionPoliciesImpl implements ProtectionPolicies {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ProtectionPolicyResource
+      bodyMapper: Mappers.ProtectionPolicyResource,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -194,23 +196,22 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.vaultName,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.policyName
+    Parameters.policyName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ProtectionPolicyResource
+      bodyMapper: Mappers.ProtectionPolicyResource,
     },
     202: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters13,
   queryParameters: [Parameters.apiVersion],
@@ -219,15 +220,18 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.vaultName,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.policyName
+    Parameters.policyName,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [
+    Parameters.accept,
+    Parameters.contentType,
+    Parameters.xMsAuthorizationAuxiliary,
+  ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -235,8 +239,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -244,8 +248,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.vaultName,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.policyName
+    Parameters.policyName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
+import type { TextAnalyticsErrorResult, TextAnalyticsSuccessResult } from "./textAnalyticsResult";
 import {
-  TextAnalyticsErrorResult,
-  TextAnalyticsSuccessResult,
   makeTextAnalyticsErrorResult,
   makeTextAnalyticsSuccessResult,
 } from "./textAnalyticsResult";
-import {
+import type {
   DocumentSentiment,
   DocumentSentimentLabel,
   SentenceSentiment as GeneratedSentenceSentiment,
@@ -20,7 +19,8 @@ import {
   TargetRelation,
   TextAnalyticsError,
 } from "./generated/models";
-import { AssessmentIndex, parseAssessmentIndex } from "./util";
+import type { AssessmentIndex } from "./util";
+import { parseAssessmentIndex } from "./util";
 
 /**
  * The result of the analyze sentiment operation on a single document.
@@ -144,7 +144,7 @@ export type AnalyzeSentimentErrorResult = TextAnalyticsErrorResult;
  * @internal
  */
 export function makeAnalyzeSentimentResult(
-  result: DocumentSentiment
+  result: DocumentSentiment,
 ): AnalyzeSentimentSuccessResult {
   const {
     id,
@@ -167,7 +167,7 @@ export function makeAnalyzeSentimentResult(
  */
 export function makeAnalyzeSentimentErrorResult(
   id: string,
-  error: TextAnalyticsError
+  error: TextAnalyticsError,
 ): AnalyzeSentimentErrorResult {
   return makeTextAnalyticsErrorResult(id, error);
 }
@@ -183,7 +183,7 @@ export function makeAnalyzeSentimentErrorResult(
  */
 function convertGeneratedSentenceSentiment(
   sentence: GeneratedSentenceSentiment,
-  result: DocumentSentiment
+  result: DocumentSentiment,
 ): SentenceSentiment {
   return {
     confidenceScores: sentence.confidenceScores,
@@ -204,7 +204,7 @@ function convertGeneratedSentenceSentiment(
             assessments: target.relations
               .filter((relation) => relation.relationType === "assessment")
               .map((relation) => convertTargetRelationToAssessmentSentiment(relation, result)),
-          })
+          }),
         )
       : [],
   };
@@ -222,7 +222,7 @@ function convertGeneratedSentenceSentiment(
  */
 function convertTargetRelationToAssessmentSentiment(
   targetRelation: TargetRelation,
-  result: DocumentSentiment
+  result: DocumentSentiment,
 ): AssessmentSentiment {
   const assessmentPtr = targetRelation.ref;
   const assessmentIndex: AssessmentIndex = parseAssessmentIndex(assessmentPtr);

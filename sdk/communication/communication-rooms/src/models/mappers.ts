@@ -1,73 +1,95 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import * as RestModel from "../generated/src/models";
-import { Room, RoomParticipant } from "./models";
-import {
-  CommunicationUserIdentifier,
-  SerializedCommunicationIdentifier,
-} from "@azure/communication-common";
-import {
-  deserializeCommunicationIdentifier,
-  getIdentifierKind,
-  serializeCommunicationIdentifier,
-} from "@azure/communication-common";
+import type * as RestModel from "../generated/src/models";
+import type {
+  CommunicationRoom,
+  ParticipantRole,
+  RoomParticipant,
+  RoomParticipantPatch,
+} from "./models";
+import type { CommunicationIdentifier } from "@azure/communication-common";
+import { getIdentifierKind, getIdentifierRawId } from "@azure/communication-common";
+import type {
+  ParticipantProperties,
+  RoomParticipant as RESTRoomParticipant,
+} from "../generated/src/models";
+import { createIdentifierFromRawId } from "@azure/communication-common";
+
+const defaultRole: ParticipantRole = "Attendee";
 
 /**
  * @internal
  * Mapping room participant customer model to room participant REST model.
  */
 export const mapToRoomParticipantRestModel = (
-  roomParticipant: RoomParticipant
-): RestModel.RoomParticipant => {
-  const { id, ...rest } = roomParticipant;
+  roomParticipant: RoomParticipantPatch,
+): RESTRoomParticipant => {
+  const { id, role } = roomParticipant;
   if (getIdentifierKind(id).kind !== "communicationUser") {
     throwException("We currently only support CommunicationUsers");
   }
   return {
-    communicationIdentifier: serializeCommunicationIdentifier(id),
-    ...rest,
-  };
-};
-
-/**
- * Mapping CommunicationUserIdentifier to room participant REST model.
- */
-export const mapCommunicationIdentifierToRoomParticipantRestModel = (
-  communicationIdentifier: CommunicationUserIdentifier
-): RestModel.RoomParticipant => {
-  return {
-    communicationIdentifier: serializeCommunicationIdentifier(communicationIdentifier),
+    rawId: getIdentifierRawId(id),
+    role: role || defaultRole,
   };
 };
 
 /**
  * @internal
- * Mapping room participant REST model to room participant SDK model.
+ * Mapping room participant REST model to room participant customer model
  */
-export const mapToRoomParticipantSdkModel = (
-  roomParticipant: RestModel.RoomParticipant
+export const mapToRoomParticipantSDKModel = (
+  roomParticipant: RESTRoomParticipant,
 ): RoomParticipant => {
-  const { communicationIdentifier, ...rest } = roomParticipant;
+  const { rawId, role } = roomParticipant;
   return {
-    id: deserializeCommunicationIdentifier(
-      communicationIdentifier as SerializedCommunicationIdentifier
-    ),
-    ...rest,
+    id: createIdentifierFromRawId(rawId),
+    role: role || defaultRole,
   };
 };
 
 /**
  * @internal
- * Mapping room REST model to room SDK model.
+ * Mapping room participant role to participants rawId.
  */
-export const mapToRoomSdkModel = (result: RestModel.RoomModel): Room => {
-  const { id, createdDateTime, participants, roomJoinPolicy, ...rest } = result;
+export const mapRoomParticipantToRawId = (
+  participants?: RoomParticipantPatch[],
+): Record<string, ParticipantProperties> => {
+  participants = participants ?? [];
+  const mappedParticipants: Record<string, RestModel.ParticipantProperties> = {};
+  for (const participant of participants) {
+    const mappedParticipant = mapToRoomParticipantRestModel(participant);
+    mappedParticipants[mappedParticipant.rawId] = { role: mappedParticipant.role || defaultRole };
+  }
+
+  return mappedParticipants;
+};
+
+/**
+ * @internal
+ * Mapping communication identifier for removal.
+ */
+export const mapRoomParticipantForRemoval = (
+  ids: CommunicationIdentifier[],
+): Record<string, ParticipantProperties> => {
+  const mappedParticipants: Record<string, any> = {};
+  for (const id of ids) {
+    const rawId = getIdentifierRawId(id);
+    mappedParticipants[rawId] = null;
+  }
+
+  return mappedParticipants;
+};
+
+/**
+ * @internal
+ * Mapping room rest model to room customer model.
+ */
+export const mapCommunicationRoomToSDKModel = (room: RestModel.RoomModel): CommunicationRoom => {
+  const { createdAt, ...rest } = room;
   return {
-    id: id ?? throwException("Room ID cannot be null."),
-    createdOn: createdDateTime,
-    participants: participants?.map((participant) => mapToRoomParticipantSdkModel(participant)),
-    joinPolicy: roomJoinPolicy,
+    createdOn: createdAt,
     ...rest,
   };
 };

@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-
+// Licensed under the MIT License.
+/* eslint-disable no-unused-expressions */
 import assert from "assert";
-import { Container, CosmosClient } from "../../../src";
+import type { Container } from "../../../src";
+import { CosmosClient } from "../../../src";
 import { addEntropy, removeAllDatabases } from "../common/TestHelpers";
 import { endpoint } from "../common/_testConfig";
 import { masterKey } from "../common/_fakeTestSecrets";
+import { expect } from "chai";
 
 describe("Timeout", function () {
   beforeEach(async function () {
@@ -28,7 +30,8 @@ describe("Timeout", function () {
       plugins: [
         {
           on: "request",
-          plugin: async (context, next) => {
+          plugin: async (context, diagNode, next) => {
+            expect(diagNode, "DiagnosticsNode should not be undefined or null").to.exist;
             // Simulate a request longer than our timeout duration
             await new Promise<void>((resolve) => {
               setTimeout(() => {

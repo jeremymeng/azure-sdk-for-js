@@ -10,16 +10,18 @@
 // Licensed under the MIT License.
 const { DeviceUpdate } = require("@azure/arm-deviceupdate");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to (INTERNAL - DO NOT USE) Creates or updates the specified private endpoint connection proxy resource associated with the device update account.
  *
  * @summary (INTERNAL - DO NOT USE) Creates or updates the specified private endpoint connection proxy resource associated with the device update account.
- * x-ms-original-file: specification/deviceupdate/resource-manager/Microsoft.DeviceUpdate/stable/2022-10-01/examples/PrivateEndpointConnectionProxies/PrivateEndpointConnectionProxy_CreateOrUpdate.json
+ * x-ms-original-file: specification/deviceupdate/resource-manager/Microsoft.DeviceUpdate/stable/2023-07-01/examples/PrivateEndpointConnectionProxies/PrivateEndpointConnectionProxy_CreateOrUpdate.json
  */
 async function privateEndpointConnectionProxyCreateOrUpdate() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
-  const resourceGroupName = "test-rg";
+  const subscriptionId =
+    process.env["DEVICEUPDATE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
+  const resourceGroupName = process.env["DEVICEUPDATE_RESOURCE_GROUP"] || "test-rg";
   const accountName = "contoso";
   const privateEndpointConnectionProxyId = "peexample01";
   const privateEndpointConnectionProxy = {
@@ -50,9 +52,13 @@ async function privateEndpointConnectionProxyCreateOrUpdate() {
     resourceGroupName,
     accountName,
     privateEndpointConnectionProxyId,
-    privateEndpointConnectionProxy
+    privateEndpointConnectionProxy,
   );
   console.log(result);
 }
 
-privateEndpointConnectionProxyCreateOrUpdate().catch(console.error);
+async function main() {
+  privateEndpointConnectionProxyCreateOrUpdate();
+}
+
+main().catch(console.error);

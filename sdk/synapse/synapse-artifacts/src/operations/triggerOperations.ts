@@ -14,8 +14,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ArtifactsClient } from "../artifactsClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   TriggerResource,
   TriggerGetTriggersByWorkspaceNextOptionalParams,
@@ -34,7 +38,7 @@ import {
   TriggerUnsubscribeTriggerFromEventsResponse,
   TriggerStartTriggerOptionalParams,
   TriggerStopTriggerOptionalParams,
-  TriggerGetTriggersByWorkspaceNextResponse
+  TriggerGetTriggersByWorkspaceNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -55,7 +59,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
    * @param options The options parameters.
    */
   public listTriggersByWorkspace(
-    options?: TriggerGetTriggersByWorkspaceOptionalParams
+    options?: TriggerGetTriggersByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<TriggerResource> {
     const iter = this.getTriggersByWorkspacePagingAll(options);
     return {
@@ -70,13 +74,13 @@ export class TriggerOperationsImpl implements TriggerOperations {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.getTriggersByWorkspacePagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *getTriggersByWorkspacePagingPage(
     options?: TriggerGetTriggersByWorkspaceOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<TriggerResource[]> {
     let result: TriggerGetTriggersByWorkspaceResponse;
     let continuationToken = settings?.continuationToken;
@@ -90,7 +94,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
     while (continuationToken) {
       result = await this._getTriggersByWorkspaceNext(
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -100,7 +104,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
   }
 
   private async *getTriggersByWorkspacePagingAll(
-    options?: TriggerGetTriggersByWorkspaceOptionalParams
+    options?: TriggerGetTriggersByWorkspaceOptionalParams,
   ): AsyncIterableIterator<TriggerResource> {
     for await (const page of this.getTriggersByWorkspacePagingPage(options)) {
       yield* page;
@@ -112,7 +116,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
    * @param options The options parameters.
    */
   private async _getTriggersByWorkspace(
-    options?: TriggerGetTriggersByWorkspaceOptionalParams
+    options?: TriggerGetTriggersByWorkspaceOptionalParams,
   ): Promise<TriggerGetTriggersByWorkspaceResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient._getTriggersByWorkspace",
@@ -120,9 +124,9 @@ export class TriggerOperationsImpl implements TriggerOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { options },
-          getTriggersByWorkspaceOperationSpec
+          getTriggersByWorkspaceOperationSpec,
         ) as Promise<TriggerGetTriggersByWorkspaceResponse>;
-      }
+      },
     );
   }
 
@@ -135,38 +139,38 @@ export class TriggerOperationsImpl implements TriggerOperations {
   async beginCreateOrUpdateTrigger(
     triggerName: string,
     trigger: TriggerResource,
-    options?: TriggerCreateOrUpdateTriggerOptionalParams
+    options?: TriggerCreateOrUpdateTriggerOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TriggerCreateOrUpdateTriggerResponse>,
+    SimplePollerLike<
+      OperationState<TriggerCreateOrUpdateTriggerResponse>,
       TriggerCreateOrUpdateTriggerResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<TriggerCreateOrUpdateTriggerResponse> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginCreateOrUpdateTrigger",
         options ?? {},
         async () => {
-          return this.client.sendOperationRequest(args, spec) as Promise<
-            TriggerCreateOrUpdateTriggerResponse
-          >;
-        }
+          return this.client.sendOperationRequest(
+            args,
+            spec,
+          ) as Promise<TriggerCreateOrUpdateTriggerResponse>;
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -175,8 +179,8 @@ export class TriggerOperationsImpl implements TriggerOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -184,19 +188,22 @@ export class TriggerOperationsImpl implements TriggerOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { triggerName, trigger, options },
-      createOrUpdateTriggerOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { triggerName, trigger, options },
+      spec: createOrUpdateTriggerOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      TriggerCreateOrUpdateTriggerResponse,
+      OperationState<TriggerCreateOrUpdateTriggerResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -211,12 +218,12 @@ export class TriggerOperationsImpl implements TriggerOperations {
   async beginCreateOrUpdateTriggerAndWait(
     triggerName: string,
     trigger: TriggerResource,
-    options?: TriggerCreateOrUpdateTriggerOptionalParams
+    options?: TriggerCreateOrUpdateTriggerOptionalParams,
   ): Promise<TriggerCreateOrUpdateTriggerResponse> {
     const poller = await this.beginCreateOrUpdateTrigger(
       triggerName,
       trigger,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -228,7 +235,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async getTrigger(
     triggerName: string,
-    options?: TriggerGetTriggerOptionalParams
+    options?: TriggerGetTriggerOptionalParams,
   ): Promise<TriggerGetTriggerResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient.getTrigger",
@@ -236,9 +243,9 @@ export class TriggerOperationsImpl implements TriggerOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { triggerName, options },
-          getTriggerOperationSpec
+          getTriggerOperationSpec,
         ) as Promise<TriggerGetTriggerResponse>;
-      }
+      },
     );
   }
 
@@ -249,31 +256,30 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginDeleteTrigger(
     triggerName: string,
-    options?: TriggerDeleteTriggerOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: TriggerDeleteTriggerOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginDeleteTrigger",
         options ?? {},
         async () => {
           return this.client.sendOperationRequest(args, spec) as Promise<void>;
-        }
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -282,8 +288,8 @@ export class TriggerOperationsImpl implements TriggerOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -291,19 +297,19 @@ export class TriggerOperationsImpl implements TriggerOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { triggerName, options },
-      deleteTriggerOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { triggerName, options },
+      spec: deleteTriggerOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -316,7 +322,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginDeleteTriggerAndWait(
     triggerName: string,
-    options?: TriggerDeleteTriggerOptionalParams
+    options?: TriggerDeleteTriggerOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDeleteTrigger(triggerName, options);
     return poller.pollUntilDone();
@@ -329,38 +335,38 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginSubscribeTriggerToEvents(
     triggerName: string,
-    options?: TriggerSubscribeTriggerToEventsOptionalParams
+    options?: TriggerSubscribeTriggerToEventsOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TriggerSubscribeTriggerToEventsResponse>,
+    SimplePollerLike<
+      OperationState<TriggerSubscribeTriggerToEventsResponse>,
       TriggerSubscribeTriggerToEventsResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<TriggerSubscribeTriggerToEventsResponse> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginSubscribeTriggerToEvents",
         options ?? {},
         async () => {
-          return this.client.sendOperationRequest(args, spec) as Promise<
-            TriggerSubscribeTriggerToEventsResponse
-          >;
-        }
+          return this.client.sendOperationRequest(
+            args,
+            spec,
+          ) as Promise<TriggerSubscribeTriggerToEventsResponse>;
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -369,8 +375,8 @@ export class TriggerOperationsImpl implements TriggerOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -378,19 +384,22 @@ export class TriggerOperationsImpl implements TriggerOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { triggerName, options },
-      subscribeTriggerToEventsOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { triggerName, options },
+      spec: subscribeTriggerToEventsOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      TriggerSubscribeTriggerToEventsResponse,
+      OperationState<TriggerSubscribeTriggerToEventsResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -403,11 +412,11 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginSubscribeTriggerToEventsAndWait(
     triggerName: string,
-    options?: TriggerSubscribeTriggerToEventsOptionalParams
+    options?: TriggerSubscribeTriggerToEventsOptionalParams,
   ): Promise<TriggerSubscribeTriggerToEventsResponse> {
     const poller = await this.beginSubscribeTriggerToEvents(
       triggerName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -419,7 +428,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async getEventSubscriptionStatus(
     triggerName: string,
-    options?: TriggerGetEventSubscriptionStatusOptionalParams
+    options?: TriggerGetEventSubscriptionStatusOptionalParams,
   ): Promise<TriggerGetEventSubscriptionStatusResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient.getEventSubscriptionStatus",
@@ -427,9 +436,9 @@ export class TriggerOperationsImpl implements TriggerOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { triggerName, options },
-          getEventSubscriptionStatusOperationSpec
+          getEventSubscriptionStatusOperationSpec,
         ) as Promise<TriggerGetEventSubscriptionStatusResponse>;
-      }
+      },
     );
   }
 
@@ -440,38 +449,38 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginUnsubscribeTriggerFromEvents(
     triggerName: string,
-    options?: TriggerUnsubscribeTriggerFromEventsOptionalParams
+    options?: TriggerUnsubscribeTriggerFromEventsOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<TriggerUnsubscribeTriggerFromEventsResponse>,
+    SimplePollerLike<
+      OperationState<TriggerUnsubscribeTriggerFromEventsResponse>,
       TriggerUnsubscribeTriggerFromEventsResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<TriggerUnsubscribeTriggerFromEventsResponse> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginUnsubscribeTriggerFromEvents",
         options ?? {},
         async () => {
-          return this.client.sendOperationRequest(args, spec) as Promise<
-            TriggerUnsubscribeTriggerFromEventsResponse
-          >;
-        }
+          return this.client.sendOperationRequest(
+            args,
+            spec,
+          ) as Promise<TriggerUnsubscribeTriggerFromEventsResponse>;
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -480,8 +489,8 @@ export class TriggerOperationsImpl implements TriggerOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -489,19 +498,22 @@ export class TriggerOperationsImpl implements TriggerOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { triggerName, options },
-      unsubscribeTriggerFromEventsOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { triggerName, options },
+      spec: unsubscribeTriggerFromEventsOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      TriggerUnsubscribeTriggerFromEventsResponse,
+      OperationState<TriggerUnsubscribeTriggerFromEventsResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -514,11 +526,11 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginUnsubscribeTriggerFromEventsAndWait(
     triggerName: string,
-    options?: TriggerUnsubscribeTriggerFromEventsOptionalParams
+    options?: TriggerUnsubscribeTriggerFromEventsOptionalParams,
   ): Promise<TriggerUnsubscribeTriggerFromEventsResponse> {
     const poller = await this.beginUnsubscribeTriggerFromEvents(
       triggerName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -530,31 +542,30 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginStartTrigger(
     triggerName: string,
-    options?: TriggerStartTriggerOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: TriggerStartTriggerOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginStartTrigger",
         options ?? {},
         async () => {
           return this.client.sendOperationRequest(args, spec) as Promise<void>;
-        }
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -563,8 +574,8 @@ export class TriggerOperationsImpl implements TriggerOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -572,19 +583,19 @@ export class TriggerOperationsImpl implements TriggerOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { triggerName, options },
-      startTriggerOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { triggerName, options },
+      spec: startTriggerOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -597,7 +608,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginStartTriggerAndWait(
     triggerName: string,
-    options?: TriggerStartTriggerOptionalParams
+    options?: TriggerStartTriggerOptionalParams,
   ): Promise<void> {
     const poller = await this.beginStartTrigger(triggerName, options);
     return poller.pollUntilDone();
@@ -610,31 +621,30 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginStopTrigger(
     triggerName: string,
-    options?: TriggerStopTriggerOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: TriggerStopTriggerOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return tracingClient.withSpan(
         "ArtifactsClient.beginStopTrigger",
         options ?? {},
         async () => {
           return this.client.sendOperationRequest(args, spec) as Promise<void>;
-        }
+        },
       );
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -643,8 +653,8 @@ export class TriggerOperationsImpl implements TriggerOperations {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -652,19 +662,19 @@ export class TriggerOperationsImpl implements TriggerOperations {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { triggerName, options },
-      stopTriggerOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { triggerName, options },
+      spec: stopTriggerOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -677,7 +687,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   async beginStopTriggerAndWait(
     triggerName: string,
-    options?: TriggerStopTriggerOptionalParams
+    options?: TriggerStopTriggerOptionalParams,
   ): Promise<void> {
     const poller = await this.beginStopTrigger(triggerName, options);
     return poller.pollUntilDone();
@@ -690,7 +700,7 @@ export class TriggerOperationsImpl implements TriggerOperations {
    */
   private async _getTriggersByWorkspaceNext(
     nextLink: string,
-    options?: TriggerGetTriggersByWorkspaceNextOptionalParams
+    options?: TriggerGetTriggersByWorkspaceNextOptionalParams,
   ): Promise<TriggerGetTriggersByWorkspaceNextResponse> {
     return tracingClient.withSpan(
       "ArtifactsClient._getTriggersByWorkspaceNext",
@@ -698,9 +708,9 @@ export class TriggerOperationsImpl implements TriggerOperations {
       async (options) => {
         return this.client.sendOperationRequest(
           { nextLink, options },
-          getTriggersByWorkspaceNextOperationSpec
+          getTriggersByWorkspaceNextOperationSpec,
         ) as Promise<TriggerGetTriggersByWorkspaceNextResponse>;
-      }
+      },
     );
   }
 }
@@ -712,64 +722,64 @@ const getTriggersByWorkspaceOperationSpec: coreClient.OperationSpec = {
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.TriggerListResponse
+      bodyMapper: Mappers.TriggerListResponse,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateTriggerOperationSpec: coreClient.OperationSpec = {
   path: "/triggers/{triggerName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.TriggerResource
+      bodyMapper: Mappers.TriggerResource,
     },
     201: {
-      bodyMapper: Mappers.TriggerResource
+      bodyMapper: Mappers.TriggerResource,
     },
     202: {
-      bodyMapper: Mappers.TriggerResource
+      bodyMapper: Mappers.TriggerResource,
     },
     204: {
-      bodyMapper: Mappers.TriggerResource
+      bodyMapper: Mappers.TriggerResource,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.trigger,
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.triggerName],
   headerParameters: [
     Parameters.accept,
     Parameters.contentType,
-    Parameters.ifMatch
+    Parameters.ifMatch,
   ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getTriggerOperationSpec: coreClient.OperationSpec = {
   path: "/triggers/{triggerName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.TriggerResource
+      bodyMapper: Mappers.TriggerResource,
     },
     304: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.triggerName],
   headerParameters: [Parameters.accept, Parameters.ifNoneMatch],
-  serializer
+  serializer,
 };
 const deleteTriggerOperationSpec: coreClient.OperationSpec = {
   path: "/triggers/{triggerName}",
@@ -780,79 +790,79 @@ const deleteTriggerOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.triggerName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const subscribeTriggerToEventsOperationSpec: coreClient.OperationSpec = {
   path: "/triggers/{triggerName}/subscribeToEvents",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.TriggerSubscriptionOperationStatus
+      bodyMapper: Mappers.TriggerSubscriptionOperationStatus,
     },
     201: {
-      bodyMapper: Mappers.TriggerSubscriptionOperationStatus
+      bodyMapper: Mappers.TriggerSubscriptionOperationStatus,
     },
     202: {
-      bodyMapper: Mappers.TriggerSubscriptionOperationStatus
+      bodyMapper: Mappers.TriggerSubscriptionOperationStatus,
     },
     204: {
-      bodyMapper: Mappers.TriggerSubscriptionOperationStatus
+      bodyMapper: Mappers.TriggerSubscriptionOperationStatus,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.triggerName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getEventSubscriptionStatusOperationSpec: coreClient.OperationSpec = {
   path: "/triggers/{triggerName}/getEventSubscriptionStatus",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.TriggerSubscriptionOperationStatus
+      bodyMapper: Mappers.TriggerSubscriptionOperationStatus,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.triggerName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const unsubscribeTriggerFromEventsOperationSpec: coreClient.OperationSpec = {
   path: "/triggers/{triggerName}/unsubscribeFromEvents",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.TriggerSubscriptionOperationStatus
+      bodyMapper: Mappers.TriggerSubscriptionOperationStatus,
     },
     201: {
-      bodyMapper: Mappers.TriggerSubscriptionOperationStatus
+      bodyMapper: Mappers.TriggerSubscriptionOperationStatus,
     },
     202: {
-      bodyMapper: Mappers.TriggerSubscriptionOperationStatus
+      bodyMapper: Mappers.TriggerSubscriptionOperationStatus,
     },
     204: {
-      bodyMapper: Mappers.TriggerSubscriptionOperationStatus
+      bodyMapper: Mappers.TriggerSubscriptionOperationStatus,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.triggerName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const startTriggerOperationSpec: coreClient.OperationSpec = {
   path: "/triggers/{triggerName}/start",
@@ -863,13 +873,13 @@ const startTriggerOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.triggerName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const stopTriggerOperationSpec: coreClient.OperationSpec = {
   path: "/triggers/{triggerName}/stop",
@@ -880,26 +890,26 @@ const stopTriggerOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion4],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.endpoint, Parameters.triggerName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getTriggersByWorkspaceNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.TriggerListResponse
+      bodyMapper: Mappers.TriggerListResponse,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

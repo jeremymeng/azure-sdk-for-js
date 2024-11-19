@@ -10,19 +10,25 @@
 // Licensed under the MIT License.
 import {
   AuthorizationRule,
-  EventHubManagementClient
+  EventHubManagementClient,
 } from "@azure/arm-eventhub";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Creates or updates an AuthorizationRule for the specified Event Hub. Creation/update of the AuthorizationRule will take a few seconds to take effect.
  *
  * @summary Creates or updates an AuthorizationRule for the specified Event Hub. Creation/update of the AuthorizationRule will take a few seconds to take effect.
- * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2021-11-01/examples/EventHubs/EHEventHubAuthorizationRuleCreate.json
+ * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2024-01-01/examples/EventHubs/EHEventHubAuthorizationRuleCreate.json
  */
 async function eventHubAuthorizationRuleCreate() {
-  const subscriptionId = "5f750a97-50d9-4e36-8081-c9ee4c0210d4";
-  const resourceGroupName = "ArunMonocle";
+  const subscriptionId =
+    process.env["EVENTHUB_SUBSCRIPTION_ID"] ||
+    "5f750a97-50d9-4e36-8081-c9ee4c0210d4";
+  const resourceGroupName =
+    process.env["EVENTHUB_RESOURCE_GROUP"] || "ArunMonocle";
   const namespaceName = "sdk-Namespace-960";
   const eventHubName = "sdk-EventHub-532";
   const authorizationRuleName = "sdk-Authrules-2513";
@@ -34,9 +40,13 @@ async function eventHubAuthorizationRuleCreate() {
     namespaceName,
     eventHubName,
     authorizationRuleName,
-    parameters
+    parameters,
   );
   console.log(result);
 }
 
-eventHubAuthorizationRuleCreate().catch(console.error);
+async function main() {
+  eventHubAuthorizationRuleCreate();
+}
+
+main().catch(console.error);

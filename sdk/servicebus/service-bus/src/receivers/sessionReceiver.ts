@@ -1,10 +1,20 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { ConnectionContext } from "../connectionContext";
-import { MessageHandlers, ReceiveMessagesOptions, ServiceBusReceivedMessage } from "..";
-import { PeekMessagesOptions, GetMessageIteratorOptions, SubscribeOptions } from "../models";
-import { MessageSession } from "../session/messageSession";
+import type { ConnectionContext } from "../connectionContext.js";
+import type {
+  MessageHandlers,
+  ReceiveMessagesOptions,
+  ServiceBusReceivedMessage,
+} from "../index.js";
+import type {
+  PeekMessagesOptions,
+  GetMessageIteratorOptions,
+  SubscribeOptions,
+  DeleteMessagesOptions,
+  PurgeMessagesOptions,
+} from "../models.js";
+import type { MessageSession } from "../session/messageSession.js";
 import {
   getAlreadyReceivingErrorMsg,
   getReceiverClosedErrorMsg,
@@ -14,8 +24,8 @@ import {
   throwTypeErrorIfParameterNotLong,
   throwErrorIfInvalidOperationOnMessage,
   throwTypeErrorIfParameterTypeMismatch,
-} from "../util/errors";
-import { OnError, OnMessage } from "../core/messageReceiver";
+} from "../util/errors.js";
+import type { OnError, OnMessage } from "../core/messageReceiver.js";
 import {
   abandonMessage,
   assertValidMessageHandlers,
@@ -24,24 +34,19 @@ import {
   deferMessage,
   getMessageIterator,
   wrapProcessErrorHandler,
-} from "./receiverCommon";
-import { defaultMaxTimeAfterFirstMessageForBatchingMs, ServiceBusReceiver } from "./receiver";
-import Long from "long";
-import { ServiceBusMessageImpl, DeadLetterOptions } from "../serviceBusMessage";
-import {
-  Constants,
-  RetryConfig,
-  RetryOperationType,
-  RetryOptions,
-  retry,
-  ErrorNameConditionMapper,
-} from "@azure/core-amqp";
-import { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs";
-import { AmqpError } from "rhea-promise";
-import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage";
-import { tracingClient } from "../diagnostics/tracing";
-import { receiverLogger as logger } from "../log";
-import { translateServiceBusError } from "../serviceBusError";
+} from "./receiverCommon.js";
+import type { ServiceBusReceiver } from "./receiver.js";
+import { defaultMaxTimeAfterFirstMessageForBatchingMs, MaxDeleteMessageCount } from "./receiver.js";
+import type Long from "long";
+import type { ServiceBusMessageImpl, DeadLetterOptions } from "../serviceBusMessage.js";
+import type { RetryConfig, RetryOptions } from "@azure/core-amqp";
+import { Constants, RetryOperationType, retry, ErrorNameConditionMapper } from "@azure/core-amqp";
+import type { OperationOptionsBase } from "../modelsToBeSharedWithEventHubs.js";
+import type { AmqpError } from "rhea-promise";
+import { toProcessingSpanOptions } from "../diagnostics/instrumentServiceBusMessage.js";
+import { tracingClient } from "../diagnostics/tracing.js";
+import { receiverLogger as logger } from "../log.js";
+import { translateServiceBusError } from "../serviceBusError.js";
 
 /**
  *A receiver that handles sessions, including renewing the session lock.
@@ -72,7 +77,7 @@ export interface ServiceBusSessionReceiver extends ServiceBusReceiver {
    */
   subscribe(
     handlers: MessageHandlers,
-    options?: SubscribeOptions
+    options?: SubscribeOptions,
   ): {
     /**
      * Causes the subscriber to stop receiving new messages.
@@ -133,7 +138,9 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
     private _context: ConnectionContext,
     public entityPath: string,
     public receiveMode: "peekLock" | "receiveAndDelete",
-    private _retryOptions: RetryOptions = {}
+    private _skipParsingBodyAsJson: boolean,
+    private _skipConvertingDate: boolean,
+    private _retryOptions: RetryOptions = {},
   ) {
     throwErrorIfConnectionClosed(_context);
     this.sessionId = _messageSession.sessionId;
@@ -232,7 +239,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
           abortSignal: options?.abortSignal,
         };
         return retry<Date>(config);
-      }
+      },
     );
   }
 
@@ -270,7 +277,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
           abortSignal: options?.abortSignal,
         };
         return retry<void>(config);
-      }
+      },
     );
   }
 
@@ -307,13 +314,13 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
           abortSignal: options?.abortSignal,
         };
         return retry<any>(config);
-      }
+      },
     );
   }
 
   async peekMessages(
     maxMessageCount: number,
-    options: PeekMessagesOptions = {}
+    options: PeekMessagesOptions = {},
   ): Promise<ServiceBusReceivedMessage[]> {
     this._throwIfReceiverOrConnectionClosed();
 
@@ -322,17 +329,23 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
       associatedLinkName: this._messageSession.name,
       requestName: "peekMessages",
       timeoutInMs: this._retryOptions?.timeoutInMs,
+      skipParsingBodyAsJson: this._skipParsingBodyAsJson,
+      skipConvertingDate: this._skipConvertingDate,
+    };
+    // omitMessageBody is available at runtime, but only exported in experimental subpath
+    const { fromSequenceNumber, omitMessageBody } = options as PeekMessagesOptions & {
+      omitMessageBody: boolean;
     };
     const peekOperationPromise = async (): Promise<ServiceBusReceivedMessage[]> => {
-      if (options.fromSequenceNumber !== undefined) {
+      if (fromSequenceNumber !== undefined) {
         return this._context
           .getManagementClient(this.entityPath)
           .peekBySequenceNumber(
-            options.fromSequenceNumber,
+            fromSequenceNumber,
             maxMessageCount,
             this.sessionId,
-            options.omitMessageBody,
-            managementRequestOptions
+            omitMessageBody,
+            managementRequestOptions,
           );
       } else {
         return this._context
@@ -340,8 +353,8 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
           .peekMessagesBySession(
             this.sessionId,
             maxMessageCount,
-            options.omitMessageBody,
-            managementRequestOptions
+            omitMessageBody,
+            managementRequestOptions,
           );
       }
     };
@@ -358,18 +371,18 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
 
   async receiveDeferredMessages(
     sequenceNumbers: Long | Long[],
-    options: OperationOptionsBase = {}
+    options: OperationOptionsBase = {},
   ): Promise<ServiceBusReceivedMessage[]> {
     this._throwIfReceiverOrConnectionClosed();
     throwTypeErrorIfParameterMissing(
       this._context.connectionId,
       "sequenceNumbers",
-      sequenceNumbers
+      sequenceNumbers,
     );
     throwTypeErrorIfParameterNotLong(
       this._context.connectionId,
       "sequenceNumbers",
-      sequenceNumbers
+      sequenceNumbers,
     );
 
     const deferredSequenceNumbers = Array.isArray(sequenceNumbers)
@@ -385,6 +398,8 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
           associatedLinkName: this._messageSession.name,
           requestName: "receiveDeferredMessages",
           timeoutInMs: this._retryOptions.timeoutInMs,
+          skipParsingBodyAsJson: this._skipParsingBodyAsJson,
+          skipConvertingDate: this._skipConvertingDate,
         });
       return deferredMessages;
     };
@@ -398,22 +413,63 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
     return retry<ServiceBusReceivedMessage[]>(config);
   }
 
+  async deleteMessages(options: DeleteMessagesOptions): Promise<number> {
+    this._throwIfReceiverOrConnectionClosed();
+
+    const deleteMessagesOperationPromise = (): Promise<number> => {
+      return this._context
+        .getManagementClient(this.entityPath)
+        .deleteMessages(options.maxMessageCount, options?.beforeEnqueueTime, this.sessionId, {
+          ...options,
+          associatedLinkName: this._messageSession.name,
+          requestName: "deleteMessages",
+          timeoutInMs: this._retryOptions.timeoutInMs,
+        });
+    };
+    const config: RetryConfig<number> = {
+      operation: deleteMessagesOperationPromise,
+      connectionId: this._context.connectionId,
+      operationType: RetryOperationType.management,
+      retryOptions: this._retryOptions,
+      abortSignal: options?.abortSignal,
+    };
+    return retry<number>(config);
+  }
+
+  async purgeMessages(options?: PurgeMessagesOptions): Promise<number> {
+    let deletedCount = await this.deleteMessages({
+      maxMessageCount: MaxDeleteMessageCount,
+      beforeEnqueueTime: options?.beforeEnqueueTime,
+    });
+    if (deletedCount === MaxDeleteMessageCount) {
+      let batchCount = MaxDeleteMessageCount;
+      while (batchCount === MaxDeleteMessageCount) {
+        batchCount = await this.deleteMessages({
+          maxMessageCount: MaxDeleteMessageCount,
+          beforeEnqueueTime: options?.beforeEnqueueTime,
+        });
+        deletedCount += batchCount;
+      }
+    }
+    return deletedCount;
+  }
+
   async receiveMessages(
     maxMessageCount: number,
-    options?: ReceiveMessagesOptions
+    options?: ReceiveMessagesOptions,
   ): Promise<ServiceBusReceivedMessage[]> {
     this._throwIfReceiverOrConnectionClosed();
     this._throwIfAlreadyReceiving();
     throwTypeErrorIfParameterMissing(
       this._context.connectionId,
       "maxMessageCount",
-      maxMessageCount
+      maxMessageCount,
     );
     throwTypeErrorIfParameterTypeMismatch(
       this._context.connectionId,
       "maxMessageCount",
       maxMessageCount,
-      "number"
+      "number",
     );
 
     if (isNaN(maxMessageCount) || maxMessageCount < 1) {
@@ -425,7 +481,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
         maxMessageCount,
         options?.maxWaitTimeInMs ?? Constants.defaultOperationTimeoutInMs,
         defaultMaxTimeAfterFirstMessageForBatchingMs,
-        options ?? {}
+        options ?? {},
       );
 
       return receivedMessages;
@@ -444,7 +500,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
 
   subscribe(
     handlers: MessageHandlers,
-    options?: SubscribeOptions
+    options?: SubscribeOptions,
   ): {
     close(): Promise<void>;
   } {
@@ -461,11 +517,11 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
           "SessionReceiver.process",
           options ?? {},
           () => handlers.processMessage(message),
-          toProcessingSpanOptions(message, this, this._context.config)
+          toProcessingSpanOptions(message, this, this._context.config, "process"),
         );
       },
       processError,
-      options
+      options,
     );
 
     return {
@@ -499,7 +555,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
   private _registerMessageHandler(
     onMessage: OnMessage,
     onError: OnError,
-    options: SubscribeOptions
+    options: SubscribeOptions,
   ): void {
     this._throwIfReceiverOrConnectionClosed();
     this._throwIfAlreadyReceiving();
@@ -527,7 +583,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
   }
 
   getMessageIterator(
-    options?: GetMessageIteratorOptions
+    options?: GetMessageIteratorOptions,
   ): AsyncIterableIterator<ServiceBusReceivedMessage> {
     return getMessageIterator(this, options);
   }
@@ -541,7 +597,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
 
   async abandonMessage(
     message: ServiceBusReceivedMessage,
-    propertiesToModify?: { [key: string]: number | boolean | string | Date | null }
+    propertiesToModify?: { [key: string]: number | boolean | string | Date | null },
   ): Promise<void> {
     this._throwIfReceiverOrConnectionClosed();
     throwErrorIfInvalidOperationOnMessage(message, this.receiveMode, this._context.connectionId);
@@ -551,13 +607,13 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
       this._context,
       this.entityPath,
       propertiesToModify,
-      this._retryOptions
+      this._retryOptions,
     );
   }
 
   async deferMessage(
     message: ServiceBusReceivedMessage,
-    propertiesToModify?: { [key: string]: number | boolean | string | Date | null }
+    propertiesToModify?: { [key: string]: number | boolean | string | Date | null },
   ): Promise<void> {
     this._throwIfReceiverOrConnectionClosed();
     throwErrorIfInvalidOperationOnMessage(message, this.receiveMode, this._context.connectionId);
@@ -567,13 +623,13 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
       this._context,
       this.entityPath,
       propertiesToModify,
-      this._retryOptions
+      this._retryOptions,
     );
   }
 
   async deadLetterMessage(
     message: ServiceBusReceivedMessage,
-    options?: DeadLetterOptions & { [key: string]: number | boolean | string | Date | null }
+    options?: DeadLetterOptions & { [key: string]: number | boolean | string | Date | null },
   ): Promise<void> {
     this._throwIfReceiverOrConnectionClosed();
     throwErrorIfInvalidOperationOnMessage(message, this.receiveMode, this._context.connectionId);
@@ -593,7 +649,7 @@ export class ServiceBusSessionReceiverImpl implements ServiceBusSessionReceiver 
         err,
         "%s An error occurred while closing the SessionReceiver for session %s",
         this.logPrefix,
-        this.sessionId
+        this.sessionId,
       );
       throw err;
     } finally {

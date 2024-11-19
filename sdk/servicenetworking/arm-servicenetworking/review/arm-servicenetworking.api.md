@@ -6,18 +6,16 @@
 
 import * as coreAuth from '@azure/core-auth';
 import * as coreClient from '@azure/core-client';
+import { OperationState } from '@azure/core-lro';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
+import { SimplePollerLike } from '@azure/core-lro';
 
 // @public
 export type ActionType = string;
 
 // @public
 export interface Association extends TrackedResource {
-    associationType?: "subnets";
-    readonly provisioningState?: ProvisioningState;
-    subnet?: AssociationSubnet;
+    properties?: AssociationProperties;
 }
 
 // @public
@@ -27,11 +25,18 @@ export interface AssociationListResult {
 }
 
 // @public
+export interface AssociationProperties {
+    associationType: AssociationType;
+    readonly provisioningState?: ProvisioningState;
+    subnet?: AssociationSubnet;
+}
+
+// @public
 export interface AssociationsInterface {
-    beginCreateOrUpdate(resourceGroupName: string, trafficControllerName: string, associationName: string, resource: Association, options?: AssociationsInterfaceCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<AssociationsInterfaceCreateOrUpdateResponse>, AssociationsInterfaceCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, trafficControllerName: string, associationName: string, resource: Association, options?: AssociationsInterfaceCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<AssociationsInterfaceCreateOrUpdateResponse>, AssociationsInterfaceCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, trafficControllerName: string, associationName: string, resource: Association, options?: AssociationsInterfaceCreateOrUpdateOptionalParams): Promise<AssociationsInterfaceCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, trafficControllerName: string, associationName: string, options?: AssociationsInterfaceDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
-    beginDeleteAndWait(resourceGroupName: string, trafficControllerName: string, associationName: string, options?: AssociationsInterfaceDeleteOptionalParams): Promise<void>;
+    beginDelete(resourceGroupName: string, trafficControllerName: string, associationName: string, options?: AssociationsInterfaceDeleteOptionalParams): Promise<SimplePollerLike<OperationState<AssociationsInterfaceDeleteResponse>, AssociationsInterfaceDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, trafficControllerName: string, associationName: string, options?: AssociationsInterfaceDeleteOptionalParams): Promise<AssociationsInterfaceDeleteResponse>;
     get(resourceGroupName: string, trafficControllerName: string, associationName: string, options?: AssociationsInterfaceGetOptionalParams): Promise<AssociationsInterfaceGetResponse>;
     listByTrafficController(resourceGroupName: string, trafficControllerName: string, options?: AssociationsInterfaceListByTrafficControllerOptionalParams): PagedAsyncIterableIterator<Association>;
     update(resourceGroupName: string, trafficControllerName: string, associationName: string, properties: AssociationUpdate, options?: AssociationsInterfaceUpdateOptionalParams): Promise<AssociationsInterfaceUpdateResponse>;
@@ -53,7 +58,6 @@ export type AssociationsInterfaceCreateOrUpdateResponse = Association;
 
 // @public
 export interface AssociationsInterfaceDeleteHeaders {
-    // (undocumented)
     location?: string;
     retryAfter?: number;
 }
@@ -63,6 +67,9 @@ export interface AssociationsInterfaceDeleteOptionalParams extends coreClient.Op
     resumeFrom?: string;
     updateIntervalInMs?: number;
 }
+
+// @public
+export type AssociationsInterfaceDeleteResponse = AssociationsInterfaceDeleteHeaders;
 
 // @public
 export interface AssociationsInterfaceGetOptionalParams extends coreClient.OperationOptions {
@@ -98,6 +105,14 @@ export interface AssociationSubnet {
 }
 
 // @public
+export interface AssociationSubnetUpdate {
+    id?: string;
+}
+
+// @public
+export type AssociationType = string;
+
+// @public
 export interface AssociationUpdate {
     properties?: AssociationUpdateProperties;
     tags?: {
@@ -107,8 +122,8 @@ export interface AssociationUpdate {
 
 // @public
 export interface AssociationUpdateProperties {
-    associationType?: "subnets";
-    subnet?: AssociationSubnet;
+    associationType?: AssociationType;
+    subnet?: AssociationSubnetUpdate;
 }
 
 // @public
@@ -136,14 +151,8 @@ export interface ErrorResponse {
 
 // @public
 export interface Frontend extends TrackedResource {
-    ipAddressVersion?: FrontendIPAddressVersion;
-    mode?: "public";
-    readonly provisioningState?: ProvisioningState;
-    publicIPAddress?: FrontendPropertiesIPAddress;
+    properties?: FrontendProperties;
 }
-
-// @public
-export type FrontendIPAddressVersion = "IPv4" | "IPv6";
 
 // @public
 export interface FrontendListResult {
@@ -152,16 +161,17 @@ export interface FrontendListResult {
 }
 
 // @public
-export interface FrontendPropertiesIPAddress {
-    id: string;
+export interface FrontendProperties {
+    readonly fqdn?: string;
+    readonly provisioningState?: ProvisioningState;
 }
 
 // @public
 export interface FrontendsInterface {
-    beginCreateOrUpdate(resourceGroupName: string, trafficControllerName: string, frontendName: string, resource: Frontend, options?: FrontendsInterfaceCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<FrontendsInterfaceCreateOrUpdateResponse>, FrontendsInterfaceCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, trafficControllerName: string, frontendName: string, resource: Frontend, options?: FrontendsInterfaceCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<FrontendsInterfaceCreateOrUpdateResponse>, FrontendsInterfaceCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, trafficControllerName: string, frontendName: string, resource: Frontend, options?: FrontendsInterfaceCreateOrUpdateOptionalParams): Promise<FrontendsInterfaceCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, trafficControllerName: string, frontendName: string, options?: FrontendsInterfaceDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
-    beginDeleteAndWait(resourceGroupName: string, trafficControllerName: string, frontendName: string, options?: FrontendsInterfaceDeleteOptionalParams): Promise<void>;
+    beginDelete(resourceGroupName: string, trafficControllerName: string, frontendName: string, options?: FrontendsInterfaceDeleteOptionalParams): Promise<SimplePollerLike<OperationState<FrontendsInterfaceDeleteResponse>, FrontendsInterfaceDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, trafficControllerName: string, frontendName: string, options?: FrontendsInterfaceDeleteOptionalParams): Promise<FrontendsInterfaceDeleteResponse>;
     get(resourceGroupName: string, trafficControllerName: string, frontendName: string, options?: FrontendsInterfaceGetOptionalParams): Promise<FrontendsInterfaceGetResponse>;
     listByTrafficController(resourceGroupName: string, trafficControllerName: string, options?: FrontendsInterfaceListByTrafficControllerOptionalParams): PagedAsyncIterableIterator<Frontend>;
     update(resourceGroupName: string, trafficControllerName: string, frontendName: string, properties: FrontendUpdate, options?: FrontendsInterfaceUpdateOptionalParams): Promise<FrontendsInterfaceUpdateResponse>;
@@ -183,7 +193,6 @@ export type FrontendsInterfaceCreateOrUpdateResponse = Frontend;
 
 // @public
 export interface FrontendsInterfaceDeleteHeaders {
-    // (undocumented)
     location?: string;
     retryAfter?: number;
 }
@@ -193,6 +202,9 @@ export interface FrontendsInterfaceDeleteOptionalParams extends coreClient.Opera
     resumeFrom?: string;
     updateIntervalInMs?: number;
 }
+
+// @public
+export type FrontendsInterfaceDeleteResponse = FrontendsInterfaceDeleteHeaders;
 
 // @public
 export interface FrontendsInterfaceGetOptionalParams extends coreClient.OperationOptions {
@@ -224,17 +236,9 @@ export type FrontendsInterfaceUpdateResponse = Frontend;
 
 // @public
 export interface FrontendUpdate {
-    properties?: FrontendUpdateProperties;
     tags?: {
         [propertyName: string]: string;
     };
-}
-
-// @public
-export interface FrontendUpdateProperties {
-    ipAddressVersion?: FrontendIPAddressVersion;
-    mode?: "public";
-    publicIPAddress?: FrontendPropertiesIPAddress;
 }
 
 // @public
@@ -243,6 +247,11 @@ export function getContinuationToken(page: unknown): string | undefined;
 // @public
 export enum KnownActionType {
     Internal = "Internal"
+}
+
+// @public
+export enum KnownAssociationType {
+    Subnets = "subnets"
 }
 
 // @public
@@ -258,6 +267,11 @@ export enum KnownOrigin {
     System = "system",
     User = "user",
     UserSystem = "user,system"
+}
+
+// @public
+export enum KnownPolicyType {
+    WAF = "waf"
 }
 
 // @public
@@ -317,6 +331,9 @@ export type OperationsListResponse = OperationListResult;
 export type Origin = string;
 
 // @public
+export type PolicyType = string;
+
+// @public
 export type ProvisioningState = string;
 
 // @public
@@ -328,8 +345,117 @@ export interface Resource {
 }
 
 // @public
-export interface ResourceID {
+export interface ResourceId {
     id: string;
+}
+
+// @public
+export interface SecurityPoliciesInterface {
+    beginCreateOrUpdate(resourceGroupName: string, trafficControllerName: string, securityPolicyName: string, resource: SecurityPolicy, options?: SecurityPoliciesInterfaceCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<SecurityPoliciesInterfaceCreateOrUpdateResponse>, SecurityPoliciesInterfaceCreateOrUpdateResponse>>;
+    beginCreateOrUpdateAndWait(resourceGroupName: string, trafficControllerName: string, securityPolicyName: string, resource: SecurityPolicy, options?: SecurityPoliciesInterfaceCreateOrUpdateOptionalParams): Promise<SecurityPoliciesInterfaceCreateOrUpdateResponse>;
+    beginDelete(resourceGroupName: string, trafficControllerName: string, securityPolicyName: string, options?: SecurityPoliciesInterfaceDeleteOptionalParams): Promise<SimplePollerLike<OperationState<SecurityPoliciesInterfaceDeleteResponse>, SecurityPoliciesInterfaceDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, trafficControllerName: string, securityPolicyName: string, options?: SecurityPoliciesInterfaceDeleteOptionalParams): Promise<SecurityPoliciesInterfaceDeleteResponse>;
+    get(resourceGroupName: string, trafficControllerName: string, securityPolicyName: string, options?: SecurityPoliciesInterfaceGetOptionalParams): Promise<SecurityPoliciesInterfaceGetResponse>;
+    listByTrafficController(resourceGroupName: string, trafficControllerName: string, options?: SecurityPoliciesInterfaceListByTrafficControllerOptionalParams): PagedAsyncIterableIterator<SecurityPolicy>;
+    update(resourceGroupName: string, trafficControllerName: string, securityPolicyName: string, properties: SecurityPolicyUpdate, options?: SecurityPoliciesInterfaceUpdateOptionalParams): Promise<SecurityPoliciesInterfaceUpdateResponse>;
+}
+
+// @public
+export interface SecurityPoliciesInterfaceCreateOrUpdateHeaders {
+    retryAfter?: number;
+}
+
+// @public
+export interface SecurityPoliciesInterfaceCreateOrUpdateOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type SecurityPoliciesInterfaceCreateOrUpdateResponse = SecurityPolicy;
+
+// @public
+export interface SecurityPoliciesInterfaceDeleteHeaders {
+    location?: string;
+    retryAfter?: number;
+}
+
+// @public
+export interface SecurityPoliciesInterfaceDeleteOptionalParams extends coreClient.OperationOptions {
+    resumeFrom?: string;
+    updateIntervalInMs?: number;
+}
+
+// @public
+export type SecurityPoliciesInterfaceDeleteResponse = SecurityPoliciesInterfaceDeleteHeaders;
+
+// @public
+export interface SecurityPoliciesInterfaceGetOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type SecurityPoliciesInterfaceGetResponse = SecurityPolicy;
+
+// @public
+export interface SecurityPoliciesInterfaceListByTrafficControllerNextOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type SecurityPoliciesInterfaceListByTrafficControllerNextResponse = SecurityPolicyListResult;
+
+// @public
+export interface SecurityPoliciesInterfaceListByTrafficControllerOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type SecurityPoliciesInterfaceListByTrafficControllerResponse = SecurityPolicyListResult;
+
+// @public
+export interface SecurityPoliciesInterfaceUpdateOptionalParams extends coreClient.OperationOptions {
+}
+
+// @public
+export type SecurityPoliciesInterfaceUpdateResponse = SecurityPolicy;
+
+// @public
+export interface SecurityPolicy extends TrackedResource {
+    properties?: SecurityPolicyProperties;
+}
+
+// @public
+export interface SecurityPolicyConfigurations {
+    wafSecurityPolicy?: WafSecurityPolicy;
+}
+
+// @public
+export interface SecurityPolicyConfigurationsUpdate {
+    wafSecurityPolicy?: WafSecurityPolicyUpdate;
+}
+
+// @public
+export interface SecurityPolicyListResult {
+    nextLink?: string;
+    value: SecurityPolicy[];
+}
+
+// @public
+export interface SecurityPolicyProperties {
+    readonly policyType?: PolicyType;
+    readonly provisioningState?: ProvisioningState;
+    wafPolicy?: WafPolicy;
+}
+
+// @public
+export interface SecurityPolicyUpdate {
+    properties?: SecurityPolicyUpdateProperties;
+    tags?: {
+        [propertyName: string]: string;
+    };
+}
+
+// @public
+export interface SecurityPolicyUpdateProperties {
+    wafPolicy?: WafPolicyUpdate;
 }
 
 // @public (undocumented)
@@ -345,6 +471,8 @@ export class ServiceNetworkingManagementClient extends coreClient.ServiceClient 
     frontendsInterface: FrontendsInterface;
     // (undocumented)
     operations: Operations;
+    // (undocumented)
+    securityPoliciesInterface: SecurityPoliciesInterface;
     // (undocumented)
     subscriptionId: string;
     // (undocumented)
@@ -378,18 +506,15 @@ export interface TrackedResource extends Resource {
 
 // @public
 export interface TrafficController extends TrackedResource {
-    readonly associations?: ResourceID[];
-    readonly configurationEndpoints?: string[];
-    readonly frontends?: ResourceID[];
-    readonly provisioningState?: ProvisioningState;
+    properties?: TrafficControllerProperties;
 }
 
 // @public
 export interface TrafficControllerInterface {
-    beginCreateOrUpdate(resourceGroupName: string, trafficControllerName: string, resource: TrafficController, options?: TrafficControllerInterfaceCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<TrafficControllerInterfaceCreateOrUpdateResponse>, TrafficControllerInterfaceCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, trafficControllerName: string, resource: TrafficController, options?: TrafficControllerInterfaceCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<TrafficControllerInterfaceCreateOrUpdateResponse>, TrafficControllerInterfaceCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, trafficControllerName: string, resource: TrafficController, options?: TrafficControllerInterfaceCreateOrUpdateOptionalParams): Promise<TrafficControllerInterfaceCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, trafficControllerName: string, options?: TrafficControllerInterfaceDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
-    beginDeleteAndWait(resourceGroupName: string, trafficControllerName: string, options?: TrafficControllerInterfaceDeleteOptionalParams): Promise<void>;
+    beginDelete(resourceGroupName: string, trafficControllerName: string, options?: TrafficControllerInterfaceDeleteOptionalParams): Promise<SimplePollerLike<OperationState<TrafficControllerInterfaceDeleteResponse>, TrafficControllerInterfaceDeleteResponse>>;
+    beginDeleteAndWait(resourceGroupName: string, trafficControllerName: string, options?: TrafficControllerInterfaceDeleteOptionalParams): Promise<TrafficControllerInterfaceDeleteResponse>;
     get(resourceGroupName: string, trafficControllerName: string, options?: TrafficControllerInterfaceGetOptionalParams): Promise<TrafficControllerInterfaceGetResponse>;
     listByResourceGroup(resourceGroupName: string, options?: TrafficControllerInterfaceListByResourceGroupOptionalParams): PagedAsyncIterableIterator<TrafficController>;
     listBySubscription(options?: TrafficControllerInterfaceListBySubscriptionOptionalParams): PagedAsyncIterableIterator<TrafficController>;
@@ -412,7 +537,6 @@ export type TrafficControllerInterfaceCreateOrUpdateResponse = TrafficController
 
 // @public
 export interface TrafficControllerInterfaceDeleteHeaders {
-    // (undocumented)
     location?: string;
     retryAfter?: number;
 }
@@ -422,6 +546,9 @@ export interface TrafficControllerInterfaceDeleteOptionalParams extends coreClie
     resumeFrom?: string;
     updateIntervalInMs?: number;
 }
+
+// @public
+export type TrafficControllerInterfaceDeleteResponse = TrafficControllerInterfaceDeleteHeaders;
 
 // @public
 export interface TrafficControllerInterfaceGetOptionalParams extends coreClient.OperationOptions {
@@ -472,11 +599,46 @@ export interface TrafficControllerListResult {
 }
 
 // @public
+export interface TrafficControllerProperties {
+    readonly associations?: ResourceId[];
+    readonly configurationEndpoints?: string[];
+    readonly frontends?: ResourceId[];
+    readonly provisioningState?: ProvisioningState;
+    readonly securityPolicies?: ResourceId[];
+    securityPolicyConfigurations?: SecurityPolicyConfigurations;
+}
+
+// @public
 export interface TrafficControllerUpdate {
-    properties?: Record<string, unknown>;
+    properties?: TrafficControllerUpdateProperties;
     tags?: {
         [propertyName: string]: string;
     };
+}
+
+// @public
+export interface TrafficControllerUpdateProperties {
+    securityPolicyConfigurations?: SecurityPolicyConfigurationsUpdate;
+}
+
+// @public
+export interface WafPolicy {
+    id: string;
+}
+
+// @public
+export interface WafPolicyUpdate {
+    id?: string;
+}
+
+// @public
+export interface WafSecurityPolicy {
+    id: string;
+}
+
+// @public
+export interface WafSecurityPolicyUpdate {
+    id?: string;
 }
 
 // (No @packageDocumentation comment for this package)

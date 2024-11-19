@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * This sample shows how to extract elements of a receipt from a URL to a file using the prebuilt receipt model. Rather
@@ -33,8 +33,8 @@ async function main() {
 
   const poller = await client.beginAnalyzeDocumentFromUrl(
     "prebuilt-receipt",
-    // The form recognizer service will access the following URL to a receipt image and extract data from it
-    "https://raw.githubusercontent.com/Azure/azure-sdk-for-js/main/sdk/formrecognizer/ai-form-recognizer/assets/receipt/contoso-receipt.png"
+    // The Document Intelligence service will access the following URL to a receipt image and extract data from it
+    "https://raw.githubusercontent.com/Azure/azure-sdk-for-js/main/sdk/formrecognizer/ai-form-recognizer/assets/receipt/contoso-receipt.png",
   );
   poller.onProgress((state) => console.log("Operation:", state.modelId, state.status));
 

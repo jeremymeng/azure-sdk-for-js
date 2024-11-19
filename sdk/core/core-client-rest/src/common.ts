@@ -1,18 +1,24 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   HttpClient,
+  LogPolicyOptions,
   Pipeline,
   PipelineOptions,
   PipelinePolicy,
   PipelineRequest,
+  PipelineResponse,
   RawHttpHeaders,
+  RequestBodyType,
+  TransferProgressEvent,
 } from "@azure/core-rest-pipeline";
-import { RawHttpHeadersInput } from "@azure/core-rest-pipeline";
+import type { RawHttpHeadersInput } from "@azure/core-rest-pipeline";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { OperationTracingOptions } from "@azure/core-tracing";
 
 /**
- * Shape of the default request parameters, this may be overriden by the specific
+ * Shape of the default request parameters, this may be overridden by the specific
  * request types to provide strong types
  */
 export type RequestParameters = {
@@ -47,7 +53,136 @@ export type RequestParameters = {
    * Path parameters for custom the base url
    */
   pathParameters?: Record<string, any>;
+
+  /**
+   * The number of milliseconds a request can take before automatically being terminated.
+   */
+  timeout?: number;
+
+  /**
+   * Callback which fires upon upload progress.
+   */
+  onUploadProgress?: (progress: TransferProgressEvent) => void;
+
+  /**
+   * Callback which fires upon download progress.
+   */
+  onDownloadProgress?: (progress: TransferProgressEvent) => void;
+
+  /**
+   * The signal which can be used to abort requests.
+   */
+  abortSignal?: AbortSignalLike;
+
+  /**
+   * Options used when tracing is enabled.
+   */
+  tracingOptions?: OperationTracingOptions;
+
+  /**
+   * A function to be called each time a response is received from the server
+   * while performing the requested operation.
+   * May be called multiple times.
+   */
+  onResponse?: RawResponseCallback;
 };
+
+/**
+ * A function to be called each time a response is received from the server
+ * while performing the requested operation.
+ * May be called multiple times.
+ *
+ * This callback will be called with two parameters: the raw response, including headers and response body; and an error
+ * object which will be provided if an error was thrown while processing the request.
+ * The third __legacyError parameter is provided for backwards compatability only and will have an identical value to the `error` parameter.
+ */
+export type RawResponseCallback = (
+  rawResponse: FullOperationResponse,
+  error?: unknown,
+  __legacyError?: unknown,
+) => void;
+
+/**
+ * Wrapper object for http request and response. Deserialized object is stored in
+ * the `parsedBody` property when the response body is received in JSON.
+ */
+export interface FullOperationResponse extends PipelineResponse {
+  /**
+   * The raw HTTP response headers.
+   */
+  rawHeaders?: RawHttpHeaders;
+
+  /**
+   * The response body as parsed JSON.
+   */
+  parsedBody?: RequestBodyType;
+
+  /**
+   * The request that generated the response.
+   */
+  request: PipelineRequest;
+}
+
+/**
+ * The base options type for all operations.
+ */
+export interface OperationOptions {
+  /**
+   * The signal which can be used to abort requests.
+   */
+  abortSignal?: AbortSignalLike;
+  /**
+   * Options used when creating and sending HTTP requests for this operation.
+   */
+  requestOptions?: OperationRequestOptions;
+  /**
+   * Options used when tracing is enabled.
+   */
+  tracingOptions?: OperationTracingOptions;
+
+  /**
+   * A function to be called each time a response is received from the server
+   * while performing the requested operation.
+   * May be called multiple times.
+   */
+  onResponse?: RawResponseCallback;
+}
+
+/**
+ * Options used when creating and sending HTTP requests for this operation.
+ */
+export interface OperationRequestOptions {
+  /**
+   * User defined custom request headers that
+   * will be applied before the request is sent.
+   */
+  headers?: RawHttpHeadersInput;
+
+  /**
+   * The number of milliseconds a request can take before automatically being terminated.
+   */
+  timeout?: number;
+
+  /**
+   * Callback which fires upon upload progress.
+   */
+  onUploadProgress?: (progress: TransferProgressEvent) => void;
+
+  /**
+   * Callback which fires upon download progress.
+   */
+  onDownloadProgress?: (progress: TransferProgressEvent) => void;
+
+  /**
+   * Set to true if the request is sent over HTTP instead of HTTPS
+   */
+  allowInsecureConnection?: boolean;
+
+  /**
+   * Set to true if you want to skip encoding the path parameters
+   */
+  skipUrlEncoding?: boolean;
+}
 
 /**
  * Type to use with pathUnchecked, overrides the body type to any to allow flexibility
@@ -64,15 +199,17 @@ export interface Client {
   pipeline: Pipeline;
   /**
    * This method will be used to send request that would check the path to provide
-   * strong types. When used by the codegen this type gets overriden wit the generated
+   * strong types. When used by the codegen this type gets overridden with the generated
    * types. For example:
-   * ```typescript
-   * export type MyClient = Client & {
-   *    path: Routes;
-   * }
+   * ```typescript snippet:path_example
+   * import { Client } from "@azure-rest/core-client";
+   *
+   * type MyClient = Client & {
+   *   path: Routes;
+   * };
    * ```
    */
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   path: Function;
   /**
    * This method allows arbitrary paths and doesn't provide strong types
@@ -191,8 +328,13 @@ export type ClientOptions = PipelineOptions & {
   };
   /**
    * Base url for the client
+   * @deprecated This property is deprecated and will be removed soon, please use endpoint instead
    */
   baseUrl?: string;
+  /**
+   * Endpoint for the client
+   */
+  endpoint?: string;
   /**
    * Options for setting a custom apiVersion.
    */
@@ -209,6 +351,10 @@ export type ClientOptions = PipelineOptions & {
    * Specify a custom HttpClient when making requests.
    */
   httpClient?: HttpClient;
+  /**
+   * Options to configure request/response logging.
+   */
+  loggingOptions?: LogPolicyOptions;
 };
 
 /**
@@ -238,7 +384,7 @@ export type HttpResponse = {
  * text surrounded by \{\} will be considered a path parameter
  */
 export type PathParameters<
-  TRoute extends string
+  TRoute extends string,
   // This is trying to match the string in TRoute with a template where HEAD/{PARAM}/TAIL
   // for example in the followint path: /foo/{fooId}/bar/{barId}/baz the template will infer
   // HEAD: /foo
@@ -252,7 +398,54 @@ export type PathParameters<
     // additional parameters we can call RouteParameters recursively on the Tail to match the remaining parts,
     // in case the Tail has more parameters, it will return a tuple with the parameters found in tail.
     // We spread the second path params to end up with a single dimension tuple at the end.
-    [pathParameter: string, ...pathParameters: PathParameters<Tail>]
+    [
+      pathParameter: string | number | PathParameterWithOptions,
+      ...pathParameters: PathParameters<Tail>,
+    ]
   : // When the path doesn't match the template, it means that we have no path parameters so we return
     // an empty tuple.
     [];
+
+/** A response containing error details. */
+export interface ErrorResponse {
+  /** The error object. */
+  error: ErrorModel;
+}
+
+/** The error object. */
+export interface ErrorModel {
+  /** One of a server-defined set of error codes. */
+  code: string;
+  /** A human-readable representation of the error. */
+  message: string;
+  /** The target of the error. */
+  target?: string;
+  /** An array of details about specific errors that led to this reported error. */
+  details: Array<ErrorModel>;
+  /** An object containing more specific information than the current object about the error. */
+  innererror?: InnerError;
+}
+
+/** An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses. */
+export interface InnerError {
+  /** One of a server-defined set of error codes. */
+  code: string;
+  /** Inner error. */
+  innererror?: InnerError;
+}
+
+/**
+ * An object that can be passed as a path parameter, allowing for additional options to be set relating to how the parameter is encoded.
+ */
+export interface PathParameterWithOptions {
+  /**
+   * The value of the parameter.
+   */
+  value: string | number;
+
+  /**
+   * Whether to allow for reserved characters in the value. If set to true, special characters such as '/' in the parameter's value will not be URL encoded.
+   * Defaults to false.
+   */
+  allowReserved?: boolean;
+}

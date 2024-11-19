@@ -10,16 +10,18 @@
 // Licensed under the MIT License.
 const { ContainerAppsAPIClient } = require("@azure/arm-appcontainers");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to List replicas for a Container App Revision.
  *
  * @summary List replicas for a Container App Revision.
- * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2022-06-01-preview/examples/Replicas_List.json
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/Replicas_List.json
  */
 async function listContainerAppReplicas() {
-  const subscriptionId = "651f8027-33e8-4ec4-97b4-f6e9f3dc8744";
-  const resourceGroupName = "workerapps-rg-xj";
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] || "651f8027-33e8-4ec4-97b4-f6e9f3dc8744";
+  const resourceGroupName = process.env["APPCONTAINERS_RESOURCE_GROUP"] || "workerapps-rg-xj";
   const containerAppName = "myapp";
   const revisionName = "myapp--0wlqy09";
   const credential = new DefaultAzureCredential();
@@ -27,9 +29,13 @@ async function listContainerAppReplicas() {
   const result = await client.containerAppsRevisionReplicas.listReplicas(
     resourceGroupName,
     containerAppName,
-    revisionName
+    revisionName,
   );
   console.log(result);
 }
 
-listContainerAppReplicas().catch(console.error);
+async function main() {
+  listContainerAppReplicas();
+}
+
+main().catch(console.error);

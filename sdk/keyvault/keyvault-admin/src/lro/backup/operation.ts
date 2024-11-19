@@ -1,20 +1,18 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   FullBackupOperation,
   FullBackupOptionalParams,
   FullBackupResponse,
   FullBackupStatusResponse,
-} from "../../generated/models";
-import {
-  KeyVaultAdminPollOperation,
-  KeyVaultAdminPollOperationState,
-} from "../keyVaultAdminPoller";
-import { KeyVaultBackupResult, KeyVaultBeginBackupOptions } from "../../backupClientModels";
-import { AbortSignalLike } from "@azure/abort-controller";
-import { KeyVaultClient } from "../../generated/keyVaultClient";
-import { tracingClient } from "../../tracing";
+} from "../../generated/models/index.js";
+import type { KeyVaultAdminPollOperationState } from "../keyVaultAdminPoller.js";
+import { KeyVaultAdminPollOperation } from "../keyVaultAdminPoller.js";
+import type { KeyVaultBackupResult, KeyVaultBeginBackupOptions } from "../../backupClientModels.js";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { KeyVaultClient } from "../../generated/keyVaultClient.js";
+import { tracingClient } from "../../tracing.js";
 
 /**
  * An interface representing the publicly available properties of the state of a backup Key Vault's poll operation.
@@ -33,7 +31,7 @@ export interface KeyVaultBackupPollOperationState
   /**
    * The SAS token.
    */
-  sasToken: string;
+  sasToken?: string;
 }
 
 /**
@@ -47,7 +45,7 @@ export class KeyVaultBackupPollOperation extends KeyVaultAdminPollOperation<
     public state: KeyVaultBackupPollOperationState,
     private vaultUrl: string,
     private client: KeyVaultClient,
-    private requestOptions: KeyVaultBeginBackupOptions = {}
+    private requestOptions: KeyVaultBeginBackupOptions = {},
   ) {
     super(state, { cancelMessage: "Cancelling a full Key Vault backup is not supported." });
   }
@@ -57,7 +55,7 @@ export class KeyVaultBackupPollOperation extends KeyVaultAdminPollOperation<
    */
   private fullBackup(options: FullBackupOptionalParams): Promise<FullBackupResponse> {
     return tracingClient.withSpan("KeyVaultBackupPoller.fullBackup", options, (updatedOptions) =>
-      this.client.fullBackup(this.vaultUrl, updatedOptions)
+      this.client.fullBackup(this.vaultUrl, updatedOptions),
     );
   }
 
@@ -66,12 +64,12 @@ export class KeyVaultBackupPollOperation extends KeyVaultAdminPollOperation<
    */
   private fullBackupStatus(
     jobId: string,
-    options: KeyVaultBeginBackupOptions
+    options: KeyVaultBeginBackupOptions,
   ): Promise<FullBackupStatusResponse> {
     return tracingClient.withSpan(
       "KeyVaultBackupPoller.fullBackupStatus",
       options,
-      (updatedOptions) => this.client.fullBackupStatus(this.vaultUrl, jobId, updatedOptions)
+      (updatedOptions) => this.client.fullBackupStatus(this.vaultUrl, jobId, updatedOptions),
     );
   }
 
@@ -82,7 +80,7 @@ export class KeyVaultBackupPollOperation extends KeyVaultAdminPollOperation<
     options: {
       abortSignal?: AbortSignalLike;
       fireProgress?: (state: KeyVaultBackupPollOperationState) => void;
-    } = {}
+    } = {},
   ): Promise<KeyVaultBackupPollOperation> {
     const state = this.state;
     const { blobStorageUri, sasToken } = state;
@@ -96,7 +94,8 @@ export class KeyVaultBackupPollOperation extends KeyVaultAdminPollOperation<
         ...this.requestOptions,
         azureStorageBlobContainerUri: {
           storageResourceUri: blobStorageUri!,
-          token: sasToken!,
+          token: sasToken,
+          useManagedIdentity: sasToken === undefined,
         },
       });
 
@@ -125,7 +124,7 @@ export class KeyVaultBackupPollOperation extends KeyVaultAdminPollOperation<
     } = serviceOperation;
     if (!startTime) {
       throw new Error(
-        `Missing "startTime" from the full backup operation. Full backup did not start successfully.`
+        `Missing "startTime" from the full backup operation. Full backup did not start successfully.`,
       );
     }
 

@@ -1,16 +1,11 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-export { ApplicationInsightsSampler } from "./sampling";
-export { AzureMonitorBaseExporter } from "./export/base";
-export { AzureMonitorTraceExporter } from "./export/trace";
-export { AzureMonitorMetricExporter } from "./export/metric";
-export { _AzureMonitorStatsbeatExporter } from "./export/statsbeat";
-export { AzureMonitorExporterOptions } from "./config";
-export { ServiceApiVersion } from "./Declarations/Constants";
-export {
-  ApplicationInsightsClientOptionalParams,
-  MonitorBase,
-  MonitorDomain,
-  TelemetryItem,
-} from "./generated/models";
+export { ApplicationInsightsSampler } from "./sampling.js";
+export { AzureMonitorBaseExporter } from "./export/base.js";
+export { AzureMonitorTraceExporter } from "./export/trace.js";
+export { AzureMonitorMetricExporter } from "./export/metric.js";
+export { AzureMonitorLogExporter } from "./export/log.js";
+export { AzureMonitorExporterOptions } from "./config.js";
+export { ServiceApiVersion } from "./Declarations/Constants.js";
+export { ApplicationInsightsClientOptionalParams } from "./generated/models/index.js";

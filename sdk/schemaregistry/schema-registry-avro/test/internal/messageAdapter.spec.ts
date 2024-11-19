@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   MessageAdapter as EHMessageAdapter,
   EventData,
   EventDataAdapterParameters,
-  createEventDataAdapter,
 } from "@azure/event-hubs";
-import { AssertEqualKeys } from "../utils/utils";
-import { MessageAdapter } from "../../src/models";
-import { assert } from "chai";
-import { matrix } from "@azure/test-utils";
+import { createEventDataAdapter } from "@azure/event-hubs";
+import type { AssertEqualKeys } from "../utils/utils.js";
+import type { MessageAdapter } from "../../src/models.js";
+import { matrix } from "@azure-tools/test-utils-vitest";
+import { describe, it, assert } from "vitest";
 
 function isMessageAdapter<MessageT>(obj: any): obj is MessageAdapter<MessageT> {
   return typeof obj.produce === "function" && typeof obj.consume === "function";
@@ -41,7 +41,7 @@ describe("Message Adapters", function () {
       const areEqual: AssertEqualKeys<MessageAdapter<unknown>, EHMessageAdapter<unknown>> = true;
       assert.isTrue(
         areEqual,
-        "MessageAdapter should have the same shape as @azure/event-hubs's MessageAdapter."
+        "MessageAdapter should have the same shape as @azure/event-hubs's MessageAdapter.",
       );
     });
   });
@@ -53,7 +53,7 @@ describe("Message Adapters", function () {
       > = true;
       assert.isTrue(
         areEqual,
-        'EventDataAdapterParameters should have the same shape as Omit<EventData, "body" | "contentType">.'
+        'EventDataAdapterParameters should have the same shape as Omit<EventData, "body" | "contentType">.',
       );
     });
   });
@@ -69,7 +69,7 @@ describe("Message Adapters", function () {
             adapter.consume({
               contentType: "",
             }),
-          /Expected the body field to be defined/
+          /Expected the body field to be defined/,
         );
       });
       it("consumeMessage rejects messages with no contentType", async () => {
@@ -78,7 +78,7 @@ describe("Message Adapters", function () {
             adapter.consume({
               body: dummyUint8Array,
             }),
-          /Expected the contentType field to be defined/
+          /Expected the contentType field to be defined/,
         );
       });
     });

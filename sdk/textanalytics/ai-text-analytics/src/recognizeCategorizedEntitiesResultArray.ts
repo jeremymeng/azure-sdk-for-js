@@ -1,9 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { EntitiesResult, TextDocumentBatchStatistics, TextDocumentInput } from "./generated/models";
+import type {
+  EntitiesResult,
+  TextDocumentBatchStatistics,
+  TextDocumentInput,
+} from "./generated/models";
+import type { RecognizeCategorizedEntitiesResult } from "./recognizeCategorizedEntitiesResult";
 import {
-  RecognizeCategorizedEntitiesResult,
   makeRecognizeCategorizedEntitiesErrorResult,
   makeRecognizeCategorizedEntitiesResult,
 } from "./recognizeCategorizedEntitiesResult";
@@ -33,12 +37,12 @@ export interface RecognizeCategorizedEntitiesResultArray
  */
 export function makeRecognizeCategorizedEntitiesResultArray(
   input: TextDocumentInput[],
-  response: EntitiesResult
+  response: EntitiesResult,
 ): RecognizeCategorizedEntitiesResultArray {
   return combineSuccessfulAndErroneousDocumentsWithStatisticsAndModelVersion(
     input,
     response,
     makeRecognizeCategorizedEntitiesResult,
-    makeRecognizeCategorizedEntitiesErrorResult
+    makeRecognizeCategorizedEntitiesErrorResult,
   );
 }

@@ -26,7 +26,10 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -128,7 +131,7 @@ describe("Resources test", () => {
     for await (let item of client.tagsOperations.list()) {
       resArray.push(item);
     }
-    assert.equal(resArray.length, 21);
+    assert.equal(resArray.length, 24);
   });
 
   it("resourceGroups delete test", async function () {
@@ -139,4 +142,17 @@ describe("Resources test", () => {
     }
     assert.notEqual(resArray.length, 0);
   });
+
+  it("resources list test", async function () {
+    const filter = `ResourceType eq 'Microsoft.OperationsManagement/solutions'`;
+    const resources = [];
+    const resourcesIterable = client.resources.list({ filter, top: 1 });
+    // const resourcesIterable = resourceManager.resources.list();
+    for await (const resource of resourcesIterable) {
+      resources.push(resource);
+    };
+    assert(resources.length > 1);
+  });
+
+
 });

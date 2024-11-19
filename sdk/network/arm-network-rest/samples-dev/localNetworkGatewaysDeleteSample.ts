@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -32,7 +32,7 @@ async function deleteLocalNetworkGateway() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/localNetworkGateways/{localNetworkGatewayName}",
       subscriptionId,
       resourceGroupName,
-      localNetworkGatewayName
+      localNetworkGatewayName,
     )
     .delete(options);
   const poller = getLongRunningPoller(client, initialResponse);

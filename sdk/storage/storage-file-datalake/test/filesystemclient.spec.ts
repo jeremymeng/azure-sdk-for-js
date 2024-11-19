@@ -1,26 +1,25 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { SpanGraph, setTracer, getYieldedValue } from "@azure/test-utils";
-import { isLiveMode, record, Recorder } from "@azure-tools/test-recorder";
-import { setSpan, context } from "@azure/core-tracing";
-import { assert } from "chai";
+import { assert, getYieldedValue } from "@azure-tools/test-utils";
+import { isLiveMode, Recorder } from "@azure-tools/test-recorder";
+import { useFakeTimers } from "sinon";
 
-import {
-  DataLakeFileSystemClient,
+import type {
   FileSystemListPathsResponse,
   DataLakeServiceClient,
   FileSystemListDeletedPathsResponse,
-  DataLakeFileClient,
-  DataLakeDirectoryClient,
 } from "../src";
+import { DataLakeFileSystemClient, DataLakeFileClient, DataLakeDirectoryClient } from "../src";
 import {
   getDataLakeServiceClient,
   getEncryptionScope,
   getGenericDataLakeServiceClient,
+  getUniqueName,
   recorderEnvSetup,
+  uriSanitizers,
 } from "./utils";
-import { Context } from "mocha";
+import type { Context } from "mocha";
 
 describe("DataLakeFileSystemClient", () => {
   let fileSystemName: string;
@@ -30,9 +29,11 @@ describe("DataLakeFileSystemClient", () => {
   let serviceClient: DataLakeServiceClient;
 
   beforeEach(async function (this: Context) {
-    recorder = record(this, recorderEnvSetup);
-    serviceClient = getDataLakeServiceClient();
-    fileSystemName = recorder.getUniqueName("filesystem");
+    recorder = new Recorder(this.currentTest);
+    await recorder.start(recorderEnvSetup);
+    await recorder.addSanitizers({ uriSanitizers }, ["record", "playback"]);
+    serviceClient = getDataLakeServiceClient(recorder);
+    fileSystemName = recorder.variable("filesystem", getUniqueName("filesystem"));
     fileSystemClient = serviceClient.getFileSystemClient(fileSystemName);
     await fileSystemClient.createIfNotExists();
   });
@@ -55,51 +56,17 @@ describe("DataLakeFileSystemClient", () => {
   });
 
   it("setMetadata with tracing", async () => {
-    const tracer = setTracer();
-    const rootSpan = tracer.startSpan("root");
-
-    const metadata = {
-      key0: "val0",
-      keya: "vala",
-      keyb: "valb",
-    };
-    await fileSystemClient.setMetadata(metadata, {
-      tracingOptions: {
-        tracingContext: setSpan(context.active(), rootSpan),
+    await assert.supportsTracing(
+      async (options) => {
+        const metadata = {
+          key0: "val0",
+          keya: "vala",
+          keyb: "valb",
+        };
+        await fileSystemClient.setMetadata(metadata, options);
       },
-    });
-    rootSpan.end();
-
-    const rootSpans = tracer.getRootSpans();
-    assert.strictEqual(rootSpans.length, 1, "Should only have one root span.");
-    assert.strictEqual(rootSpan, rootSpans[0], "The root span should match what was passed in.");
-
-    const expectedGraph: SpanGraph = {
-      roots: [
-        {
-          name: rootSpan.name,
-          children: [
-            {
-              name: "Azure.Storage.DataLake.DataLakeFileSystemClient-setMetadata",
-              children: [
-                {
-                  name: "Azure.Storage.Blob.ContainerClient-setMetadata",
-                  children: [
-                    {
-                      name: "HTTP PUT",
-                      children: [],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    };
-
-    assert.deepStrictEqual(tracer.getSpanGraph(rootSpan.spanContext().traceId), expectedGraph);
-    assert.strictEqual(tracer.getActiveSpans().length, 0, "All spans should have had end called");
+      ["DataLakeFileSystemClient-setMetadata"],
+    );
   });
 
   it("getProperties", async () => {
@@ -122,7 +89,9 @@ describe("DataLakeFileSystemClient", () => {
   });
 
   it("create with all parameters configured", async () => {
-    const cClient = serviceClient.getFileSystemClient(recorder.getUniqueName(fileSystemName));
+    const cClient = serviceClient.getFileSystemClient(
+      recorder.variable(fileSystemName, getUniqueName(fileSystemName)),
+    );
     const metadata = { key: "value" };
     const access = "filesystem";
     await cClient.create({ metadata, access });
@@ -139,7 +108,9 @@ describe("DataLakeFileSystemClient", () => {
       this.skip();
     }
 
-    const cClient = serviceClient.getFileSystemClient(recorder.getUniqueName(fileSystemName));
+    const cClient = serviceClient.getFileSystemClient(
+      recorder.variable(fileSystemName, getUniqueName(fileSystemName)),
+    );
     await cClient.create({
       fileSystemEncryptionScope: {
         defaultEncryptionScope: encryptionScopeName,
@@ -159,7 +130,9 @@ describe("DataLakeFileSystemClient", () => {
       this.skip();
     }
 
-    const cClient = serviceClient.getFileSystemClient(recorder.getUniqueName(fileSystemName));
+    const cClient = serviceClient.getFileSystemClient(
+      recorder.variable(fileSystemName, getUniqueName(fileSystemName)),
+    );
     await cClient.create({
       fileSystemEncryptionScope: {
         defaultEncryptionScope: encryptionScopeName,
@@ -172,7 +145,9 @@ describe("DataLakeFileSystemClient", () => {
   });
 
   it("createIfNotExists", async () => {
-    const cClient = serviceClient.getFileSystemClient(recorder.getUniqueName(fileSystemName));
+    const cClient = serviceClient.getFileSystemClient(
+      recorder.variable(fileSystemName, getUniqueName(fileSystemName)),
+    );
     const metadata = { key: "value" };
     const access = "filesystem";
     const createRes = await cClient.createIfNotExists({ metadata, access });
@@ -186,7 +161,9 @@ describe("DataLakeFileSystemClient", () => {
   });
 
   it("deleteIfExists", async () => {
-    const cClient = serviceClient.getFileSystemClient(recorder.getUniqueName(fileSystemName));
+    const cClient = serviceClient.getFileSystemClient(
+      recorder.variable(fileSystemName, getUniqueName(fileSystemName)),
+    );
     const res = await cClient.deleteIfExists();
     assert.ok(!res.succeeded);
 
@@ -201,11 +178,13 @@ describe("DataLakeFileSystemClient", () => {
   });
 
   it("listPaths with default parameters", async () => {
-    const recordedNow = recorder.newDate("now"); // Flaky workaround for the recording to work.
+    const recordedNow = new Date(recorder.variable("now", new Date().toISOString())); // Flaky workaround for the recording to work.
 
     const fileClients = [];
     for (let i = 0; i < 3; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`file${i}`, getUniqueName(`file${i}`)),
+      );
       await fileClient.create();
       fileClients.push(fileClient);
     }
@@ -236,7 +215,9 @@ describe("DataLakeFileSystemClient", () => {
       this.skip();
     }
 
-    const cClient = serviceClient.getFileSystemClient(recorder.getUniqueName(fileSystemName));
+    const cClient = serviceClient.getFileSystemClient(
+      recorder.variable(fileSystemName, getUniqueName(fileSystemName)),
+    );
     await cClient.create({
       fileSystemEncryptionScope: {
         defaultEncryptionScope: encryptionScopeName,
@@ -244,10 +225,10 @@ describe("DataLakeFileSystemClient", () => {
       },
     });
 
-    const fileClient = cClient.getFileClient(recorder.getUniqueName(`file`));
+    const fileClient = cClient.getFileClient(recorder.variable(`file`, getUniqueName(`file`)));
     await fileClient.create();
 
-    const dirClient = cClient.getFileClient(recorder.getUniqueName(`dir`));
+    const dirClient = cClient.getFileClient(recorder.variable(`dir`, getUniqueName(`dir`)));
     await dirClient.create();
 
     const result = (await cClient.listPaths().byPage().next()).value as FileSystemListPathsResponse;
@@ -255,6 +236,30 @@ describe("DataLakeFileSystemClient", () => {
     assert.equal(result.pathItems!.length, 2);
     assert.equal(result.pathItems![0].encryptionScope, encryptionScopeName);
     assert.equal(result.pathItems![1].encryptionScope, encryptionScopeName);
+
+    await fileClient.delete();
+    await dirClient.delete();
+  });
+
+  it("listPaths - Encryption context", async function (this: Context) {
+    const encryptionContext = "EncryptionContext";
+
+    const cClient = serviceClient.getFileSystemClient(
+      recorder.variable(fileSystemName, getUniqueName(fileSystemName)),
+    );
+    await cClient.create();
+
+    const fileClient = cClient.getFileClient(recorder.variable(`file`, getUniqueName(`file`)));
+    await fileClient.create({ encryptionContext: encryptionContext });
+
+    const dirClient = cClient.getFileClient(recorder.variable(`dir`, getUniqueName(`dir`)));
+    await dirClient.create({ encryptionContext: encryptionContext });
+
+    const result = (await cClient.listPaths().byPage().next()).value as FileSystemListPathsResponse;
+
+    assert.equal(result.pathItems!.length, 2);
+    assert.equal(result.pathItems![0].encryptionContext, encryptionContext);
+    assert.equal(result.pathItems![1].encryptionContext, encryptionContext);
 
     await fileClient.delete();
     await dirClient.delete();
@@ -268,7 +273,9 @@ describe("DataLakeFileSystemClient", () => {
       this.skip();
     }
 
-    const cClient = serviceClient.getFileSystemClient(recorder.getUniqueName(fileSystemName));
+    const cClient = serviceClient.getFileSystemClient(
+      recorder.variable(fileSystemName, getUniqueName(fileSystemName)),
+    );
     await cClient.create({
       fileSystemEncryptionScope: {
         defaultEncryptionScope: encryptionScopeName,
@@ -276,9 +283,9 @@ describe("DataLakeFileSystemClient", () => {
       },
     });
 
-    const fileClient = cClient.getFileClient(recorder.getUniqueName(`file`));
+    const fileClient = cClient.getFileClient(recorder.variable(`file`, getUniqueName(`file`)));
     await fileClient.create();
-    const dirClient = cClient.getFileClient(recorder.getUniqueName(`dir`));
+    const dirClient = cClient.getFileClient(recorder.variable(`dir`, getUniqueName(`dir`)));
     await dirClient.create();
 
     for await (const listedFile of cClient.listPaths()) {
@@ -290,7 +297,9 @@ describe("DataLakeFileSystemClient", () => {
   });
 
   it("listPaths - ExpiryTime, NeverExpire", async () => {
-    const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file`));
+    const fileClient = fileSystemClient.getFileClient(
+      recorder.variable(`file`, getUniqueName(`file`)),
+    );
     await fileClient.create();
     await fileClient.setExpiry("NeverExpire");
     const result = (await fileSystemClient.listPaths().byPage().next())
@@ -301,22 +310,30 @@ describe("DataLakeFileSystemClient", () => {
   });
 
   it("listPaths - ExpiryTime, Absolute", async () => {
-    const now = new Date();
-    const recordedNow = recorder.newDate("now"); // Flaky workaround for the recording to work.
+    const now = new Date(recorder.variable("now", new Date().toISOString()));
     const delta = 30 * 1000;
     const expiresOn = new Date(now.getTime() + delta);
-    const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file`));
+    const fileClient = fileSystemClient.getFileClient(
+      recorder.variable(`file`, getUniqueName(`file`)),
+    );
 
     const content = "Hello, World";
     await fileClient.create();
     await fileClient.append(content, 0, content.length);
     await fileClient.flush(content.length);
-    await fileClient.setExpiry("Absolute", { expiresOn });
+    const clock = useFakeTimers(now);
+    let setExpiryPromise: Promise<unknown>;
+    try {
+      setExpiryPromise = fileClient.setExpiry("Absolute", { expiresOn });
+    } finally {
+      clock.restore();
+    }
+    await setExpiryPromise;
 
     const result = (await fileSystemClient.listPaths().byPage().next())
       .value as FileSystemListPathsResponse;
 
-    const recordedExpiresOn = new Date(recordedNow.getTime() + delta);
+    const recordedExpiresOn = new Date(expiresOn.getTime());
     recordedExpiresOn.setMilliseconds(0); // milliseconds dropped
     assert.equal(result.pathItems![0].expiresOn?.getTime(), recordedExpiresOn.getTime());
     await fileClient.delete();
@@ -324,7 +341,9 @@ describe("DataLakeFileSystemClient", () => {
 
   it("listPaths - ExpiryTime, RelativeToNow", async () => {
     const delta = 30 * 1000;
-    const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file`));
+    const fileClient = fileSystemClient.getFileClient(
+      recorder.variable(`file`, getUniqueName(`file`)),
+    );
 
     const content = "Hello, World";
     await fileClient.create();
@@ -341,7 +360,9 @@ describe("DataLakeFileSystemClient", () => {
 
   it("listPaths - ExpiryTime, RelativeToCreation", async () => {
     const delta = 1000 * 3600 + 0.12;
-    const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file`));
+    const fileClient = fileSystemClient.getFileClient(
+      recorder.variable(`file`, getUniqueName(`file`)),
+    );
 
     const content = "Hello, World";
     await fileClient.create();
@@ -353,7 +374,7 @@ describe("DataLakeFileSystemClient", () => {
       .value as FileSystemListPathsResponse;
     assert.equal(
       result.pathItems![0].expiresOn?.getTime(),
-      result.pathItems![0].createdOn!.getTime() + Math.round(delta)
+      result.pathItems![0].createdOn!.getTime() + Math.round(delta),
     );
     await fileClient.delete();
   });
@@ -361,7 +382,9 @@ describe("DataLakeFileSystemClient", () => {
   it("listPaths with default parameters - null path shouldn't throw error", async () => {
     const fileClients = [];
     for (let i = 0; i < 3; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`file${i}`, getUniqueName(`file${i}`)),
+      );
 
       await fileClient.create();
       fileClients.push(fileClient);
@@ -385,7 +408,9 @@ describe("DataLakeFileSystemClient", () => {
       keyb: "c",
     };
     for (let i = 0; i < 2; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata: metadata,
@@ -434,7 +459,9 @@ describe("DataLakeFileSystemClient", () => {
       keyb: "c",
     };
     for (let i = 0; i < 4; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata,
@@ -465,7 +492,9 @@ describe("DataLakeFileSystemClient", () => {
       keyb: "c",
     };
     for (let i = 0; i < 2; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata,
@@ -498,7 +527,9 @@ describe("DataLakeFileSystemClient", () => {
       keyb: "c",
     };
     for (let i = 0; i < 4; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata,
@@ -533,7 +564,9 @@ describe("DataLakeFileSystemClient", () => {
       keyb: "c",
     };
     for (let i = 0; i < 4; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata,
@@ -579,17 +612,17 @@ describe("DataLakeFileSystemClient", () => {
   it("verify fileSystemName passed to the client", async () => {
     const accountName = "myaccount";
     const newClient = new DataLakeFileSystemClient(
-      `https://${accountName}.dfs.core.windows.net/` + fileSystemName
+      `https://${accountName}.dfs.core.windows.net/` + fileSystemName,
     );
     assert.equal(
       newClient.name,
       fileSystemName,
-      "File system name is not the same as the one provided."
+      "File system name is not the same as the one provided.",
     );
     assert.equal(
       newClient.accountName,
       accountName,
-      "Account name is not the same as the one provided."
+      "Account name is not the same as the one provided.",
     );
   });
 
@@ -600,7 +633,7 @@ describe("DataLakeFileSystemClient", () => {
 
   it("exists returns false on non-existing file system", async () => {
     const newFileSystemClient = serviceClient.getFileSystemClient(
-      recorder.getUniqueName("newfilesystem")
+      recorder.variable("newfilesystem", getUniqueName("newfilesystem")),
     );
     const result = await newFileSystemClient.exists();
     assert.ok(result === false, "exists() should returns false on non-existing file system");
@@ -614,34 +647,42 @@ describe("DataLakeFileSystemClient with soft delete", () => {
   let serviceClient: DataLakeServiceClient;
 
   beforeEach(async function (this: Context) {
-    recorder = record(this, recorderEnvSetup);
-
     if (isLiveMode()) {
       // Turn on this case when the Container Rename feature is ready in the service side.
       this.skip();
     }
 
+    recorder = new Recorder(this.currentTest);
+    await recorder.start(recorderEnvSetup);
+    await recorder.addSanitizers({ uriSanitizers }, ["record", "playback"]);
+
     try {
-      serviceClient = getGenericDataLakeServiceClient("DFS_SOFT_DELETE_");
+      serviceClient = getGenericDataLakeServiceClient(recorder, "DFS_SOFT_DELETE_");
     } catch (err: any) {
       this.skip();
     }
 
-    fileSystemClient = serviceClient.getFileSystemClient(recorder.getUniqueName(`filesystem`));
+    fileSystemClient = serviceClient.getFileSystemClient(
+      recorder.variable(`filesystem`, getUniqueName(`filesystem`)),
+    );
     await fileSystemClient.createIfNotExists();
   });
 
   afterEach(async function () {
-    if (fileSystemClient !== undefined) {
+    if (fileSystemClient) {
       await fileSystemClient.deleteIfExists();
     }
-    await recorder.stop();
+    if (recorder) {
+      await recorder.stop();
+    }
   });
 
   it("listDeletedPaths with default parameters", async () => {
     const fileClients = [];
     for (let i = 0; i < 3; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`file${i}`, getUniqueName(`file${i}`)),
+      );
       await fileClient.create();
       fileClients.push(fileClient);
     }
@@ -667,7 +708,9 @@ describe("DataLakeFileSystemClient with soft delete", () => {
   it("listDeletedPaths and listPaths with recreating file after deletion", async () => {
     const fileClients = [];
     for (let i = 0; i < 3; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`file${i}`, getUniqueName(`file${i}`)),
+      );
       await fileClient.create();
       fileClients.push(fileClient);
     }
@@ -701,7 +744,9 @@ describe("DataLakeFileSystemClient with soft delete", () => {
   it("listDeletedPaths with recreating and deletion again", async () => {
     const fileClients = [];
     for (let i = 0; i < 3; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`file${i}`, getUniqueName(`file${i}`)),
+      );
       await fileClient.create();
       fileClients.push(fileClient);
     }
@@ -729,7 +774,9 @@ describe("DataLakeFileSystemClient with soft delete", () => {
   it("listDeletedPaths with default parameters - empty path shouldn't throw error", async () => {
     const fileClients = [];
     for (let i = 0; i < 3; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`file${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`file${i}`, getUniqueName(`file${i}`)),
+      );
 
       await fileClient.create();
       fileClients.push(fileClient);
@@ -760,7 +807,9 @@ describe("DataLakeFileSystemClient with soft delete", () => {
       keyb: "c",
     };
     for (let i = 0; i < 2; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata: metadata,
@@ -810,7 +859,9 @@ describe("DataLakeFileSystemClient with soft delete", () => {
       keyb: "c",
     };
     for (let i = 0; i < 4; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata,
@@ -842,7 +893,9 @@ describe("DataLakeFileSystemClient with soft delete", () => {
       keyb: "c",
     };
     for (let i = 0; i < 2; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata,
@@ -879,7 +932,9 @@ describe("DataLakeFileSystemClient with soft delete", () => {
       keyb: "c",
     };
     for (let i = 0; i < 4; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata,
@@ -915,7 +970,9 @@ describe("DataLakeFileSystemClient with soft delete", () => {
       keyb: "c",
     };
     for (let i = 0; i < 4; i++) {
-      const fileClient = fileSystemClient.getFileClient(recorder.getUniqueName(`${prefix}${i}`));
+      const fileClient = fileSystemClient.getFileClient(
+        recorder.variable(`${prefix}${i}`, getUniqueName(`${prefix}${i}`)),
+      );
 
       await fileClient.create({
         metadata,
@@ -961,7 +1018,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
   });
 
   it("Undelete file and directory", async () => {
-    const fileName = recorder.getUniqueName(`file`);
+    const fileName = recorder.variable(`file`, getUniqueName(`file`));
     const fileClient = fileSystemClient.getFileClient(fileName);
     await fileClient.create();
     const fileDeleteResponse = await fileClient.delete();
@@ -969,7 +1026,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
 
     const fileundeleteResponse = await fileSystemClient.undeletePath(
       fileName,
-      fileDeleteResponse.deletionId ?? ""
+      fileDeleteResponse.deletionId ?? "",
     );
 
     assert.ok(fileundeleteResponse.pathClient instanceof DataLakeFileClient);
@@ -977,7 +1034,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
     assert.ok(await fileundeleteResponse.pathClient.exists());
     await fileundeleteResponse.pathClient.delete();
 
-    const directoryName = recorder.getUniqueName(`directory`);
+    const directoryName = recorder.variable(`directory`, getUniqueName(`directory`));
     const directoryClient = fileSystemClient.getDirectoryClient(directoryName);
     await directoryClient.create();
     const directoryDeleteResponse = await directoryClient.delete();
@@ -985,7 +1042,44 @@ describe("DataLakeFileSystemClient with soft delete", () => {
 
     const directoryUndeleteResponse = await fileSystemClient.undeletePath(
       directoryName,
-      directoryDeleteResponse.deletionId ?? ""
+      directoryDeleteResponse.deletionId ?? "",
+    );
+
+    assert.ok(directoryUndeleteResponse.pathClient instanceof DataLakeDirectoryClient);
+
+    assert.ok(await directoryUndeleteResponse.pathClient.exists());
+    await directoryUndeleteResponse.pathClient.delete();
+  });
+
+  it("Undelete file and directory - with directory dots", async () => {
+    const fileBaseName = recorder.variable("file", getUniqueName(`file`));
+    const fileClient = fileSystemClient.getFileClient(fileBaseName);
+    await fileClient.create();
+    const fileDeleteResponse = await fileClient.delete();
+    assert.ok(fileDeleteResponse.deletionId);
+
+    const fileNameWithDirDots = "./adir/.././anotherdir/./../" + fileBaseName;
+
+    const fileundeleteResponse = await fileSystemClient.undeletePath(
+      fileNameWithDirDots,
+      fileDeleteResponse.deletionId ?? "",
+    );
+
+    assert.ok(fileundeleteResponse.pathClient instanceof DataLakeFileClient);
+
+    assert.ok(await fileundeleteResponse.pathClient.exists());
+    await fileundeleteResponse.pathClient.delete();
+
+    const directoryBaseName = recorder.variable("directory", getUniqueName(`directory`));
+    const directoryClient = fileSystemClient.getDirectoryClient(directoryBaseName);
+    await directoryClient.create();
+    const directoryDeleteResponse = await directoryClient.delete();
+    assert.ok(directoryDeleteResponse.deletionId);
+
+    const directoryNameWithDirDots = "./adir/.././anotherdir/./../" + directoryBaseName;
+    const directoryUndeleteResponse = await fileSystemClient.undeletePath(
+      directoryNameWithDirDots,
+      directoryDeleteResponse.deletionId ?? "",
     );
 
     assert.ok(directoryUndeleteResponse.pathClient instanceof DataLakeDirectoryClient);
@@ -995,7 +1089,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
   });
 
   it("Undelete file and directory - recreate and delete path and undelete the path with first deletionid", async () => {
-    const fileName = recorder.getUniqueName(`file`);
+    const fileName = recorder.variable(`file`, getUniqueName(`file`));
     const fileClient = fileSystemClient.getFileClient(fileName);
     await fileClient.create();
     const fileDeleteResponse = await fileClient.delete();
@@ -1007,7 +1101,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
 
     const fileundeleteResponse = await fileSystemClient.undeletePath(
       fileName,
-      firstDeletionId ?? ""
+      firstDeletionId ?? "",
     );
 
     assert.ok(fileundeleteResponse.pathClient instanceof DataLakeFileClient);
@@ -1017,7 +1111,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
   });
 
   it("Undelete file and directory - recreate and delete path and undelete the path twice", async () => {
-    const fileName = recorder.getUniqueName(`file`);
+    const fileName = recorder.variable(`file`, getUniqueName(`file`));
     const fileClient = fileSystemClient.getFileClient(fileName);
     await fileClient.create();
     const firstDeleteResponse = await fileClient.delete();
@@ -1029,7 +1123,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
 
     const fileundeleteResponse = await fileSystemClient.undeletePath(
       fileName,
-      secondDeleteResponse.deletionId ?? ""
+      secondDeleteResponse.deletionId ?? "",
     );
 
     assert.ok(fileundeleteResponse.pathClient instanceof DataLakeFileClient);
@@ -1047,7 +1141,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
   });
 
   it("Undelete file and directory with deleteIfExists", async () => {
-    const fileName = recorder.getUniqueName(`file`);
+    const fileName = recorder.variable(`file`, getUniqueName(`file`));
     const fileClient = fileSystemClient.getFileClient(fileName);
     await fileClient.create();
     const fileDeleteResponse = await fileClient.deleteIfExists();
@@ -1055,14 +1149,14 @@ describe("DataLakeFileSystemClient with soft delete", () => {
 
     const fileundeleteResponse = await fileSystemClient.undeletePath(
       fileName,
-      fileDeleteResponse.deletionId ?? ""
+      fileDeleteResponse.deletionId ?? "",
     );
 
     assert.ok(fileundeleteResponse.pathClient instanceof DataLakeFileClient);
 
     assert.ok(await fileundeleteResponse.pathClient.exists());
 
-    const directoryName = recorder.getUniqueName(`directory`);
+    const directoryName = recorder.variable(`directory`, getUniqueName(`directory`));
     const directoryClient = fileSystemClient.getDirectoryClient(directoryName);
     await directoryClient.create();
     const directoryDeleteResponse = await directoryClient.deleteIfExists();
@@ -1070,7 +1164,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
 
     const directoryUndeleteResponse = await fileSystemClient.undeletePath(
       directoryName,
-      directoryDeleteResponse.deletionId ?? ""
+      directoryDeleteResponse.deletionId ?? "",
     );
 
     assert.ok(directoryUndeleteResponse.pathClient instanceof DataLakeDirectoryClient);
@@ -1093,7 +1187,7 @@ describe("DataLakeFileSystemClient with soft delete", () => {
 
       const fileundeleteResponse = await fileSystemClient.undeletePath(
         fileName,
-        fileDeleteResponse.deletionId ?? ""
+        fileDeleteResponse.deletionId ?? "",
       );
 
       assert.ok(fileundeleteResponse.pathClient instanceof DataLakeFileClient);

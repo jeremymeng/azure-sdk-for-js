@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { assert } from "chai";
 import * as sinon from "sinon";
@@ -41,7 +41,7 @@ describe("odata", function () {
   it("many arguments", function () {
     assert.strictEqual(
       odata`Foo eq ${2} and Bar eq ${3} and Baz eq ${4} and Qux eq ${5} and Quux eq ${6}`,
-      "Foo eq 2 and Bar eq 3 and Baz eq 4 and Qux eq 5 and Quux eq 6"
+      "Foo eq 2 and Bar eq 3 and Baz eq 4 and Qux eq 5 and Quux eq 6",
     );
   });
 

@@ -21,9 +21,7 @@ module.exports = function (config) {
       "karma-mocha",
       "karma-mocha-reporter",
       "karma-chrome-launcher",
-      "karma-edge-launcher",
       "karma-firefox-launcher",
-      "karma-ie-launcher",
       "karma-env-preprocessor",
       "karma-coverage",
       "karma-sourcemap-loader",
@@ -48,11 +46,8 @@ module.exports = function (config) {
     envPreprocessor: [
       "TEST_MODE",
       "EVENT_GRID_EVENT_GRID_SCHEMA_ENDPOINT",
-      "EVENT_GRID_EVENT_GRID_SCHEMA_API_KEY",
       "EVENT_GRID_CUSTOM_SCHEMA_ENDPOINT",
-      "EVENT_GRID_CUSTOM_SCHEMA_API_KEY",
       "EVENT_GRID_CLOUD_EVENT_SCHEMA_ENDPOINT",
-      "EVENT_GRID_CLOUD_EVENT_SCHEMA_API_KEY",
       "RECORDINGS_RELATIVE_PATH",
     ],
 

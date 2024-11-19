@@ -6,9 +6,9 @@
 
 import * as coreAuth from '@azure/core-auth';
 import * as coreClient from '@azure/core-client';
+import { OperationState } from '@azure/core-lro';
 import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
+import { SimplePollerLike } from '@azure/core-lro';
 
 // @public
 export interface AaaaRecord {
@@ -49,6 +49,12 @@ export enum KnownProvisioningState {
     Failed = "Failed",
     Succeeded = "Succeeded",
     Updating = "Updating"
+}
+
+// @public
+export enum KnownResolutionPolicy {
+    Default = "Default",
+    NxDomainRedirect = "NxDomainRedirect"
 }
 
 // @public
@@ -108,11 +114,11 @@ export interface PrivateZoneListResult {
 
 // @public
 export interface PrivateZones {
-    beginCreateOrUpdate(resourceGroupName: string, privateZoneName: string, parameters: PrivateZone, options?: PrivateZonesCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<PrivateZonesCreateOrUpdateResponse>, PrivateZonesCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, privateZoneName: string, parameters: PrivateZone, options?: PrivateZonesCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<PrivateZonesCreateOrUpdateResponse>, PrivateZonesCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, privateZoneName: string, parameters: PrivateZone, options?: PrivateZonesCreateOrUpdateOptionalParams): Promise<PrivateZonesCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, privateZoneName: string, options?: PrivateZonesDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, privateZoneName: string, options?: PrivateZonesDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, privateZoneName: string, options?: PrivateZonesDeleteOptionalParams): Promise<void>;
-    beginUpdate(resourceGroupName: string, privateZoneName: string, parameters: PrivateZone, options?: PrivateZonesUpdateOptionalParams): Promise<PollerLike<PollOperationState<PrivateZonesUpdateResponse>, PrivateZonesUpdateResponse>>;
+    beginUpdate(resourceGroupName: string, privateZoneName: string, parameters: PrivateZone, options?: PrivateZonesUpdateOptionalParams): Promise<SimplePollerLike<OperationState<PrivateZonesUpdateResponse>, PrivateZonesUpdateResponse>>;
     beginUpdateAndWait(resourceGroupName: string, privateZoneName: string, parameters: PrivateZone, options?: PrivateZonesUpdateOptionalParams): Promise<PrivateZonesUpdateResponse>;
     get(resourceGroupName: string, privateZoneName: string, options?: PrivateZonesGetOptionalParams): Promise<PrivateZonesGetResponse>;
     list(options?: PrivateZonesListOptionalParams): PagedAsyncIterableIterator<PrivateZone>;
@@ -146,7 +152,6 @@ export type PrivateZonesGetResponse = PrivateZone;
 
 // @public
 export interface PrivateZonesListByResourceGroupNextOptionalParams extends coreClient.OperationOptions {
-    top?: number;
 }
 
 // @public
@@ -162,7 +167,6 @@ export type PrivateZonesListByResourceGroupResponse = PrivateZoneListResult;
 
 // @public
 export interface PrivateZonesListNextOptionalParams extends coreClient.OperationOptions {
-    top?: number;
 }
 
 // @public
@@ -256,8 +260,6 @@ export type RecordSetsGetResponse = RecordSet;
 
 // @public
 export interface RecordSetsListByTypeNextOptionalParams extends coreClient.OperationOptions {
-    recordsetnamesuffix?: string;
-    top?: number;
 }
 
 // @public
@@ -274,8 +276,6 @@ export type RecordSetsListByTypeResponse = RecordSetListResult;
 
 // @public
 export interface RecordSetsListNextOptionalParams extends coreClient.OperationOptions {
-    recordsetnamesuffix?: string;
-    top?: number;
 }
 
 // @public
@@ -300,6 +300,9 @@ export type RecordSetsUpdateResponse = RecordSet;
 
 // @public
 export type RecordType = "A" | "AAAA" | "CNAME" | "MX" | "PTR" | "SOA" | "SRV" | "TXT";
+
+// @public
+export type ResolutionPolicy = string;
 
 // @public
 export interface Resource {
@@ -350,6 +353,7 @@ export interface VirtualNetworkLink extends TrackedResource {
     etag?: string;
     readonly provisioningState?: ProvisioningState;
     registrationEnabled?: boolean;
+    resolutionPolicy?: ResolutionPolicy;
     virtualNetwork?: SubResource;
     readonly virtualNetworkLinkState?: VirtualNetworkLinkState;
 }
@@ -362,11 +366,11 @@ export interface VirtualNetworkLinkListResult {
 
 // @public
 export interface VirtualNetworkLinks {
-    beginCreateOrUpdate(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, parameters: VirtualNetworkLink, options?: VirtualNetworkLinksCreateOrUpdateOptionalParams): Promise<PollerLike<PollOperationState<VirtualNetworkLinksCreateOrUpdateResponse>, VirtualNetworkLinksCreateOrUpdateResponse>>;
+    beginCreateOrUpdate(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, parameters: VirtualNetworkLink, options?: VirtualNetworkLinksCreateOrUpdateOptionalParams): Promise<SimplePollerLike<OperationState<VirtualNetworkLinksCreateOrUpdateResponse>, VirtualNetworkLinksCreateOrUpdateResponse>>;
     beginCreateOrUpdateAndWait(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, parameters: VirtualNetworkLink, options?: VirtualNetworkLinksCreateOrUpdateOptionalParams): Promise<VirtualNetworkLinksCreateOrUpdateResponse>;
-    beginDelete(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, options?: VirtualNetworkLinksDeleteOptionalParams): Promise<PollerLike<PollOperationState<void>, void>>;
+    beginDelete(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, options?: VirtualNetworkLinksDeleteOptionalParams): Promise<SimplePollerLike<OperationState<void>, void>>;
     beginDeleteAndWait(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, options?: VirtualNetworkLinksDeleteOptionalParams): Promise<void>;
-    beginUpdate(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, parameters: VirtualNetworkLink, options?: VirtualNetworkLinksUpdateOptionalParams): Promise<PollerLike<PollOperationState<VirtualNetworkLinksUpdateResponse>, VirtualNetworkLinksUpdateResponse>>;
+    beginUpdate(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, parameters: VirtualNetworkLink, options?: VirtualNetworkLinksUpdateOptionalParams): Promise<SimplePollerLike<OperationState<VirtualNetworkLinksUpdateResponse>, VirtualNetworkLinksUpdateResponse>>;
     beginUpdateAndWait(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, parameters: VirtualNetworkLink, options?: VirtualNetworkLinksUpdateOptionalParams): Promise<VirtualNetworkLinksUpdateResponse>;
     get(resourceGroupName: string, privateZoneName: string, virtualNetworkLinkName: string, options?: VirtualNetworkLinksGetOptionalParams): Promise<VirtualNetworkLinksGetResponse>;
     list(resourceGroupName: string, privateZoneName: string, options?: VirtualNetworkLinksListOptionalParams): PagedAsyncIterableIterator<VirtualNetworkLink>;
@@ -399,7 +403,6 @@ export type VirtualNetworkLinksGetResponse = VirtualNetworkLink;
 
 // @public
 export interface VirtualNetworkLinksListNextOptionalParams extends coreClient.OperationOptions {
-    top?: number;
 }
 
 // @public

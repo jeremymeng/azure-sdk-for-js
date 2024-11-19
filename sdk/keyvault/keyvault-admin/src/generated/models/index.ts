@@ -162,7 +162,9 @@ export interface SASTokenParameter {
   /** Azure Blob storage container Uri */
   storageResourceUri: string;
   /** The SAS token pointing to an Azure Blob storage container */
-  token: string;
+  token?: string;
+  /** Indicates which authentication method should be used. If set to true, Managed HSM will use the configured user-assigned managed identity to authenticate with Azure Storage. Otherwise, a SAS token has to be specified. */
+  useManagedIdentity?: boolean;
 }
 
 /** Full backup operation */
@@ -287,20 +289,20 @@ export interface KeyVaultClientSelectiveKeyRestoreOperationHeaders {
   azureAsyncOperation?: string;
 }
 
-/** Known values of {@link ApiVersion74Preview1} that the service accepts. */
-export enum KnownApiVersion74Preview1 {
-  /** Api Version '7.4-preview.1' */
-  Seven4Preview1 = "7.4-preview.1"
+/** Known values of {@link ApiVersion75} that the service accepts. */
+export enum KnownApiVersion75 {
+  /** Api Version '7.5' */
+  Seven5 = "7.5"
 }
 
 /**
- * Defines values for ApiVersion74Preview1. \
- * {@link KnownApiVersion74Preview1} can be used interchangeably with ApiVersion74Preview1,
+ * Defines values for ApiVersion75. \
+ * {@link KnownApiVersion75} can be used interchangeably with ApiVersion75,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **7.4-preview.1**: Api Version '7.4-preview.1'
+ * **7.5**: Api Version '7.5'
  */
-export type ApiVersion74Preview1 = string;
+export type ApiVersion75 = string;
 
 /** Known values of {@link RoleType} that the service accepts. */
 export enum KnownRoleType {

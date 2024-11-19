@@ -1,24 +1,23 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
+import type { SipRoutingClient } from "../../../src/index.js";
 
-import { assert } from "chai";
-import { Context } from "mocha";
-
-import { SipRoutingClient } from "../../../src";
-
-import { isPlaybackMode, Recorder } from "@azure-tools/test-recorder";
-import { SipTrunk } from "../../../src/models";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isPlaybackMode } from "@azure-tools/test-recorder";
+import type { SipTrunk } from "../../../src/models.js";
 import {
   clearSipConfiguration,
   createRecordedClient,
   createRecordedClientWithToken,
   getUniqueFqdn,
+  listAllTrunks,
   resetUniqueFqdns,
-} from "./utils/recordedClient";
-import { matrix } from "@azure/test-utils";
+} from "./utils/recordedClient.js";
+import { matrix } from "@azure-tools/test-utils-vitest";
+import { describe, it, assert, beforeEach, afterEach, beforeAll } from "vitest";
 
-matrix([[true, false]], async function (useAad) {
-  describe(`SipRoutingClient - get trunks${useAad ? " [AAD]" : ""}`, function () {
+matrix([[true, false]], async (useAad) => {
+  describe(`SipRoutingClient - get trunks${useAad ? " [AAD]" : ""}`, () => {
     let client: SipRoutingClient;
     let recorder: Recorder;
     let firstFqdn = "";
@@ -26,26 +25,24 @@ matrix([[true, false]], async function (useAad) {
     let thirdFqdn = "";
     let fourthFqdn = "";
 
-    before(async function (this: Context) {
+    beforeAll(async () => {
       if (!isPlaybackMode()) {
         await clearSipConfiguration();
       }
     });
 
-    beforeEach(async function (this: Context) {
+    beforeEach(async (ctx) => {
       ({ client, recorder } = useAad
-        ? await createRecordedClientWithToken(this)
-        : await createRecordedClient(this));
+        ? await createRecordedClientWithToken(ctx)
+        : await createRecordedClient(ctx));
       firstFqdn = getUniqueFqdn(recorder);
       secondFqdn = getUniqueFqdn(recorder);
       thirdFqdn = getUniqueFqdn(recorder);
       fourthFqdn = getUniqueFqdn(recorder);
     });
 
-    afterEach(async function (this: Context) {
-      if (!this.currentTest?.isPending()) {
-        await recorder.stop();
-      }
+    afterEach(async () => {
+      await recorder.stop();
       resetUniqueFqdns();
     });
 
@@ -69,13 +66,13 @@ matrix([[true, false]], async function (useAad) {
     });
 
     it("can retrieve trunks", async () => {
-      assert.isArray(await client.getTrunks());
+      assert.isArray(await listAllTrunks(client));
     });
 
     it("can retrieve empty trunks", async () => {
       await client.setTrunks([]);
 
-      const trunks = await client.getTrunks();
+      const trunks = await listAllTrunks(client);
 
       assert.isNotNull(trunks);
       assert.isArray(trunks);
@@ -90,7 +87,7 @@ matrix([[true, false]], async function (useAad) {
       ];
       await client.setTrunks(expectedTrunks);
 
-      const trunks = await client.getTrunks();
+      const trunks = await listAllTrunks(client);
 
       assert.isNotNull(trunks);
       assert.isArray(trunks);

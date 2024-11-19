@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { PerfOptionDictionary } from "@azure/test-utils-perf";
+import { PerfOptionDictionary } from "@azure-tools/test-perf";
 import { ServiceBusMessage, ServiceBusSender } from "@azure/service-bus";
 import { ServiceBusTest } from "./sbBase.spec";
 
@@ -25,7 +25,7 @@ export class BatchSendTest extends ServiceBusTest<SendTestOptions> {
       required: true,
       description: "Number of messages per send",
       shortName: "num",
-      longName: "numberOfMessages",
+      longName: "batch-size",
       defaultValue: 10,
     },
   };

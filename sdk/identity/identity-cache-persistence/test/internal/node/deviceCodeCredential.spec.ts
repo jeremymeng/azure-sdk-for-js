@@ -1,17 +1,18 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable sort-imports */
 
-import { DeviceCodeCredential, TokenCachePersistenceOptions } from "../../../../identity/src";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../../../identity/test/msalTestUtils";
-import { Recorder, isLiveMode } from "@azure-tools/test-recorder";
-import { createPersistence } from "./setup.spec";
-import { MsalNode } from "../../../../identity/src/msal/nodeFlows/msalNodeCommon";
+import { DeviceCodeCredential, type TokenCachePersistenceOptions } from "@azure/identity";
+import { msalNodeTestSetup, type MsalTestCleanup } from "./msalNodeTestSetup";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isLiveMode } from "@azure-tools/test-recorder";
+
 import { PublicClientApplication } from "@azure/msal-node";
-import Sinon from "sinon";
+import type Sinon from "sinon";
 import assert from "assert";
+import { createPersistence } from "./setup.spec";
 
 describe("DeviceCodeCredential (internal)", function (this: Mocha.Suite) {
   let cleanup: MsalTestCleanup;
@@ -24,12 +25,12 @@ describe("DeviceCodeCredential (internal)", function (this: Mocha.Suite) {
     cleanup = setup.cleanup;
     recorder = setup.recorder;
 
-    getTokenSilentSpy = setup.sandbox.spy(MsalNode.prototype, "getTokenSilent");
+    getTokenSilentSpy = setup.sandbox.spy(PublicClientApplication.prototype, "acquireTokenSilent");
 
     // MsalClientSecret calls to this method underneath.
     doGetTokenSpy = setup.sandbox.spy(
       PublicClientApplication.prototype,
-      "acquireTokenByDeviceCode"
+      "acquireTokenByDeviceCode",
     );
   });
   afterEach(async function () {
@@ -61,7 +62,7 @@ describe("DeviceCodeCredential (internal)", function (this: Mocha.Suite) {
     const credential = new DeviceCodeCredential(
       recorder.configureClientOptions({
         tokenCachePersistenceOptions,
-      })
+      }),
     );
 
     await credential.getToken(scope);
@@ -93,7 +94,7 @@ describe("DeviceCodeCredential (internal)", function (this: Mocha.Suite) {
     const credential = new DeviceCodeCredential(
       recorder.configureClientOptions({
         tokenCachePersistenceOptions,
-      })
+      }),
     );
 
     await credential.getToken(scope);
@@ -134,7 +135,7 @@ describe("DeviceCodeCredential (internal)", function (this: Mocha.Suite) {
         // To be able to re-use the account, the Token Cache must also have been provided.
         // TODO: Perhaps make the account parameter part of the tokenCachePersistenceOptions?
         tokenCachePersistenceOptions,
-      })
+      }),
     );
 
     const account = await credential.authenticate(scope);
@@ -148,7 +149,7 @@ describe("DeviceCodeCredential (internal)", function (this: Mocha.Suite) {
         // To be able to re-use the account, the Token Cache must also have been provided.
         // TODO: Perhaps make the account parameter part of the tokenCachePersistenceOptions?
         tokenCachePersistenceOptions,
-      })
+      }),
     );
 
     // The cache should have a token a this point
@@ -161,8 +162,7 @@ describe("DeviceCodeCredential (internal)", function (this: Mocha.Suite) {
     assert.ok(token?.expiresOnTimestamp! > Date.now());
     assert.equal(getTokenSilentSpy.callCount, 2);
 
-    // TODO: Why is this the case?
-    // I created an issue to track this: https://github.com/Azure/azure-sdk-for-js/issues/14701
-    assert.equal(doGetTokenSpy.callCount, 2);
+    // Resolved with issue - https://github.com/Azure/azure-sdk-for-js/issues/24349
+    assert.equal(doGetTokenSpy.callCount, 1);
   });
 });

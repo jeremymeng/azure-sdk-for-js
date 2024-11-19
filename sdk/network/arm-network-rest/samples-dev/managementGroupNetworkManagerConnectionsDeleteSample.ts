@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -29,7 +29,7 @@ async function deleteManagementGroupNetworkManagerConnection() {
     .path(
       "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Network/networkManagerConnections/{networkManagerConnectionName}",
       managementGroupId,
-      networkManagerConnectionName
+      networkManagerConnectionName,
     )
     .delete(options);
   console.log(result);

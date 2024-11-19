@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -37,7 +37,7 @@ async function virtualWanCreate() {
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualWans/{VirtualWANName}",
       subscriptionId,
       resourceGroupName,
-      VirtualWANName
+      VirtualWANName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);

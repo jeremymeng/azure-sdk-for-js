@@ -1,12 +1,149 @@
 # Release History
 
-## 12.13.0 (Unreleased)
+## 12.26.0 (2024-11-13)
 
 ### Features Added
 
-### Breaking Changes
+- Includes all features released in 12.26.0-beta.1.
+
+## 12.26.0-beta.1 (2024-10-15)
+
+### Features Added
+
+- Added support for service version 2025-01-05.
+- Added generateUserDelegationSasUrl() to BlobClient and ContainerClient.
+- Added BlobErrorCode.BlobAccessTierNotSupportedForAccountType enum value.
+
+## 12.25.0 (2024-09-22)
+
+### Features Added
+
+- Includes all features released in 12.25.0-beta.1.
+- Added support for customer provided key in BlockBlobClient.uploadStream().
+
+### Other Changes
+
+- Upgraded dependency on `@azure/core-xml` to version `1.4.3`.
+
+## 12.25.0-beta.1 (2024-08-09)
+
+### Features Added
+
+- Added support for service version 2024-11-04.
+- Added ability to retrieve SAS string to sign for debugging purposes.
+
+## 12.24.0 (2024-07-18)
+
+### Features Added
+
+- Includes all features released in 12.24.0-beta.1.
 
 ### Bugs Fixed
+
+- Correct content-length header with request body length. (#30138)
+
+## 12.24.0-beta.1 (2024-06-13)
+
+### Features Added
+
+- Added support for service version 2024-08-04.
+- Added BlobContainerClient.getAccountInfo() and BlobClient.getAccountInfo() APIs.
+- Added more detailed messaging for authorization failure cases.
+
+## 12.23.0 (2024-06-04)
+
+### Features Added
+
+- Includes all features released in 12.23.0-beta.1.
+- Allow HTTP connections
+
+## 12.18.0 (2024-05-11)
+
+### Features Added
+
+- Includes all features released in 12.18.0-beta.1.
+
+## 12.18.0-beta.1 (2024-04-18)
+
+### Features Added
+
+- Added support for service version 2024-05-04.
+
+## 12.17.0 (2023-11-09)
+
+### Features Added
+
+- Includes all features released in 12.17.0-beta.1.
+
+## 12.23.0-beta.1 (2023-11-01)
+
+### Other Changes
+
+- Migrated dependency on `@azure/core-http` to `@azure/core-rest-pipeline`.
+
+## 12.17.0-beta.1 (2023-10-18)
+
+### Features Added
+
+- Added support for service version 2023-11-03.
+- Added method to generate audience for blob servcie for a storage account.
+
+## 12.16.0-beta.1 (2023-08-11)
+
+### Features Added
+
+- Added support for service version 2023-08-03.
+- Added rehydrate-pending-to-cold value to ArchiveStatus enum.
+
+## 12.15.0 (2023-07-12)
+
+### Features Added
+
+- Includes all features released in 12.15.0.
+
+## 12.15.0-beta.1 (2023-05-31)
+
+### Features Added
+
+- Added support for service version 2023-01-03.
+
+## 12.14.0 (2023-04-13)
+
+### Features Added
+
+- Includes all features released in 12.14.0-beta.1.
+
+### Bugs Fixed
+
+- Fixed an issue of: StoragePipelineOptions is not passed into constructors for blob clients correctly when using undefined as credential parameter.
+
+## 12.14.0-beta.1 (2023-03-29)
+
+### Features Added
+
+- Added support for service version 2022-11-02.
+
+## 12.13.0 (2023-02-23)
+
+### Features Added
+
+- Includes all features released in 12.13.0-beta.1.
+- Added BlobDownloadHeaders.createdOn property for interface BlobClient.Download().
+
+### Bugs Fixed
+
+- Fixed an issue of getting 403 error for file or directory name with './' or '../'
+
+## 12.13.0-beta.1 (2023-02-09)
+
+### Features Added
+
+- Added support for service version 2021-12-02.
+- Added support for Blob Cold Tier.
+
+### Bugs Fixed
+
+- Fixed bug where IncrementalCopyOfEarlierVersionSnapshotNotAllowed was spelled incorrectly.
 
 ### Other Changes
 
@@ -310,7 +447,8 @@
   {
     blobAccessConditions: {
       modifiedAccessConditions: {
-        ifMatch: uploadResponse.eTag
+        ifMatch: uploadResponse.eTag;
+      }
     }
   }
   ```
@@ -320,7 +458,8 @@
   ```js
   {
     conditions: {
-      ifMatch: uploadResponse.eTag
+      ifMatch: uploadResponse.eTag;
+    }
   }
   ```
 

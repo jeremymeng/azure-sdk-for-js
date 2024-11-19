@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   PartnerConfiguration,
   PartnerConfigurationsListByResourceGroupOptionalParams,
@@ -24,7 +24,7 @@ import {
   PartnerConfigurationsAuthorizePartnerOptionalParams,
   PartnerConfigurationsAuthorizePartnerResponse,
   PartnerConfigurationsUnauthorizePartnerOptionalParams,
-  PartnerConfigurationsUnauthorizePartnerResponse
+  PartnerConfigurationsUnauthorizePartnerResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -37,14 +37,14 @@ export interface PartnerConfigurations {
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: PartnerConfigurationsListByResourceGroupOptionalParams
+    options?: PartnerConfigurationsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<PartnerConfiguration>;
   /**
    * List all the partner configurations under an Azure subscription.
    * @param options The options parameters.
    */
   listBySubscription(
-    options?: PartnerConfigurationsListBySubscriptionOptionalParams
+    options?: PartnerConfigurationsListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<PartnerConfiguration>;
   /**
    * Get properties of a partner configuration.
@@ -53,7 +53,7 @@ export interface PartnerConfigurations {
    */
   get(
     resourceGroupName: string,
-    options?: PartnerConfigurationsGetOptionalParams
+    options?: PartnerConfigurationsGetOptionalParams,
   ): Promise<PartnerConfigurationsGetResponse>;
   /**
    * Synchronously creates or updates a partner configuration with the specified parameters.
@@ -64,10 +64,10 @@ export interface PartnerConfigurations {
   beginCreateOrUpdate(
     resourceGroupName: string,
     partnerConfigurationInfo: PartnerConfiguration,
-    options?: PartnerConfigurationsCreateOrUpdateOptionalParams
+    options?: PartnerConfigurationsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<PartnerConfigurationsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<PartnerConfigurationsCreateOrUpdateResponse>,
       PartnerConfigurationsCreateOrUpdateResponse
     >
   >;
@@ -80,7 +80,7 @@ export interface PartnerConfigurations {
   beginCreateOrUpdateAndWait(
     resourceGroupName: string,
     partnerConfigurationInfo: PartnerConfiguration,
-    options?: PartnerConfigurationsCreateOrUpdateOptionalParams
+    options?: PartnerConfigurationsCreateOrUpdateOptionalParams,
   ): Promise<PartnerConfigurationsCreateOrUpdateResponse>;
   /**
    * Delete existing partner configuration.
@@ -89,8 +89,8 @@ export interface PartnerConfigurations {
    */
   beginDelete(
     resourceGroupName: string,
-    options?: PartnerConfigurationsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: PartnerConfigurationsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Delete existing partner configuration.
    * @param resourceGroupName The name of the resource group within the user's subscription.
@@ -98,7 +98,7 @@ export interface PartnerConfigurations {
    */
   beginDeleteAndWait(
     resourceGroupName: string,
-    options?: PartnerConfigurationsDeleteOptionalParams
+    options?: PartnerConfigurationsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Synchronously updates a partner configuration with the specified parameters.
@@ -109,10 +109,10 @@ export interface PartnerConfigurations {
   beginUpdate(
     resourceGroupName: string,
     partnerConfigurationUpdateParameters: PartnerConfigurationUpdateParameters,
-    options?: PartnerConfigurationsUpdateOptionalParams
+    options?: PartnerConfigurationsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<PartnerConfigurationsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<PartnerConfigurationsUpdateResponse>,
       PartnerConfigurationsUpdateResponse
     >
   >;
@@ -125,7 +125,7 @@ export interface PartnerConfigurations {
   beginUpdateAndWait(
     resourceGroupName: string,
     partnerConfigurationUpdateParameters: PartnerConfigurationUpdateParameters,
-    options?: PartnerConfigurationsUpdateOptionalParams
+    options?: PartnerConfigurationsUpdateOptionalParams,
   ): Promise<PartnerConfigurationsUpdateResponse>;
   /**
    * Authorize a single partner either by partner registration immutable Id or by partner name.
@@ -136,7 +136,7 @@ export interface PartnerConfigurations {
   authorizePartner(
     resourceGroupName: string,
     partnerInfo: Partner,
-    options?: PartnerConfigurationsAuthorizePartnerOptionalParams
+    options?: PartnerConfigurationsAuthorizePartnerOptionalParams,
   ): Promise<PartnerConfigurationsAuthorizePartnerResponse>;
   /**
    * Unauthorize a single partner either by partner registration immutable Id or by partner name.
@@ -147,6 +147,6 @@ export interface PartnerConfigurations {
   unauthorizePartner(
     resourceGroupName: string,
     partnerInfo: Partner,
-    options?: PartnerConfigurationsUnauthorizePartnerOptionalParams
+    options?: PartnerConfigurationsUnauthorizePartnerOptionalParams,
   ): Promise<PartnerConfigurationsUnauthorizePartnerResponse>;
 }

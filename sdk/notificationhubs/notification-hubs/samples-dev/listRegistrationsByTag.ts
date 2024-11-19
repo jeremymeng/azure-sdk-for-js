@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 /**
@@ -13,11 +13,8 @@
  * @azsdk-weight 100
  */
 
-import * as dotenv from "dotenv";
+import "dotenv/config";
 import { createClientContext, listRegistrationsByTag } from "@azure/notification-hubs/api";
-
-// Load the .env file if it exists
-dotenv.config();
 
 // Define connection string and hub name
 const connectionString = process.env.NOTIFICATIONHUBS_CONNECTION_STRING || "<connection string>";
@@ -26,7 +23,7 @@ const hubName = process.env.NOTIFICATION_HUB_NAME || "<hub name>";
 const TOP = 100;
 const TAG = "likes_hockey";
 
-async function main() {
+async function main(): Promise<void> {
   const context = createClientContext(connectionString, hubName);
 
   // Unlimited

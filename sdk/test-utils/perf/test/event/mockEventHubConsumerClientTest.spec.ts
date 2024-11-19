@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { PerfOptionDictionary } from "../../src";
 import { EventPerfTest } from "../../src/eventPerfTest";
@@ -50,11 +50,11 @@ export class MockEventHubConsumerClientTest extends EventPerfTest<SubscribeOptio
         partitions: partitions?.value,
         maxBatchSize: maxBatchSize.value,
         maxEventsPerSecond: maxEventsPerSecond.value,
-      }
+      },
     );
   }
 
   async cleanup() {
-    this.subscriber && (await this.subscriber.close());
+    await this.subscriber?.close();
   }
 }

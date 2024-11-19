@@ -6,10 +6,10 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   RestoreRequestResource,
-  RestoresTriggerOptionalParams
+  RestoresTriggerOptionalParams,
 } from "../models";
 
 /** Interface representing a Restores. */
@@ -36,8 +36,8 @@ export interface Restores {
     protectedItemName: string,
     recoveryPointId: string,
     parameters: RestoreRequestResource,
-    options?: RestoresTriggerOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: RestoresTriggerOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Restores the specified backed up data. This is an asynchronous operation. To know the status of this
    * API call, use
@@ -60,6 +60,6 @@ export interface Restores {
     protectedItemName: string,
     recoveryPointId: string,
     parameters: RestoreRequestResource,
-    options?: RestoresTriggerOptionalParams
+    options?: RestoresTriggerOptionalParams,
   ): Promise<void>;
 }

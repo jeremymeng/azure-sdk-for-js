@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
+  Pipeline,
   PipelinePolicy,
   PipelineRequest,
   PipelineResponse,
@@ -18,4 +19,11 @@ export function createDisableKeepAlivePolicy(): PipelinePolicy {
       return next(request);
     },
   };
+}
+
+/**
+ * @internal
+ */
+export function pipelineContainsDisableKeepAlivePolicy(pipeline: Pipeline): boolean {
+  return pipeline.getOrderedPolicies().some((policy) => policy.name === disableKeepAlivePolicyName);
 }

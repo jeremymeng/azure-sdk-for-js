@@ -16,14 +16,14 @@ require("dotenv").config();
  * This sample demonstrates how to Create a TrafficController
  *
  * @summary Create a TrafficController
- * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/cadl/examples/TrafficControllerPut.json
+ * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/preview/2024-05-01-preview/examples/TrafficControllerPut.json
  */
 async function putTrafficController() {
   const subscriptionId = process.env["SERVICENETWORKING_SUBSCRIPTION_ID"] || "subid";
   const resourceGroupName = process.env["SERVICENETWORKING_RESOURCE_GROUP"] || "rg1";
-  const trafficControllerName = "TC1";
+  const trafficControllerName = "tc1";
   const resource = {
-    location: "West US",
+    location: "NorthCentralUS",
     tags: { key1: "value1" },
   };
   const credential = new DefaultAzureCredential();
@@ -31,7 +31,7 @@ async function putTrafficController() {
   const result = await client.trafficControllerInterface.beginCreateOrUpdateAndWait(
     resourceGroupName,
     trafficControllerName,
-    resource
+    resource,
   );
   console.log(result);
 }

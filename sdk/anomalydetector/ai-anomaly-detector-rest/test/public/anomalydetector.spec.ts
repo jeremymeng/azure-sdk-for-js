@@ -1,21 +1,22 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { isPlaybackMode, Recorder } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isPlaybackMode } from "@azure-tools/test-recorder";
 import { assert } from "chai";
-import { Context } from "mocha";
-import {
+import type { Context } from "mocha";
+import type {
   AnomalyDetectorRestClient,
-  isUnexpected,
   TrainMultivariateModelParameters,
   DetectMultivariateBatchAnomalyParameters,
 } from "../../src";
+import { isUnexpected } from "../../src";
 import { createClient, createRecorder } from "./utils/recordedClient";
 
 describe("AnomalyDetectorClient", () => {
   let recorder: Recorder;
   let client: AnomalyDetectorRestClient;
-  function sleep(time: number): Promise<NodeJS.Timer> {
+  function sleep(time: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, time));
   }
   const series = [
@@ -111,7 +112,7 @@ describe("AnomalyDetectorClient", () => {
       result.body.isAnomaly.filter((v) => {
         return v === true;
       }),
-      14
+      14,
     );
   });
 

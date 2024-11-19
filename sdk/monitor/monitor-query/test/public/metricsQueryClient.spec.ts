@@ -1,28 +1,28 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
+import { getYieldedValue } from "@azure-tools/test-utils-vitest";
+import type { MetricsQueryClient } from "../../src/index.js";
+import { Durations } from "../../src/index.js";
 
-import { assert } from "chai";
-import { Context } from "mocha";
-import { getYieldedValue } from "@azure/test-utils";
-import { Durations, MetricsQueryClient } from "../../src";
-
+import type { RecorderAndMetricsClient } from "./shared/testShared.js";
 import {
-  RecorderAndMetricsClient,
   createRecorderAndMetricsClient,
   getMetricsArmResourceId,
   loggerForTest,
-} from "./shared/testShared";
+} from "./shared/testShared.js";
 import { Recorder } from "@azure-tools/test-recorder";
+import { describe, it, assert, beforeEach, afterEach } from "vitest";
+
 describe("MetricsClient live tests", function () {
   let resourceId: string;
   let metricsQueryClient: MetricsQueryClient;
   let recorder: Recorder;
 
-  beforeEach(async function (this: Context) {
+  beforeEach(async function (ctx) {
     loggerForTest.verbose(`Recorder: starting...`);
-    recorder = new Recorder(this.currentTest);
+    recorder = new Recorder(ctx);
     const recordedClient: RecorderAndMetricsClient = await createRecorderAndMetricsClient(recorder);
-    ({ resourceId } = getMetricsArmResourceId());
+    resourceId = getMetricsArmResourceId();
     metricsQueryClient = recordedClient.client;
   });
 
@@ -43,7 +43,7 @@ describe("MetricsClient live tests", function () {
       const resultQuery = await metricsQueryClient.queryResource(
         resourceId,
         [result.value.name || ""],
-        {}
+        {},
       );
       assert(resultQuery);
       assert(resultQuery.granularity);
@@ -69,7 +69,7 @@ describe("MetricsClient live tests", function () {
       if (i % 20 === 0 || i === metricDefinitionsLength) {
         const newResults = await metricsQueryClient.queryResource(resourceId, definitionNames, {
           timespan: {
-            duration: Durations.twentyFourHours,
+            duration: Durations.oneDay,
           },
         });
         assert.ok(newResults);
@@ -87,9 +87,9 @@ describe("MetricsClient live tests", function () {
       resourceId,
       [firstResult.name!],
       {
-        timespan: { duration: Durations.twentyFourHours },
+        timespan: { duration: Durations.oneDay },
         metricNamespace: firstResult.namespace,
-      }
+      },
     );
 
     assert.ok(individualMetricWithNamespace);

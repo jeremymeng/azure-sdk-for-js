@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   WorkloadClassifier,
   WorkloadClassifiersListByWorkloadGroupOptionalParams,
@@ -15,7 +15,7 @@ import {
   WorkloadClassifiersGetResponse,
   WorkloadClassifiersCreateOrUpdateOptionalParams,
   WorkloadClassifiersCreateOrUpdateResponse,
-  WorkloadClassifiersDeleteOptionalParams
+  WorkloadClassifiersDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -35,7 +35,7 @@ export interface WorkloadClassifiers {
     serverName: string,
     databaseName: string,
     workloadGroupName: string,
-    options?: WorkloadClassifiersListByWorkloadGroupOptionalParams
+    options?: WorkloadClassifiersListByWorkloadGroupOptionalParams,
   ): PagedAsyncIterableIterator<WorkloadClassifier>;
   /**
    * Gets a workload classifier
@@ -53,7 +53,7 @@ export interface WorkloadClassifiers {
     databaseName: string,
     workloadGroupName: string,
     workloadClassifierName: string,
-    options?: WorkloadClassifiersGetOptionalParams
+    options?: WorkloadClassifiersGetOptionalParams,
   ): Promise<WorkloadClassifiersGetResponse>;
   /**
    * Creates or updates a workload classifier.
@@ -73,10 +73,10 @@ export interface WorkloadClassifiers {
     workloadGroupName: string,
     workloadClassifierName: string,
     parameters: WorkloadClassifier,
-    options?: WorkloadClassifiersCreateOrUpdateOptionalParams
+    options?: WorkloadClassifiersCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<WorkloadClassifiersCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<WorkloadClassifiersCreateOrUpdateResponse>,
       WorkloadClassifiersCreateOrUpdateResponse
     >
   >;
@@ -98,7 +98,7 @@ export interface WorkloadClassifiers {
     workloadGroupName: string,
     workloadClassifierName: string,
     parameters: WorkloadClassifier,
-    options?: WorkloadClassifiersCreateOrUpdateOptionalParams
+    options?: WorkloadClassifiersCreateOrUpdateOptionalParams,
   ): Promise<WorkloadClassifiersCreateOrUpdateResponse>;
   /**
    * Deletes a workload classifier.
@@ -116,8 +116,8 @@ export interface WorkloadClassifiers {
     databaseName: string,
     workloadGroupName: string,
     workloadClassifierName: string,
-    options?: WorkloadClassifiersDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: WorkloadClassifiersDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a workload classifier.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -134,6 +134,6 @@ export interface WorkloadClassifiers {
     databaseName: string,
     workloadGroupName: string,
     workloadClassifierName: string,
-    options?: WorkloadClassifiersDeleteOptionalParams
+    options?: WorkloadClassifiersDeleteOptionalParams,
   ): Promise<void>;
 }

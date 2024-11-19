@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
-import { AggregateAuthenticationError, CredentialUnavailableError } from "../errors";
-import { credentialLogger, formatError, formatSuccess } from "../util/logging";
-import { tracingClient } from "../util/tracing";
+import type { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
+import { AggregateAuthenticationError, CredentialUnavailableError } from "../errors.js";
+import { credentialLogger, formatError, formatSuccess } from "../util/logging.js";
+import { tracingClient } from "../util/tracing.js";
 
 /**
  * @internal
@@ -12,8 +12,9 @@ import { tracingClient } from "../util/tracing";
 export const logger = credentialLogger("ChainedTokenCredential");
 
 /**
- * Enables multiple `TokenCredential` implementations to be tried in order
- * until one of the getToken methods returns an access token.
+ * Enables multiple `TokenCredential` implementations to be tried in order until
+ * one of the getToken methods returns an access token. For more information, see
+ * [ChainedTokenCredential overview](https://aka.ms/azsdk/js/identity/credential-chains#use-chainedtokencredential-for-granularity).
  */
 export class ChainedTokenCredential implements TokenCredential {
   private _sources: TokenCredential[] = [];
@@ -24,7 +25,14 @@ export class ChainedTokenCredential implements TokenCredential {
    * @param sources - `TokenCredential` implementations to be tried in order.
    *
    * Example usage:
-   * ```javascript
+   * ```ts snippet:chained_token_credential_example
+   * import { ClientSecretCredential, ChainedTokenCredential } from "@azure/identity";
+   *
+   * const tenantId = "<tenant-id>";
+   * const clientId = "<client-id>";
+   * const clientSecret = "<client-secret>";
+   * const anotherClientId = "<another-client-id>";
+   * const anotherSecret = "<another-client-secret>";
    * const firstCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
    * const secondCredential = new ClientSecretCredential(tenantId, anotherClientId, anotherSecret);
    * const credentialChain = new ChainedTokenCredential(firstCredential, secondCredential);
@@ -48,8 +56,16 @@ export class ChainedTokenCredential implements TokenCredential {
    *                `TokenCredential` implementation might make.
    */
   async getToken(scopes: string | string[], options: GetTokenOptions = {}): Promise<AccessToken> {
+    const { token } = await this.getTokenInternal(scopes, options);
+    return token;
+  }
+
+  private async getTokenInternal(
+    scopes: string | string[],
+    options: GetTokenOptions = {},
+  ): Promise<{ token: AccessToken; successfulCredential: TokenCredential }> {
     let token: AccessToken | null = null;
-    let successfulCredentialName = "";
+    let successfulCredential: TokenCredential;
     const errors: Error[] = [];
 
     return tracingClient.withSpan(
@@ -59,7 +75,7 @@ export class ChainedTokenCredential implements TokenCredential {
         for (let i = 0; i < this._sources.length && token === null; i++) {
           try {
             token = await this._sources[i].getToken(scopes, updatedOptions);
-            successfulCredentialName = this._sources[i].constructor.name;
+            successfulCredential = this._sources[i];
           } catch (err: any) {
             if (
               err.name === "CredentialUnavailableError" ||
@@ -76,19 +92,21 @@ export class ChainedTokenCredential implements TokenCredential {
         if (!token && errors.length > 0) {
           const err = new AggregateAuthenticationError(
             errors,
-            "ChainedTokenCredential authentication failed."
+            "ChainedTokenCredential authentication failed.",
           );
           logger.getToken.info(formatError(scopes, err));
           throw err;
         }
 
-        logger.getToken.info(`Result for ${successfulCredentialName}: ${formatSuccess(scopes)}`);
+        logger.getToken.info(
+          `Result for ${successfulCredential.constructor.name}: ${formatSuccess(scopes)}`,
+        );
 
         if (token === null) {
           throw new CredentialUnavailableError("Failed to retrieve a valid token");
         }
-        return token;
-      }
+        return { token, successfulCredential };
+      },
     );
   }
 }

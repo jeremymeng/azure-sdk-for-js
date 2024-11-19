@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { EventData, isAmqpAnnotatedMessage } from "../eventData";
-import { TracingContext } from "@azure/core-tracing";
-import { AmqpAnnotatedMessage } from "@azure/core-amqp";
-import { OperationOptions } from "../util/operationOptions";
-import { toSpanOptions, tracingClient } from "./tracing";
+import type { EventData } from "../eventData.js";
+import { isAmqpAnnotatedMessage } from "../eventData.js";
+import type { TracingContext } from "@azure/core-tracing";
+import type { AmqpAnnotatedMessage } from "@azure/core-amqp";
+import type { OperationOptions } from "../util/operationOptions.js";
+import type { MessagingOperationNames } from "./tracing.js";
+import { toSpanOptions, tracingClient } from "./tracing.js";
 
 /**
  * @internal
@@ -18,12 +20,14 @@ export const TRACEPARENT_PROPERTY = "Diagnostic-Id";
  * has already been instrumented.
  * @param eventData - The `EventData` or `AmqpAnnotatedMessage` to instrument.
  * @param span - The `Span` containing the context to propagate tracing information.
+ * @param operation - The type of the operation being performed.
  */
 export function instrumentEventData(
   eventData: EventData | AmqpAnnotatedMessage,
   options: OperationOptions,
   entityPath: string,
-  host: string
+  host: string,
+  operation?: MessagingOperationNames,
 ): { event: EventData; spanContext: TracingContext | undefined } {
   const props = isAmqpAnnotatedMessage(eventData)
     ? eventData.applicationProperties
@@ -39,7 +43,7 @@ export function instrumentEventData(
   const { span: messageSpan, updatedOptions } = tracingClient.startSpan(
     "message",
     options,
-    toSpanOptions({ entityPath, host }, "producer")
+    toSpanOptions({ entityPath, host }, operation, "producer"),
   );
   try {
     if (!messageSpan.isRecording()) {
@@ -50,7 +54,7 @@ export function instrumentEventData(
     }
 
     const traceParent = tracingClient.createRequestHeaders(
-      updatedOptions.tracingOptions?.tracingContext
+      updatedOptions.tracingOptions?.tracingContext,
     )["traceparent"];
     if (traceParent) {
       const copiedProps = { ...props };

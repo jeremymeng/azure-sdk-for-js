@@ -12,9 +12,9 @@ import {
   PipelineResponse,
   SendRequest
 } from "@azure/core-rest-pipeline";
-import { JobRouterAdministrationImpl, JobRouterImpl } from "./operations";
-import { JobRouterAdministration, JobRouter } from "./operationsInterfaces";
-import { JobRouterApiClientOptionalParams } from "./models";
+import { JobRouterAdministrationImpl, JobRouterImpl } from "./operations/index.js";
+import { JobRouterAdministration, JobRouter } from "./operationsInterfaces/index.js";
+import { JobRouterApiClientOptionalParams } from "./models/index.js";
 
 export class JobRouterApiClient extends coreClient.ServiceClient {
   endpoint: string;
@@ -38,7 +38,7 @@ export class JobRouterApiClient extends coreClient.ServiceClient {
       requestContentType: "application/json; charset=utf-8"
     };
 
-    const packageDetails = `azsdk-js-azure-communication-job-router/1.0.0-beta.1`;
+    const packageDetails = `azsdk-js-communication-job-router/1.0.0-beta.1`;
     const userAgentPrefix =
       options.userAgentOptions && options.userAgentOptions.userAgentPrefix
         ? `${options.userAgentOptions.userAgentPrefix} ${packageDetails}`
@@ -50,7 +50,7 @@ export class JobRouterApiClient extends coreClient.ServiceClient {
       userAgentOptions: {
         userAgentPrefix
       },
-      baseUri: options.endpoint ?? options.baseUri ?? "{endpoint}"
+      endpoint: options.endpoint ?? options.baseUri ?? "{endpoint}"
     };
     super(optionsWithDefaults);
     // Parameter assignments

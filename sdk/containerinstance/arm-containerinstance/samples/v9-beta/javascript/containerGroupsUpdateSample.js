@@ -16,10 +16,11 @@ require("dotenv").config();
  * This sample demonstrates how to Updates container group tags with specified values.
  *
  * @summary Updates container group tags with specified values.
- * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2022-10-01-preview/examples/ContainerGroupsUpdate.json
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/ContainerGroupsUpdate.json
  */
 async function containerGroupsUpdate() {
-  const subscriptionId = process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "subid";
+  const subscriptionId =
+    process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
   const resourceGroupName = process.env["CONTAINERINSTANCE_RESOURCE_GROUP"] || "demoResource";
   const containerGroupName = "demo1";
   const resource = {
@@ -30,7 +31,7 @@ async function containerGroupsUpdate() {
   const result = await client.containerGroups.update(
     resourceGroupName,
     containerGroupName,
-    resource
+    resource,
   );
   console.log(result);
 }

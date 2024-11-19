@@ -10,6 +10,9 @@
 // Licensed under the MIT License.
 import { SecurityCenter } from "@azure/arm-security";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Details of a specific Compliance.
@@ -18,13 +21,16 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/preview/2017-08-01-preview/examples/Compliances/GetCompliance_example.json
  */
 async function getSecurityComplianceDataForADay() {
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
   const scope = "subscriptions/20ff7fc3-e762-44dd-bd96-b71116dcdc23";
   const complianceName = "2018-01-01Z";
   const credential = new DefaultAzureCredential();
-  const client = new SecurityCenter(credential, subscriptionId);
+  const client = new SecurityCenter(credential);
   const result = await client.compliances.get(scope, complianceName);
   console.log(result);
 }
 
-getSecurityComplianceDataForADay().catch(console.error);
+async function main() {
+  getSecurityComplianceDataForADay();
+}
+
+main().catch(console.error);

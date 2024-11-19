@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   NetworkManager,
   NetworkManagersListBySubscriptionOptionalParams,
@@ -19,7 +19,7 @@ import {
   NetworkManagersDeleteOptionalParams,
   PatchObject,
   NetworkManagersPatchOptionalParams,
-  NetworkManagersPatchResponse
+  NetworkManagersPatchResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface NetworkManagers {
    * @param options The options parameters.
    */
   listBySubscription(
-    options?: NetworkManagersListBySubscriptionOptionalParams
+    options?: NetworkManagersListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<NetworkManager>;
   /**
    * List network managers in a resource group.
@@ -39,7 +39,7 @@ export interface NetworkManagers {
    */
   list(
     resourceGroupName: string,
-    options?: NetworkManagersListOptionalParams
+    options?: NetworkManagersListOptionalParams,
   ): PagedAsyncIterableIterator<NetworkManager>;
   /**
    * Gets the specified Network Manager.
@@ -50,7 +50,7 @@ export interface NetworkManagers {
   get(
     resourceGroupName: string,
     networkManagerName: string,
-    options?: NetworkManagersGetOptionalParams
+    options?: NetworkManagersGetOptionalParams,
   ): Promise<NetworkManagersGetResponse>;
   /**
    * Creates or updates a Network Manager.
@@ -63,7 +63,7 @@ export interface NetworkManagers {
     resourceGroupName: string,
     networkManagerName: string,
     parameters: NetworkManager,
-    options?: NetworkManagersCreateOrUpdateOptionalParams
+    options?: NetworkManagersCreateOrUpdateOptionalParams,
   ): Promise<NetworkManagersCreateOrUpdateResponse>;
   /**
    * Deletes a network manager.
@@ -74,8 +74,8 @@ export interface NetworkManagers {
   beginDelete(
     resourceGroupName: string,
     networkManagerName: string,
-    options?: NetworkManagersDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: NetworkManagersDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a network manager.
    * @param resourceGroupName The name of the resource group.
@@ -85,7 +85,7 @@ export interface NetworkManagers {
   beginDeleteAndWait(
     resourceGroupName: string,
     networkManagerName: string,
-    options?: NetworkManagersDeleteOptionalParams
+    options?: NetworkManagersDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Patch NetworkManager.
@@ -98,6 +98,6 @@ export interface NetworkManagers {
     resourceGroupName: string,
     networkManagerName: string,
     parameters: PatchObject,
-    options?: NetworkManagersPatchOptionalParams
+    options?: NetworkManagersPatchOptionalParams,
   ): Promise<NetworkManagersPatchResponse>;
 }

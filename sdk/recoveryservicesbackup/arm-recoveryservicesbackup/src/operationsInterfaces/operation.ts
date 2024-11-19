@@ -7,9 +7,9 @@
  */
 
 import {
-  ValidateOperationRequestUnion,
+  ValidateOperationRequestResource,
   OperationValidateOptionalParams,
-  OperationValidateResponse
+  OperationValidateResponse,
 } from "../models";
 
 /** Interface representing a Operation. */
@@ -25,7 +25,7 @@ export interface Operation {
   validate(
     vaultName: string,
     resourceGroupName: string,
-    parameters: ValidateOperationRequestUnion,
-    options?: OperationValidateOptionalParams
+    parameters: ValidateOperationRequestResource,
+    options?: OperationValidateOptionalParams,
   ): Promise<OperationValidateResponse>;
 }

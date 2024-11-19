@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-import { CosmosClientOptions } from "../CosmosClientOptions";
-import { OperationType, ResourceType } from "./constants";
+// Licensed under the MIT License.
+import type { CosmosClientOptions } from "../CosmosClientOptions";
+import type { ResourceType } from "./constants";
+import { OperationType } from "./constants";
 
 const trimLeftSlashes = new RegExp("^[/]+");
 const trimRightSlashes = new RegExp("[/]+$");
@@ -101,6 +102,13 @@ export function sleep(time: number): Promise<void> {
  */
 export function getContainerLink(link: string): string {
   return link.split("/").slice(0, 4).join("/");
+}
+
+/**
+ * @hidden
+ */
+export function prepareURL(endpoint: string, path: string): string {
+  return trimSlashes(endpoint) + path;
 }
 
 /**
@@ -343,7 +351,7 @@ export function parseConnectionString(connectionString: string): CosmosClientOpt
       (connectionObject as any)[key] = value.join("=");
       return connectionObject;
     },
-    {} as ConnectionObject
+    {} as ConnectionObject,
   );
   if (!AccountEndpoint || !AccountKey) {
     throw new Error("Could not parse the provided connection string");

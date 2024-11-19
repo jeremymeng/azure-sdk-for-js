@@ -1,6 +1,6 @@
 # Release History
 
-## 13.0.4 (Unreleased)
+## 15.0.1 (Unreleased)
 
 ### Features Added
 
@@ -10,25 +10,317 @@
 
 ### Other Changes
 
+## 15.0.0 (2024-06-11)
+    
+### Features Added
+
+  - Added operation WebApps.createOrUpdateSiteContainer
+  - Added operation WebApps.createOrUpdateSiteContainerSlot
+  - Added operation WebApps.deleteSiteContainer
+  - Added operation WebApps.deleteSiteContainerSlot
+  - Added operation WebApps.getSiteContainer
+  - Added operation WebApps.getSiteContainerSlot
+  - Added operation WebApps.listSiteContainers
+  - Added operation WebApps.listSiteContainersSlot
+  - Added Interface EnvironmentVariable
+  - Added Interface FunctionAppConfig
+  - Added Interface FunctionsAlwaysReadyConfig
+  - Added Interface FunctionsDeployment
+  - Added Interface FunctionsDeploymentStorage
+  - Added Interface FunctionsDeploymentStorageAuthentication
+  - Added Interface FunctionsRuntime
+  - Added Interface FunctionsScaleAndConcurrency
+  - Added Interface FunctionsScaleAndConcurrencyTriggers
+  - Added Interface FunctionsScaleAndConcurrencyTriggersHttp
+  - Added Interface SiteContainer
+  - Added Interface SiteContainerCollection
+  - Added Interface SiteDnsConfig
+  - Added Interface VolumeMount
+  - Added Interface WebAppsCreateOrUpdateSiteContainerOptionalParams
+  - Added Interface WebAppsCreateOrUpdateSiteContainerSlotOptionalParams
+  - Added Interface WebAppsDeleteSiteContainerOptionalParams
+  - Added Interface WebAppsDeleteSiteContainerSlotOptionalParams
+  - Added Interface WebAppsGetSiteContainerOptionalParams
+  - Added Interface WebAppsGetSiteContainerSlotOptionalParams
+  - Added Interface WebAppsListSiteContainersNextOptionalParams
+  - Added Interface WebAppsListSiteContainersOptionalParams
+  - Added Interface WebAppsListSiteContainersSlotNextOptionalParams
+  - Added Interface WebAppsListSiteContainersSlotOptionalParams
+  - Added Type Alias AuthenticationType
+  - Added Type Alias AuthType
+  - Added Type Alias AzureStorageProtocol
+  - Added Type Alias FunctionsDeploymentStorageType
+  - Added Type Alias RuntimeName
+  - Added Type Alias WebAppsCreateOrUpdateSiteContainerResponse
+  - Added Type Alias WebAppsCreateOrUpdateSiteContainerSlotResponse
+  - Added Type Alias WebAppsGetSiteContainerResponse
+  - Added Type Alias WebAppsGetSiteContainerSlotResponse
+  - Added Type Alias WebAppsListSiteContainersNextResponse
+  - Added Type Alias WebAppsListSiteContainersResponse
+  - Added Type Alias WebAppsListSiteContainersSlotNextResponse
+  - Added Type Alias WebAppsListSiteContainersSlotResponse
+  - Interface AzureStorageInfoValue has a new optional parameter protocol
+  - Interface Site has a new optional parameter dnsConfiguration
+  - Interface Site has a new optional parameter functionAppConfig
+  - Interface Site has a new optional parameter vnetBackupRestoreEnabled
+  - Interface SitePatchResource has a new optional parameter dnsConfiguration
+  - Added Enum KnownAuthenticationType
+  - Added Enum KnownAzureStorageProtocol
+  - Added Enum KnownFunctionsDeploymentStorageType
+  - Added Enum KnownRuntimeName
+  - Enum KnownSkuName has a new value FlexConsumption
+  - Enum KnownSupportedTlsVersions has a new value One3
+
+### Breaking Changes
+
+  - Operation AppServiceEnvironments.beginApproveOrRejectPrivateEndpointConnection has a new signature
+  - Operation AppServiceEnvironments.beginApproveOrRejectPrivateEndpointConnectionAndWait has a new signature
+  - Operation StaticSites.beginApproveOrRejectPrivateEndpointConnection has a new signature
+  - Operation StaticSites.beginApproveOrRejectPrivateEndpointConnectionAndWait has a new signature
+  - Operation WebApps.beginApproveOrRejectPrivateEndpointConnection has a new signature
+  - Operation WebApps.beginApproveOrRejectPrivateEndpointConnectionAndWait has a new signature
+  - Operation WebApps.beginApproveOrRejectPrivateEndpointConnectionSlot has a new signature
+  - Operation WebApps.beginApproveOrRejectPrivateEndpointConnectionSlotAndWait has a new signature
+    
+    
+## 14.1.0 (2023-11-16)
+    
+### Features Added
+
+  - Added operation group GetUsagesInLocation
+  - Added Interface AseRegion
+  - Added Interface AseRegionCollection
+  - Added Interface DaprConfig
+  - Added Interface DiagnosticData_2
+  - Added Interface GetUsagesInLocationListNextOptionalParams
+  - Added Interface GetUsagesInLocationListOptionalParams
+  - Added Interface ListAseRegionsNextOptionalParams
+  - Added Interface ListAseRegionsOptionalParams
+  - Added Interface ResourceConfig
+  - Added Type Alias DaprLogLevel
+  - Added Type Alias GetUsagesInLocationListNextResponse
+  - Added Type Alias GetUsagesInLocationListResponse
+  - Added Type Alias ListAseRegionsNextResponse
+  - Added Type Alias ListAseRegionsResponse
+  - Added Type Alias TlsCipherSuites
+  - Interface CheckNameAvailabilityOptionalParams has a new optional parameter environmentId
+  - Interface ResourceNameAvailabilityRequest has a new optional parameter environmentId
+  - Interface Site has a new optional parameter daprConfig
+  - Interface Site has a new optional parameter resourceConfig
+  - Interface Site has a new optional parameter workloadProfileName
+  - Interface SiteConfig has a new optional parameter minTlsCipherSuite
+  - Interface SiteConfigResource has a new optional parameter minTlsCipherSuite
+  - Added Enum KnownDaprLogLevel
+  - Added Enum KnownTlsCipherSuites
+  - Added Enum KnownWorkflowState
+  - Class WebSiteManagementClient has a new signature
+  - Type of parameter dataset of interface DetectorResponse is changed from DiagnosticData[] to DiagnosticData_2[]
+    
+    
+## 14.0.0 (2023-03-10)
+    
+### Features Added
+
+  - Added operation StaticSites.createOrUpdateBasicAuth
+  - Added operation StaticSites.createOrUpdateBuildDatabaseConnection
+  - Added operation StaticSites.createOrUpdateDatabaseConnection
+  - Added operation StaticSites.deleteBuildDatabaseConnection
+  - Added operation StaticSites.deleteDatabaseConnection
+  - Added operation StaticSites.getBasicAuth
+  - Added operation StaticSites.getBuildDatabaseConnection
+  - Added operation StaticSites.getBuildDatabaseConnectionWithDetails
+  - Added operation StaticSites.getDatabaseConnection
+  - Added operation StaticSites.getDatabaseConnectionWithDetails
+  - Added operation StaticSites.listBasicAuth
+  - Added operation StaticSites.listBuildDatabaseConnections
+  - Added operation StaticSites.listBuildDatabaseConnectionsWithDetails
+  - Added operation StaticSites.listDatabaseConnections
+  - Added operation StaticSites.listDatabaseConnectionsWithDetails
+  - Added operation StaticSites.updateBuildDatabaseConnection
+  - Added operation StaticSites.updateDatabaseConnection
+  - Added operation WebApps.deployWorkflowArtifacts
+  - Added operation WebApps.deployWorkflowArtifactsSlot
+  - Added operation WebApps.getInstanceWorkflowSlot
+  - Added operation WebApps.getWorkflow
+  - Added operation WebApps.listInstanceWorkflowsSlot
+  - Added operation WebApps.listWorkflows
+  - Added operation WebApps.listWorkflowsConnections
+  - Added operation WebApps.listWorkflowsConnectionsSlot
+  - Added Interface AppServiceEnvironmentsCreateOrUpdateHeaders
+  - Added Interface DatabaseConnection
+  - Added Interface DatabaseConnectionCollection
+  - Added Interface DatabaseConnectionOverview
+  - Added Interface DatabaseConnectionPatchRequest
+  - Added Interface StaticSiteBasicAuthPropertiesARMResource
+  - Added Interface StaticSiteBasicAuthPropertiesCollection
+  - Added Interface StaticSiteDatabaseConnectionConfigurationFileOverview
+  - Added Interface StaticSitesCreateOrUpdateBasicAuthOptionalParams
+  - Added Interface StaticSitesCreateOrUpdateBuildDatabaseConnectionOptionalParams
+  - Added Interface StaticSitesCreateOrUpdateDatabaseConnectionOptionalParams
+  - Added Interface StaticSitesDeleteBuildDatabaseConnectionOptionalParams
+  - Added Interface StaticSitesDeleteDatabaseConnectionOptionalParams
+  - Added Interface StaticSitesGetBasicAuthOptionalParams
+  - Added Interface StaticSitesGetBuildDatabaseConnectionOptionalParams
+  - Added Interface StaticSitesGetBuildDatabaseConnectionsNextOptionalParams
+  - Added Interface StaticSitesGetBuildDatabaseConnectionsOptionalParams
+  - Added Interface StaticSitesGetBuildDatabaseConnectionsWithDetailsNextOptionalParams
+  - Added Interface StaticSitesGetBuildDatabaseConnectionsWithDetailsOptionalParams
+  - Added Interface StaticSitesGetBuildDatabaseConnectionWithDetailsOptionalParams
+  - Added Interface StaticSitesGetDatabaseConnectionOptionalParams
+  - Added Interface StaticSitesGetDatabaseConnectionsNextOptionalParams
+  - Added Interface StaticSitesGetDatabaseConnectionsOptionalParams
+  - Added Interface StaticSitesGetDatabaseConnectionsWithDetailsNextOptionalParams
+  - Added Interface StaticSitesGetDatabaseConnectionsWithDetailsOptionalParams
+  - Added Interface StaticSitesGetDatabaseConnectionWithDetailsOptionalParams
+  - Added Interface StaticSitesListBasicAuthNextOptionalParams
+  - Added Interface StaticSitesListBasicAuthOptionalParams
+  - Added Interface StaticSitesUpdateBuildDatabaseConnectionOptionalParams
+  - Added Interface StaticSitesUpdateDatabaseConnectionOptionalParams
+  - Added Interface WebAppsDeployWorkflowArtifactsOptionalParams
+  - Added Interface WebAppsDeployWorkflowArtifactsSlotOptionalParams
+  - Added Interface WebAppsGetInstanceWorkflowSlotOptionalParams
+  - Added Interface WebAppsGetWorkflowOptionalParams
+  - Added Interface WebAppsListInstanceWorkflowsSlotNextOptionalParams
+  - Added Interface WebAppsListInstanceWorkflowsSlotOptionalParams
+  - Added Interface WebAppsListWorkflowsConnectionsOptionalParams
+  - Added Interface WebAppsListWorkflowsConnectionsSlotOptionalParams
+  - Added Interface WebAppsListWorkflowsNextOptionalParams
+  - Added Interface WebAppsListWorkflowsOptionalParams
+  - Added Interface WorkflowArtifacts
+  - Added Interface WorkflowEnvelope
+  - Added Interface WorkflowEnvelopeCollection
+  - Added Interface WorkflowEnvelopeProperties
+  - Added Interface WorkflowHealth
+  - Added Type Alias BasicAuthName
+  - Added Type Alias DefaultAction
+  - Added Type Alias ProviderOsTypeSelected
+  - Added Type Alias ProviderStackOsType
+  - Added Type Alias StaticSitesCreateOrUpdateBasicAuthResponse
+  - Added Type Alias StaticSitesCreateOrUpdateBuildDatabaseConnectionResponse
+  - Added Type Alias StaticSitesCreateOrUpdateDatabaseConnectionResponse
+  - Added Type Alias StaticSitesGetBasicAuthResponse
+  - Added Type Alias StaticSitesGetBuildDatabaseConnectionResponse
+  - Added Type Alias StaticSitesGetBuildDatabaseConnectionsNextResponse
+  - Added Type Alias StaticSitesGetBuildDatabaseConnectionsResponse
+  - Added Type Alias StaticSitesGetBuildDatabaseConnectionsWithDetailsNextResponse
+  - Added Type Alias StaticSitesGetBuildDatabaseConnectionsWithDetailsResponse
+  - Added Type Alias StaticSitesGetBuildDatabaseConnectionWithDetailsResponse
+  - Added Type Alias StaticSitesGetDatabaseConnectionResponse
+  - Added Type Alias StaticSitesGetDatabaseConnectionsNextResponse
+  - Added Type Alias StaticSitesGetDatabaseConnectionsResponse
+  - Added Type Alias StaticSitesGetDatabaseConnectionsWithDetailsNextResponse
+  - Added Type Alias StaticSitesGetDatabaseConnectionsWithDetailsResponse
+  - Added Type Alias StaticSitesGetDatabaseConnectionWithDetailsResponse
+  - Added Type Alias StaticSitesListBasicAuthNextResponse
+  - Added Type Alias StaticSitesListBasicAuthResponse
+  - Added Type Alias StaticSitesUpdateBuildDatabaseConnectionResponse
+  - Added Type Alias StaticSitesUpdateDatabaseConnectionResponse
+  - Added Type Alias WebAppsGetInstanceWorkflowSlotResponse
+  - Added Type Alias WebAppsGetWorkflowResponse
+  - Added Type Alias WebAppsListInstanceWorkflowsSlotNextResponse
+  - Added Type Alias WebAppsListInstanceWorkflowsSlotResponse
+  - Added Type Alias WebAppsListWorkflowsConnectionsResponse
+  - Added Type Alias WebAppsListWorkflowsConnectionsSlotResponse
+  - Added Type Alias WebAppsListWorkflowsNextResponse
+  - Added Type Alias WebAppsListWorkflowsResponse
+  - Added Type Alias WorkflowHealthState
+  - Interface Site has a new optional parameter managedEnvironmentId
+  - Interface SiteConfig has a new optional parameter elasticWebAppScaleLimit
+  - Interface SiteConfig has a new optional parameter ipSecurityRestrictionsDefaultAction
+  - Interface SiteConfig has a new optional parameter metadata
+  - Interface SiteConfig has a new optional parameter scmIpSecurityRestrictionsDefaultAction
+  - Interface SiteConfigResource has a new optional parameter elasticWebAppScaleLimit
+  - Interface SiteConfigResource has a new optional parameter ipSecurityRestrictionsDefaultAction
+  - Interface SiteConfigResource has a new optional parameter metadata
+  - Interface SiteConfigResource has a new optional parameter scmIpSecurityRestrictionsDefaultAction
+  - Interface StaticSiteARMResource has a new optional parameter databaseConnections
+  - Interface StaticSiteBuildARMResource has a new optional parameter databaseConnections
+  - Interface StaticSitePatchResource has a new optional parameter databaseConnections
+  - Added Enum KnownBasicAuthName
+  - Added Enum KnownDefaultAction
+  - Added Enum KnownProviderOsTypeSelected
+  - Added Enum KnownProviderStackOsType
+  - Interface AppServiceEnvironmentsListUsagesNextOptionalParams no longer has parameter filter
+  - Interface AppServiceEnvironmentsListWebAppsNextOptionalParams no longer has parameter propertiesToInclude
+  - Interface AppServicePlansListNextOptionalParams no longer has parameter detailed
+  - Interface AppServicePlansListUsagesNextOptionalParams no longer has parameter filter
+  - Interface AppServicePlansListWebAppsNextOptionalParams no longer has parameter filter
+  - Interface AppServicePlansListWebAppsNextOptionalParams no longer has parameter skipToken
+  - Interface AppServicePlansListWebAppsNextOptionalParams no longer has parameter top
+  - Interface CertificatesListNextOptionalParams no longer has parameter filter
+  - Interface ListBillingMetersNextOptionalParams no longer has parameter billingLocation
+  - Interface ListBillingMetersNextOptionalParams no longer has parameter osType
+  - Interface ListCustomHostNameSitesNextOptionalParams no longer has parameter hostname
+  - Interface ListGeoRegionsNextOptionalParams no longer has parameter linuxDynamicWorkersEnabled
+  - Interface ListGeoRegionsNextOptionalParams no longer has parameter linuxWorkersEnabled
+  - Interface ListGeoRegionsNextOptionalParams no longer has parameter sku
+  - Interface ListGeoRegionsNextOptionalParams no longer has parameter xenonWorkersEnabled
+  - Interface ProviderGetAvailableStacksNextOptionalParams no longer has parameter osTypeSelected
+  - Interface ProviderGetAvailableStacksOnPremNextOptionalParams no longer has parameter osTypeSelected
+  - Interface ProviderGetFunctionAppStacksForLocationNextOptionalParams no longer has parameter stackOsType
+  - Interface ProviderGetFunctionAppStacksNextOptionalParams no longer has parameter stackOsType
+  - Interface ProviderGetWebAppStacksForLocationNextOptionalParams no longer has parameter stackOsType
+  - Interface ProviderGetWebAppStacksNextOptionalParams no longer has parameter stackOsType
+  - Interface RecommendationsListHistoryForHostingEnvironmentNextOptionalParams no longer has parameter expiredOnly
+  - Interface RecommendationsListHistoryForHostingEnvironmentNextOptionalParams no longer has parameter filter
+  - Interface RecommendationsListHistoryForWebAppNextOptionalParams no longer has parameter expiredOnly
+  - Interface RecommendationsListHistoryForWebAppNextOptionalParams no longer has parameter filter
+  - Interface RecommendationsListNextOptionalParams no longer has parameter featured
+  - Interface RecommendationsListNextOptionalParams no longer has parameter filter
+  - Interface RecommendationsListRecommendedRulesForHostingEnvironmentNextOptionalParams no longer has parameter featured
+  - Interface RecommendationsListRecommendedRulesForHostingEnvironmentNextOptionalParams no longer has parameter filter
+  - Interface RecommendationsListRecommendedRulesForWebAppNextOptionalParams no longer has parameter featured
+  - Interface RecommendationsListRecommendedRulesForWebAppNextOptionalParams no longer has parameter filter
+  - Interface WebAppsListByResourceGroupNextOptionalParams no longer has parameter includeSlots
+  - Interface WebAppsListPerfMonCountersNextOptionalParams no longer has parameter filter
+  - Interface WebAppsListPerfMonCountersSlotNextOptionalParams no longer has parameter filter
+  - Interface WebAppsListUsagesNextOptionalParams no longer has parameter filter
+  - Interface WebAppsListUsagesSlotNextOptionalParams no longer has parameter filter
+  - Interface WorkflowRunActionsListNextOptionalParams no longer has parameter filter
+  - Interface WorkflowRunActionsListNextOptionalParams no longer has parameter top
+  - Interface WorkflowRunsListNextOptionalParams no longer has parameter filter
+  - Interface WorkflowRunsListNextOptionalParams no longer has parameter top
+  - Interface WorkflowTriggerHistoriesListNextOptionalParams no longer has parameter filter
+  - Interface WorkflowTriggerHistoriesListNextOptionalParams no longer has parameter top
+  - Interface WorkflowTriggersListNextOptionalParams no longer has parameter filter
+  - Interface WorkflowTriggersListNextOptionalParams no longer has parameter top
+  - Interface WorkflowVersionsListNextOptionalParams no longer has parameter top
+
+### Breaking Changes
+
+  - Type of parameter osTypeSelected of interface ProviderGetAvailableStacksOnPremOptionalParams is changed from Enum19 to ProviderOsTypeSelected
+  - Type of parameter osTypeSelected of interface ProviderGetAvailableStacksOptionalParams is changed from Enum14 to ProviderOsTypeSelected
+  - Type of parameter stackOsType of interface ProviderGetFunctionAppStacksForLocationOptionalParams is changed from Enum16 to ProviderStackOsType
+  - Type of parameter stackOsType of interface ProviderGetFunctionAppStacksOptionalParams is changed from Enum15 to ProviderStackOsType
+  - Type of parameter stackOsType of interface ProviderGetWebAppStacksForLocationOptionalParams is changed from Enum17 to ProviderStackOsType
+  - Type of parameter stackOsType of interface ProviderGetWebAppStacksOptionalParams is changed from Enum18 to ProviderStackOsType
+  - Removed Enum KnownEnum14
+  - Removed Enum KnownEnum15
+  - Removed Enum KnownEnum16
+  - Removed Enum KnownEnum17
+  - Removed Enum KnownEnum18
+  - Removed Enum KnownEnum19
+  - Removed Enum KnownWorkflowState
+    
 ## 13.0.3 (2022-11-16)
 
   - Bugs Fixed
 
 ## 13.0.2 (2022-10-08)
 
-**Bugs Fixed**
+### Bugs Fixed
 
   -  revert credential scopes
 
 ## 13.0.1 (2022-09-30)
 
-**Bugs Fixed**
+### Bugs Fixed
 
   -  fix better user experience of credential scopes in government cloud
 
 ## 13.0.0 (2022-07-06)
     
-**Features**
+### Features Added
 
   - Added operation group WorkflowRunActionRepetitions
   - Added operation group WorkflowRunActionRepetitionsRequestHistories
@@ -426,7 +718,7 @@
   - Enum KnownEnum19 has a new value LinuxFunctions
   - Enum KnownEnum19 has a new value WindowsFunctions
 
-**Breaking Changes**
+### Breaking Changes
 
   - Removed Enum KnownAppServiceCertificateOrderPatchResourcePropertiesAppServiceCertificateNotRenewableReasonsItem
   - Removed Enum KnownAppServiceCertificateOrderPropertiesAppServiceCertificateNotRenewableReasonsItem
@@ -439,18 +731,18 @@
     
 ## 12.0.0 (2022-04-07)
     
-**Features**
+### Features Added
 
   - Added operation group Global_2
 
-**Breaking Changes**
+### Breaking Changes
 
   - Removed operation group Global
     
     
 ## 11.0.0 (2022-01-10)
     
-**Features**
+### Features Added
 
   - Added operation group ContainerApps
   - Added operation group ContainerAppsRevisions
@@ -545,7 +837,7 @@
   - Added Enum KnownRevisionHealthState
   - Added Enum KnownRevisionProvisioningState
 
-**Breaking Changes**
+### Breaking Changes
 
   - Removed Enum KnownEnum10
   - Removed Enum KnownEnum11
@@ -562,4 +854,4 @@ To understand the detail of the change, please refer to [Changelog](https://aka.
 
 To migrate the existing applications to the latest version, please refer to [Migration Guide](https://aka.ms/js-track2-migration-guide).
 
-To learn more, please refer to our documentation [Quick Start](https://aka.ms/js-track2-quickstart).
+To learn more, please refer to our documentation [Quick Start](https://aka.ms/azsdk/js/mgmt/quickstart ).

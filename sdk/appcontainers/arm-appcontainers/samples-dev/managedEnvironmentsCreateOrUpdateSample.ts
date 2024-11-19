@@ -10,66 +10,179 @@
 // Licensed under the MIT License.
 import {
   ManagedEnvironment,
-  ContainerAppsAPIClient
+  ContainerAppsAPIClient,
 } from "@azure/arm-appcontainers";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Creates or updates a Managed Environment used to host container apps.
  *
  * @summary Creates or updates a Managed Environment used to host container apps.
- * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2022-06-01-preview/examples/ManagedEnvironments_CreateOrUpdate.json
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/ManagedEnvironments_CustomInfrastructureResourceGroup_Create.json
  */
-async function createEnvironments() {
-  const subscriptionId = "34adfa4f-cedf-4dc0-ba29-b6d1a69ab345";
-  const resourceGroupName = "examplerg";
+async function createEnvironmentWithCustomInfrastructureResourceGroup() {
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] ||
+    "34adfa4f-cedf-4dc0-ba29-b6d1a69ab345";
+  const resourceGroupName =
+    process.env["APPCONTAINERS_RESOURCE_GROUP"] || "examplerg";
   const environmentName = "testcontainerenv";
   const environmentEnvelope: ManagedEnvironment = {
     appLogsConfiguration: {
-      logAnalyticsConfiguration: { customerId: "string", sharedKey: "string" }
+      logAnalyticsConfiguration: { customerId: "string", sharedKey: "string" },
     },
     customDomainConfiguration: {
-      certificatePassword: Buffer.from("private key password"),
-      certificateValue: Buffer.from("PFX-or-PEM-blob"),
-      dnsSuffix: "www.my-name.com"
+      certificatePassword: "1234",
+      certificateValue: Buffer.from("Y2VydA=="),
+      dnsSuffix: "www.my-name.com",
     },
     daprAIConnectionString:
       "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://northcentralus-0.in.applicationinsights.azure.com/",
+    infrastructureResourceGroup: "myInfrastructureRgName",
     location: "East US",
-    sku: { name: "Premium" },
     vnetConfiguration: {
-      outboundSettings: {
-        outBoundType: "UserDefinedRouting",
-        virtualNetworkApplianceIp: "192.168.1.20"
-      }
+      infrastructureSubnetId:
+        "/subscriptions/34adfa4f-cedf-4dc0-ba29-b6d1a69ab345/resourceGroups/RGName/providers/Microsoft.Network/virtualNetworks/VNetName/subnets/subnetName1",
     },
     workloadProfiles: [
       {
+        name: "My-GP-01",
+        enableFips: true,
         maximumCount: 12,
         minimumCount: 3,
-        workloadProfileType: "GeneralPurpose"
+        workloadProfileType: "GeneralPurpose",
       },
       {
+        name: "My-MO-01",
         maximumCount: 6,
         minimumCount: 3,
-        workloadProfileType: "MemoryOptimized"
+        workloadProfileType: "MemoryOptimized",
       },
       {
+        name: "My-CO-01",
         maximumCount: 6,
         minimumCount: 3,
-        workloadProfileType: "ComputeOptimized"
-      }
+        workloadProfileType: "ComputeOptimized",
+      },
+      { name: "My-consumption-01", workloadProfileType: "Consumption" },
     ],
-    zoneRedundant: true
+    zoneRedundant: true,
   };
   const credential = new DefaultAzureCredential();
   const client = new ContainerAppsAPIClient(credential, subscriptionId);
   const result = await client.managedEnvironments.beginCreateOrUpdateAndWait(
     resourceGroupName,
     environmentName,
-    environmentEnvelope
+    environmentEnvelope,
   );
   console.log(result);
 }
 
-createEnvironments().catch(console.error);
+/**
+ * This sample demonstrates how to Creates or updates a Managed Environment used to host container apps.
+ *
+ * @summary Creates or updates a Managed Environment used to host container apps.
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/ManagedEnvironments_CreateOrUpdate.json
+ */
+async function createEnvironments() {
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] ||
+    "34adfa4f-cedf-4dc0-ba29-b6d1a69ab345";
+  const resourceGroupName =
+    process.env["APPCONTAINERS_RESOURCE_GROUP"] || "examplerg";
+  const environmentName = "testcontainerenv";
+  const environmentEnvelope: ManagedEnvironment = {
+    appInsightsConfiguration: {
+      connectionString:
+        "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/",
+    },
+    appLogsConfiguration: {
+      logAnalyticsConfiguration: {
+        customerId: "string",
+        dynamicJsonColumns: true,
+        sharedKey: "string",
+      },
+    },
+    customDomainConfiguration: {
+      certificatePassword: "1234",
+      certificateValue: Buffer.from("Y2VydA=="),
+      dnsSuffix: "www.my-name.com",
+    },
+    daprAIConnectionString:
+      "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://northcentralus-0.in.applicationinsights.azure.com/",
+    identity: {
+      type: "SystemAssigned, UserAssigned",
+      userAssignedIdentities: {
+        "/subscriptions/00000000000000000000000000000000/resourceGroups/contosoResources/providers/MicrosoftManagedIdentity/userAssignedIdentities/contosoIdentity":
+          {},
+      },
+    },
+    location: "East US",
+    openTelemetryConfiguration: {
+      destinationsConfiguration: {
+        dataDogConfiguration: {
+          key: "000000000000000000000000",
+          site: "string",
+        },
+        otlpConfigurations: [
+          {
+            name: "dashboard",
+            endpoint: "dashboard.k8s.region.azurecontainerapps.io:80",
+            headers: [{ key: "api-key", value: "xxxxxxxxxxx" }],
+            insecure: true,
+          },
+        ],
+      },
+      logsConfiguration: { destinations: ["appInsights"] },
+      metricsConfiguration: { destinations: ["dataDog"], includeKeda: true },
+      tracesConfiguration: { destinations: ["appInsights"], includeDapr: true },
+    },
+    peerAuthentication: { mtls: { enabled: true } },
+    peerTrafficConfiguration: { encryption: { enabled: true } },
+    vnetConfiguration: {
+      infrastructureSubnetId:
+        "/subscriptions/34adfa4f-cedf-4dc0-ba29-b6d1a69ab345/resourceGroups/RGName/providers/Microsoft.Network/virtualNetworks/VNetName/subnets/subnetName1",
+    },
+    workloadProfiles: [
+      {
+        name: "My-GP-01",
+        enableFips: true,
+        maximumCount: 12,
+        minimumCount: 3,
+        workloadProfileType: "GeneralPurpose",
+      },
+      {
+        name: "My-MO-01",
+        maximumCount: 6,
+        minimumCount: 3,
+        workloadProfileType: "MemoryOptimized",
+      },
+      {
+        name: "My-CO-01",
+        maximumCount: 6,
+        minimumCount: 3,
+        workloadProfileType: "ComputeOptimized",
+      },
+      { name: "My-consumption-01", workloadProfileType: "Consumption" },
+    ],
+    zoneRedundant: true,
+  };
+  const credential = new DefaultAzureCredential();
+  const client = new ContainerAppsAPIClient(credential, subscriptionId);
+  const result = await client.managedEnvironments.beginCreateOrUpdateAndWait(
+    resourceGroupName,
+    environmentName,
+    environmentEnvelope,
+  );
+  console.log(result);
+}
+
+async function main() {
+  createEnvironmentWithCustomInfrastructureResourceGroup();
+  createEnvironments();
+}
+
+main().catch(console.error);

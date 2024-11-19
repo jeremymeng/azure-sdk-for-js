@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { Recorder, isPlaybackMode } from "@azure-tools/test-recorder";
-import { TableItem, TableItemResultPage, TableServiceClient, odata } from "../../src";
-
-import { Context } from "mocha";
-import { FullOperationResponse } from "@azure/core-client";
-import { assert } from "@azure/test-utils";
+import type { TableItem, TableItemResultPage, TableServiceClient } from "../../src";
+import { odata } from "../../src";
+import type { Context } from "mocha";
+import type { FullOperationResponse, OperationOptions } from "@azure/core-client";
 import { createTableServiceClient } from "./utils/recordedClient";
-import { isNode } from "@azure/test-utils";
+import { assert } from "@azure-tools/test-utils";
+import { isNodeLike } from "@azure/core-util";
 
-describe(`TableServiceClient`, () => {
+describe(`TableServiceClient`, function () {
   let client: TableServiceClient;
   let recorder: Recorder;
-  const suffix = isNode ? `node` : `browser`;
+  const suffix = isNodeLike ? `node` : `browser`;
 
   beforeEach(async function (this: Context) {
     recorder = new Recorder(this.currentTest);
@@ -24,8 +24,8 @@ describe(`TableServiceClient`, () => {
     await recorder.stop();
   });
 
-  describe("Create, get table and delete", () => {
-    it("should create new table, then delete", async () => {
+  describe("Create, get table and delete", function () {
+    it("should create new table, then delete", async function () {
       const tableName = `testTable${suffix}`;
       let createResult: FullOperationResponse | undefined;
       let deleteTableResult: FullOperationResponse | undefined;
@@ -47,7 +47,7 @@ describe(`TableServiceClient`, () => {
     });
   });
 
-  describe("listTables", () => {
+  describe("listTables", function () {
     const tableNames: string[] = [];
     const expectedTotalItems = 20;
     let unRecordedClient: TableServiceClient;
@@ -78,7 +78,7 @@ describe(`TableServiceClient`, () => {
       }
     });
 
-    it("should list all", async () => {
+    it("should list all", async function () {
       const tables = client.listTables();
       const all: TableItem[] = [];
       for await (const table of tables) {
@@ -87,12 +87,12 @@ describe(`TableServiceClient`, () => {
       for (let i = 0; i < expectedTotalItems; i++) {
         assert.isTrue(
           all.some((t) => t.name === `ListTableTest${suffix}${i}`),
-          `Couldn't find table ListTableTest${suffix}${i}`
+          `Couldn't find table ListTableTest${suffix}${i}`,
         );
       }
     });
 
-    it("should list with filter", async () => {
+    it("should list with filter", async function () {
       const tableName = `ListTableTest${suffix}1`;
       const tables = client.listTables({
         queryOptions: { filter: odata`TableName eq ${tableName}` },
@@ -119,7 +119,7 @@ describe(`TableServiceClient`, () => {
       for (let i = 0; i < expectedTotalItems; i++) {
         assert.isTrue(
           all.some((t) => t.name === `ListTableTest${suffix}${i}`),
-          `Couldn't find table ListTableTest${suffix}${i}`
+          `Couldn't find table ListTableTest${suffix}${i}`,
         );
       }
     });
@@ -167,19 +167,19 @@ describe(`TableServiceClient`, () => {
       assert.deepEqual(result, lastPage);
     });
   });
-  describe("Statistics", () => {
-    it("should getStatistics", async () => {
+  describe("Statistics", function () {
+    it("should getStatistics", async function () {
       const result = await client.getStatistics();
       assert.deepEqual(result.geoReplication?.status, "live");
     });
   });
 
-  describe("tracing", () => {
-    it("should trace through the various operations", async () => {
+  describe("tracing", function () {
+    it("should trace through the various operations", async function () {
       const tableName = `testTracing${suffix}`;
       await recorder.setMatcher("HeaderlessMatcher");
       await assert.supportsTracing(
-        async (options) => {
+        async (options: OperationOptions) => {
           await client.createTable(tableName, options);
           await client.getProperties(options);
           try {
@@ -200,7 +200,7 @@ describe(`TableServiceClient`, () => {
           "TableServiceClient.setProperties",
           "TableServiceClient.getStatistics",
           "TableServiceClient.deleteTable",
-        ]
+        ],
       );
     });
   });

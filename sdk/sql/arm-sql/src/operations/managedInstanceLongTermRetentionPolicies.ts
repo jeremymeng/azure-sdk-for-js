@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SqlManagementClient } from "../sqlManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ManagedInstanceLongTermRetentionPolicy,
   ManagedInstanceLongTermRetentionPoliciesListByDatabaseNextOptionalParams,
@@ -25,13 +29,14 @@ import {
   ManagedInstanceLongTermRetentionPoliciesGetResponse,
   ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateOptionalParams,
   ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateResponse,
-  ManagedInstanceLongTermRetentionPoliciesListByDatabaseNextResponse
+  ManagedInstanceLongTermRetentionPoliciesListByDatabaseNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing ManagedInstanceLongTermRetentionPolicies operations. */
 export class ManagedInstanceLongTermRetentionPoliciesImpl
-  implements ManagedInstanceLongTermRetentionPolicies {
+  implements ManagedInstanceLongTermRetentionPolicies
+{
   private readonly client: SqlManagementClient;
 
   /**
@@ -54,13 +59,13 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
     resourceGroupName: string,
     managedInstanceName: string,
     databaseName: string,
-    options?: ManagedInstanceLongTermRetentionPoliciesListByDatabaseOptionalParams
+    options?: ManagedInstanceLongTermRetentionPoliciesListByDatabaseOptionalParams,
   ): PagedAsyncIterableIterator<ManagedInstanceLongTermRetentionPolicy> {
     const iter = this.listByDatabasePagingAll(
       resourceGroupName,
       managedInstanceName,
       databaseName,
-      options
+      options,
     );
     return {
       next() {
@@ -78,9 +83,9 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
           managedInstanceName,
           databaseName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -89,7 +94,7 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
     managedInstanceName: string,
     databaseName: string,
     options?: ManagedInstanceLongTermRetentionPoliciesListByDatabaseOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionPolicy[]> {
     let result: ManagedInstanceLongTermRetentionPoliciesListByDatabaseResponse;
     let continuationToken = settings?.continuationToken;
@@ -98,7 +103,7 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
         resourceGroupName,
         managedInstanceName,
         databaseName,
-        options
+        options,
       );
       let page = result.value || [];
       continuationToken = result.nextLink;
@@ -111,7 +116,7 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
         managedInstanceName,
         databaseName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -124,13 +129,13 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
     resourceGroupName: string,
     managedInstanceName: string,
     databaseName: string,
-    options?: ManagedInstanceLongTermRetentionPoliciesListByDatabaseOptionalParams
+    options?: ManagedInstanceLongTermRetentionPoliciesListByDatabaseOptionalParams,
   ): AsyncIterableIterator<ManagedInstanceLongTermRetentionPolicy> {
     for await (const page of this.listByDatabasePagingPage(
       resourceGroupName,
       managedInstanceName,
       databaseName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -150,7 +155,7 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
     managedInstanceName: string,
     databaseName: string,
     policyName: ManagedInstanceLongTermRetentionPolicyName,
-    options?: ManagedInstanceLongTermRetentionPoliciesGetOptionalParams
+    options?: ManagedInstanceLongTermRetentionPoliciesGetOptionalParams,
   ): Promise<ManagedInstanceLongTermRetentionPoliciesGetResponse> {
     return this.client.sendOperationRequest(
       {
@@ -158,9 +163,9 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
         managedInstanceName,
         databaseName,
         policyName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -180,32 +185,29 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
     databaseName: string,
     policyName: ManagedInstanceLongTermRetentionPolicyName,
     parameters: ManagedInstanceLongTermRetentionPolicy,
-    options?: ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateOptionalParams
+    options?: ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateResponse
-      >,
+    SimplePollerLike<
+      OperationState<ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateResponse>,
       ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -214,8 +216,8 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -223,26 +225,29 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         managedInstanceName,
         databaseName,
         policyName,
         parameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateResponse,
+      OperationState<ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -264,7 +269,7 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
     databaseName: string,
     policyName: ManagedInstanceLongTermRetentionPolicyName,
     parameters: ManagedInstanceLongTermRetentionPolicy,
-    options?: ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateOptionalParams
+    options?: ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateOptionalParams,
   ): Promise<ManagedInstanceLongTermRetentionPoliciesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
@@ -272,7 +277,7 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
       databaseName,
       policyName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -289,11 +294,11 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
     resourceGroupName: string,
     managedInstanceName: string,
     databaseName: string,
-    options?: ManagedInstanceLongTermRetentionPoliciesListByDatabaseOptionalParams
+    options?: ManagedInstanceLongTermRetentionPoliciesListByDatabaseOptionalParams,
   ): Promise<ManagedInstanceLongTermRetentionPoliciesListByDatabaseResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, managedInstanceName, databaseName, options },
-      listByDatabaseOperationSpec
+      listByDatabaseOperationSpec,
     );
   }
 
@@ -311,19 +316,17 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
     managedInstanceName: string,
     databaseName: string,
     nextLink: string,
-    options?: ManagedInstanceLongTermRetentionPoliciesListByDatabaseNextOptionalParams
-  ): Promise<
-    ManagedInstanceLongTermRetentionPoliciesListByDatabaseNextResponse
-  > {
+    options?: ManagedInstanceLongTermRetentionPoliciesListByDatabaseNextOptionalParams,
+  ): Promise<ManagedInstanceLongTermRetentionPoliciesListByDatabaseNextResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         managedInstanceName,
         databaseName,
         nextLink,
-        options
+        options,
       },
-      listByDatabaseNextOperationSpec
+      listByDatabaseNextOperationSpec,
     );
   }
 }
@@ -331,89 +334,86 @@ export class ManagedInstanceLongTermRetentionPoliciesImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}/backupLongTermRetentionPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}/backupLongTermRetentionPolicies/{policyName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.databaseName,
     Parameters.managedInstanceName,
-    Parameters.policyName2
+    Parameters.policyName1,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}/backupLongTermRetentionPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}/backupLongTermRetentionPolicies/{policyName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy,
     },
     201: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy,
     },
     202: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy,
     },
     204: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicy,
     },
-    default: {}
+    default: {},
   },
-  requestBody: Parameters.parameters51,
-  queryParameters: [Parameters.apiVersion2],
+  requestBody: Parameters.parameters35,
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.databaseName,
     Parameters.managedInstanceName,
-    Parameters.policyName2
+    Parameters.policyName1,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listByDatabaseOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}/backupLongTermRetentionPolicies",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}/backupLongTermRetentionPolicies",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicyListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicyListResult,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.databaseName,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByDatabaseNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicyListResult
+      bodyMapper: Mappers.ManagedInstanceLongTermRetentionPolicyListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
@@ -421,8 +421,8 @@ const listByDatabaseNextOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.databaseName,
     Parameters.nextLink,
-    Parameters.managedInstanceName
+    Parameters.managedInstanceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

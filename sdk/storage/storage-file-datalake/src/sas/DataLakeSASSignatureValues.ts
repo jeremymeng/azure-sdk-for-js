@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 import { StorageSharedKeyCredential } from "../credentials/StorageSharedKeyCredential";
 import { UserDelegationKeyCredential } from "../credentials/UserDelegationKeyCredential";
 import { DataLakeSASPermissions } from "./DataLakeSASPermissions";
 import { FileSystemSASPermissions } from "./FileSystemSASPermissions";
-import { UserDelegationKey } from "../models";
-import { ipRangeToString, SasIPRange } from "./SasIPRange";
-import { SASProtocol, SASQueryParameters } from "./SASQueryParameters";
+import type { UserDelegationKey } from "../models";
+import type { SasIPRange } from "./SasIPRange";
+import { ipRangeToString } from "./SasIPRange";
+import type { SASProtocol } from "./SASQueryParameters";
+import { SASQueryParameters } from "./SASQueryParameters";
 import { SERVICE_VERSION } from "../utils/constants";
 import { truncatedISO8061Date } from "../utils/utils.common";
 import { DirectorySASPermissions } from "./DirectorySASPermissions";
@@ -196,7 +198,7 @@ export interface DataLakeSASSignatureValues {
  */
 export function generateDataLakeSASQueryParameters(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
-  sharedKeyCredential: StorageSharedKeyCredential
+  sharedKeyCredential: StorageSharedKeyCredential,
 ): SASQueryParameters;
 
 /**
@@ -230,14 +232,26 @@ export function generateDataLakeSASQueryParameters(
 export function generateDataLakeSASQueryParameters(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
   userDelegationKey: UserDelegationKey,
-  accountName: string
+  accountName: string,
 ): SASQueryParameters;
 
 export function generateDataLakeSASQueryParameters(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
   sharedKeyCredentialOrUserDelegationKey: StorageSharedKeyCredential | UserDelegationKey,
-  accountName?: string
+  accountName?: string,
 ): SASQueryParameters {
+  return generateDataLakeSASQueryParametersInternal(
+    dataLakeSASSignatureValues,
+    sharedKeyCredentialOrUserDelegationKey,
+    accountName,
+  ).sasQueryParameter;
+}
+
+export function generateDataLakeSASQueryParametersInternal(
+  dataLakeSASSignatureValues: DataLakeSASSignatureValues,
+  sharedKeyCredentialOrUserDelegationKey: StorageSharedKeyCredential | UserDelegationKey,
+  accountName?: string,
+): { sasQueryParameter: SASQueryParameters; stringToSign: string } {
   const version = dataLakeSASSignatureValues.version
     ? dataLakeSASSignatureValues.version
     : SERVICE_VERSION;
@@ -251,7 +265,7 @@ export function generateDataLakeSASQueryParameters(
   if (sharedKeyCredential === undefined && accountName !== undefined) {
     userDelegationKeyCredential = new UserDelegationKeyCredential(
       accountName,
-      sharedKeyCredentialOrUserDelegationKey as UserDelegationKey
+      sharedKeyCredentialOrUserDelegationKey as UserDelegationKey,
     );
   }
 
@@ -264,12 +278,12 @@ export function generateDataLakeSASQueryParameters(
     if (sharedKeyCredential !== undefined) {
       return generateBlobSASQueryParameters20201206(
         dataLakeSASSignatureValues,
-        sharedKeyCredential
+        sharedKeyCredential,
       );
     } else {
       return generateBlobSASQueryParametersUDK20201206(
         dataLakeSASSignatureValues,
-        userDelegationKeyCredential!
+        userDelegationKeyCredential!,
       );
     }
   }
@@ -280,19 +294,19 @@ export function generateDataLakeSASQueryParameters(
     if (sharedKeyCredential !== undefined) {
       return generateBlobSASQueryParameters20181109(
         dataLakeSASSignatureValues,
-        sharedKeyCredential
+        sharedKeyCredential,
       );
     } else {
       // Version 2020-02-10 delegation SAS signature construction includes preauthorizedAgentObjectId, agentObjectId, correlationId.
       if (version >= "2020-02-10") {
         return generateBlobSASQueryParametersUDK20200210(
           dataLakeSASSignatureValues,
-          userDelegationKeyCredential!
+          userDelegationKeyCredential!,
         );
       } else {
         return generateBlobSASQueryParametersUDK20181109(
           dataLakeSASSignatureValues,
-          userDelegationKeyCredential!
+          userDelegationKeyCredential!,
         );
       }
     }
@@ -302,11 +316,11 @@ export function generateDataLakeSASQueryParameters(
     if (sharedKeyCredential !== undefined) {
       return generateBlobSASQueryParameters20150405(
         dataLakeSASSignatureValues,
-        sharedKeyCredential
+        sharedKeyCredential,
       );
     } else {
       throw new RangeError(
-        "'version' must be >= '2018-11-09' when generating user delegation SAS using user delegation key."
+        "'version' must be >= '2018-11-09' when generating user delegation SAS using user delegation key.",
       );
     }
   }
@@ -332,14 +346,14 @@ export function generateDataLakeSASQueryParameters(
  */
 function generateBlobSASQueryParameters20150405(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
-  sharedKeyCredential: StorageSharedKeyCredential
-): SASQueryParameters {
+  sharedKeyCredential: StorageSharedKeyCredential,
+): { sasQueryParameter: SASQueryParameters; stringToSign: string } {
   if (
     !dataLakeSASSignatureValues.identifier &&
     !(dataLakeSASSignatureValues.permissions && dataLakeSASSignatureValues.expiresOn)
   ) {
     throw new RangeError(
-      "Must provide 'permissions' and 'expiresOn' for DataLake SAS generation when 'identifier' is not provided."
+      "Must provide 'permissions' and 'expiresOn' for DataLake SAS generation when 'identifier' is not provided.",
     );
   }
 
@@ -349,7 +363,7 @@ function generateBlobSASQueryParameters20150405(
 
   dataLakeSASSignatureValues = SASSignatureValuesSanityCheckAndAutofill(
     dataLakeSASSignatureValues,
-    version
+    version,
   );
 
   let resource: string = "c";
@@ -362,11 +376,11 @@ function generateBlobSASQueryParameters20150405(
   if (dataLakeSASSignatureValues.permissions) {
     if (dataLakeSASSignatureValues.pathName) {
       verifiedPermissions = DataLakeSASPermissions.parse(
-        dataLakeSASSignatureValues.permissions.toString()
+        dataLakeSASSignatureValues.permissions.toString(),
       ).toString();
     } else {
       verifiedPermissions = FileSystemSASPermissions.parse(
-        dataLakeSASSignatureValues.permissions.toString()
+        dataLakeSASSignatureValues.permissions.toString(),
       ).toString();
     }
   }
@@ -383,7 +397,7 @@ function generateBlobSASQueryParameters20150405(
     getCanonicalName(
       sharedKeyCredential.accountName,
       dataLakeSASSignatureValues.fileSystemName,
-      dataLakeSASSignatureValues.pathName
+      dataLakeSASSignatureValues.pathName,
     ),
     dataLakeSASSignatureValues.identifier,
     dataLakeSASSignatureValues.ipRange ? ipRangeToString(dataLakeSASSignatureValues.ipRange) : "",
@@ -400,24 +414,27 @@ function generateBlobSASQueryParameters20150405(
 
   const signature = sharedKeyCredential.computeHMACSHA256(stringToSign);
 
-  return new SASQueryParameters(
-    version,
-    signature,
-    verifiedPermissions,
-    undefined,
-    undefined,
-    dataLakeSASSignatureValues.protocol,
-    dataLakeSASSignatureValues.startsOn,
-    dataLakeSASSignatureValues.expiresOn,
-    dataLakeSASSignatureValues.ipRange,
-    dataLakeSASSignatureValues.identifier,
-    resource,
-    dataLakeSASSignatureValues.cacheControl,
-    dataLakeSASSignatureValues.contentDisposition,
-    dataLakeSASSignatureValues.contentEncoding,
-    dataLakeSASSignatureValues.contentLanguage,
-    dataLakeSASSignatureValues.contentType
-  );
+  return {
+    sasQueryParameter: new SASQueryParameters(
+      version,
+      signature,
+      verifiedPermissions,
+      undefined,
+      undefined,
+      dataLakeSASSignatureValues.protocol,
+      dataLakeSASSignatureValues.startsOn,
+      dataLakeSASSignatureValues.expiresOn,
+      dataLakeSASSignatureValues.ipRange,
+      dataLakeSASSignatureValues.identifier,
+      resource,
+      dataLakeSASSignatureValues.cacheControl,
+      dataLakeSASSignatureValues.contentDisposition,
+      dataLakeSASSignatureValues.contentEncoding,
+      dataLakeSASSignatureValues.contentLanguage,
+      dataLakeSASSignatureValues.contentType,
+    ),
+    stringToSign: stringToSign,
+  };
 }
 
 /**
@@ -438,14 +455,14 @@ function generateBlobSASQueryParameters20150405(
  */
 function generateBlobSASQueryParameters20181109(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
-  sharedKeyCredential: StorageSharedKeyCredential
-): SASQueryParameters {
+  sharedKeyCredential: StorageSharedKeyCredential,
+): { sasQueryParameter: SASQueryParameters; stringToSign: string } {
   if (
     !dataLakeSASSignatureValues.identifier &&
     !(dataLakeSASSignatureValues.permissions && dataLakeSASSignatureValues.expiresOn)
   ) {
     throw new RangeError(
-      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when 'identifier' is not provided."
+      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when 'identifier' is not provided.",
     );
   }
 
@@ -455,7 +472,7 @@ function generateBlobSASQueryParameters20181109(
 
   dataLakeSASSignatureValues = SASSignatureValuesSanityCheckAndAutofill(
     dataLakeSASSignatureValues,
-    version
+    version,
   );
 
   let resource: string = "c";
@@ -476,16 +493,16 @@ function generateBlobSASQueryParameters20181109(
     if (dataLakeSASSignatureValues.pathName) {
       if (dataLakeSASSignatureValues.isDirectory) {
         verifiedPermissions = DirectorySASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       } else {
         verifiedPermissions = DataLakeSASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       }
     } else {
       verifiedPermissions = FileSystemSASPermissions.parse(
-        dataLakeSASSignatureValues.permissions.toString()
+        dataLakeSASSignatureValues.permissions.toString(),
       ).toString();
     }
   }
@@ -502,7 +519,7 @@ function generateBlobSASQueryParameters20181109(
     getCanonicalName(
       sharedKeyCredential.accountName,
       dataLakeSASSignatureValues.fileSystemName,
-      dataLakeSASSignatureValues.pathName
+      dataLakeSASSignatureValues.pathName,
     ),
     dataLakeSASSignatureValues.identifier,
     dataLakeSASSignatureValues.ipRange ? ipRangeToString(dataLakeSASSignatureValues.ipRange) : "",
@@ -521,26 +538,29 @@ function generateBlobSASQueryParameters20181109(
 
   const signature = sharedKeyCredential.computeHMACSHA256(stringToSign);
 
-  return new SASQueryParameters(
-    version,
-    signature,
-    verifiedPermissions,
-    undefined,
-    undefined,
-    dataLakeSASSignatureValues.protocol,
-    dataLakeSASSignatureValues.startsOn,
-    dataLakeSASSignatureValues.expiresOn,
-    dataLakeSASSignatureValues.ipRange,
-    dataLakeSASSignatureValues.identifier,
-    resource,
-    dataLakeSASSignatureValues.cacheControl,
-    dataLakeSASSignatureValues.contentDisposition,
-    dataLakeSASSignatureValues.contentEncoding,
-    dataLakeSASSignatureValues.contentLanguage,
-    dataLakeSASSignatureValues.contentType,
-    undefined,
-    dataLakeSASSignatureValues.directoryDepth
-  );
+  return {
+    sasQueryParameter: new SASQueryParameters(
+      version,
+      signature,
+      verifiedPermissions,
+      undefined,
+      undefined,
+      dataLakeSASSignatureValues.protocol,
+      dataLakeSASSignatureValues.startsOn,
+      dataLakeSASSignatureValues.expiresOn,
+      dataLakeSASSignatureValues.ipRange,
+      dataLakeSASSignatureValues.identifier,
+      resource,
+      dataLakeSASSignatureValues.cacheControl,
+      dataLakeSASSignatureValues.contentDisposition,
+      dataLakeSASSignatureValues.contentEncoding,
+      dataLakeSASSignatureValues.contentLanguage,
+      dataLakeSASSignatureValues.contentType,
+      undefined,
+      dataLakeSASSignatureValues.directoryDepth,
+    ),
+    stringToSign: stringToSign,
+  };
 }
 
 /**
@@ -559,11 +579,11 @@ function generateBlobSASQueryParameters20181109(
  */
 function generateBlobSASQueryParametersUDK20181109(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
-  userDelegationKeyCredential: UserDelegationKeyCredential
-): SASQueryParameters {
+  userDelegationKeyCredential: UserDelegationKeyCredential,
+): { sasQueryParameter: SASQueryParameters; stringToSign: string } {
   if (!dataLakeSASSignatureValues.permissions || !dataLakeSASSignatureValues.expiresOn) {
     throw new RangeError(
-      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when generating user delegation SAS."
+      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when generating user delegation SAS.",
     );
   }
 
@@ -572,7 +592,7 @@ function generateBlobSASQueryParametersUDK20181109(
     : SERVICE_VERSION;
   dataLakeSASSignatureValues = SASSignatureValuesSanityCheckAndAutofill(
     dataLakeSASSignatureValues,
-    version
+    version,
   );
 
   let resource: string = "c";
@@ -593,16 +613,16 @@ function generateBlobSASQueryParametersUDK20181109(
     if (dataLakeSASSignatureValues.pathName) {
       if (dataLakeSASSignatureValues.isDirectory) {
         verifiedPermissions = DirectorySASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       } else {
         verifiedPermissions = DataLakeSASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       }
     } else {
       verifiedPermissions = FileSystemSASPermissions.parse(
-        dataLakeSASSignatureValues.permissions.toString()
+        dataLakeSASSignatureValues.permissions.toString(),
       ).toString();
     }
   }
@@ -619,7 +639,7 @@ function generateBlobSASQueryParametersUDK20181109(
     getCanonicalName(
       userDelegationKeyCredential.accountName,
       dataLakeSASSignatureValues.fileSystemName,
-      dataLakeSASSignatureValues.pathName
+      dataLakeSASSignatureValues.pathName,
     ),
     userDelegationKeyCredential.userDelegationKey.signedObjectId,
     userDelegationKeyCredential.userDelegationKey.signedTenantId,
@@ -645,29 +665,32 @@ function generateBlobSASQueryParametersUDK20181109(
 
   const signature = userDelegationKeyCredential.computeHMACSHA256(stringToSign);
 
-  return new SASQueryParameters(
-    version,
-    signature,
-    verifiedPermissions,
-    undefined,
-    undefined,
-    dataLakeSASSignatureValues.protocol,
-    dataLakeSASSignatureValues.startsOn,
-    dataLakeSASSignatureValues.expiresOn,
-    dataLakeSASSignatureValues.ipRange,
-    dataLakeSASSignatureValues.identifier,
-    resource,
-    dataLakeSASSignatureValues.cacheControl,
-    dataLakeSASSignatureValues.contentDisposition,
-    dataLakeSASSignatureValues.contentEncoding,
-    dataLakeSASSignatureValues.contentLanguage,
-    dataLakeSASSignatureValues.contentType,
-    userDelegationKeyCredential.userDelegationKey,
-    dataLakeSASSignatureValues.directoryDepth,
-    dataLakeSASSignatureValues.preauthorizedAgentObjectId,
-    dataLakeSASSignatureValues.agentObjectId,
-    dataLakeSASSignatureValues.correlationId
-  );
+  return {
+    sasQueryParameter: new SASQueryParameters(
+      version,
+      signature,
+      verifiedPermissions,
+      undefined,
+      undefined,
+      dataLakeSASSignatureValues.protocol,
+      dataLakeSASSignatureValues.startsOn,
+      dataLakeSASSignatureValues.expiresOn,
+      dataLakeSASSignatureValues.ipRange,
+      dataLakeSASSignatureValues.identifier,
+      resource,
+      dataLakeSASSignatureValues.cacheControl,
+      dataLakeSASSignatureValues.contentDisposition,
+      dataLakeSASSignatureValues.contentEncoding,
+      dataLakeSASSignatureValues.contentLanguage,
+      dataLakeSASSignatureValues.contentType,
+      userDelegationKeyCredential.userDelegationKey,
+      dataLakeSASSignatureValues.directoryDepth,
+      dataLakeSASSignatureValues.preauthorizedAgentObjectId,
+      dataLakeSASSignatureValues.agentObjectId,
+      dataLakeSASSignatureValues.correlationId,
+    ),
+    stringToSign: stringToSign,
+  };
 }
 
 /**
@@ -686,11 +709,11 @@ function generateBlobSASQueryParametersUDK20181109(
  */
 function generateBlobSASQueryParametersUDK20200210(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
-  userDelegationKeyCredential: UserDelegationKeyCredential
-): SASQueryParameters {
+  userDelegationKeyCredential: UserDelegationKeyCredential,
+): { sasQueryParameter: SASQueryParameters; stringToSign: string } {
   if (!dataLakeSASSignatureValues.permissions || !dataLakeSASSignatureValues.expiresOn) {
     throw new RangeError(
-      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when generating user delegation SAS."
+      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when generating user delegation SAS.",
     );
   }
 
@@ -699,7 +722,7 @@ function generateBlobSASQueryParametersUDK20200210(
     : SERVICE_VERSION;
   dataLakeSASSignatureValues = SASSignatureValuesSanityCheckAndAutofill(
     dataLakeSASSignatureValues,
-    version
+    version,
   );
 
   let resource: string = "c";
@@ -720,16 +743,16 @@ function generateBlobSASQueryParametersUDK20200210(
     if (dataLakeSASSignatureValues.pathName) {
       if (dataLakeSASSignatureValues.isDirectory) {
         verifiedPermissions = DirectorySASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       } else {
         verifiedPermissions = DataLakeSASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       }
     } else {
       verifiedPermissions = FileSystemSASPermissions.parse(
-        dataLakeSASSignatureValues.permissions.toString()
+        dataLakeSASSignatureValues.permissions.toString(),
       ).toString();
     }
   }
@@ -746,7 +769,7 @@ function generateBlobSASQueryParametersUDK20200210(
     getCanonicalName(
       userDelegationKeyCredential.accountName,
       dataLakeSASSignatureValues.fileSystemName,
-      dataLakeSASSignatureValues.pathName
+      dataLakeSASSignatureValues.pathName,
     ),
     userDelegationKeyCredential.userDelegationKey.signedObjectId,
     userDelegationKeyCredential.userDelegationKey.signedTenantId,
@@ -775,29 +798,32 @@ function generateBlobSASQueryParametersUDK20200210(
 
   const signature = userDelegationKeyCredential.computeHMACSHA256(stringToSign);
 
-  return new SASQueryParameters(
-    version,
-    signature,
-    verifiedPermissions,
-    undefined,
-    undefined,
-    dataLakeSASSignatureValues.protocol,
-    dataLakeSASSignatureValues.startsOn,
-    dataLakeSASSignatureValues.expiresOn,
-    dataLakeSASSignatureValues.ipRange,
-    dataLakeSASSignatureValues.identifier,
-    resource,
-    dataLakeSASSignatureValues.cacheControl,
-    dataLakeSASSignatureValues.contentDisposition,
-    dataLakeSASSignatureValues.contentEncoding,
-    dataLakeSASSignatureValues.contentLanguage,
-    dataLakeSASSignatureValues.contentType,
-    userDelegationKeyCredential.userDelegationKey,
-    dataLakeSASSignatureValues.directoryDepth,
-    dataLakeSASSignatureValues.preauthorizedAgentObjectId,
-    dataLakeSASSignatureValues.agentObjectId,
-    dataLakeSASSignatureValues.correlationId
-  );
+  return {
+    sasQueryParameter: new SASQueryParameters(
+      version,
+      signature,
+      verifiedPermissions,
+      undefined,
+      undefined,
+      dataLakeSASSignatureValues.protocol,
+      dataLakeSASSignatureValues.startsOn,
+      dataLakeSASSignatureValues.expiresOn,
+      dataLakeSASSignatureValues.ipRange,
+      dataLakeSASSignatureValues.identifier,
+      resource,
+      dataLakeSASSignatureValues.cacheControl,
+      dataLakeSASSignatureValues.contentDisposition,
+      dataLakeSASSignatureValues.contentEncoding,
+      dataLakeSASSignatureValues.contentLanguage,
+      dataLakeSASSignatureValues.contentType,
+      userDelegationKeyCredential.userDelegationKey,
+      dataLakeSASSignatureValues.directoryDepth,
+      dataLakeSASSignatureValues.preauthorizedAgentObjectId,
+      dataLakeSASSignatureValues.agentObjectId,
+      dataLakeSASSignatureValues.correlationId,
+    ),
+    stringToSign: stringToSign,
+  };
 }
 
 /**
@@ -818,14 +844,14 @@ function generateBlobSASQueryParametersUDK20200210(
  */
 function generateBlobSASQueryParameters20201206(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
-  sharedKeyCredential: StorageSharedKeyCredential
-): SASQueryParameters {
+  sharedKeyCredential: StorageSharedKeyCredential,
+): { sasQueryParameter: SASQueryParameters; stringToSign: string } {
   if (
     !dataLakeSASSignatureValues.identifier &&
     !(dataLakeSASSignatureValues.permissions && dataLakeSASSignatureValues.expiresOn)
   ) {
     throw new RangeError(
-      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when 'identifier' is not provided."
+      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when 'identifier' is not provided.",
     );
   }
 
@@ -835,7 +861,7 @@ function generateBlobSASQueryParameters20201206(
 
   dataLakeSASSignatureValues = SASSignatureValuesSanityCheckAndAutofill(
     dataLakeSASSignatureValues,
-    version
+    version,
   );
 
   let resource: string = "c";
@@ -856,16 +882,16 @@ function generateBlobSASQueryParameters20201206(
     if (dataLakeSASSignatureValues.pathName) {
       if (dataLakeSASSignatureValues.isDirectory) {
         verifiedPermissions = DirectorySASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       } else {
         verifiedPermissions = DataLakeSASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       }
     } else {
       verifiedPermissions = FileSystemSASPermissions.parse(
-        dataLakeSASSignatureValues.permissions.toString()
+        dataLakeSASSignatureValues.permissions.toString(),
       ).toString();
     }
   }
@@ -882,7 +908,7 @@ function generateBlobSASQueryParameters20201206(
     getCanonicalName(
       sharedKeyCredential.accountName,
       dataLakeSASSignatureValues.fileSystemName,
-      dataLakeSASSignatureValues.pathName
+      dataLakeSASSignatureValues.pathName,
     ),
     dataLakeSASSignatureValues.identifier,
     dataLakeSASSignatureValues.ipRange ? ipRangeToString(dataLakeSASSignatureValues.ipRange) : "",
@@ -902,30 +928,33 @@ function generateBlobSASQueryParameters20201206(
 
   const signature = sharedKeyCredential.computeHMACSHA256(stringToSign);
 
-  return new SASQueryParameters(
-    version,
-    signature,
-    verifiedPermissions,
-    undefined,
-    undefined,
-    dataLakeSASSignatureValues.protocol,
-    dataLakeSASSignatureValues.startsOn,
-    dataLakeSASSignatureValues.expiresOn,
-    dataLakeSASSignatureValues.ipRange,
-    dataLakeSASSignatureValues.identifier,
-    resource,
-    dataLakeSASSignatureValues.cacheControl,
-    dataLakeSASSignatureValues.contentDisposition,
-    dataLakeSASSignatureValues.contentEncoding,
-    dataLakeSASSignatureValues.contentLanguage,
-    dataLakeSASSignatureValues.contentType,
-    undefined,
-    dataLakeSASSignatureValues.directoryDepth,
-    undefined,
-    undefined,
-    undefined,
-    dataLakeSASSignatureValues.encryptionScope
-  );
+  return {
+    sasQueryParameter: new SASQueryParameters(
+      version,
+      signature,
+      verifiedPermissions,
+      undefined,
+      undefined,
+      dataLakeSASSignatureValues.protocol,
+      dataLakeSASSignatureValues.startsOn,
+      dataLakeSASSignatureValues.expiresOn,
+      dataLakeSASSignatureValues.ipRange,
+      dataLakeSASSignatureValues.identifier,
+      resource,
+      dataLakeSASSignatureValues.cacheControl,
+      dataLakeSASSignatureValues.contentDisposition,
+      dataLakeSASSignatureValues.contentEncoding,
+      dataLakeSASSignatureValues.contentLanguage,
+      dataLakeSASSignatureValues.contentType,
+      undefined,
+      dataLakeSASSignatureValues.directoryDepth,
+      undefined,
+      undefined,
+      undefined,
+      dataLakeSASSignatureValues.encryptionScope,
+    ),
+    stringToSign: stringToSign,
+  };
 }
 
 /**
@@ -944,11 +973,11 @@ function generateBlobSASQueryParameters20201206(
  */
 function generateBlobSASQueryParametersUDK20201206(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
-  userDelegationKeyCredential: UserDelegationKeyCredential
-): SASQueryParameters {
+  userDelegationKeyCredential: UserDelegationKeyCredential,
+): { sasQueryParameter: SASQueryParameters; stringToSign: string } {
   if (!dataLakeSASSignatureValues.permissions || !dataLakeSASSignatureValues.expiresOn) {
     throw new RangeError(
-      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when generating user delegation SAS."
+      "Must provide 'permissions' and 'expiresOn' for Blob SAS generation when generating user delegation SAS.",
     );
   }
 
@@ -957,7 +986,7 @@ function generateBlobSASQueryParametersUDK20201206(
     : SERVICE_VERSION;
   dataLakeSASSignatureValues = SASSignatureValuesSanityCheckAndAutofill(
     dataLakeSASSignatureValues,
-    version
+    version,
   );
 
   let resource: string = "c";
@@ -978,16 +1007,16 @@ function generateBlobSASQueryParametersUDK20201206(
     if (dataLakeSASSignatureValues.pathName) {
       if (dataLakeSASSignatureValues.isDirectory) {
         verifiedPermissions = DirectorySASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       } else {
         verifiedPermissions = DataLakeSASPermissions.parse(
-          dataLakeSASSignatureValues.permissions.toString()
+          dataLakeSASSignatureValues.permissions.toString(),
         ).toString();
       }
     } else {
       verifiedPermissions = FileSystemSASPermissions.parse(
-        dataLakeSASSignatureValues.permissions.toString()
+        dataLakeSASSignatureValues.permissions.toString(),
       ).toString();
     }
   }
@@ -1004,7 +1033,7 @@ function generateBlobSASQueryParametersUDK20201206(
     getCanonicalName(
       userDelegationKeyCredential.accountName,
       dataLakeSASSignatureValues.fileSystemName,
-      dataLakeSASSignatureValues.pathName
+      dataLakeSASSignatureValues.pathName,
     ),
     userDelegationKeyCredential.userDelegationKey.signedObjectId,
     userDelegationKeyCredential.userDelegationKey.signedTenantId,
@@ -1034,30 +1063,33 @@ function generateBlobSASQueryParametersUDK20201206(
 
   const signature = userDelegationKeyCredential.computeHMACSHA256(stringToSign);
 
-  return new SASQueryParameters(
-    version,
-    signature,
-    verifiedPermissions,
-    undefined,
-    undefined,
-    dataLakeSASSignatureValues.protocol,
-    dataLakeSASSignatureValues.startsOn,
-    dataLakeSASSignatureValues.expiresOn,
-    dataLakeSASSignatureValues.ipRange,
-    dataLakeSASSignatureValues.identifier,
-    resource,
-    dataLakeSASSignatureValues.cacheControl,
-    dataLakeSASSignatureValues.contentDisposition,
-    dataLakeSASSignatureValues.contentEncoding,
-    dataLakeSASSignatureValues.contentLanguage,
-    dataLakeSASSignatureValues.contentType,
-    userDelegationKeyCredential.userDelegationKey,
-    dataLakeSASSignatureValues.directoryDepth,
-    dataLakeSASSignatureValues.preauthorizedAgentObjectId,
-    dataLakeSASSignatureValues.agentObjectId,
-    dataLakeSASSignatureValues.correlationId,
-    dataLakeSASSignatureValues.encryptionScope
-  );
+  return {
+    sasQueryParameter: new SASQueryParameters(
+      version,
+      signature,
+      verifiedPermissions,
+      undefined,
+      undefined,
+      dataLakeSASSignatureValues.protocol,
+      dataLakeSASSignatureValues.startsOn,
+      dataLakeSASSignatureValues.expiresOn,
+      dataLakeSASSignatureValues.ipRange,
+      dataLakeSASSignatureValues.identifier,
+      resource,
+      dataLakeSASSignatureValues.cacheControl,
+      dataLakeSASSignatureValues.contentDisposition,
+      dataLakeSASSignatureValues.contentEncoding,
+      dataLakeSASSignatureValues.contentLanguage,
+      dataLakeSASSignatureValues.contentType,
+      userDelegationKeyCredential.userDelegationKey,
+      dataLakeSASSignatureValues.directoryDepth,
+      dataLakeSASSignatureValues.preauthorizedAgentObjectId,
+      dataLakeSASSignatureValues.agentObjectId,
+      dataLakeSASSignatureValues.correlationId,
+      dataLakeSASSignatureValues.encryptionScope,
+    ),
+    stringToSign: stringToSign,
+  };
 }
 
 function getCanonicalName(accountName: string, containerName: string, blobName?: string): string {
@@ -1072,7 +1104,7 @@ function getCanonicalName(accountName: string, containerName: string, blobName?:
 
 function SASSignatureValuesSanityCheckAndAutofill(
   dataLakeSASSignatureValues: DataLakeSASSignatureValues,
-  version: string
+  version: string,
 ): DataLakeSASSignatureValues {
   if (
     version < "2020-02-10" &&
@@ -1122,7 +1154,7 @@ function SASSignatureValuesSanityCheckAndAutofill(
       dataLakeSASSignatureValues.correlationId)
   ) {
     throw RangeError(
-      "'version' must be >= '2020-02-10' when providing 'preauthorizedAgentObjectId', 'agentObjectId' or 'correlationId'."
+      "'version' must be >= '2020-02-10' when providing 'preauthorizedAgentObjectId', 'agentObjectId' or 'correlationId'.",
     );
   }
   if (
@@ -1130,7 +1162,7 @@ function SASSignatureValuesSanityCheckAndAutofill(
     dataLakeSASSignatureValues.agentObjectId
   ) {
     throw RangeError(
-      "'preauthorizedAgentObjectId' or 'agentObjectId' shouldn't be specified at the same time."
+      "'preauthorizedAgentObjectId' or 'agentObjectId' shouldn't be specified at the same time.",
     );
   }
 

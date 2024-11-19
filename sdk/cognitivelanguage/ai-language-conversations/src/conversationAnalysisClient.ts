@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /*
  * Copyright (c) Microsoft Corporation.
  * Licensed under the MIT License.
  */
 
-import {
+import type {
   AnalyzeConversationJobsInput,
   AnalyzeConversationOptionalParams,
   AnalyzeConversationResponse,
@@ -16,9 +16,11 @@ import {
   ConversationAnalysisResponse,
 } from "./models";
 import { DEFAULT_COGNITIVE_SCOPE, SDK_VERSION } from "./constants";
-import { KeyCredential, TokenCredential, isTokenCredential } from "@azure/core-auth";
-import { PollOperationState, PollerLike } from "@azure/core-lro";
-import { TracingClient, createTracingClient } from "@azure/core-tracing";
+import type { KeyCredential, TokenCredential } from "@azure/core-auth";
+import { isTokenCredential } from "@azure/core-auth";
+import type { PollOperationState, PollerLike } from "@azure/core-lro";
+import type { TracingClient } from "@azure/core-tracing";
+import { createTracingClient } from "@azure/core-tracing";
 import { ConversationAnalysisClient as GeneratedClient } from "./generated";
 import { bearerTokenAuthenticationPolicy } from "@azure/core-rest-pipeline";
 import { conversationAnalysisAzureKeyCredentialPolicy } from "./azureKeyCredentialPolicy";
@@ -74,7 +76,7 @@ export class ConversationAnalysisClient {
   constructor(
     endpoint: string,
     credential: TokenCredential | KeyCredential,
-    options: ConversationAnalysisClientOptionalParams = {}
+    options: ConversationAnalysisClientOptionalParams = {},
   ) {
     this._client = new GeneratedClient(endpoint, options);
 
@@ -98,7 +100,7 @@ export class ConversationAnalysisClient {
    */
   analyzeConversation(
     task: AnalyzeConversationTaskUnion,
-    options?: AnalyzeConversationOptionalParams
+    options?: AnalyzeConversationOptionalParams,
   ): Promise<AnalyzeConversationResponse> {
     return this._tracing.withSpan(
       "ConversationAnalysisClient.analyzeConversation",
@@ -106,8 +108,8 @@ export class ConversationAnalysisClient {
       (updatedOptions) =>
         this._client.analyzeConversation(
           task,
-          updatedOptions
-        ) as Promise<AnalyzeConversationResponse>
+          updatedOptions,
+        ) as Promise<AnalyzeConversationResponse>,
     );
   }
 
@@ -118,7 +120,7 @@ export class ConversationAnalysisClient {
    */
   async beginConversationAnalysis(
     task: AnalyzeConversationJobsInput,
-    options?: ConversationAnalysisOptionalParams
+    options?: ConversationAnalysisOptionalParams,
   ): Promise<
     PollerLike<PollOperationState<ConversationAnalysisResponse>, ConversationAnalysisResponse>
   > {
@@ -128,7 +130,7 @@ export class ConversationAnalysisClient {
       (updatedOptions) =>
         this._client.beginConversationAnalysis(task, updatedOptions) as Promise<
           PollerLike<PollOperationState<ConversationAnalysisResponse>, ConversationAnalysisResponse>
-        >
+        >,
     );
   }
 }

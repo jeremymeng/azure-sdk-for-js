@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetworkManagementClient } from "../networkManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   PublicIPPrefix,
   PublicIPPrefixesListAllNextOptionalParams,
@@ -32,7 +36,7 @@ import {
   PublicIPPrefixesUpdateTagsOptionalParams,
   PublicIPPrefixesUpdateTagsResponse,
   PublicIPPrefixesListAllNextResponse,
-  PublicIPPrefixesListNextResponse
+  PublicIPPrefixesListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -53,7 +57,7 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
    * @param options The options parameters.
    */
   public listAll(
-    options?: PublicIPPrefixesListAllOptionalParams
+    options?: PublicIPPrefixesListAllOptionalParams,
   ): PagedAsyncIterableIterator<PublicIPPrefix> {
     const iter = this.listAllPagingAll(options);
     return {
@@ -68,13 +72,13 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listAllPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listAllPagingPage(
     options?: PublicIPPrefixesListAllOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<PublicIPPrefix[]> {
     let result: PublicIPPrefixesListAllResponse;
     let continuationToken = settings?.continuationToken;
@@ -95,7 +99,7 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
   }
 
   private async *listAllPagingAll(
-    options?: PublicIPPrefixesListAllOptionalParams
+    options?: PublicIPPrefixesListAllOptionalParams,
   ): AsyncIterableIterator<PublicIPPrefix> {
     for await (const page of this.listAllPagingPage(options)) {
       yield* page;
@@ -109,7 +113,7 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
    */
   public list(
     resourceGroupName: string,
-    options?: PublicIPPrefixesListOptionalParams
+    options?: PublicIPPrefixesListOptionalParams,
   ): PagedAsyncIterableIterator<PublicIPPrefix> {
     const iter = this.listPagingAll(resourceGroupName, options);
     return {
@@ -124,14 +128,14 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listPagingPage(resourceGroupName, options, settings);
-      }
+      },
     };
   }
 
   private async *listPagingPage(
     resourceGroupName: string,
     options?: PublicIPPrefixesListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<PublicIPPrefix[]> {
     let result: PublicIPPrefixesListResponse;
     let continuationToken = settings?.continuationToken;
@@ -146,7 +150,7 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
       result = await this._listNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -157,7 +161,7 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
 
   private async *listPagingAll(
     resourceGroupName: string,
-    options?: PublicIPPrefixesListOptionalParams
+    options?: PublicIPPrefixesListOptionalParams,
   ): AsyncIterableIterator<PublicIPPrefix> {
     for await (const page of this.listPagingPage(resourceGroupName, options)) {
       yield* page;
@@ -173,25 +177,24 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
   async beginDelete(
     resourceGroupName: string,
     publicIpPrefixName: string,
-    options?: PublicIPPrefixesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: PublicIPPrefixesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -200,8 +203,8 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -209,20 +212,20 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, publicIpPrefixName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, publicIpPrefixName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -237,12 +240,12 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
   async beginDeleteAndWait(
     resourceGroupName: string,
     publicIpPrefixName: string,
-    options?: PublicIPPrefixesDeleteOptionalParams
+    options?: PublicIPPrefixesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       publicIpPrefixName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -256,11 +259,11 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
   get(
     resourceGroupName: string,
     publicIpPrefixName: string,
-    options?: PublicIPPrefixesGetOptionalParams
+    options?: PublicIPPrefixesGetOptionalParams,
   ): Promise<PublicIPPrefixesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, publicIpPrefixName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -275,30 +278,29 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
     resourceGroupName: string,
     publicIpPrefixName: string,
     parameters: PublicIPPrefix,
-    options?: PublicIPPrefixesCreateOrUpdateOptionalParams
+    options?: PublicIPPrefixesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<PublicIPPrefixesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<PublicIPPrefixesCreateOrUpdateResponse>,
       PublicIPPrefixesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<PublicIPPrefixesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -307,8 +309,8 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -316,20 +318,23 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, publicIpPrefixName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, publicIpPrefixName, parameters, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PublicIPPrefixesCreateOrUpdateResponse,
+      OperationState<PublicIPPrefixesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -346,13 +351,13 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
     resourceGroupName: string,
     publicIpPrefixName: string,
     parameters: PublicIPPrefix,
-    options?: PublicIPPrefixesCreateOrUpdateOptionalParams
+    options?: PublicIPPrefixesCreateOrUpdateOptionalParams,
   ): Promise<PublicIPPrefixesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       publicIpPrefixName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -368,11 +373,11 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
     resourceGroupName: string,
     publicIpPrefixName: string,
     parameters: TagsObject,
-    options?: PublicIPPrefixesUpdateTagsOptionalParams
+    options?: PublicIPPrefixesUpdateTagsOptionalParams,
   ): Promise<PublicIPPrefixesUpdateTagsResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, publicIpPrefixName, parameters, options },
-      updateTagsOperationSpec
+      updateTagsOperationSpec,
     );
   }
 
@@ -381,7 +386,7 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
    * @param options The options parameters.
    */
   private _listAll(
-    options?: PublicIPPrefixesListAllOptionalParams
+    options?: PublicIPPrefixesListAllOptionalParams,
   ): Promise<PublicIPPrefixesListAllResponse> {
     return this.client.sendOperationRequest({ options }, listAllOperationSpec);
   }
@@ -393,11 +398,11 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
    */
   private _list(
     resourceGroupName: string,
-    options?: PublicIPPrefixesListOptionalParams
+    options?: PublicIPPrefixesListOptionalParams,
   ): Promise<PublicIPPrefixesListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -408,11 +413,11 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
    */
   private _listAllNext(
     nextLink: string,
-    options?: PublicIPPrefixesListAllNextOptionalParams
+    options?: PublicIPPrefixesListAllNextOptionalParams,
   ): Promise<PublicIPPrefixesListAllNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listAllNextOperationSpec
+      listAllNextOperationSpec,
     );
   }
 
@@ -425,11 +430,11 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
   private _listNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: PublicIPPrefixesListNextOptionalParams
+    options?: PublicIPPrefixesListNextOptionalParams,
   ): Promise<PublicIPPrefixesListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -437,8 +442,7 @@ export class PublicIPPrefixesImpl implements PublicIPPrefixes {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -446,85 +450,82 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.publicIpPrefixName
+    Parameters.publicIpPrefixName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PublicIPPrefix
+      bodyMapper: Mappers.PublicIPPrefix,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.expand],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.publicIpPrefixName
+    Parameters.publicIpPrefixName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.PublicIPPrefix
+      bodyMapper: Mappers.PublicIPPrefix,
     },
     201: {
-      bodyMapper: Mappers.PublicIPPrefix
+      bodyMapper: Mappers.PublicIPPrefix,
     },
     202: {
-      bodyMapper: Mappers.PublicIPPrefix
+      bodyMapper: Mappers.PublicIPPrefix,
     },
     204: {
-      bodyMapper: Mappers.PublicIPPrefix
+      bodyMapper: Mappers.PublicIPPrefix,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.parameters64,
+  requestBody: Parameters.parameters68,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.publicIpPrefixName
+    Parameters.publicIpPrefixName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateTagsOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIpPrefixName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.PublicIPPrefix
+      bodyMapper: Mappers.PublicIPPrefix,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters1,
   queryParameters: [Parameters.apiVersion],
@@ -532,88 +533,84 @@ const updateTagsOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.publicIpPrefixName
+    Parameters.publicIpPrefixName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listAllOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Network/publicIPPrefixes",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/publicIPPrefixes",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PublicIPPrefixListResult
+      bodyMapper: Mappers.PublicIPPrefixListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PublicIPPrefixListResult
+      bodyMapper: Mappers.PublicIPPrefixListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listAllNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PublicIPPrefixListResult
+      bodyMapper: Mappers.PublicIPPrefixListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.PublicIPPrefixListResult
+      bodyMapper: Mappers.PublicIPPrefixListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

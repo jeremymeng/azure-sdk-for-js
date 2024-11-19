@@ -1,37 +1,40 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import * as dotenv from "dotenv";
-import { Recorder, env } from "@azure-tools/test-recorder";
-import { RouterAdministrationClient, RouterClient } from "../../../src";
-import { Context } from "mocha";
-import { isNode } from "@azure/core-util";
-import { RouterAdministrationClientOptions, RouterClientOptions } from "../../../src";
-import { createRecorder } from "../../public/utils/recordedClient";
+import type { Recorder, TestInfo } from "@azure-tools/test-recorder";
+import { env } from "@azure-tools/test-recorder";
+import { JobRouterAdministrationClient, JobRouterClient } from "../../../src/index.js";
+import { isNodeLike } from "@azure/core-util";
+import type {
+  JobRouterAdministrationClientOptions,
+  JobRouterClientOptions,
+} from "../../../src/index.js";
+import { createRecorder } from "./recordedClient.js";
 
-if (isNode) {
+if (isNodeLike) {
   dotenv.config();
 }
 
 export interface RecordedRouterClient {
-  client: RouterClient;
-  administrationClient: RouterAdministrationClient;
+  client: JobRouterClient;
+  administrationClient: JobRouterAdministrationClient;
   recorder: Recorder;
 }
 
 export async function createRecordedRouterClientWithConnectionString(
-  context: Context
+  context: TestInfo,
 ): Promise<RecordedRouterClient> {
-  const recorder = await createRecorder(context.currentTest);
+  const recorder = await createRecorder(context);
 
   return {
-    client: new RouterClient(
+    client: new JobRouterClient(
       env.COMMUNICATION_CONNECTION_STRING as string,
-      recorder.configureClientOptions({}) as RouterClientOptions
+      recorder.configureClientOptions({}) as JobRouterClientOptions,
     ),
-    administrationClient: new RouterAdministrationClient(
+    administrationClient: new JobRouterAdministrationClient(
       env.COMMUNICATION_CONNECTION_STRING as string,
-      recorder.configureClientOptions({}) as RouterAdministrationClientOptions
+      recorder.configureClientOptions({}) as JobRouterAdministrationClientOptions,
     ),
     recorder,
   };

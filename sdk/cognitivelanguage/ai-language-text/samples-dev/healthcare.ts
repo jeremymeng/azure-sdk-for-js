@@ -6,15 +6,13 @@
  * healthcare-related entities in some documents and prints them to the
  * console.
  *
- * @summary detects healthcare entities in a piece of text and creates an FHIR representation
+ * @summary detects healthcare entities in a piece of text
  * @azsdk-weight 50
  */
 
 import {
   AnalyzeBatchAction,
   AzureKeyCredential,
-  KnownHealthcareDocumentType,
-  KnownFhirVersion,
   TextAnalysisClient,
 } from "@azure/ai-language-text";
 
@@ -39,15 +37,13 @@ export async function main() {
   const actions: AnalyzeBatchAction[] = [
     {
       kind: "Healthcare",
-      fhirVersion: KnownFhirVersion["4.0.1"],
-      documentType: KnownHealthcareDocumentType.DischargeSummary,
     },
   ];
   const poller = await client.beginAnalyzeBatch(actions, documents, "en");
 
   poller.onProgress(() => {
     console.log(
-      `Last time the operation was updated was on: ${poller.getOperationState().modifiedOn}`
+      `Last time the operation was updated was on: ${poller.getOperationState().modifiedOn}`,
     );
   });
   console.log(`The operation was created on ${poller.getOperationState().createdOn}`);
@@ -83,14 +79,11 @@ export async function main() {
         console.log(`\tRecognized relations between entities:`);
         for (const relation of result.entityRelations) {
           console.log(
-            `\t\t- Relation of type ${relation.relationType} found between the following entities:`
+            `\t\t- Relation of type ${relation.relationType} found between the following entities:`,
           );
           for (const role of relation.roles) {
             console.log(`\t\t\t- "${role.entity.text}" with the role ${role.name}`);
           }
-        }
-        if (result.fhirBundle) {
-          console.log(`FHIR object: ${JSON.stringify(result.fhirBundle, undefined, 2)}`);
         }
       }
     }

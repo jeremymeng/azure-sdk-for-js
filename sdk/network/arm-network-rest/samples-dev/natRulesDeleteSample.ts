@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -34,7 +34,7 @@ async function natRuleDelete() {
       subscriptionId,
       resourceGroupName,
       gatewayName,
-      natRuleName
+      natRuleName,
     )
     .delete(options);
   const poller = getLongRunningPoller(client, initialResponse);

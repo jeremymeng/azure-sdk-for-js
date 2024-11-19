@@ -10,9 +10,12 @@
 // Licensed under the MIT License.
 import {
   IotSecuritySolutionListByResourceGroupOptionalParams,
-  SecurityCenter
+  SecurityCenter,
 } from "@azure/arm-security";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Use this method to get the list IoT Security solutions organized by resource group.
@@ -21,20 +24,20 @@ import { DefaultAzureCredential } from "@azure/identity";
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/stable/2019-08-01/examples/IoTSecuritySolutions/GetIoTSecuritySolutionsListByRg.json
  */
 async function listIoTSecuritySolutionsByResourceGroup() {
-  const subscriptionId = "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
-  const resourceGroupName = "MyGroup";
+  const subscriptionId =
+    process.env["SECURITY_SUBSCRIPTION_ID"] ||
+    "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
+  const resourceGroupName = process.env["SECURITY_RESOURCE_GROUP"] || "MyGroup";
   const credential = new DefaultAzureCredential();
   const client = new SecurityCenter(credential, subscriptionId);
   const resArray = new Array();
   for await (let item of client.iotSecuritySolution.listByResourceGroup(
-    resourceGroupName
+    resourceGroupName,
   )) {
     resArray.push(item);
   }
   console.log(resArray);
 }
-
-listIoTSecuritySolutionsByResourceGroup().catch(console.error);
 
 /**
  * This sample demonstrates how to Use this method to get the list IoT Security solutions organized by resource group.
@@ -43,23 +46,30 @@ listIoTSecuritySolutionsByResourceGroup().catch(console.error);
  * x-ms-original-file: specification/security/resource-manager/Microsoft.Security/stable/2019-08-01/examples/IoTSecuritySolutions/GetIoTSecuritySolutionsListByIotHubAndRg.json
  */
 async function listIoTSecuritySolutionsByResourceGroupAndIoTHub() {
-  const subscriptionId = "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
-  const resourceGroupName = "MyRg";
+  const subscriptionId =
+    process.env["SECURITY_SUBSCRIPTION_ID"] ||
+    "20ff7fc3-e762-44dd-bd96-b71116dcdc23";
+  const resourceGroupName = process.env["SECURITY_RESOURCE_GROUP"] || "MyRg";
   const filter =
     'properties.iotHubs/any(i eq "/subscriptions/075423e9-7d33-4166-8bdf-3920b04e3735/resourceGroups/myRg/providers/Microsoft.Devices/IotHubs/FirstIotHub")';
   const options: IotSecuritySolutionListByResourceGroupOptionalParams = {
-    filter
+    filter,
   };
   const credential = new DefaultAzureCredential();
   const client = new SecurityCenter(credential, subscriptionId);
   const resArray = new Array();
   for await (let item of client.iotSecuritySolution.listByResourceGroup(
     resourceGroupName,
-    options
+    options,
   )) {
     resArray.push(item);
   }
   console.log(resArray);
 }
 
-listIoTSecuritySolutionsByResourceGroupAndIoTHub().catch(console.error);
+async function main() {
+  listIoTSecuritySolutionsByResourceGroup();
+  listIoTSecuritySolutionsByResourceGroupAndIoTHub();
+}
+
+main().catch(console.error);

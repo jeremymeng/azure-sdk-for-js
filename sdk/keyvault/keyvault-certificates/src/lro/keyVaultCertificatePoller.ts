@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { OperationOptions } from "@azure/core-client";
+import type { OperationOptions } from "@azure/core-client";
 import { delay } from "@azure/core-util";
-import { Poller, PollOperation, PollOperationState } from "@azure/core-lro";
-import { KeyVaultClient } from "../generated/keyVaultClient";
+import type { PollOperation, PollOperationState } from "@azure/core-lro";
+import { Poller } from "@azure/core-lro";
+import type { KeyVaultClient } from "../generated/keyVaultClient.js";
 
 /**
  * Common parameters to a Key Vault Certificate Poller.
@@ -34,7 +35,7 @@ export interface KeyVaultCertificatePollOperationState<TResult>
  */
 // eslint-disable-next-line no-use-before-define
 export function cleanState<TState extends KeyVaultCertificatePollOperationState<TResult>, TResult>(
-  state: TState
+  state: TState,
 ): KeyVaultCertificatePollOperationState<TResult> {
   return {
     certificateName: state.certificateName,
@@ -51,7 +52,7 @@ export function cleanState<TState extends KeyVaultCertificatePollOperationState<
  */
 export abstract class KeyVaultCertificatePoller<
   TState extends KeyVaultCertificatePollOperationState<TResult>,
-  TResult
+  TResult,
 > extends Poller<TState, TResult> {
   /**
    * Defines how much time the poller is going to wait before making a new request to the service.
@@ -85,12 +86,15 @@ export interface KeyVaultCertificatePollOperationOptions {
  */
 export class KeyVaultCertificatePollOperation<
   TState extends KeyVaultCertificatePollOperationState<TResult>,
-  TResult
+  TResult,
 > implements PollOperation<TState, TResult>
 {
   private cancelMessage: string = "";
 
-  constructor(public state: TState, options: KeyVaultCertificatePollOperationOptions = {}) {
+  constructor(
+    public state: TState,
+    options: KeyVaultCertificatePollOperationOptions = {},
+  ) {
     if (options.cancelMessage) {
       this.cancelMessage = options.cancelMessage;
     }

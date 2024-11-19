@@ -11,9 +11,9 @@ description: Email REST API Client
 generate-metadata: false
 license-header: MICROSOFT_MIT_NO_VERSION
 output-folder: ../src/generated
-tag: package-2021-10-01-preview
-package-version: 1.0.0-beta.2
-require: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/communication/data-plane/Email/readme.md
+tag: package-2024-07-01-preview
+package-version: 1.0.0
+require: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/e64ad693df24b47d4009eece6663c8d95cf94be6/specification/communication/data-plane/Email/readme.md
 model-date-time-as-string: false
 optional-response-headers: true
 typescript: true
@@ -26,18 +26,8 @@ use-extension:
 
 ## Customizations for Email Client Generator
 
-See the [AutoRest samples](https://github.com/Azure/autorest/tree/master/Samples/3b-custom-transformations)
+See the [AutoRest samples](https://github.com/Azure/autorest/tree/main/Samples/3b-custom-transformations)
 for more about how we're customizing things.
-
-### Change the bCC property to bcc
-
-```yaml
-directive:
-  - from: swagger-document
-    where: $.definitions.EmailRecipients.properties.bCC
-    transform: >
-      $["x-ms-client-name"] = "bcc"
-```
 
 ### Remove "To" from the required properties
 
@@ -47,4 +37,27 @@ directive:
     where: $.definitions.EmailRecipients
     transform: >
       $["required"] = []
+```
+
+### Rename the "userEngagementTrackingDisabled" property to "disableUserEngagementTracking"
+
+```yaml
+directive:
+  - from: swagger-document
+    where: $.definitions.EmailMessage.properties
+    transform: >
+      $["userEngagementTrackingDisabled"]["x-ms-client-name"] = "disableUserEngagementTracking"
+```
+
+### Ensure contentInBase64 is a string.
+
+```yaml
+directive:
+  - from: swagger-document
+    where: $.definitions.EmailAttachment.properties.contentInBase64
+    transform: >
+      $["type"] = "string";
+      if ($["format"]) {
+        delete $["format"];
+      }
 ```

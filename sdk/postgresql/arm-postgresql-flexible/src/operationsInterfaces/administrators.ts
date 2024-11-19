@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ActiveDirectoryAdministrator,
   AdministratorsListByServerOptionalParams,
@@ -16,7 +16,7 @@ import {
   AdministratorsCreateResponse,
   AdministratorsDeleteOptionalParams,
   AdministratorsGetOptionalParams,
-  AdministratorsGetResponse
+  AdministratorsGetResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -31,7 +31,7 @@ export interface Administrators {
   listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: AdministratorsListByServerOptionalParams
+    options?: AdministratorsListByServerOptionalParams,
   ): PagedAsyncIterableIterator<ActiveDirectoryAdministrator>;
   /**
    * Creates a new server.
@@ -46,10 +46,10 @@ export interface Administrators {
     serverName: string,
     objectId: string,
     parameters: ActiveDirectoryAdministratorAdd,
-    options?: AdministratorsCreateOptionalParams
+    options?: AdministratorsCreateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<AdministratorsCreateResponse>,
+    SimplePollerLike<
+      OperationState<AdministratorsCreateResponse>,
       AdministratorsCreateResponse
     >
   >;
@@ -66,7 +66,7 @@ export interface Administrators {
     serverName: string,
     objectId: string,
     parameters: ActiveDirectoryAdministratorAdd,
-    options?: AdministratorsCreateOptionalParams
+    options?: AdministratorsCreateOptionalParams,
   ): Promise<AdministratorsCreateResponse>;
   /**
    * Deletes an Active Directory Administrator associated with the server.
@@ -79,8 +79,8 @@ export interface Administrators {
     resourceGroupName: string,
     serverName: string,
     objectId: string,
-    options?: AdministratorsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: AdministratorsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes an Active Directory Administrator associated with the server.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -92,7 +92,7 @@ export interface Administrators {
     resourceGroupName: string,
     serverName: string,
     objectId: string,
-    options?: AdministratorsDeleteOptionalParams
+    options?: AdministratorsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Gets information about a server.
@@ -105,6 +105,6 @@ export interface Administrators {
     resourceGroupName: string,
     serverName: string,
     objectId: string,
-    options?: AdministratorsGetOptionalParams
+    options?: AdministratorsGetOptionalParams,
   ): Promise<AdministratorsGetResponse>;
 }

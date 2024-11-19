@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary Imports a PFX and PEM certificate and then deletes them.
@@ -146,7 +146,7 @@ export async function main(): Promise<void> {
         issuerName: WellKnownIssuer.Self,
         subject: "CN=contoso.com",
       },
-    }
+    },
   );
 
   console.log("importedCertificate", importedCertificate);
@@ -169,7 +169,7 @@ export async function main(): Promise<void> {
         issuerName: WellKnownIssuer.Self,
         subject: "CN=contoso.com",
       },
-    }
+    },
   );
 
   console.log("importedCertificate", importedCertificate);

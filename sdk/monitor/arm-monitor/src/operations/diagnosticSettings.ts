@@ -6,7 +6,7 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
 import { DiagnosticSettings } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -15,12 +15,12 @@ import { MonitorClient } from "../monitorClient";
 import {
   DiagnosticSettingsResource,
   DiagnosticSettingsListOptionalParams,
+  DiagnosticSettingsListResponse,
   DiagnosticSettingsGetOptionalParams,
   DiagnosticSettingsGetResponse,
   DiagnosticSettingsCreateOrUpdateOptionalParams,
   DiagnosticSettingsCreateOrUpdateResponse,
   DiagnosticSettingsDeleteOptionalParams,
-  DiagnosticSettingsListResponse
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -43,7 +43,7 @@ export class DiagnosticSettingsImpl implements DiagnosticSettings {
    */
   public list(
     resourceUri: string,
-    options?: DiagnosticSettingsListOptionalParams
+    options?: DiagnosticSettingsListOptionalParams,
   ): PagedAsyncIterableIterator<DiagnosticSettingsResource> {
     const iter = this.listPagingAll(resourceUri, options);
     return {
@@ -53,23 +53,28 @@ export class DiagnosticSettingsImpl implements DiagnosticSettings {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(resourceUri, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(resourceUri, options, settings);
+      },
     };
   }
 
   private async *listPagingPage(
     resourceUri: string,
-    options?: DiagnosticSettingsListOptionalParams
+    options?: DiagnosticSettingsListOptionalParams,
+    _settings?: PageSettings,
   ): AsyncIterableIterator<DiagnosticSettingsResource[]> {
-    let result = await this._list(resourceUri, options);
+    let result: DiagnosticSettingsListResponse;
+    result = await this._list(resourceUri, options);
     yield result.value || [];
   }
 
   private async *listPagingAll(
     resourceUri: string,
-    options?: DiagnosticSettingsListOptionalParams
+    options?: DiagnosticSettingsListOptionalParams,
   ): AsyncIterableIterator<DiagnosticSettingsResource> {
     for await (const page of this.listPagingPage(resourceUri, options)) {
       yield* page;
@@ -85,11 +90,11 @@ export class DiagnosticSettingsImpl implements DiagnosticSettings {
   get(
     resourceUri: string,
     name: string,
-    options?: DiagnosticSettingsGetOptionalParams
+    options?: DiagnosticSettingsGetOptionalParams,
   ): Promise<DiagnosticSettingsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceUri, name, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -104,11 +109,11 @@ export class DiagnosticSettingsImpl implements DiagnosticSettings {
     resourceUri: string,
     name: string,
     parameters: DiagnosticSettingsResource,
-    options?: DiagnosticSettingsCreateOrUpdateOptionalParams
+    options?: DiagnosticSettingsCreateOrUpdateOptionalParams,
   ): Promise<DiagnosticSettingsCreateOrUpdateResponse> {
     return this.client.sendOperationRequest(
       { resourceUri, name, parameters, options },
-      createOrUpdateOperationSpec
+      createOrUpdateOperationSpec,
     );
   }
 
@@ -121,11 +126,11 @@ export class DiagnosticSettingsImpl implements DiagnosticSettings {
   delete(
     resourceUri: string,
     name: string,
-    options?: DiagnosticSettingsDeleteOptionalParams
+    options?: DiagnosticSettingsDeleteOptionalParams,
   ): Promise<void> {
     return this.client.sendOperationRequest(
       { resourceUri, name, options },
-      deleteOperationSpec
+      deleteOperationSpec,
     );
   }
 
@@ -136,11 +141,11 @@ export class DiagnosticSettingsImpl implements DiagnosticSettings {
    */
   private _list(
     resourceUri: string,
-    options?: DiagnosticSettingsListOptionalParams
+    options?: DiagnosticSettingsListOptionalParams,
   ): Promise<DiagnosticSettingsListResponse> {
     return this.client.sendOperationRequest(
       { resourceUri, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 }
@@ -152,34 +157,34 @@ const getOperationSpec: coreClient.OperationSpec = {
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DiagnosticSettingsResource
+      bodyMapper: Mappers.DiagnosticSettingsResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.$host, Parameters.resourceUri, Parameters.name],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
   path: "/{resourceUri}/providers/Microsoft.Insights/diagnosticSettings/{name}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.DiagnosticSettingsResource
+      bodyMapper: Mappers.DiagnosticSettingsResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.parameters3,
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.$host, Parameters.resourceUri, Parameters.name],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
   path: "/{resourceUri}/providers/Microsoft.Insights/diagnosticSettings/{name}",
@@ -188,27 +193,27 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     200: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.$host, Parameters.resourceUri, Parameters.name],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
   path: "/{resourceUri}/providers/Microsoft.Insights/diagnosticSettings",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DiagnosticSettingsResourceCollection
+      bodyMapper: Mappers.DiagnosticSettingsResourceCollection,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion3],
+  queryParameters: [Parameters.apiVersion5],
   urlParameters: [Parameters.$host, Parameters.resourceUri],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

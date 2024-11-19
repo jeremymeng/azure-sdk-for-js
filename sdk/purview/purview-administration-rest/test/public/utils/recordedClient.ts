@@ -1,18 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /// <reference lib="esnext.asynciterable" />
 
-import { env, Recorder, RecorderStartOptions } from "@azure-tools/test-recorder";
-import {
-  PurviewAccount,
-  PurviewAccountClient,
-  PurviewMetadataPolicies,
-  PurviewMetadataPoliciesClient,
-} from "../../../src";
+import type { Recorder, RecorderStartOptions } from "@azure-tools/test-recorder";
+import { env } from "@azure-tools/test-recorder";
+import type { PurviewAccount, PurviewMetadataPolicies } from "../../../src";
+import { PurviewAccountClient, PurviewMetadataPoliciesClient } from "../../../src";
 import { createTestCredential } from "@azure-tools/test-credential";
 
-import { ClientOptions } from "@azure-rest/core-client";
+import type { ClientOptions } from "@azure-rest/core-client";
 
 const replaceableVariables: { [k: string]: string } = {
   ENDPOINT: "https://endpoint",
@@ -27,7 +24,7 @@ const recorderOptions: RecorderStartOptions = {
 
 export async function createAccountClient(
   recorder: Recorder,
-  options?: ClientOptions
+  options?: ClientOptions,
 ): Promise<PurviewAccount.Client.PurviewAccountRestClient> {
   const credential = createTestCredential();
   await recorder.start(recorderOptions);
@@ -35,13 +32,13 @@ export async function createAccountClient(
   return PurviewAccountClient(
     env.ENDPOINT ?? "",
     credential,
-    recorder.configureClientOptions({ options })
+    recorder.configureClientOptions({ options }),
   );
 }
 
 export async function createMetadataClient(
   recorder: Recorder,
-  options?: ClientOptions
+  options?: ClientOptions,
 ): Promise<PurviewMetadataPolicies.Client.PurviewMetadataPoliciesRestClient> {
   const credential = createTestCredential();
   await recorder.start(recorderOptions);
@@ -49,6 +46,6 @@ export async function createMetadataClient(
   return PurviewMetadataPoliciesClient(
     env.ENDPOINT ?? "",
     credential,
-    recorder.configureClientOptions({ options })
+    recorder.configureClientOptions({ options }),
   );
 }

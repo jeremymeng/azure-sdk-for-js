@@ -16,10 +16,11 @@ require("dotenv").config();
  * This sample demonstrates how to Executes a command for a specific container instance in a specified resource group and container group.
  *
  * @summary Executes a command for a specific container instance in a specified resource group and container group.
- * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2022-10-01-preview/examples/ContainerExec.json
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/ContainerExec.json
  */
 async function containerExec() {
-  const subscriptionId = process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "subid";
+  const subscriptionId =
+    process.env["CONTAINERINSTANCE_SUBSCRIPTION_ID"] || "00000000-0000-0000-0000-000000000000";
   const resourceGroupName = process.env["CONTAINERINSTANCE_RESOURCE_GROUP"] || "demo";
   const containerGroupName = "demo1";
   const containerName = "container1";
@@ -33,7 +34,7 @@ async function containerExec() {
     resourceGroupName,
     containerGroupName,
     containerName,
-    containerExecRequest
+    containerExecRequest,
   );
   console.log(result);
 }

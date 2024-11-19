@@ -1,24 +1,22 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
-  KeyVaultAdminPollOperation,
-  KeyVaultAdminPollOperationState,
-} from "../keyVaultAdminPoller";
-import {
+import type { KeyVaultAdminPollOperationState } from "../keyVaultAdminPoller.js";
+import { KeyVaultAdminPollOperation } from "../keyVaultAdminPoller.js";
+import type {
   KeyVaultBeginSelectiveKeyRestoreOptions,
   KeyVaultSelectiveKeyRestoreResult,
-} from "../../backupClientModels";
-import {
+} from "../../backupClientModels.js";
+import type {
   RestoreOperation,
   RestoreStatusResponse,
   SelectiveKeyRestoreOperationOptionalParams,
   SelectiveKeyRestoreOperationResponse,
-} from "../../generated/models";
-import { AbortSignalLike } from "@azure/abort-controller";
-import { KeyVaultClient } from "../../generated/keyVaultClient";
-import { OperationOptions } from "@azure/core-client";
-import { tracingClient } from "../../tracing";
+} from "../../generated/models/index.js";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { KeyVaultClient } from "../../generated/keyVaultClient.js";
+import type { OperationOptions } from "@azure/core-client";
+import { tracingClient } from "../../tracing.js";
 
 /**
  * An interface representing the publicly available properties of the state of a restore Key Vault's poll operation.
@@ -46,7 +44,7 @@ export interface KeyVaultSelectiveKeyRestorePollOperationState
   /**
    * The SAS token.
    */
-  sasToken: string;
+  sasToken?: string;
 }
 
 /**
@@ -60,7 +58,7 @@ export class KeyVaultSelectiveKeyRestorePollOperation extends KeyVaultAdminPollO
     public state: KeyVaultSelectiveKeyRestorePollOperationState,
     private vaultUrl: string,
     private client: KeyVaultClient,
-    private requestOptions: KeyVaultBeginSelectiveKeyRestoreOptions = {}
+    private requestOptions: KeyVaultBeginSelectiveKeyRestoreOptions = {},
   ) {
     super(state, { cancelMessage: "Cancelling a selective Key Vault restore is not supported." });
   }
@@ -70,13 +68,13 @@ export class KeyVaultSelectiveKeyRestorePollOperation extends KeyVaultAdminPollO
    */
   private selectiveRestore(
     keyName: string,
-    options: SelectiveKeyRestoreOperationOptionalParams
+    options: SelectiveKeyRestoreOperationOptionalParams,
   ): Promise<SelectiveKeyRestoreOperationResponse> {
     return tracingClient.withSpan(
       "KeyVaultSelectiveKeyRestorePoller.selectiveRestore",
       options,
       (updatedOptions) =>
-        this.client.selectiveKeyRestoreOperation(this.vaultUrl, keyName, updatedOptions)
+        this.client.selectiveKeyRestoreOperation(this.vaultUrl, keyName, updatedOptions),
     );
   }
 
@@ -87,7 +85,7 @@ export class KeyVaultSelectiveKeyRestorePollOperation extends KeyVaultAdminPollO
     return tracingClient.withSpan(
       "KeyVaultSelectiveKeyRestorePoller.restoreStatus",
       options,
-      (updatedOptions) => this.client.restoreStatus(this.vaultUrl, jobId, updatedOptions)
+      (updatedOptions) => this.client.restoreStatus(this.vaultUrl, jobId, updatedOptions),
     );
   }
 
@@ -98,7 +96,7 @@ export class KeyVaultSelectiveKeyRestorePollOperation extends KeyVaultAdminPollO
     options: {
       abortSignal?: AbortSignalLike;
       fireProgress?: (state: KeyVaultSelectiveKeyRestorePollOperationState) => void;
-    } = {}
+    } = {},
   ): Promise<KeyVaultSelectiveKeyRestorePollOperation> {
     const state = this.state;
     const { keyName, folderUri, sasToken, folderName } = state;
@@ -115,6 +113,7 @@ export class KeyVaultSelectiveKeyRestorePollOperation extends KeyVaultAdminPollO
           sasTokenParameters: {
             storageResourceUri: folderUri,
             token: sasToken,
+            useManagedIdentity: sasToken === undefined,
           },
         },
       });

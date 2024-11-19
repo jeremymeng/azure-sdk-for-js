@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { SqlManagementClient } from "../sqlManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   EncryptionProtector,
   EncryptionProtectorsListByServerNextOptionalParams,
@@ -26,7 +30,7 @@ import {
   EncryptionProtectorsCreateOrUpdateOptionalParams,
   EncryptionProtectorsCreateOrUpdateResponse,
   EncryptionProtectorsRevalidateOptionalParams,
-  EncryptionProtectorsListByServerNextResponse
+  EncryptionProtectorsListByServerNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -52,12 +56,12 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
   public listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: EncryptionProtectorsListByServerOptionalParams
+    options?: EncryptionProtectorsListByServerOptionalParams,
   ): PagedAsyncIterableIterator<EncryptionProtector> {
     const iter = this.listByServerPagingAll(
       resourceGroupName,
       serverName,
-      options
+      options,
     );
     return {
       next() {
@@ -74,9 +78,9 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
           resourceGroupName,
           serverName,
           options,
-          settings
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -84,7 +88,7 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
     resourceGroupName: string,
     serverName: string,
     options?: EncryptionProtectorsListByServerOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<EncryptionProtector[]> {
     let result: EncryptionProtectorsListByServerResponse;
     let continuationToken = settings?.continuationToken;
@@ -100,7 +104,7 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
         resourceGroupName,
         serverName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -112,12 +116,12 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
   private async *listByServerPagingAll(
     resourceGroupName: string,
     serverName: string,
-    options?: EncryptionProtectorsListByServerOptionalParams
+    options?: EncryptionProtectorsListByServerOptionalParams,
   ): AsyncIterableIterator<EncryptionProtector> {
     for await (const page of this.listByServerPagingPage(
       resourceGroupName,
       serverName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -133,11 +137,11 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
   private _listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: EncryptionProtectorsListByServerOptionalParams
+    options?: EncryptionProtectorsListByServerOptionalParams,
   ): Promise<EncryptionProtectorsListByServerResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, options },
-      listByServerOperationSpec
+      listByServerOperationSpec,
     );
   }
 
@@ -153,11 +157,11 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
     resourceGroupName: string,
     serverName: string,
     encryptionProtectorName: EncryptionProtectorName,
-    options?: EncryptionProtectorsGetOptionalParams
+    options?: EncryptionProtectorsGetOptionalParams,
   ): Promise<EncryptionProtectorsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, encryptionProtectorName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -175,30 +179,29 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
     serverName: string,
     encryptionProtectorName: EncryptionProtectorName,
     parameters: EncryptionProtector,
-    options?: EncryptionProtectorsCreateOrUpdateOptionalParams
+    options?: EncryptionProtectorsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<EncryptionProtectorsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<EncryptionProtectorsCreateOrUpdateResponse>,
       EncryptionProtectorsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<EncryptionProtectorsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -207,8 +210,8 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -216,25 +219,28 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         serverName,
         encryptionProtectorName,
         parameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      EncryptionProtectorsCreateOrUpdateResponse,
+      OperationState<EncryptionProtectorsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -254,14 +260,14 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
     serverName: string,
     encryptionProtectorName: EncryptionProtectorName,
     parameters: EncryptionProtector,
-    options?: EncryptionProtectorsCreateOrUpdateOptionalParams
+    options?: EncryptionProtectorsCreateOrUpdateOptionalParams,
   ): Promise<EncryptionProtectorsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       serverName,
       encryptionProtectorName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -278,25 +284,24 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
     resourceGroupName: string,
     serverName: string,
     encryptionProtectorName: EncryptionProtectorName,
-    options?: EncryptionProtectorsRevalidateOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: EncryptionProtectorsRevalidateOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -305,8 +310,8 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -314,19 +319,19 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, serverName, encryptionProtectorName, options },
-      revalidateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, serverName, encryptionProtectorName, options },
+      spec: revalidateOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -344,13 +349,13 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
     resourceGroupName: string,
     serverName: string,
     encryptionProtectorName: EncryptionProtectorName,
-    options?: EncryptionProtectorsRevalidateOptionalParams
+    options?: EncryptionProtectorsRevalidateOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRevalidate(
       resourceGroupName,
       serverName,
       encryptionProtectorName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -367,11 +372,11 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
     resourceGroupName: string,
     serverName: string,
     nextLink: string,
-    options?: EncryptionProtectorsListByServerNextOptionalParams
+    options?: EncryptionProtectorsListByServerNextOptionalParams,
   ): Promise<EncryptionProtectorsListByServerNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, serverName, nextLink, options },
-      listByServerNextOperationSpec
+      listByServerNextOperationSpec,
     );
   }
 }
@@ -379,109 +384,105 @@ export class EncryptionProtectorsImpl implements EncryptionProtectors {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listByServerOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.EncryptionProtectorListResult
+      bodyMapper: Mappers.EncryptionProtectorListResult,
     },
-    default: {}
+    default: {},
   },
-  queryParameters: [Parameters.apiVersion2],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.serverName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector/{encryptionProtectorName}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.EncryptionProtector
-    },
-    default: {}
-  },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.encryptionProtectorName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector/{encryptionProtectorName}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.EncryptionProtector,
+    },
+    default: {},
+  },
+  queryParameters: [Parameters.apiVersion3],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.serverName,
+    Parameters.encryptionProtectorName,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector/{encryptionProtectorName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector/{encryptionProtectorName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.EncryptionProtector
+      bodyMapper: Mappers.EncryptionProtector,
     },
     201: {
-      bodyMapper: Mappers.EncryptionProtector
+      bodyMapper: Mappers.EncryptionProtector,
     },
     202: {
-      bodyMapper: Mappers.EncryptionProtector
+      bodyMapper: Mappers.EncryptionProtector,
     },
     204: {
-      bodyMapper: Mappers.EncryptionProtector
+      bodyMapper: Mappers.EncryptionProtector,
     },
-    default: {}
+    default: {},
   },
-  requestBody: Parameters.parameters22,
-  queryParameters: [Parameters.apiVersion2],
+  requestBody: Parameters.parameters17,
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.encryptionProtectorName
+    Parameters.encryptionProtectorName,
   ],
-  headerParameters: [Parameters.accept, Parameters.contentType],
+  headerParameters: [Parameters.contentType, Parameters.accept],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const revalidateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector/{encryptionProtectorName}/revalidate",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector/{encryptionProtectorName}/revalidate",
   httpMethod: "POST",
   responses: { 200: {}, 201: {}, 202: {}, 204: {}, default: {} },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion3],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.encryptionProtectorName
+    Parameters.encryptionProtectorName,
   ],
-  serializer
+  serializer,
 };
 const listByServerNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.EncryptionProtectorListResult
+      bodyMapper: Mappers.EncryptionProtectorListResult,
     },
-    default: {}
+    default: {},
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.serverName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

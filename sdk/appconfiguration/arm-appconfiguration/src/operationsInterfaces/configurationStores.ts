@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ConfigurationStore,
   ConfigurationStoresListOptionalParams,
@@ -29,7 +29,7 @@ import {
   ConfigurationStoresRegenerateKeyResponse,
   ConfigurationStoresGetDeletedOptionalParams,
   ConfigurationStoresGetDeletedResponse,
-  ConfigurationStoresPurgeDeletedOptionalParams
+  ConfigurationStoresPurgeDeletedOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -40,7 +40,7 @@ export interface ConfigurationStores {
    * @param options The options parameters.
    */
   list(
-    options?: ConfigurationStoresListOptionalParams
+    options?: ConfigurationStoresListOptionalParams,
   ): PagedAsyncIterableIterator<ConfigurationStore>;
   /**
    * Lists the configuration stores for a given resource group.
@@ -49,7 +49,7 @@ export interface ConfigurationStores {
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: ConfigurationStoresListByResourceGroupOptionalParams
+    options?: ConfigurationStoresListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<ConfigurationStore>;
   /**
    * Lists the access key for the specified configuration store.
@@ -60,14 +60,14 @@ export interface ConfigurationStores {
   listKeys(
     resourceGroupName: string,
     configStoreName: string,
-    options?: ConfigurationStoresListKeysOptionalParams
+    options?: ConfigurationStoresListKeysOptionalParams,
   ): PagedAsyncIterableIterator<ApiKey>;
   /**
    * Gets information about the deleted configuration stores in a subscription.
    * @param options The options parameters.
    */
   listDeleted(
-    options?: ConfigurationStoresListDeletedOptionalParams
+    options?: ConfigurationStoresListDeletedOptionalParams,
   ): PagedAsyncIterableIterator<DeletedConfigurationStore>;
   /**
    * Gets the properties of the specified configuration store.
@@ -78,7 +78,7 @@ export interface ConfigurationStores {
   get(
     resourceGroupName: string,
     configStoreName: string,
-    options?: ConfigurationStoresGetOptionalParams
+    options?: ConfigurationStoresGetOptionalParams,
   ): Promise<ConfigurationStoresGetResponse>;
   /**
    * Creates a configuration store with the specified parameters.
@@ -91,10 +91,10 @@ export interface ConfigurationStores {
     resourceGroupName: string,
     configStoreName: string,
     configStoreCreationParameters: ConfigurationStore,
-    options?: ConfigurationStoresCreateOptionalParams
+    options?: ConfigurationStoresCreateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationStoresCreateResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationStoresCreateResponse>,
       ConfigurationStoresCreateResponse
     >
   >;
@@ -109,7 +109,7 @@ export interface ConfigurationStores {
     resourceGroupName: string,
     configStoreName: string,
     configStoreCreationParameters: ConfigurationStore,
-    options?: ConfigurationStoresCreateOptionalParams
+    options?: ConfigurationStoresCreateOptionalParams,
   ): Promise<ConfigurationStoresCreateResponse>;
   /**
    * Deletes a configuration store.
@@ -120,8 +120,8 @@ export interface ConfigurationStores {
   beginDelete(
     resourceGroupName: string,
     configStoreName: string,
-    options?: ConfigurationStoresDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: ConfigurationStoresDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a configuration store.
    * @param resourceGroupName The name of the resource group to which the container registry belongs.
@@ -131,7 +131,7 @@ export interface ConfigurationStores {
   beginDeleteAndWait(
     resourceGroupName: string,
     configStoreName: string,
-    options?: ConfigurationStoresDeleteOptionalParams
+    options?: ConfigurationStoresDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Updates a configuration store with the specified parameters.
@@ -144,10 +144,10 @@ export interface ConfigurationStores {
     resourceGroupName: string,
     configStoreName: string,
     configStoreUpdateParameters: ConfigurationStoreUpdateParameters,
-    options?: ConfigurationStoresUpdateOptionalParams
+    options?: ConfigurationStoresUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationStoresUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationStoresUpdateResponse>,
       ConfigurationStoresUpdateResponse
     >
   >;
@@ -162,7 +162,7 @@ export interface ConfigurationStores {
     resourceGroupName: string,
     configStoreName: string,
     configStoreUpdateParameters: ConfigurationStoreUpdateParameters,
-    options?: ConfigurationStoresUpdateOptionalParams
+    options?: ConfigurationStoresUpdateOptionalParams,
   ): Promise<ConfigurationStoresUpdateResponse>;
   /**
    * Regenerates an access key for the specified configuration store.
@@ -175,7 +175,7 @@ export interface ConfigurationStores {
     resourceGroupName: string,
     configStoreName: string,
     regenerateKeyParameters: RegenerateKeyParameters,
-    options?: ConfigurationStoresRegenerateKeyOptionalParams
+    options?: ConfigurationStoresRegenerateKeyOptionalParams,
   ): Promise<ConfigurationStoresRegenerateKeyResponse>;
   /**
    * Gets a deleted Azure app configuration store.
@@ -186,7 +186,7 @@ export interface ConfigurationStores {
   getDeleted(
     location: string,
     configStoreName: string,
-    options?: ConfigurationStoresGetDeletedOptionalParams
+    options?: ConfigurationStoresGetDeletedOptionalParams,
   ): Promise<ConfigurationStoresGetDeletedResponse>;
   /**
    * Permanently deletes the specified configuration store.
@@ -197,8 +197,8 @@ export interface ConfigurationStores {
   beginPurgeDeleted(
     location: string,
     configStoreName: string,
-    options?: ConfigurationStoresPurgeDeletedOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: ConfigurationStoresPurgeDeletedOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Permanently deletes the specified configuration store.
    * @param location The location in which uniqueness will be verified.
@@ -208,6 +208,6 @@ export interface ConfigurationStores {
   beginPurgeDeletedAndWait(
     location: string,
     configStoreName: string,
-    options?: ConfigurationStoresPurgeDeletedOptionalParams
+    options?: ConfigurationStoresPurgeDeletedOptionalParams,
   ): Promise<void>;
 }

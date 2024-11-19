@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   AnalyzeActionName,
   AnalyzeActionParameters,
   AnalyzeBatchAction,
@@ -12,15 +12,17 @@ import {
   TextAnalysisClientOptions,
   TextAnalysisOperationOptions,
 } from "./models";
-import {
+import type {
   AnalyzeBatchActionUnion,
   GeneratedClientOptionalParams,
   LanguageDetectionInput,
   TextDocumentInput,
 } from "./generated/models";
 import { DEFAULT_COGNITIVE_SCOPE, SDK_VERSION } from "./constants";
-import { KeyCredential, TokenCredential, isTokenCredential } from "@azure/core-auth";
-import { TracingClient, createTracingClient } from "@azure/core-tracing";
+import type { KeyCredential, TokenCredential } from "@azure/core-auth";
+import { isTokenCredential } from "@azure/core-auth";
+import type { TracingClient } from "@azure/core-tracing";
+import { createTracingClient } from "@azure/core-tracing";
 import {
   convertToLanguageDetectionInput,
   convertToTextDocumentInput,
@@ -139,12 +141,12 @@ export class TextAnalysisClient {
   constructor(
     endpointUrl: string,
     credential: TokenCredential,
-    options?: TextAnalysisClientOptions
+    options?: TextAnalysisClientOptions,
   );
   constructor(
     endpointUrl: string,
     credential: TokenCredential | KeyCredential,
-    options: TextAnalysisClientOptions = {}
+    options: TextAnalysisClientOptions = {},
   ) {
     const {
       defaultCountryHint = "us",
@@ -223,7 +225,7 @@ export class TextAnalysisClient {
   public async analyze<ActionName extends "LanguageDetection">(
     actionName: ActionName,
     documents: LanguageDetectionInput[],
-    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions
+    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions,
   ): Promise<AnalyzeResult<ActionName>>;
   /**
    * Runs a predictive model to determine the language that the passed-in
@@ -275,7 +277,7 @@ export class TextAnalysisClient {
     actionName: ActionName,
     documents: string[],
     countryHint?: string,
-    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions
+    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions,
   ): Promise<AnalyzeResult<ActionName>>;
   /**
    * Runs a predictive model to perform the action of choice on the input
@@ -360,7 +362,7 @@ export class TextAnalysisClient {
   public async analyze<ActionName extends AnalyzeActionName = AnalyzeActionName>(
     actionName: ActionName,
     documents: TextDocumentInput[],
-    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions
+    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions,
   ): Promise<AnalyzeResult<ActionName>>;
 
   /**
@@ -411,10 +413,10 @@ export class TextAnalysisClient {
    *
    * ```js
    * const documents = [<input strings>];
-   * const languageHint = "en";
+   * const languageCode = "en";
    * const categoriesFilter = [KnownPiiCategory.USSocialSecurityNumber];
    * const domainFilter = KnownPiiDomain.Phi;
-   * const results = await client.analyze("PiiEntityRecognition", documents, languageHint, {
+   * const results = await client.analyze("PiiEntityRecognition", documents, languageCode, {
    *   domainFilter, categoriesFilter
    * });
    *
@@ -444,8 +446,7 @@ export class TextAnalysisClient {
    *    about the languages supported for Entity Recognition actions can be
    *    found in {@link https://docs.microsoft.com//azure/cognitive-services/language-service/named-entity-recognition/language-support}.
    *    If set to "auto", the service will automatically infer the language from
-   *    the input text. If that process fails, the value in the `defaultLanguage`
-   *    option will be used.
+   *    the input text.
    * @param options - optional action parameters and settings for the operation
    *
    * @returns an array of results corresponding to the input documents
@@ -454,7 +455,7 @@ export class TextAnalysisClient {
     actionName: ActionName,
     documents: string[],
     languageCode?: string,
-    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions
+    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions,
   ): Promise<AnalyzeResult<ActionName>>;
   // implementation
   public async analyze<ActionName extends AnalyzeActionName = AnalyzeActionName>(
@@ -463,7 +464,7 @@ export class TextAnalysisClient {
     languageOrCountryHintOrOptions?:
       | string
       | (AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions),
-    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions
+    options?: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions,
   ): Promise<AnalyzeResult<ActionName>> {
     let realOptions: AnalyzeActionParameters<ActionName> & TextAnalysisOperationOptions;
 
@@ -478,14 +479,14 @@ export class TextAnalysisClient {
           documents,
           typeof languageOrCountryHintOrOptions === "string"
             ? languageOrCountryHintOrOptions
-            : this.defaultCountryHint
+            : this.defaultCountryHint,
         );
       } else {
         realInputs = convertToTextDocumentInput(
           documents,
           typeof languageOrCountryHintOrOptions === "string"
             ? languageOrCountryHintOrOptions
-            : this.defaultLanguage
+            : this.defaultLanguage,
         );
       }
       realOptions = options || ({} as any);
@@ -510,17 +511,17 @@ export class TextAnalysisClient {
                 },
                 parameters: action,
               } as any,
-              updatedOptions
+              updatedOptions,
             )
             .then(
               (result) =>
                 transformActionResult(
                   actionName,
                   realInputs.map(({ id }) => id),
-                  result
-                ) as AnalyzeResult<ActionName>
-            )
-        )
+                  result,
+                ) as AnalyzeResult<ActionName>,
+            ),
+        ),
     );
   }
 
@@ -578,8 +579,7 @@ export class TextAnalysisClient {
    *    about the languages supported for Entity Recognition actions can be
    *    found in {@link https://docs.microsoft.com//azure/cognitive-services/language-service/named-entity-recognition/language-support}.
    *    If set to "auto", the service will automatically infer the language from
-   *    the input text. If that process fails, the value in the `defaultLanguage`
-   *    option will be used.
+   *    the input text.
    * @param options - optional settings for the operation
    *
    * @returns an array of results corresponding to the input actions
@@ -588,7 +588,7 @@ export class TextAnalysisClient {
     actions: AnalyzeBatchAction[],
     documents: string[],
     languageCode?: string,
-    options?: BeginAnalyzeBatchOptions
+    options?: BeginAnalyzeBatchOptions,
   ): Promise<AnalyzeBatchPoller>;
   /**
    * Performs an array (batch) of actions on the input documents. Each action has
@@ -643,14 +643,14 @@ export class TextAnalysisClient {
   async beginAnalyzeBatch(
     actions: AnalyzeBatchAction[],
     documents: TextDocumentInput[],
-    options?: BeginAnalyzeBatchOptions
+    options?: BeginAnalyzeBatchOptions,
   ): Promise<AnalyzeBatchPoller>;
   // implementation
   async beginAnalyzeBatch(
     actions: AnalyzeBatchAction[],
     documents: TextDocumentInput[] | string[],
     languageOrOptions?: BeginAnalyzeBatchOptions | string,
-    options: BeginAnalyzeBatchOptions = {}
+    options: BeginAnalyzeBatchOptions = {},
   ): Promise<AnalyzeBatchPoller> {
     let realOptions: BeginAnalyzeBatchOptions;
     let realInputs: TextDocumentInput[];
@@ -660,8 +660,8 @@ export class TextAnalysisClient {
     }
 
     if (isStringArray(documents)) {
-      const languageHint = (languageOrOptions as string) ?? this.defaultLanguage;
-      realInputs = convertToTextDocumentInput(documents, languageHint);
+      const languageCode = (languageOrOptions as string) ?? this.defaultLanguage;
+      realInputs = convertToTextDocumentInput(documents, languageCode);
       realOptions = options;
     } else {
       realInputs = documents;
@@ -672,7 +672,7 @@ export class TextAnalysisClient {
         kind,
         actionName,
         parameters: rest,
-      })
+      }),
     );
     const { includeStatistics, updateIntervalInMs, displayName, ...rest } = realOptions;
     const lro = createAnalyzeBatchLro({
@@ -737,12 +737,12 @@ export class TextAnalysisClient {
    */
   async restoreAnalyzeBatchPoller(
     serializedState: string,
-    options?: RestoreAnalyzeBatchPollerOptions
+    options?: RestoreAnalyzeBatchPollerOptions,
   ): Promise<AnalyzeBatchPoller>;
   // implementation
   async restoreAnalyzeBatchPoller(
     serializedState: string,
-    options: RestoreAnalyzeBatchPollerOptions = {}
+    options: RestoreAnalyzeBatchPollerOptions = {},
   ): Promise<AnalyzeBatchPoller> {
     const { includeStatistics, updateIntervalInMs, ...rest } = options;
     const docIds = getDocIDsFromState(serializedState);

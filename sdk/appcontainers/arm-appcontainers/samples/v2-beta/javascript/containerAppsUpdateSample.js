@@ -10,16 +10,18 @@
 // Licensed under the MIT License.
 const { ContainerAppsAPIClient } = require("@azure/arm-appcontainers");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Patches a Container App using JSON Merge Patch
  *
  * @summary Patches a Container App using JSON Merge Patch
- * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2022-06-01-preview/examples/ContainerApps_Patch.json
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/ContainerApps_Patch.json
  */
 async function patchContainerApp() {
-  const subscriptionId = "34adfa4f-cedf-4dc0-ba29-b6d1a69ab345";
-  const resourceGroupName = "rg";
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] || "34adfa4f-cedf-4dc0-ba29-b6d1a69ab345";
+  const resourceGroupName = process.env["APPCONTAINERS_RESOURCE_GROUP"] || "rg";
   const containerAppName = "testcontainerApp0";
   const containerAppEnvelope = {
     configuration: {
@@ -62,6 +64,7 @@ async function patchContainerApp() {
             ipAddressRange: "192.168.1.1/8",
           },
         ],
+        stickySessions: { affinity: "sticky" },
         targetPort: 3000,
         traffic: [
           {
@@ -72,6 +75,19 @@ async function patchContainerApp() {
         ],
       },
       maxInactiveRevisions: 10,
+      runtime: {
+        dotnet: { autoConfigureDataProtection: true },
+        java: {
+          enableMetrics: true,
+          javaAgent: {
+            enabled: true,
+            logging: {
+              loggerSettings: [{ level: "debug", logger: "org.springframework.boot" }],
+            },
+          },
+        },
+      },
+      service: { type: "redis" },
     },
     location: "East US",
     tags: { tag1: "value1", tag2: "value2" },
@@ -102,8 +118,10 @@ async function patchContainerApp() {
         },
       ],
       scale: {
+        cooldownPeriod: 350,
         maxReplicas: 5,
         minReplicas: 1,
+        pollingInterval: 35,
         rules: [
           {
             name: "httpscalingrule",
@@ -111,6 +129,15 @@ async function patchContainerApp() {
           },
         ],
       },
+      serviceBinds: [
+        {
+          name: "service",
+          clientType: "dotnet",
+          customizedKeys: { desiredKey: "defaultKey" },
+          serviceId:
+            "/subscriptions/34adfa4f-cedf-4dc0-ba29-b6d1a69ab345/resourceGroups/rg/providers/Microsoft.App/containerApps/service",
+        },
+      ],
     },
   };
   const credential = new DefaultAzureCredential();
@@ -118,9 +145,13 @@ async function patchContainerApp() {
   const result = await client.containerApps.beginUpdateAndWait(
     resourceGroupName,
     containerAppName,
-    containerAppEnvelope
+    containerAppEnvelope,
   );
   console.log(result);
 }
 
-patchContainerApp().catch(console.error);
+async function main() {
+  patchContainerApp();
+}
+
+main().catch(console.error);

@@ -6,14 +6,14 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ProtectionPoliciesGetOptionalParams,
   ProtectionPoliciesGetResponse,
   ProtectionPolicyResource,
   ProtectionPoliciesCreateOrUpdateOptionalParams,
   ProtectionPoliciesCreateOrUpdateResponse,
-  ProtectionPoliciesDeleteOptionalParams
+  ProtectionPoliciesDeleteOptionalParams,
 } from "../models";
 
 /** Interface representing a ProtectionPolicies. */
@@ -32,7 +32,7 @@ export interface ProtectionPolicies {
     vaultName: string,
     resourceGroupName: string,
     policyName: string,
-    options?: ProtectionPoliciesGetOptionalParams
+    options?: ProtectionPoliciesGetOptionalParams,
   ): Promise<ProtectionPoliciesGetResponse>;
   /**
    * Creates or modifies a backup policy. This is an asynchronous operation. Status of the operation can
@@ -50,7 +50,7 @@ export interface ProtectionPolicies {
     resourceGroupName: string,
     policyName: string,
     parameters: ProtectionPolicyResource,
-    options?: ProtectionPoliciesCreateOrUpdateOptionalParams
+    options?: ProtectionPoliciesCreateOrUpdateOptionalParams,
   ): Promise<ProtectionPoliciesCreateOrUpdateResponse>;
   /**
    * Deletes specified backup policy from your Recovery Services Vault. This is an asynchronous
@@ -66,8 +66,8 @@ export interface ProtectionPolicies {
     vaultName: string,
     resourceGroupName: string,
     policyName: string,
-    options?: ProtectionPoliciesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: ProtectionPoliciesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes specified backup policy from your Recovery Services Vault. This is an asynchronous
    * operation. Status of the
@@ -82,6 +82,6 @@ export interface ProtectionPolicies {
     vaultName: string,
     resourceGroupName: string,
     policyName: string,
-    options?: ProtectionPoliciesDeleteOptionalParams
+    options?: ProtectionPoliciesDeleteOptionalParams,
   ): Promise<void>;
 }

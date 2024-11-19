@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   LinkedServiceResource,
   LinkedServiceGetLinkedServicesByWorkspaceOptionalParams,
@@ -17,7 +17,7 @@ import {
   LinkedServiceGetLinkedServiceResponse,
   LinkedServiceDeleteLinkedServiceOptionalParams,
   ArtifactRenameRequest,
-  LinkedServiceRenameLinkedServiceOptionalParams
+  LinkedServiceRenameLinkedServiceOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -28,7 +28,7 @@ export interface LinkedServiceOperations {
    * @param options The options parameters.
    */
   listLinkedServicesByWorkspace(
-    options?: LinkedServiceGetLinkedServicesByWorkspaceOptionalParams
+    options?: LinkedServiceGetLinkedServicesByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<LinkedServiceResource>;
   /**
    * Creates or updates a linked service.
@@ -39,10 +39,10 @@ export interface LinkedServiceOperations {
   beginCreateOrUpdateLinkedService(
     linkedServiceName: string,
     linkedService: LinkedServiceResource,
-    options?: LinkedServiceCreateOrUpdateLinkedServiceOptionalParams
+    options?: LinkedServiceCreateOrUpdateLinkedServiceOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<LinkedServiceCreateOrUpdateLinkedServiceResponse>,
+    SimplePollerLike<
+      OperationState<LinkedServiceCreateOrUpdateLinkedServiceResponse>,
       LinkedServiceCreateOrUpdateLinkedServiceResponse
     >
   >;
@@ -55,7 +55,7 @@ export interface LinkedServiceOperations {
   beginCreateOrUpdateLinkedServiceAndWait(
     linkedServiceName: string,
     linkedService: LinkedServiceResource,
-    options?: LinkedServiceCreateOrUpdateLinkedServiceOptionalParams
+    options?: LinkedServiceCreateOrUpdateLinkedServiceOptionalParams,
   ): Promise<LinkedServiceCreateOrUpdateLinkedServiceResponse>;
   /**
    * Gets a linked service.
@@ -64,7 +64,7 @@ export interface LinkedServiceOperations {
    */
   getLinkedService(
     linkedServiceName: string,
-    options?: LinkedServiceGetLinkedServiceOptionalParams
+    options?: LinkedServiceGetLinkedServiceOptionalParams,
   ): Promise<LinkedServiceGetLinkedServiceResponse>;
   /**
    * Deletes a linked service.
@@ -73,8 +73,8 @@ export interface LinkedServiceOperations {
    */
   beginDeleteLinkedService(
     linkedServiceName: string,
-    options?: LinkedServiceDeleteLinkedServiceOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: LinkedServiceDeleteLinkedServiceOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a linked service.
    * @param linkedServiceName The linked service name.
@@ -82,7 +82,7 @@ export interface LinkedServiceOperations {
    */
   beginDeleteLinkedServiceAndWait(
     linkedServiceName: string,
-    options?: LinkedServiceDeleteLinkedServiceOptionalParams
+    options?: LinkedServiceDeleteLinkedServiceOptionalParams,
   ): Promise<void>;
   /**
    * Renames a linked service.
@@ -93,8 +93,8 @@ export interface LinkedServiceOperations {
   beginRenameLinkedService(
     linkedServiceName: string,
     request: ArtifactRenameRequest,
-    options?: LinkedServiceRenameLinkedServiceOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: LinkedServiceRenameLinkedServiceOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Renames a linked service.
    * @param linkedServiceName The linked service name.
@@ -104,6 +104,6 @@ export interface LinkedServiceOperations {
   beginRenameLinkedServiceAndWait(
     linkedServiceName: string,
     request: ArtifactRenameRequest,
-    options?: LinkedServiceRenameLinkedServiceOptionalParams
+    options?: LinkedServiceRenameLinkedServiceOptionalParams,
   ): Promise<void>;
 }

@@ -1,17 +1,20 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable sort-imports */
 
-import { MsalTestCleanup, msalNodeTestSetup } from "../../../../identity/test/msalTestUtils";
-import { TokenCachePersistenceOptions, UsernamePasswordCredential } from "../../../../identity/src";
-import { MsalNode } from "../../../../identity/src/msal/nodeFlows/msalNodeCommon";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { env } from "@azure-tools/test-recorder";
+import type { TokenCachePersistenceOptions } from "@azure/identity";
+import { UsernamePasswordCredential } from "@azure/identity";
+
 import { PublicClientApplication } from "@azure/msal-node";
-import { createPersistence } from "./setup.spec";
-import { Recorder, env } from "@azure-tools/test-recorder";
-import Sinon from "sinon";
+import type Sinon from "sinon";
 import assert from "assert";
+import { createPersistence } from "./setup.spec";
+import type { MsalTestCleanup } from "./msalNodeTestSetup";
+import { msalNodeTestSetup } from "./msalNodeTestSetup";
 
 describe("UsernamePasswordCredential (internal)", function (this: Mocha.Suite) {
   let cleanup: MsalTestCleanup;
@@ -24,12 +27,12 @@ describe("UsernamePasswordCredential (internal)", function (this: Mocha.Suite) {
     cleanup = setup.cleanup;
     recorder = setup.recorder;
 
-    getTokenSilentSpy = setup.sandbox.spy(MsalNode.prototype, "getTokenSilent");
+    getTokenSilentSpy = setup.sandbox.spy(PublicClientApplication.prototype, "acquireTokenSilent");
 
     // MsalClientSecret calls to this method underneath.
     doGetTokenSpy = setup.sandbox.spy(
       PublicClientApplication.prototype,
-      "acquireTokenByUsernamePassword"
+      "acquireTokenByUsernamePassword",
     );
   });
 
@@ -60,7 +63,7 @@ describe("UsernamePasswordCredential (internal)", function (this: Mocha.Suite) {
       env.AZURE_CLIENT_ID!,
       env.AZURE_USERNAME!,
       env.AZURE_PASSWORD!,
-      recorder.configureClientOptions({ tokenCachePersistenceOptions })
+      recorder.configureClientOptions({ tokenCachePersistenceOptions }),
     );
 
     await credential.getToken(scope);
@@ -90,7 +93,7 @@ describe("UsernamePasswordCredential (internal)", function (this: Mocha.Suite) {
       env.AZURE_CLIENT_ID!,
       env.AZURE_USERNAME!,
       env.AZURE_PASSWORD!,
-      recorder.configureClientOptions({ tokenCachePersistenceOptions })
+      recorder.configureClientOptions({ tokenCachePersistenceOptions }),
     );
 
     await credential.getToken(scope);

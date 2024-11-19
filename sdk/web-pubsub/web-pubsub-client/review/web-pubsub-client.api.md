@@ -4,9 +4,7 @@
 
 ```ts
 
-/// <reference types="node" />
-
-import { AbortSignalLike } from '@azure/abort-controller';
+import type { AbortSignalLike } from '@azure/abort-controller';
 
 // @public
 export interface AckMessage extends WebPubSubMessageBase {
@@ -121,7 +119,7 @@ export interface OnGroupDataMessageArgs {
 }
 
 // @public
-export interface OnRestoreGroupFailedArgs {
+export interface OnRejoinGroupFailedArgs {
     error: Error;
     group: string;
 }
@@ -151,7 +149,7 @@ export interface SendEventMessage extends WebPubSubMessageBase {
 export interface SendEventOptions {
     abortSignal?: AbortSignalLike;
     ackId?: number;
-    fireAndForget: boolean;
+    fireAndForget?: boolean;
 }
 
 // @public
@@ -182,8 +180,8 @@ export interface SendToGroupMessage extends WebPubSubMessageBase {
 export interface SendToGroupOptions {
     abortSignal?: AbortSignalLike;
     ackId?: number;
-    fireAndForget: boolean;
-    noEcho: boolean;
+    fireAndForget?: boolean;
+    noEcho?: boolean;
 }
 
 // @public
@@ -230,7 +228,7 @@ export type UpstreamMessageType =
 
 // @public
 export class WebPubSubClient {
-    constructor(clientAccessUri: string, options?: WebPubSubClientOptions);
+    constructor(clientAccessUrl: string, options?: WebPubSubClientOptions);
     constructor(credential: WebPubSubClientCredential, options?: WebPubSubClientOptions);
     joinGroup(groupName: string, options?: JoinGroupOptions): Promise<WebPubSubResult>;
     leaveGroup(groupName: string, options?: LeaveGroupOptions): Promise<WebPubSubResult>;
@@ -239,15 +237,15 @@ export class WebPubSubClient {
     off(event: "stopped", listener: (e: OnStoppedArgs) => void): void;
     off(event: "server-message", listener: (e: OnServerDataMessageArgs) => void): void;
     off(event: "group-message", listener: (e: OnGroupDataMessageArgs) => void): void;
-    off(event: "rejoin-group-failed", listener: (e: OnRestoreGroupFailedArgs) => void): void;
+    off(event: "rejoin-group-failed", listener: (e: OnRejoinGroupFailedArgs) => void): void;
     on(event: "connected", listener: (e: OnConnectedArgs) => void): void;
     on(event: "disconnected", listener: (e: OnDisconnectedArgs) => void): void;
     on(event: "stopped", listener: (e: OnStoppedArgs) => void): void;
     on(event: "server-message", listener: (e: OnServerDataMessageArgs) => void): void;
     on(event: "group-message", listener: (e: OnGroupDataMessageArgs) => void): void;
-    on(event: "rejoin-group-failed", listener: (e: OnRestoreGroupFailedArgs) => void): void;
+    on(event: "rejoin-group-failed", listener: (e: OnRejoinGroupFailedArgs) => void): void;
     sendEvent(eventName: string, content: JSONTypes | ArrayBuffer, dataType: WebPubSubDataType, options?: SendEventOptions): Promise<WebPubSubResult>;
-    sendToGroup(groupName: string, content: JSONTypes | ArrayBuffer, dataType: WebPubSubDataType, options?: SendToGroupOptions): Promise<void | WebPubSubResult>;
+    sendToGroup(groupName: string, content: JSONTypes | ArrayBuffer, dataType: WebPubSubDataType, options?: SendToGroupOptions): Promise<WebPubSubResult>;
     start(options?: StartOptions): Promise<void>;
     stop(): void;
 }
@@ -260,7 +258,7 @@ export interface WebPubSubClientCredential {
 // @public
 export interface WebPubSubClientOptions {
     autoReconnect?: boolean;
-    autoRestoreGroups?: boolean;
+    autoRejoinGroups?: boolean;
     messageRetryOptions?: WebPubSubRetryOptions;
     protocol?: WebPubSubClientProtocol;
     reconnectRetryOptions?: WebPubSubRetryOptions;
@@ -270,7 +268,7 @@ export interface WebPubSubClientOptions {
 export interface WebPubSubClientProtocol {
     readonly isReliableSubProtocol: boolean;
     readonly name: string;
-    parseMessages(input: string | ArrayBuffer | Buffer): WebPubSubMessage | null;
+    parseMessages(input: string | ArrayBuffer | Buffer): WebPubSubMessage[] | WebPubSubMessage | null;
     writeMessage(message: WebPubSubMessage): string | ArrayBuffer;
 }
 
@@ -310,7 +308,7 @@ export interface WebPubSubMessageBase {
 
 // @public
 export interface WebPubSubResult {
-    ackId: number;
+    ackId?: number;
     isDuplicated: boolean;
 }
 

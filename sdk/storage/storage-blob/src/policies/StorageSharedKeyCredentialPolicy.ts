@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { RequestPolicy, RequestPolicyOptions, WebResource } from "@azure/core-http";
-import { StorageSharedKeyCredential } from "../credentials/StorageSharedKeyCredential";
+import type {
+  RequestPolicy,
+  RequestPolicyOptionsLike as RequestPolicyOptions,
+  WebResourceLike as WebResource,
+} from "@azure/core-http-compat";
+import type { StorageSharedKeyCredential } from "../credentials/StorageSharedKeyCredential";
 import { HeaderConstants } from "../utils/constants";
 import { getURLPath, getURLQueries } from "../utils/utils.common";
 import { CredentialPolicy } from "./CredentialPolicy";
+import { compareHeader } from "../utils/SharedKeyComparator";
 
 /**
  * StorageSharedKeyCredentialPolicy is a policy used to sign HTTP request with a shared key.
@@ -25,7 +30,7 @@ export class StorageSharedKeyCredentialPolicy extends CredentialPolicy {
   constructor(
     nextPolicy: RequestPolicy,
     options: RequestPolicyOptions,
-    factory: StorageSharedKeyCredential
+    factory: StorageSharedKeyCredential,
   ) {
     super(nextPolicy, options);
     this.factory = factory;
@@ -69,7 +74,7 @@ export class StorageSharedKeyCredentialPolicy extends CredentialPolicy {
     const signature: string = this.factory.computeHMACSHA256(stringToSign);
     request.headers.set(
       HeaderConstants.AUTHORIZATION,
-      `SharedKey ${this.factory.accountName}:${signature}`
+      `SharedKey ${this.factory.accountName}:${signature}`,
     );
 
     // console.log(`[URL]:${request.url}`);
@@ -122,7 +127,7 @@ export class StorageSharedKeyCredentialPolicy extends CredentialPolicy {
     });
 
     headersArray.sort((a, b): number => {
-      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      return compareHeader(a.name.toLowerCase(), b.name.toLowerCase());
     });
 
     // Remove duplicate headers

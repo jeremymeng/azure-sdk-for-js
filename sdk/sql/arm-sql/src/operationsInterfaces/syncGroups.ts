@@ -7,14 +7,14 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   SyncDatabaseIdProperties,
   SyncGroupsListSyncDatabaseIdsOptionalParams,
   SyncFullSchemaProperties,
   SyncGroupsListHubSchemasOptionalParams,
   SyncGroupLogProperties,
-  Enum60,
+  SyncGroupsType,
   SyncGroupsListLogsOptionalParams,
   SyncGroup,
   SyncGroupsListByDatabaseOptionalParams,
@@ -27,7 +27,7 @@ import {
   SyncGroupsCreateOrUpdateResponse,
   SyncGroupsDeleteOptionalParams,
   SyncGroupsUpdateOptionalParams,
-  SyncGroupsUpdateResponse
+  SyncGroupsUpdateResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -40,7 +40,7 @@ export interface SyncGroups {
    */
   listSyncDatabaseIds(
     locationName: string,
-    options?: SyncGroupsListSyncDatabaseIdsOptionalParams
+    options?: SyncGroupsListSyncDatabaseIdsOptionalParams,
   ): PagedAsyncIterableIterator<SyncDatabaseIdProperties>;
   /**
    * Gets a collection of hub database schemas.
@@ -56,7 +56,7 @@ export interface SyncGroups {
     serverName: string,
     databaseName: string,
     syncGroupName: string,
-    options?: SyncGroupsListHubSchemasOptionalParams
+    options?: SyncGroupsListHubSchemasOptionalParams,
   ): PagedAsyncIterableIterator<SyncFullSchemaProperties>;
   /**
    * Gets a collection of sync group logs.
@@ -77,8 +77,8 @@ export interface SyncGroups {
     syncGroupName: string,
     startTime: string,
     endTime: string,
-    typeParam: Enum60,
-    options?: SyncGroupsListLogsOptionalParams
+    typeParam: SyncGroupsType,
+    options?: SyncGroupsListLogsOptionalParams,
   ): PagedAsyncIterableIterator<SyncGroupLogProperties>;
   /**
    * Lists sync groups under a hub database.
@@ -92,7 +92,7 @@ export interface SyncGroups {
     resourceGroupName: string,
     serverName: string,
     databaseName: string,
-    options?: SyncGroupsListByDatabaseOptionalParams
+    options?: SyncGroupsListByDatabaseOptionalParams,
   ): PagedAsyncIterableIterator<SyncGroup>;
   /**
    * Refreshes a hub database schema.
@@ -108,8 +108,8 @@ export interface SyncGroups {
     serverName: string,
     databaseName: string,
     syncGroupName: string,
-    options?: SyncGroupsRefreshHubSchemaOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: SyncGroupsRefreshHubSchemaOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Refreshes a hub database schema.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -124,7 +124,7 @@ export interface SyncGroups {
     serverName: string,
     databaseName: string,
     syncGroupName: string,
-    options?: SyncGroupsRefreshHubSchemaOptionalParams
+    options?: SyncGroupsRefreshHubSchemaOptionalParams,
   ): Promise<void>;
   /**
    * Cancels a sync group synchronization.
@@ -140,7 +140,7 @@ export interface SyncGroups {
     serverName: string,
     databaseName: string,
     syncGroupName: string,
-    options?: SyncGroupsCancelSyncOptionalParams
+    options?: SyncGroupsCancelSyncOptionalParams,
   ): Promise<void>;
   /**
    * Triggers a sync group synchronization.
@@ -156,7 +156,7 @@ export interface SyncGroups {
     serverName: string,
     databaseName: string,
     syncGroupName: string,
-    options?: SyncGroupsTriggerSyncOptionalParams
+    options?: SyncGroupsTriggerSyncOptionalParams,
   ): Promise<void>;
   /**
    * Gets a sync group.
@@ -172,7 +172,7 @@ export interface SyncGroups {
     serverName: string,
     databaseName: string,
     syncGroupName: string,
-    options?: SyncGroupsGetOptionalParams
+    options?: SyncGroupsGetOptionalParams,
   ): Promise<SyncGroupsGetResponse>;
   /**
    * Creates or updates a sync group.
@@ -190,10 +190,10 @@ export interface SyncGroups {
     databaseName: string,
     syncGroupName: string,
     parameters: SyncGroup,
-    options?: SyncGroupsCreateOrUpdateOptionalParams
+    options?: SyncGroupsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SyncGroupsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<SyncGroupsCreateOrUpdateResponse>,
       SyncGroupsCreateOrUpdateResponse
     >
   >;
@@ -213,7 +213,7 @@ export interface SyncGroups {
     databaseName: string,
     syncGroupName: string,
     parameters: SyncGroup,
-    options?: SyncGroupsCreateOrUpdateOptionalParams
+    options?: SyncGroupsCreateOrUpdateOptionalParams,
   ): Promise<SyncGroupsCreateOrUpdateResponse>;
   /**
    * Deletes a sync group.
@@ -229,8 +229,8 @@ export interface SyncGroups {
     serverName: string,
     databaseName: string,
     syncGroupName: string,
-    options?: SyncGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: SyncGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a sync group.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -245,7 +245,7 @@ export interface SyncGroups {
     serverName: string,
     databaseName: string,
     syncGroupName: string,
-    options?: SyncGroupsDeleteOptionalParams
+    options?: SyncGroupsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Updates a sync group.
@@ -263,10 +263,10 @@ export interface SyncGroups {
     databaseName: string,
     syncGroupName: string,
     parameters: SyncGroup,
-    options?: SyncGroupsUpdateOptionalParams
+    options?: SyncGroupsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SyncGroupsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<SyncGroupsUpdateResponse>,
       SyncGroupsUpdateResponse
     >
   >;
@@ -286,6 +286,6 @@ export interface SyncGroups {
     databaseName: string,
     syncGroupName: string,
     parameters: SyncGroup,
-    options?: SyncGroupsUpdateOptionalParams
+    options?: SyncGroupsUpdateOptionalParams,
   ): Promise<SyncGroupsUpdateResponse>;
 }

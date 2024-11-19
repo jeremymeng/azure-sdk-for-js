@@ -1,50 +1,47 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
+import type { SipRoutingClient } from "../../../src/index.js";
 
-import { assert } from "chai";
-import { Context } from "mocha";
-
-import { SipRoutingClient } from "../../../src";
-
-import { matrix } from "@azure/test-utils";
-import { isPlaybackMode, Recorder } from "@azure-tools/test-recorder";
+import { matrix } from "@azure-tools/test-utils-vitest";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isPlaybackMode } from "@azure-tools/test-recorder";
 import {
   clearSipConfiguration,
   createRecordedClient,
   createRecordedClientWithToken,
-} from "./utils/recordedClient";
+  listAllRoutes,
+} from "./utils/recordedClient.js";
+import { describe, it, assert, beforeEach, afterEach, beforeAll } from "vitest";
 
-matrix([[true, false]], async function (useAad) {
-  describe(`SipRoutingClient - get routes${useAad ? " [AAD]" : ""}`, function () {
+matrix([[true, false]], async (useAad) => {
+  describe(`SipRoutingClient - get routes${useAad ? " [AAD]" : ""}`, () => {
     let client: SipRoutingClient;
     let recorder: Recorder;
 
-    before(async function (this: Context) {
+    beforeAll(async () => {
       if (!isPlaybackMode()) {
         await clearSipConfiguration();
       }
     });
 
-    beforeEach(async function (this: Context) {
+    beforeEach(async (ctx) => {
       ({ client, recorder } = useAad
-        ? await createRecordedClientWithToken(this)
-        : await createRecordedClient(this));
+        ? await createRecordedClientWithToken(ctx)
+        : await createRecordedClient(ctx));
     });
 
-    afterEach(async function (this: Context) {
-      if (!this.currentTest?.isPending()) {
-        await recorder.stop();
-      }
+    afterEach(async () => {
+      await recorder.stop();
     });
 
     it("can retrieve routes", async () => {
-      assert.isArray(await client.getRoutes());
+      assert.isArray(await listAllRoutes(client));
     });
 
     it("can retrieve empty routes", async () => {
       await client.setRoutes([]);
 
-      const routes = await client.getRoutes();
+      const routes = await listAllRoutes(client);
 
       assert.isNotNull(routes);
       assert.isArray(routes);
@@ -68,7 +65,7 @@ matrix([[true, false]], async function (useAad) {
       ];
       await client.setRoutes(expectedRoutes);
 
-      const routes = await client.getRoutes();
+      const routes = await listAllRoutes(client);
 
       assert.isNotNull(routes);
       assert.isArray(routes);

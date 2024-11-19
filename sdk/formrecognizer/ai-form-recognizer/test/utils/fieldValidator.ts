@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * This is a utility module for validating the contents of objects returned by document analysis methods using a simple
@@ -8,8 +8,8 @@
 
 import { assert } from "chai";
 
-import { AnalyzedDocument } from "../../src/lro/analysis";
-import {
+import type { AnalyzedDocument } from "../../src/lro/analysis";
+import type {
   DocumentArrayField,
   DocumentDateField,
   DocumentField,
@@ -98,7 +98,7 @@ function validateSpec(spec: FieldSpec, field: DocumentField | undefined) {
  */
 function validateObjectSpec(
   spec: { [k: string]: FieldSpec },
-  o: { [k: string]: DocumentField | undefined }
+  o: { [k: string]: DocumentField | undefined },
 ): void {
   for (const [fieldName, fieldSpec] of Object.entries(spec)) {
     validateSpec(fieldSpec, o[fieldName]);
@@ -122,7 +122,7 @@ function createSpecForField(field: DocumentField | undefined): FieldSpec {
           ...fields,
           [fieldName]: createSpecForField(fieldValue),
         }),
-        {} as { [k: string]: FieldSpec }
+        {} as { [k: string]: FieldSpec },
       );
     case "currency":
     case "address":
@@ -158,7 +158,7 @@ export function createValidator(spec: { [k: string]: FieldSpec }): Validator {
       // spec for the document to use in the tests. This helps catch regressions in model quality or missing fields.
       logger.info(
         "createValidator - conforming spec for input value:",
-        JSON.stringify(createConformingSpec(document), null, 2)
+        JSON.stringify(createConformingSpec(document), null, 2),
       );
     }
     validateObjectSpec(spec, document.fields);

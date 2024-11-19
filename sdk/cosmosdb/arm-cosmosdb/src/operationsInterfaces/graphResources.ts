@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   GraphResourceGetResults,
   GraphResourcesListGraphsOptionalParams,
@@ -16,7 +16,7 @@ import {
   GraphResourceCreateUpdateParameters,
   GraphResourcesCreateUpdateGraphOptionalParams,
   GraphResourcesCreateUpdateGraphResponse,
-  GraphResourcesDeleteGraphResourceOptionalParams
+  GraphResourcesDeleteGraphResourceOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -31,7 +31,7 @@ export interface GraphResources {
   listGraphs(
     resourceGroupName: string,
     accountName: string,
-    options?: GraphResourcesListGraphsOptionalParams
+    options?: GraphResourcesListGraphsOptionalParams,
   ): PagedAsyncIterableIterator<GraphResourceGetResults>;
   /**
    * Gets the Graph resource under an existing Azure Cosmos DB database account with the provided name.
@@ -44,7 +44,7 @@ export interface GraphResources {
     resourceGroupName: string,
     accountName: string,
     graphName: string,
-    options?: GraphResourcesGetGraphOptionalParams
+    options?: GraphResourcesGetGraphOptionalParams,
   ): Promise<GraphResourcesGetGraphResponse>;
   /**
    * Create or update an Azure Cosmos DB Graph.
@@ -59,10 +59,10 @@ export interface GraphResources {
     accountName: string,
     graphName: string,
     createUpdateGraphParameters: GraphResourceCreateUpdateParameters,
-    options?: GraphResourcesCreateUpdateGraphOptionalParams
+    options?: GraphResourcesCreateUpdateGraphOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<GraphResourcesCreateUpdateGraphResponse>,
+    SimplePollerLike<
+      OperationState<GraphResourcesCreateUpdateGraphResponse>,
       GraphResourcesCreateUpdateGraphResponse
     >
   >;
@@ -79,7 +79,7 @@ export interface GraphResources {
     accountName: string,
     graphName: string,
     createUpdateGraphParameters: GraphResourceCreateUpdateParameters,
-    options?: GraphResourcesCreateUpdateGraphOptionalParams
+    options?: GraphResourcesCreateUpdateGraphOptionalParams,
   ): Promise<GraphResourcesCreateUpdateGraphResponse>;
   /**
    * Deletes an existing Azure Cosmos DB Graph Resource.
@@ -92,8 +92,8 @@ export interface GraphResources {
     resourceGroupName: string,
     accountName: string,
     graphName: string,
-    options?: GraphResourcesDeleteGraphResourceOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: GraphResourcesDeleteGraphResourceOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes an existing Azure Cosmos DB Graph Resource.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -105,6 +105,6 @@ export interface GraphResources {
     resourceGroupName: string,
     accountName: string,
     graphName: string,
-    options?: GraphResourcesDeleteGraphResourceOptionalParams
+    options?: GraphResourcesDeleteGraphResourceOptionalParams,
   ): Promise<void>;
 }

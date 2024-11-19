@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license
+// Licensed under the MIT License
 
 import chalk from "chalk";
-
 import { baseCommands, baseCommandInfo } from ".";
 import { resolveProject } from "../util/resolveProject";
 import { createPrinter } from "../util/printer";
 import { leafCommand, makeCommandInfo } from "../framework/command";
 import { printCommandUsage } from "../framework/printCommandUsage";
+import * as pwsh from "../util/pwsh";
 
 const log = createPrinter("about");
 
@@ -31,10 +31,19 @@ export default leafCommand(commandInfo, async (options) => {
     console.log(chalk.blueBright(`  Name/Version:\t${packageInfo.name}@${packageInfo.version}`));
     console.log(chalk.blueBright(`  Location:\t${packageInfo.path}`));
     console.log();
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error("Could not locate dev-tool package.");
     log.error("Unable to display dev-tool version information.");
   }
+
+  const hasPowerShell = await pwsh.hasPowerShell();
+
+  if (hasPowerShell) {
+    console.log(chalk.blueBright("  PowerShell: Found"));
+  } else {
+    console.log(chalk.yellow("  PowerShell: Not found"));
+  }
+  console.log();
 
   if (options.args.length || options["--"]?.length) {
     console.log();

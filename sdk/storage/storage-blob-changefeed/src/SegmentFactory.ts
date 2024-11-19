@@ -1,17 +1,16 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { ShardFactory } from "./ShardFactory";
-import { ContainerClient, CommonOptions } from "@azure/storage-blob";
+import type { ShardFactory } from "./ShardFactory";
+import type { ContainerClient, CommonOptions } from "@azure/storage-blob";
 import { CHANGE_FEED_CONTAINER_NAME } from "./utils/constants";
-import { Shard } from "./Shard";
+import type { Shard } from "./Shard";
 import { Segment } from "./Segment";
-import { SegmentCursor } from "./models/ChangeFeedCursor";
+import type { SegmentCursor } from "./models/ChangeFeedCursor";
 import { bodyToString } from "./utils/utils.node";
 import { parseDateFromSegmentPath } from "./utils/utils.common";
-import { AbortSignalLike } from "@azure/core-http";
-import { createSpan } from "./utils/tracing";
-import { SpanStatusCode } from "@azure/core-tracing";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import { tracingClient } from "./utils/tracing";
 
 export interface SegmentManifest {
   version?: number;
@@ -44,11 +43,9 @@ export class SegmentFactory {
     containerClient: ContainerClient,
     manifestPath: string,
     cursor?: SegmentCursor,
-    options: CreateSegmentOptions = {}
+    options: CreateSegmentOptions = {},
   ): Promise<Segment> {
-    const { span, updatedOptions } = createSpan("SegmentFactory-create", options);
-
-    try {
+    return tracingClient.withSpan("SegmentFactory-create", options, async (updatedOptions) => {
       const shards: Shard[] = [];
       const dateTime: Date = parseDateFromSegmentPath(manifestPath);
 
@@ -65,7 +62,7 @@ export class SegmentFactory {
       for (const shardPath of segmentManifest.chunkFilePaths) {
         const shardPathSubStr = shardPath.substring(containerPrefixLength);
         const shardCursor = cursor?.ShardCursors.find((x) =>
-          x.CurrentChunkPath.startsWith(shardPathSubStr)
+          x.CurrentChunkPath.startsWith(shardPathSubStr),
         );
         const shard: Shard = await this.shardFactory.create(
           containerClient,
@@ -74,7 +71,7 @@ export class SegmentFactory {
           {
             abortSignal: options.abortSignal,
             tracingOptions: updatedOptions.tracingOptions,
-          }
+          },
         );
         if (shard.hasNext()) {
           shards.push(shard);
@@ -89,14 +86,6 @@ export class SegmentFactory {
         }
       }
       return new Segment(shards, shardIndex, dateTime, manifestPath);
-    } catch (e: any) {
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-        message: e.message,
-      });
-      throw e;
-    } finally {
-      span.end();
-    }
+    });
   }
 }

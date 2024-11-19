@@ -1,22 +1,23 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   FullRestoreOperationOptionalParams,
   FullRestoreOperationResponse,
   RestoreOperation,
   RestoreStatusResponse,
-} from "../../generated/models";
-import {
-  KeyVaultAdminPollOperation,
-  KeyVaultAdminPollOperationState,
-} from "../keyVaultAdminPoller";
-import { KeyVaultBeginRestoreOptions, KeyVaultRestoreResult } from "../../backupClientModels";
+} from "../../generated/models/index.js";
+import type { KeyVaultAdminPollOperationState } from "../keyVaultAdminPoller.js";
+import { KeyVaultAdminPollOperation } from "../keyVaultAdminPoller.js";
+import type {
+  KeyVaultBeginRestoreOptions,
+  KeyVaultRestoreResult,
+} from "../../backupClientModels.js";
 
-import { AbortSignalLike } from "@azure/abort-controller";
-import { KeyVaultClient } from "../../generated/keyVaultClient";
-import { OperationOptions } from "@azure/core-client";
-import { tracingClient } from "../../tracing";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { KeyVaultClient } from "../../generated/keyVaultClient.js";
+import type { OperationOptions } from "@azure/core-client";
+import { tracingClient } from "../../tracing.js";
 
 /**
  * An interface representing the publicly available properties of the state of a restore Key Vault's poll operation.
@@ -37,7 +38,7 @@ export interface KeyVaultRestorePollOperationState
   /**
    * The SAS token.
    */
-  sasToken: string;
+  sasToken?: string;
   /**
    * The Folder name of the blob where the previous successful full backup was stored
    */
@@ -55,7 +56,7 @@ export class KeyVaultRestorePollOperation extends KeyVaultAdminPollOperation<
     public state: KeyVaultRestorePollOperationState,
     private vaultUrl: string,
     private client: KeyVaultClient,
-    private requestOptions: KeyVaultBeginRestoreOptions = {}
+    private requestOptions: KeyVaultBeginRestoreOptions = {},
   ) {
     super(state, {
       cancelMessage: "Cancelling the restoration full Key Vault backup is not supported.",
@@ -66,10 +67,10 @@ export class KeyVaultRestorePollOperation extends KeyVaultAdminPollOperation<
    * Tracing the fullRestore operation
    */
   private fullRestore(
-    options: FullRestoreOperationOptionalParams
+    options: FullRestoreOperationOptionalParams,
   ): Promise<FullRestoreOperationResponse> {
     return tracingClient.withSpan("KeyVaultRestorePoller.fullRestore", options, (updatedOptions) =>
-      this.client.fullRestoreOperation(this.vaultUrl, updatedOptions)
+      this.client.fullRestoreOperation(this.vaultUrl, updatedOptions),
     );
   }
 
@@ -78,12 +79,12 @@ export class KeyVaultRestorePollOperation extends KeyVaultAdminPollOperation<
    */
   private async restoreStatus(
     jobId: string,
-    options: OperationOptions
+    options: OperationOptions,
   ): Promise<RestoreStatusResponse> {
     return tracingClient.withSpan(
       "KeyVaultRestorePoller.restoreStatus",
       options,
-      (updatedOptions) => this.client.restoreStatus(this.vaultUrl, jobId, updatedOptions)
+      (updatedOptions) => this.client.restoreStatus(this.vaultUrl, jobId, updatedOptions),
     );
   }
 
@@ -94,7 +95,7 @@ export class KeyVaultRestorePollOperation extends KeyVaultAdminPollOperation<
     options: {
       abortSignal?: AbortSignalLike;
       fireProgress?: (state: KeyVaultRestorePollOperationState) => void;
-    } = {}
+    } = {},
   ): Promise<KeyVaultRestorePollOperation> {
     const state = this.state;
     const { folderUri, sasToken, folderName } = state;
@@ -111,6 +112,7 @@ export class KeyVaultRestorePollOperation extends KeyVaultAdminPollOperation<
           sasTokenParameters: {
             storageResourceUri: folderUri,
             token: sasToken,
+            useManagedIdentity: sasToken === undefined,
           },
         },
       });
@@ -133,7 +135,7 @@ export class KeyVaultRestorePollOperation extends KeyVaultAdminPollOperation<
 
     if (!startTime) {
       throw new Error(
-        `Missing "startTime" from the full restore operation. Restore did not start successfully.`
+        `Missing "startTime" from the full restore operation. Restore did not start successfully.`,
       );
     }
 

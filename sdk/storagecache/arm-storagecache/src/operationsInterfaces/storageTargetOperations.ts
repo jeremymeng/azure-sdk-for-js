@@ -6,12 +6,12 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   StorageTargetFlushOptionalParams,
   StorageTargetSuspendOptionalParams,
   StorageTargetResumeOptionalParams,
-  StorageTargetInvalidateOptionalParams
+  StorageTargetInvalidateOptionalParams,
 } from "../models";
 
 /** Interface representing a StorageTargetOperations. */
@@ -19,8 +19,8 @@ export interface StorageTargetOperations {
   /**
    * Tells the cache to write all dirty data to the Storage Target's backend storage. Client requests to
    * this storage target's namespace will return errors until the flush operation completes.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -29,13 +29,13 @@ export interface StorageTargetOperations {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetFlushOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: StorageTargetFlushOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Tells the cache to write all dirty data to the Storage Target's backend storage. Client requests to
    * this storage target's namespace will return errors until the flush operation completes.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -44,12 +44,12 @@ export interface StorageTargetOperations {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetFlushOptionalParams
+    options?: StorageTargetFlushOptionalParams,
   ): Promise<void>;
   /**
    * Suspends client access to a storage target.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -58,12 +58,12 @@ export interface StorageTargetOperations {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetSuspendOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: StorageTargetSuspendOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Suspends client access to a storage target.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -72,12 +72,12 @@ export interface StorageTargetOperations {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetSuspendOptionalParams
+    options?: StorageTargetSuspendOptionalParams,
   ): Promise<void>;
   /**
    * Resumes client access to a previously suspended storage target.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -86,12 +86,12 @@ export interface StorageTargetOperations {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetResumeOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: StorageTargetResumeOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Resumes client access to a previously suspended storage target.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -100,13 +100,13 @@ export interface StorageTargetOperations {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetResumeOptionalParams
+    options?: StorageTargetResumeOptionalParams,
   ): Promise<void>;
   /**
    * Invalidate all cached data for a storage target. Cached files are discarded and fetched from the
    * back end on the next request.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -115,13 +115,13 @@ export interface StorageTargetOperations {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetInvalidateOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: StorageTargetInvalidateOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Invalidate all cached data for a storage target. Cached files are discarded and fetched from the
    * back end on the next request.
-   * @param resourceGroupName Target resource group.
-   * @param cacheName Name of Cache. Length of name must not be greater than 80 and chars must be from
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param cacheName Name of cache. Length of name must not be greater than 80 and chars must be from
    *                  the [-0-9a-zA-Z_] char class.
    * @param storageTargetName Name of Storage Target.
    * @param options The options parameters.
@@ -130,6 +130,6 @@ export interface StorageTargetOperations {
     resourceGroupName: string,
     cacheName: string,
     storageTargetName: string,
-    options?: StorageTargetInvalidateOptionalParams
+    options?: StorageTargetInvalidateOptionalParams,
   ): Promise<void>;
 }

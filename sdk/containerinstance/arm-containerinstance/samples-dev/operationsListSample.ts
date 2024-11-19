@@ -18,7 +18,7 @@ dotenv.config();
  * This sample demonstrates how to List the operations for Azure Container Instance service.
  *
  * @summary List the operations for Azure Container Instance service.
- * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2022-10-01-preview/examples/OperationsList.json
+ * x-ms-original-file: specification/containerinstance/resource-manager/Microsoft.ContainerInstance/preview/2024-05-01-preview/examples/OperationsList.json
  */
 async function operationsList() {
   const subscriptionId =
@@ -27,7 +27,7 @@ async function operationsList() {
   const credential = new DefaultAzureCredential();
   const client = new ContainerInstanceManagementClient(
     credential,
-    subscriptionId
+    subscriptionId,
   );
   const resArray = new Array();
   for await (let item of client.operations.list()) {

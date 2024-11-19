@@ -6,18 +6,24 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { VirtualNetworkLinks } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { DnsResolverManagementClient } from "../dnsResolverManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   VirtualNetworkLink,
   VirtualNetworkLinksListNextOptionalParams,
   VirtualNetworkLinksListOptionalParams,
+  VirtualNetworkLinksListResponse,
   VirtualNetworkLinksCreateOrUpdateOptionalParams,
   VirtualNetworkLinksCreateOrUpdateResponse,
   VirtualNetworkLinkPatch,
@@ -26,8 +32,7 @@ import {
   VirtualNetworkLinksDeleteOptionalParams,
   VirtualNetworkLinksGetOptionalParams,
   VirtualNetworkLinksGetResponse,
-  VirtualNetworkLinksListResponse,
-  VirtualNetworkLinksListNextResponse
+  VirtualNetworkLinksListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -52,12 +57,12 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
   public list(
     resourceGroupName: string,
     dnsForwardingRulesetName: string,
-    options?: VirtualNetworkLinksListOptionalParams
+    options?: VirtualNetworkLinksListOptionalParams,
   ): PagedAsyncIterableIterator<VirtualNetworkLink> {
     const iter = this.listPagingAll(
       resourceGroupName,
       dnsForwardingRulesetName,
-      options
+      options,
     );
     return {
       next() {
@@ -66,49 +71,62 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listPagingPage(
           resourceGroupName,
           dnsForwardingRulesetName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
   private async *listPagingPage(
     resourceGroupName: string,
     dnsForwardingRulesetName: string,
-    options?: VirtualNetworkLinksListOptionalParams
+    options?: VirtualNetworkLinksListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<VirtualNetworkLink[]> {
-    let result = await this._list(
-      resourceGroupName,
-      dnsForwardingRulesetName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: VirtualNetworkLinksListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(
+        resourceGroupName,
+        dnsForwardingRulesetName,
+        options,
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(
         resourceGroupName,
         dnsForwardingRulesetName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listPagingAll(
     resourceGroupName: string,
     dnsForwardingRulesetName: string,
-    options?: VirtualNetworkLinksListOptionalParams
+    options?: VirtualNetworkLinksListOptionalParams,
   ): AsyncIterableIterator<VirtualNetworkLink> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       dnsForwardingRulesetName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -127,30 +145,29 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     dnsForwardingRulesetName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams
+    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualNetworkLinksCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualNetworkLinksCreateOrUpdateResponse>,
       VirtualNetworkLinksCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VirtualNetworkLinksCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -159,8 +176,8 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -168,25 +185,28 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         dnsForwardingRulesetName,
         virtualNetworkLinkName,
         parameters,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VirtualNetworkLinksCreateOrUpdateResponse,
+      OperationState<VirtualNetworkLinksCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -205,14 +225,14 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     dnsForwardingRulesetName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams
+    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams,
   ): Promise<VirtualNetworkLinksCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       dnsForwardingRulesetName,
       virtualNetworkLinkName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -230,30 +250,29 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     dnsForwardingRulesetName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLinkPatch,
-    options?: VirtualNetworkLinksUpdateOptionalParams
+    options?: VirtualNetworkLinksUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualNetworkLinksUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualNetworkLinksUpdateResponse>,
       VirtualNetworkLinksUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<VirtualNetworkLinksUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -262,8 +281,8 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -271,25 +290,28 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         dnsForwardingRulesetName,
         virtualNetworkLinkName,
         parameters,
-        options
+        options,
       },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VirtualNetworkLinksUpdateResponse,
+      OperationState<VirtualNetworkLinksUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -308,14 +330,14 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     dnsForwardingRulesetName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLinkPatch,
-    options?: VirtualNetworkLinksUpdateOptionalParams
+    options?: VirtualNetworkLinksUpdateOptionalParams,
   ): Promise<VirtualNetworkLinksUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       dnsForwardingRulesetName,
       virtualNetworkLinkName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -332,25 +354,24 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     resourceGroupName: string,
     dnsForwardingRulesetName: string,
     virtualNetworkLinkName: string,
-    options?: VirtualNetworkLinksDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VirtualNetworkLinksDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -359,8 +380,8 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -368,24 +389,24 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         dnsForwardingRulesetName,
         virtualNetworkLinkName,
-        options
+        options,
       },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -403,13 +424,13 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     resourceGroupName: string,
     dnsForwardingRulesetName: string,
     virtualNetworkLinkName: string,
-    options?: VirtualNetworkLinksDeleteOptionalParams
+    options?: VirtualNetworkLinksDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       dnsForwardingRulesetName,
       virtualNetworkLinkName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -425,16 +446,16 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     resourceGroupName: string,
     dnsForwardingRulesetName: string,
     virtualNetworkLinkName: string,
-    options?: VirtualNetworkLinksGetOptionalParams
+    options?: VirtualNetworkLinksGetOptionalParams,
   ): Promise<VirtualNetworkLinksGetResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         dnsForwardingRulesetName,
         virtualNetworkLinkName,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -447,11 +468,11 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
   private _list(
     resourceGroupName: string,
     dnsForwardingRulesetName: string,
-    options?: VirtualNetworkLinksListOptionalParams
+    options?: VirtualNetworkLinksListOptionalParams,
   ): Promise<VirtualNetworkLinksListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, dnsForwardingRulesetName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -466,11 +487,11 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
     resourceGroupName: string,
     dnsForwardingRulesetName: string,
     nextLink: string,
-    options?: VirtualNetworkLinksListNextOptionalParams
+    options?: VirtualNetworkLinksListNextOptionalParams,
   ): Promise<VirtualNetworkLinksListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, dnsForwardingRulesetName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -478,25 +499,24 @@ export class VirtualNetworkLinksImpl implements VirtualNetworkLinks {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks/{virtualNetworkLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks/{virtualNetworkLinkName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     201: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     202: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     204: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters10,
   queryParameters: [Parameters.apiVersion],
@@ -505,37 +525,36 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.dnsForwardingRulesetName,
-    Parameters.virtualNetworkLinkName
+    Parameters.virtualNetworkLinkName,
   ],
   headerParameters: [
     Parameters.contentType,
     Parameters.accept,
     Parameters.ifMatch,
-    Parameters.ifNoneMatch
+    Parameters.ifNoneMatch,
   ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks/{virtualNetworkLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks/{virtualNetworkLinkName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     201: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     202: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     204: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters11,
   queryParameters: [Parameters.apiVersion],
@@ -544,19 +563,18 @@ const updateOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.dnsForwardingRulesetName,
-    Parameters.virtualNetworkLinkName
+    Parameters.virtualNetworkLinkName,
   ],
   headerParameters: [
     Parameters.contentType,
     Parameters.accept,
-    Parameters.ifMatch
+    Parameters.ifMatch,
   ],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks/{virtualNetworkLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks/{virtualNetworkLinkName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -564,8 +582,8 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -573,22 +591,21 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.dnsForwardingRulesetName,
-    Parameters.virtualNetworkLinkName
+    Parameters.virtualNetworkLinkName,
   ],
   headerParameters: [Parameters.accept, Parameters.ifMatch],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks/{virtualNetworkLinkName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks/{virtualNetworkLinkName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLink
+      bodyMapper: Mappers.VirtualNetworkLink,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -596,52 +613,50 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.dnsForwardingRulesetName,
-    Parameters.virtualNetworkLinkName
+    Parameters.virtualNetworkLinkName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsForwardingRulesets/{dnsForwardingRulesetName}/virtualNetworkLinks",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLinkListResult
+      bodyMapper: Mappers.VirtualNetworkLinkListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.dnsForwardingRulesetName
+    Parameters.dnsForwardingRulesetName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualNetworkLinkListResult
+      bodyMapper: Mappers.VirtualNetworkLinkListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion, Parameters.top],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.nextLink,
-    Parameters.dnsForwardingRulesetName
+    Parameters.dnsForwardingRulesetName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

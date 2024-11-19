@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -34,7 +34,7 @@ async function deletePrivateEndPointConnectionForAPrivateLinkService() {
       subscriptionId,
       resourceGroupName,
       serviceName,
-      peConnectionName
+      peConnectionName,
     )
     .delete(options);
   const poller = getLongRunningPoller(client, initialResponse);

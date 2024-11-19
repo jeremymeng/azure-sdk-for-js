@@ -8,7 +8,7 @@
 
 import * as coreClient from "@azure/core-client";
 import * as coreAuth from "@azure/core-auth";
-import { GeneratedMonitorIngestionClientOptionalParams } from "./models";
+import { GeneratedMonitorIngestionClientOptionalParams } from "./models/index.js";
 
 /** @internal */
 export class GeneratedMonitorIngestionClientContext extends coreClient.ServiceClient {
@@ -43,7 +43,7 @@ export class GeneratedMonitorIngestionClientContext extends coreClient.ServiceCl
       credential: credentials
     };
 
-    const packageDetails = `azsdk-js-monitor-ingestion/1.0.0-beta.4`;
+    const packageDetails = `azsdk-js-monitor-ingestion/1.1.1`;
     const userAgentPrefix =
       options.userAgentOptions && options.userAgentOptions.userAgentPrefix
         ? `${options.userAgentOptions.userAgentPrefix} ${packageDetails}`
@@ -62,6 +62,6 @@ export class GeneratedMonitorIngestionClientContext extends coreClient.ServiceCl
     this.endpoint = endpoint;
 
     // Assigning values to Constant parameters
-    this.apiVersion = options.apiVersion || "2021-11-01-preview";
+    this.apiVersion = options.apiVersion || "2023-01-01";
   }
 }

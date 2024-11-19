@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   EmailServiceResource,
   EmailServicesListBySubscriptionOptionalParams,
@@ -21,7 +21,7 @@ import {
   EmailServicesUpdateOptionalParams,
   EmailServicesUpdateResponse,
   EmailServicesListVerifiedExchangeOnlineDomainsOptionalParams,
-  EmailServicesListVerifiedExchangeOnlineDomainsResponse
+  EmailServicesListVerifiedExchangeOnlineDomainsResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -32,7 +32,7 @@ export interface EmailServices {
    * @param options The options parameters.
    */
   listBySubscription(
-    options?: EmailServicesListBySubscriptionOptionalParams
+    options?: EmailServicesListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<EmailServiceResource>;
   /**
    * Handles requests to list all resources in a resource group.
@@ -41,7 +41,7 @@ export interface EmailServices {
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: EmailServicesListByResourceGroupOptionalParams
+    options?: EmailServicesListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<EmailServiceResource>;
   /**
    * Get the EmailService and its properties.
@@ -52,7 +52,7 @@ export interface EmailServices {
   get(
     resourceGroupName: string,
     emailServiceName: string,
-    options?: EmailServicesGetOptionalParams
+    options?: EmailServicesGetOptionalParams,
   ): Promise<EmailServicesGetResponse>;
   /**
    * Create a new EmailService or update an existing EmailService.
@@ -65,10 +65,10 @@ export interface EmailServices {
     resourceGroupName: string,
     emailServiceName: string,
     parameters: EmailServiceResource,
-    options?: EmailServicesCreateOrUpdateOptionalParams
+    options?: EmailServicesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<EmailServicesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<EmailServicesCreateOrUpdateResponse>,
       EmailServicesCreateOrUpdateResponse
     >
   >;
@@ -83,7 +83,7 @@ export interface EmailServices {
     resourceGroupName: string,
     emailServiceName: string,
     parameters: EmailServiceResource,
-    options?: EmailServicesCreateOrUpdateOptionalParams
+    options?: EmailServicesCreateOrUpdateOptionalParams,
   ): Promise<EmailServicesCreateOrUpdateResponse>;
   /**
    * Operation to delete a EmailService.
@@ -94,8 +94,8 @@ export interface EmailServices {
   beginDelete(
     resourceGroupName: string,
     emailServiceName: string,
-    options?: EmailServicesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: EmailServicesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Operation to delete a EmailService.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -105,7 +105,7 @@ export interface EmailServices {
   beginDeleteAndWait(
     resourceGroupName: string,
     emailServiceName: string,
-    options?: EmailServicesDeleteOptionalParams
+    options?: EmailServicesDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Operation to update an existing EmailService.
@@ -118,10 +118,10 @@ export interface EmailServices {
     resourceGroupName: string,
     emailServiceName: string,
     parameters: EmailServiceResourceUpdate,
-    options?: EmailServicesUpdateOptionalParams
+    options?: EmailServicesUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<EmailServicesUpdateResponse>,
+    SimplePollerLike<
+      OperationState<EmailServicesUpdateResponse>,
       EmailServicesUpdateResponse
     >
   >;
@@ -136,13 +136,13 @@ export interface EmailServices {
     resourceGroupName: string,
     emailServiceName: string,
     parameters: EmailServiceResourceUpdate,
-    options?: EmailServicesUpdateOptionalParams
+    options?: EmailServicesUpdateOptionalParams,
   ): Promise<EmailServicesUpdateResponse>;
   /**
    * Get a list of domains that are fully verified in Exchange Online.
    * @param options The options parameters.
    */
   listVerifiedExchangeOnlineDomains(
-    options?: EmailServicesListVerifiedExchangeOnlineDomainsOptionalParams
+    options?: EmailServicesListVerifiedExchangeOnlineDomainsOptionalParams,
   ): Promise<EmailServicesListVerifiedExchangeOnlineDomainsResponse>;
 }

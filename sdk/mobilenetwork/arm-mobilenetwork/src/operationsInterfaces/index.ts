@@ -8,9 +8,12 @@
 
 export * from "./attachedDataNetworks";
 export * from "./dataNetworks";
+export * from "./diagnosticsPackages";
 export * from "./mobileNetworks";
 export * from "./operations";
+export * from "./packetCaptures";
 export * from "./packetCoreControlPlanes";
+export * from "./routingInfo";
 export * from "./packetCoreControlPlaneVersions";
 export * from "./packetCoreDataPlanes";
 export * from "./services";
@@ -19,3 +22,5 @@ export * from "./simGroups";
 export * from "./simPolicies";
 export * from "./sites";
 export * from "./slices";
+export * from "./extendedUeInformation";
+export * from "./ueInformation";

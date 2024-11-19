@@ -16,7 +16,7 @@ require("dotenv").config();
  * This sample demonstrates how to List TrafficController resources by subscription ID
  *
  * @summary List TrafficController resources by subscription ID
- * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/cadl/examples/TrafficControllersGetList.json
+ * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/preview/2024-05-01-preview/examples/TrafficControllersGetList.json
  */
 async function getTrafficControllersList() {
   const subscriptionId = process.env["SERVICENETWORKING_SUBSCRIPTION_ID"] || "subid";

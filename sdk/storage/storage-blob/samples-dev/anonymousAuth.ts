@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary authenticate anonymously using a SAS-encoded URL
@@ -21,7 +21,7 @@ async function main() {
   const blobServiceClient = new BlobServiceClient(
     // When using AnonymousCredential, following url should include a valid SAS or support public access
     `https://${account}.blob.core.windows.net${accountSas}`,
-    new AnonymousCredential()
+    new AnonymousCredential(),
   );
 
   console.log("Containers:");

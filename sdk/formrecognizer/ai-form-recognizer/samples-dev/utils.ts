@@ -1,5 +1,9 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
+
+/**
+ * @azsdk-util
+ */
 
 import { DocumentSpan } from "@azure/ai-form-recognizer";
 

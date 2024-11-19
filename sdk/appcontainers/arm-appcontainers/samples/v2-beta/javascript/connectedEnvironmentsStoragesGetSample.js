@@ -10,16 +10,18 @@
 // Licensed under the MIT License.
 const { ContainerAppsAPIClient } = require("@azure/arm-appcontainers");
 const { DefaultAzureCredential } = require("@azure/identity");
+require("dotenv").config();
 
 /**
  * This sample demonstrates how to Get storage for a connectedEnvironment.
  *
  * @summary Get storage for a connectedEnvironment.
- * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2022-06-01-preview/examples/ConnectedEnvironmentsStorages_Get.json
+ * x-ms-original-file: specification/app/resource-manager/Microsoft.App/preview/2024-08-02-preview/examples/ConnectedEnvironmentsStorages_Get.json
  */
 async function getAEnvironmentsStoragePropertiesBySubscription() {
-  const subscriptionId = "8efdecc5-919e-44eb-b179-915dca89ebf9";
-  const resourceGroupName = "examplerg";
+  const subscriptionId =
+    process.env["APPCONTAINERS_SUBSCRIPTION_ID"] || "8efdecc5-919e-44eb-b179-915dca89ebf9";
+  const resourceGroupName = process.env["APPCONTAINERS_RESOURCE_GROUP"] || "examplerg";
   const connectedEnvironmentName = "env";
   const storageName = "jlaw-demo1";
   const credential = new DefaultAzureCredential();
@@ -27,9 +29,13 @@ async function getAEnvironmentsStoragePropertiesBySubscription() {
   const result = await client.connectedEnvironmentsStorages.get(
     resourceGroupName,
     connectedEnvironmentName,
-    storageName
+    storageName,
   );
   console.log(result);
 }
 
-getAEnvironmentsStoragePropertiesBySubscription().catch(console.error);
+async function main() {
+  getAEnvironmentsStoragePropertiesBySubscription();
+}
+
+main().catch(console.error);

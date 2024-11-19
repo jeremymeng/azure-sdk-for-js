@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 import { Constants } from "../common";
-import { CosmosHeaders } from "../queryExecutionContext";
+import type { CosmosHeaders } from "../queryExecutionContext";
 import { ConsistencyLevel } from "./ConsistencyLevel";
 
 /**
@@ -98,4 +98,5 @@ export interface Location {
   name: string;
   databaseAccountEndpoint: string;
   unavailable?: boolean;
+  lastUnavailabilityTimestampInMs?: number;
 }

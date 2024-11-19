@@ -1,16 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
- * @summary Demonstrates how to upload logs to a Monitor Resource (Log Analytics workspace)
+ * @summary Demonstrates how to upload logs to a Monitor Resource (Log Analytics workspace).
+ * The user can track failed log entries and the associated error message via the AggregateUploadLogsError Object.
  */
 import { DefaultAzureCredential } from "@azure/identity";
-import { LogsIngestionClient } from "@azure/monitor-ingestion";
+import { isAggregateLogsUploadError, LogsIngestionClient } from "@azure/monitor-ingestion";
+import "dotenv/config";
 
-import * as dotenv from "dotenv";
-dotenv.config();
-
-export async function main() {
+async function main(): Promise<void> {
   const logsIngestionEndpoint = process.env.LOGS_INGESTION_ENDPOINT || "logs_ingestion_endpoint";
   const ruleId = process.env.DATA_COLLECTION_RULE_ID || "data_collection_rule_id";
   const streamName = process.env.STREAM_NAME || "data_stream_name";
@@ -28,10 +27,15 @@ export async function main() {
       AdditionalContext: "context",
     },
   ];
-  const result = await client.upload(ruleId, streamName, logs);
-  if (result.status !== "Success") {
-    console.log("Some logs have failed to complete ingestion. Upload status=", result.status);
-    for (const errors of result.errors) {
+  try {
+    await client.upload(ruleId, streamName, logs);
+  } catch (e) {
+    const aggregateErrors = isAggregateLogsUploadError(e) ? e.errors : [];
+    console.log(
+      "Some logs have failed to complete ingestion. Length of errors =",
+      aggregateErrors.length,
+    );
+    for (const errors of aggregateErrors) {
       console.log(`Error - ${JSON.stringify(errors.cause)}`);
       console.log(`Log - ${JSON.stringify(errors.failedLogs)}`);
     }

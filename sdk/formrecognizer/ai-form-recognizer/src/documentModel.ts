@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { DocumentFieldSchema, DocumentModelDetails } from "./generated";
-import { AnalyzedDocument, AnalyzeResult } from "./lro/analysis";
-import { DocumentField } from "./models/fields";
-import { FormRecognizerApiVersion } from "./options";
+import type { DocumentFieldSchema, DocumentModelDetails } from "./generated";
+import type { AnalyzedDocument, AnalyzeResult } from "./lro/analysis";
+import type { DocumentField } from "./models/fields";
 import { isAcronymic, uncapitalize } from "./util";
 
 /**
@@ -21,7 +20,7 @@ export interface DocumentModel<Result> {
   /**
    * The API version of the model.
    */
-  apiVersion?: FormRecognizerApiVersion;
+  apiVersion?: string;
   /**
    * An associated transformation that is used to conver the base (weak) Result type to the strong version.
    */
@@ -39,11 +38,11 @@ export interface DocumentModel<Result> {
 function extractField(
   fieldName: string,
   schema: DocumentFieldSchema,
-  field: DocumentField
+  field: DocumentField,
 ): DocumentField {
   if (schema.type !== field.kind) {
     throw new Error(
-      `Schema violation: ${fieldName} had type "${field.kind}", but expected "${schema.type}"`
+      `Schema violation: ${fieldName} had type "${field.kind}", but expected "${schema.type}"`,
     );
   }
 
@@ -53,12 +52,15 @@ function extractField(
 
     for (const [subFieldName, subFieldSchema] of Object.entries(schema.properties!)) {
       if (field.properties[subFieldName] !== undefined && field.properties[subFieldName] !== null) {
-        result[isAcronymic(subFieldName) ? subFieldName : uncapitalize(subFieldName)] =
-          extractField(
-            fieldName + "." + subFieldName,
-            subFieldSchema,
-            field.properties[subFieldName]!
-          );
+        const trueFieldName = (
+          isAcronymic(subFieldName) ? subFieldName : uncapitalize(subFieldName)
+        ).replace(/\s/g, "");
+
+        result[trueFieldName] = extractField(
+          fieldName + "." + subFieldName,
+          subFieldSchema,
+          field.properties[subFieldName]!,
+        );
       }
     }
 
@@ -70,7 +72,7 @@ function extractField(
     return {
       ...field,
       values: field.values.map((val, idx) =>
-        extractField(fieldName + "[" + idx + "]", schema.items!, val)
+        extractField(fieldName + "[" + idx + "]", schema.items!, val),
       ),
     };
   } else return field;
@@ -87,19 +89,19 @@ function extractField(
  * @returns - a DocumentModel that encodes the schema
  */
 export function createModelFromSchema(
-  schema: Omit<DocumentModelDetails, "createdOn">
+  schema: Omit<DocumentModelDetails, "createdOn">,
 ): DocumentModel<AnalyzeResult<unknown>> {
   return {
     modelId: schema.modelId,
-    apiVersion: schema.apiVersion as FormRecognizerApiVersion,
+    apiVersion: schema.apiVersion,
     transformResult(baseResult: AnalyzeResult): AnalyzeResult<unknown> {
       const hasDocuments = Object.entries(schema.docTypes ?? {}).length > 0;
 
-      const defaultDocuments = hasDocuments ? [] : undefined;
-
       return {
         ...baseResult,
-        documents: baseResult.documents?.map(toDocument) ?? defaultDocuments,
+        documents: hasDocuments
+          ? baseResult.documents?.map(toDocument)
+          : (baseResult.documents ?? []),
       };
 
       function toDocument(document: AnalyzedDocument): unknown {
@@ -108,7 +110,7 @@ export function createModelFromSchema(
 
         if (model === undefined) {
           throw new Error(
-            `Unexpected document type "${document.docType}" in result using model "${schema.modelId}"`
+            `Unexpected document type "${document.docType}" in result using model "${schema.modelId}"`,
           );
         }
         for (const [fieldName, fieldSchema] of Object.entries(model.fieldSchema)) {
@@ -117,10 +119,13 @@ export function createModelFromSchema(
             document.fields[fieldName] !== undefined &&
             document.fields[fieldName] !== null
           ) {
-            result[isAcronymic(fieldName) ? fieldName : uncapitalize(fieldName)] = extractField(
+            const trueFieldName = (
+              isAcronymic(fieldName) ? fieldName : uncapitalize(fieldName)
+            ).replace(/\s/g, "");
+            result[trueFieldName] = extractField(
               fieldName,
               fieldSchema,
-              document.fields[fieldName]
+              document.fields[fieldName],
             );
           }
         }

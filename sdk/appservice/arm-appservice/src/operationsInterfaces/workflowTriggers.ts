@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   WorkflowTrigger,
   WorkflowTriggersListOptionalParams,
@@ -17,7 +17,7 @@ import {
   WorkflowTriggersListCallbackUrlResponse,
   WorkflowTriggersRunOptionalParams,
   WorkflowTriggersGetSchemaJsonOptionalParams,
-  WorkflowTriggersGetSchemaJsonResponse
+  WorkflowTriggersGetSchemaJsonResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -34,7 +34,7 @@ export interface WorkflowTriggers {
     resourceGroupName: string,
     name: string,
     workflowName: string,
-    options?: WorkflowTriggersListOptionalParams
+    options?: WorkflowTriggersListOptionalParams,
   ): PagedAsyncIterableIterator<WorkflowTrigger>;
   /**
    * Gets a workflow trigger.
@@ -49,7 +49,7 @@ export interface WorkflowTriggers {
     name: string,
     workflowName: string,
     triggerName: string,
-    options?: WorkflowTriggersGetOptionalParams
+    options?: WorkflowTriggersGetOptionalParams,
   ): Promise<WorkflowTriggersGetResponse>;
   /**
    * Get the callback URL for a workflow trigger.
@@ -64,7 +64,7 @@ export interface WorkflowTriggers {
     name: string,
     workflowName: string,
     triggerName: string,
-    options?: WorkflowTriggersListCallbackUrlOptionalParams
+    options?: WorkflowTriggersListCallbackUrlOptionalParams,
   ): Promise<WorkflowTriggersListCallbackUrlResponse>;
   /**
    * Runs a workflow trigger.
@@ -79,8 +79,8 @@ export interface WorkflowTriggers {
     name: string,
     workflowName: string,
     triggerName: string,
-    options?: WorkflowTriggersRunOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: WorkflowTriggersRunOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Runs a workflow trigger.
    * @param resourceGroupName Name of the resource group to which the resource belongs.
@@ -94,7 +94,7 @@ export interface WorkflowTriggers {
     name: string,
     workflowName: string,
     triggerName: string,
-    options?: WorkflowTriggersRunOptionalParams
+    options?: WorkflowTriggersRunOptionalParams,
   ): Promise<void>;
   /**
    * Get the trigger schema as JSON.
@@ -109,6 +109,6 @@ export interface WorkflowTriggers {
     name: string,
     workflowName: string,
     triggerName: string,
-    options?: WorkflowTriggersGetSchemaJsonOptionalParams
+    options?: WorkflowTriggersGetSchemaJsonOptionalParams,
   ): Promise<WorkflowTriggersGetSchemaJsonResponse>;
 }

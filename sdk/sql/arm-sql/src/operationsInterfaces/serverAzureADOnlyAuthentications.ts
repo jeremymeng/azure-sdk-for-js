@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ServerAzureADOnlyAuthentication,
   ServerAzureADOnlyAuthenticationsListByServerOptionalParams,
@@ -16,7 +16,7 @@ import {
   ServerAzureADOnlyAuthenticationsGetResponse,
   ServerAzureADOnlyAuthenticationsCreateOrUpdateOptionalParams,
   ServerAzureADOnlyAuthenticationsCreateOrUpdateResponse,
-  ServerAzureADOnlyAuthenticationsDeleteOptionalParams
+  ServerAzureADOnlyAuthenticationsDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -32,7 +32,7 @@ export interface ServerAzureADOnlyAuthentications {
   listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: ServerAzureADOnlyAuthenticationsListByServerOptionalParams
+    options?: ServerAzureADOnlyAuthenticationsListByServerOptionalParams,
   ): PagedAsyncIterableIterator<ServerAzureADOnlyAuthentication>;
   /**
    * Gets a specific Azure Active Directory only authentication property.
@@ -46,7 +46,7 @@ export interface ServerAzureADOnlyAuthentications {
     resourceGroupName: string,
     serverName: string,
     authenticationName: AuthenticationName,
-    options?: ServerAzureADOnlyAuthenticationsGetOptionalParams
+    options?: ServerAzureADOnlyAuthenticationsGetOptionalParams,
   ): Promise<ServerAzureADOnlyAuthenticationsGetResponse>;
   /**
    * Sets Server Active Directory only authentication property or updates an existing server Active
@@ -64,12 +64,10 @@ export interface ServerAzureADOnlyAuthentications {
     serverName: string,
     authenticationName: AuthenticationName,
     parameters: ServerAzureADOnlyAuthentication,
-    options?: ServerAzureADOnlyAuthenticationsCreateOrUpdateOptionalParams
+    options?: ServerAzureADOnlyAuthenticationsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        ServerAzureADOnlyAuthenticationsCreateOrUpdateResponse
-      >,
+    SimplePollerLike<
+      OperationState<ServerAzureADOnlyAuthenticationsCreateOrUpdateResponse>,
       ServerAzureADOnlyAuthenticationsCreateOrUpdateResponse
     >
   >;
@@ -89,7 +87,7 @@ export interface ServerAzureADOnlyAuthentications {
     serverName: string,
     authenticationName: AuthenticationName,
     parameters: ServerAzureADOnlyAuthentication,
-    options?: ServerAzureADOnlyAuthenticationsCreateOrUpdateOptionalParams
+    options?: ServerAzureADOnlyAuthenticationsCreateOrUpdateOptionalParams,
   ): Promise<ServerAzureADOnlyAuthenticationsCreateOrUpdateResponse>;
   /**
    * Deletes an existing server Active Directory only authentication property.
@@ -103,8 +101,8 @@ export interface ServerAzureADOnlyAuthentications {
     resourceGroupName: string,
     serverName: string,
     authenticationName: AuthenticationName,
-    options?: ServerAzureADOnlyAuthenticationsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: ServerAzureADOnlyAuthenticationsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes an existing server Active Directory only authentication property.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -117,6 +115,6 @@ export interface ServerAzureADOnlyAuthentications {
     resourceGroupName: string,
     serverName: string,
     authenticationName: AuthenticationName,
-    options?: ServerAzureADOnlyAuthenticationsDeleteOptionalParams
+    options?: ServerAzureADOnlyAuthenticationsDeleteOptionalParams,
   ): Promise<void>;
 }

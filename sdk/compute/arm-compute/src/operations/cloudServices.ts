@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { ComputeManagementClient } from "../computeManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   CloudService,
   CloudServicesListAllNextOptionalParams,
@@ -39,7 +43,7 @@ import {
   CloudServicesRebuildOptionalParams,
   CloudServicesDeleteInstancesOptionalParams,
   CloudServicesListAllNextResponse,
-  CloudServicesListNextResponse
+  CloudServicesListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -62,7 +66,7 @@ export class CloudServicesImpl implements CloudServices {
    * @param options The options parameters.
    */
   public listAll(
-    options?: CloudServicesListAllOptionalParams
+    options?: CloudServicesListAllOptionalParams,
   ): PagedAsyncIterableIterator<CloudService> {
     const iter = this.listAllPagingAll(options);
     return {
@@ -77,13 +81,13 @@ export class CloudServicesImpl implements CloudServices {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listAllPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listAllPagingPage(
     options?: CloudServicesListAllOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<CloudService[]> {
     let result: CloudServicesListAllResponse;
     let continuationToken = settings?.continuationToken;
@@ -104,7 +108,7 @@ export class CloudServicesImpl implements CloudServices {
   }
 
   private async *listAllPagingAll(
-    options?: CloudServicesListAllOptionalParams
+    options?: CloudServicesListAllOptionalParams,
   ): AsyncIterableIterator<CloudService> {
     for await (const page of this.listAllPagingPage(options)) {
       yield* page;
@@ -119,7 +123,7 @@ export class CloudServicesImpl implements CloudServices {
    */
   public list(
     resourceGroupName: string,
-    options?: CloudServicesListOptionalParams
+    options?: CloudServicesListOptionalParams,
   ): PagedAsyncIterableIterator<CloudService> {
     const iter = this.listPagingAll(resourceGroupName, options);
     return {
@@ -134,14 +138,14 @@ export class CloudServicesImpl implements CloudServices {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listPagingPage(resourceGroupName, options, settings);
-      }
+      },
     };
   }
 
   private async *listPagingPage(
     resourceGroupName: string,
     options?: CloudServicesListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<CloudService[]> {
     let result: CloudServicesListResponse;
     let continuationToken = settings?.continuationToken;
@@ -156,7 +160,7 @@ export class CloudServicesImpl implements CloudServices {
       result = await this._listNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -167,7 +171,7 @@ export class CloudServicesImpl implements CloudServices {
 
   private async *listPagingAll(
     resourceGroupName: string,
-    options?: CloudServicesListOptionalParams
+    options?: CloudServicesListOptionalParams,
   ): AsyncIterableIterator<CloudService> {
     for await (const page of this.listPagingPage(resourceGroupName, options)) {
       yield* page;
@@ -184,30 +188,29 @@ export class CloudServicesImpl implements CloudServices {
   async beginCreateOrUpdate(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesCreateOrUpdateOptionalParams
+    options?: CloudServicesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CloudServicesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<CloudServicesCreateOrUpdateResponse>,
       CloudServicesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CloudServicesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -216,8 +219,8 @@ export class CloudServicesImpl implements CloudServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -225,19 +228,22 @@ export class CloudServicesImpl implements CloudServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cloudServiceName, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cloudServiceName, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CloudServicesCreateOrUpdateResponse,
+      OperationState<CloudServicesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -253,12 +259,12 @@ export class CloudServicesImpl implements CloudServices {
   async beginCreateOrUpdateAndWait(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesCreateOrUpdateOptionalParams
+    options?: CloudServicesCreateOrUpdateOptionalParams,
   ): Promise<CloudServicesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -272,30 +278,29 @@ export class CloudServicesImpl implements CloudServices {
   async beginUpdate(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesUpdateOptionalParams
+    options?: CloudServicesUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<CloudServicesUpdateResponse>,
+    SimplePollerLike<
+      OperationState<CloudServicesUpdateResponse>,
       CloudServicesUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<CloudServicesUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -304,8 +309,8 @@ export class CloudServicesImpl implements CloudServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -313,19 +318,22 @@ export class CloudServicesImpl implements CloudServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cloudServiceName, options },
-      updateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cloudServiceName, options },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      CloudServicesUpdateResponse,
+      OperationState<CloudServicesUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -340,12 +348,12 @@ export class CloudServicesImpl implements CloudServices {
   async beginUpdateAndWait(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesUpdateOptionalParams
+    options?: CloudServicesUpdateOptionalParams,
   ): Promise<CloudServicesUpdateResponse> {
     const poller = await this.beginUpdate(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -359,25 +367,24 @@ export class CloudServicesImpl implements CloudServices {
   async beginDelete(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServicesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -386,8 +393,8 @@ export class CloudServicesImpl implements CloudServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -395,19 +402,19 @@ export class CloudServicesImpl implements CloudServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cloudServiceName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cloudServiceName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -422,12 +429,12 @@ export class CloudServicesImpl implements CloudServices {
   async beginDeleteAndWait(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesDeleteOptionalParams
+    options?: CloudServicesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -441,11 +448,11 @@ export class CloudServicesImpl implements CloudServices {
   get(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesGetOptionalParams
+    options?: CloudServicesGetOptionalParams,
   ): Promise<CloudServicesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, cloudServiceName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -458,11 +465,11 @@ export class CloudServicesImpl implements CloudServices {
   getInstanceView(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesGetInstanceViewOptionalParams
+    options?: CloudServicesGetInstanceViewOptionalParams,
   ): Promise<CloudServicesGetInstanceViewResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, cloudServiceName, options },
-      getInstanceViewOperationSpec
+      getInstanceViewOperationSpec,
     );
   }
 
@@ -473,7 +480,7 @@ export class CloudServicesImpl implements CloudServices {
    * @param options The options parameters.
    */
   private _listAll(
-    options?: CloudServicesListAllOptionalParams
+    options?: CloudServicesListAllOptionalParams,
   ): Promise<CloudServicesListAllResponse> {
     return this.client.sendOperationRequest({ options }, listAllOperationSpec);
   }
@@ -486,11 +493,11 @@ export class CloudServicesImpl implements CloudServices {
    */
   private _list(
     resourceGroupName: string,
-    options?: CloudServicesListOptionalParams
+    options?: CloudServicesListOptionalParams,
   ): Promise<CloudServicesListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -503,25 +510,24 @@ export class CloudServicesImpl implements CloudServices {
   async beginStart(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesStartOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServicesStartOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -530,8 +536,8 @@ export class CloudServicesImpl implements CloudServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -539,19 +545,19 @@ export class CloudServicesImpl implements CloudServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cloudServiceName, options },
-      startOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cloudServiceName, options },
+      spec: startOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -566,12 +572,12 @@ export class CloudServicesImpl implements CloudServices {
   async beginStartAndWait(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesStartOptionalParams
+    options?: CloudServicesStartOptionalParams,
   ): Promise<void> {
     const poller = await this.beginStart(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -586,25 +592,24 @@ export class CloudServicesImpl implements CloudServices {
   async beginPowerOff(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesPowerOffOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServicesPowerOffOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -613,8 +618,8 @@ export class CloudServicesImpl implements CloudServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -622,19 +627,19 @@ export class CloudServicesImpl implements CloudServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cloudServiceName, options },
-      powerOffOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cloudServiceName, options },
+      spec: powerOffOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -650,12 +655,12 @@ export class CloudServicesImpl implements CloudServices {
   async beginPowerOffAndWait(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesPowerOffOptionalParams
+    options?: CloudServicesPowerOffOptionalParams,
   ): Promise<void> {
     const poller = await this.beginPowerOff(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -669,25 +674,24 @@ export class CloudServicesImpl implements CloudServices {
   async beginRestart(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesRestartOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServicesRestartOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -696,8 +700,8 @@ export class CloudServicesImpl implements CloudServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -705,19 +709,19 @@ export class CloudServicesImpl implements CloudServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cloudServiceName, options },
-      restartOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cloudServiceName, options },
+      spec: restartOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -732,12 +736,12 @@ export class CloudServicesImpl implements CloudServices {
   async beginRestartAndWait(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesRestartOptionalParams
+    options?: CloudServicesRestartOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRestart(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -752,25 +756,24 @@ export class CloudServicesImpl implements CloudServices {
   async beginReimage(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesReimageOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServicesReimageOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -779,8 +782,8 @@ export class CloudServicesImpl implements CloudServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -788,19 +791,19 @@ export class CloudServicesImpl implements CloudServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cloudServiceName, options },
-      reimageOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cloudServiceName, options },
+      spec: reimageOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -816,12 +819,12 @@ export class CloudServicesImpl implements CloudServices {
   async beginReimageAndWait(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesReimageOptionalParams
+    options?: CloudServicesReimageOptionalParams,
   ): Promise<void> {
     const poller = await this.beginReimage(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -837,25 +840,24 @@ export class CloudServicesImpl implements CloudServices {
   async beginRebuild(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesRebuildOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServicesRebuildOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -864,8 +866,8 @@ export class CloudServicesImpl implements CloudServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -873,19 +875,19 @@ export class CloudServicesImpl implements CloudServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cloudServiceName, options },
-      rebuildOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cloudServiceName, options },
+      spec: rebuildOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -902,12 +904,12 @@ export class CloudServicesImpl implements CloudServices {
   async beginRebuildAndWait(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesRebuildOptionalParams
+    options?: CloudServicesRebuildOptionalParams,
   ): Promise<void> {
     const poller = await this.beginRebuild(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -921,25 +923,24 @@ export class CloudServicesImpl implements CloudServices {
   async beginDeleteInstances(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesDeleteInstancesOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: CloudServicesDeleteInstancesOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -948,8 +949,8 @@ export class CloudServicesImpl implements CloudServices {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -957,19 +958,19 @@ export class CloudServicesImpl implements CloudServices {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, cloudServiceName, options },
-      deleteInstancesOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, cloudServiceName, options },
+      spec: deleteInstancesOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -984,12 +985,12 @@ export class CloudServicesImpl implements CloudServices {
   async beginDeleteInstancesAndWait(
     resourceGroupName: string,
     cloudServiceName: string,
-    options?: CloudServicesDeleteInstancesOptionalParams
+    options?: CloudServicesDeleteInstancesOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDeleteInstances(
       resourceGroupName,
       cloudServiceName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -1001,11 +1002,11 @@ export class CloudServicesImpl implements CloudServices {
    */
   private _listAllNext(
     nextLink: string,
-    options?: CloudServicesListAllNextOptionalParams
+    options?: CloudServicesListAllNextOptionalParams,
   ): Promise<CloudServicesListAllNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listAllNextOperationSpec
+      listAllNextOperationSpec,
     );
   }
 
@@ -1018,11 +1019,11 @@ export class CloudServicesImpl implements CloudServices {
   private _listNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: CloudServicesListNextOptionalParams
+    options?: CloudServicesListNextOptionalParams,
   ): Promise<CloudServicesListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -1030,74 +1031,71 @@ export class CloudServicesImpl implements CloudServices {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudService
+      bodyMapper: Mappers.CloudService,
     },
     201: {
-      bodyMapper: Mappers.CloudService
+      bodyMapper: Mappers.CloudService,
     },
     202: {
-      bodyMapper: Mappers.CloudService
+      bodyMapper: Mappers.CloudService,
     },
     204: {
-      bodyMapper: Mappers.CloudService
+      bodyMapper: Mappers.CloudService,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.parameters31,
+  requestBody: Parameters.parameters33,
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudService
+      bodyMapper: Mappers.CloudService,
     },
     201: {
-      bodyMapper: Mappers.CloudService
+      bodyMapper: Mappers.CloudService,
     },
     202: {
-      bodyMapper: Mappers.CloudService
+      bodyMapper: Mappers.CloudService,
     },
     204: {
-      bodyMapper: Mappers.CloudService
+      bodyMapper: Mappers.CloudService,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.parameters32,
+  requestBody: Parameters.parameters34,
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -1105,104 +1103,99 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudService
+      bodyMapper: Mappers.CloudService,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getInstanceViewOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/instanceView",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/instanceView",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudServiceInstanceView
+      bodyMapper: Mappers.CloudServiceInstanceView,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listAllOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/cloudServices",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/cloudServices",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudServiceListResult
+      bodyMapper: Mappers.CloudServiceListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudServiceListResult
+      bodyMapper: Mappers.CloudServiceListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const startOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/start",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/start",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1210,22 +1203,21 @@ const startOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const powerOffOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/poweroff",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/poweroff",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1233,22 +1225,21 @@ const powerOffOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const restartOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/restart",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/restart",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1256,24 +1247,23 @@ const restartOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.parameters33,
+  requestBody: Parameters.parameters35,
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const reimageOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/reimage",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/reimage",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1281,24 +1271,23 @@ const reimageOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.parameters33,
+  requestBody: Parameters.parameters35,
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const rebuildOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/rebuild",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/rebuild",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1306,24 +1295,23 @@ const rebuildOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.parameters33,
+  requestBody: Parameters.parameters35,
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteInstancesOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/delete",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/cloudServices/{cloudServiceName}/delete",
   httpMethod: "POST",
   responses: {
     200: {},
@@ -1331,57 +1319,57 @@ const deleteInstancesOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  requestBody: Parameters.parameters33,
+  requestBody: Parameters.parameters35,
   queryParameters: [Parameters.apiVersion4],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.cloudServiceName
+    Parameters.cloudServiceName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listAllNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudServiceListResult
+      bodyMapper: Mappers.CloudServiceListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.CloudServiceListResult
+      bodyMapper: Mappers.CloudServiceListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.resourceGroupName
+    Parameters.resourceGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   VpnServerConfigurationPolicyGroup,
   ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams,
@@ -15,7 +15,7 @@ import {
   ConfigurationPolicyGroupsCreateOrUpdateResponse,
   ConfigurationPolicyGroupsDeleteOptionalParams,
   ConfigurationPolicyGroupsGetOptionalParams,
-  ConfigurationPolicyGroupsGetResponse
+  ConfigurationPolicyGroupsGetResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface ConfigurationPolicyGroups {
   listByVpnServerConfiguration(
     resourceGroupName: string,
     vpnServerConfigurationName: string,
-    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams
+    options?: ConfigurationPolicyGroupsListByVpnServerConfigurationOptionalParams,
   ): PagedAsyncIterableIterator<VpnServerConfigurationPolicyGroup>;
   /**
    * Creates a ConfigurationPolicyGroup if it doesn't exist else updates the existing one.
@@ -46,10 +46,10 @@ export interface ConfigurationPolicyGroups {
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
     vpnServerConfigurationPolicyGroupParameters: VpnServerConfigurationPolicyGroup,
-    options?: ConfigurationPolicyGroupsCreateOrUpdateOptionalParams
+    options?: ConfigurationPolicyGroupsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ConfigurationPolicyGroupsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ConfigurationPolicyGroupsCreateOrUpdateResponse>,
       ConfigurationPolicyGroupsCreateOrUpdateResponse
     >
   >;
@@ -67,7 +67,7 @@ export interface ConfigurationPolicyGroups {
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
     vpnServerConfigurationPolicyGroupParameters: VpnServerConfigurationPolicyGroup,
-    options?: ConfigurationPolicyGroupsCreateOrUpdateOptionalParams
+    options?: ConfigurationPolicyGroupsCreateOrUpdateOptionalParams,
   ): Promise<ConfigurationPolicyGroupsCreateOrUpdateResponse>;
   /**
    * Deletes a ConfigurationPolicyGroup.
@@ -80,8 +80,8 @@ export interface ConfigurationPolicyGroups {
     resourceGroupName: string,
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
-    options?: ConfigurationPolicyGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: ConfigurationPolicyGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a ConfigurationPolicyGroup.
    * @param resourceGroupName The resource group name of the ConfigurationPolicyGroup.
@@ -93,7 +93,7 @@ export interface ConfigurationPolicyGroups {
     resourceGroupName: string,
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
-    options?: ConfigurationPolicyGroupsDeleteOptionalParams
+    options?: ConfigurationPolicyGroupsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Retrieves the details of a ConfigurationPolicyGroup.
@@ -106,6 +106,6 @@ export interface ConfigurationPolicyGroups {
     resourceGroupName: string,
     vpnServerConfigurationName: string,
     configurationPolicyGroupName: string,
-    options?: ConfigurationPolicyGroupsGetOptionalParams
+    options?: ConfigurationPolicyGroupsGetOptionalParams,
   ): Promise<ConfigurationPolicyGroupsGetResponse>;
 }

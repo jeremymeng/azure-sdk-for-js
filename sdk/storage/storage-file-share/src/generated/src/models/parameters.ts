@@ -9,9 +9,8 @@
 import {
   OperationParameter,
   OperationURLParameter,
-  OperationQueryParameter,
-  QueryCollectionFormat
-} from "@azure/core-http";
+  OperationQueryParameter
+} from "@azure/core-client";
 import {
   FileServiceProperties as FileServicePropertiesMapper,
   SharePermission as SharePermissionMapper
@@ -100,9 +99,20 @@ export const timeoutInSeconds: OperationQueryParameter = {
 export const version: OperationParameter = {
   parameterPath: "version",
   mapper: {
-    defaultValue: "2021-10-04",
+    defaultValue: "2025-01-05",
     isConstant: true,
     serializedName: "x-ms-version",
+    type: {
+      name: "String"
+    }
+  }
+};
+
+export const fileRequestIntent: OperationParameter = {
+  parameterPath: ["options", "fileRequestIntent"],
+  mapper: {
+    serializedName: "x-ms-file-request-intent",
+    xmlName: "x-ms-file-request-intent",
     type: {
       name: "String"
     }
@@ -185,7 +195,7 @@ export const include: OperationQueryParameter = {
       }
     }
   },
-  collectionFormat: QueryCollectionFormat.Csv
+  collectionFormat: "CSV"
 };
 
 export const restype1: OperationQueryParameter = {
@@ -205,11 +215,11 @@ export const metadata: OperationParameter = {
   mapper: {
     serializedName: "x-ms-meta",
     xmlName: "x-ms-meta",
+    headerCollectionPrefix: "x-ms-meta-",
     type: {
       name: "Dictionary",
       value: { type: { name: "String" } }
-    },
-    headerCollectionPrefix: "x-ms-meta-"
+    }
   }
 };
 
@@ -234,7 +244,7 @@ export const accessTier: OperationParameter = {
     xmlName: "x-ms-access-tier",
     type: {
       name: "Enum",
-      allowedValues: ["TransactionOptimized", "Hot", "Cool"]
+      allowedValues: ["TransactionOptimized", "Hot", "Cool", "Premium"]
     }
   }
 };
@@ -258,6 +268,72 @@ export const rootSquash: OperationParameter = {
     type: {
       name: "Enum",
       allowedValues: ["NoRootSquash", "RootSquash", "AllSquash"]
+    }
+  }
+};
+
+export const enableSnapshotVirtualDirectoryAccess: OperationParameter = {
+  parameterPath: ["options", "enableSnapshotVirtualDirectoryAccess"],
+  mapper: {
+    serializedName: "x-ms-enable-snapshot-virtual-directory-access",
+    xmlName: "x-ms-enable-snapshot-virtual-directory-access",
+    type: {
+      name: "Boolean"
+    }
+  }
+};
+
+export const paidBurstingEnabled: OperationParameter = {
+  parameterPath: ["options", "paidBurstingEnabled"],
+  mapper: {
+    serializedName: "x-ms-share-paid-bursting-enabled",
+    xmlName: "x-ms-share-paid-bursting-enabled",
+    type: {
+      name: "Boolean"
+    }
+  }
+};
+
+export const paidBurstingMaxBandwidthMibps: OperationParameter = {
+  parameterPath: ["options", "paidBurstingMaxBandwidthMibps"],
+  mapper: {
+    serializedName: "x-ms-share-paid-bursting-max-bandwidth-mibps",
+    xmlName: "x-ms-share-paid-bursting-max-bandwidth-mibps",
+    type: {
+      name: "Number"
+    }
+  }
+};
+
+export const paidBurstingMaxIops: OperationParameter = {
+  parameterPath: ["options", "paidBurstingMaxIops"],
+  mapper: {
+    serializedName: "x-ms-share-paid-bursting-max-iops",
+    xmlName: "x-ms-share-paid-bursting-max-iops",
+    type: {
+      name: "Number"
+    }
+  }
+};
+
+export const shareProvisionedIops: OperationParameter = {
+  parameterPath: ["options", "shareProvisionedIops"],
+  mapper: {
+    serializedName: "x-ms-share-provisioned-iops",
+    xmlName: "x-ms-share-provisioned-iops",
+    type: {
+      name: "Number"
+    }
+  }
+};
+
+export const shareProvisionedBandwidthMibps: OperationParameter = {
+  parameterPath: ["options", "shareProvisionedBandwidthMibps"],
+  mapper: {
+    serializedName: "x-ms-share-provisioned-bandwidth-mibps",
+    xmlName: "x-ms-share-provisioned-bandwidth-mibps",
+    type: {
+      name: "Number"
     }
   }
 };
@@ -436,6 +512,18 @@ export const comp3: OperationQueryParameter = {
   }
 };
 
+export const contentType1: OperationParameter = {
+  parameterPath: ["options", "contentType"],
+  mapper: {
+    defaultValue: "application/json",
+    isConstant: true,
+    serializedName: "Content-Type",
+    type: {
+      name: "String"
+    }
+  }
+};
+
 export const sharePermission: OperationParameter = {
   parameterPath: "sharePermission",
   mapper: SharePermissionMapper
@@ -473,6 +561,18 @@ export const filePermissionKey: OperationParameter = {
     xmlName: "x-ms-file-permission-key",
     type: {
       name: "String"
+    }
+  }
+};
+
+export const filePermissionFormat: OperationParameter = {
+  parameterPath: ["options", "filePermissionFormat"],
+  mapper: {
+    serializedName: "x-ms-file-permission-format",
+    xmlName: "x-ms-file-permission-format",
+    type: {
+      name: "Enum",
+      allowedValues: ["Sddl", "Binary"]
     }
   }
 };
@@ -578,6 +678,17 @@ export const restype2: OperationQueryParameter = {
   }
 };
 
+export const allowTrailingDot: OperationParameter = {
+  parameterPath: ["options", "allowTrailingDot"],
+  mapper: {
+    serializedName: "x-ms-allow-trailing-dot",
+    xmlName: "x-ms-allow-trailing-dot",
+    type: {
+      name: "Boolean"
+    }
+  }
+};
+
 export const filePermission: OperationParameter = {
   parameterPath: ["options", "filePermission"],
   mapper: {
@@ -661,7 +772,7 @@ export const include1: OperationQueryParameter = {
       }
     }
   },
-  collectionFormat: QueryCollectionFormat.Csv
+  collectionFormat: "CSV"
 };
 
 export const includeExtendedInfo: OperationParameter = {
@@ -838,6 +949,17 @@ export const fileChangeTime: OperationParameter = {
   }
 };
 
+export const allowSourceTrailingDot: OperationParameter = {
+  parameterPath: ["options", "allowSourceTrailingDot"],
+  mapper: {
+    serializedName: "x-ms-source-allow-trailing-dot",
+    xmlName: "x-ms-source-allow-trailing-dot",
+    type: {
+      name: "Boolean"
+    }
+  }
+};
+
 export const fileContentLength: OperationParameter = {
   parameterPath: "fileContentLength",
   mapper: {
@@ -961,7 +1083,7 @@ export const fileContentLength1: OperationParameter = {
   }
 };
 
-export const contentType1: OperationParameter = {
+export const contentType2: OperationParameter = {
   parameterPath: ["options", "contentType"],
   mapper: {
     defaultValue: "application/octet-stream",
@@ -1175,6 +1297,17 @@ export const prevsharesnapshot: OperationQueryParameter = {
     xmlName: "prevsharesnapshot",
     type: {
       name: "String"
+    }
+  }
+};
+
+export const supportRename: OperationParameter = {
+  parameterPath: ["options", "supportRename"],
+  mapper: {
+    serializedName: "x-ms-file-support-rename",
+    xmlName: "x-ms-file-support-rename",
+    type: {
+      name: "Boolean"
     }
   }
 };

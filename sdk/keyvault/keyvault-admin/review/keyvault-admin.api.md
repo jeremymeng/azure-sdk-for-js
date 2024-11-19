@@ -4,14 +4,12 @@
 
 ```ts
 
-/// <reference lib="esnext.asynciterable" />
-
-import { CommonClientOptions } from '@azure/core-client';
-import { OperationOptions } from '@azure/core-client';
-import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
-import { TokenCredential } from '@azure/core-auth';
+import type { CommonClientOptions } from '@azure/core-client';
+import type { OperationOptions } from '@azure/core-client';
+import type { PagedAsyncIterableIterator } from '@azure/core-paging';
+import type { PollerLike } from '@azure/core-lro';
+import type { PollOperationState } from '@azure/core-lro';
+import type { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface AccessControlClientOptions extends CommonClientOptions {
@@ -20,7 +18,7 @@ export interface AccessControlClientOptions extends CommonClientOptions {
 }
 
 // @public
-export interface BooleanKeyVaultSetting extends KeyVaultSettingCommon {
+export interface BooleanKeyVaultSetting extends KeyVaultSetting {
     kind: "boolean";
     value: boolean;
 }
@@ -50,6 +48,9 @@ export interface GetSettingOptions extends OperationOptions {
 }
 
 // @public
+export function isBooleanSetting(setting: KeyVaultSetting): setting is BooleanKeyVaultSetting;
+
+// @public
 export class KeyVaultAccessControlClient {
     constructor(vaultUrl: string, credential: TokenCredential, options?: AccessControlClientOptions);
     createRoleAssignment(roleScope: KeyVaultRoleScope, name: string, roleDefinitionId: string, principalId: string, options?: CreateRoleAssignmentOptions): Promise<KeyVaultRoleAssignment>;
@@ -76,8 +77,11 @@ export interface KeyVaultAdminPollOperationState<TResult> extends PollOperationS
 export class KeyVaultBackupClient {
     constructor(vaultUrl: string, credential: TokenCredential, options?: KeyVaultBackupClientOptions);
     beginBackup(blobStorageUri: string, sasToken: string, options?: KeyVaultBeginBackupOptions): Promise<PollerLike<KeyVaultBackupOperationState, KeyVaultBackupResult>>;
+    beginBackup(blobStorageUri: string, options?: KeyVaultBeginBackupOptions): Promise<PollerLike<KeyVaultBackupOperationState, KeyVaultBackupResult>>;
     beginRestore(folderUri: string, sasToken: string, options?: KeyVaultBeginRestoreOptions): Promise<PollerLike<KeyVaultRestoreOperationState, KeyVaultRestoreResult>>;
+    beginRestore(folderUri: string, options?: KeyVaultBeginRestoreOptions): Promise<PollerLike<KeyVaultRestoreOperationState, KeyVaultRestoreResult>>;
     beginSelectiveKeyRestore(keyName: string, folderUri: string, sasToken: string, options?: KeyVaultBeginSelectiveKeyRestoreOptions): Promise<PollerLike<KeyVaultSelectiveKeyRestoreOperationState, KeyVaultSelectiveKeyRestoreResult>>;
+    beginSelectiveKeyRestore(keyName: string, folderUri: string, options?: KeyVaultBeginSelectiveKeyRestoreOptions): Promise<PollerLike<KeyVaultSelectiveKeyRestoreOperationState, KeyVaultSelectiveKeyRestoreResult>>;
     readonly vaultUrl: string;
 }
 
@@ -177,11 +181,10 @@ export interface KeyVaultSelectiveKeyRestoreResult {
 }
 
 // @public
-export type KeyVaultSetting = UnknownKeyVaultSetting | BooleanKeyVaultSetting;
-
-// @public
-export interface KeyVaultSettingCommon {
+export interface KeyVaultSetting {
+    kind?: string;
     name: string;
+    value: unknown;
 }
 
 // @public
@@ -189,7 +192,7 @@ export class KeyVaultSettingsClient {
     constructor(vaultUrl: string, credential: TokenCredential, options?: SettingsClientOptions);
     getSetting(settingName: string, options?: GetSettingOptions): Promise<KeyVaultSetting>;
     getSettings(options?: ListSettingsOptions): Promise<ListSettingsResponse>;
-    updateSetting(settingName: string, value: boolean, options?: UpdateSettingOptions): Promise<KeyVaultSetting>;
+    updateSetting(setting: KeyVaultSetting, options?: UpdateSettingOptions): Promise<KeyVaultSetting>;
     readonly vaultUrl: string;
 }
 
@@ -238,7 +241,7 @@ export enum KnownKeyVaultRoleScope {
 }
 
 // @public
-export const LATEST_API_VERSION = "7.4-preview.1";
+export const LATEST_API_VERSION = "7.5";
 
 // @public
 export interface ListRoleAssignmentsOptions extends OperationOptions {
@@ -286,13 +289,7 @@ export interface SettingsClientOptions extends CommonClientOptions {
 }
 
 // @public
-export type SUPPORTED_API_VERSIONS = "7.2" | "7.3" | "7.4-preview.1";
-
-// @public
-export interface UnknownKeyVaultSetting extends KeyVaultSettingCommon {
-    kind?: never;
-    value: unknown;
-}
+export type SUPPORTED_API_VERSIONS = "7.2" | "7.3" | "7.4" | "7.5";
 
 // @public
 export interface UpdateSettingOptions extends OperationOptions {

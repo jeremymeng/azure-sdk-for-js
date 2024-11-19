@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { KeyCredential, SASCredential } from "@azure/core-auth";
-import {
+import type { KeyCredential, SASCredential } from "@azure/core-auth";
+import type {
   PipelineResponse,
   PipelineRequest,
   SendRequest,
@@ -31,7 +31,7 @@ export const eventGridCredentialPolicyName = "eventGridCredentialPolicy";
  * using the appropriate header for Event Grid
  */
 export function eventGridCredentialPolicy(
-  credential: KeyCredential | SASCredential
+  credential: KeyCredential | SASCredential,
 ): PipelinePolicy {
   return {
     name: eventGridCredentialPolicyName,

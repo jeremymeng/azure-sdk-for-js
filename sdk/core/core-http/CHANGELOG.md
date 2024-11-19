@@ -1,5 +1,36 @@
 # Release History
 
+## 3.0.5 (2024-11-13)
+
+### Other Changes
+
+- Add deprecation note to README.
+
+## 3.0.4 (2023-11-14)
+
+### Other Changes
+
+- Trim leading and trailing whitespace from header values.
+
+## 3.0.3 (2023-08-31)
+
+### Other Changes
+
+- Defer error object creation
+
+## 3.0.2 (2023-06-01)
+
+### Other Changes
+
+- Export `isNode` from `@azure/core-util`.
+- Remove the validation that credential scopes must be a valid URL [Issue #25881](https://github.com/Azure/azure-sdk-for-js/issues/25881)
+
+## 3.0.1 (2023-04-11)
+
+### Other Changes
+
+- Upgrade dependency `xml2js` version to `^0.5.0`.
+
 ## 3.0.0 (2023-02-03)
 
 ### Features Added
@@ -37,7 +68,7 @@
 
 ### Bugs Fixed
 
-- Updated the HTTP tracing span names to conform to the [OpenTelemetry Specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md#name). [#19838](https://github.com/Azure/azure-sdk-for-js/pull/19838)
+- Updated the HTTP tracing span names to conform to the [OpenTelemetry Specification](https://github.com/open-telemetry/semantic-conventions/blob/4040095eda0159e38edfe7084ed32d3077a6ffb0/docs/http/http-spans.md#name). [#19838](https://github.com/Azure/azure-sdk-for-js/pull/19838)
   - New HTTP spans will use the `HTTP <VERB>` convention instead of using the URL path.
 
 ## 2.2.3 (2022-01-06)

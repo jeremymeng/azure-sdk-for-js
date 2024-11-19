@@ -4,14 +4,12 @@
 
 ```ts
 
-/// <reference lib="esnext.asynciterable" />
-
-import { CommonClientOptions } from '@azure/core-client';
+import type { CommonClientOptions } from '@azure/core-client';
 import * as coreClient from '@azure/core-client';
-import { KeyCredential } from '@azure/core-auth';
-import { OperationOptions } from '@azure/core-client';
-import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { TokenCredential } from '@azure/core-auth';
+import type { KeyCredential } from '@azure/core-auth';
+import type { OperationOptions } from '@azure/core-client';
+import type { PagedAsyncIterableIterator } from '@azure/core-paging';
+import type { TokenCredential } from '@azure/core-auth';
 
 // @public
 export type AttachmentType = "callToAction" | "termsOfService" | "privacyPolicy" | "other";
@@ -59,11 +57,15 @@ export interface GetUSProgramBriefOptions extends OperationOptions {
 }
 
 // @public
+export interface ListShortCodeCostsOptions extends ShortCodesGetCostsOptionalParams {
+}
+
+// @public
 export interface ListShortCodesOptions extends ShortCodesGetShortCodesOptionalParams {
 }
 
 // @public
-export interface ListUSProgramBriefsOptions extends OperationOptions {
+export interface ListUSProgramBriefsOptions extends ShortCodesGetUSProgramBriefsOptionalParams {
 }
 
 // @public
@@ -162,17 +164,18 @@ export interface ReviewNote {
 // @public
 export interface ShortCode {
     countryCode?: string;
-    number?: string;
-    numberType?: NumberType;
     programBriefIds?: string[];
     purchaseDate?: Date;
+    value?: string;
 }
 
 // @public
 export interface ShortCodeCost {
-    amount: number;
-    billingFrequency: BillingFrequency;
-    currencyCode: string;
+    amount?: number;
+    billingFrequency?: BillingFrequency;
+    countryCode?: string;
+    currencyCode?: string;
+    isVanityShortCode?: boolean;
 }
 
 // @public (undocumented)
@@ -190,6 +193,8 @@ export class ShortCodesClient {
     getUSProgramBrief(programBriefId: string, options?: GetUSProgramBriefOptions): Promise<USProgramBrief>;
     // (undocumented)
     getUSProgramBriefAttachment(programBriefId: string, attachmentId: string, options?: ShortCodesGetUSProgramBriefAttachmentOptionalParams): Promise<ProgramBriefAttachment>;
+    // (undocumented)
+    listShortCodeCosts(options?: ListShortCodeCostsOptions): PagedAsyncIterableIterator<ShortCodeCost>;
     // (undocumented)
     listShortCodes(options?: ListShortCodesOptions): PagedAsyncIterableIterator<ShortCode>;
     // (undocumented)
@@ -216,6 +221,12 @@ export interface ShortCodesDeleteUSProgramBriefAttachmentOptionalParams extends 
 }
 
 // @public
+export interface ShortCodesGetCostsOptionalParams extends coreClient.OperationOptions {
+    skip?: number;
+    top?: number;
+}
+
+// @public
 export interface ShortCodesGetShortCodesOptionalParams extends coreClient.OperationOptions {
     skip?: number;
     top?: number;
@@ -227,6 +238,12 @@ export interface ShortCodesGetUSProgramBriefAttachmentOptionalParams extends cor
 
 // @public
 export interface ShortCodesGetUSProgramBriefAttachmentsOptionalParams extends coreClient.OperationOptions {
+    skip?: number;
+    top?: number;
+}
+
+// @public
+export interface ShortCodesGetUSProgramBriefsOptionalParams extends coreClient.OperationOptions {
     skip?: number;
     top?: number;
 }

@@ -27,7 +27,11 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -130,13 +134,19 @@ describe("ServiceFabric test", () => {
   });
 
   it("clusters list test", async function () {
-    const res = (await client.clusters.listByResourceGroup(resourceGroup)).value
-    assert.equal(res?.length, 1)
+    const resArray = new Array();
+    for await (let item of client.clusters.listByResourceGroup(resourceGroup)) {
+      resArray.push(item);
+    }
+    assert.equal(resArray.length, 1);
   });
 
   it("applicationTypes list test", async function () {
-    const res = await client.applicationTypes.list(resourceGroup, clusterName)
-    assert.equal(res.value?.length, 1)
+    const resArray = new Array();
+    for await (let item of client.applicationTypes.list(resourceGroup, clusterName)) {
+      resArray.push(item);
+    }
+    assert.equal(resArray.length, 1);
   });
 
   it("clusters update test", async function () {
@@ -190,13 +200,19 @@ describe("ServiceFabric test", () => {
 
   it("applicationTypes delete test", async function () {
     const resDelete = await client.applicationTypes.beginDeleteAndWait(resourceGroup, clusterName, applicationTypeName, testPollingOptions);
-    const res = await client.applicationTypes.list(resourceGroup, clusterName)
-    assert.equal(res.value?.length, 0)
+    const resArray = new Array();
+    for await (let item of client.applicationTypes.list(resourceGroup, clusterName)) {
+      resArray.push(item);
+    }
+    assert.equal(resArray.length, 0);
   });
 
   it("clusters delete test", async function () {
     const resDelete = await client.clusters.delete(resourceGroup, clusterName);
-    const res = (await client.clusters.listByResourceGroup(resourceGroup)).value
-    assert.equal(res?.length, 0)
+    const resArray = new Array();
+    for await (let item of client.clusters.listByResourceGroup(resourceGroup)) {
+      resArray.push(item);
+    }
+    assert.equal(resArray.length, 0);
   });
 });

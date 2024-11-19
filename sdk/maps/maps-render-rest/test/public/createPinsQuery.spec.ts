@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { Recorder } from "@azure-tools/test-recorder";
-import { LatLon } from "@azure/maps-common";
+import type { Recorder } from "@azure-tools/test-recorder";
+import type { LatLon } from "@azure/maps-common";
 import { assert } from "chai";
-import { Context } from "mocha";
-import { createPinsQuery, isUnexpected, MapsRenderClient } from "../../src";
+import type { Context } from "mocha";
+import type { MapsRenderClient } from "../../src";
+import { createPinsQuery, isUnexpected } from "../../src";
 import { createClient, createRecorder } from "./utils/recordedClient";
 
 describe("create pins query helper", () => {
@@ -70,11 +71,11 @@ describe("create pins query helper", () => {
 
     assert.equal(
       pinsQuery,
-      "default||'A'13.35 52.577|13.2988 52.6&pins=default|coFFFFFF||'A'13.35 52.577|13.2988 52.6&pins=none|coFFFFFF||'A'13.35 52.577|13.2988 52.6&pins=custom|coFFFFFF||'A'13.35 52.577|13.2988 52.6||http://contoso.com/pushpins/red.png"
+      "default||'A'13.35 52.577|13.2988 52.6&pins=default|coFFFFFF||'A'13.35 52.577|13.2988 52.6&pins=none|coFFFFFF||'A'13.35 52.577|13.2988 52.6&pins=custom|coFFFFFF||'A'13.35 52.577|13.2988 52.6||http://contoso.com/pushpins/red.png",
     );
 
     /* We don't test custom pin E2E since we have no reliable image source */
-    const res = await client.path("/map/static/{format}", "png").get({
+    const res = await client.path("/map/static").get({
       queryParameters: {
         zoom: 10,
         bbox: [13.228, 52.4559, 13.5794, 52.629],
@@ -106,10 +107,10 @@ describe("create pins query helper", () => {
 
     assert.equal(
       pinsQuery,
-      "default|al0.8|la10 4|lc000000|ls10|an0 0|ro90|sc2|co123456||13.35 52.577"
+      "default|al0.8|la10 4|lc000000|ls10|an0 0|ro90|sc2|co123456||13.35 52.577",
     );
 
-    const res = await client.path("/map/static/{format}", "png").get({
+    const res = await client.path("/map/static").get({
       queryParameters: {
         zoom: 10,
         bbox: [13.228, 52.4559, 13.5794, 52.629],

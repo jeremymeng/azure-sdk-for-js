@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   VolumeQuotaRule,
   VolumeQuotaRulesListByVolumeOptionalParams,
@@ -18,7 +18,7 @@ import {
   VolumeQuotaRulePatch,
   VolumeQuotaRulesUpdateOptionalParams,
   VolumeQuotaRulesUpdateResponse,
-  VolumeQuotaRulesDeleteOptionalParams
+  VolumeQuotaRulesDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -26,7 +26,7 @@ import {
 export interface VolumeQuotaRules {
   /**
    * List all quota rules associated with the volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -37,11 +37,11 @@ export interface VolumeQuotaRules {
     accountName: string,
     poolName: string,
     volumeName: string,
-    options?: VolumeQuotaRulesListByVolumeOptionalParams
+    options?: VolumeQuotaRulesListByVolumeOptionalParams,
   ): PagedAsyncIterableIterator<VolumeQuotaRule>;
   /**
    * Get details of the specified quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -54,11 +54,11 @@ export interface VolumeQuotaRules {
     poolName: string,
     volumeName: string,
     volumeQuotaRuleName: string,
-    options?: VolumeQuotaRulesGetOptionalParams
+    options?: VolumeQuotaRulesGetOptionalParams,
   ): Promise<VolumeQuotaRulesGetResponse>;
   /**
    * Create the specified quota rule within the given volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -73,16 +73,16 @@ export interface VolumeQuotaRules {
     volumeName: string,
     volumeQuotaRuleName: string,
     body: VolumeQuotaRule,
-    options?: VolumeQuotaRulesCreateOptionalParams
+    options?: VolumeQuotaRulesCreateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VolumeQuotaRulesCreateResponse>,
+    SimplePollerLike<
+      OperationState<VolumeQuotaRulesCreateResponse>,
       VolumeQuotaRulesCreateResponse
     >
   >;
   /**
    * Create the specified quota rule within the given volume
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -97,11 +97,11 @@ export interface VolumeQuotaRules {
     volumeName: string,
     volumeQuotaRuleName: string,
     body: VolumeQuotaRule,
-    options?: VolumeQuotaRulesCreateOptionalParams
+    options?: VolumeQuotaRulesCreateOptionalParams,
   ): Promise<VolumeQuotaRulesCreateResponse>;
   /**
    * Patch a quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -116,16 +116,16 @@ export interface VolumeQuotaRules {
     volumeName: string,
     volumeQuotaRuleName: string,
     body: VolumeQuotaRulePatch,
-    options?: VolumeQuotaRulesUpdateOptionalParams
+    options?: VolumeQuotaRulesUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VolumeQuotaRulesUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VolumeQuotaRulesUpdateResponse>,
       VolumeQuotaRulesUpdateResponse
     >
   >;
   /**
    * Patch a quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -140,11 +140,11 @@ export interface VolumeQuotaRules {
     volumeName: string,
     volumeQuotaRuleName: string,
     body: VolumeQuotaRulePatch,
-    options?: VolumeQuotaRulesUpdateOptionalParams
+    options?: VolumeQuotaRulesUpdateOptionalParams,
   ): Promise<VolumeQuotaRulesUpdateResponse>;
   /**
    * Delete quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -157,11 +157,11 @@ export interface VolumeQuotaRules {
     poolName: string,
     volumeName: string,
     volumeQuotaRuleName: string,
-    options?: VolumeQuotaRulesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: VolumeQuotaRulesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Delete quota rule
-   * @param resourceGroupName The name of the resource group.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param accountName The name of the NetApp account
    * @param poolName The name of the capacity pool
    * @param volumeName The name of the volume
@@ -174,6 +174,6 @@ export interface VolumeQuotaRules {
     poolName: string,
     volumeName: string,
     volumeQuotaRuleName: string,
-    options?: VolumeQuotaRulesDeleteOptionalParams
+    options?: VolumeQuotaRulesDeleteOptionalParams,
   ): Promise<void>;
 }

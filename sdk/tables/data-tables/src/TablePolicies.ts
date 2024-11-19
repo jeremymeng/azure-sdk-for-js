@@ -1,19 +1,18 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import {
   HeaderConstants,
   TRANSACTION_HTTP_LINE_ENDING,
   TRANSACTION_HTTP_VERSION_1_1,
 } from "./utils/constants";
-import {
+import type {
   PipelinePolicy,
   PipelineRequest,
   PipelineResponse,
   SendRequest,
-  createHttpHeaders,
-  createPipelineRequest,
 } from "@azure/core-rest-pipeline";
+import { createHttpHeaders, createPipelineRequest } from "@azure/core-rest-pipeline";
 import { getChangeSetBoundary } from "./utils/transactionHelpers";
 
 export const transactionRequestAssemblePolicyName = "transactionRequestAssemblePolicy";
@@ -26,7 +25,7 @@ const dummyResponse: PipelineResponse = {
 
 export function transactionRequestAssemblePolicy(
   bodyParts: string[],
-  changesetId: string
+  changesetId: string,
 ): PipelinePolicy {
   return {
     name: transactionRequestAssemblePolicyName,

@@ -6,7 +6,8 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { TargetTypes } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -19,7 +20,7 @@ import {
   TargetTypesListResponse,
   TargetTypesGetOptionalParams,
   TargetTypesGetResponse,
-  TargetTypesListNextResponse
+  TargetTypesListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -42,7 +43,7 @@ export class TargetTypesImpl implements TargetTypes {
    */
   public list(
     locationName: string,
-    options?: TargetTypesListOptionalParams
+    options?: TargetTypesListOptionalParams,
   ): PagedAsyncIterableIterator<TargetType> {
     const iter = this.listPagingAll(locationName, options);
     return {
@@ -52,29 +53,41 @@ export class TargetTypesImpl implements TargetTypes {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(locationName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(locationName, options, settings);
+      },
     };
   }
 
   private async *listPagingPage(
     locationName: string,
-    options?: TargetTypesListOptionalParams
+    options?: TargetTypesListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<TargetType[]> {
-    let result = await this._list(locationName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: TargetTypesListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(locationName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(locationName, continuationToken, options);
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listPagingAll(
     locationName: string,
-    options?: TargetTypesListOptionalParams
+    options?: TargetTypesListOptionalParams,
   ): AsyncIterableIterator<TargetType> {
     for await (const page of this.listPagingPage(locationName, options)) {
       yield* page;
@@ -88,11 +101,11 @@ export class TargetTypesImpl implements TargetTypes {
    */
   private _list(
     locationName: string,
-    options?: TargetTypesListOptionalParams
+    options?: TargetTypesListOptionalParams,
   ): Promise<TargetTypesListResponse> {
     return this.client.sendOperationRequest(
       { locationName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -105,11 +118,11 @@ export class TargetTypesImpl implements TargetTypes {
   get(
     locationName: string,
     targetTypeName: string,
-    options?: TargetTypesGetOptionalParams
+    options?: TargetTypesGetOptionalParams,
   ): Promise<TargetTypesGetResponse> {
     return this.client.sendOperationRequest(
       { locationName, targetTypeName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -122,11 +135,11 @@ export class TargetTypesImpl implements TargetTypes {
   private _listNext(
     locationName: string,
     nextLink: string,
-    options?: TargetTypesListNextOptionalParams
+    options?: TargetTypesListNextOptionalParams,
   ): Promise<TargetTypesListNextResponse> {
     return this.client.sendOperationRequest(
       { locationName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -134,66 +147,63 @@ export class TargetTypesImpl implements TargetTypes {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Chaos/locations/{locationName}/targetTypes",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Chaos/locations/{locationName}/targetTypes",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.TargetTypeListResult
+      bodyMapper: Mappers.TargetTypeListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion, Parameters.continuationToken],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.locationName
+    Parameters.locationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Chaos/locations/{locationName}/targetTypes/{targetTypeName}",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Chaos/locations/{locationName}/targetTypes/{targetTypeName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.TargetType
+      bodyMapper: Mappers.TargetType,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.locationName,
-    Parameters.targetTypeName
+    Parameters.targetTypeName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.TargetTypeListResult
+      bodyMapper: Mappers.TargetTypeListResult,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion, Parameters.continuationToken],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
     Parameters.nextLink,
-    Parameters.locationName
+    Parameters.locationName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

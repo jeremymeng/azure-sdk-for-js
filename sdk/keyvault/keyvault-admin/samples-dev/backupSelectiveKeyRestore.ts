@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
- * @summary Uses a BackupClient to backup and restore a specific key in Azure Key Vault using Azure Storage Blob.
+ * @summary Uses a BackupClient to backup and restore a specific key in an Azure Key Vault Managed HSM using Azure Storage Blob.
  */
 
 import { KeyVaultBackupClient } from "@azure/keyvault-admin";
@@ -45,7 +45,7 @@ export async function main(): Promise<void> {
   const selectiveKeyRestorePoller = await client.beginSelectiveKeyRestore(
     key.name,
     backupResult.folderUri!,
-    sasToken
+    sasToken,
   );
   const restoreResult = await selectiveKeyRestorePoller.pollUntilDone();
   console.log("restoreResult", restoreResult);

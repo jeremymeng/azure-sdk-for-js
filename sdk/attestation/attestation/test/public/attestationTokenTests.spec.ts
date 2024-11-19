@@ -1,28 +1,24 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../../src/jsrsasign.d.ts"/>
 import * as jsrsasign from "jsrsasign";
 
-import { assert, use as chaiUse, expect } from "chai";
-import { Context } from "mocha";
-import chaiPromises from "chai-as-promised";
-chaiUse(chaiPromises);
-
 import { Recorder } from "@azure-tools/test-recorder";
-import { bytesToString, stringToBytes } from "../../src/utils/utf8";
+import { bytesToString, stringToBytes } from "../../src/utils/utf8.js";
 
-import { createECDSKey, createRSAKey, createX509Certificate } from "../utils/cryptoUtils";
-import { verifyAttestationSigningKey } from "../../src/utils/helpers";
-import { AttestationTokenImpl } from "../../src/models/attestationToken";
-import { recorderOptions } from "../utils/recordedClient";
+import { createECDSKey, createRSAKey, createX509Certificate } from "../utils/cryptoUtils.js";
+import { verifyAttestationSigningKey } from "../../src/utils/helpers.js";
+import { AttestationTokenImpl } from "../../src/models/attestationToken.js";
+import { recorderOptions } from "../utils/recordedClient.js";
+import { describe, it, assert, expect, beforeEach, afterEach } from "vitest";
 
 describe("AttestationTokenTests", function () {
   let recorder: Recorder;
 
-  beforeEach(async function (this: Context) {
-    recorder = new Recorder(this.currentTest);
+  beforeEach(async function (ctx) {
+    recorder = new Recorder(ctx);
     await recorder.start(recorderOptions);
   });
 
@@ -180,7 +176,7 @@ describe("AttestationTokenTests", function () {
           console.log("In callback, token algorithm: " + tokenToCheck.algorithm);
           return undefined;
         },
-      })
+      }),
     );
 
     assert.isTrue(
@@ -192,7 +188,7 @@ describe("AttestationTokenTests", function () {
             return ["There was a validation failure"];
           },
         })
-        .find((s) => s.search("validation")) !== undefined
+        .find((s) => s.search("validation")) !== undefined,
     );
   });
 
@@ -217,7 +213,7 @@ describe("AttestationTokenTests", function () {
           validateToken: true,
           validateIssuer: true,
           expectedIssuer: "this is an issuer",
-        })
+        }),
       );
 
       assert.isTrue(
@@ -227,7 +223,7 @@ describe("AttestationTokenTests", function () {
             validateIssuer: true,
             expectedIssuer: "this is a different issuer",
           })
-          .find((s) => s.search("different issuer")) !== undefined
+          .find((s) => s.search("different issuer")) !== undefined,
       );
     }
   });
@@ -252,7 +248,7 @@ describe("AttestationTokenTests", function () {
           validateToken: true,
           validateExpirationTime: true,
           validateNotBeforeTime: true,
-        })
+        }),
       );
     }
 
@@ -275,7 +271,7 @@ describe("AttestationTokenTests", function () {
             validateExpirationTime: true,
             validateNotBeforeTime: true,
           })
-          .find((s) => s.search("expired")) !== undefined
+          .find((s) => s.search("expired")) !== undefined,
       );
 
       // Validate the token again, this time specifying a validation slack of
@@ -287,7 +283,7 @@ describe("AttestationTokenTests", function () {
           validateExpirationTime: true,
           validateNotBeforeTime: true,
           timeValidationSlack: 10,
-        })
+        }),
       );
     }
     {
@@ -308,7 +304,7 @@ describe("AttestationTokenTests", function () {
             validateExpirationTime: true,
             validateNotBeforeTime: true,
           })
-          .find((s) => s.search("not yet")) !== undefined
+          .find((s) => s.search("not yet")) !== undefined,
       );
 
       // Validate the token again, this time specifying a validation slack of
@@ -320,7 +316,7 @@ describe("AttestationTokenTests", function () {
           validateExpirationTime: true,
           validateNotBeforeTime: true,
           timeValidationSlack: 10,
-        })
+        }),
       );
     }
   });

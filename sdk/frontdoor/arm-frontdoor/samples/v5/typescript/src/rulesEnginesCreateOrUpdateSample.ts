@@ -10,16 +10,19 @@
 // Licensed under the MIT License.
 import { RulesEngine, FrontDoorManagementClient } from "@azure/arm-frontdoor";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Creates a new Rules Engine Configuration with the specified name within the specified Front Door.
  *
  * @summary Creates a new Rules Engine Configuration with the specified name within the specified Front Door.
- * x-ms-original-file: specification/frontdoor/resource-manager/Microsoft.Network/stable/2020-05-01/examples/FrontdoorRulesEngineCreate.json
+ * x-ms-original-file: specification/frontdoor/resource-manager/Microsoft.Network/stable/2021-06-01/examples/FrontdoorRulesEngineCreate.json
  */
 async function createOrUpdateASpecificRulesEngineConfiguration() {
-  const subscriptionId = "subid";
-  const resourceGroupName = "rg1";
+  const subscriptionId = process.env["FRONTDOOR_SUBSCRIPTION_ID"] || "subid";
+  const resourceGroupName = process.env["FRONTDOOR_RESOURCE_GROUP"] || "rg1";
   const frontDoorName = "frontDoor1";
   const rulesEngineName = "rulesEngine1";
   const rulesEngineParameters: RulesEngine = {
@@ -35,18 +38,18 @@ async function createOrUpdateASpecificRulesEngineConfiguration() {
             customPath: "/api",
             customQueryString: "a=b",
             redirectProtocol: "HttpsOnly",
-            redirectType: "Moved"
-          }
+            redirectType: "Moved",
+          },
         },
         matchConditions: [
           {
             rulesEngineMatchValue: ["CH"],
             rulesEngineMatchVariable: "RemoteAddr",
-            rulesEngineOperator: "GeoMatch"
-          }
+            rulesEngineOperator: "GeoMatch",
+          },
         ],
         matchProcessingBehavior: "Stop",
-        priority: 1
+        priority: 1,
       },
       {
         name: "Rule2",
@@ -55,19 +58,19 @@ async function createOrUpdateASpecificRulesEngineConfiguration() {
             {
               headerActionType: "Overwrite",
               headerName: "Cache-Control",
-              value: "public, max-age=31536000"
-            }
-          ]
+              value: "public, max-age=31536000",
+            },
+          ],
         },
         matchConditions: [
           {
             rulesEngineMatchValue: ["jpg"],
             rulesEngineMatchVariable: "RequestFilenameExtension",
             rulesEngineOperator: "Equal",
-            transforms: ["Lowercase"]
-          }
+            transforms: ["Lowercase"],
+          },
         ],
-        priority: 2
+        priority: 2,
       },
       {
         name: "Rule3",
@@ -76,18 +79,17 @@ async function createOrUpdateASpecificRulesEngineConfiguration() {
             odataType:
               "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
             backendPool: {
-              id:
-                "/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/frontDoors/frontDoor1/backendPools/backendPool1"
+              id: "/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/frontDoors/frontDoor1/backendPools/backendPool1",
             },
             cacheConfiguration: {
               cacheDuration: "P1DT12H20M30S",
               dynamicCompression: "Disabled",
               queryParameterStripDirective: "StripOnly",
-              queryParameters: "a=b,p=q"
+              queryParameters: "a=b,p=q",
             },
             customForwardingPath: undefined,
-            forwardingProtocol: "HttpsOnly"
-          }
+            forwardingProtocol: "HttpsOnly",
+          },
         },
         matchConditions: [
           {
@@ -96,12 +98,12 @@ async function createOrUpdateASpecificRulesEngineConfiguration() {
             rulesEngineMatchVariable: "RequestHeader",
             rulesEngineOperator: "Equal",
             selector: "Rules-Engine-Route-Forward",
-            transforms: ["Lowercase"]
-          }
+            transforms: ["Lowercase"],
+          },
         ],
-        priority: 3
-      }
-    ]
+        priority: 3,
+      },
+    ],
   };
   const credential = new DefaultAzureCredential();
   const client = new FrontDoorManagementClient(credential, subscriptionId);
@@ -109,9 +111,13 @@ async function createOrUpdateASpecificRulesEngineConfiguration() {
     resourceGroupName,
     frontDoorName,
     rulesEngineName,
-    rulesEngineParameters
+    rulesEngineParameters,
   );
   console.log(result);
 }
 
-createOrUpdateASpecificRulesEngineConfiguration().catch(console.error);
+async function main() {
+  createOrUpdateASpecificRulesEngineConfiguration();
+}
+
+main().catch(console.error);

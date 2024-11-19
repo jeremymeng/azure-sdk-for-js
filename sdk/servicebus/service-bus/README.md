@@ -63,7 +63,7 @@ In addition to what is described there, this library also needs additional polyf
 
 If you are using Webpack v5, you can install the following dev dependencies
 
-- `npm install --save-dev buffer os-browserify path-browserify process`
+- `npm install --save-dev os-browserify path-browserify`
 
 then add the following into your webpack.config.js
 
@@ -99,7 +99,7 @@ then add the following into your webpack.config.js
 
 If you are using Rollup bundler, install the following dev dependencies
 
-- `npm install --save-dev buffer process @rollup/plugin-commonjs @rollup/plugin-inject @rollup/plugin-node-resolve`
+- `npm install --save-dev @rollup/plugin-commonjs @rollup/plugin-inject @rollup/plugin-node-resolve`
 
 Then include the following in your rollup.config.js
 
@@ -136,6 +136,10 @@ export default {
 ```
 
 Please consult the documentation of your favorite bundler for more information on using polyfills.
+
+### React Native Support
+
+Similar to browsers, React Native does not support some JavaScript api used by this SDK library so you need to provide polyfills for them.  Please see the [Messaging React Native sample with Expo](https://github.com/Azure/azure-sdk-for-js/blob/main/samples/frameworks/react-native-expo/ts/messaging/README.md) for more details.
 
 ### Authenticate the client
 
@@ -175,7 +179,7 @@ const serviceBusClient = new ServiceBusClient(fullyQualifiedNamespace, credentia
 > against AAD, then set the "scopes" for service-bus to the following to get
 > the appropriate token:
 
-> ```typescript
+> ```
 > ["https://servicebus.azure.net//user_impersonation"];
 > ```
 
@@ -317,7 +321,7 @@ receiver.subscribe({
 Use the [getMessageIterator][receiver_getmessageiterator] to get an async iterator over messages
 
 ```javascript
-for await (let message of receiver.getMessageIterator()) {
+for await (const message of receiver.getMessageIterator()) {
   // your code here
 }
 ```

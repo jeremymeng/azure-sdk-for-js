@@ -6,14 +6,19 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { VirtualMachines } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { AzureVMwareSolutionAPI } from "../azureVMwareSolutionAPI";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   VirtualMachine,
   VirtualMachinesListNextOptionalParams,
@@ -23,7 +28,8 @@ import {
   VirtualMachinesGetResponse,
   VirtualMachineRestrictMovement,
   VirtualMachinesRestrictMovementOptionalParams,
-  VirtualMachinesListNextResponse
+  VirtualMachinesRestrictMovementResponse,
+  VirtualMachinesListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -40,23 +46,23 @@ export class VirtualMachinesImpl implements VirtualMachines {
   }
 
   /**
-   * List of virtual machines in a private cloud cluster
+   * List VirtualMachine resources by Cluster
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
+   * @param clusterName Name of the cluster
    * @param options The options parameters.
    */
   public list(
     resourceGroupName: string,
     privateCloudName: string,
     clusterName: string,
-    options?: VirtualMachinesListOptionalParams
+    options?: VirtualMachinesListOptionalParams,
   ): PagedAsyncIterableIterator<VirtualMachine> {
     const iter = this.listPagingAll(
       resourceGroupName,
       privateCloudName,
       clusterName,
-      options
+      options,
     );
     return {
       next() {
@@ -65,14 +71,18 @@ export class VirtualMachinesImpl implements VirtualMachines {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
         return this.listPagingPage(
           resourceGroupName,
           privateCloudName,
           clusterName,
-          options
+          options,
+          settings,
         );
-      }
+      },
     };
   }
 
@@ -80,26 +90,35 @@ export class VirtualMachinesImpl implements VirtualMachines {
     resourceGroupName: string,
     privateCloudName: string,
     clusterName: string,
-    options?: VirtualMachinesListOptionalParams
+    options?: VirtualMachinesListOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<VirtualMachine[]> {
-    let result = await this._list(
-      resourceGroupName,
-      privateCloudName,
-      clusterName,
-      options
-    );
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: VirtualMachinesListResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._list(
+        resourceGroupName,
+        privateCloudName,
+        clusterName,
+        options,
+      );
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listNext(
         resourceGroupName,
         privateCloudName,
         clusterName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
@@ -107,43 +126,43 @@ export class VirtualMachinesImpl implements VirtualMachines {
     resourceGroupName: string,
     privateCloudName: string,
     clusterName: string,
-    options?: VirtualMachinesListOptionalParams
+    options?: VirtualMachinesListOptionalParams,
   ): AsyncIterableIterator<VirtualMachine> {
     for await (const page of this.listPagingPage(
       resourceGroupName,
       privateCloudName,
       clusterName,
-      options
+      options,
     )) {
       yield* page;
     }
   }
 
   /**
-   * List of virtual machines in a private cloud cluster
+   * List VirtualMachine resources by Cluster
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
+   * @param clusterName Name of the cluster
    * @param options The options parameters.
    */
   private _list(
     resourceGroupName: string,
     privateCloudName: string,
     clusterName: string,
-    options?: VirtualMachinesListOptionalParams
+    options?: VirtualMachinesListOptionalParams,
   ): Promise<VirtualMachinesListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, clusterName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
   /**
-   * Get a virtual machine by id in a private cloud cluster
+   * Get a VirtualMachine
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
-   * @param virtualMachineId Virtual Machine identifier
+   * @param clusterName Name of the cluster
+   * @param virtualMachineId ID of the virtual machine.
    * @param options The options parameters.
    */
   get(
@@ -151,7 +170,7 @@ export class VirtualMachinesImpl implements VirtualMachines {
     privateCloudName: string,
     clusterName: string,
     virtualMachineId: string,
-    options?: VirtualMachinesGetOptionalParams
+    options?: VirtualMachinesGetOptionalParams,
   ): Promise<VirtualMachinesGetResponse> {
     return this.client.sendOperationRequest(
       {
@@ -159,9 +178,9 @@ export class VirtualMachinesImpl implements VirtualMachines {
         privateCloudName,
         clusterName,
         virtualMachineId,
-        options
+        options,
       },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -169,9 +188,9 @@ export class VirtualMachinesImpl implements VirtualMachines {
    * Enable or disable DRS-driven VM movement restriction
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
-   * @param virtualMachineId Virtual Machine identifier
-   * @param restrictMovement Whether VM DRS-driven movement is restricted (Enabled) or not (Disabled)
+   * @param clusterName Name of the cluster
+   * @param virtualMachineId ID of the virtual machine.
+   * @param restrictMovement The body type of the operation request.
    * @param options The options parameters.
    */
   async beginRestrictMovement(
@@ -180,25 +199,29 @@ export class VirtualMachinesImpl implements VirtualMachines {
     clusterName: string,
     virtualMachineId: string,
     restrictMovement: VirtualMachineRestrictMovement,
-    options?: VirtualMachinesRestrictMovementOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: VirtualMachinesRestrictMovementOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VirtualMachinesRestrictMovementResponse>,
+      VirtualMachinesRestrictMovementResponse
+    >
+  > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
-    ): Promise<void> => {
+      spec: coreClient.OperationSpec,
+    ): Promise<VirtualMachinesRestrictMovementResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -207,8 +230,8 @@ export class VirtualMachinesImpl implements VirtualMachines {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -216,26 +239,30 @@ export class VirtualMachinesImpl implements VirtualMachines {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      {
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
         resourceGroupName,
         privateCloudName,
         clusterName,
         virtualMachineId,
         restrictMovement,
-        options
+        options,
       },
-      restrictMovementOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+      spec: restrictMovementOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      VirtualMachinesRestrictMovementResponse,
+      OperationState<VirtualMachinesRestrictMovementResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -245,9 +272,9 @@ export class VirtualMachinesImpl implements VirtualMachines {
    * Enable or disable DRS-driven VM movement restriction
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
-   * @param virtualMachineId Virtual Machine identifier
-   * @param restrictMovement Whether VM DRS-driven movement is restricted (Enabled) or not (Disabled)
+   * @param clusterName Name of the cluster
+   * @param virtualMachineId ID of the virtual machine.
+   * @param restrictMovement The body type of the operation request.
    * @param options The options parameters.
    */
   async beginRestrictMovementAndWait(
@@ -256,15 +283,15 @@ export class VirtualMachinesImpl implements VirtualMachines {
     clusterName: string,
     virtualMachineId: string,
     restrictMovement: VirtualMachineRestrictMovement,
-    options?: VirtualMachinesRestrictMovementOptionalParams
-  ): Promise<void> {
+    options?: VirtualMachinesRestrictMovementOptionalParams,
+  ): Promise<VirtualMachinesRestrictMovementResponse> {
     const poller = await this.beginRestrictMovement(
       resourceGroupName,
       privateCloudName,
       clusterName,
       virtualMachineId,
       restrictMovement,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -273,7 +300,7 @@ export class VirtualMachinesImpl implements VirtualMachines {
    * ListNext
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
    * @param privateCloudName Name of the private cloud
-   * @param clusterName Name of the cluster in the private cloud
+   * @param clusterName Name of the cluster
    * @param nextLink The nextLink from the previous successful call to the List method.
    * @param options The options parameters.
    */
@@ -282,11 +309,11 @@ export class VirtualMachinesImpl implements VirtualMachines {
     privateCloudName: string,
     clusterName: string,
     nextLink: string,
-    options?: VirtualMachinesListNextOptionalParams
+    options?: VirtualMachinesListNextOptionalParams,
   ): Promise<VirtualMachinesListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, privateCloudName, clusterName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -294,39 +321,15 @@ export class VirtualMachinesImpl implements VirtualMachines {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/virtualMachines",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/virtualMachines",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualMachinesList
+      bodyMapper: Mappers.VirtualMachinesList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
-  },
-  queryParameters: [Parameters.apiVersion],
-  urlParameters: [
-    Parameters.$host,
-    Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.privateCloudName,
-    Parameters.clusterName
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/virtualMachines/{virtualMachineId}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.VirtualMachine
+      bodyMapper: Mappers.ErrorResponse,
     },
-    default: {
-      bodyMapper: Mappers.CloudError
-    }
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
@@ -335,23 +338,52 @@ const getOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
     Parameters.clusterName,
-    Parameters.virtualMachineId
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const getOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/virtualMachines/{virtualMachineId}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.VirtualMachine,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.subscriptionId,
+    Parameters.resourceGroupName,
+    Parameters.privateCloudName,
+    Parameters.clusterName,
+    Parameters.virtualMachineId,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const restrictMovementOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/virtualMachines/{virtualMachineId}/restrictMovement",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/clusters/{clusterName}/virtualMachines/{virtualMachineId}/restrictMovement",
   httpMethod: "POST",
   responses: {
-    200: {},
-    201: {},
-    202: {},
-    204: {},
+    200: {
+      headersMapper: Mappers.VirtualMachinesRestrictMovementHeaders,
+    },
+    201: {
+      headersMapper: Mappers.VirtualMachinesRestrictMovementHeaders,
+    },
+    202: {
+      headersMapper: Mappers.VirtualMachinesRestrictMovementHeaders,
+    },
+    204: {
+      headersMapper: Mappers.VirtualMachinesRestrictMovementHeaders,
+    },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   requestBody: Parameters.restrictMovement,
   queryParameters: [Parameters.apiVersion],
@@ -361,32 +393,31 @@ const restrictMovementOperationSpec: coreClient.OperationSpec = {
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
     Parameters.clusterName,
-    Parameters.virtualMachineId
+    Parameters.virtualMachineId,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.VirtualMachinesList
+      bodyMapper: Mappers.VirtualMachinesList,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.nextLink,
     Parameters.subscriptionId,
     Parameters.resourceGroupName,
     Parameters.privateCloudName,
-    Parameters.clusterName
+    Parameters.clusterName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

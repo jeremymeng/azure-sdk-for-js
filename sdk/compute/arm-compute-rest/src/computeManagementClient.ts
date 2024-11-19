@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { ClientOptions, getClient } from "@azure-rest/core-client";
-import { TokenCredential } from "@azure/core-auth";
-import { ComputeManagementClient } from "./clientDefinitions";
+import type { ClientOptions } from "@azure-rest/core-client";
+import { getClient } from "@azure-rest/core-client";
+import type { TokenCredential } from "@azure/core-auth";
+import type { ComputeManagementClient } from "./clientDefinitions";
 
 /**
  * Initialize a new instance of the class ComputeManagementClient class.
@@ -11,7 +12,7 @@ import { ComputeManagementClient } from "./clientDefinitions";
  */
 export default function createClient(
   credentials: TokenCredential,
-  options: ClientOptions = {}
+  options: ClientOptions = {},
 ): ComputeManagementClient {
   const baseUrl = options.baseUrl ?? `https://management.azure.com`;
   options = {

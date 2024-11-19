@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -32,7 +32,7 @@ async function getListOfPrivateLinkServiceIdThatCanBeLinkedToAPrivateEndPointWit
       "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/locations/{location}/autoApprovedPrivateLinkServices",
       subscriptionId,
       resourceGroupName,
-      location
+      location,
     )
     .get(options);
   const pageData = paginate(client, initialResponse);
@@ -44,5 +44,5 @@ async function getListOfPrivateLinkServiceIdThatCanBeLinkedToAPrivateEndPointWit
 }
 
 getListOfPrivateLinkServiceIdThatCanBeLinkedToAPrivateEndPointWithAutoApproved().catch(
-  console.error
+  console.error,
 );

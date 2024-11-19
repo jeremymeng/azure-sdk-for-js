@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { TableClient, TableEntityResult, TransactionAction, odata } from "../../src";
+import type { TableClient, TableEntityResult, TransactionAction } from "../../src";
+import { odata } from "../../src";
 
-import { Context } from "mocha";
+import type { Context } from "mocha";
 import { assert } from "chai";
 import { createTableClient } from "./utils/recordedClient";
 import { isLiveMode } from "@azure-tools/test-recorder";
-import { isNode } from "@azure/test-utils";
+import { isNodeLike } from "@azure/core-util";
 
 describe("SpecialCharacters", function () {
   before(function (this: Context) {
@@ -17,7 +18,7 @@ describe("SpecialCharacters", function () {
     }
   });
   let client: TableClient;
-  const suffix = isNode ? "Node" : "Browser";
+  const suffix = isNodeLike ? "Node" : "Browser";
   const tableName = `SpecialCharacterTest${suffix}`;
   const specialCharacters = [
     { char: `'`, name: "single quote" },
@@ -43,44 +44,44 @@ describe("SpecialCharacters", function () {
     { char: `*`, name: "star" },
   ];
 
-  describe("Single operations", () => {
+  describe("Single operations", function () {
     beforeEach(async function (this: Context) {
       client = await createTableClient(tableName, "TokenCredential");
     });
 
     specialCharacters.forEach(({ char, name }) => {
-      describe(`${name} roundtrip`, () => {
+      describe(`${name} roundtrip`, function () {
         const partitionKey = `foo${char}`;
         const rowKey = `${char}bar`;
         const value = `test${char}`;
 
-        it("should create entity with single quote in the partitionKey and rowKey", async () => {
+        it("should create entity with single quote in the partitionKey and rowKey", async function () {
           await client.createTable();
           const entity = await client.createEntity({ partitionKey, rowKey, value });
           assert.isDefined(entity);
         });
 
-        it("should upsert merge entity", async () => {
+        it("should upsert merge entity", async function () {
           const result = await client.upsertEntity({ partitionKey, rowKey, value }, "Merge");
           assert.isDefined(result.etag);
         });
 
-        it("should upsert replace entity", async () => {
+        it("should upsert replace entity", async function () {
           const result = await client.upsertEntity({ partitionKey, rowKey, value }, "Replace");
           assert.isDefined(result.etag);
         });
 
-        it("should update replace entity", async () => {
+        it("should update replace entity", async function () {
           const result = await client.updateEntity({ partitionKey, rowKey, value }, "Replace");
           assert.isDefined(result.etag);
         });
 
-        it("should update merge entity", async () => {
+        it("should update merge entity", async function () {
           const result = await client.updateEntity({ partitionKey, rowKey, value }, "Merge");
           assert.isDefined(result.etag);
         });
 
-        it("should get entity", async () => {
+        it("should get entity", async function () {
           const entity = await client.getEntity(partitionKey, rowKey);
 
           assert.equal(entity.partitionKey, partitionKey);
@@ -88,7 +89,7 @@ describe("SpecialCharacters", function () {
           assert.equal(entity.value, value);
         });
 
-        it("should filter entity by partition key", async () => {
+        it("should filter entity by partition key", async function () {
           const entities = client.listEntities({
             queryOptions: { filter: odata`PartitionKey eq ${partitionKey}` },
           });
@@ -100,7 +101,7 @@ describe("SpecialCharacters", function () {
           }
         });
 
-        it("should filter entity by row key", async () => {
+        it("should filter entity by row key", async function () {
           const entities = client.listEntities({
             queryOptions: { filter: odata`RowKey eq ${rowKey}` },
           });
@@ -112,25 +113,25 @@ describe("SpecialCharacters", function () {
           }
         });
 
-        it("should delete entity", async () => {
+        it("should delete entity", async function () {
           const result = await client.deleteEntity(partitionKey, rowKey);
           assert.ok(result);
         });
       });
     });
 
-    after(async () => {
+    after(async function () {
       await client.deleteTable();
     });
   });
 
-  describe("Batch", () => {
+  describe("Batch", function () {
     beforeEach(async function (this: Context) {
       client = await createTableClient(`${tableName}Batch`, "TokenCredential");
     });
 
     const partitionKey = `foo'`;
-    it("should create entity with single quote in the partitionKey and rowKey", async () => {
+    it("should create entity with single quote in the partitionKey and rowKey", async function () {
       await client.createTable();
       const actions: TransactionAction[] = specialCharacters.map(({ char }) => {
         const rowKey = `${char}bar`;
@@ -142,7 +143,7 @@ describe("SpecialCharacters", function () {
       assert.equal(result.status, 202);
     });
 
-    it("should upsert merge entity with single quote in the partitionKey and rowKey", async () => {
+    it("should upsert merge entity with single quote in the partitionKey and rowKey", async function () {
       const actions: TransactionAction[] = specialCharacters.map(({ char }) => {
         const rowKey = `${char}bar`;
         const value = `test${char}`;
@@ -153,7 +154,7 @@ describe("SpecialCharacters", function () {
       assert.equal(result.status, 202);
     });
 
-    it("should upsert replace entity with single quote in the partitionKey and rowKey", async () => {
+    it("should upsert replace entity with single quote in the partitionKey and rowKey", async function () {
       const actions: TransactionAction[] = specialCharacters.map(({ char }) => {
         const rowKey = `${char}bar`;
         const value = `test${char}`;
@@ -164,7 +165,7 @@ describe("SpecialCharacters", function () {
       assert.equal(result.status, 202);
     });
 
-    it("should update merge entity with single quote in the partitionKey and rowKey", async () => {
+    it("should update merge entity with single quote in the partitionKey and rowKey", async function () {
       const actions: TransactionAction[] = specialCharacters.map(({ char }) => {
         const rowKey = `${char}bar`;
         const value = `test${char}`;
@@ -175,7 +176,7 @@ describe("SpecialCharacters", function () {
       assert.equal(result.status, 202);
     });
 
-    it("should update replace entity with single quote in the partitionKey and rowKey", async () => {
+    it("should update replace entity with single quote in the partitionKey and rowKey", async function () {
       const actions: TransactionAction[] = specialCharacters.map(({ char }) => {
         const rowKey = `${char}bar`;
         const value = `test${char}`;
@@ -186,7 +187,7 @@ describe("SpecialCharacters", function () {
       assert.equal(result.status, 202);
     });
 
-    it(`should filter entity by partition key`, async () => {
+    it(`should filter entity by partition key`, async function () {
       const entities = client.listEntities({
         queryOptions: { filter: odata`PartitionKey eq ${partitionKey}` },
       });
@@ -203,7 +204,7 @@ describe("SpecialCharacters", function () {
     specialCharacters.forEach(({ char, name }) => {
       const rowKey = `${char}bar`;
       const value = `test${char}`;
-      it(`should get entity with ${name}`, async () => {
+      it(`should get entity with ${name}`, async function () {
         const entity = await client.getEntity(partitionKey, rowKey);
 
         assert.equal(entity.partitionKey, partitionKey);
@@ -211,7 +212,7 @@ describe("SpecialCharacters", function () {
         assert.equal(entity.value, value);
       });
 
-      it(`should filter entity by row key with ${name}`, async () => {
+      it(`should filter entity by row key with ${name}`, async function () {
         const entities = client.listEntities({
           queryOptions: { filter: odata`RowKey eq ${rowKey}` },
         });
@@ -226,17 +227,17 @@ describe("SpecialCharacters", function () {
         }
 
         const hasEntity = results.some(
-          (e) => e.partitionKey === partitionKey && e.rowKey === rowKey && e.value === value
+          (e) => e.partitionKey === partitionKey && e.rowKey === rowKey && e.value === value,
         );
 
         assert.isTrue(
           hasEntity,
-          `Couldn't find entity with partitionKey: ${partitionKey} and rowKey: ${rowKey}`
+          `Couldn't find entity with partitionKey: ${partitionKey} and rowKey: ${rowKey}`,
         );
       });
     });
 
-    it(`should delete in batch`, async () => {
+    it(`should delete in batch`, async function () {
       const actions: TransactionAction[] = specialCharacters.map(({ char }) => {
         const rowKey = `${char}bar`;
         const action: TransactionAction = ["delete", { partitionKey, rowKey }];
@@ -245,7 +246,7 @@ describe("SpecialCharacters", function () {
       const result = await client.submitTransaction(actions);
       assert.equal(result.status, 202);
     });
-    after(async () => {
+    after(async function () {
       await client.deleteTable();
     });
   });

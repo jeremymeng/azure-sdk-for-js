@@ -1,36 +1,38 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   CommunicationIdentifier,
   CommunicationIdentifierKind,
   SerializedCommunicationIdentifier,
+} from "../../src/index.js";
+import {
   deserializeCommunicationIdentifier,
   serializeCommunicationIdentifier,
-} from "../../src";
-import { assert } from "chai";
+} from "../../src/index.js";
+import { describe, it, assert } from "vitest";
 
 const assertSerialize = (
   identifier: CommunicationIdentifier,
-  expected: SerializedCommunicationIdentifier
+  expected: SerializedCommunicationIdentifier,
 ): void => {
   assert.deepEqual(serializeCommunicationIdentifier(identifier), expected);
 };
 
 const assertDeserialize = (
   serializedIdentifier: SerializedCommunicationIdentifier,
-  expected: CommunicationIdentifierKind
+  expected: CommunicationIdentifierKind,
 ): void => {
   assert.deepEqual(deserializeCommunicationIdentifier(serializedIdentifier), expected);
 };
 
 const assertThrowsMissingProperty = <
   P extends keyof SerializedCommunicationIdentifier,
-  Q extends string & keyof Required<SerializedCommunicationIdentifier>[P]
+  Q extends string & keyof Required<SerializedCommunicationIdentifier>[P],
 >(
   serializedIdentifier: SerializedCommunicationIdentifier,
   identifierType: P,
-  missingPropertyName: Q
+  missingPropertyName: Q,
 ): void => {
   assert.throws(() => {
     deserializeCommunicationIdentifier(serializedIdentifier);
@@ -38,15 +40,15 @@ const assertThrowsMissingProperty = <
 };
 
 const assertThrowsTooManyProperties = (
-  serializedIdentifier: SerializedCommunicationIdentifier
+  serializedIdentifier: SerializedCommunicationIdentifier,
 ): void => {
   assert.throws(() => {
     deserializeCommunicationIdentifier(serializedIdentifier);
   }, /^Only one of the properties in \[[\w,"\s]+\] should be present.$/);
 };
 
-describe("Identifier model serializer", () => {
-  it("can serialize", () => {
+describe("Identifier model serializer", function () {
+  it("can serialize", function () {
     assertSerialize(
       {
         communicationUserId:
@@ -57,7 +59,7 @@ describe("Identifier model serializer", () => {
         communicationUser: {
           id: "8:acs:37691ec4-57fb-4c0f-ae31-32791610cb14_37691ec4-57fb-4c0f-ae31-32791610cb14",
         },
-      }
+      },
     );
     assertSerialize(
       { microsoftTeamsUserId: "37691ec4-57fb-4c0f-ae31-32791610cb14" },
@@ -68,7 +70,7 @@ describe("Identifier model serializer", () => {
           isAnonymous: false,
           cloud: "public",
         },
-      }
+      },
     );
     assertSerialize(
       { microsoftTeamsUserId: "37691ec4-57fb-4c0f-ae31-32791610cb14", isAnonymous: false },
@@ -79,7 +81,7 @@ describe("Identifier model serializer", () => {
           isAnonymous: false,
           cloud: "public",
         },
-      }
+      },
     );
     assertSerialize(
       { microsoftTeamsUserId: "37691ec4-57fb-4c0f-ae31-32791610cb14", isAnonymous: true },
@@ -90,7 +92,7 @@ describe("Identifier model serializer", () => {
           isAnonymous: true,
           cloud: "public",
         },
-      }
+      },
     );
     assertSerialize(
       { microsoftTeamsUserId: "37691ec4-57fb-4c0f-ae31-32791610cb14", rawId: "override" },
@@ -101,7 +103,7 @@ describe("Identifier model serializer", () => {
           isAnonymous: false,
           cloud: "public",
         },
-      }
+      },
     );
     assertSerialize(
       {
@@ -115,7 +117,7 @@ describe("Identifier model serializer", () => {
           isAnonymous: false,
           cloud: "dod",
         },
-      }
+      },
     );
     assertSerialize(
       { phoneNumber: "+12345556789" },
@@ -124,7 +126,7 @@ describe("Identifier model serializer", () => {
         phoneNumber: {
           value: "+12345556789",
         },
-      }
+      },
     );
     assertSerialize(
       { phoneNumber: "+12345556789", rawId: "override" },
@@ -133,21 +135,21 @@ describe("Identifier model serializer", () => {
         phoneNumber: {
           value: "+12345556789",
         },
-      }
+      },
     );
     assertSerialize(
       { id: "48:37691ec4-57fb-4c0f-ae31-32791610cb14" },
-      { rawId: "48:37691ec4-57fb-4c0f-ae31-32791610cb14" }
+      { rawId: "48:37691ec4-57fb-4c0f-ae31-32791610cb14" },
     );
   });
 
-  it("serializes as unknown identifier if kind not understood", () => {
+  it("serializes as unknown identifier if kind not understood", function () {
     assertSerialize({ kind: "foobar", id: "42", someOtherProp: true } as any, {
       rawId: "42",
     });
   });
 
-  it("can deserialize", () => {
+  it("can deserialize", function () {
     assertDeserialize(
       {
         communicationUser: {
@@ -158,7 +160,7 @@ describe("Identifier model serializer", () => {
         kind: "communicationUser",
         communicationUserId:
           "8:acs:37691ec4-57fb-4c0f-ae31-32791610cb14_37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       {
@@ -171,7 +173,7 @@ describe("Identifier model serializer", () => {
         kind: "communicationUser",
         communicationUserId:
           "8:acs:37691ec4-57fb-4c0f-ae31-32791610cb14_37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       {
@@ -184,7 +186,7 @@ describe("Identifier model serializer", () => {
         kind: "communicationUser",
         communicationUserId:
           "8:acs:37691ec4-57fb-4c0f-ae31-32791610cb14_37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       {
@@ -194,7 +196,7 @@ describe("Identifier model serializer", () => {
       {
         kind: "unknown",
         id: "8:acs:37691ec4-57fb-4c0f-ae31-32791610cb14_37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       {
@@ -207,7 +209,7 @@ describe("Identifier model serializer", () => {
         kind: "communicationUser",
         communicationUserId:
           "8:acs:37691ec4-57fb-4c0f-ae31-32791610cb14_37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       {
@@ -220,19 +222,19 @@ describe("Identifier model serializer", () => {
         kind: "communicationUser",
         communicationUserId:
           "8:acs:37691ec4-57fb-4c0f-ae31-32791610cb14_37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       { phoneNumber: { value: "+1234555000" }, rawId: "4:+1234555000" },
-      { kind: "phoneNumber", phoneNumber: "+1234555000", rawId: "4:+1234555000" }
+      { kind: "phoneNumber", phoneNumber: "+1234555000", rawId: "4:+1234555000" },
     );
     assertDeserialize(
       { kind: "phoneNumber", phoneNumber: { value: "+1234555000" }, rawId: "4:+1234555000" },
-      { kind: "phoneNumber", phoneNumber: "+1234555000", rawId: "4:+1234555000" }
+      { kind: "phoneNumber", phoneNumber: "+1234555000", rawId: "4:+1234555000" },
     );
     assertDeserialize(
       { kind: "phoneNumber", rawId: "4:+1234555000" },
-      { kind: "unknown", id: "4:+1234555000" }
+      { kind: "unknown", id: "4:+1234555000" },
     );
     assertDeserialize(
       {
@@ -249,7 +251,7 @@ describe("Identifier model serializer", () => {
         isAnonymous: false,
         cloud: "public",
         rawId: "8:orgid:37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       {
@@ -266,7 +268,7 @@ describe("Identifier model serializer", () => {
         isAnonymous: true,
         cloud: "public",
         rawId: "8:teamsvisitor:37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       {
@@ -283,7 +285,7 @@ describe("Identifier model serializer", () => {
         isAnonymous: false,
         cloud: "gcch",
         rawId: "8:gcch:37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       {
@@ -301,7 +303,7 @@ describe("Identifier model serializer", () => {
         isAnonymous: false,
         cloud: "public",
         rawId: "8:orgid:37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       {
@@ -311,39 +313,39 @@ describe("Identifier model serializer", () => {
       {
         kind: "unknown",
         id: "8:orgid:37691ec4-57fb-4c0f-ae31-32791610cb14",
-      }
+      },
     );
     assertDeserialize(
       { rawId: "48:37691ec4-57fb-4c0f-ae31-32791610cb14" },
-      { kind: "unknown", id: "48:37691ec4-57fb-4c0f-ae31-32791610cb14" }
+      { kind: "unknown", id: "48:37691ec4-57fb-4c0f-ae31-32791610cb14" },
     );
     assertDeserialize(
       { kind: "unknown", rawId: "48:37691ec4-57fb-4c0f-ae31-32791610cb14" },
-      { kind: "unknown", id: "48:37691ec4-57fb-4c0f-ae31-32791610cb14" }
+      { kind: "unknown", id: "48:37691ec4-57fb-4c0f-ae31-32791610cb14" },
     );
   });
 
-  it("deserializes as unknown identifier if kind not understood", () => {
+  it("deserializes as unknown identifier if kind not understood", function () {
     assertDeserialize({ rawId: "42", someOtherProp: true } as any, {
       kind: "unknown",
       id: "42",
     });
   });
 
-  it("throws if property is missing", () => {
+  it("throws if property is missing", function () {
     assertThrowsMissingProperty(
       {
         communicationUser: {} as any,
       },
       "communicationUser",
-      "id"
+      "id",
     );
     assertThrowsMissingProperty(
       {
         phoneNumber: {} as any,
       },
       "phoneNumber",
-      "value"
+      "value",
     );
     assertThrowsMissingProperty(
       {
@@ -352,7 +354,7 @@ describe("Identifier model serializer", () => {
         } as any,
       },
       "microsoftTeamsUser",
-      "userId"
+      "userId",
     );
     assertThrowsMissingProperty(
       {
@@ -362,7 +364,7 @@ describe("Identifier model serializer", () => {
         } as any,
       },
       "microsoftTeamsUser",
-      "isAnonymous"
+      "isAnonymous",
     );
     assertThrowsMissingProperty(
       {
@@ -372,7 +374,7 @@ describe("Identifier model serializer", () => {
         } as any,
       },
       "microsoftTeamsUser",
-      "cloud"
+      "cloud",
     );
 
     assert.throws(() => {
@@ -380,7 +382,7 @@ describe("Identifier model serializer", () => {
     }, `Property rawId is required for identifier of type unknown.`);
   });
 
-  it("ignores additional properties", () => {
+  it("ignores additional properties", function () {
     assert.doesNotThrow(() => {
       deserializeCommunicationIdentifier({
         microsoftTeamsUser: {
@@ -394,7 +396,7 @@ describe("Identifier model serializer", () => {
     });
   });
 
-  it("throws if more than one nested model", () => {
+  it("throws if more than one nested model", function () {
     assertThrowsTooManyProperties({
       rawId: "rawId",
       microsoftTeamsUser: {

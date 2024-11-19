@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   FrontendEndpoint,
   FrontendEndpointsListByFrontDoorOptionalParams,
@@ -15,7 +15,7 @@ import {
   FrontendEndpointsGetResponse,
   CustomHttpsConfiguration,
   FrontendEndpointsEnableHttpsOptionalParams,
-  FrontendEndpointsDisableHttpsOptionalParams
+  FrontendEndpointsDisableHttpsOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface FrontendEndpoints {
   listByFrontDoor(
     resourceGroupName: string,
     frontDoorName: string,
-    options?: FrontendEndpointsListByFrontDoorOptionalParams
+    options?: FrontendEndpointsListByFrontDoorOptionalParams,
   ): PagedAsyncIterableIterator<FrontendEndpoint>;
   /**
    * Gets a Frontend endpoint with the specified name within the specified Front Door.
@@ -43,7 +43,7 @@ export interface FrontendEndpoints {
     resourceGroupName: string,
     frontDoorName: string,
     frontendEndpointName: string,
-    options?: FrontendEndpointsGetOptionalParams
+    options?: FrontendEndpointsGetOptionalParams,
   ): Promise<FrontendEndpointsGetResponse>;
   /**
    * Enables a frontendEndpoint for HTTPS traffic
@@ -58,8 +58,8 @@ export interface FrontendEndpoints {
     frontDoorName: string,
     frontendEndpointName: string,
     customHttpsConfiguration: CustomHttpsConfiguration,
-    options?: FrontendEndpointsEnableHttpsOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: FrontendEndpointsEnableHttpsOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Enables a frontendEndpoint for HTTPS traffic
    * @param resourceGroupName Name of the Resource group within the Azure subscription.
@@ -73,7 +73,7 @@ export interface FrontendEndpoints {
     frontDoorName: string,
     frontendEndpointName: string,
     customHttpsConfiguration: CustomHttpsConfiguration,
-    options?: FrontendEndpointsEnableHttpsOptionalParams
+    options?: FrontendEndpointsEnableHttpsOptionalParams,
   ): Promise<void>;
   /**
    * Disables a frontendEndpoint for HTTPS traffic
@@ -86,8 +86,8 @@ export interface FrontendEndpoints {
     resourceGroupName: string,
     frontDoorName: string,
     frontendEndpointName: string,
-    options?: FrontendEndpointsDisableHttpsOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: FrontendEndpointsDisableHttpsOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Disables a frontendEndpoint for HTTPS traffic
    * @param resourceGroupName Name of the Resource group within the Azure subscription.
@@ -99,6 +99,6 @@ export interface FrontendEndpoints {
     resourceGroupName: string,
     frontDoorName: string,
     frontendEndpointName: string,
-    options?: FrontendEndpointsDisableHttpsOptionalParams
+    options?: FrontendEndpointsDisableHttpsOptionalParams,
   ): Promise<void>;
 }

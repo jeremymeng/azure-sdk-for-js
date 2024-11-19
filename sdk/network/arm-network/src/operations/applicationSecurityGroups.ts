@@ -13,8 +13,12 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { NetworkManagementClient } from "../networkManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   ApplicationSecurityGroup,
   ApplicationSecurityGroupsListAllNextOptionalParams,
@@ -32,13 +36,14 @@ import {
   ApplicationSecurityGroupsUpdateTagsOptionalParams,
   ApplicationSecurityGroupsUpdateTagsResponse,
   ApplicationSecurityGroupsListAllNextResponse,
-  ApplicationSecurityGroupsListNextResponse
+  ApplicationSecurityGroupsListNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
 /** Class containing ApplicationSecurityGroups operations. */
 export class ApplicationSecurityGroupsImpl
-  implements ApplicationSecurityGroups {
+  implements ApplicationSecurityGroups
+{
   private readonly client: NetworkManagementClient;
 
   /**
@@ -54,7 +59,7 @@ export class ApplicationSecurityGroupsImpl
    * @param options The options parameters.
    */
   public listAll(
-    options?: ApplicationSecurityGroupsListAllOptionalParams
+    options?: ApplicationSecurityGroupsListAllOptionalParams,
   ): PagedAsyncIterableIterator<ApplicationSecurityGroup> {
     const iter = this.listAllPagingAll(options);
     return {
@@ -69,13 +74,13 @@ export class ApplicationSecurityGroupsImpl
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listAllPagingPage(options, settings);
-      }
+      },
     };
   }
 
   private async *listAllPagingPage(
     options?: ApplicationSecurityGroupsListAllOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ApplicationSecurityGroup[]> {
     let result: ApplicationSecurityGroupsListAllResponse;
     let continuationToken = settings?.continuationToken;
@@ -96,7 +101,7 @@ export class ApplicationSecurityGroupsImpl
   }
 
   private async *listAllPagingAll(
-    options?: ApplicationSecurityGroupsListAllOptionalParams
+    options?: ApplicationSecurityGroupsListAllOptionalParams,
   ): AsyncIterableIterator<ApplicationSecurityGroup> {
     for await (const page of this.listAllPagingPage(options)) {
       yield* page;
@@ -110,7 +115,7 @@ export class ApplicationSecurityGroupsImpl
    */
   public list(
     resourceGroupName: string,
-    options?: ApplicationSecurityGroupsListOptionalParams
+    options?: ApplicationSecurityGroupsListOptionalParams,
   ): PagedAsyncIterableIterator<ApplicationSecurityGroup> {
     const iter = this.listPagingAll(resourceGroupName, options);
     return {
@@ -125,14 +130,14 @@ export class ApplicationSecurityGroupsImpl
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listPagingPage(resourceGroupName, options, settings);
-      }
+      },
     };
   }
 
   private async *listPagingPage(
     resourceGroupName: string,
     options?: ApplicationSecurityGroupsListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<ApplicationSecurityGroup[]> {
     let result: ApplicationSecurityGroupsListResponse;
     let continuationToken = settings?.continuationToken;
@@ -147,7 +152,7 @@ export class ApplicationSecurityGroupsImpl
       result = await this._listNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -158,7 +163,7 @@ export class ApplicationSecurityGroupsImpl
 
   private async *listPagingAll(
     resourceGroupName: string,
-    options?: ApplicationSecurityGroupsListOptionalParams
+    options?: ApplicationSecurityGroupsListOptionalParams,
   ): AsyncIterableIterator<ApplicationSecurityGroup> {
     for await (const page of this.listPagingPage(resourceGroupName, options)) {
       yield* page;
@@ -174,25 +179,24 @@ export class ApplicationSecurityGroupsImpl
   async beginDelete(
     resourceGroupName: string,
     applicationSecurityGroupName: string,
-    options?: ApplicationSecurityGroupsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: ApplicationSecurityGroupsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -201,8 +205,8 @@ export class ApplicationSecurityGroupsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -210,20 +214,20 @@ export class ApplicationSecurityGroupsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, applicationSecurityGroupName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, applicationSecurityGroupName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "location"
+      resourceLocationConfig: "location",
     });
     await poller.poll();
     return poller;
@@ -238,12 +242,12 @@ export class ApplicationSecurityGroupsImpl
   async beginDeleteAndWait(
     resourceGroupName: string,
     applicationSecurityGroupName: string,
-    options?: ApplicationSecurityGroupsDeleteOptionalParams
+    options?: ApplicationSecurityGroupsDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       applicationSecurityGroupName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -257,11 +261,11 @@ export class ApplicationSecurityGroupsImpl
   get(
     resourceGroupName: string,
     applicationSecurityGroupName: string,
-    options?: ApplicationSecurityGroupsGetOptionalParams
+    options?: ApplicationSecurityGroupsGetOptionalParams,
   ): Promise<ApplicationSecurityGroupsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, applicationSecurityGroupName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -276,30 +280,29 @@ export class ApplicationSecurityGroupsImpl
     resourceGroupName: string,
     applicationSecurityGroupName: string,
     parameters: ApplicationSecurityGroup,
-    options?: ApplicationSecurityGroupsCreateOrUpdateOptionalParams
+    options?: ApplicationSecurityGroupsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ApplicationSecurityGroupsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ApplicationSecurityGroupsCreateOrUpdateResponse>,
       ApplicationSecurityGroupsCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<ApplicationSecurityGroupsCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -308,8 +311,8 @@ export class ApplicationSecurityGroupsImpl
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -317,20 +320,28 @@ export class ApplicationSecurityGroupsImpl
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, applicationSecurityGroupName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: {
+        resourceGroupName,
+        applicationSecurityGroupName,
+        parameters,
+        options,
+      },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      ApplicationSecurityGroupsCreateOrUpdateResponse,
+      OperationState<ApplicationSecurityGroupsCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
       intervalInMs: options?.updateIntervalInMs,
-      lroResourceLocationConfig: "azure-async-operation"
+      resourceLocationConfig: "azure-async-operation",
     });
     await poller.poll();
     return poller;
@@ -347,13 +358,13 @@ export class ApplicationSecurityGroupsImpl
     resourceGroupName: string,
     applicationSecurityGroupName: string,
     parameters: ApplicationSecurityGroup,
-    options?: ApplicationSecurityGroupsCreateOrUpdateOptionalParams
+    options?: ApplicationSecurityGroupsCreateOrUpdateOptionalParams,
   ): Promise<ApplicationSecurityGroupsCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       applicationSecurityGroupName,
       parameters,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -369,11 +380,11 @@ export class ApplicationSecurityGroupsImpl
     resourceGroupName: string,
     applicationSecurityGroupName: string,
     parameters: TagsObject,
-    options?: ApplicationSecurityGroupsUpdateTagsOptionalParams
+    options?: ApplicationSecurityGroupsUpdateTagsOptionalParams,
   ): Promise<ApplicationSecurityGroupsUpdateTagsResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, applicationSecurityGroupName, parameters, options },
-      updateTagsOperationSpec
+      updateTagsOperationSpec,
     );
   }
 
@@ -382,7 +393,7 @@ export class ApplicationSecurityGroupsImpl
    * @param options The options parameters.
    */
   private _listAll(
-    options?: ApplicationSecurityGroupsListAllOptionalParams
+    options?: ApplicationSecurityGroupsListAllOptionalParams,
   ): Promise<ApplicationSecurityGroupsListAllResponse> {
     return this.client.sendOperationRequest({ options }, listAllOperationSpec);
   }
@@ -394,11 +405,11 @@ export class ApplicationSecurityGroupsImpl
    */
   private _list(
     resourceGroupName: string,
-    options?: ApplicationSecurityGroupsListOptionalParams
+    options?: ApplicationSecurityGroupsListOptionalParams,
   ): Promise<ApplicationSecurityGroupsListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listOperationSpec
+      listOperationSpec,
     );
   }
 
@@ -409,11 +420,11 @@ export class ApplicationSecurityGroupsImpl
    */
   private _listAllNext(
     nextLink: string,
-    options?: ApplicationSecurityGroupsListAllNextOptionalParams
+    options?: ApplicationSecurityGroupsListAllNextOptionalParams,
   ): Promise<ApplicationSecurityGroupsListAllNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listAllNextOperationSpec
+      listAllNextOperationSpec,
     );
   }
 
@@ -426,11 +437,11 @@ export class ApplicationSecurityGroupsImpl
   private _listNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: ApplicationSecurityGroupsListNextOptionalParams
+    options?: ApplicationSecurityGroupsListNextOptionalParams,
   ): Promise<ApplicationSecurityGroupsListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
     );
   }
 }
@@ -438,8 +449,7 @@ export class ApplicationSecurityGroupsImpl
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
@@ -447,61 +457,59 @@ const deleteOperationSpec: coreClient.OperationSpec = {
     202: {},
     204: {},
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.applicationSecurityGroupName
+    Parameters.applicationSecurityGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationSecurityGroup
+      bodyMapper: Mappers.ApplicationSecurityGroup,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.applicationSecurityGroupName
+    Parameters.applicationSecurityGroupName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationSecurityGroup
+      bodyMapper: Mappers.ApplicationSecurityGroup,
     },
     201: {
-      bodyMapper: Mappers.ApplicationSecurityGroup
+      bodyMapper: Mappers.ApplicationSecurityGroup,
     },
     202: {
-      bodyMapper: Mappers.ApplicationSecurityGroup
+      bodyMapper: Mappers.ApplicationSecurityGroup,
     },
     204: {
-      bodyMapper: Mappers.ApplicationSecurityGroup
+      bodyMapper: Mappers.ApplicationSecurityGroup,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters3,
   queryParameters: [Parameters.apiVersion],
@@ -509,23 +517,22 @@ const createOrUpdateOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.applicationSecurityGroupName
+    Parameters.applicationSecurityGroupName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const updateTagsOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationSecurityGroup
+      bodyMapper: Mappers.ApplicationSecurityGroup,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   requestBody: Parameters.parameters1,
   queryParameters: [Parameters.apiVersion],
@@ -533,88 +540,84 @@ const updateTagsOperationSpec: coreClient.OperationSpec = {
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.applicationSecurityGroupName
+    Parameters.applicationSecurityGroupName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listAllOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Network/applicationSecurityGroups",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/applicationSecurityGroups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationSecurityGroupListResult
+      bodyMapper: Mappers.ApplicationSecurityGroupListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationSecurityGroupListResult
+      bodyMapper: Mappers.ApplicationSecurityGroupListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
-    Parameters.subscriptionId
+    Parameters.subscriptionId,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listAllNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationSecurityGroupListResult
+      bodyMapper: Mappers.ApplicationSecurityGroupListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ApplicationSecurityGroupListResult
+      bodyMapper: Mappers.ApplicationSecurityGroupListResult,
     },
     default: {
-      bodyMapper: Mappers.CloudError
-    }
+      bodyMapper: Mappers.CloudError,
+    },
   },
-  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
     Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

@@ -1,45 +1,42 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { assert } from "chai";
-import { Context } from "mocha";
-
-import { SipRoutingClient } from "../../../src";
-
-import { isPlaybackMode, Recorder } from "@azure-tools/test-recorder";
-import { SipTrunk } from "../../../src/models";
+import type { SipRoutingClient } from "../../../src/index.js";
+import type { Recorder } from "@azure-tools/test-recorder";
+import { isPlaybackMode } from "@azure-tools/test-recorder";
+import type { SipTrunk } from "../../../src/models.js";
 import {
   clearSipConfiguration,
   createRecordedClient,
   createRecordedClientWithToken,
   getUniqueFqdn,
+  listAllTrunks,
   resetUniqueFqdns,
-} from "./utils/recordedClient";
-import { matrix } from "@azure/test-utils";
+} from "./utils/recordedClient.js";
+import { matrix } from "@azure-tools/test-utils-vitest";
+import { describe, it, assert, beforeEach, afterEach, beforeAll } from "vitest";
 
-matrix([[true, false]], async function (useAad) {
-  describe(`SipRoutingClient - delete trunk${useAad ? " [AAD]" : ""}`, function () {
+matrix([[true, false]], async (useAad) => {
+  describe(`SipRoutingClient - delete trunk${useAad ? " [AAD]" : ""}`, () => {
     let client: SipRoutingClient;
     let recorder: Recorder;
     let testFqdn = "";
 
-    before(async function (this: Context) {
+    beforeAll(async () => {
       if (!isPlaybackMode()) {
         await clearSipConfiguration();
       }
     });
 
-    beforeEach(async function (this: Context) {
+    beforeEach(async (ctx) => {
       ({ client, recorder } = useAad
-        ? await createRecordedClientWithToken(this)
-        : await createRecordedClient(this));
+        ? await createRecordedClientWithToken(ctx)
+        : await createRecordedClient(ctx));
       testFqdn = getUniqueFqdn(recorder);
     });
 
-    afterEach(async function (this: Context) {
-      if (!this.currentTest?.isPending()) {
-        await recorder.stop();
-      }
+    afterEach(async () => {
+      await recorder.stop();
       resetUniqueFqdns();
     });
 
@@ -50,11 +47,11 @@ matrix([[true, false]], async function (useAad) {
       };
       const storedTrunk = await client.setTrunk(trunk);
       assert.deepEqual(storedTrunk, trunk);
-      assert.exists((await client.getTrunks()).find((value) => value.fqdn === trunk.fqdn));
+      assert.exists((await listAllTrunks(client)).find((value) => value.fqdn === trunk.fqdn));
 
       await client.deleteTrunk(testFqdn);
 
-      assert.notExists((await client.getTrunks()).find((value) => value.fqdn === trunk.fqdn));
+      assert.notExists((await listAllTrunks(client)).find((value) => value.fqdn === trunk.fqdn));
     });
 
     it("cannot delete a not existing trunk but succeeds", async () => {
@@ -62,7 +59,7 @@ matrix([[true, false]], async function (useAad) {
 
       await client.deleteTrunk("notExisting.fqdn.com");
 
-      const storedTrunks = await client.getTrunks();
+      const storedTrunks = await listAllTrunks(client);
       assert.isNotNull(storedTrunks);
       assert.isArray(storedTrunks);
       assert.isEmpty(storedTrunks);

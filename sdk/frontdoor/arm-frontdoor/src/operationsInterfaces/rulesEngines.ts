@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   RulesEngine,
   RulesEnginesListByFrontDoorOptionalParams,
@@ -15,7 +15,7 @@ import {
   RulesEnginesGetResponse,
   RulesEnginesCreateOrUpdateOptionalParams,
   RulesEnginesCreateOrUpdateResponse,
-  RulesEnginesDeleteOptionalParams
+  RulesEnginesDeleteOptionalParams,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -30,7 +30,7 @@ export interface RulesEngines {
   listByFrontDoor(
     resourceGroupName: string,
     frontDoorName: string,
-    options?: RulesEnginesListByFrontDoorOptionalParams
+    options?: RulesEnginesListByFrontDoorOptionalParams,
   ): PagedAsyncIterableIterator<RulesEngine>;
   /**
    * Gets a Rules Engine Configuration with the specified name within the specified Front Door.
@@ -43,7 +43,7 @@ export interface RulesEngines {
     resourceGroupName: string,
     frontDoorName: string,
     rulesEngineName: string,
-    options?: RulesEnginesGetOptionalParams
+    options?: RulesEnginesGetOptionalParams,
   ): Promise<RulesEnginesGetResponse>;
   /**
    * Creates a new Rules Engine Configuration with the specified name within the specified Front Door.
@@ -59,10 +59,10 @@ export interface RulesEngines {
     frontDoorName: string,
     rulesEngineName: string,
     rulesEngineParameters: RulesEngine,
-    options?: RulesEnginesCreateOrUpdateOptionalParams
+    options?: RulesEnginesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<RulesEnginesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<RulesEnginesCreateOrUpdateResponse>,
       RulesEnginesCreateOrUpdateResponse
     >
   >;
@@ -80,7 +80,7 @@ export interface RulesEngines {
     frontDoorName: string,
     rulesEngineName: string,
     rulesEngineParameters: RulesEngine,
-    options?: RulesEnginesCreateOrUpdateOptionalParams
+    options?: RulesEnginesCreateOrUpdateOptionalParams,
   ): Promise<RulesEnginesCreateOrUpdateResponse>;
   /**
    * Deletes an existing Rules Engine Configuration with the specified parameters.
@@ -93,8 +93,8 @@ export interface RulesEngines {
     resourceGroupName: string,
     frontDoorName: string,
     rulesEngineName: string,
-    options?: RulesEnginesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: RulesEnginesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes an existing Rules Engine Configuration with the specified parameters.
    * @param resourceGroupName Name of the Resource group within the Azure subscription.
@@ -106,6 +106,6 @@ export interface RulesEngines {
     resourceGroupName: string,
     frontDoorName: string,
     rulesEngineName: string,
-    options?: RulesEnginesDeleteOptionalParams
+    options?: RulesEnginesDeleteOptionalParams,
   ): Promise<void>;
 }

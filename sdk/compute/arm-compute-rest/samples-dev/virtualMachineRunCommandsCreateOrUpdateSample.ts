@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -48,7 +48,7 @@ async function createOrUpdateARunCommand() {
       subscriptionId,
       resourceGroupName,
       vmName,
-      runCommandName
+      runCommandName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);

@@ -4,16 +4,14 @@
 
 ```ts
 
-/// <reference lib="esnext.asynciterable" />
-
-import { CommonClientOptions } from '@azure/core-client';
+import type { CommonClientOptions } from '@azure/core-client';
 import * as coreClient from '@azure/core-client';
-import { KeyCredential } from '@azure/core-auth';
-import { OperationOptions } from '@azure/core-client';
-import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
-import { TokenCredential } from '@azure/core-auth';
+import type { KeyCredential } from '@azure/core-auth';
+import type { OperationOptions } from '@azure/core-client';
+import type { PagedAsyncIterableIterator } from '@azure/core-paging';
+import type { PollerLike } from '@azure/core-lro';
+import type { PollOperationState } from '@azure/core-lro';
+import type { TokenCredential } from '@azure/core-auth';
 
 // @public
 export interface BeginPurchasePhoneNumbersOptions extends OperationOptions {
@@ -61,8 +59,46 @@ export interface ListPurchasedPhoneNumbersOptions extends OperationOptions {
 }
 
 // @public
+export interface ListSipRoutesOptions extends OperationOptions {
+}
+
+// @public
+export interface ListSipTrunksOptions extends OperationOptions {
+}
+
+// @public
 export interface ListTollFreeAreaCodesOptions extends Omit<PhoneNumbersListAreaCodesOptionalParams, "assignmentType" | "locality" | "administrativeDivision"> {
 }
+
+// @public
+export interface OperatorDetails {
+    mobileCountryCode?: string;
+    mobileNetworkCode?: string;
+    name: string;
+}
+
+// @public
+export interface OperatorInformation {
+    internationalFormat?: string;
+    isoCountryCode?: string;
+    nationalFormat?: string;
+    numberType?: OperatorNumberType;
+    operatorDetails?: OperatorDetails;
+    phoneNumber: string;
+}
+
+// @public
+export interface OperatorInformationOptions {
+    includeAdditionalOperatorDetails?: boolean;
+}
+
+// @public
+export interface OperatorInformationResult {
+    values?: OperatorInformation[];
+}
+
+// @public
+export type OperatorNumberType = "unknown" | "other" | "geographic" | "mobile";
 
 // @public
 export interface PhoneNumberAdministrativeDivision {
@@ -136,6 +172,7 @@ export class PhoneNumbersClient {
     listAvailableOfferings(countryCode: string, options?: ListOfferingsOptions): PagedAsyncIterableIterator<PhoneNumberOffering>;
     listAvailableTollFreeAreaCodes(countryCode: string, options?: ListTollFreeAreaCodesOptions): PagedAsyncIterableIterator<PhoneNumberAreaCode>;
     listPurchasedPhoneNumbers(options?: ListPurchasedPhoneNumbersOptions): PagedAsyncIterableIterator<PurchasedPhoneNumber>;
+    searchOperatorInformation(phoneNumbers: string[], options?: SearchOperatorInformationOptions): Promise<OperatorInformationResult>;
 }
 
 // @public
@@ -157,11 +194,16 @@ export interface PhoneNumberSearchResult {
     assignmentType: PhoneNumberAssignmentType;
     capabilities: PhoneNumberCapabilities;
     cost: PhoneNumberCost;
+    error?: PhoneNumberSearchResultError;
+    errorCode?: number;
     phoneNumbers: string[];
     phoneNumberType: PhoneNumberType;
     searchExpiresBy: Date;
     searchId: string;
 }
+
+// @public
+export type PhoneNumberSearchResultError = "NoError" | "UnknownErrorCode" | "OutOfStock" | "AuthorizationDenied" | "MissingAddress" | "InvalidAddress" | "InvalidOfferModel" | "NotEnoughLicenses" | "NoWallet" | "NotEnoughCredit" | "NumbersPartiallyAcquired" | "AllNumbersNotAcquired" | "ReservationExpired" | "PurchaseFailed" | "BillingUnavailable" | "ProvisioningFailed" | "UnknownSearchError";
 
 // @public
 export interface PhoneNumbersListAreaCodesOptionalParams extends coreClient.OperationOptions {
@@ -202,14 +244,20 @@ export interface SearchAvailablePhoneNumbersRequest extends PhoneNumberSearchReq
 }
 
 // @public
+export interface SearchOperatorInformationOptions extends OperationOptions {
+    // (undocumented)
+    includeAdditionalOperatorDetails: boolean;
+}
+
+// @public
 export class SipRoutingClient {
     constructor(connectionString: string, options?: SipRoutingClientOptions);
     constructor(endpoint: string, credential: KeyCredential, options?: SipRoutingClientOptions);
     constructor(endpoint: string, credential: TokenCredential, options?: SipRoutingClientOptions);
     deleteTrunk(fqdn: string, options?: OperationOptions): Promise<void>;
-    getRoutes(options?: OperationOptions): Promise<SipTrunkRoute[]>;
     getTrunk(fqdn: string, options?: OperationOptions): Promise<SipTrunk>;
-    getTrunks(options?: OperationOptions): Promise<SipTrunk[]>;
+    listRoutes(options?: ListSipRoutesOptions): PagedAsyncIterableIterator<SipTrunkRoute>;
+    listTrunks(options?: ListSipTrunksOptions): PagedAsyncIterableIterator<SipTrunk>;
     setRoutes(routes: SipTrunkRoute[], options?: OperationOptions): Promise<SipTrunkRoute[]>;
     setTrunk(trunk: SipTrunk, options?: OperationOptions): Promise<SipTrunk>;
     setTrunks(trunks: SipTrunk[], options?: OperationOptions): Promise<SipTrunk[]>;

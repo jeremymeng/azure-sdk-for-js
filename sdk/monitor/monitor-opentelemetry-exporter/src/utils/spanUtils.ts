@@ -1,27 +1,65 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { URL } from "url";
-import { ReadableSpan, TimedEvent } from "@opentelemetry/sdk-trace-base";
+import type { ReadableSpan, TimedEvent } from "@opentelemetry/sdk-trace-base";
 import { hrTimeToMilliseconds } from "@opentelemetry/core";
-import { diag, SpanKind, SpanStatusCode, Link, Attributes } from "@opentelemetry/api";
-import { SemanticAttributes, DbSystemValues } from "@opentelemetry/semantic-conventions";
-
-import { createTagsFromResource, getDependencyTarget, getUrl, isSqlDB } from "./common";
-import { Tags, Properties, MSLink, Measurements } from "../types";
-import { msToTimeSpan } from "./breezeUtils";
-import { parseEventHubSpan } from "./eventhub";
-import { AzureMonitorSampleRate, DependencyTypes, MS_LINKS } from "./constants/applicationinsights";
-import { AzNamespace, MicrosoftEventHub } from "./constants/span/azAttributes";
+import type { Link, Attributes, SpanContext } from "@opentelemetry/api";
+import { diag, SpanKind, SpanStatusCode, isValidTraceId, isValidSpanId } from "@opentelemetry/api";
 import {
+  DBSYSTEMVALUES_MONGODB,
+  DBSYSTEMVALUES_MYSQL,
+  DBSYSTEMVALUES_POSTGRESQL,
+  DBSYSTEMVALUES_REDIS,
+  SEMATTRS_DB_NAME,
+  SEMATTRS_DB_OPERATION,
+  SEMATTRS_DB_STATEMENT,
+  SEMATTRS_DB_SYSTEM,
+  SEMATTRS_ENDUSER_ID,
+  SEMATTRS_EXCEPTION_ESCAPED,
+  SEMATTRS_EXCEPTION_MESSAGE,
+  SEMATTRS_EXCEPTION_STACKTRACE,
+  SEMATTRS_EXCEPTION_TYPE,
+  SEMATTRS_HTTP_CLIENT_IP,
+  SEMATTRS_HTTP_HOST,
+  SEMATTRS_HTTP_METHOD,
+  SEMATTRS_HTTP_ROUTE,
+  SEMATTRS_HTTP_STATUS_CODE,
+  SEMATTRS_HTTP_URL,
+  SEMATTRS_HTTP_USER_AGENT,
+  SEMATTRS_NET_PEER_IP,
+  SEMATTRS_NET_PEER_NAME,
+  SEMATTRS_PEER_SERVICE,
+  SEMATTRS_RPC_GRPC_STATUS_CODE,
+  SEMATTRS_RPC_SYSTEM,
+} from "@opentelemetry/semantic-conventions";
+
+import {
+  createTagsFromResource,
+  getDependencyTarget,
+  getUrl,
+  hrTimeToDate,
+  isSqlDB,
+  serializeAttribute,
+} from "./common.js";
+import type { Tags, Properties, MSLink, Measurements } from "../types.js";
+import { MaxPropertyLengths } from "../types.js";
+import { parseEventHubSpan } from "./eventhub.js";
+import {
+  AzureMonitorSampleRate,
+  DependencyTypes,
+  MS_LINKS,
+} from "./constants/applicationinsights.js";
+import { AzNamespace, MicrosoftEventHub } from "./constants/span/azAttributes.js";
+import type {
   TelemetryExceptionData,
   MessageData,
   RemoteDependencyData,
   RequestData,
   TelemetryItem as Envelope,
-  KnownContextTagKeys,
   TelemetryExceptionDetails,
-} from "../generated";
+} from "../generated/index.js";
+import { KnownContextTagKeys } from "../generated/index.js";
+import { msToTimeSpan } from "./breezeUtils.js";
 
 function createTagsFromSpan(span: ReadableSpan): Tags {
   const tags: Tags = createTagsFromResource(span.resource);
@@ -29,18 +67,22 @@ function createTagsFromSpan(span: ReadableSpan): Tags {
   if (span.parentSpanId) {
     tags[KnownContextTagKeys.AiOperationParentId] = span.parentSpanId;
   }
-  const httpUserAgent = span.attributes[SemanticAttributes.HTTP_USER_AGENT];
+  const endUserId = span.attributes[SEMATTRS_ENDUSER_ID];
+  if (endUserId) {
+    tags[KnownContextTagKeys.AiUserId] = String(endUserId);
+  }
+  const httpUserAgent = span.attributes[SEMATTRS_HTTP_USER_AGENT];
   if (httpUserAgent) {
     // TODO: Not exposed in Swagger, need to update def
     tags["ai.user.userAgent"] = String(httpUserAgent);
   }
   if (span.kind === SpanKind.SERVER) {
-    const httpMethod = span.attributes[SemanticAttributes.HTTP_METHOD];
-    const httpClientIp = span.attributes[SemanticAttributes.HTTP_CLIENT_IP];
-    const netPeerIp = span.attributes[SemanticAttributes.NET_PEER_IP];
+    const httpMethod = span.attributes[SEMATTRS_HTTP_METHOD];
+    const httpClientIp = span.attributes[SEMATTRS_HTTP_CLIENT_IP];
+    const netPeerIp = span.attributes[SEMATTRS_NET_PEER_IP];
     if (httpMethod) {
-      const httpRoute = span.attributes[SemanticAttributes.HTTP_ROUTE];
-      const httpUrl = span.attributes[SemanticAttributes.HTTP_URL];
+      const httpRoute = span.attributes[SEMATTRS_HTTP_ROUTE];
+      const httpUrl = span.attributes[SEMATTRS_HTTP_URL];
       tags[KnownContextTagKeys.AiOperationName] = span.name; // Default
       if (httpRoute) {
         tags[KnownContextTagKeys.AiOperationName] = `${httpMethod as string} ${
@@ -48,9 +90,11 @@ function createTagsFromSpan(span: ReadableSpan): Tags {
         }`;
       } else if (httpUrl) {
         try {
-          let url = new URL(String(httpUrl));
+          const url = new URL(String(httpUrl));
           tags[KnownContextTagKeys.AiOperationName] = `${httpMethod} ${url.pathname}`;
-        } catch (ex: any) {}
+        } catch {
+          /* no-op */
+        }
       }
       if (httpClientIp) {
         tags[KnownContextTagKeys.AiLocationIp] = String(httpClientIp);
@@ -75,24 +119,32 @@ function createPropertiesFromSpanAttributes(attributes?: Attributes): {
   const properties: { [propertyName: string]: string } = {};
   if (attributes) {
     for (const key of Object.keys(attributes)) {
+      // Avoid duplication ignoring fields already mapped.
       if (
         !(
-          key.startsWith("http.") ||
-          key.startsWith("rpc.") ||
-          key.startsWith("db.") ||
-          key.startsWith("peer.") ||
-          key.startsWith("message.") ||
-          key.startsWith("messaging.") ||
-          key.startsWith("enduser.") ||
-          key.startsWith("net.") ||
-          key.startsWith("exception.") ||
-          key.startsWith("thread.") ||
-          key.startsWith("faas.") ||
-          key.startsWith("code.") ||
-          key.startsWith("_MS.")
+          key.startsWith("_MS.") ||
+          key.startsWith("microsoft.") ||
+          key === SEMATTRS_NET_PEER_IP ||
+          key === SEMATTRS_NET_PEER_NAME ||
+          key === SEMATTRS_PEER_SERVICE ||
+          key === SEMATTRS_HTTP_METHOD ||
+          key === SEMATTRS_HTTP_URL ||
+          key === SEMATTRS_HTTP_STATUS_CODE ||
+          key === SEMATTRS_HTTP_ROUTE ||
+          key === SEMATTRS_HTTP_HOST ||
+          key === SEMATTRS_HTTP_URL ||
+          key === SEMATTRS_DB_SYSTEM ||
+          key === SEMATTRS_DB_STATEMENT ||
+          key === SEMATTRS_DB_OPERATION ||
+          key === SEMATTRS_DB_NAME ||
+          key === SEMATTRS_RPC_SYSTEM ||
+          key === SEMATTRS_RPC_GRPC_STATUS_CODE ||
+          key === SEMATTRS_EXCEPTION_TYPE ||
+          key === SEMATTRS_EXCEPTION_MESSAGE ||
+          key === SEMATTRS_EXCEPTION_STACKTRACE
         )
       ) {
-        properties[key] = attributes[key] as string;
+        properties[key] = serializeAttribute(attributes[key]);
       }
     }
   }
@@ -115,9 +167,9 @@ function createPropertiesFromSpan(span: ReadableSpan): [Properties, Measurements
 
 function createDependencyData(span: ReadableSpan): RemoteDependencyData {
   const remoteDependencyData: RemoteDependencyData = {
-    name: span.name, //Default
+    name: span.name, // Default
     id: `${span.spanContext().spanId}`,
-    success: span.status.code != SpanStatusCode.ERROR,
+    success: span.status?.code !== SpanStatusCode.ERROR,
     resultCode: "0",
     type: "Dependency",
     duration: msToTimeSpan(hrTimeToMilliseconds(span.duration)),
@@ -130,21 +182,23 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
     remoteDependencyData.type = DependencyTypes.InProc;
   }
 
-  const httpMethod = span.attributes[SemanticAttributes.HTTP_METHOD];
-  const dbSystem = span.attributes[SemanticAttributes.DB_SYSTEM];
-  const rpcSystem = span.attributes[SemanticAttributes.RPC_SYSTEM];
+  const httpMethod = span.attributes[SEMATTRS_HTTP_METHOD];
+  const dbSystem = span.attributes[SEMATTRS_DB_SYSTEM];
+  const rpcSystem = span.attributes[SEMATTRS_RPC_SYSTEM];
   // HTTP Dependency
   if (httpMethod) {
-    const httpUrl = span.attributes[SemanticAttributes.HTTP_URL];
+    const httpUrl = span.attributes[SEMATTRS_HTTP_URL];
     if (httpUrl) {
       try {
-        let dependencyUrl = new URL(String(httpUrl));
+        const dependencyUrl = new URL(String(httpUrl));
         remoteDependencyData.name = `${httpMethod} ${dependencyUrl.pathname}`;
-      } catch (ex: any) {}
+      } catch {
+        /* no-op */
+      }
     }
     remoteDependencyData.type = DependencyTypes.Http;
     remoteDependencyData.data = getUrl(span.attributes);
-    const httpStatusCode = span.attributes[SemanticAttributes.HTTP_STATUS_CODE];
+    const httpStatusCode = span.attributes[SEMATTRS_HTTP_STATUS_CODE];
     if (httpStatusCode) {
       remoteDependencyData.resultCode = String(httpStatusCode);
     }
@@ -152,45 +206,50 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
     if (target) {
       try {
         // Remove default port
-        let portRegex = new RegExp(/(https?)(:\/\/.*)(:\d+)(\S*)/);
-        let res = portRegex.exec(target);
-        if (res != null) {
-          let protocol = res[1];
-          let port = res[3];
-          if ((protocol == "https" && port == ":443") || (protocol == "http" && port == ":80")) {
+        const portRegex = new RegExp(/(https?)(:\/\/.*)(:\d+)(\S*)/);
+        const res = portRegex.exec(target);
+        if (res !== null) {
+          const protocol = res[1];
+          const port = res[3];
+          if (
+            (protocol === "https" && port === ":443") ||
+            (protocol === "http" && port === ":80")
+          ) {
             // Drop port
             target = res[1] + res[2] + res[4];
           }
         }
-      } catch (ex: any) {}
+      } catch {
+        /* no-op */
+      }
       remoteDependencyData.target = `${target}`;
     }
   }
   // DB Dependency
   else if (dbSystem) {
     // TODO: Remove special logic when Azure UX supports OpenTelemetry dbSystem
-    if (String(dbSystem) === DbSystemValues.MYSQL) {
+    if (String(dbSystem) === DBSYSTEMVALUES_MYSQL) {
       remoteDependencyData.type = "mysql";
-    } else if (String(dbSystem) === DbSystemValues.POSTGRESQL) {
+    } else if (String(dbSystem) === DBSYSTEMVALUES_POSTGRESQL) {
       remoteDependencyData.type = "postgresql";
-    } else if (String(dbSystem) === DbSystemValues.MONGODB) {
+    } else if (String(dbSystem) === DBSYSTEMVALUES_MONGODB) {
       remoteDependencyData.type = "mongodb";
-    } else if (String(dbSystem) === DbSystemValues.REDIS) {
+    } else if (String(dbSystem) === DBSYSTEMVALUES_REDIS) {
       remoteDependencyData.type = "redis";
     } else if (isSqlDB(String(dbSystem))) {
       remoteDependencyData.type = "SQL";
     } else {
       remoteDependencyData.type = String(dbSystem);
     }
-    const dbStatement = span.attributes[SemanticAttributes.DB_STATEMENT];
-    const dbOperation = span.attributes[SemanticAttributes.DB_OPERATION];
+    const dbStatement = span.attributes[SEMATTRS_DB_STATEMENT];
+    const dbOperation = span.attributes[SEMATTRS_DB_OPERATION];
     if (dbStatement) {
       remoteDependencyData.data = String(dbStatement);
     } else if (dbOperation) {
       remoteDependencyData.data = String(dbOperation);
     }
-    let target = getDependencyTarget(span.attributes);
-    const dbName = span.attributes[SemanticAttributes.DB_NAME];
+    const target = getDependencyTarget(span.attributes);
+    const dbName = span.attributes[SEMATTRS_DB_NAME];
     if (target) {
       remoteDependencyData.target = dbName ? `${target}|${dbName}` : `${target}`;
     } else {
@@ -199,12 +258,16 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
   }
   // grpc Dependency
   else if (rpcSystem) {
-    remoteDependencyData.type = DependencyTypes.Grpc;
-    const grpcStatusCode = span.attributes[SemanticAttributes.RPC_GRPC_STATUS_CODE];
+    if (rpcSystem === DependencyTypes.Wcf) {
+      remoteDependencyData.type = DependencyTypes.Wcf;
+    } else {
+      remoteDependencyData.type = DependencyTypes.Grpc;
+    }
+    const grpcStatusCode = span.attributes[SEMATTRS_RPC_GRPC_STATUS_CODE];
     if (grpcStatusCode) {
       remoteDependencyData.resultCode = String(grpcStatusCode);
     }
-    let target = getDependencyTarget(span.attributes);
+    const target = getDependencyTarget(span.attributes);
     if (target) {
       remoteDependencyData.target = `${target}`;
     } else if (rpcSystem) {
@@ -217,17 +280,19 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
 function createRequestData(span: ReadableSpan): RequestData {
   const requestData: RequestData = {
     id: `${span.spanContext().spanId}`,
-    success: span.status.code != SpanStatusCode.ERROR,
+    success:
+      span.status.code !== SpanStatusCode.ERROR &&
+      (Number(span.attributes[SEMATTRS_HTTP_STATUS_CODE]) || 0) < 400,
     responseCode: "0",
     duration: msToTimeSpan(hrTimeToMilliseconds(span.duration)),
     version: 2,
     source: undefined,
   };
-  const httpMethod = span.attributes[SemanticAttributes.HTTP_METHOD];
-  const grpcStatusCode = span.attributes[SemanticAttributes.RPC_GRPC_STATUS_CODE];
+  const httpMethod = span.attributes[SEMATTRS_HTTP_METHOD];
+  const grpcStatusCode = span.attributes[SEMATTRS_RPC_GRPC_STATUS_CODE];
   if (httpMethod) {
     requestData.url = getUrl(span.attributes);
-    const httpStatusCode = span.attributes[SemanticAttributes.HTTP_STATUS_CODE];
+    const httpStatusCode = span.attributes[SEMATTRS_HTTP_STATUS_CODE];
     if (httpStatusCode) {
       requestData.responseCode = String(httpStatusCode);
     }
@@ -246,7 +311,7 @@ export function readableSpanToEnvelope(span: ReadableSpan, ikey: string): Envelo
   let baseType: "RemoteDependencyData" | "RequestData";
   let baseData: RemoteDependencyData | RequestData;
 
-  const time = new Date(hrTimeToMilliseconds(span.startTime));
+  const time = hrTimeToDate(span.startTime);
   const instrumentationKey = ikey;
   const tags = createTagsFromSpan(span);
   const [properties, measurements] = createPropertiesFromSpan(span);
@@ -286,6 +351,34 @@ export function readableSpanToEnvelope(span: ReadableSpan, ikey: string): Envelo
     }
   }
 
+  // Truncate properties
+  if (baseData.id) {
+    baseData.id = baseData.id.substring(0, MaxPropertyLengths.NINE_BIT);
+  }
+  if (baseData.name) {
+    baseData.name = baseData.name.substring(0, MaxPropertyLengths.TEN_BIT);
+  }
+  if (baseData.resultCode) {
+    baseData.resultCode = String(baseData.resultCode).substring(0, MaxPropertyLengths.TEN_BIT);
+  }
+  if (baseData.data) {
+    baseData.data = String(baseData.data).substring(0, MaxPropertyLengths.THIRTEEN_BIT);
+  }
+  if (baseData.type) {
+    baseData.type = String(baseData.type).substring(0, MaxPropertyLengths.TEN_BIT);
+  }
+  if (baseData.target) {
+    baseData.target = String(baseData.target).substring(0, MaxPropertyLengths.TEN_BIT);
+  }
+  if (baseData.properties) {
+    for (const key of Object.keys(baseData.properties)) {
+      baseData.properties[key] = baseData.properties[key].substring(
+        0,
+        MaxPropertyLengths.THIRTEEN_BIT,
+      );
+    }
+  }
+
   return {
     name,
     sampleRate,
@@ -309,61 +402,78 @@ export function readableSpanToEnvelope(span: ReadableSpan, ikey: string): Envelo
  * @internal
  */
 export function spanEventsToEnvelopes(span: ReadableSpan, ikey: string): Envelope[] {
-  let envelopes: Envelope[] = [];
+  const envelopes: Envelope[] = [];
   if (span.events) {
     span.events.forEach((event: TimedEvent) => {
       let baseType: "ExceptionData" | "MessageData";
-      let time = new Date(hrTimeToMilliseconds(event.time));
+      const time = hrTimeToDate(event.time);
       let name = "";
       let baseData: TelemetryExceptionData | MessageData;
       const properties = createPropertiesFromSpanAttributes(event.attributes);
 
-      let tags: Tags = createTagsFromResource(span.resource);
+      const tags: Tags = createTagsFromResource(span.resource);
       tags[KnownContextTagKeys.AiOperationId] = span.spanContext().traceId;
-      let spanId = span.spanContext()?.spanId;
+      const spanId = span.spanContext()?.spanId;
       if (spanId) {
         tags[KnownContextTagKeys.AiOperationParentId] = spanId;
       }
 
       // Only generate exception telemetry for incoming requests
-      if (event.name == "exception" && span.kind == SpanKind.SERVER) {
-        name = "Microsoft.ApplicationInsights.Exception";
-        baseType = "ExceptionData";
-        let typeName = "";
-        let message = "Exception";
-        let stack = "";
-        let hasFullStack = false;
-        if (event.attributes) {
-          typeName = String(event.attributes[SemanticAttributes.EXCEPTION_TYPE]);
-          stack = String(event.attributes[SemanticAttributes.EXCEPTION_STACKTRACE]);
-          if (stack) {
-            hasFullStack = true;
-          }
-          let exceptionMsg = event.attributes[SemanticAttributes.EXCEPTION_MESSAGE];
-          if (exceptionMsg) {
-            message = String(exceptionMsg);
-          }
-          let escaped = event.attributes[SemanticAttributes.EXCEPTION_ESCAPED];
-          if (escaped != undefined) {
-            properties[SemanticAttributes.EXCEPTION_ESCAPED] = String(escaped);
-          }
+      if (event.name === "exception") {
+        let isValidParent = false;
+        const parentSpanContext: SpanContext | undefined = span.parentSpanId
+          ? span.spanContext()
+          : undefined;
+        if (parentSpanContext) {
+          isValidParent =
+            isValidTraceId(parentSpanContext.traceId) && isValidSpanId(parentSpanContext.spanId);
         }
-        let exceptionDetails: TelemetryExceptionDetails = {
-          typeName: typeName,
-          message: message,
-          stack: stack,
-          hasFullStack: hasFullStack,
-        };
-        let exceptionData: TelemetryExceptionData = {
-          exceptions: [exceptionDetails],
-          version: 2,
-          properties: properties,
-        };
-        baseData = exceptionData;
+        /*
+         * Only generate exception telemetry for children of a remote span,
+         * internal spans, and top level spans. This is to avoid unresolvable exceptions from outgoing calls.
+         */
+        if (!isValidParent || parentSpanContext?.isRemote || span.kind === SpanKind.INTERNAL) {
+          name = "Microsoft.ApplicationInsights.Exception";
+          baseType = "ExceptionData";
+          let typeName = "";
+          let message = "Exception";
+          let stack = "";
+          let hasFullStack = false;
+          if (event.attributes) {
+            typeName = String(event.attributes[SEMATTRS_EXCEPTION_TYPE]);
+            stack = String(event.attributes[SEMATTRS_EXCEPTION_STACKTRACE]);
+            if (stack) {
+              hasFullStack = true;
+            }
+            const exceptionMsg = event.attributes[SEMATTRS_EXCEPTION_MESSAGE];
+            if (exceptionMsg) {
+              message = String(exceptionMsg);
+            }
+            const escaped = event.attributes[SEMATTRS_EXCEPTION_ESCAPED];
+            if (escaped !== undefined) {
+              properties[SEMATTRS_EXCEPTION_ESCAPED] = String(escaped);
+            }
+          }
+          const exceptionDetails: TelemetryExceptionDetails = {
+            typeName: typeName,
+            message: message,
+            stack: stack,
+            hasFullStack: hasFullStack,
+          };
+          const exceptionData: TelemetryExceptionData = {
+            exceptions: [exceptionDetails],
+            version: 2,
+            properties: properties,
+          };
+          baseData = exceptionData;
+        } else {
+          // Drop non-server exception span events
+          return;
+        }
       } else {
         name = "Microsoft.ApplicationInsights.Message";
         baseType = "MessageData";
-        let messageData: MessageData = {
+        const messageData: MessageData = {
           message: event.name,
           version: 2,
           properties: properties,
@@ -374,7 +484,19 @@ export function spanEventsToEnvelopes(span: ReadableSpan, ikey: string): Envelop
       if (span.attributes[AzureMonitorSampleRate]) {
         sampleRate = Number(span.attributes[AzureMonitorSampleRate]);
       }
-      let env: Envelope = {
+      // Truncate properties
+      if (baseData.message) {
+        baseData.message = String(baseData.message).substring(0, MaxPropertyLengths.FIFTEEN_BIT);
+      }
+      if (baseData.properties) {
+        for (const key of Object.keys(baseData.properties)) {
+          baseData.properties[key] = baseData.properties[key].substring(
+            0,
+            MaxPropertyLengths.THIRTEEN_BIT,
+          );
+        }
+      }
+      const env: Envelope = {
         name: name,
         time: time,
         instrumentationKey: ikey,

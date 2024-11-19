@@ -1,85 +1,61 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+import * as path from "node:path";
 
-import * as fs from "fs";
-import * as jwt from "jsonwebtoken";
-import * as net from "net";
-import * as path from "path";
-import * as tls from "tls";
-import * as uuid from "uuid";
-import { MsalTestCleanup, msalNodeTestSetup } from "../../msalTestUtils";
-import { ClientAssertionCredential } from "../../../src";
+import type { MsalTestCleanup } from "../../node/msalNodeTestSetup.js";
+import { msalNodeTestSetup } from "../../node/msalNodeTestSetup.js";
+
+import { ClientAssertionCredential } from "../../../src/index.js";
 import { ConfidentialClientApplication } from "@azure/msal-node";
-import { Context } from "mocha";
-import { MsalNode } from "../../../src/msal/nodeFlows/msalNodeCommon";
-import Sinon from "sinon";
-import { assert } from "chai";
+import { createJWTTokenFromCertificate } from "../../public/node/utils/utils.js";
 import { env } from "@azure-tools/test-recorder";
-import ms from "ms";
+import { describe, it, assert, expect, vi, beforeEach, afterEach, MockInstance } from "vitest";
 
 describe("ClientAssertionCredential (internal)", function () {
   let cleanup: MsalTestCleanup;
-  let getTokenSilentSpy: Sinon.SinonSpy;
-  let doGetTokenSpy: Sinon.SinonSpy;
+  let doGetTokenSpy: MockInstance<
+    typeof ConfidentialClientApplication.prototype.acquireTokenByClientCredential
+  >;
 
-  beforeEach(async function (this: Context) {
-    const setup = await msalNodeTestSetup(this.currentTest);
+  beforeEach(async function (ctx) {
+    const setup = await msalNodeTestSetup(ctx);
     cleanup = setup.cleanup;
 
-    getTokenSilentSpy = setup.sandbox.spy(MsalNode.prototype, "getTokenSilent");
-    doGetTokenSpy = Sinon.spy(
+    doGetTokenSpy = vi.spyOn(
       ConfidentialClientApplication.prototype,
-      "acquireTokenByClientCredential"
+      "acquireTokenByClientCredential",
     );
   });
+
   afterEach(async function () {
     await cleanup();
-    Sinon.restore();
   });
 
   it("Should throw if the parameteres are not correctly specified", async function () {
-    const errors: Error[] = [];
-    try {
-      new ClientAssertionCredential(
-        undefined as any,
-        env.AZURE_CLIENT_ID ?? "client",
-        async () => "assertion"
-      );
-    } catch (e: any) {
-      errors.push(e);
-    }
-    try {
-      new ClientAssertionCredential(
-        env.AZURE_TENANT_ID ?? "tenant",
-        undefined as any,
-        async () => "assertion"
-      );
-    } catch (e: any) {
-      errors.push(e);
-    }
-    try {
-      new ClientAssertionCredential(
-        env.AZURE_TENANT_ID ?? "tenant",
-        env.AZURE_CLIENT_ID ?? "client",
-        undefined as any
-      );
-    } catch (e: any) {
-      errors.push(e);
-    }
-    try {
-      new ClientAssertionCredential(undefined as any, undefined as any, undefined as any);
-    } catch (e: any) {
-      errors.push(e);
-    }
-    assert.equal(errors.length, 4);
-    errors.forEach((e) => {
-      assert.equal(
-        e.message,
-        "ClientAssertionCredential: tenantId, clientId, and clientAssertion are required parameters."
-      );
-    });
+    assert.throws(
+      () =>
+        new ClientAssertionCredential(
+          undefined as any,
+          env.AZURE_CLIENT_ID ?? "client",
+          async () => "assertion",
+        ),
+      "ClientAssertionCredential: tenantId is a required parameter.",
+    );
+    assert.throws(
+      () =>
+        new ClientAssertionCredential(
+          env.AZURE_TENANT_ID ?? "tenant",
+          undefined as any,
+          async () => "assertion",
+        ),
+      "ClientAssertionCredential: clientId is a required parameter.",
+    );
+
+    assert.throws(
+      () => new ClientAssertionCredential(undefined as any, undefined as any, undefined as any),
+      "ClientAssertionCredential: tenantId is a required parameter.",
+    );
   });
 
   it("Sends the expected parameters", async function () {
@@ -87,10 +63,10 @@ describe("ClientAssertionCredential (internal)", function () {
     const clientId = env.IDENTITY_SP_CLIENT_ID || env.AZURE_CLIENT_ID!;
     const certificatePath = env.IDENTITY_SP_CERT_PEM || path.join("assets", "fake-cert.pem");
     const authorityHost = `https://login.microsoftonline.com/${tenantId}`;
+    const jwt = await createJWTTokenFromCertificate(authorityHost, clientId, certificatePath);
 
     async function getAssertion(): Promise<string> {
-      const jwtoken = await createJWTTokenFromCertificate(authorityHost, clientId, certificatePath);
-      return jwtoken;
+      return jwt;
     }
     const credential = new ClientAssertionCredential(tenantId, clientId, getAssertion);
 
@@ -98,44 +74,10 @@ describe("ClientAssertionCredential (internal)", function () {
       await credential.getToken("https://vault.azure.net/.default");
     } catch (e: any) {
       // We're ignoring errors since our main goal here is to ensure that we send the correct parameters to MSAL.
-      console.log("error", e);
     }
 
-    assert.equal(getTokenSilentSpy.callCount, 1);
-    assert.equal(doGetTokenSpy.callCount, 1);
-
-    // TODO: you can test if this matches
-    // const returnedAssertion = await getAssertion();
-    // const sentConfiguration = doGetTokenSpy.args[0][0];
-    // assert.equal(sentConfiguration.clientAssertion, "assertion");
+    expect(doGetTokenSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ clientAssertion: getAssertion }),
+    );
   });
 });
-
-async function createJWTTokenFromCertificate(
-  authorityHost: string,
-  clientId: string,
-  certificatePath: string
-): Promise<string> {
-  const privateKeyPemCert = fs.readFileSync(certificatePath);
-  const audience = `${authorityHost}/v2.0`;
-  const secureContext = tls.createSecureContext({
-    cert: privateKeyPemCert,
-  });
-  const secureSocket = new tls.TLSSocket(new net.Socket(), { secureContext });
-  const cert = secureSocket.getCertificate() as tls.PeerCertificate;
-  secureSocket.destroy();
-  const signedCert = jwt.sign({}, privateKeyPemCert, {
-    header: {
-      alg: "RS256",
-      typ: "JWT",
-      x5t: Buffer.from(cert.fingerprint256, "hex").toString("base64"),
-    },
-    algorithm: "RS256",
-    audience: audience,
-    jwtid: uuid.v4(),
-    expiresIn: ms("1 h"),
-    subject: clientId,
-    issuer: clientId,
-  });
-  return signedCert;
-}

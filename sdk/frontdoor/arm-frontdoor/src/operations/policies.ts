@@ -13,19 +13,30 @@ import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
 import { FrontDoorManagementClient } from "../frontDoorManagementClient";
-import { PollerLike, PollOperationState, LroEngine } from "@azure/core-lro";
-import { LroImpl } from "../lroImpl";
+import {
+  SimplePollerLike,
+  OperationState,
+  createHttpPoller,
+} from "@azure/core-lro";
+import { createLroSpec } from "../lroImpl";
 import {
   WebApplicationFirewallPolicy,
   PoliciesListNextOptionalParams,
   PoliciesListOptionalParams,
   PoliciesListResponse,
+  PoliciesListBySubscriptionNextOptionalParams,
+  PoliciesListBySubscriptionOptionalParams,
+  PoliciesListBySubscriptionResponse,
   PoliciesGetOptionalParams,
   PoliciesGetResponse,
   PoliciesCreateOrUpdateOptionalParams,
   PoliciesCreateOrUpdateResponse,
+  TagsObject,
+  PoliciesUpdateOptionalParams,
+  PoliciesUpdateResponse,
   PoliciesDeleteOptionalParams,
-  PoliciesListNextResponse
+  PoliciesListNextResponse,
+  PoliciesListBySubscriptionNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -48,7 +59,7 @@ export class PoliciesImpl implements Policies {
    */
   public list(
     resourceGroupName: string,
-    options?: PoliciesListOptionalParams
+    options?: PoliciesListOptionalParams,
   ): PagedAsyncIterableIterator<WebApplicationFirewallPolicy> {
     const iter = this.listPagingAll(resourceGroupName, options);
     return {
@@ -63,14 +74,14 @@ export class PoliciesImpl implements Policies {
           throw new Error("maxPageSize is not supported by this operation.");
         }
         return this.listPagingPage(resourceGroupName, options, settings);
-      }
+      },
     };
   }
 
   private async *listPagingPage(
     resourceGroupName: string,
     options?: PoliciesListOptionalParams,
-    settings?: PageSettings
+    settings?: PageSettings,
   ): AsyncIterableIterator<WebApplicationFirewallPolicy[]> {
     let result: PoliciesListResponse;
     let continuationToken = settings?.continuationToken;
@@ -85,7 +96,7 @@ export class PoliciesImpl implements Policies {
       result = await this._listNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
       let page = result.value || [];
@@ -96,9 +107,63 @@ export class PoliciesImpl implements Policies {
 
   private async *listPagingAll(
     resourceGroupName: string,
-    options?: PoliciesListOptionalParams
+    options?: PoliciesListOptionalParams,
   ): AsyncIterableIterator<WebApplicationFirewallPolicy> {
     for await (const page of this.listPagingPage(resourceGroupName, options)) {
+      yield* page;
+    }
+  }
+
+  /**
+   * Lists all of the protection policies within a subscription.
+   * @param options The options parameters.
+   */
+  public listBySubscription(
+    options?: PoliciesListBySubscriptionOptionalParams,
+  ): PagedAsyncIterableIterator<WebApplicationFirewallPolicy> {
+    const iter = this.listBySubscriptionPagingAll(options);
+    return {
+      next() {
+        return iter.next();
+      },
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listBySubscriptionPagingPage(options, settings);
+      },
+    };
+  }
+
+  private async *listBySubscriptionPagingPage(
+    options?: PoliciesListBySubscriptionOptionalParams,
+    settings?: PageSettings,
+  ): AsyncIterableIterator<WebApplicationFirewallPolicy[]> {
+    let result: PoliciesListBySubscriptionResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listBySubscription(options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
+    while (continuationToken) {
+      result = await this._listBySubscriptionNext(continuationToken, options);
+      continuationToken = result.nextLink;
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
+  }
+
+  private async *listBySubscriptionPagingAll(
+    options?: PoliciesListBySubscriptionOptionalParams,
+  ): AsyncIterableIterator<WebApplicationFirewallPolicy> {
+    for await (const page of this.listBySubscriptionPagingPage(options)) {
       yield* page;
     }
   }
@@ -110,11 +175,24 @@ export class PoliciesImpl implements Policies {
    */
   private _list(
     resourceGroupName: string,
-    options?: PoliciesListOptionalParams
+    options?: PoliciesListOptionalParams,
   ): Promise<PoliciesListResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listOperationSpec
+      listOperationSpec,
+    );
+  }
+
+  /**
+   * Lists all of the protection policies within a subscription.
+   * @param options The options parameters.
+   */
+  private _listBySubscription(
+    options?: PoliciesListBySubscriptionOptionalParams,
+  ): Promise<PoliciesListBySubscriptionResponse> {
+    return this.client.sendOperationRequest(
+      { options },
+      listBySubscriptionOperationSpec,
     );
   }
 
@@ -127,11 +205,11 @@ export class PoliciesImpl implements Policies {
   get(
     resourceGroupName: string,
     policyName: string,
-    options?: PoliciesGetOptionalParams
+    options?: PoliciesGetOptionalParams,
   ): Promise<PoliciesGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, policyName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -146,30 +224,29 @@ export class PoliciesImpl implements Policies {
     resourceGroupName: string,
     policyName: string,
     parameters: WebApplicationFirewallPolicy,
-    options?: PoliciesCreateOrUpdateOptionalParams
+    options?: PoliciesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<PoliciesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<PoliciesCreateOrUpdateResponse>,
       PoliciesCreateOrUpdateResponse
     >
   > {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<PoliciesCreateOrUpdateResponse> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -178,8 +255,8 @@ export class PoliciesImpl implements Policies {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -187,19 +264,22 @@ export class PoliciesImpl implements Policies {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, policyName, parameters, options },
-      createOrUpdateOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, policyName, parameters, options },
+      spec: createOrUpdateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PoliciesCreateOrUpdateResponse,
+      OperationState<PoliciesCreateOrUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -216,13 +296,109 @@ export class PoliciesImpl implements Policies {
     resourceGroupName: string,
     policyName: string,
     parameters: WebApplicationFirewallPolicy,
-    options?: PoliciesCreateOrUpdateOptionalParams
+    options?: PoliciesCreateOrUpdateOptionalParams,
   ): Promise<PoliciesCreateOrUpdateResponse> {
     const poller = await this.beginCreateOrUpdate(
       resourceGroupName,
       policyName,
       parameters,
-      options
+      options,
+    );
+    return poller.pollUntilDone();
+  }
+
+  /**
+   * Patch a specific frontdoor webApplicationFirewall policy for tags update under the specified
+   * subscription and resource group.
+   * @param resourceGroupName Name of the Resource group within the Azure subscription.
+   * @param policyName The name of the Web Application Firewall Policy.
+   * @param parameters FrontdoorWebApplicationFirewallPolicy parameters to be patched.
+   * @param options The options parameters.
+   */
+  async beginUpdate(
+    resourceGroupName: string,
+    policyName: string,
+    parameters: TagsObject,
+    options?: PoliciesUpdateOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<PoliciesUpdateResponse>,
+      PoliciesUpdateResponse
+    >
+  > {
+    const directSendOperation = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ): Promise<PoliciesUpdateResponse> => {
+      return this.client.sendOperationRequest(args, spec);
+    };
+    const sendOperationFn = async (
+      args: coreClient.OperationArguments,
+      spec: coreClient.OperationSpec,
+    ) => {
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
+      const providedCallback = args.options?.onResponse;
+      const callback: coreClient.RawResponseCallback = (
+        rawResponse: coreClient.FullOperationResponse,
+        flatResponse: unknown,
+      ) => {
+        currentRawResponse = rawResponse;
+        providedCallback?.(rawResponse, flatResponse);
+      };
+      const updatedArgs = {
+        ...args,
+        options: {
+          ...args.options,
+          onResponse: callback,
+        },
+      };
+      const flatResponse = await directSendOperation(updatedArgs, spec);
+      return {
+        flatResponse,
+        rawResponse: {
+          statusCode: currentRawResponse!.status,
+          body: currentRawResponse!.parsedBody,
+          headers: currentRawResponse!.headers.toJSON(),
+        },
+      };
+    };
+
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, policyName, parameters, options },
+      spec: updateOperationSpec,
+    });
+    const poller = await createHttpPoller<
+      PoliciesUpdateResponse,
+      OperationState<PoliciesUpdateResponse>
+    >(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
+    });
+    await poller.poll();
+    return poller;
+  }
+
+  /**
+   * Patch a specific frontdoor webApplicationFirewall policy for tags update under the specified
+   * subscription and resource group.
+   * @param resourceGroupName Name of the Resource group within the Azure subscription.
+   * @param policyName The name of the Web Application Firewall Policy.
+   * @param parameters FrontdoorWebApplicationFirewallPolicy parameters to be patched.
+   * @param options The options parameters.
+   */
+  async beginUpdateAndWait(
+    resourceGroupName: string,
+    policyName: string,
+    parameters: TagsObject,
+    options?: PoliciesUpdateOptionalParams,
+  ): Promise<PoliciesUpdateResponse> {
+    const poller = await this.beginUpdate(
+      resourceGroupName,
+      policyName,
+      parameters,
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -236,25 +412,24 @@ export class PoliciesImpl implements Policies {
   async beginDelete(
     resourceGroupName: string,
     policyName: string,
-    options?: PoliciesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>> {
+    options?: PoliciesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>> {
     const directSendOperation = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ): Promise<void> => {
       return this.client.sendOperationRequest(args, spec);
     };
-    const sendOperation = async (
+    const sendOperationFn = async (
       args: coreClient.OperationArguments,
-      spec: coreClient.OperationSpec
+      spec: coreClient.OperationSpec,
     ) => {
-      let currentRawResponse:
-        | coreClient.FullOperationResponse
-        | undefined = undefined;
+      let currentRawResponse: coreClient.FullOperationResponse | undefined =
+        undefined;
       const providedCallback = args.options?.onResponse;
       const callback: coreClient.RawResponseCallback = (
         rawResponse: coreClient.FullOperationResponse,
-        flatResponse: unknown
+        flatResponse: unknown,
       ) => {
         currentRawResponse = rawResponse;
         providedCallback?.(rawResponse, flatResponse);
@@ -263,8 +438,8 @@ export class PoliciesImpl implements Policies {
         ...args,
         options: {
           ...args.options,
-          onResponse: callback
-        }
+          onResponse: callback,
+        },
       };
       const flatResponse = await directSendOperation(updatedArgs, spec);
       return {
@@ -272,19 +447,19 @@ export class PoliciesImpl implements Policies {
         rawResponse: {
           statusCode: currentRawResponse!.status,
           body: currentRawResponse!.parsedBody,
-          headers: currentRawResponse!.headers.toJSON()
-        }
+          headers: currentRawResponse!.headers.toJSON(),
+        },
       };
     };
 
-    const lro = new LroImpl(
-      sendOperation,
-      { resourceGroupName, policyName, options },
-      deleteOperationSpec
-    );
-    const poller = new LroEngine(lro, {
-      resumeFrom: options?.resumeFrom,
-      intervalInMs: options?.updateIntervalInMs
+    const lro = createLroSpec({
+      sendOperationFn,
+      args: { resourceGroupName, policyName, options },
+      spec: deleteOperationSpec,
+    });
+    const poller = await createHttpPoller<void, OperationState<void>>(lro, {
+      restoreFrom: options?.resumeFrom,
+      intervalInMs: options?.updateIntervalInMs,
     });
     await poller.poll();
     return poller;
@@ -299,12 +474,12 @@ export class PoliciesImpl implements Policies {
   async beginDeleteAndWait(
     resourceGroupName: string,
     policyName: string,
-    options?: PoliciesDeleteOptionalParams
+    options?: PoliciesDeleteOptionalParams,
   ): Promise<void> {
     const poller = await this.beginDelete(
       resourceGroupName,
       policyName,
-      options
+      options,
     );
     return poller.pollUntilDone();
   }
@@ -318,11 +493,26 @@ export class PoliciesImpl implements Policies {
   private _listNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: PoliciesListNextOptionalParams
+    options?: PoliciesListNextOptionalParams,
   ): Promise<PoliciesListNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listNextOperationSpec
+      listNextOperationSpec,
+    );
+  }
+
+  /**
+   * ListBySubscriptionNext
+   * @param nextLink The nextLink from the previous successful call to the ListBySubscription method.
+   * @param options The options parameters.
+   */
+  private _listBySubscriptionNext(
+    nextLink: string,
+    options?: PoliciesListBySubscriptionNextOptionalParams,
+  ): Promise<PoliciesListBySubscriptionNextResponse> {
+    return this.client.sendOperationRequest(
+      { nextLink, options },
+      listBySubscriptionNextOperationSpec,
     );
   }
 }
@@ -330,113 +520,175 @@ export class PoliciesImpl implements Policies {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const listOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoorWebApplicationFirewallPolicies",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoorWebApplicationFirewallPolicies",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.WebApplicationFirewallPolicyList
+      bodyMapper: Mappers.WebApplicationFirewallPolicyList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
+    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
+};
+const listBySubscriptionOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/frontDoorWebApplicationFirewallPolicies",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.WebApplicationFirewallPolicyList,
+    },
+    default: {
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
+  },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [Parameters.$host, Parameters.subscriptionId],
+  headerParameters: [Parameters.accept],
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/FrontDoorWebApplicationFirewallPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/FrontDoorWebApplicationFirewallPolicies/{policyName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.WebApplicationFirewallPolicy
+      bodyMapper: Mappers.WebApplicationFirewallPolicy,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion2],
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.policyName
+    Parameters.subscriptionId,
+    Parameters.policyName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/FrontDoorWebApplicationFirewallPolicies/{policyName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/FrontDoorWebApplicationFirewallPolicies/{policyName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.WebApplicationFirewallPolicy
+      bodyMapper: Mappers.WebApplicationFirewallPolicy,
     },
     201: {
-      bodyMapper: Mappers.WebApplicationFirewallPolicy
+      bodyMapper: Mappers.WebApplicationFirewallPolicy,
     },
     202: {
-      bodyMapper: Mappers.WebApplicationFirewallPolicy
+      bodyMapper: Mappers.WebApplicationFirewallPolicy,
     },
     204: {
-      bodyMapper: Mappers.WebApplicationFirewallPolicy
+      bodyMapper: Mappers.WebApplicationFirewallPolicy,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  requestBody: Parameters.parameters4,
-  queryParameters: [Parameters.apiVersion2],
+  requestBody: Parameters.parameters,
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.policyName
+    Parameters.subscriptionId,
+    Parameters.policyName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/FrontDoorWebApplicationFirewallPolicies/{policyName}",
-  httpMethod: "DELETE",
-  responses: { 200: {}, 201: {}, 202: {}, 204: {} },
-  queryParameters: [Parameters.apiVersion2],
+const updateOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/FrontDoorWebApplicationFirewallPolicies/{policyName}",
+  httpMethod: "PATCH",
+  responses: {
+    200: {
+      bodyMapper: Mappers.WebApplicationFirewallPolicy,
+    },
+    201: {
+      bodyMapper: Mappers.WebApplicationFirewallPolicy,
+    },
+    202: {
+      bodyMapper: Mappers.WebApplicationFirewallPolicy,
+    },
+    204: {
+      bodyMapper: Mappers.WebApplicationFirewallPolicy,
+    },
+    default: {
+      bodyMapper: Mappers.ErrorResponse,
+    },
+  },
+  requestBody: Parameters.parameters1,
+  queryParameters: [Parameters.apiVersion],
   urlParameters: [
     Parameters.$host,
-    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.policyName
+    Parameters.subscriptionId,
+    Parameters.policyName,
   ],
-  serializer
+  headerParameters: [Parameters.accept, Parameters.contentType],
+  mediaType: "json",
+  serializer,
+};
+const deleteOperationSpec: coreClient.OperationSpec = {
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/FrontDoorWebApplicationFirewallPolicies/{policyName}",
+  httpMethod: "DELETE",
+  responses: { 200: {}, 201: {}, 202: {}, 204: {} },
+  queryParameters: [Parameters.apiVersion],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.resourceGroupName,
+    Parameters.subscriptionId,
+    Parameters.policyName,
+  ],
+  serializer,
 };
 const listNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.WebApplicationFirewallPolicyList
+      bodyMapper: Mappers.WebApplicationFirewallPolicyList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
-  queryParameters: [Parameters.apiVersion2],
+  urlParameters: [
+    Parameters.$host,
+    Parameters.resourceGroupName,
+    Parameters.subscriptionId,
+    Parameters.nextLink,
+  ],
+  headerParameters: [Parameters.accept],
+  serializer,
+};
+const listBySubscriptionNextOperationSpec: coreClient.OperationSpec = {
+  path: "{nextLink}",
+  httpMethod: "GET",
+  responses: {
+    200: {
+      bodyMapper: Mappers.WebApplicationFirewallPolicyList,
+    },
+    default: {
+      bodyMapper: Mappers.DefaultErrorResponse,
+    },
+  },
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.resourceGroupName,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

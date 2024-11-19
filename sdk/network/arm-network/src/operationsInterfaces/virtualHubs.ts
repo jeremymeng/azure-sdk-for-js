@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   VirtualHub,
   VirtualHubsListByResourceGroupOptionalParams,
@@ -21,10 +21,13 @@ import {
   VirtualHubsUpdateTagsResponse,
   VirtualHubsDeleteOptionalParams,
   VirtualHubsGetEffectiveVirtualHubRoutesOptionalParams,
+  VirtualHubsGetEffectiveVirtualHubRoutesResponse,
   GetInboundRoutesParameters,
   VirtualHubsGetInboundRoutesOptionalParams,
+  VirtualHubsGetInboundRoutesResponse,
   GetOutboundRoutesParameters,
-  VirtualHubsGetOutboundRoutesOptionalParams
+  VirtualHubsGetOutboundRoutesOptionalParams,
+  VirtualHubsGetOutboundRoutesResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -37,14 +40,14 @@ export interface VirtualHubs {
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: VirtualHubsListByResourceGroupOptionalParams
+    options?: VirtualHubsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<VirtualHub>;
   /**
    * Lists all the VirtualHubs in a subscription.
    * @param options The options parameters.
    */
   list(
-    options?: VirtualHubsListOptionalParams
+    options?: VirtualHubsListOptionalParams,
   ): PagedAsyncIterableIterator<VirtualHub>;
   /**
    * Retrieves the details of a VirtualHub.
@@ -55,7 +58,7 @@ export interface VirtualHubs {
   get(
     resourceGroupName: string,
     virtualHubName: string,
-    options?: VirtualHubsGetOptionalParams
+    options?: VirtualHubsGetOptionalParams,
   ): Promise<VirtualHubsGetResponse>;
   /**
    * Creates a VirtualHub resource if it doesn't exist else updates the existing VirtualHub.
@@ -68,10 +71,10 @@ export interface VirtualHubs {
     resourceGroupName: string,
     virtualHubName: string,
     virtualHubParameters: VirtualHub,
-    options?: VirtualHubsCreateOrUpdateOptionalParams
+    options?: VirtualHubsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualHubsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualHubsCreateOrUpdateResponse>,
       VirtualHubsCreateOrUpdateResponse
     >
   >;
@@ -86,7 +89,7 @@ export interface VirtualHubs {
     resourceGroupName: string,
     virtualHubName: string,
     virtualHubParameters: VirtualHub,
-    options?: VirtualHubsCreateOrUpdateOptionalParams
+    options?: VirtualHubsCreateOrUpdateOptionalParams,
   ): Promise<VirtualHubsCreateOrUpdateResponse>;
   /**
    * Updates VirtualHub tags.
@@ -99,7 +102,7 @@ export interface VirtualHubs {
     resourceGroupName: string,
     virtualHubName: string,
     virtualHubParameters: TagsObject,
-    options?: VirtualHubsUpdateTagsOptionalParams
+    options?: VirtualHubsUpdateTagsOptionalParams,
   ): Promise<VirtualHubsUpdateTagsResponse>;
   /**
    * Deletes a VirtualHub.
@@ -110,8 +113,8 @@ export interface VirtualHubs {
   beginDelete(
     resourceGroupName: string,
     virtualHubName: string,
-    options?: VirtualHubsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: VirtualHubsDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a VirtualHub.
    * @param resourceGroupName The resource group name of the VirtualHub.
@@ -121,7 +124,7 @@ export interface VirtualHubs {
   beginDeleteAndWait(
     resourceGroupName: string,
     virtualHubName: string,
-    options?: VirtualHubsDeleteOptionalParams
+    options?: VirtualHubsDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Gets the effective routes configured for the Virtual Hub resource or the specified resource .
@@ -132,8 +135,13 @@ export interface VirtualHubs {
   beginGetEffectiveVirtualHubRoutes(
     resourceGroupName: string,
     virtualHubName: string,
-    options?: VirtualHubsGetEffectiveVirtualHubRoutesOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: VirtualHubsGetEffectiveVirtualHubRoutesOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VirtualHubsGetEffectiveVirtualHubRoutesResponse>,
+      VirtualHubsGetEffectiveVirtualHubRoutesResponse
+    >
+  >;
   /**
    * Gets the effective routes configured for the Virtual Hub resource or the specified resource .
    * @param resourceGroupName The resource group name of the VirtualHub.
@@ -143,8 +151,8 @@ export interface VirtualHubs {
   beginGetEffectiveVirtualHubRoutesAndWait(
     resourceGroupName: string,
     virtualHubName: string,
-    options?: VirtualHubsGetEffectiveVirtualHubRoutesOptionalParams
-  ): Promise<void>;
+    options?: VirtualHubsGetEffectiveVirtualHubRoutesOptionalParams,
+  ): Promise<VirtualHubsGetEffectiveVirtualHubRoutesResponse>;
   /**
    * Gets the inbound routes configured for the Virtual Hub on a particular connection.
    * @param resourceGroupName The resource group name of the VirtualHub.
@@ -157,8 +165,13 @@ export interface VirtualHubs {
     resourceGroupName: string,
     virtualHubName: string,
     getInboundRoutesParameters: GetInboundRoutesParameters,
-    options?: VirtualHubsGetInboundRoutesOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: VirtualHubsGetInboundRoutesOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VirtualHubsGetInboundRoutesResponse>,
+      VirtualHubsGetInboundRoutesResponse
+    >
+  >;
   /**
    * Gets the inbound routes configured for the Virtual Hub on a particular connection.
    * @param resourceGroupName The resource group name of the VirtualHub.
@@ -171,8 +184,8 @@ export interface VirtualHubs {
     resourceGroupName: string,
     virtualHubName: string,
     getInboundRoutesParameters: GetInboundRoutesParameters,
-    options?: VirtualHubsGetInboundRoutesOptionalParams
-  ): Promise<void>;
+    options?: VirtualHubsGetInboundRoutesOptionalParams,
+  ): Promise<VirtualHubsGetInboundRoutesResponse>;
   /**
    * Gets the outbound routes configured for the Virtual Hub on a particular connection.
    * @param resourceGroupName The resource group name of the VirtualHub.
@@ -185,8 +198,13 @@ export interface VirtualHubs {
     resourceGroupName: string,
     virtualHubName: string,
     getOutboundRoutesParameters: GetOutboundRoutesParameters,
-    options?: VirtualHubsGetOutboundRoutesOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: VirtualHubsGetOutboundRoutesOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<VirtualHubsGetOutboundRoutesResponse>,
+      VirtualHubsGetOutboundRoutesResponse
+    >
+  >;
   /**
    * Gets the outbound routes configured for the Virtual Hub on a particular connection.
    * @param resourceGroupName The resource group name of the VirtualHub.
@@ -199,6 +217,6 @@ export interface VirtualHubs {
     resourceGroupName: string,
     virtualHubName: string,
     getOutboundRoutesParameters: GetOutboundRoutesParameters,
-    options?: VirtualHubsGetOutboundRoutesOptionalParams
-  ): Promise<void>;
+    options?: VirtualHubsGetOutboundRoutesOptionalParams,
+  ): Promise<VirtualHubsGetOutboundRoutesResponse>;
 }

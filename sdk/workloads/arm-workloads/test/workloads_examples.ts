@@ -27,7 +27,11 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -41,7 +45,8 @@ describe("workloads test", () => {
   let resourceGroup: string;
   let monitorName: string;
   let monitorParameter: Monitor;
-
+  let sapVirtualInstanceName: string;
+  let location: string;
 
   beforeEach(async function (this: Context) {
     recorder = new Recorder(this.currentTest);
@@ -52,13 +57,15 @@ describe("workloads test", () => {
     client = new WorkloadsClient(credential, subscriptionId, recorder.configureClientOptions({}));
     resourceGroup = "myjstest";
     monitorName = "myMonitor";
+    sapVirtualInstanceName = "O13";
+    location = "eastus2"
   });
 
   afterEach(async function () {
     await recorder.stop();
   });
 
-  //create Workloads
+  //create monitors
   it("Workloads create test", async function () {
     monitorParameter = {
       appLocation: "eastus2",
@@ -71,9 +78,69 @@ describe("workloads test", () => {
       routingPreference: "RouteAll",
       tags: { key: "value" }
     };
-    //create monitors
-    const res = await client.monitors.beginCreateAndWait(resourceGroup, monitorName, monitorParameter)
+    const res = await client.monitors.beginCreateAndWait(resourceGroup, monitorName, monitorParameter, testPollingOptions)
     assert.equal(res.name, monitorName);
+  });
+
+  //create svi
+  it.skip("svi create test", async function () {
+    const subnetId = "/subscriptions/" + subscriptionId + "/resourceGroups/myjstest/providers/Microsoft.Networks/virtualNetworks/networknamex/subnets/subnetworknamex"
+    const res = await client.sAPVirtualInstances.beginCreateAndWait(
+      resourceGroup,
+      sapVirtualInstanceName,
+      {
+        body: {
+          configuration: {
+            appLocation: location,
+            configurationType: "DeploymentWithOSConfig",
+            infrastructureConfiguration: {
+              appResourceGroup: resourceGroup,
+              databaseType: "HANA",
+              deploymentType: "SingleServer",
+              networkConfiguration: { isSecondaryIpEnabled: true },
+              subnetId,
+              virtualMachineConfiguration: {
+                imageReference: {
+                  offer: "RHEL-SAP-HA",
+                  publisher: "RedHat",
+                  sku: "82sapha-gen2",
+                  version: "latest"
+                },
+                osProfile: {
+                  adminUsername: "testuser",
+                  osConfiguration: {
+                    disablePasswordAuthentication: true,
+                    osType: "Linux",
+                    sshKeyPair: {
+                      publicKey: "",
+                      privateKey: ""
+                    }
+                  }
+                },
+                vmSize: "Standard_E32ds_v4"
+              }
+            },
+            osSapConfiguration: { sapFqdn: "sap.test.com" },
+          },
+          environment: "NonProd",
+          location,
+          sapProduct: "S4HANA",
+          tags: {},
+          managedResourceGroupConfiguration: {
+            "name": "mrg-Y13-bf4ab3"
+          }
+        },
+        updateIntervalInMs: isPlaybackMode() ? 0 : undefined,
+      }
+    );
+    assert.equal(res.name, monitorName);
+  }).timeout(3600000);
+
+  //get svi
+  it.skip("svi get test", async function () {
+    //get monitors from workloads
+    const res = await client.sAPVirtualInstances.get(resourceGroup, sapVirtualInstanceName);
+    assert.equal(res.name, sapVirtualInstanceName);
   });
 
   //get monitors
@@ -96,11 +163,21 @@ describe("workloads test", () => {
 
   //delete monitors
   it("Workloads delete test", async function () {
-    const res = await client.monitors.beginDeleteAndWait(resourceGroup, monitorName);
+    const res = await client.monitors.beginDeleteAndWait(resourceGroup, monitorName, testPollingOptions);
     const resArray = new Array();
     for await (let item of client.monitors.listByResourceGroup(resourceGroup)) {
       resArray.push(item);
     }
     assert.equal(resArray.length, 0);
+  });
+
+  //delete svi
+  it.skip("svi delete test", async function () {
+    const res = await client.sAPVirtualInstances.beginDeleteAndWait(resourceGroup, sapVirtualInstanceName, testPollingOptions);
+    const resArray = new Array();
+    for await (let item of client.sAPVirtualInstances.listByResourceGroup(resourceGroup)) {
+      resArray.push(item);
+    }
+    assert.equal(resArray.length, 1);
   });
 });

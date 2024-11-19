@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @file Testing the ts-package-json-files-required rule.
- * @author Arpan Laha
+ *
  */
 
-import { RuleTester } from "eslint";
+import { createRuleTester } from "../ruleTester";
 import rule from "../../src/rules/ts-package-json-files-required";
 
 //------------------------------------------------------------------------------
@@ -85,10 +85,8 @@ const examplePackageGood = `{
     "karma": "^4.0.1",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.2",
-    "karma-edge-launcher": "^0.4.2",
     "karma-env-preprocessor": "^0.1.1",
     "karma-firefox-launcher": "^1.1.0",
-    "karma-ie-launcher": "^1.0.0",
     "karma-junit-reporter": "^1.2.0",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
@@ -197,10 +195,8 @@ const examplePackageBad = `{
     "karma": "^4.0.1",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.2",
-    "karma-edge-launcher": "^0.4.2",
     "karma-env-preprocessor": "^0.1.1",
     "karma-firefox-launcher": "^1.1.0",
-    "karma-ie-launcher": "^1.0.0",
     "karma-junit-reporter": "^1.2.0",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
@@ -307,10 +303,8 @@ const examplePackageBadFixed = `{
     "karma": "^4.0.1",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.2",
-    "karma-edge-launcher": "^0.4.2",
     "karma-env-preprocessor": "^0.1.1",
     "karma-firefox-launcher": "^1.1.0",
-    "karma-ie-launcher": "^1.0.0",
     "karma-junit-reporter": "^1.2.0",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
@@ -346,13 +340,7 @@ const examplePackageBadFixed = `{
 // Tests
 //------------------------------------------------------------------------------
 
-const ruleTester = new RuleTester({
-  parser: require.resolve("@typescript-eslint/parser"),
-  parserOptions: {
-    createDefaultProgram: true,
-    project: "./tsconfig.json",
-  },
-});
+const ruleTester = createRuleTester();
 
 ruleTester.run("ts-package-json-files-required", rule, {
   valid: [
@@ -416,7 +404,8 @@ ruleTester.run("ts-package-json-files-required", rule, {
       filename: "package.json",
       errors: [
         {
-          message: "src is included in files and dist-esm/src is not included in files",
+          message:
+            "Issue with files: src is included in files and dist-esm/src is not included in files",
         },
       ],
       output: '{"files": ["dist", "dist-esm/src"]}',
@@ -426,7 +415,7 @@ ruleTester.run("ts-package-json-files-required", rule, {
       filename: "package.json",
       errors: [
         {
-          message: "src is included in files and dist is not included in files",
+          message: "Issue with files: src is included in files and dist is not included in files",
         },
       ],
       output: '{"files": ["dist-esm/src", "dist"]}',
@@ -436,7 +425,7 @@ ruleTester.run("ts-package-json-files-required", rule, {
       filename: "package.json",
       errors: [
         {
-          message: "dist-esm/src is not included in files",
+          message: "Issue with files: dist-esm/src is not included in files",
         },
       ],
       output: '{"files": ["dist", "dist-esm/src"]}',
@@ -446,7 +435,7 @@ ruleTester.run("ts-package-json-files-required", rule, {
       filename: "package.json",
       errors: [
         {
-          message: "dist is not included in files",
+          message: "Issue with files: dist is not included in files",
         },
       ],
       output: '{"files": ["dist-esm/src", "dist"]}',
@@ -456,7 +445,7 @@ ruleTester.run("ts-package-json-files-required", rule, {
       filename: "package.json",
       errors: [
         {
-          message: "dist,dist-esm/src are not included in files",
+          message: "Issue with files: dist,dist-esm/src are not included in files",
         },
       ],
       output: '{"files": ["dist", "dist-esm/src"]}',
@@ -467,7 +456,7 @@ ruleTester.run("ts-package-json-files-required", rule, {
       filename: "package.json",
       errors: [
         {
-          message: "dist,dist-esm/src are not included in files",
+          message: "Issue with files: dist,dist-esm/src are not included in files",
         },
       ],
       output: examplePackageBadFixed,

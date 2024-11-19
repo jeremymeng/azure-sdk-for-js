@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { AbortSignalLike } from "@azure/abort-controller";
-import { OperationOptions } from "@azure/core-client";
-import { KeyVaultClient } from "../../generated/keyVaultClient";
-import { GetKeyOptions, KeyVaultKey, RecoverDeletedKeyOptions } from "../../keysModels";
-import { tracingClient } from "../../tracing";
-import { getKeyFromKeyBundle } from "../../transformations";
-import { KeyVaultKeyPollOperation, KeyVaultKeyPollOperationState } from "../keyVaultKeyPoller";
+import type { AbortSignalLike } from "@azure/abort-controller";
+import type { OperationOptions } from "@azure/core-client";
+import type { KeyVaultClient } from "../../generated/keyVaultClient.js";
+import type { GetKeyOptions, KeyVaultKey, RecoverDeletedKeyOptions } from "../../keysModels.js";
+import { tracingClient } from "../../tracing.js";
+import { getKeyFromKeyBundle } from "../../transformations.js";
+import type { KeyVaultKeyPollOperationState } from "../keyVaultKeyPoller.js";
+import { KeyVaultKeyPollOperation } from "../keyVaultKeyPoller.js";
 
 /**
  * An interface representing the state of a delete key's poll operation
@@ -23,7 +24,7 @@ export class RecoverDeletedKeyPollOperation extends KeyVaultKeyPollOperation<
     public state: RecoverDeletedKeyPollOperationState,
     private vaultUrl: string,
     private client: KeyVaultClient,
-    private operationOptions: OperationOptions = {}
+    private operationOptions: OperationOptions = {},
   ) {
     super(state, { cancelMessage: "Canceling the recovery of a deleted key is not supported." });
   }
@@ -41,10 +42,10 @@ export class RecoverDeletedKeyPollOperation extends KeyVaultKeyPollOperation<
           this.vaultUrl,
           name,
           updatedOptions?.version || "",
-          updatedOptions
+          updatedOptions,
         );
         return getKeyFromKeyBundle(response);
-      }
+      },
     );
   }
 
@@ -54,7 +55,7 @@ export class RecoverDeletedKeyPollOperation extends KeyVaultKeyPollOperation<
    */
   private async recoverDeletedKey(
     name: string,
-    options: RecoverDeletedKeyOptions = {}
+    options: RecoverDeletedKeyOptions = {},
   ): Promise<KeyVaultKey> {
     return tracingClient.withSpan(
       "RecoverDeletedKeyPoller.recoverDeleteKey",
@@ -62,7 +63,7 @@ export class RecoverDeletedKeyPollOperation extends KeyVaultKeyPollOperation<
       async (updatedOptions) => {
         const response = await this.client.recoverDeletedKey(this.vaultUrl, name, updatedOptions);
         return getKeyFromKeyBundle(response);
-      }
+      },
     );
   }
 
@@ -73,7 +74,7 @@ export class RecoverDeletedKeyPollOperation extends KeyVaultKeyPollOperation<
     options: {
       abortSignal?: AbortSignalLike;
       fireProgress?: (state: RecoverDeletedKeyPollOperationState) => void;
-    } = {}
+    } = {},
   ): Promise<RecoverDeletedKeyPollOperation> {
     const state = this.state;
     const { name } = state;

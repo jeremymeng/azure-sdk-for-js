@@ -6,7 +6,7 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
 import { Services } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -17,7 +17,7 @@ import {
   ServicesListOptionalParams,
   ServicesListResponse,
   ServicesGetOptionalParams,
-  ServicesGetResponse
+  ServicesGetResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -44,7 +44,7 @@ export class ServicesImpl implements Services {
    * @param options The options parameters.
    */
   public list(
-    options?: ServicesListOptionalParams
+    options?: ServicesListOptionalParams,
   ): PagedAsyncIterableIterator<Service> {
     const iter = this.listPagingAll(options);
     return {
@@ -54,21 +54,26 @@ export class ServicesImpl implements Services {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listPagingPage(options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listPagingPage(options, settings);
+      },
     };
   }
 
   private async *listPagingPage(
-    options?: ServicesListOptionalParams
+    options?: ServicesListOptionalParams,
+    _settings?: PageSettings,
   ): AsyncIterableIterator<Service[]> {
-    let result = await this._list(options);
+    let result: ServicesListResponse;
+    result = await this._list(options);
     yield result.value || [];
   }
 
   private async *listPagingAll(
-    options?: ServicesListOptionalParams
+    options?: ServicesListOptionalParams,
   ): AsyncIterableIterator<Service> {
     for await (const page of this.listPagingPage(options)) {
       yield* page;
@@ -86,7 +91,7 @@ export class ServicesImpl implements Services {
    * @param options The options parameters.
    */
   private _list(
-    options?: ServicesListOptionalParams
+    options?: ServicesListOptionalParams,
   ): Promise<ServicesListResponse> {
     return this.client.sendOperationRequest({ options }, listOperationSpec);
   }
@@ -98,11 +103,11 @@ export class ServicesImpl implements Services {
    */
   get(
     serviceName: string,
-    options?: ServicesGetOptionalParams
+    options?: ServicesGetOptionalParams,
   ): Promise<ServicesGetResponse> {
     return this.client.sendOperationRequest(
       { serviceName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 }
@@ -114,30 +119,30 @@ const listOperationSpec: coreClient.OperationSpec = {
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ServicesListResult
+      bodyMapper: Mappers.ServicesListResult,
     },
     default: {
-      bodyMapper: Mappers.ExceptionResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
   path: "/providers/Microsoft.Support/services/{serviceName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.Service
+      bodyMapper: Mappers.Service,
     },
     default: {
-      bodyMapper: Mappers.ExceptionResponse
-    }
+      bodyMapper: Mappers.ErrorResponse,
+    },
   },
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host, Parameters.serviceName],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

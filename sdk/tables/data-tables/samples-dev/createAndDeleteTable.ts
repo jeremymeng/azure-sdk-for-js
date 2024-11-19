@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 /**
  * This sample demonstrates create and delete a table
  *
@@ -8,14 +8,14 @@
  */
 
 import { TableServiceClient, TableClient } from "@azure/data-tables";
-import { v4 } from "uuid";
+import { randomUUID } from "@azure/core-util";
 
 // Load the .env file if it exists
 import * as dotenv from "dotenv";
 dotenv.config();
 
 const sasConnectionString = process.env["SAS_CONNECTION_STRING"] || "";
-const tableSufix = v4().replace(/-/g, "");
+const tableSufix = randomUUID().replace(/-/g, "");
 
 async function createAndDeleteTable() {
   console.log("== Delete and create table Sample ==");

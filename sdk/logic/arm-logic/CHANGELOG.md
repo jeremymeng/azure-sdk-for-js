@@ -1,6 +1,6 @@
 # Release History
 
-## 8.1.1 (Unreleased)
+## 8.2.1 (Unreleased)
 
 ### Features Added
 
@@ -10,9 +10,43 @@
 
 ### Other Changes
 
+## 8.2.0 (2023-01-20)
+    
+### Features Added
+
+  - Interface IntegrationAccountAgreementsListNextOptionalParams no longer has parameter filter
+  - Interface IntegrationAccountAgreementsListNextOptionalParams no longer has parameter top
+  - Interface IntegrationAccountCertificatesListNextOptionalParams no longer has parameter top
+  - Interface IntegrationAccountMapsListNextOptionalParams no longer has parameter filter
+  - Interface IntegrationAccountMapsListNextOptionalParams no longer has parameter top
+  - Interface IntegrationAccountPartnersListNextOptionalParams no longer has parameter filter
+  - Interface IntegrationAccountPartnersListNextOptionalParams no longer has parameter top
+  - Interface IntegrationAccountSchemasListNextOptionalParams no longer has parameter filter
+  - Interface IntegrationAccountSchemasListNextOptionalParams no longer has parameter top
+  - Interface IntegrationAccountSessionsListNextOptionalParams no longer has parameter filter
+  - Interface IntegrationAccountSessionsListNextOptionalParams no longer has parameter top
+  - Interface IntegrationAccountsListByResourceGroupNextOptionalParams no longer has parameter top
+  - Interface IntegrationAccountsListBySubscriptionNextOptionalParams no longer has parameter top
+  - Interface IntegrationServiceEnvironmentsListByResourceGroupNextOptionalParams no longer has parameter top
+  - Interface IntegrationServiceEnvironmentsListBySubscriptionNextOptionalParams no longer has parameter top
+  - Interface WorkflowRunActionsListNextOptionalParams no longer has parameter filter
+  - Interface WorkflowRunActionsListNextOptionalParams no longer has parameter top
+  - Interface WorkflowRunsListNextOptionalParams no longer has parameter filter
+  - Interface WorkflowRunsListNextOptionalParams no longer has parameter top
+  - Interface WorkflowsListByResourceGroupNextOptionalParams no longer has parameter filter
+  - Interface WorkflowsListByResourceGroupNextOptionalParams no longer has parameter top
+  - Interface WorkflowsListBySubscriptionNextOptionalParams no longer has parameter filter
+  - Interface WorkflowsListBySubscriptionNextOptionalParams no longer has parameter top
+  - Interface WorkflowTriggerHistoriesListNextOptionalParams no longer has parameter filter
+  - Interface WorkflowTriggerHistoriesListNextOptionalParams no longer has parameter top
+  - Interface WorkflowTriggersListNextOptionalParams no longer has parameter filter
+  - Interface WorkflowTriggersListNextOptionalParams no longer has parameter top
+  - Interface WorkflowVersionsListNextOptionalParams no longer has parameter top
+    
+    
 ## 8.1.0 (2022-09-21)
     
-**Features**
+### Features Added
 
   - Added Interface ApiOperation
   - Added Interface ApiReference
@@ -59,4 +93,4 @@ To understand the detail of the change, please refer to [Changelog](https://aka.
 
 To migrate the existing applications to the latest version, please refer to [Migration Guide](https://aka.ms/js-track2-migration-guide).
 
-To learn more, please refer to our documentation [Quick Start](https://aka.ms/js-track2-quickstart).
+To learn more, please refer to our documentation [Quick Start](https://aka.ms/azsdk/js/mgmt/quickstart ).

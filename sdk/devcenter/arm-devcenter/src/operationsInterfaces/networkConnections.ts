@@ -7,13 +7,15 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   NetworkConnection,
   NetworkConnectionsListBySubscriptionOptionalParams,
   NetworkConnectionsListByResourceGroupOptionalParams,
   HealthCheckStatusDetails,
   NetworkConnectionsListHealthDetailsOptionalParams,
+  OutboundEnvironmentEndpoint,
+  NetworkConnectionsListOutboundNetworkDependenciesEndpointsOptionalParams,
   NetworkConnectionsGetOptionalParams,
   NetworkConnectionsGetResponse,
   NetworkConnectionsCreateOrUpdateOptionalParams,
@@ -22,9 +24,11 @@ import {
   NetworkConnectionsUpdateOptionalParams,
   NetworkConnectionsUpdateResponse,
   NetworkConnectionsDeleteOptionalParams,
+  NetworkConnectionsDeleteResponse,
   NetworkConnectionsGetHealthDetailsOptionalParams,
   NetworkConnectionsGetHealthDetailsResponse,
-  NetworkConnectionsRunHealthChecksOptionalParams
+  NetworkConnectionsRunHealthChecksOptionalParams,
+  NetworkConnectionsRunHealthChecksResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -35,7 +39,7 @@ export interface NetworkConnections {
    * @param options The options parameters.
    */
   listBySubscription(
-    options?: NetworkConnectionsListBySubscriptionOptionalParams
+    options?: NetworkConnectionsListBySubscriptionOptionalParams,
   ): PagedAsyncIterableIterator<NetworkConnection>;
   /**
    * Lists network connections in a resource group
@@ -44,7 +48,7 @@ export interface NetworkConnections {
    */
   listByResourceGroup(
     resourceGroupName: string,
-    options?: NetworkConnectionsListByResourceGroupOptionalParams
+    options?: NetworkConnectionsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<NetworkConnection>;
   /**
    * Lists health check status details
@@ -55,8 +59,20 @@ export interface NetworkConnections {
   listHealthDetails(
     resourceGroupName: string,
     networkConnectionName: string,
-    options?: NetworkConnectionsListHealthDetailsOptionalParams
+    options?: NetworkConnectionsListHealthDetailsOptionalParams,
   ): PagedAsyncIterableIterator<HealthCheckStatusDetails>;
+  /**
+   * Lists the endpoints that agents may call as part of Dev Box service administration. These FQDNs
+   * should be allowed for outbound access in order for the Dev Box service to function.
+   * @param resourceGroupName The name of the resource group. The name is case insensitive.
+   * @param networkConnectionName Name of the Network Connection that can be applied to a Pool.
+   * @param options The options parameters.
+   */
+  listOutboundNetworkDependenciesEndpoints(
+    resourceGroupName: string,
+    networkConnectionName: string,
+    options?: NetworkConnectionsListOutboundNetworkDependenciesEndpointsOptionalParams,
+  ): PagedAsyncIterableIterator<OutboundEnvironmentEndpoint>;
   /**
    * Gets a network connection resource
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -66,7 +82,7 @@ export interface NetworkConnections {
   get(
     resourceGroupName: string,
     networkConnectionName: string,
-    options?: NetworkConnectionsGetOptionalParams
+    options?: NetworkConnectionsGetOptionalParams,
   ): Promise<NetworkConnectionsGetResponse>;
   /**
    * Creates or updates a Network Connections resource
@@ -79,10 +95,10 @@ export interface NetworkConnections {
     resourceGroupName: string,
     networkConnectionName: string,
     body: NetworkConnection,
-    options?: NetworkConnectionsCreateOrUpdateOptionalParams
+    options?: NetworkConnectionsCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<NetworkConnectionsCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<NetworkConnectionsCreateOrUpdateResponse>,
       NetworkConnectionsCreateOrUpdateResponse
     >
   >;
@@ -97,7 +113,7 @@ export interface NetworkConnections {
     resourceGroupName: string,
     networkConnectionName: string,
     body: NetworkConnection,
-    options?: NetworkConnectionsCreateOrUpdateOptionalParams
+    options?: NetworkConnectionsCreateOrUpdateOptionalParams,
   ): Promise<NetworkConnectionsCreateOrUpdateResponse>;
   /**
    * Partially updates a Network Connection
@@ -110,10 +126,10 @@ export interface NetworkConnections {
     resourceGroupName: string,
     networkConnectionName: string,
     body: NetworkConnectionUpdate,
-    options?: NetworkConnectionsUpdateOptionalParams
+    options?: NetworkConnectionsUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<NetworkConnectionsUpdateResponse>,
+    SimplePollerLike<
+      OperationState<NetworkConnectionsUpdateResponse>,
       NetworkConnectionsUpdateResponse
     >
   >;
@@ -128,7 +144,7 @@ export interface NetworkConnections {
     resourceGroupName: string,
     networkConnectionName: string,
     body: NetworkConnectionUpdate,
-    options?: NetworkConnectionsUpdateOptionalParams
+    options?: NetworkConnectionsUpdateOptionalParams,
   ): Promise<NetworkConnectionsUpdateResponse>;
   /**
    * Deletes a Network Connections resource
@@ -139,8 +155,13 @@ export interface NetworkConnections {
   beginDelete(
     resourceGroupName: string,
     networkConnectionName: string,
-    options?: NetworkConnectionsDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: NetworkConnectionsDeleteOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<NetworkConnectionsDeleteResponse>,
+      NetworkConnectionsDeleteResponse
+    >
+  >;
   /**
    * Deletes a Network Connections resource
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -150,8 +171,8 @@ export interface NetworkConnections {
   beginDeleteAndWait(
     resourceGroupName: string,
     networkConnectionName: string,
-    options?: NetworkConnectionsDeleteOptionalParams
-  ): Promise<void>;
+    options?: NetworkConnectionsDeleteOptionalParams,
+  ): Promise<NetworkConnectionsDeleteResponse>;
   /**
    * Gets health check status details.
    * @param resourceGroupName The name of the resource group. The name is case insensitive.
@@ -161,7 +182,7 @@ export interface NetworkConnections {
   getHealthDetails(
     resourceGroupName: string,
     networkConnectionName: string,
-    options?: NetworkConnectionsGetHealthDetailsOptionalParams
+    options?: NetworkConnectionsGetHealthDetailsOptionalParams,
   ): Promise<NetworkConnectionsGetHealthDetailsResponse>;
   /**
    * Triggers a new health check run. The execution and health check result can be tracked via the
@@ -173,8 +194,13 @@ export interface NetworkConnections {
   beginRunHealthChecks(
     resourceGroupName: string,
     networkConnectionName: string,
-    options?: NetworkConnectionsRunHealthChecksOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: NetworkConnectionsRunHealthChecksOptionalParams,
+  ): Promise<
+    SimplePollerLike<
+      OperationState<NetworkConnectionsRunHealthChecksResponse>,
+      NetworkConnectionsRunHealthChecksResponse
+    >
+  >;
   /**
    * Triggers a new health check run. The execution and health check result can be tracked via the
    * network Connection health check details
@@ -185,6 +211,6 @@ export interface NetworkConnections {
   beginRunHealthChecksAndWait(
     resourceGroupName: string,
     networkConnectionName: string,
-    options?: NetworkConnectionsRunHealthChecksOptionalParams
-  ): Promise<void>;
+    options?: NetworkConnectionsRunHealthChecksOptionalParams,
+  ): Promise<NetworkConnectionsRunHealthChecksResponse>;
 }

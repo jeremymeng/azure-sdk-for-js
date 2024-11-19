@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import {
+import type {
   PipelinePolicy,
   PipelineRequest,
   PipelineResponse,
   SendRequest,
 } from "@azure/core-rest-pipeline";
-import { logger } from "../logger";
+import { logger } from "../logger.js";
 
 /**
  * The sync token header, as described here:
@@ -29,7 +29,7 @@ export function syncTokenPolicy(syncTokens: SyncTokens): PipelinePolicy {
 
       if (syncTokenHeaderValue) {
         logger.info(
-          "[syncTokenPolicy] Setting headers with ${SyncTokenHeaderName} and ${syncTokenHeaderValue}"
+          "[syncTokenPolicy] Setting headers with ${SyncTokenHeaderName} and ${syncTokenHeaderValue}",
         );
         request.headers.set(SyncTokenHeaderName, syncTokenHeaderValue);
       }
@@ -129,7 +129,7 @@ export function parseSyncToken(syncToken: string): SyncToken {
 
   if (matches == null) {
     throw new Error(
-      `Failed to parse sync token '${syncToken}' with regex ${syncTokenRegex.source}`
+      `Failed to parse sync token '${syncToken}' with regex ${syncTokenRegex.source}`,
     );
   }
 

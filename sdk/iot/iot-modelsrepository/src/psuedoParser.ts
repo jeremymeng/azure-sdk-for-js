@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { DTDL } from "./psuedoDtdl";
+import type { DTDL } from "./psuedoDtdl";
 import { logger } from "./logger";
-import { DtmiResolver } from "./dtmiResolver";
+import type { DtmiResolver } from "./dtmiResolver";
 import { RestError } from "@azure/core-rest-pipeline";
 
 /**
@@ -41,7 +41,7 @@ export class PseudoParser {
   private async _expand(
     model: DTDL,
     modelMap: { [dtmi: string]: DTDL },
-    tryFromExpanded: boolean
+    tryFromExpanded: boolean,
   ): Promise<void> {
     logger.info(`Expanding model: ${model["@id"]}`);
     const dependencies = this._getModelDependencies(model);
@@ -54,7 +54,7 @@ export class PseudoParser {
       try {
         resolvedDependenciesMap = await this._resolver.resolve(
           dependenciesToResolve,
-          tryFromExpanded
+          tryFromExpanded,
         );
       } catch (e: any) {
         if (e instanceof RestError) {

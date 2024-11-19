@@ -4,16 +4,16 @@
 
 ```ts
 
-import { Client } from '@azure-rest/core-client';
-import { ClientOptions } from '@azure-rest/core-client';
-import { HttpResponse } from '@azure-rest/core-client';
-import { LroEngineOptions } from '@azure/core-lro';
-import { PagedAsyncIterableIterator } from '@azure/core-paging';
-import { PathUncheckedResponse } from '@azure-rest/core-client';
-import { PollerLike } from '@azure/core-lro';
-import { PollOperationState } from '@azure/core-lro';
-import { RequestParameters } from '@azure-rest/core-client';
-import { TokenCredential } from '@azure/core-auth';
+import type { Client } from '@azure-rest/core-client';
+import type { ClientOptions } from '@azure-rest/core-client';
+import type { HttpResponse } from '@azure-rest/core-client';
+import type { LroEngineOptions } from '@azure/core-lro';
+import type { PagedAsyncIterableIterator } from '@azure/core-paging';
+import type { PathUncheckedResponse } from '@azure-rest/core-client';
+import type { PollerLike } from '@azure/core-lro';
+import type { PollOperationState } from '@azure/core-lro';
+import type { RequestParameters } from '@azure-rest/core-client';
+import type { TokenCredential } from '@azure/core-auth';
 
 // @public (undocumented)
 export interface AbnormalTimePeriod {
@@ -5699,7 +5699,7 @@ export interface DetectorResponseOutput extends ProxyOnlyResourceOutput {
 // @public (undocumented)
 export interface DetectorResponseProperties {
     dataProvidersMetadata?: Array<DataProviderMetadata>;
-    dataset?: Array<DiagnosticData>;
+    dataset?: Array<DiagnosticData_2>;
     metadata?: DetectorInfo;
     status?: Status;
     suggestedUtterances?: QueryUtterancesResults;
@@ -5775,10 +5775,11 @@ export interface DiagnosticCategoryPropertiesOutput {
 }
 
 // @public (undocumented)
-export interface DiagnosticData {
+interface DiagnosticData_2 {
     renderingProperties?: Rendering;
     table?: DataTableResponseObject;
 }
+export { DiagnosticData_2 as DiagnosticData }
 
 // @public (undocumented)
 export interface DiagnosticDataOutput {

@@ -10,43 +10,46 @@
 // Licensed under the MIT License.
 import {
   BlobContainersListOptionalParams,
-  StorageManagementClient
+  StorageManagementClient,
 } from "@azure/arm-storage";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Lists all containers and does not support a prefix like data plane. Also SRP today does not return continuation token.
  *
  * @summary Lists all containers and does not support a prefix like data plane. Also SRP today does not return continuation token.
- * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2022-09-01/examples/BlobContainersList.json
+ * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2023-05-01/examples/BlobContainersList.json
  */
 async function listContainers() {
-  const subscriptionId = "{subscription-id}";
-  const resourceGroupName = "res9290";
+  const subscriptionId =
+    process.env["STORAGE_SUBSCRIPTION_ID"] || "{subscription-id}";
+  const resourceGroupName = process.env["STORAGE_RESOURCE_GROUP"] || "res9290";
   const accountName = "sto1590";
   const credential = new DefaultAzureCredential();
   const client = new StorageManagementClient(credential, subscriptionId);
   const resArray = new Array();
   for await (let item of client.blobContainers.list(
     resourceGroupName,
-    accountName
+    accountName,
   )) {
     resArray.push(item);
   }
   console.log(resArray);
 }
 
-listContainers().catch(console.error);
-
 /**
  * This sample demonstrates how to Lists all containers and does not support a prefix like data plane. Also SRP today does not return continuation token.
  *
  * @summary Lists all containers and does not support a prefix like data plane. Also SRP today does not return continuation token.
- * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2022-09-01/examples/DeletedBlobContainersList.json
+ * x-ms-original-file: specification/storage/resource-manager/Microsoft.Storage/stable/2023-05-01/examples/DeletedBlobContainersList.json
  */
 async function listDeletedContainers() {
-  const subscriptionId = "{subscription-id}";
-  const resourceGroupName = "res9290";
+  const subscriptionId =
+    process.env["STORAGE_SUBSCRIPTION_ID"] || "{subscription-id}";
+  const resourceGroupName = process.env["STORAGE_RESOURCE_GROUP"] || "res9290";
   const accountName = "sto1590";
   const include = "deleted";
   const options: BlobContainersListOptionalParams = { include };
@@ -56,11 +59,16 @@ async function listDeletedContainers() {
   for await (let item of client.blobContainers.list(
     resourceGroupName,
     accountName,
-    options
+    options,
   )) {
     resArray.push(item);
   }
   console.log(resArray);
 }
 
-listDeletedContainers().catch(console.error);
+async function main() {
+  listContainers();
+  listDeletedContainers();
+}
+
+main().catch(console.error);

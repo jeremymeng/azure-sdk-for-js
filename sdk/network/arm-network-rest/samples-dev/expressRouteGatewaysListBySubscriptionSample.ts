@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -27,7 +27,7 @@ async function expressRouteGatewayListBySubscription() {
   const result = await client
     .path(
       "/subscriptions/{subscriptionId}/providers/Microsoft.Network/expressRouteGateways",
-      subscriptionId
+      subscriptionId,
     )
     .get(options);
   console.log(result);

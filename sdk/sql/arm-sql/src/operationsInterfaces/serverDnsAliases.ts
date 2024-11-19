@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   ServerDnsAlias,
   ServerDnsAliasesListByServerOptionalParams,
@@ -18,7 +18,7 @@ import {
   ServerDnsAliasesDeleteOptionalParams,
   ServerDnsAliasAcquisition,
   ServerDnsAliasesAcquireOptionalParams,
-  ServerDnsAliasesAcquireResponse
+  ServerDnsAliasesAcquireResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -34,7 +34,7 @@ export interface ServerDnsAliases {
   listByServer(
     resourceGroupName: string,
     serverName: string,
-    options?: ServerDnsAliasesListByServerOptionalParams
+    options?: ServerDnsAliasesListByServerOptionalParams,
   ): PagedAsyncIterableIterator<ServerDnsAlias>;
   /**
    * Gets a server DNS alias.
@@ -48,7 +48,7 @@ export interface ServerDnsAliases {
     resourceGroupName: string,
     serverName: string,
     dnsAliasName: string,
-    options?: ServerDnsAliasesGetOptionalParams
+    options?: ServerDnsAliasesGetOptionalParams,
   ): Promise<ServerDnsAliasesGetResponse>;
   /**
    * Creates a server DNS alias.
@@ -62,10 +62,10 @@ export interface ServerDnsAliases {
     resourceGroupName: string,
     serverName: string,
     dnsAliasName: string,
-    options?: ServerDnsAliasesCreateOrUpdateOptionalParams
+    options?: ServerDnsAliasesCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ServerDnsAliasesCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<ServerDnsAliasesCreateOrUpdateResponse>,
       ServerDnsAliasesCreateOrUpdateResponse
     >
   >;
@@ -81,7 +81,7 @@ export interface ServerDnsAliases {
     resourceGroupName: string,
     serverName: string,
     dnsAliasName: string,
-    options?: ServerDnsAliasesCreateOrUpdateOptionalParams
+    options?: ServerDnsAliasesCreateOrUpdateOptionalParams,
   ): Promise<ServerDnsAliasesCreateOrUpdateResponse>;
   /**
    * Deletes the server DNS alias with the given name.
@@ -95,8 +95,8 @@ export interface ServerDnsAliases {
     resourceGroupName: string,
     serverName: string,
     dnsAliasName: string,
-    options?: ServerDnsAliasesDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: ServerDnsAliasesDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes the server DNS alias with the given name.
    * @param resourceGroupName The name of the resource group that contains the resource. You can obtain
@@ -109,7 +109,7 @@ export interface ServerDnsAliases {
     resourceGroupName: string,
     serverName: string,
     dnsAliasName: string,
-    options?: ServerDnsAliasesDeleteOptionalParams
+    options?: ServerDnsAliasesDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Acquires server DNS alias from another server.
@@ -125,10 +125,10 @@ export interface ServerDnsAliases {
     serverName: string,
     dnsAliasName: string,
     parameters: ServerDnsAliasAcquisition,
-    options?: ServerDnsAliasesAcquireOptionalParams
+    options?: ServerDnsAliasesAcquireOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<ServerDnsAliasesAcquireResponse>,
+    SimplePollerLike<
+      OperationState<ServerDnsAliasesAcquireResponse>,
       ServerDnsAliasesAcquireResponse
     >
   >;
@@ -146,6 +146,6 @@ export interface ServerDnsAliases {
     serverName: string,
     dnsAliasName: string,
     parameters: ServerDnsAliasAcquisition,
-    options?: ServerDnsAliasesAcquireOptionalParams
+    options?: ServerDnsAliasesAcquireOptionalParams,
   ): Promise<ServerDnsAliasesAcquireResponse>;
 }

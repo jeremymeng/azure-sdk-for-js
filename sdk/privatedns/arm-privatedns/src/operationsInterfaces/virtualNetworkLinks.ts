@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   VirtualNetworkLink,
   VirtualNetworkLinksListOptionalParams,
@@ -17,7 +17,7 @@ import {
   VirtualNetworkLinksUpdateResponse,
   VirtualNetworkLinksDeleteOptionalParams,
   VirtualNetworkLinksGetOptionalParams,
-  VirtualNetworkLinksGetResponse
+  VirtualNetworkLinksGetResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -32,7 +32,7 @@ export interface VirtualNetworkLinks {
   list(
     resourceGroupName: string,
     privateZoneName: string,
-    options?: VirtualNetworkLinksListOptionalParams
+    options?: VirtualNetworkLinksListOptionalParams,
   ): PagedAsyncIterableIterator<VirtualNetworkLink>;
   /**
    * Creates or updates a virtual network link to the specified Private DNS zone.
@@ -47,10 +47,10 @@ export interface VirtualNetworkLinks {
     privateZoneName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams
+    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualNetworkLinksCreateOrUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualNetworkLinksCreateOrUpdateResponse>,
       VirtualNetworkLinksCreateOrUpdateResponse
     >
   >;
@@ -67,7 +67,7 @@ export interface VirtualNetworkLinks {
     privateZoneName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams
+    options?: VirtualNetworkLinksCreateOrUpdateOptionalParams,
   ): Promise<VirtualNetworkLinksCreateOrUpdateResponse>;
   /**
    * Updates a virtual network link to the specified Private DNS zone.
@@ -82,10 +82,10 @@ export interface VirtualNetworkLinks {
     privateZoneName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksUpdateOptionalParams
+    options?: VirtualNetworkLinksUpdateOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<VirtualNetworkLinksUpdateResponse>,
+    SimplePollerLike<
+      OperationState<VirtualNetworkLinksUpdateResponse>,
       VirtualNetworkLinksUpdateResponse
     >
   >;
@@ -102,7 +102,7 @@ export interface VirtualNetworkLinks {
     privateZoneName: string,
     virtualNetworkLinkName: string,
     parameters: VirtualNetworkLink,
-    options?: VirtualNetworkLinksUpdateOptionalParams
+    options?: VirtualNetworkLinksUpdateOptionalParams,
   ): Promise<VirtualNetworkLinksUpdateResponse>;
   /**
    * Deletes a virtual network link to the specified Private DNS zone. WARNING: In case of a registration
@@ -117,8 +117,8 @@ export interface VirtualNetworkLinks {
     resourceGroupName: string,
     privateZoneName: string,
     virtualNetworkLinkName: string,
-    options?: VirtualNetworkLinksDeleteOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: VirtualNetworkLinksDeleteOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a virtual network link to the specified Private DNS zone. WARNING: In case of a registration
    * virtual network, all auto-registered DNS records in the zone for the virtual network will also be
@@ -132,7 +132,7 @@ export interface VirtualNetworkLinks {
     resourceGroupName: string,
     privateZoneName: string,
     virtualNetworkLinkName: string,
-    options?: VirtualNetworkLinksDeleteOptionalParams
+    options?: VirtualNetworkLinksDeleteOptionalParams,
   ): Promise<void>;
   /**
    * Gets a virtual network link to the specified Private DNS zone.
@@ -145,6 +145,6 @@ export interface VirtualNetworkLinks {
     resourceGroupName: string,
     privateZoneName: string,
     virtualNetworkLinkName: string,
-    options?: VirtualNetworkLinksGetOptionalParams
+    options?: VirtualNetworkLinksGetOptionalParams,
   ): Promise<VirtualNetworkLinksGetResponse>;
 }

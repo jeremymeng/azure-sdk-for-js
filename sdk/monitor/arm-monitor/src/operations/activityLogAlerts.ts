@@ -6,7 +6,8 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PagedAsyncIterableIterator } from "@azure/core-paging";
+import { PagedAsyncIterableIterator, PageSettings } from "@azure/core-paging";
+import { setContinuationToken } from "../pagingHelper";
 import { ActivityLogAlerts } from "../operationsInterfaces";
 import * as coreClient from "@azure/core-client";
 import * as Mappers from "../models/mappers";
@@ -16,8 +17,10 @@ import {
   ActivityLogAlertResource,
   ActivityLogAlertsListBySubscriptionIdNextOptionalParams,
   ActivityLogAlertsListBySubscriptionIdOptionalParams,
+  ActivityLogAlertsListBySubscriptionIdResponse,
   ActivityLogAlertsListByResourceGroupNextOptionalParams,
   ActivityLogAlertsListByResourceGroupOptionalParams,
+  ActivityLogAlertsListByResourceGroupResponse,
   ActivityLogAlertsCreateOrUpdateOptionalParams,
   ActivityLogAlertsCreateOrUpdateResponse,
   ActivityLogAlertsGetOptionalParams,
@@ -26,10 +29,8 @@ import {
   AlertRulePatchObject,
   ActivityLogAlertsUpdateOptionalParams,
   ActivityLogAlertsUpdateResponse,
-  ActivityLogAlertsListBySubscriptionIdResponse,
-  ActivityLogAlertsListByResourceGroupResponse,
   ActivityLogAlertsListBySubscriptionIdNextResponse,
-  ActivityLogAlertsListByResourceGroupNextResponse
+  ActivityLogAlertsListByResourceGroupNextResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -50,7 +51,7 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
    * @param options The options parameters.
    */
   public listBySubscriptionId(
-    options?: ActivityLogAlertsListBySubscriptionIdOptionalParams
+    options?: ActivityLogAlertsListBySubscriptionIdOptionalParams,
   ): PagedAsyncIterableIterator<ActivityLogAlertResource> {
     const iter = this.listBySubscriptionIdPagingAll(options);
     return {
@@ -60,27 +61,39 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listBySubscriptionIdPagingPage(options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listBySubscriptionIdPagingPage(options, settings);
+      },
     };
   }
 
   private async *listBySubscriptionIdPagingPage(
-    options?: ActivityLogAlertsListBySubscriptionIdOptionalParams
+    options?: ActivityLogAlertsListBySubscriptionIdOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<ActivityLogAlertResource[]> {
-    let result = await this._listBySubscriptionId(options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: ActivityLogAlertsListBySubscriptionIdResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listBySubscriptionId(options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listBySubscriptionIdNext(continuationToken, options);
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listBySubscriptionIdPagingAll(
-    options?: ActivityLogAlertsListBySubscriptionIdOptionalParams
+    options?: ActivityLogAlertsListBySubscriptionIdOptionalParams,
   ): AsyncIterableIterator<ActivityLogAlertResource> {
     for await (const page of this.listBySubscriptionIdPagingPage(options)) {
       yield* page;
@@ -94,7 +107,7 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
    */
   public listByResourceGroup(
     resourceGroupName: string,
-    options?: ActivityLogAlertsListByResourceGroupOptionalParams
+    options?: ActivityLogAlertsListByResourceGroupOptionalParams,
   ): PagedAsyncIterableIterator<ActivityLogAlertResource> {
     const iter = this.listByResourceGroupPagingAll(resourceGroupName, options);
     return {
@@ -104,37 +117,53 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
       [Symbol.asyncIterator]() {
         return this;
       },
-      byPage: () => {
-        return this.listByResourceGroupPagingPage(resourceGroupName, options);
-      }
+      byPage: (settings?: PageSettings) => {
+        if (settings?.maxPageSize) {
+          throw new Error("maxPageSize is not supported by this operation.");
+        }
+        return this.listByResourceGroupPagingPage(
+          resourceGroupName,
+          options,
+          settings,
+        );
+      },
     };
   }
 
   private async *listByResourceGroupPagingPage(
     resourceGroupName: string,
-    options?: ActivityLogAlertsListByResourceGroupOptionalParams
+    options?: ActivityLogAlertsListByResourceGroupOptionalParams,
+    settings?: PageSettings,
   ): AsyncIterableIterator<ActivityLogAlertResource[]> {
-    let result = await this._listByResourceGroup(resourceGroupName, options);
-    yield result.value || [];
-    let continuationToken = result.nextLink;
+    let result: ActivityLogAlertsListByResourceGroupResponse;
+    let continuationToken = settings?.continuationToken;
+    if (!continuationToken) {
+      result = await this._listByResourceGroup(resourceGroupName, options);
+      let page = result.value || [];
+      continuationToken = result.nextLink;
+      setContinuationToken(page, continuationToken);
+      yield page;
+    }
     while (continuationToken) {
       result = await this._listByResourceGroupNext(
         resourceGroupName,
         continuationToken,
-        options
+        options,
       );
       continuationToken = result.nextLink;
-      yield result.value || [];
+      let page = result.value || [];
+      setContinuationToken(page, continuationToken);
+      yield page;
     }
   }
 
   private async *listByResourceGroupPagingAll(
     resourceGroupName: string,
-    options?: ActivityLogAlertsListByResourceGroupOptionalParams
+    options?: ActivityLogAlertsListByResourceGroupOptionalParams,
   ): AsyncIterableIterator<ActivityLogAlertResource> {
     for await (const page of this.listByResourceGroupPagingPage(
       resourceGroupName,
-      options
+      options,
     )) {
       yield* page;
     }
@@ -151,16 +180,16 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
     resourceGroupName: string,
     activityLogAlertName: string,
     activityLogAlertRule: ActivityLogAlertResource,
-    options?: ActivityLogAlertsCreateOrUpdateOptionalParams
+    options?: ActivityLogAlertsCreateOrUpdateOptionalParams,
   ): Promise<ActivityLogAlertsCreateOrUpdateResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         activityLogAlertName,
         activityLogAlertRule,
-        options
+        options,
       },
-      createOrUpdateOperationSpec
+      createOrUpdateOperationSpec,
     );
   }
 
@@ -173,11 +202,11 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
   get(
     resourceGroupName: string,
     activityLogAlertName: string,
-    options?: ActivityLogAlertsGetOptionalParams
+    options?: ActivityLogAlertsGetOptionalParams,
   ): Promise<ActivityLogAlertsGetResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, activityLogAlertName, options },
-      getOperationSpec
+      getOperationSpec,
     );
   }
 
@@ -190,11 +219,11 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
   delete(
     resourceGroupName: string,
     activityLogAlertName: string,
-    options?: ActivityLogAlertsDeleteOptionalParams
+    options?: ActivityLogAlertsDeleteOptionalParams,
   ): Promise<void> {
     return this.client.sendOperationRequest(
       { resourceGroupName, activityLogAlertName, options },
-      deleteOperationSpec
+      deleteOperationSpec,
     );
   }
 
@@ -211,16 +240,16 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
     resourceGroupName: string,
     activityLogAlertName: string,
     activityLogAlertRulePatch: AlertRulePatchObject,
-    options?: ActivityLogAlertsUpdateOptionalParams
+    options?: ActivityLogAlertsUpdateOptionalParams,
   ): Promise<ActivityLogAlertsUpdateResponse> {
     return this.client.sendOperationRequest(
       {
         resourceGroupName,
         activityLogAlertName,
         activityLogAlertRulePatch,
-        options
+        options,
       },
-      updateOperationSpec
+      updateOperationSpec,
     );
   }
 
@@ -229,11 +258,11 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
    * @param options The options parameters.
    */
   private _listBySubscriptionId(
-    options?: ActivityLogAlertsListBySubscriptionIdOptionalParams
+    options?: ActivityLogAlertsListBySubscriptionIdOptionalParams,
   ): Promise<ActivityLogAlertsListBySubscriptionIdResponse> {
     return this.client.sendOperationRequest(
       { options },
-      listBySubscriptionIdOperationSpec
+      listBySubscriptionIdOperationSpec,
     );
   }
 
@@ -244,11 +273,11 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
    */
   private _listByResourceGroup(
     resourceGroupName: string,
-    options?: ActivityLogAlertsListByResourceGroupOptionalParams
+    options?: ActivityLogAlertsListByResourceGroupOptionalParams,
   ): Promise<ActivityLogAlertsListByResourceGroupResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, options },
-      listByResourceGroupOperationSpec
+      listByResourceGroupOperationSpec,
     );
   }
 
@@ -259,11 +288,11 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
    */
   private _listBySubscriptionIdNext(
     nextLink: string,
-    options?: ActivityLogAlertsListBySubscriptionIdNextOptionalParams
+    options?: ActivityLogAlertsListBySubscriptionIdNextOptionalParams,
   ): Promise<ActivityLogAlertsListBySubscriptionIdNextResponse> {
     return this.client.sendOperationRequest(
       { nextLink, options },
-      listBySubscriptionIdNextOperationSpec
+      listBySubscriptionIdNextOperationSpec,
     );
   }
 
@@ -276,11 +305,11 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
   private _listByResourceGroupNext(
     resourceGroupName: string,
     nextLink: string,
-    options?: ActivityLogAlertsListByResourceGroupNextOptionalParams
+    options?: ActivityLogAlertsListByResourceGroupNextOptionalParams,
   ): Promise<ActivityLogAlertsListByResourceGroupNextResponse> {
     return this.client.sendOperationRequest(
       { resourceGroupName, nextLink, options },
-      listByResourceGroupNextOperationSpec
+      listByResourceGroupNextOperationSpec,
     );
   }
 }
@@ -288,175 +317,167 @@ export class ActivityLogAlertsImpl implements ActivityLogAlerts {
 const serializer = coreClient.createSerializer(Mappers, /* isXml */ false);
 
 const createOrUpdateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.ActivityLogAlertResource
+      bodyMapper: Mappers.ActivityLogAlertResource,
     },
     201: {
-      bodyMapper: Mappers.ActivityLogAlertResource
+      bodyMapper: Mappers.ActivityLogAlertResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseAutoGenerated
-    }
+      bodyMapper: Mappers.ErrorResponseAutoGenerated4,
+    },
   },
   requestBody: Parameters.activityLogAlertRule,
-  queryParameters: [Parameters.apiVersion12],
+  queryParameters: [Parameters.apiVersion13],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.activityLogAlertName
+    Parameters.resourceGroupName,
+    Parameters.activityLogAlertName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.ActivityLogAlertResource
+      bodyMapper: Mappers.ActivityLogAlertResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseAutoGenerated
-    }
+      bodyMapper: Mappers.ErrorResponseAutoGenerated4,
+    },
   },
-  queryParameters: [Parameters.apiVersion12],
+  queryParameters: [Parameters.apiVersion13],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.activityLogAlertName
+    Parameters.resourceGroupName,
+    Parameters.activityLogAlertName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const deleteOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
   httpMethod: "DELETE",
   responses: {
     200: {},
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorResponseAutoGenerated
-    }
+      bodyMapper: Mappers.ErrorResponseAutoGenerated4,
+    },
   },
-  queryParameters: [Parameters.apiVersion12],
+  queryParameters: [Parameters.apiVersion13],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.activityLogAlertName
+    Parameters.resourceGroupName,
+    Parameters.activityLogAlertName,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const updateOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.ActivityLogAlertResource
+      bodyMapper: Mappers.ActivityLogAlertResource,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseAutoGenerated
-    }
+      bodyMapper: Mappers.ErrorResponseAutoGenerated4,
+    },
   },
   requestBody: Parameters.activityLogAlertRulePatch,
-  queryParameters: [Parameters.apiVersion12],
+  queryParameters: [Parameters.apiVersion13],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.activityLogAlertName
+    Parameters.resourceGroupName,
+    Parameters.activityLogAlertName,
   ],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listBySubscriptionIdOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/activityLogAlerts",
+  path: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/activityLogAlerts",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AlertRuleList
+      bodyMapper: Mappers.AlertRuleList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseAutoGenerated
-    }
+      bodyMapper: Mappers.ErrorResponseAutoGenerated4,
+    },
   },
-  queryParameters: [Parameters.apiVersion12],
+  queryParameters: [Parameters.apiVersion13],
   urlParameters: [Parameters.$host, Parameters.subscriptionId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts",
+  path: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AlertRuleList
+      bodyMapper: Mappers.AlertRuleList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseAutoGenerated
-    }
+      bodyMapper: Mappers.ErrorResponseAutoGenerated4,
+    },
   },
-  queryParameters: [Parameters.apiVersion12],
+  queryParameters: [Parameters.apiVersion13],
   urlParameters: [
     Parameters.$host,
+    Parameters.subscriptionId,
     Parameters.resourceGroupName,
-    Parameters.subscriptionId
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listBySubscriptionIdNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AlertRuleList
+      bodyMapper: Mappers.AlertRuleList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseAutoGenerated
-    }
+      bodyMapper: Mappers.ErrorResponseAutoGenerated4,
+    },
   },
-  queryParameters: [Parameters.apiVersion12],
   urlParameters: [
     Parameters.$host,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listByResourceGroupNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AlertRuleList
+      bodyMapper: Mappers.AlertRuleList,
     },
     default: {
-      bodyMapper: Mappers.ErrorResponseAutoGenerated
-    }
+      bodyMapper: Mappers.ErrorResponseAutoGenerated4,
+    },
   },
-  queryParameters: [Parameters.apiVersion12],
   urlParameters: [
     Parameters.$host,
-    Parameters.resourceGroupName,
     Parameters.subscriptionId,
-    Parameters.nextLink
+    Parameters.resourceGroupName,
+    Parameters.nextLink,
   ],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };

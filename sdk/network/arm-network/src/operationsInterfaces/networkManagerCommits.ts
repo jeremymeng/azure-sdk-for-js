@@ -6,11 +6,11 @@
  * Changes may cause incorrect behavior and will be lost if the code is regenerated.
  */
 
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   NetworkManagerCommit,
   NetworkManagerCommitsPostOptionalParams,
-  NetworkManagerCommitsPostResponse
+  NetworkManagerCommitsPostResponse,
 } from "../models";
 
 /** Interface representing a NetworkManagerCommits. */
@@ -26,10 +26,10 @@ export interface NetworkManagerCommits {
     resourceGroupName: string,
     networkManagerName: string,
     parameters: NetworkManagerCommit,
-    options?: NetworkManagerCommitsPostOptionalParams
+    options?: NetworkManagerCommitsPostOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<NetworkManagerCommitsPostResponse>,
+    SimplePollerLike<
+      OperationState<NetworkManagerCommitsPostResponse>,
       NetworkManagerCommitsPostResponse
     >
   >;
@@ -44,6 +44,6 @@ export interface NetworkManagerCommits {
     resourceGroupName: string,
     networkManagerName: string,
     parameters: NetworkManagerCommit,
-    options?: NetworkManagerCommitsPostOptionalParams
+    options?: NetworkManagerCommitsPostOptionalParams,
   ): Promise<NetworkManagerCommitsPostResponse>;
 }

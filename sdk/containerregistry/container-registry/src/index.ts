@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 export * from "./containerRegistryClient";
 export {
@@ -20,4 +20,4 @@ export {
   ListTagPropertiesOptions,
 } from "./registryArtifact";
 export * from "./models";
-export * from "./blob";
+export * from "./content";

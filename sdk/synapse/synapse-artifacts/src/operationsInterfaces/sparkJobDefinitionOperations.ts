@@ -7,7 +7,7 @@
  */
 
 import { PagedAsyncIterableIterator } from "@azure/core-paging";
-import { PollerLike, PollOperationState } from "@azure/core-lro";
+import { SimplePollerLike, OperationState } from "@azure/core-lro";
 import {
   SparkJobDefinitionResource,
   SparkJobDefinitionGetSparkJobDefinitionsByWorkspaceOptionalParams,
@@ -21,7 +21,7 @@ import {
   ArtifactRenameRequest,
   SparkJobDefinitionRenameSparkJobDefinitionOptionalParams,
   SparkJobDefinitionDebugSparkJobDefinitionOptionalParams,
-  SparkJobDefinitionDebugSparkJobDefinitionResponse
+  SparkJobDefinitionDebugSparkJobDefinitionResponse,
 } from "../models";
 
 /// <reference lib="esnext.asynciterable" />
@@ -32,7 +32,7 @@ export interface SparkJobDefinitionOperations {
    * @param options The options parameters.
    */
   listSparkJobDefinitionsByWorkspace(
-    options?: SparkJobDefinitionGetSparkJobDefinitionsByWorkspaceOptionalParams
+    options?: SparkJobDefinitionGetSparkJobDefinitionsByWorkspaceOptionalParams,
   ): PagedAsyncIterableIterator<SparkJobDefinitionResource>;
   /**
    * Creates or updates a Spark Job Definition.
@@ -43,12 +43,10 @@ export interface SparkJobDefinitionOperations {
   beginCreateOrUpdateSparkJobDefinition(
     sparkJobDefinitionName: string,
     sparkJobDefinition: SparkJobDefinitionResource,
-    options?: SparkJobDefinitionCreateOrUpdateSparkJobDefinitionOptionalParams
+    options?: SparkJobDefinitionCreateOrUpdateSparkJobDefinitionOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<
-        SparkJobDefinitionCreateOrUpdateSparkJobDefinitionResponse
-      >,
+    SimplePollerLike<
+      OperationState<SparkJobDefinitionCreateOrUpdateSparkJobDefinitionResponse>,
       SparkJobDefinitionCreateOrUpdateSparkJobDefinitionResponse
     >
   >;
@@ -61,7 +59,7 @@ export interface SparkJobDefinitionOperations {
   beginCreateOrUpdateSparkJobDefinitionAndWait(
     sparkJobDefinitionName: string,
     sparkJobDefinition: SparkJobDefinitionResource,
-    options?: SparkJobDefinitionCreateOrUpdateSparkJobDefinitionOptionalParams
+    options?: SparkJobDefinitionCreateOrUpdateSparkJobDefinitionOptionalParams,
   ): Promise<SparkJobDefinitionCreateOrUpdateSparkJobDefinitionResponse>;
   /**
    * Gets a Spark Job Definition.
@@ -70,7 +68,7 @@ export interface SparkJobDefinitionOperations {
    */
   getSparkJobDefinition(
     sparkJobDefinitionName: string,
-    options?: SparkJobDefinitionGetSparkJobDefinitionOptionalParams
+    options?: SparkJobDefinitionGetSparkJobDefinitionOptionalParams,
   ): Promise<SparkJobDefinitionGetSparkJobDefinitionResponse>;
   /**
    * Deletes a Spark Job Definition.
@@ -79,8 +77,8 @@ export interface SparkJobDefinitionOperations {
    */
   beginDeleteSparkJobDefinition(
     sparkJobDefinitionName: string,
-    options?: SparkJobDefinitionDeleteSparkJobDefinitionOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: SparkJobDefinitionDeleteSparkJobDefinitionOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Deletes a Spark Job Definition.
    * @param sparkJobDefinitionName The spark job definition name.
@@ -88,7 +86,7 @@ export interface SparkJobDefinitionOperations {
    */
   beginDeleteSparkJobDefinitionAndWait(
     sparkJobDefinitionName: string,
-    options?: SparkJobDefinitionDeleteSparkJobDefinitionOptionalParams
+    options?: SparkJobDefinitionDeleteSparkJobDefinitionOptionalParams,
   ): Promise<void>;
   /**
    * Executes the spark job definition.
@@ -97,10 +95,10 @@ export interface SparkJobDefinitionOperations {
    */
   beginExecuteSparkJobDefinition(
     sparkJobDefinitionName: string,
-    options?: SparkJobDefinitionExecuteSparkJobDefinitionOptionalParams
+    options?: SparkJobDefinitionExecuteSparkJobDefinitionOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SparkJobDefinitionExecuteSparkJobDefinitionResponse>,
+    SimplePollerLike<
+      OperationState<SparkJobDefinitionExecuteSparkJobDefinitionResponse>,
       SparkJobDefinitionExecuteSparkJobDefinitionResponse
     >
   >;
@@ -111,7 +109,7 @@ export interface SparkJobDefinitionOperations {
    */
   beginExecuteSparkJobDefinitionAndWait(
     sparkJobDefinitionName: string,
-    options?: SparkJobDefinitionExecuteSparkJobDefinitionOptionalParams
+    options?: SparkJobDefinitionExecuteSparkJobDefinitionOptionalParams,
   ): Promise<SparkJobDefinitionExecuteSparkJobDefinitionResponse>;
   /**
    * Renames a sparkJobDefinition.
@@ -122,8 +120,8 @@ export interface SparkJobDefinitionOperations {
   beginRenameSparkJobDefinition(
     sparkJobDefinitionName: string,
     request: ArtifactRenameRequest,
-    options?: SparkJobDefinitionRenameSparkJobDefinitionOptionalParams
-  ): Promise<PollerLike<PollOperationState<void>, void>>;
+    options?: SparkJobDefinitionRenameSparkJobDefinitionOptionalParams,
+  ): Promise<SimplePollerLike<OperationState<void>, void>>;
   /**
    * Renames a sparkJobDefinition.
    * @param sparkJobDefinitionName The spark job definition name.
@@ -133,7 +131,7 @@ export interface SparkJobDefinitionOperations {
   beginRenameSparkJobDefinitionAndWait(
     sparkJobDefinitionName: string,
     request: ArtifactRenameRequest,
-    options?: SparkJobDefinitionRenameSparkJobDefinitionOptionalParams
+    options?: SparkJobDefinitionRenameSparkJobDefinitionOptionalParams,
   ): Promise<void>;
   /**
    * Debug the spark job definition.
@@ -142,10 +140,10 @@ export interface SparkJobDefinitionOperations {
    */
   beginDebugSparkJobDefinition(
     sparkJobDefinitionAzureResource: SparkJobDefinitionResource,
-    options?: SparkJobDefinitionDebugSparkJobDefinitionOptionalParams
+    options?: SparkJobDefinitionDebugSparkJobDefinitionOptionalParams,
   ): Promise<
-    PollerLike<
-      PollOperationState<SparkJobDefinitionDebugSparkJobDefinitionResponse>,
+    SimplePollerLike<
+      OperationState<SparkJobDefinitionDebugSparkJobDefinitionResponse>,
       SparkJobDefinitionDebugSparkJobDefinitionResponse
     >
   >;
@@ -156,6 +154,6 @@ export interface SparkJobDefinitionOperations {
    */
   beginDebugSparkJobDefinitionAndWait(
     sparkJobDefinitionAzureResource: SparkJobDefinitionResource,
-    options?: SparkJobDefinitionDebugSparkJobDefinitionOptionalParams
+    options?: SparkJobDefinitionDebugSparkJobDefinitionOptionalParams,
   ): Promise<SparkJobDefinitionDebugSparkJobDefinitionResponse>;
 }

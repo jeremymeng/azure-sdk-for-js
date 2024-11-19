@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -41,7 +41,7 @@ async function createNetworkInterfaceTapConfigurations() {
       subscriptionId,
       resourceGroupName,
       networkInterfaceName,
-      tapConfigurationName
+      tapConfigurationName,
     )
     .put(options);
   const poller = getLongRunningPoller(client, initialResponse);

@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { Context } from "mocha";
-import { Recorder, RecorderStartOptions } from "@azure-tools/test-recorder";
-import { ClientOptions } from "@azure-rest/core-client";
+import type { Context } from "mocha";
+import type { RecorderStartOptions } from "@azure-tools/test-recorder";
+import { Recorder } from "@azure-tools/test-recorder";
+import type { ClientOptions } from "@azure-rest/core-client";
 import { createTestCredential } from "@azure-tools/test-credential";
-import ServiceFabricManagementClient, { ServiceFabricClient } from "../../../src/index";
+import type { ServiceFabricClient } from "../../../src/index";
+import ServiceFabricManagementClient from "../../../src/index";
 import "./env";
 
 const envSetupForPlayback: Record<string, string> = {
@@ -33,7 +35,7 @@ export async function createRecorder(context: Context): Promise<Recorder> {
 
 export async function createClient(
   recorder: Recorder,
-  options?: ClientOptions
+  options?: ClientOptions,
 ): Promise<ServiceFabricClient> {
   const credential = createTestCredential();
   return ServiceFabricManagementClient(credential, recorder.configureClientOptions({ ...options }));

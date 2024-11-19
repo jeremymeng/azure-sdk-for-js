@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * @summary Creates a certificate with an unknown issuer and signs it using a fake certificate authority and the mergeCertificate API.
@@ -8,7 +8,7 @@
 import * as childProcess from "child_process";
 // Load the .env file if it exists
 import * as dotenv from "dotenv";
-import * as fs from "fs";
+import * as fs from "node:fs";
 
 import { CertificateClient } from "@azure/keyvault-certificates";
 import { DefaultAzureCredential } from "@azure/identity";
@@ -55,7 +55,7 @@ ${base64Csr}
   // For more information on how to set up a local certificate authority
   // go to: https://gist.github.com/Soarez/9688998
   childProcess.execSync(
-    "openssl x509 -req -in test.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out test.crt"
+    "openssl x509 -req -in test.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out test.crt",
   );
   const base64Crt = fs.readFileSync("test.crt").toString().split("\n").slice(1, -1).join("");
 

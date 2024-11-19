@@ -16,23 +16,19 @@ require("dotenv").config();
  * This sample demonstrates how to Update a TrafficController
  *
  * @summary Update a TrafficController
- * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/cadl/examples/TrafficControllerPatch.json
+ * x-ms-original-file: specification/servicenetworking/resource-manager/Microsoft.ServiceNetworking/preview/2024-05-01-preview/examples/TrafficControllerPatch.json
  */
 async function patchTrafficController() {
   const subscriptionId = process.env["SERVICENETWORKING_SUBSCRIPTION_ID"] || "subid";
   const resourceGroupName = process.env["SERVICENETWORKING_RESOURCE_GROUP"] || "rg1";
-  const trafficControllerName = "TC1";
-  const properties = {
-    properties: {
-      configurationEndpoints: ["abc.eastus.trafficcontroller.azure.net"],
-    },
-  };
+  const trafficControllerName = "tc1";
+  const properties = { tags: { key1: "value1" } };
   const credential = new DefaultAzureCredential();
   const client = new ServiceNetworkingManagementClient(credential, subscriptionId);
   const result = await client.trafficControllerInterface.update(
     resourceGroupName,
     trafficControllerName,
-    properties
+    properties,
   );
   console.log(result);
 }

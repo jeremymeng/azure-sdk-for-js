@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { PerfTestConstructor } from "./perfTestBase";
 import minimist, { ParsedArgs } from "minimist";
@@ -60,8 +60,8 @@ function selectPerfTest(tests: PerfTestConstructor[]): PerfTestConstructor {
   if (testIndex === -1) {
     throw new Error(
       `Couldn't find a test named ${testName}. Try with any of the following: ${testsNames.join(
-        ", "
-      )}`
+        ", ",
+      )}`,
     );
   }
 

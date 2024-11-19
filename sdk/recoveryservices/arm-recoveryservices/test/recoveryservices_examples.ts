@@ -26,7 +26,12 @@ const replaceableVariables: Record<string, string> = {
 };
 
 const recorderOptions: RecorderStartOptions = {
-  envSetupForPlayback: replaceableVariables
+  envSetupForPlayback: replaceableVariables,
+  removeCentralSanitizers: [
+    "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3430", // .id in the body is not a secret and is listed below in the beforeEach section
+    "AZSDK3490", // .etag in the body is not a secret and is listed below in the beforeEach section
+  ],
 };
 
 export const testPollingOptions = {
@@ -60,7 +65,7 @@ describe("Recoveryservices test", () => {
   it("vaults create test", async function () {
     const res = await client.vaults.beginCreateOrUpdateAndWait(resourceGroup, vaultsName, {
       location: location,
-      properties: {},
+      properties: { publicNetworkAccess: "Enabled" },
       sku: {
         name: "Standard"
       },
@@ -97,7 +102,7 @@ describe("Recoveryservices test", () => {
   });
 
   it("vaults delete test", async function () {
-    const res = await client.vaults.delete(resourceGroup, vaultsName);
+    const res = await client.vaults.beginDeleteAndWait(resourceGroup, vaultsName);
     const resArray = new Array();
     for await (let item of client.vaults.listByResourceGroup(resourceGroup)) {
       resArray.push(item);

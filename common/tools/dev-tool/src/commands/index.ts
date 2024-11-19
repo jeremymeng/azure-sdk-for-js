@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license
+// Licensed under the MIT License
 
-import { subCommand, makeCommandInfo } from "../framework/command";
+import { makeCommandInfo, subCommand } from "../framework/command";
+
 import { createPrinter } from "../util/printer";
 
 const log = createPrinter("dev-tool");
@@ -10,11 +11,14 @@ const log = createPrinter("dev-tool");
  * All of dev-tool's base commands and the modules that define them
  */
 export const baseCommands = {
+  admin: () => import("./admin"),
   about: () => import("./about"),
   package: () => import("./package"),
   samples: () => import("./samples"),
   "test-proxy": () => import("./test-proxy"),
   run: () => import("./run"),
+  migrate: () => import("./migrate"),
+  customization: () => import("./customization"),
 } as const;
 
 /**

@@ -1,24 +1,8 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import * as dotenv from "dotenv";
-import Sinon, { createSandbox } from "sinon";
-import { MsalBaseUtilities } from "../src/msal/utils";
-import { Recorder } from "@azure-tools/test-recorder";
-import { isNode } from "@azure/core-util";
-
-// Browser tests fail if dotenv.config is called in that environment.
-if (isNode) {
-  dotenv.config({ path: ".env" });
-}
-
-export type MsalTestCleanup = () => Promise<void>;
-
-export interface MsalTestSetupResponse {
-  cleanup: MsalTestCleanup;
-  recorder: Recorder;
-  sandbox: Sinon.SinonSandbox;
-}
+import { env } from "@azure-tools/test-recorder";
+import { DeveloperSignOnClientId } from "../src/constants.js";
 
 export const PlaybackTenantId = "12345678-1234-1234-1234-123456789012";
 
@@ -26,6 +10,7 @@ export const PlaybackTenantId = "12345678-1234-1234-1234-123456789012";
  * OpenId configuration discovery endpoint response
  * @internal
  */
+
 export const openIdConfigurationResponse: Record<string, string | string[] | boolean> = {
   token_endpoint: `https://login.microsoftonline.com/${PlaybackTenantId}/oauth2/v2.0/token`,
   token_endpoint_auth_methods_supported: [
@@ -76,148 +61,49 @@ export const openIdConfigurationResponse: Record<string, string | string[] | boo
   rbac_url: "https://pas.windows.net",
 };
 
-export async function msalNodeTestSetup(
-  testContext?: Mocha.Test,
-  playbackClientId = "azure_client_id"
-): Promise<MsalTestSetupResponse> {
-  const playbackValues = {
-    correlationId: "client-request-id",
-  };
-  const recorder = new Recorder(testContext);
-  recorder.setMatcher("CustomDefaultMatcher", {
-    excludedHeaders: ["X-AnchorMailbox", "Content-Length", "User-Agent"],
-  });
+interface UsernamePasswordStaticResources {
+  clientId: string;
+  tenantId: string;
+  username: string;
+  password: string;
+}
 
-  await recorder.start({
-    envSetupForPlayback: {
-      AZURE_TENANT_ID: PlaybackTenantId,
-      AZURE_CLIENT_ID: playbackClientId,
-      AZURE_CLIENT_SECRET: "azure_client_secret",
-      AZURE_USERNAME: "azure_username",
-      AZURE_PASSWORD: "azure_password",
-      AZURE_IDENTITY_TEST_TENANTID: "",
-      AZURE_IDENTITY_TEST_USERNAME: "",
-      AZURE_IDENTITY_TEST_PASSWORD: "",
-      IDENTITY_SP_CLIENT_ID: "",
-      IDENTITY_SP_TENANT_ID: "",
-      IDENTITY_SP_CLIENT_SECRET: "",
-      IDENTITY_SP_CERT_PEM: "",
-      AZURE_CAE_MANAGEMENT_ENDPOINT: "https://management.azure.com/",
-      AZURE_CLIENT_CERTIFICATE_PATH: "assets/fake-cert.pem",
-    },
-    sanitizerOptions: {
-      headerSanitizers: [
-        {
-          key: "User-Agent",
-          value: "User-Agent",
-        },
-        {
-          key: "Set-Cookie",
-          regex: true,
-          target: `(fpc|esctx)=(?<secret_cookie>[^;]+)`,
-          value: "secret_cookie",
-          groupForReplace: "secret_cookie",
-        },
-      ],
-      generalSanitizers: [
-        {
-          regex: true,
-          target: `enter the code [A-Z0-9]* to authenticate`,
-          value: `enter the code USER_CODE to authenticate`,
-        },
-      ],
-    },
-  });
+/**
+ * Certain tests rely on static resources fetched from the identity test secrets vault and "merged" into the test environment in CI.
+ *
+ * A helper function validates that these resources are present in the environment as they are not deployed per run.
+ *
+ * When in doubt, reach out to the feature crew for help.
+ *
+ * @returns A set of well-known static resources for the tests.
+ */
+export function getUsernamePasswordStaticResources(): UsernamePasswordStaticResources {
+  const clientId = DeveloperSignOnClientId;
+  const tenantId = env.AZURE_IDENTITY_TEST_TENANTID;
+  if (!tenantId) {
+    throw new Error(
+      "AZURE_IDENTITY_TEST_TENANTID must be present in the environment to run the tests.",
+    );
+  }
 
-  // Playback sanitizers
-  await recorder.addSanitizers(
-    {
-      bodySanitizers: [
-        {
-          regex: true,
-          target: `client_assertion=[a-zA-Z0-9-._]*`,
-          value: "client_assertion=client_assertion",
-        },
-        {
-          regex: true,
-          target: 'device_code=[^&"]+',
-          value: "device_code=DEVICE_CODE",
-        },
-        {
-          regex: true,
-          target: `x-client-OS=[a-zA-Z0-9]+`,
-          value: `x-client-OS=x-client-OS`,
-        },
-        {
-          regex: true,
-          target: `x-client-CPU=[a-zA-Z0-9]+`,
-          value: `x-client-CPU=x-client-CPU`,
-        },
-        {
-          regex: true,
-          target: `x-client-VER=[a-zA-Z0-9.-]+`,
-          value: `x-client-VER=identity-client-version`,
-        },
-      ],
-      bodyKeySanitizers: [
-        {
-          jsonPath: "$.device_code",
-          value: "DEVICE_CODE",
-        },
-        {
-          jsonPath: "$.bodyProvided.device_code",
-          value: "DEVICE_CODE",
-        },
-        {
-          jsonPath: "$.interval",
-          value: "0",
-        },
-        {
-          jsonPath: "$.client-request-id",
-          value: playbackValues.correlationId,
-        },
-        {
-          jsonPath: "$.access_token",
-          value: "access_token",
-        },
-        {
-          jsonPath: "$.bodyProvided.access_token",
-          value: "access_token",
-        },
-        {
-          jsonPath: "$.refresh_token",
-          value: "refresh_token",
-        },
-        {
-          jsonPath: "$.bodyProvided.refresh_token",
-          value: "refresh_token",
-        },
-        {
-          jsonPath: "$.id_token",
-          value:
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImtpZCJ9.eyJhdWQiOiJhdWQiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vMTIzNDU2NzgtMTIzNC0xMjM0LTEyMzQtMTIzNDU2Nzg5MDEyL3YyLjAiLCJpYXQiOjE2MTUzMzcxNjMsIm5iZiI6MTYxNTMzNzE2MywiZXhwIjoxNjE1MzQxMDYzLCJhaW8iOiJhaW8iLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9pZHAvIiwibmFtZSI6IkRhbmllbCBSb2Ryw61ndWV6Iiwib2lkIjoib2lkIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZGFucm9kcmlAbWljcm9zb2Z0LmNvbSIsInJoIjoicmguIiwic3ViIjoic3ViIiwidGlkIjoiMTIzNDU2NzgtMTIzNC0xMjM0LTEyMzQtMTIzNDU2Nzg5MDEyIiwidXRpIjoidXRpIiwidmVyIjoiMi4wIn0=.bm9faWRlYV93aGF0c190aGlz",
-        },
-        {
-          jsonPath: "$.client_info",
-          value:
-            "eyJ1aWQiOiIxMjM0NTY3OC0xMjM0LTEyMzQtMTIzNC0xMjM0NTY3ODkwMTIiLCJ1dGlkIjoiMTIzNDU2NzgtMTIzNC0xMjM0LTEyMzQtMTIzNDU2Nzg5MDEyIn0K",
-        },
-      ],
-    },
-    ["record", "playback"]
-  );
+  const username = env.AZURE_IDENTITY_TEST_USERNAME;
+  if (!username) {
+    throw new Error(
+      "AZURE_IDENTITY_TEST_USERNAME must be present in the environment to run the tests.",
+    );
+  }
 
-  const sandbox = createSandbox();
-
-  const stub = sandbox.stub(MsalBaseUtilities.prototype, "generateUuid");
-  stub.returns(playbackValues.correlationId);
+  const password = env.AZURE_IDENTITY_TEST_PASSWORD;
+  if (!password) {
+    throw new Error(
+      "AZURE_IDENTITY_TEST_PASSWORD must be present in the environment to run the tests.",
+    );
+  }
 
   return {
-    sandbox,
-    recorder,
-    async cleanup() {
-      await recorder.stop();
-      sandbox.restore();
-    },
+    clientId,
+    tenantId,
+    username,
+    password,
   };
 }

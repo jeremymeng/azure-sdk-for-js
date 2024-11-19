@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { ClientParamsFromConnectionString, ConnectionString } from "./internalModels";
+import type { ClientParamsFromConnectionString, ConnectionString } from "./internalModels";
 import { fromAccountConnectionString, getAccountConnectionString } from "./accountConnectionString";
 
-import { TableServiceClientOptions } from "../models";
+import type { TableServiceClientOptions } from "../models";
 
 const DevelopmentConnectionString =
   "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1";
@@ -21,7 +21,7 @@ const DevelopmentConnectionString =
  */
 export function getClientParamsFromConnectionString(
   connectionString: string,
-  options: TableServiceClientOptions = {}
+  options: TableServiceClientOptions = {},
 ): ClientParamsFromConnectionString {
   if (connectionString.toLowerCase().indexOf("usedevelopmentstorage=true") !== -1) {
     connectionString = DevelopmentConnectionString;
@@ -37,7 +37,7 @@ export function getClientParamsFromConnectionString(
     };
   } else {
     throw new Error(
-      "Connection string must be either an Account connection string or a SAS connection string"
+      "Connection string must be either an Account connection string or a SAS connection string",
     );
   }
 }
@@ -61,7 +61,7 @@ export function extractConnectionStringParts(connectionString: string): Connecti
       getValueInConnString(connectionString, "AccountKey"),
       getValueInConnString(connectionString, "DefaultEndpointsProtocol"),
       getValueInConnString(connectionString, "EndpointSuffix"),
-      tableEndpoint
+      tableEndpoint,
     );
   } else {
     return getSASConnectionString(connectionString, tableEndpoint);
@@ -101,7 +101,7 @@ function getValueInConnString(
     | "AccountKey"
     | "DefaultEndpointsProtocol"
     | "EndpointSuffix"
-    | "SharedAccessSignature"
+    | "SharedAccessSignature",
 ): string {
   const searchKey = argument.toLowerCase();
   const elements = connectionString.split(";").filter((e) => Boolean(e));

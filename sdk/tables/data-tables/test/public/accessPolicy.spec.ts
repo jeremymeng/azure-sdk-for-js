@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 import { Recorder, isPlaybackMode } from "@azure-tools/test-recorder";
 
-import { Context } from "mocha";
-import { TableClient } from "../../src";
+import type { Context } from "mocha";
+import type { TableClient } from "../../src";
 import { assert } from "chai";
 import { createTableClient } from "./utils/recordedClient";
-import { isNode } from "@azure/test-utils";
+import { isNodeLike } from "@azure/core-util";
 
-describe(`Access Policy operations`, () => {
+describe(`Access Policy operations`, function () {
   let client: TableClient;
   let unrecordedClient: TableClient;
   let recorder: Recorder;
@@ -25,7 +25,7 @@ describe(`Access Policy operations`, () => {
   });
 
   before(async function (this: Context) {
-    if (!isNode) {
+    if (!isNodeLike) {
       this.skip();
     }
 
@@ -35,8 +35,8 @@ describe(`Access Policy operations`, () => {
     }
   });
 
-  after(async () => {
-    if (!isPlaybackMode() && isNode) {
+  after(async function () {
+    if (!isPlaybackMode() && isNodeLike) {
       await unrecordedClient.deleteTable();
     }
   });

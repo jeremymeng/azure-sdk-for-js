@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 export { ContainerRepositoryProperties, ArtifactTagProperties } from "./generated";
 
-import { ArtifactTagProperties } from "./generated";
+import type { ArtifactTagProperties } from "./generated";
 
 /**
  * Defines known cloud audiences for Azure Container Registry.
@@ -11,7 +11,10 @@ import { ArtifactTagProperties } from "./generated";
 export enum KnownContainerRegistryAudience {
   /** Azure China */
   AzureResourceManagerChina = "https://management.chinacloudapi.cn",
-  /** Azure Gemany */
+  /**
+   * Azure Germany
+   * @deprecated Azure Germany is being deprecated in favor of standard nonsovereign Azure regions in Germany.
+   */
   AzureResourceManagerGermany = "https://management.microsoftazure.de",
   /** Azure Government */
   AzureResourceManagerGovernment = "https://management.usgovcloudapi.net",

@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
-import { DocumentSpan } from "..";
+import type { DocumentSpan } from "..";
 
-import { AddressValue, CurrencyValue, DocumentField as GeneratedDocumentField } from "../generated";
+import type {
+  AddressValue,
+  CurrencyValue,
+  DocumentField as GeneratedDocumentField,
+} from "../generated";
 import { toBoundingRegions } from "../transforms/polygon";
 import { capitalize } from "../util";
-import { BoundingRegion } from "./documentElements";
+import type { BoundingRegion } from "./documentElements";
 
 /**
  * Fields that are common to all DocumentField variants.
@@ -53,6 +57,7 @@ export type DocumentField =
   | DocumentPhoneNumberField
   | DocumentNumberField
   | DocumentIntegerField
+  | DocumentBooleanField
   | DocumentSelectionMarkField
   | DocumentCountryRegionField
   | DocumentSignatureField
@@ -209,6 +214,14 @@ export interface DocumentAddressField extends DocumentFieldCommon {
 }
 
 /**
+ * A DocumentField that has a boolean value.
+ */
+export interface DocumentBooleanField extends DocumentValueField<boolean> {
+  /** Field kind: "boolean". */
+  kind: "boolean";
+}
+
+/**
  * A DocumentField that consists of several named properties that have their own DocumentField values.
  */
 export interface DocumentObjectField<Properties = { [k: string]: DocumentField | undefined }>
@@ -231,10 +244,13 @@ export interface DocumentObjectField<Properties = { [k: string]: DocumentField |
 export function toAnalyzedDocumentFieldsFromGenerated(fields: {
   [k: string]: GeneratedDocumentField;
 }): { [k: string]: DocumentField } {
-  return Object.entries(fields ?? {}).reduce((transformedFields, [name, value]) => {
-    transformedFields[name] = toDocumentField(value);
-    return transformedFields;
-  }, {} as { [k: string]: DocumentField });
+  return Object.entries(fields ?? {}).reduce(
+    (transformedFields, [name, value]) => {
+      transformedFields[name] = toDocumentField(value);
+      return transformedFields;
+    },
+    {} as { [k: string]: DocumentField },
+  );
 }
 
 /**
@@ -252,6 +268,7 @@ export function toDocumentField(field: GeneratedDocumentField): DocumentField {
       case "time":
       case "phoneNumber":
       case "number":
+      case "boolean":
       case "integer":
       case "selectionMark":
       case "countryRegion":

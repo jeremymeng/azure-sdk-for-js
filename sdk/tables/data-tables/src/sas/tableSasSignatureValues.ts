@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 /**
  * ONLY AVAILABLE IN NODE.JS RUNTIME.
@@ -7,10 +7,13 @@
  * TableSASSignatureValues is used to help generating SAS tokens for tables.
  */
 
-import { SasIPRange, ipRangeToString } from "./sasIPRange";
-import { SasProtocol, SasQueryParameters } from "./sasQueryParameters";
-import { TableSasPermissions, tableSasPermissionsToString } from "./tableSasPermisions";
-import { NamedKeyCredential } from "@azure/core-auth";
+import type { SasIPRange } from "./sasIPRange";
+import { ipRangeToString } from "./sasIPRange";
+import type { SasProtocol } from "./sasQueryParameters";
+import { SasQueryParameters } from "./sasQueryParameters";
+import type { TableSasPermissions } from "./tableSasPermisions";
+import { tableSasPermissionsToString } from "./tableSasPermisions";
+import type { NamedKeyCredential } from "@azure/core-auth";
 import { SERVICE_VERSION } from "../utils/constants";
 import { computeHMACSHA256 } from "../utils/computeHMACSHA256";
 import { truncatedISO8061Date } from "../utils/truncateISO8061Date";
@@ -101,7 +104,7 @@ export interface TableSasSignatureValues {
 export function generateTableSasQueryParameters(
   tableName: string,
   credential: NamedKeyCredential,
-  tableSasSignatureValues: TableSasSignatureValues
+  tableSasSignatureValues: TableSasSignatureValues,
 ): SasQueryParameters {
   const version = tableSasSignatureValues.version ?? SERVICE_VERSION;
 
@@ -154,6 +157,10 @@ export function generateTableSasQueryParameters(
     ipRange: tableSasSignatureValues.ipRange,
     identifier: tableSasSignatureValues.identifier,
     tableName,
+    startPartitionKey: tableSasSignatureValues.startPartitionKey,
+    startRowKey: tableSasSignatureValues.startRowKey,
+    endPartitionKey: tableSasSignatureValues.endPartitionKey,
+    endRowKey: tableSasSignatureValues.endRowKey,
   });
 }
 

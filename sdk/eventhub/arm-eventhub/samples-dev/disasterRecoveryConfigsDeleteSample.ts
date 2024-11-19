@@ -10,16 +10,21 @@
 // Licensed under the MIT License.
 import { EventHubManagementClient } from "@azure/arm-eventhub";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * This sample demonstrates how to Deletes an Alias(Disaster Recovery configuration)
  *
  * @summary Deletes an Alias(Disaster Recovery configuration)
- * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2021-11-01/examples/disasterRecoveryConfigs/EHAliasDelete.json
+ * x-ms-original-file: specification/eventhub/resource-manager/Microsoft.EventHub/stable/2024-01-01/examples/disasterRecoveryConfigs/EHAliasDelete.json
  */
 async function ehAliasDelete() {
-  const subscriptionId = "exampleSubscriptionId";
-  const resourceGroupName = "exampleResourceGroup";
+  const subscriptionId =
+    process.env["EVENTHUB_SUBSCRIPTION_ID"] || "exampleSubscriptionId";
+  const resourceGroupName =
+    process.env["EVENTHUB_RESOURCE_GROUP"] || "exampleResourceGroup";
   const namespaceName = "sdk-Namespace-5849";
   const alias = "sdk-DisasterRecovery-3814";
   const credential = new DefaultAzureCredential();
@@ -27,9 +32,13 @@ async function ehAliasDelete() {
   const result = await client.disasterRecoveryConfigs.delete(
     resourceGroupName,
     namespaceName,
-    alias
+    alias,
   );
   console.log(result);
 }
 
-ehAliasDelete().catch(console.error);
+async function main() {
+  ehAliasDelete();
+}
+
+main().catch(console.error);
