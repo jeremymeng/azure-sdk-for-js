@@ -3,7 +3,7 @@
   "sdk-type": "client",
   "author": "Microsoft Corporation",
   "description": "An isomorphic client library for the Azure Metrics Advisor service.",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "keywords": [
     "node",
     "azure",
@@ -78,7 +78,6 @@
   "dependencies": {
     "@azure/core-auth": "^1.9.0",
     "@azure/core-client": "^1.9.2",
-    "@azure/core-http-compat": "^2.1.2",
     "@azure/core-lro": "^2.7.2",
     "@azure/core-paging": "^1.6.2",
     "@azure/core-rest-pipeline": "^1.18.0",

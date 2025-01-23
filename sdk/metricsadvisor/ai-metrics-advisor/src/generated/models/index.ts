@@ -7,7 +7,6 @@
  */
 
 import * as coreClient from "@azure/core-client";
-import * as coreHttpCompat from "@azure/core-http-compat";
 
 export type DataSourceCredentialUnion =
   | DataSourceCredential
@@ -1482,211 +1481,218 @@ export interface WebhookHookParameterPatch {
   certificatePassword?: string;
 }
 
-export type AzureSQLConnectionStringCredential = DataSourceCredential & {
+export interface AzureSQLConnectionStringCredential
+  extends DataSourceCredential {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceCredentialType: "AzureSQLConnectionString";
   parameters: AzureSQLConnectionStringParam;
-};
+}
 
-export type DataLakeGen2SharedKeyCredential = DataSourceCredential & {
+export interface DataLakeGen2SharedKeyCredential extends DataSourceCredential {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceCredentialType: "DataLakeGen2SharedKey";
   parameters: DataLakeGen2SharedKeyParam;
-};
+}
 
-export type ServicePrincipalCredential = DataSourceCredential & {
+export interface ServicePrincipalCredential extends DataSourceCredential {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceCredentialType: "ServicePrincipal";
   parameters: ServicePrincipalParam;
-};
+}
 
-export type ServicePrincipalInKVCredential = DataSourceCredential & {
+export interface ServicePrincipalInKVCredential extends DataSourceCredential {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceCredentialType: "ServicePrincipalInKV";
   parameters: ServicePrincipalInKVParam;
-};
+}
 
-export type AzureSQLConnectionStringCredentialPatch = DataSourceCredentialPatch & {
+export interface AzureSQLConnectionStringCredentialPatch
+  extends DataSourceCredentialPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceCredentialType: "AzureSQLConnectionString";
   parameters?: AzureSQLConnectionStringParamPatch;
-};
+}
 
-export type DataLakeGen2SharedKeyCredentialPatch = DataSourceCredentialPatch & {
+export interface DataLakeGen2SharedKeyCredentialPatch
+  extends DataSourceCredentialPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceCredentialType: "DataLakeGen2SharedKey";
   parameters?: DataLakeGen2SharedKeyParamPatch;
-};
+}
 
-export type ServicePrincipalCredentialPatch = DataSourceCredentialPatch & {
+export interface ServicePrincipalCredentialPatch
+  extends DataSourceCredentialPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceCredentialType: "ServicePrincipal";
   parameters?: ServicePrincipalParamPatch;
-};
+}
 
-export type ServicePrincipalInKVCredentialPatch = DataSourceCredentialPatch & {
+export interface ServicePrincipalInKVCredentialPatch
+  extends DataSourceCredentialPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceCredentialType: "ServicePrincipalInKV";
   parameters?: ServicePrincipalInKVParamPatch;
-};
+}
 
-export type AzureApplicationInsightsDataFeed = DataFeedDetail & {
+export interface AzureApplicationInsightsDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureApplicationInsights";
   dataSourceParameter: AzureApplicationInsightsParameter;
-};
+}
 
-export type AzureBlobDataFeed = DataFeedDetail & {
+export interface AzureBlobDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureBlob";
   dataSourceParameter: AzureBlobParameter;
-};
+}
 
-export type AzureCosmosDBDataFeed = DataFeedDetail & {
+export interface AzureCosmosDBDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureCosmosDB";
   dataSourceParameter: AzureCosmosDBParameter;
-};
+}
 
-export type AzureDataExplorerDataFeed = DataFeedDetail & {
+export interface AzureDataExplorerDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureDataExplorer";
   dataSourceParameter: SqlSourceParameter;
-};
+}
 
-export type AzureDataLakeStorageGen2DataFeed = DataFeedDetail & {
+export interface AzureDataLakeStorageGen2DataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureDataLakeStorageGen2";
   dataSourceParameter: AzureDataLakeStorageGen2Parameter;
-};
+}
 
-export type AzureEventHubsDataFeed = DataFeedDetail & {
+export interface AzureEventHubsDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureEventHubs";
   dataSourceParameter: AzureEventHubsParameter;
-};
+}
 
-export type AzureLogAnalyticsDataFeed = DataFeedDetail & {
+export interface AzureLogAnalyticsDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureLogAnalytics";
   dataSourceParameter: AzureLogAnalyticsParameter;
-};
+}
 
-export type AzureTableDataFeed = DataFeedDetail & {
+export interface AzureTableDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureTable";
   dataSourceParameter: AzureTableParameter;
-};
+}
 
-export type InfluxDBDataFeed = DataFeedDetail & {
+export interface InfluxDBDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "InfluxDB";
   dataSourceParameter: InfluxDBParameter;
-};
+}
 
-export type MySqlDataFeed = DataFeedDetail & {
+export interface MySqlDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "MySql";
   dataSourceParameter: SqlSourceParameter;
-};
+}
 
-export type PostgreSqlDataFeed = DataFeedDetail & {
+export interface PostgreSqlDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "PostgreSql";
   dataSourceParameter: SqlSourceParameter;
-};
+}
 
-export type SQLServerDataFeed = DataFeedDetail & {
+export interface SQLServerDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "SqlServer";
   dataSourceParameter: SqlSourceParameter;
-};
+}
 
-export type MongoDBDataFeed = DataFeedDetail & {
+export interface MongoDBDataFeed extends DataFeedDetail {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "MongoDB";
   dataSourceParameter: MongoDBParameter;
-};
+}
 
-export type AzureApplicationInsightsDataFeedPatch = DataFeedDetailPatch & {
+export interface AzureApplicationInsightsDataFeedPatch
+  extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureApplicationInsights";
   dataSourceParameter?: AzureApplicationInsightsParameterPatch;
-};
+}
 
-export type AzureBlobDataFeedPatch = DataFeedDetailPatch & {
+export interface AzureBlobDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureBlob";
   dataSourceParameter?: AzureBlobParameterPatch;
-};
+}
 
-export type AzureCosmosDBDataFeedPatch = DataFeedDetailPatch & {
+export interface AzureCosmosDBDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureCosmosDB";
   dataSourceParameter?: AzureCosmosDBParameterPatch;
-};
+}
 
-export type AzureDataExplorerDataFeedPatch = DataFeedDetailPatch & {
+export interface AzureDataExplorerDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureDataExplorer";
   dataSourceParameter?: SQLSourceParameterPatch;
-};
+}
 
-export type AzureDataLakeStorageGen2DataFeedPatch = DataFeedDetailPatch & {
+export interface AzureDataLakeStorageGen2DataFeedPatch
+  extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureDataLakeStorageGen2";
   dataSourceParameter?: AzureDataLakeStorageGen2ParameterPatch;
-};
+}
 
-export type AzureEventHubsDataFeedPatch = DataFeedDetailPatch & {
+export interface AzureEventHubsDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureEventHubs";
   dataSourceParameter?: AzureEventHubsParameterPatch;
-};
+}
 
-export type AzureLogAnalyticsDataFeedPatch = DataFeedDetailPatch & {
+export interface AzureLogAnalyticsDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureLogAnalytics";
   dataSourceParameter?: AzureLogAnalyticsParameterPatch;
-};
+}
 
-export type AzureTableDataFeedPatch = DataFeedDetailPatch & {
+export interface AzureTableDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "AzureTable";
   dataSourceParameter?: AzureTableParameterPatch;
-};
+}
 
-export type InfluxDBDataFeedPatch = DataFeedDetailPatch & {
+export interface InfluxDBDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "InfluxDB";
   dataSourceParameter?: InfluxDBParameterPatch;
-};
+}
 
-export type MySqlDataFeedPatch = DataFeedDetailPatch & {
+export interface MySqlDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "MySql";
   dataSourceParameter?: SQLSourceParameterPatch;
-};
+}
 
-export type PostgreSqlDataFeedPatch = DataFeedDetailPatch & {
+export interface PostgreSqlDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "PostgreSql";
   dataSourceParameter?: SQLSourceParameterPatch;
-};
+}
 
-export type SQLServerDataFeedPatch = DataFeedDetailPatch & {
+export interface SQLServerDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "SqlServer";
   dataSourceParameter?: SQLSourceParameterPatch;
-};
+}
 
-export type MongoDBDataFeedPatch = DataFeedDetailPatch & {
+export interface MongoDBDataFeedPatch extends DataFeedDetailPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   dataSourceType: "MongoDB";
   dataSourceParameter?: MongoDBParameterPatch;
-};
+}
 
-export type AnomalyFeedback = MetricFeedback & {
+export interface AnomalyFeedback extends MetricFeedback {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   feedbackType: "Anomaly";
   /** the start timestamp of feedback time range */
@@ -1697,9 +1703,9 @@ export type AnomalyFeedback = MetricFeedback & {
   /** the corresponding anomaly detection configuration of this feedback */
   anomalyDetectionConfigurationId?: string;
   anomalyDetectionConfigurationSnapshot?: AnomalyDetectionConfiguration;
-};
+}
 
-export type ChangePointFeedback = MetricFeedback & {
+export interface ChangePointFeedback extends MetricFeedback {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   feedbackType: "ChangePoint";
   /** the start timestamp of feedback time range */
@@ -1707,9 +1713,9 @@ export type ChangePointFeedback = MetricFeedback & {
   /** the end timestamp of feedback time range, when equals to startTime means only one timestamp */
   endTime: Date;
   value: ChangePointFeedbackValue;
-};
+}
 
-export type CommentFeedback = MetricFeedback & {
+export interface CommentFeedback extends MetricFeedback {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   feedbackType: "Comment";
   /** the start timestamp of feedback time range */
@@ -1717,38 +1723,38 @@ export type CommentFeedback = MetricFeedback & {
   /** the end timestamp of feedback time range, when equals to startTime means only one timestamp */
   endTime?: Date;
   value: CommentFeedbackValue;
-};
+}
 
-export type PeriodFeedback = MetricFeedback & {
+export interface PeriodFeedback extends MetricFeedback {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   feedbackType: "Period";
   value: PeriodFeedbackValue;
-};
+}
 
-export type EmailHookInfo = HookInfo & {
+export interface EmailHookInfo extends HookInfo {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   hookType: "Email";
   /** Parameters for Email Hook */
   hookParameter: EmailHookParameter;
-};
+}
 
-export type WebhookHookInfo = HookInfo & {
+export interface WebhookHookInfo extends HookInfo {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   hookType: "Webhook";
   hookParameter: WebhookHookParameter;
-};
+}
 
-export type EmailHookInfoPatch = HookInfoPatch & {
+export interface EmailHookInfoPatch extends HookInfoPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   hookType: "Email";
   hookParameter?: EmailHookParameterPatch;
-};
+}
 
-export type WebhookHookInfoPatch = HookInfoPatch & {
+export interface WebhookHookInfoPatch extends HookInfoPatch {
   /** Polymorphic discriminator, which specifies the different types this object can be */
   hookType: "Webhook";
   hookParameter?: WebhookHookParameterPatch;
-};
+}
 
 /** Defines headers for GeneratedClient_createAnomalyAlertingConfiguration operation. */
 export interface GeneratedClientCreateAnomalyAlertingConfigurationHeaders {
@@ -1895,14 +1901,16 @@ export interface GetAnomalyAlertingConfigurationOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the getAnomalyAlertingConfiguration operation. */
-export type GetAnomalyAlertingConfigurationResponse = AnomalyAlertingConfiguration;
+export type GetAnomalyAlertingConfigurationResponse =
+  AnomalyAlertingConfiguration;
 
 /** Optional parameters. */
 export interface UpdateAnomalyAlertingConfigurationOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the updateAnomalyAlertingConfiguration operation. */
-export type UpdateAnomalyAlertingConfigurationResponse = AnomalyAlertingConfiguration;
+export type UpdateAnomalyAlertingConfigurationResponse =
+  AnomalyAlertingConfiguration;
 
 /** Optional parameters. */
 export interface DeleteAnomalyAlertingConfigurationOptionalParams
@@ -1913,7 +1921,8 @@ export interface CreateAnomalyAlertingConfigurationOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the createAnomalyAlertingConfiguration operation. */
-export type CreateAnomalyAlertingConfigurationResponse = GeneratedClientCreateAnomalyAlertingConfigurationHeaders;
+export type CreateAnomalyAlertingConfigurationResponse =
+  GeneratedClientCreateAnomalyAlertingConfigurationHeaders;
 
 /** Optional parameters. */
 export interface GetAlertsByAnomalyAlertingConfigurationOptionalParams
@@ -1937,7 +1946,8 @@ export interface GetAnomaliesFromAlertByAnomalyAlertingConfigurationOptionalPara
 }
 
 /** Contains response data for the getAnomaliesFromAlertByAnomalyAlertingConfiguration operation. */
-export type GetAnomaliesFromAlertByAnomalyAlertingConfigurationResponse = AnomalyResultList;
+export type GetAnomaliesFromAlertByAnomalyAlertingConfigurationResponse =
+  AnomalyResultList;
 
 /** Optional parameters. */
 export interface GetIncidentsFromAlertByAnomalyAlertingConfigurationOptionalParams
@@ -1949,21 +1959,24 @@ export interface GetIncidentsFromAlertByAnomalyAlertingConfigurationOptionalPara
 }
 
 /** Contains response data for the getIncidentsFromAlertByAnomalyAlertingConfiguration operation. */
-export type GetIncidentsFromAlertByAnomalyAlertingConfigurationResponse = IncidentResultList;
+export type GetIncidentsFromAlertByAnomalyAlertingConfigurationResponse =
+  IncidentResultList;
 
 /** Optional parameters. */
 export interface GetAnomalyDetectionConfigurationOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the getAnomalyDetectionConfiguration operation. */
-export type GetAnomalyDetectionConfigurationResponse = AnomalyDetectionConfiguration;
+export type GetAnomalyDetectionConfigurationResponse =
+  AnomalyDetectionConfiguration;
 
 /** Optional parameters. */
 export interface UpdateAnomalyDetectionConfigurationOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the updateAnomalyDetectionConfiguration operation. */
-export type UpdateAnomalyDetectionConfigurationResponse = AnomalyDetectionConfiguration;
+export type UpdateAnomalyDetectionConfigurationResponse =
+  AnomalyDetectionConfiguration;
 
 /** Optional parameters. */
 export interface DeleteAnomalyDetectionConfigurationOptionalParams
@@ -1974,7 +1987,8 @@ export interface CreateAnomalyDetectionConfigurationOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the createAnomalyDetectionConfiguration operation. */
-export type CreateAnomalyDetectionConfigurationResponse = GeneratedClientCreateAnomalyDetectionConfigurationHeaders;
+export type CreateAnomalyDetectionConfigurationResponse =
+  GeneratedClientCreateAnomalyDetectionConfigurationHeaders;
 
 /** Optional parameters. */
 export interface GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationOptionalParams
@@ -1986,7 +2000,8 @@ export interface GetAnomalyAlertingConfigurationsByAnomalyDetectionConfiguration
 }
 
 /** Contains response data for the getAnomalyAlertingConfigurationsByAnomalyDetectionConfiguration operation. */
-export type GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationResponse = AnomalyAlertingConfigurationList;
+export type GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationResponse =
+  AnomalyAlertingConfigurationList;
 
 /** Optional parameters. */
 export interface GetSeriesByAnomalyDetectionConfigurationOptionalParams
@@ -2005,7 +2020,8 @@ export interface GetAnomaliesByAnomalyDetectionConfigurationOptionalParams
 }
 
 /** Contains response data for the getAnomaliesByAnomalyDetectionConfiguration operation. */
-export type GetAnomaliesByAnomalyDetectionConfigurationResponse = AnomalyResultList;
+export type GetAnomaliesByAnomalyDetectionConfigurationResponse =
+  AnomalyResultList;
 
 /** Optional parameters. */
 export interface GetDimensionOfAnomaliesByAnomalyDetectionConfigurationOptionalParams
@@ -2017,7 +2033,8 @@ export interface GetDimensionOfAnomaliesByAnomalyDetectionConfigurationOptionalP
 }
 
 /** Contains response data for the getDimensionOfAnomaliesByAnomalyDetectionConfiguration operation. */
-export type GetDimensionOfAnomaliesByAnomalyDetectionConfigurationResponse = AnomalyDimensionList;
+export type GetDimensionOfAnomaliesByAnomalyDetectionConfigurationResponse =
+  AnomalyDimensionList;
 
 /** Optional parameters. */
 export interface GetIncidentsByAnomalyDetectionConfigurationOptionalParams
@@ -2027,7 +2044,8 @@ export interface GetIncidentsByAnomalyDetectionConfigurationOptionalParams
 }
 
 /** Contains response data for the getIncidentsByAnomalyDetectionConfiguration operation. */
-export type GetIncidentsByAnomalyDetectionConfigurationResponse = IncidentResultList;
+export type GetIncidentsByAnomalyDetectionConfigurationResponse =
+  IncidentResultList;
 
 /** Optional parameters. */
 export interface GetIncidentsByAnomalyDetectionConfigurationNextPagesOptionalParams
@@ -2039,14 +2057,16 @@ export interface GetIncidentsByAnomalyDetectionConfigurationNextPagesOptionalPar
 }
 
 /** Contains response data for the getIncidentsByAnomalyDetectionConfigurationNextPages operation. */
-export type GetIncidentsByAnomalyDetectionConfigurationNextPagesResponse = IncidentResultList;
+export type GetIncidentsByAnomalyDetectionConfigurationNextPagesResponse =
+  IncidentResultList;
 
 /** Optional parameters. */
 export interface GetRootCauseOfIncidentByAnomalyDetectionConfigurationOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the getRootCauseOfIncidentByAnomalyDetectionConfiguration operation. */
-export type GetRootCauseOfIncidentByAnomalyDetectionConfigurationResponse = RootCauseList;
+export type GetRootCauseOfIncidentByAnomalyDetectionConfigurationResponse =
+  RootCauseList;
 
 /** Optional parameters. */
 export interface CreateCredentialOptionalParams
@@ -2156,7 +2176,8 @@ export interface CreateMetricFeedbackOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the createMetricFeedback operation. */
-export type CreateMetricFeedbackResponse = GeneratedClientCreateMetricFeedbackHeaders;
+export type CreateMetricFeedbackResponse =
+  GeneratedClientCreateMetricFeedbackHeaders;
 
 /** Optional parameters. */
 export interface ListHooksOptionalParams extends coreClient.OperationOptions {
@@ -2256,7 +2277,8 @@ export interface GetAnomalyDetectionConfigurationsByMetricOptionalParams
 }
 
 /** Contains response data for the getAnomalyDetectionConfigurationsByMetric operation. */
-export type GetAnomalyDetectionConfigurationsByMetricResponse = AnomalyDetectionConfigurationList;
+export type GetAnomalyDetectionConfigurationsByMetricResponse =
+  AnomalyDetectionConfigurationList;
 
 /** Optional parameters. */
 export interface GetEnrichmentStatusByMetricOptionalParams
@@ -2275,21 +2297,24 @@ export interface GetAlertsByAnomalyAlertingConfigurationNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the getAlertsByAnomalyAlertingConfigurationNext operation. */
-export type GetAlertsByAnomalyAlertingConfigurationNextResponse = AlertResultList;
+export type GetAlertsByAnomalyAlertingConfigurationNextResponse =
+  AlertResultList;
 
 /** Optional parameters. */
 export interface GetAnomaliesByAnomalyDetectionConfigurationNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the getAnomaliesByAnomalyDetectionConfigurationNext operation. */
-export type GetAnomaliesByAnomalyDetectionConfigurationNextResponse = AnomalyResultList;
+export type GetAnomaliesByAnomalyDetectionConfigurationNextResponse =
+  AnomalyResultList;
 
 /** Optional parameters. */
 export interface GetDimensionOfAnomaliesByAnomalyDetectionConfigurationNextOptionalParams
   extends coreClient.OperationOptions {}
 
 /** Contains response data for the getDimensionOfAnomaliesByAnomalyDetectionConfigurationNext operation. */
-export type GetDimensionOfAnomaliesByAnomalyDetectionConfigurationNextResponse = AnomalyDimensionList;
+export type GetDimensionOfAnomaliesByAnomalyDetectionConfigurationNextResponse =
+  AnomalyDimensionList;
 
 /** Optional parameters. */
 export interface ListMetricFeedbacksNextOptionalParams
@@ -2328,125 +2353,76 @@ export type GetEnrichmentStatusByMetricNextResponse = EnrichmentStatusList;
 
 /** Optional parameters. */
 export interface GetAnomaliesFromAlertByAnomalyAlertingConfigurationNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** for paging, skipped number */
-  skip?: number;
-  /** the maximum number of items in one page */
-  maxpagesize?: number;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the getAnomaliesFromAlertByAnomalyAlertingConfigurationNext operation. */
-export type GetAnomaliesFromAlertByAnomalyAlertingConfigurationNextResponse = AnomalyResultList;
+export type GetAnomaliesFromAlertByAnomalyAlertingConfigurationNextResponse =
+  AnomalyResultList;
 
 /** Optional parameters. */
 export interface GetIncidentsFromAlertByAnomalyAlertingConfigurationNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** for paging, skipped number */
-  skip?: number;
-  /** the maximum number of items in one page */
-  maxpagesize?: number;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the getIncidentsFromAlertByAnomalyAlertingConfigurationNext operation. */
-export type GetIncidentsFromAlertByAnomalyAlertingConfigurationNextResponse = IncidentResultList;
+export type GetIncidentsFromAlertByAnomalyAlertingConfigurationNextResponse =
+  IncidentResultList;
 
 /** Optional parameters. */
 export interface GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** for paging, skipped number */
-  skip?: number;
-  /** the maximum number of items in one page */
-  maxpagesize?: number;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNext operation. */
-export type GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextResponse = AnomalyAlertingConfigurationList;
+export type GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextResponse =
+  AnomalyAlertingConfigurationList;
 
 /** Optional parameters. */
 export interface GetIncidentsByAnomalyDetectionConfigurationNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** the maximum number of items in one page */
-  maxpagesize?: number;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the getIncidentsByAnomalyDetectionConfigurationNext operation. */
-export type GetIncidentsByAnomalyDetectionConfigurationNextResponse = IncidentResultList;
+export type GetIncidentsByAnomalyDetectionConfigurationNextResponse =
+  IncidentResultList;
 
 /** Optional parameters. */
 export interface GetIncidentsByAnomalyDetectionConfigurationNextPagesNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** the maximum number of items in one page */
-  maxpagesize?: number;
-  /** the token for getting the next page */
-  token?: string;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the getIncidentsByAnomalyDetectionConfigurationNextPagesNext operation. */
-export type GetIncidentsByAnomalyDetectionConfigurationNextPagesNextResponse = IncidentResultList;
+export type GetIncidentsByAnomalyDetectionConfigurationNextPagesNextResponse =
+  IncidentResultList;
 
 /** Optional parameters. */
 export interface ListCredentialsNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** for paging, skipped number */
-  skip?: number;
-  /** the maximum number of items in one page */
-  maxpagesize?: number;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the listCredentialsNext operation. */
 export type ListCredentialsNextResponse = DataSourceCredentialList;
 
 /** Optional parameters. */
 export interface ListDataFeedsNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** for paging, skipped number */
-  skip?: number;
-  /** the maximum number of items in one page */
-  maxpagesize?: number;
-  /** filter data feed by its name */
-  dataFeedName?: string;
-  /** filter data feed by its source type */
-  dataSourceType?: DataSourceType;
-  /** filter data feed by its granularity */
-  granularityName?: Granularity;
-  /** filter data feed by its status */
-  status?: EntityStatus;
-  /** filter data feed by its creator */
-  creator?: string;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the listDataFeedsNext operation. */
 export type ListDataFeedsNextResponse = DataFeedList;
 
 /** Optional parameters. */
 export interface ListHooksNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** for paging, skipped number */
-  skip?: number;
-  /** the maximum number of items in one page */
-  maxpagesize?: number;
-  /** filter hook by its name */
-  hookName?: string;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the listHooksNext operation. */
 export type ListHooksNextResponse = HookList;
 
 /** Optional parameters. */
 export interface GetAnomalyDetectionConfigurationsByMetricNextOptionalParams
-  extends coreClient.OperationOptions {
-  /** for paging, skipped number */
-  skip?: number;
-  /** the maximum number of items in one page */
-  maxpagesize?: number;
-}
+  extends coreClient.OperationOptions {}
 
 /** Contains response data for the getAnomalyDetectionConfigurationsByMetricNext operation. */
-export type GetAnomalyDetectionConfigurationsByMetricNextResponse = AnomalyDetectionConfigurationList;
+export type GetAnomalyDetectionConfigurationsByMetricNextResponse =
+  AnomalyDetectionConfigurationList;
 
 /** Optional parameters. */
 export interface GeneratedClientOptionalParams
-  extends coreHttpCompat.ExtendedServiceClientOptions {
+  extends coreClient.ServiceClientOptions {
   /** Overrides client endpoint. */
   endpoint?: string;
 }

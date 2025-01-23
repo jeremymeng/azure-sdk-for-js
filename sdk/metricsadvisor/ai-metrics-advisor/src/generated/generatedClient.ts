@@ -7,7 +7,6 @@
  */
 
 import * as coreClient from "@azure/core-client";
-import * as coreHttpCompat from "@azure/core-http-compat";
 import * as Parameters from "./models/parameters.js";
 import * as Mappers from "./models/mappers.js";
 import {
@@ -152,11 +151,11 @@ import {
   ListHooksNextOptionalParams,
   ListHooksNextResponse,
   GetAnomalyDetectionConfigurationsByMetricNextOptionalParams,
-  GetAnomalyDetectionConfigurationsByMetricNextResponse
+  GetAnomalyDetectionConfigurationsByMetricNextResponse,
 } from "./models/index.js";
 
 /** @internal */
-export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
+export class GeneratedClient extends coreClient.ServiceClient {
   endpoint: string;
 
   /**
@@ -175,10 +174,10 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
       options = {};
     }
     const defaults: GeneratedClientOptionalParams = {
-      requestContentType: "application/json; charset=utf-8"
+      requestContentType: "application/json; charset=utf-8",
     };
 
-    const packageDetails = `azsdk-js-ai-metrics-advisor/1.0.1`;
+    const packageDetails = `azsdk-js-ai-metrics-advisor/1.1.0`;
     const userAgentPrefix =
       options.userAgentOptions && options.userAgentOptions.userAgentPrefix
         ? `${options.userAgentOptions.userAgentPrefix} ${packageDetails}`
@@ -188,9 +187,10 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
       ...defaults,
       ...options,
       userAgentOptions: {
-        userAgentPrefix
+        userAgentPrefix,
       },
-      baseUri: options.endpoint || "{endpoint}/metricsadvisor/v1.0"
+      endpoint:
+        options.endpoint ?? options.baseUri ?? "{endpoint}/metricsadvisor/v1.0",
     };
     super(optionsWithDefaults);
     // Parameter assignments
@@ -202,11 +202,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    * @param options The options parameters.
    */
   getActiveSeriesCount(
-    options?: GetActiveSeriesCountOptionalParams
+    options?: GetActiveSeriesCountOptionalParams,
   ): Promise<GetActiveSeriesCountResponse> {
     return this.sendOperationRequest(
       { options },
-      getActiveSeriesCountOperationSpec
+      getActiveSeriesCountOperationSpec,
     );
   }
 
@@ -217,11 +217,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getAnomalyAlertingConfiguration(
     configurationId: string,
-    options?: GetAnomalyAlertingConfigurationOptionalParams
+    options?: GetAnomalyAlertingConfigurationOptionalParams,
   ): Promise<GetAnomalyAlertingConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, options },
-      getAnomalyAlertingConfigurationOperationSpec
+      getAnomalyAlertingConfigurationOperationSpec,
     );
   }
 
@@ -234,11 +234,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   updateAnomalyAlertingConfiguration(
     configurationId: string,
     body: AnomalyAlertingConfigurationPatch,
-    options?: UpdateAnomalyAlertingConfigurationOptionalParams
+    options?: UpdateAnomalyAlertingConfigurationOptionalParams,
   ): Promise<UpdateAnomalyAlertingConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, body, options },
-      updateAnomalyAlertingConfigurationOperationSpec
+      updateAnomalyAlertingConfigurationOperationSpec,
     );
   }
 
@@ -249,11 +249,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   deleteAnomalyAlertingConfiguration(
     configurationId: string,
-    options?: DeleteAnomalyAlertingConfigurationOptionalParams
+    options?: DeleteAnomalyAlertingConfigurationOptionalParams,
   ): Promise<void> {
     return this.sendOperationRequest(
       { configurationId, options },
-      deleteAnomalyAlertingConfigurationOperationSpec
+      deleteAnomalyAlertingConfigurationOperationSpec,
     );
   }
 
@@ -264,11 +264,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   createAnomalyAlertingConfiguration(
     body: AnomalyAlertingConfiguration,
-    options?: CreateAnomalyAlertingConfigurationOptionalParams
+    options?: CreateAnomalyAlertingConfigurationOptionalParams,
   ): Promise<CreateAnomalyAlertingConfigurationResponse> {
     return this.sendOperationRequest(
       { body, options },
-      createAnomalyAlertingConfigurationOperationSpec
+      createAnomalyAlertingConfigurationOperationSpec,
     );
   }
 
@@ -281,11 +281,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getAlertsByAnomalyAlertingConfiguration(
     configurationId: string,
     body: AlertingResultQuery,
-    options?: GetAlertsByAnomalyAlertingConfigurationOptionalParams
+    options?: GetAlertsByAnomalyAlertingConfigurationOptionalParams,
   ): Promise<GetAlertsByAnomalyAlertingConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, body, options },
-      getAlertsByAnomalyAlertingConfigurationOperationSpec
+      getAlertsByAnomalyAlertingConfigurationOperationSpec,
     );
   }
 
@@ -298,11 +298,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getAnomaliesFromAlertByAnomalyAlertingConfiguration(
     configurationId: string,
     alertId: string,
-    options?: GetAnomaliesFromAlertByAnomalyAlertingConfigurationOptionalParams
+    options?: GetAnomaliesFromAlertByAnomalyAlertingConfigurationOptionalParams,
   ): Promise<GetAnomaliesFromAlertByAnomalyAlertingConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, alertId, options },
-      getAnomaliesFromAlertByAnomalyAlertingConfigurationOperationSpec
+      getAnomaliesFromAlertByAnomalyAlertingConfigurationOperationSpec,
     );
   }
 
@@ -315,11 +315,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getIncidentsFromAlertByAnomalyAlertingConfiguration(
     configurationId: string,
     alertId: string,
-    options?: GetIncidentsFromAlertByAnomalyAlertingConfigurationOptionalParams
+    options?: GetIncidentsFromAlertByAnomalyAlertingConfigurationOptionalParams,
   ): Promise<GetIncidentsFromAlertByAnomalyAlertingConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, alertId, options },
-      getIncidentsFromAlertByAnomalyAlertingConfigurationOperationSpec
+      getIncidentsFromAlertByAnomalyAlertingConfigurationOperationSpec,
     );
   }
 
@@ -330,11 +330,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getAnomalyDetectionConfiguration(
     configurationId: string,
-    options?: GetAnomalyDetectionConfigurationOptionalParams
+    options?: GetAnomalyDetectionConfigurationOptionalParams,
   ): Promise<GetAnomalyDetectionConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, options },
-      getAnomalyDetectionConfigurationOperationSpec
+      getAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -347,11 +347,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   updateAnomalyDetectionConfiguration(
     configurationId: string,
     body: AnomalyDetectionConfigurationPatch,
-    options?: UpdateAnomalyDetectionConfigurationOptionalParams
+    options?: UpdateAnomalyDetectionConfigurationOptionalParams,
   ): Promise<UpdateAnomalyDetectionConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, body, options },
-      updateAnomalyDetectionConfigurationOperationSpec
+      updateAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -362,11 +362,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   deleteAnomalyDetectionConfiguration(
     configurationId: string,
-    options?: DeleteAnomalyDetectionConfigurationOptionalParams
+    options?: DeleteAnomalyDetectionConfigurationOptionalParams,
   ): Promise<void> {
     return this.sendOperationRequest(
       { configurationId, options },
-      deleteAnomalyDetectionConfigurationOperationSpec
+      deleteAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -377,11 +377,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   createAnomalyDetectionConfiguration(
     body: AnomalyDetectionConfiguration,
-    options?: CreateAnomalyDetectionConfigurationOptionalParams
+    options?: CreateAnomalyDetectionConfigurationOptionalParams,
   ): Promise<CreateAnomalyDetectionConfigurationResponse> {
     return this.sendOperationRequest(
       { body, options },
-      createAnomalyDetectionConfigurationOperationSpec
+      createAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -392,13 +392,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getAnomalyAlertingConfigurationsByAnomalyDetectionConfiguration(
     configurationId: string,
-    options?: GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationOptionalParams
-  ): Promise<
-    GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationResponse
-  > {
+    options?: GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationOptionalParams,
+  ): Promise<GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, options },
-      getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationOperationSpec
+      getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -411,11 +409,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getSeriesByAnomalyDetectionConfiguration(
     configurationId: string,
     body: DetectionSeriesQuery,
-    options?: GetSeriesByAnomalyDetectionConfigurationOptionalParams
+    options?: GetSeriesByAnomalyDetectionConfigurationOptionalParams,
   ): Promise<GetSeriesByAnomalyDetectionConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, body, options },
-      getSeriesByAnomalyDetectionConfigurationOperationSpec
+      getSeriesByAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -428,11 +426,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getAnomaliesByAnomalyDetectionConfiguration(
     configurationId: string,
     body: DetectionAnomalyResultQuery,
-    options?: GetAnomaliesByAnomalyDetectionConfigurationOptionalParams
+    options?: GetAnomaliesByAnomalyDetectionConfigurationOptionalParams,
   ): Promise<GetAnomaliesByAnomalyDetectionConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, body, options },
-      getAnomaliesByAnomalyDetectionConfigurationOperationSpec
+      getAnomaliesByAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -445,11 +443,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getDimensionOfAnomaliesByAnomalyDetectionConfiguration(
     configurationId: string,
     body: AnomalyDimensionQuery,
-    options?: GetDimensionOfAnomaliesByAnomalyDetectionConfigurationOptionalParams
+    options?: GetDimensionOfAnomaliesByAnomalyDetectionConfigurationOptionalParams,
   ): Promise<GetDimensionOfAnomaliesByAnomalyDetectionConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, body, options },
-      getDimensionOfAnomaliesByAnomalyDetectionConfigurationOperationSpec
+      getDimensionOfAnomaliesByAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -462,11 +460,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getIncidentsByAnomalyDetectionConfiguration(
     configurationId: string,
     body: DetectionIncidentResultQuery,
-    options?: GetIncidentsByAnomalyDetectionConfigurationOptionalParams
+    options?: GetIncidentsByAnomalyDetectionConfigurationOptionalParams,
   ): Promise<GetIncidentsByAnomalyDetectionConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, body, options },
-      getIncidentsByAnomalyDetectionConfigurationOperationSpec
+      getIncidentsByAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -477,11 +475,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getIncidentsByAnomalyDetectionConfigurationNextPages(
     configurationId: string,
-    options?: GetIncidentsByAnomalyDetectionConfigurationNextPagesOptionalParams
+    options?: GetIncidentsByAnomalyDetectionConfigurationNextPagesOptionalParams,
   ): Promise<GetIncidentsByAnomalyDetectionConfigurationNextPagesResponse> {
     return this.sendOperationRequest(
       { configurationId, options },
-      getIncidentsByAnomalyDetectionConfigurationNextPagesOperationSpec
+      getIncidentsByAnomalyDetectionConfigurationNextPagesOperationSpec,
     );
   }
 
@@ -494,11 +492,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getRootCauseOfIncidentByAnomalyDetectionConfiguration(
     configurationId: string,
     incidentId: string,
-    options?: GetRootCauseOfIncidentByAnomalyDetectionConfigurationOptionalParams
+    options?: GetRootCauseOfIncidentByAnomalyDetectionConfigurationOptionalParams,
   ): Promise<GetRootCauseOfIncidentByAnomalyDetectionConfigurationResponse> {
     return this.sendOperationRequest(
       { configurationId, incidentId, options },
-      getRootCauseOfIncidentByAnomalyDetectionConfigurationOperationSpec
+      getRootCauseOfIncidentByAnomalyDetectionConfigurationOperationSpec,
     );
   }
 
@@ -509,11 +507,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   createCredential(
     body: DataSourceCredentialUnion,
-    options?: CreateCredentialOptionalParams
+    options?: CreateCredentialOptionalParams,
   ): Promise<CreateCredentialResponse> {
     return this.sendOperationRequest(
       { body, options },
-      createCredentialOperationSpec
+      createCredentialOperationSpec,
     );
   }
 
@@ -522,7 +520,7 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    * @param options The options parameters.
    */
   listCredentials(
-    options?: ListCredentialsOptionalParams
+    options?: ListCredentialsOptionalParams,
   ): Promise<ListCredentialsResponse> {
     return this.sendOperationRequest({ options }, listCredentialsOperationSpec);
   }
@@ -536,11 +534,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   updateCredential(
     credentialId: string,
     body: DataSourceCredentialPatchUnion,
-    options?: UpdateCredentialOptionalParams
+    options?: UpdateCredentialOptionalParams,
   ): Promise<UpdateCredentialResponse> {
     return this.sendOperationRequest(
       { credentialId, body, options },
-      updateCredentialOperationSpec
+      updateCredentialOperationSpec,
     );
   }
 
@@ -551,11 +549,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   deleteCredential(
     credentialId: string,
-    options?: DeleteCredentialOptionalParams
+    options?: DeleteCredentialOptionalParams,
   ): Promise<void> {
     return this.sendOperationRequest(
       { credentialId, options },
-      deleteCredentialOperationSpec
+      deleteCredentialOperationSpec,
     );
   }
 
@@ -566,11 +564,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getCredential(
     credentialId: string,
-    options?: GetCredentialOptionalParams
+    options?: GetCredentialOptionalParams,
   ): Promise<GetCredentialResponse> {
     return this.sendOperationRequest(
       { credentialId, options },
-      getCredentialOperationSpec
+      getCredentialOperationSpec,
     );
   }
 
@@ -579,7 +577,7 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    * @param options The options parameters.
    */
   listDataFeeds(
-    options?: ListDataFeedsOptionalParams
+    options?: ListDataFeedsOptionalParams,
   ): Promise<ListDataFeedsResponse> {
     return this.sendOperationRequest({ options }, listDataFeedsOperationSpec);
   }
@@ -591,11 +589,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   createDataFeed(
     body: DataFeedDetailUnion,
-    options?: CreateDataFeedOptionalParams
+    options?: CreateDataFeedOptionalParams,
   ): Promise<CreateDataFeedResponse> {
     return this.sendOperationRequest(
       { body, options },
-      createDataFeedOperationSpec
+      createDataFeedOperationSpec,
     );
   }
 
@@ -606,11 +604,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getDataFeedById(
     dataFeedId: string,
-    options?: GetDataFeedByIdOptionalParams
+    options?: GetDataFeedByIdOptionalParams,
   ): Promise<GetDataFeedByIdResponse> {
     return this.sendOperationRequest(
       { dataFeedId, options },
-      getDataFeedByIdOperationSpec
+      getDataFeedByIdOperationSpec,
     );
   }
 
@@ -623,11 +621,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   updateDataFeed(
     dataFeedId: string,
     body: DataFeedDetailPatchUnion,
-    options?: UpdateDataFeedOptionalParams
+    options?: UpdateDataFeedOptionalParams,
   ): Promise<UpdateDataFeedResponse> {
     return this.sendOperationRequest(
       { dataFeedId, body, options },
-      updateDataFeedOperationSpec
+      updateDataFeedOperationSpec,
     );
   }
 
@@ -638,11 +636,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   deleteDataFeed(
     dataFeedId: string,
-    options?: DeleteDataFeedOptionalParams
+    options?: DeleteDataFeedOptionalParams,
   ): Promise<void> {
     return this.sendOperationRequest(
       { dataFeedId, options },
-      deleteDataFeedOperationSpec
+      deleteDataFeedOperationSpec,
     );
   }
 
@@ -653,11 +651,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getMetricFeedback(
     feedbackId: string,
-    options?: GetMetricFeedbackOptionalParams
+    options?: GetMetricFeedbackOptionalParams,
   ): Promise<GetMetricFeedbackResponse> {
     return this.sendOperationRequest(
       { feedbackId, options },
-      getMetricFeedbackOperationSpec
+      getMetricFeedbackOperationSpec,
     );
   }
 
@@ -668,11 +666,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   listMetricFeedbacks(
     body: MetricFeedbackFilter,
-    options?: ListMetricFeedbacksOptionalParams
+    options?: ListMetricFeedbacksOptionalParams,
   ): Promise<ListMetricFeedbacksResponse> {
     return this.sendOperationRequest(
       { body, options },
-      listMetricFeedbacksOperationSpec
+      listMetricFeedbacksOperationSpec,
     );
   }
 
@@ -683,11 +681,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   createMetricFeedback(
     body: MetricFeedbackUnion,
-    options?: CreateMetricFeedbackOptionalParams
+    options?: CreateMetricFeedbackOptionalParams,
   ): Promise<CreateMetricFeedbackResponse> {
     return this.sendOperationRequest(
       { body, options },
-      createMetricFeedbackOperationSpec
+      createMetricFeedbackOperationSpec,
     );
   }
 
@@ -706,11 +704,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   createHook(
     body: HookInfoUnion,
-    options?: CreateHookOptionalParams
+    options?: CreateHookOptionalParams,
   ): Promise<CreateHookResponse> {
     return this.sendOperationRequest(
       { body, options },
-      createHookOperationSpec
+      createHookOperationSpec,
     );
   }
 
@@ -721,7 +719,7 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getHook(
     hookId: string,
-    options?: GetHookOptionalParams
+    options?: GetHookOptionalParams,
   ): Promise<GetHookResponse> {
     return this.sendOperationRequest({ hookId, options }, getHookOperationSpec);
   }
@@ -735,11 +733,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   updateHook(
     hookId: string,
     body: HookInfoPatchUnion,
-    options?: UpdateHookOptionalParams
+    options?: UpdateHookOptionalParams,
   ): Promise<UpdateHookResponse> {
     return this.sendOperationRequest(
       { hookId, body, options },
-      updateHookOperationSpec
+      updateHookOperationSpec,
     );
   }
 
@@ -750,11 +748,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   deleteHook(
     hookId: string,
-    options?: DeleteHookOptionalParams
+    options?: DeleteHookOptionalParams,
   ): Promise<void> {
     return this.sendOperationRequest(
       { hookId, options },
-      deleteHookOperationSpec
+      deleteHookOperationSpec,
     );
   }
 
@@ -767,11 +765,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getDataFeedIngestionStatus(
     dataFeedId: string,
     body: IngestionStatusQueryOptions,
-    options?: GetDataFeedIngestionStatusOptionalParams
+    options?: GetDataFeedIngestionStatusOptionalParams,
   ): Promise<GetDataFeedIngestionStatusResponse> {
     return this.sendOperationRequest(
       { dataFeedId, body, options },
-      getDataFeedIngestionStatusOperationSpec
+      getDataFeedIngestionStatusOperationSpec,
     );
   }
 
@@ -784,11 +782,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   resetDataFeedIngestionStatus(
     dataFeedId: string,
     body: IngestionProgressResetOptions,
-    options?: ResetDataFeedIngestionStatusOptionalParams
+    options?: ResetDataFeedIngestionStatusOptionalParams,
   ): Promise<void> {
     return this.sendOperationRequest(
       { dataFeedId, body, options },
-      resetDataFeedIngestionStatusOperationSpec
+      resetDataFeedIngestionStatusOperationSpec,
     );
   }
 
@@ -799,11 +797,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getIngestionProgress(
     dataFeedId: string,
-    options?: GetIngestionProgressOptionalParams
+    options?: GetIngestionProgressOptionalParams,
   ): Promise<GetIngestionProgressResponse> {
     return this.sendOperationRequest(
       { dataFeedId, options },
-      getIngestionProgressOperationSpec
+      getIngestionProgressOperationSpec,
     );
   }
 
@@ -816,11 +814,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getMetricData(
     metricId: string,
     body: MetricDataQueryOptions,
-    options?: GetMetricDataOptionalParams
+    options?: GetMetricDataOptionalParams,
   ): Promise<GetMetricDataResponse> {
     return this.sendOperationRequest(
       { metricId, body, options },
-      getMetricDataOperationSpec
+      getMetricDataOperationSpec,
     );
   }
 
@@ -833,11 +831,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getMetricSeries(
     metricId: string,
     body: MetricSeriesQueryOptions,
-    options?: GetMetricSeriesOptionalParams
+    options?: GetMetricSeriesOptionalParams,
   ): Promise<GetMetricSeriesResponse> {
     return this.sendOperationRequest(
       { metricId, body, options },
-      getMetricSeriesOperationSpec
+      getMetricSeriesOperationSpec,
     );
   }
 
@@ -850,11 +848,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getMetricDimension(
     metricId: string,
     body: MetricDimensionQueryOptions,
-    options?: GetMetricDimensionOptionalParams
+    options?: GetMetricDimensionOptionalParams,
   ): Promise<GetMetricDimensionResponse> {
     return this.sendOperationRequest(
       { metricId, body, options },
-      getMetricDimensionOperationSpec
+      getMetricDimensionOperationSpec,
     );
   }
 
@@ -865,11 +863,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   getAnomalyDetectionConfigurationsByMetric(
     metricId: string,
-    options?: GetAnomalyDetectionConfigurationsByMetricOptionalParams
+    options?: GetAnomalyDetectionConfigurationsByMetricOptionalParams,
   ): Promise<GetAnomalyDetectionConfigurationsByMetricResponse> {
     return this.sendOperationRequest(
       { metricId, options },
-      getAnomalyDetectionConfigurationsByMetricOperationSpec
+      getAnomalyDetectionConfigurationsByMetricOperationSpec,
     );
   }
 
@@ -882,11 +880,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getEnrichmentStatusByMetric(
     metricId: string,
     body: EnrichmentStatusQueryOption,
-    options?: GetEnrichmentStatusByMetricOptionalParams
+    options?: GetEnrichmentStatusByMetricOptionalParams,
   ): Promise<GetEnrichmentStatusByMetricResponse> {
     return this.sendOperationRequest(
       { metricId, body, options },
-      getEnrichmentStatusByMetricOperationSpec
+      getEnrichmentStatusByMetricOperationSpec,
     );
   }
 
@@ -899,11 +897,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getAlertsByAnomalyAlertingConfigurationNext(
     nextLink: string,
     body: AlertingResultQuery,
-    options?: GetAlertsByAnomalyAlertingConfigurationNextOptionalParams
+    options?: GetAlertsByAnomalyAlertingConfigurationNextOptionalParams,
   ): Promise<GetAlertsByAnomalyAlertingConfigurationNextResponse> {
     return this.sendOperationRequest(
       { nextLink, body, options },
-      getAlertsByAnomalyAlertingConfigurationNextOperationSpec
+      getAlertsByAnomalyAlertingConfigurationNextOperationSpec,
     );
   }
 
@@ -916,11 +914,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getAnomaliesByAnomalyDetectionConfigurationNext(
     nextLink: string,
     body: DetectionAnomalyResultQuery,
-    options?: GetAnomaliesByAnomalyDetectionConfigurationNextOptionalParams
+    options?: GetAnomaliesByAnomalyDetectionConfigurationNextOptionalParams,
   ): Promise<GetAnomaliesByAnomalyDetectionConfigurationNextResponse> {
     return this.sendOperationRequest(
       { nextLink, body, options },
-      getAnomaliesByAnomalyDetectionConfigurationNextOperationSpec
+      getAnomaliesByAnomalyDetectionConfigurationNextOperationSpec,
     );
   }
 
@@ -933,13 +931,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getDimensionOfAnomaliesByAnomalyDetectionConfigurationNext(
     nextLink: string,
     body: AnomalyDimensionQuery,
-    options?: GetDimensionOfAnomaliesByAnomalyDetectionConfigurationNextOptionalParams
-  ): Promise<
-    GetDimensionOfAnomaliesByAnomalyDetectionConfigurationNextResponse
-  > {
+    options?: GetDimensionOfAnomaliesByAnomalyDetectionConfigurationNextOptionalParams,
+  ): Promise<GetDimensionOfAnomaliesByAnomalyDetectionConfigurationNextResponse> {
     return this.sendOperationRequest(
       { nextLink, body, options },
-      getDimensionOfAnomaliesByAnomalyDetectionConfigurationNextOperationSpec
+      getDimensionOfAnomaliesByAnomalyDetectionConfigurationNextOperationSpec,
     );
   }
 
@@ -952,11 +948,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   listMetricFeedbacksNext(
     nextLink: string,
     body: MetricFeedbackFilter,
-    options?: ListMetricFeedbacksNextOptionalParams
+    options?: ListMetricFeedbacksNextOptionalParams,
   ): Promise<ListMetricFeedbacksNextResponse> {
     return this.sendOperationRequest(
       { nextLink, body, options },
-      listMetricFeedbacksNextOperationSpec
+      listMetricFeedbacksNextOperationSpec,
     );
   }
 
@@ -969,11 +965,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getDataFeedIngestionStatusNext(
     nextLink: string,
     body: IngestionStatusQueryOptions,
-    options?: GetDataFeedIngestionStatusNextOptionalParams
+    options?: GetDataFeedIngestionStatusNextOptionalParams,
   ): Promise<GetDataFeedIngestionStatusNextResponse> {
     return this.sendOperationRequest(
       { nextLink, body, options },
-      getDataFeedIngestionStatusNextOperationSpec
+      getDataFeedIngestionStatusNextOperationSpec,
     );
   }
 
@@ -986,11 +982,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getMetricSeriesNext(
     nextLink: string,
     body: MetricSeriesQueryOptions,
-    options?: GetMetricSeriesNextOptionalParams
+    options?: GetMetricSeriesNextOptionalParams,
   ): Promise<GetMetricSeriesNextResponse> {
     return this.sendOperationRequest(
       { nextLink, body, options },
-      getMetricSeriesNextOperationSpec
+      getMetricSeriesNextOperationSpec,
     );
   }
 
@@ -1003,11 +999,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getMetricDimensionNext(
     nextLink: string,
     body: MetricDimensionQueryOptions,
-    options?: GetMetricDimensionNextOptionalParams
+    options?: GetMetricDimensionNextOptionalParams,
   ): Promise<GetMetricDimensionNextResponse> {
     return this.sendOperationRequest(
       { nextLink, body, options },
-      getMetricDimensionNextOperationSpec
+      getMetricDimensionNextOperationSpec,
     );
   }
 
@@ -1020,11 +1016,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getEnrichmentStatusByMetricNext(
     nextLink: string,
     body: EnrichmentStatusQueryOption,
-    options?: GetEnrichmentStatusByMetricNextOptionalParams
+    options?: GetEnrichmentStatusByMetricNextOptionalParams,
   ): Promise<GetEnrichmentStatusByMetricNextResponse> {
     return this.sendOperationRequest(
       { nextLink, body, options },
-      getEnrichmentStatusByMetricNextOperationSpec
+      getEnrichmentStatusByMetricNextOperationSpec,
     );
   }
 
@@ -1040,11 +1036,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
     configurationId: string,
     alertId: string,
     nextLink: string,
-    options?: GetAnomaliesFromAlertByAnomalyAlertingConfigurationNextOptionalParams
+    options?: GetAnomaliesFromAlertByAnomalyAlertingConfigurationNextOptionalParams,
   ): Promise<GetAnomaliesFromAlertByAnomalyAlertingConfigurationNextResponse> {
     return this.sendOperationRequest(
       { configurationId, alertId, nextLink, options },
-      getAnomaliesFromAlertByAnomalyAlertingConfigurationNextOperationSpec
+      getAnomaliesFromAlertByAnomalyAlertingConfigurationNextOperationSpec,
     );
   }
 
@@ -1060,11 +1056,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
     configurationId: string,
     alertId: string,
     nextLink: string,
-    options?: GetIncidentsFromAlertByAnomalyAlertingConfigurationNextOptionalParams
+    options?: GetIncidentsFromAlertByAnomalyAlertingConfigurationNextOptionalParams,
   ): Promise<GetIncidentsFromAlertByAnomalyAlertingConfigurationNextResponse> {
     return this.sendOperationRequest(
       { configurationId, alertId, nextLink, options },
-      getIncidentsFromAlertByAnomalyAlertingConfigurationNextOperationSpec
+      getIncidentsFromAlertByAnomalyAlertingConfigurationNextOperationSpec,
     );
   }
 
@@ -1078,13 +1074,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNext(
     configurationId: string,
     nextLink: string,
-    options?: GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextOptionalParams
-  ): Promise<
-    GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextResponse
-  > {
+    options?: GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextOptionalParams,
+  ): Promise<GetAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextResponse> {
     return this.sendOperationRequest(
       { configurationId, nextLink, options },
-      getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextOperationSpec
+      getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextOperationSpec,
     );
   }
 
@@ -1100,11 +1094,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
     configurationId: string,
     body: DetectionIncidentResultQuery,
     nextLink: string,
-    options?: GetIncidentsByAnomalyDetectionConfigurationNextOptionalParams
+    options?: GetIncidentsByAnomalyDetectionConfigurationNextOptionalParams,
   ): Promise<GetIncidentsByAnomalyDetectionConfigurationNextResponse> {
     return this.sendOperationRequest(
       { configurationId, body, nextLink, options },
-      getIncidentsByAnomalyDetectionConfigurationNextOperationSpec
+      getIncidentsByAnomalyDetectionConfigurationNextOperationSpec,
     );
   }
 
@@ -1118,11 +1112,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getIncidentsByAnomalyDetectionConfigurationNextPagesNext(
     configurationId: string,
     nextLink: string,
-    options?: GetIncidentsByAnomalyDetectionConfigurationNextPagesNextOptionalParams
+    options?: GetIncidentsByAnomalyDetectionConfigurationNextPagesNextOptionalParams,
   ): Promise<GetIncidentsByAnomalyDetectionConfigurationNextPagesNextResponse> {
     return this.sendOperationRequest(
       { configurationId, nextLink, options },
-      getIncidentsByAnomalyDetectionConfigurationNextPagesNextOperationSpec
+      getIncidentsByAnomalyDetectionConfigurationNextPagesNextOperationSpec,
     );
   }
 
@@ -1133,11 +1127,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   listCredentialsNext(
     nextLink: string,
-    options?: ListCredentialsNextOptionalParams
+    options?: ListCredentialsNextOptionalParams,
   ): Promise<ListCredentialsNextResponse> {
     return this.sendOperationRequest(
       { nextLink, options },
-      listCredentialsNextOperationSpec
+      listCredentialsNextOperationSpec,
     );
   }
 
@@ -1148,11 +1142,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   listDataFeedsNext(
     nextLink: string,
-    options?: ListDataFeedsNextOptionalParams
+    options?: ListDataFeedsNextOptionalParams,
   ): Promise<ListDataFeedsNextResponse> {
     return this.sendOperationRequest(
       { nextLink, options },
-      listDataFeedsNextOperationSpec
+      listDataFeedsNextOperationSpec,
     );
   }
 
@@ -1163,11 +1157,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
    */
   listHooksNext(
     nextLink: string,
-    options?: ListHooksNextOptionalParams
+    options?: ListHooksNextOptionalParams,
   ): Promise<ListHooksNextResponse> {
     return this.sendOperationRequest(
       { nextLink, options },
-      listHooksNextOperationSpec
+      listHooksNextOperationSpec,
     );
   }
 
@@ -1181,11 +1175,11 @@ export class GeneratedClient extends coreHttpCompat.ExtendedServiceClient {
   getAnomalyDetectionConfigurationsByMetricNext(
     metricId: string,
     nextLink: string,
-    options?: GetAnomalyDetectionConfigurationsByMetricNextOptionalParams
+    options?: GetAnomalyDetectionConfigurationsByMetricNextOptionalParams,
   ): Promise<GetAnomalyDetectionConfigurationsByMetricNextResponse> {
     return this.sendOperationRequest(
       { metricId, nextLink, options },
-      getAnomalyDetectionConfigurationsByMetricNextOperationSpec
+      getAnomalyDetectionConfigurationsByMetricNextOperationSpec,
     );
   }
 }
@@ -1197,380 +1191,388 @@ const getActiveSeriesCountOperationSpec: coreClient.OperationSpec = {
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.UsageStats
+      bodyMapper: Mappers.UsageStats,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec = {
   path: "/alert/anomaly/configurations/{configurationId}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.AnomalyAlertingConfiguration
+      bodyMapper: Mappers.AnomalyAlertingConfiguration,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.configurationId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
-const updateAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec = {
-  path: "/alert/anomaly/configurations/{configurationId}",
-  httpMethod: "PATCH",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyAlertingConfiguration
+const updateAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/alert/anomaly/configurations/{configurationId}",
+    httpMethod: "PATCH",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyAlertingConfiguration,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body,
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
-const deleteAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec = {
-  path: "/alert/anomaly/configurations/{configurationId}",
-  httpMethod: "DELETE",
-  responses: {
-    204: {},
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const createAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec = {
-  path: "/alert/anomaly/configurations",
-  httpMethod: "POST",
-  responses: {
-    201: {
-      headersMapper:
-        Mappers.GeneratedClientCreateAnomalyAlertingConfigurationHeaders
+    requestBody: Parameters.body,
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept, Parameters.contentType],
+    mediaType: "json",
+    serializer,
+  };
+const deleteAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/alert/anomaly/configurations/{configurationId}",
+    httpMethod: "DELETE",
+    responses: {
+      204: {},
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body1,
-  urlParameters: [Parameters.endpoint],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getAlertsByAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec = {
-  path: "/alert/anomaly/configurations/{configurationId}/alerts/query",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AlertResultList
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const createAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/alert/anomaly/configurations",
+    httpMethod: "POST",
+    responses: {
+      201: {
+        headersMapper:
+          Mappers.GeneratedClientCreateAnomalyAlertingConfigurationHeaders,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body2,
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getAnomaliesFromAlertByAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/alert/anomaly/configurations/{configurationId}/alerts/{alertId}/anomalies",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyResultList
+    requestBody: Parameters.body1,
+    urlParameters: [Parameters.endpoint],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getAlertsByAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/alert/anomaly/configurations/{configurationId}/alerts/query",
+    httpMethod: "POST",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AlertResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [
-    Parameters.endpoint,
-    Parameters.configurationId,
-    Parameters.alertId
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getIncidentsFromAlertByAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/alert/anomaly/configurations/{configurationId}/alerts/{alertId}/incidents",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.IncidentResultList
+    requestBody: Parameters.body2,
+    queryParameters: [Parameters.skip, Parameters.maxpagesize],
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getAnomaliesFromAlertByAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/alert/anomaly/configurations/{configurationId}/alerts/{alertId}/anomalies",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [
-    Parameters.endpoint,
-    Parameters.configurationId,
-    Parameters.alertId
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path: "/enrichment/anomalyDetection/configurations/{configurationId}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyDetectionConfiguration
+    queryParameters: [Parameters.skip, Parameters.maxpagesize],
+    urlParameters: [
+      Parameters.endpoint,
+      Parameters.configurationId,
+      Parameters.alertId,
+    ],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const getIncidentsFromAlertByAnomalyAlertingConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/alert/anomaly/configurations/{configurationId}/alerts/{alertId}/incidents",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.IncidentResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const updateAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path: "/enrichment/anomalyDetection/configurations/{configurationId}",
-  httpMethod: "PATCH",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyDetectionConfiguration
+    queryParameters: [Parameters.skip, Parameters.maxpagesize],
+    urlParameters: [
+      Parameters.endpoint,
+      Parameters.configurationId,
+      Parameters.alertId,
+    ],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const getAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyDetectionConfiguration,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body3,
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept, Parameters.contentType],
-  mediaType: "json",
-  serializer
-};
-const deleteAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path: "/enrichment/anomalyDetection/configurations/{configurationId}",
-  httpMethod: "DELETE",
-  responses: {
-    204: {},
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const createAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path: "/enrichment/anomalyDetection/configurations",
-  httpMethod: "POST",
-  responses: {
-    201: {
-      headersMapper:
-        Mappers.GeneratedClientCreateAnomalyDetectionConfigurationHeaders
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const updateAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}",
+    httpMethod: "PATCH",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyDetectionConfiguration,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body4,
-  urlParameters: [Parameters.endpoint],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/enrichment/anomalyDetection/configurations/{configurationId}/alert/anomaly/configurations",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyAlertingConfigurationList
+    requestBody: Parameters.body3,
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept, Parameters.contentType],
+    mediaType: "json",
+    serializer,
+  };
+const deleteAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}",
+    httpMethod: "DELETE",
+    responses: {
+      204: {},
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getSeriesByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/enrichment/anomalyDetection/configurations/{configurationId}/series/query",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.SeriesResultList
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const createAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations",
+    httpMethod: "POST",
+    responses: {
+      201: {
+        headersMapper:
+          Mappers.GeneratedClientCreateAnomalyDetectionConfigurationHeaders,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body5,
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getAnomaliesByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/enrichment/anomalyDetection/configurations/{configurationId}/anomalies/query",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyResultList
+    requestBody: Parameters.body4,
+    urlParameters: [Parameters.endpoint],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}/alert/anomaly/configurations",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyAlertingConfigurationList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body6,
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getDimensionOfAnomaliesByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/enrichment/anomalyDetection/configurations/{configurationId}/anomalies/dimension/query",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyDimensionList
+    queryParameters: [Parameters.skip, Parameters.maxpagesize],
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const getSeriesByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}/series/query",
+    httpMethod: "POST",
+    responses: {
+      200: {
+        bodyMapper: Mappers.SeriesResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body7,
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getIncidentsByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/enrichment/anomalyDetection/configurations/{configurationId}/incidents/query",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.IncidentResultList
+    requestBody: Parameters.body5,
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getAnomaliesByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}/anomalies/query",
+    httpMethod: "POST",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body8,
-  queryParameters: [Parameters.maxpagesize],
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getIncidentsByAnomalyDetectionConfigurationNextPagesOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/enrichment/anomalyDetection/configurations/{configurationId}/incidents/query",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.IncidentResultList
+    requestBody: Parameters.body6,
+    queryParameters: [Parameters.skip, Parameters.maxpagesize],
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getDimensionOfAnomaliesByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}/anomalies/dimension/query",
+    httpMethod: "POST",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyDimensionList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.maxpagesize, Parameters.token],
-  urlParameters: [Parameters.endpoint, Parameters.configurationId],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getRootCauseOfIncidentByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec = {
-  path:
-    "/enrichment/anomalyDetection/configurations/{configurationId}/incidents/{incidentId}/rootCause",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.RootCauseList
+    requestBody: Parameters.body7,
+    queryParameters: [Parameters.skip, Parameters.maxpagesize],
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getIncidentsByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}/incidents/query",
+    httpMethod: "POST",
+    responses: {
+      200: {
+        bodyMapper: Mappers.IncidentResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  urlParameters: [
-    Parameters.endpoint,
-    Parameters.configurationId,
-    Parameters.incidentId
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
+    requestBody: Parameters.body8,
+    queryParameters: [Parameters.maxpagesize],
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getIncidentsByAnomalyDetectionConfigurationNextPagesOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}/incidents/query",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.IncidentResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
+    },
+    queryParameters: [Parameters.maxpagesize, Parameters.token],
+    urlParameters: [Parameters.endpoint, Parameters.configurationId],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const getRootCauseOfIncidentByAnomalyDetectionConfigurationOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/enrichment/anomalyDetection/configurations/{configurationId}/incidents/{incidentId}/rootCause",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.RootCauseList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
+    },
+    urlParameters: [
+      Parameters.endpoint,
+      Parameters.configurationId,
+      Parameters.incidentId,
+    ],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
 const createCredentialOperationSpec: coreClient.OperationSpec = {
   path: "/credentials",
   httpMethod: "POST",
   responses: {
     201: {
-      headersMapper: Mappers.GeneratedClientCreateCredentialHeaders
+      headersMapper: Mappers.GeneratedClientCreateCredentialHeaders,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body9,
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listCredentialsOperationSpec: coreClient.OperationSpec = {
   path: "/credentials",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataSourceCredentialList
+      bodyMapper: Mappers.DataSourceCredentialList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   queryParameters: [Parameters.skip, Parameters.maxpagesize],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const updateCredentialOperationSpec: coreClient.OperationSpec = {
   path: "/credentials/{credentialId}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.DataSourceCredential
+      bodyMapper: Mappers.DataSourceCredential,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body10,
   urlParameters: [Parameters.endpoint, Parameters.credentialId],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteCredentialOperationSpec: coreClient.OperationSpec = {
   path: "/credentials/{credentialId}",
@@ -1578,38 +1580,38 @@ const deleteCredentialOperationSpec: coreClient.OperationSpec = {
   responses: {
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.credentialId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getCredentialOperationSpec: coreClient.OperationSpec = {
   path: "/credentials/{credentialId}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataSourceCredential
+      bodyMapper: Mappers.DataSourceCredential,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.credentialId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listDataFeedsOperationSpec: coreClient.OperationSpec = {
   path: "/dataFeeds",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataFeedList
+      bodyMapper: Mappers.DataFeedList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   queryParameters: [
     Parameters.skip,
@@ -1618,60 +1620,60 @@ const listDataFeedsOperationSpec: coreClient.OperationSpec = {
     Parameters.dataSourceType,
     Parameters.granularityName,
     Parameters.status,
-    Parameters.creator
+    Parameters.creator,
   ],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createDataFeedOperationSpec: coreClient.OperationSpec = {
   path: "/dataFeeds",
   httpMethod: "POST",
   responses: {
     201: {
-      headersMapper: Mappers.GeneratedClientCreateDataFeedHeaders
+      headersMapper: Mappers.GeneratedClientCreateDataFeedHeaders,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body11,
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getDataFeedByIdOperationSpec: coreClient.OperationSpec = {
   path: "/dataFeeds/{dataFeedId}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataFeedDetail
+      bodyMapper: Mappers.DataFeedDetail,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.dataFeedId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const updateDataFeedOperationSpec: coreClient.OperationSpec = {
   path: "/dataFeeds/{dataFeedId}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.DataFeedDetail
+      bodyMapper: Mappers.DataFeedDetail,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body12,
   urlParameters: [Parameters.endpoint, Parameters.dataFeedId],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteDataFeedOperationSpec: coreClient.OperationSpec = {
   path: "/dataFeeds/{dataFeedId}",
@@ -1679,131 +1681,131 @@ const deleteDataFeedOperationSpec: coreClient.OperationSpec = {
   responses: {
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.dataFeedId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getMetricFeedbackOperationSpec: coreClient.OperationSpec = {
   path: "/feedback/metric/{feedbackId}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricFeedback
+      bodyMapper: Mappers.MetricFeedback,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.feedbackId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listMetricFeedbacksOperationSpec: coreClient.OperationSpec = {
   path: "/feedback/metric/query",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricFeedbackList
+      bodyMapper: Mappers.MetricFeedbackList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body13,
   queryParameters: [Parameters.skip, Parameters.maxpagesize],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const createMetricFeedbackOperationSpec: coreClient.OperationSpec = {
   path: "/feedback/metric",
   httpMethod: "POST",
   responses: {
     201: {
-      headersMapper: Mappers.GeneratedClientCreateMetricFeedbackHeaders
+      headersMapper: Mappers.GeneratedClientCreateMetricFeedbackHeaders,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body14,
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const listHooksOperationSpec: coreClient.OperationSpec = {
   path: "/hooks",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.HookList
+      bodyMapper: Mappers.HookList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   queryParameters: [
     Parameters.skip,
     Parameters.maxpagesize,
-    Parameters.hookName
+    Parameters.hookName,
   ],
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const createHookOperationSpec: coreClient.OperationSpec = {
   path: "/hooks",
   httpMethod: "POST",
   responses: {
     201: {
-      headersMapper: Mappers.GeneratedClientCreateHookHeaders
+      headersMapper: Mappers.GeneratedClientCreateHookHeaders,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body15,
   urlParameters: [Parameters.endpoint],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getHookOperationSpec: coreClient.OperationSpec = {
   path: "/hooks/{hookId}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.HookInfo
+      bodyMapper: Mappers.HookInfo,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.hookId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const updateHookOperationSpec: coreClient.OperationSpec = {
   path: "/hooks/{hookId}",
   httpMethod: "PATCH",
   responses: {
     200: {
-      bodyMapper: Mappers.HookInfo
+      bodyMapper: Mappers.HookInfo,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body16,
   urlParameters: [Parameters.endpoint, Parameters.hookId],
   headerParameters: [Parameters.accept, Parameters.contentType],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const deleteHookOperationSpec: coreClient.OperationSpec = {
   path: "/hooks/{hookId}",
@@ -1811,30 +1813,30 @@ const deleteHookOperationSpec: coreClient.OperationSpec = {
   responses: {
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.hookId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getDataFeedIngestionStatusOperationSpec: coreClient.OperationSpec = {
   path: "/dataFeeds/{dataFeedId}/ingestionStatus/query",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.IngestionStatusList
+      bodyMapper: Mappers.IngestionStatusList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body17,
   queryParameters: [Parameters.skip, Parameters.maxpagesize],
   urlParameters: [Parameters.endpoint, Parameters.dataFeedId],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const resetDataFeedIngestionStatusOperationSpec: coreClient.OperationSpec = {
   path: "/dataFeeds/{dataFeedId}/ingestionProgress/reset",
@@ -1842,433 +1844,422 @@ const resetDataFeedIngestionStatusOperationSpec: coreClient.OperationSpec = {
   responses: {
     204: {},
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body18,
   urlParameters: [Parameters.endpoint, Parameters.dataFeedId],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getIngestionProgressOperationSpec: coreClient.OperationSpec = {
   path: "/dataFeeds/{dataFeedId}/ingestionProgress",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataFeedIngestionProgress
+      bodyMapper: Mappers.DataFeedIngestionProgress,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   urlParameters: [Parameters.endpoint, Parameters.dataFeedId],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const getMetricDataOperationSpec: coreClient.OperationSpec = {
   path: "/metrics/{metricId}/data/query",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricDataList
+      bodyMapper: Mappers.MetricDataList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body19,
   urlParameters: [Parameters.endpoint, Parameters.metricId],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getMetricSeriesOperationSpec: coreClient.OperationSpec = {
   path: "/metrics/{metricId}/series/query",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricSeriesList
+      bodyMapper: Mappers.MetricSeriesList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body20,
   queryParameters: [Parameters.skip, Parameters.maxpagesize],
   urlParameters: [Parameters.endpoint, Parameters.metricId],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getMetricDimensionOperationSpec: coreClient.OperationSpec = {
   path: "/metrics/{metricId}/dimension/query",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricDimensionList
+      bodyMapper: Mappers.MetricDimensionList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body21,
   queryParameters: [Parameters.skip, Parameters.maxpagesize],
   urlParameters: [Parameters.endpoint, Parameters.metricId],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const getAnomalyDetectionConfigurationsByMetricOperationSpec: coreClient.OperationSpec = {
-  path: "/metrics/{metricId}/enrichment/anomalyDetection/configurations",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyDetectionConfigurationList
+const getAnomalyDetectionConfigurationsByMetricOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/metrics/{metricId}/enrichment/anomalyDetection/configurations",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyDetectionConfigurationList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [Parameters.endpoint, Parameters.metricId],
-  headerParameters: [Parameters.accept],
-  serializer
-};
+    queryParameters: [Parameters.skip, Parameters.maxpagesize],
+    urlParameters: [Parameters.endpoint, Parameters.metricId],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
 const getEnrichmentStatusByMetricOperationSpec: coreClient.OperationSpec = {
   path: "/metrics/{metricId}/status/enrichment/anomalyDetection/query",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.EnrichmentStatusList
+      bodyMapper: Mappers.EnrichmentStatusList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body22,
   queryParameters: [Parameters.skip, Parameters.maxpagesize],
   urlParameters: [Parameters.endpoint, Parameters.metricId],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const getAlertsByAnomalyAlertingConfigurationNextOperationSpec: coreClient.OperationSpec = {
-  path: "/{nextLink}",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AlertResultList
+const getAlertsByAnomalyAlertingConfigurationNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/{nextLink}",
+    httpMethod: "POST",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AlertResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body2,
-  urlParameters: [Parameters.endpoint, Parameters.nextLink],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getAnomaliesByAnomalyDetectionConfigurationNextOperationSpec: coreClient.OperationSpec = {
-  path: "/{nextLink}",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyResultList
+    requestBody: Parameters.body2,
+    urlParameters: [Parameters.endpoint, Parameters.nextLink],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getAnomaliesByAnomalyDetectionConfigurationNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/{nextLink}",
+    httpMethod: "POST",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body6,
-  urlParameters: [Parameters.endpoint, Parameters.nextLink],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getDimensionOfAnomaliesByAnomalyDetectionConfigurationNextOperationSpec: coreClient.OperationSpec = {
-  path: "/{nextLink}",
-  httpMethod: "POST",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyDimensionList
+    requestBody: Parameters.body6,
+    urlParameters: [Parameters.endpoint, Parameters.nextLink],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getDimensionOfAnomaliesByAnomalyDetectionConfigurationNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "/{nextLink}",
+    httpMethod: "POST",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyDimensionList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  requestBody: Parameters.body7,
-  urlParameters: [Parameters.endpoint, Parameters.nextLink],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
+    requestBody: Parameters.body7,
+    urlParameters: [Parameters.endpoint, Parameters.nextLink],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
 const listMetricFeedbacksNextOperationSpec: coreClient.OperationSpec = {
   path: "/{nextLink}",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricFeedbackList
+      bodyMapper: Mappers.MetricFeedbackList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body13,
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getDataFeedIngestionStatusNextOperationSpec: coreClient.OperationSpec = {
   path: "/{nextLink}",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.IngestionStatusList
+      bodyMapper: Mappers.IngestionStatusList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body17,
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getMetricSeriesNextOperationSpec: coreClient.OperationSpec = {
   path: "/{nextLink}",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricSeriesList
+      bodyMapper: Mappers.MetricSeriesList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body20,
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getMetricDimensionNextOperationSpec: coreClient.OperationSpec = {
   path: "/{nextLink}",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.MetricDimensionList
+      bodyMapper: Mappers.MetricDimensionList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body21,
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
 const getEnrichmentStatusByMetricNextOperationSpec: coreClient.OperationSpec = {
   path: "/{nextLink}",
   httpMethod: "POST",
   responses: {
     200: {
-      bodyMapper: Mappers.EnrichmentStatusList
+      bodyMapper: Mappers.EnrichmentStatusList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
   requestBody: Parameters.body22,
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept, Parameters.contentType1],
   mediaType: "json",
-  serializer
+  serializer,
 };
-const getAnomaliesFromAlertByAnomalyAlertingConfigurationNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyResultList
+const getAnomaliesFromAlertByAnomalyAlertingConfigurationNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "{nextLink}",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [
-    Parameters.endpoint,
-    Parameters.configurationId,
-    Parameters.alertId,
-    Parameters.nextLink
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getIncidentsFromAlertByAnomalyAlertingConfigurationNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.IncidentResultList
+    urlParameters: [
+      Parameters.endpoint,
+      Parameters.configurationId,
+      Parameters.alertId,
+      Parameters.nextLink,
+    ],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const getIncidentsFromAlertByAnomalyAlertingConfigurationNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "{nextLink}",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.IncidentResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [
-    Parameters.endpoint,
-    Parameters.configurationId,
-    Parameters.alertId,
-    Parameters.nextLink
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyAlertingConfigurationList
+    urlParameters: [
+      Parameters.endpoint,
+      Parameters.configurationId,
+      Parameters.alertId,
+      Parameters.nextLink,
+    ],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const getAnomalyAlertingConfigurationsByAnomalyDetectionConfigurationNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "{nextLink}",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyAlertingConfigurationList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [
-    Parameters.endpoint,
-    Parameters.configurationId,
-    Parameters.nextLink
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
-const getIncidentsByAnomalyDetectionConfigurationNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.IncidentResultList
+    urlParameters: [
+      Parameters.endpoint,
+      Parameters.configurationId,
+      Parameters.nextLink,
+    ],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
+const getIncidentsByAnomalyDetectionConfigurationNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "{nextLink}",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.IncidentResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.maxpagesize],
-  urlParameters: [
-    Parameters.endpoint,
-    Parameters.configurationId,
-    Parameters.nextLink
-  ],
-  headerParameters: [Parameters.accept, Parameters.contentType1],
-  mediaType: "json",
-  serializer
-};
-const getIncidentsByAnomalyDetectionConfigurationNextPagesNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.IncidentResultList
+    urlParameters: [
+      Parameters.endpoint,
+      Parameters.configurationId,
+      Parameters.nextLink,
+    ],
+    headerParameters: [Parameters.accept, Parameters.contentType1],
+    mediaType: "json",
+    serializer,
+  };
+const getIncidentsByAnomalyDetectionConfigurationNextPagesNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "{nextLink}",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.IncidentResultList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.maxpagesize, Parameters.token],
-  urlParameters: [
-    Parameters.endpoint,
-    Parameters.configurationId,
-    Parameters.nextLink
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
+    urlParameters: [
+      Parameters.endpoint,
+      Parameters.configurationId,
+      Parameters.nextLink,
+    ],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };
 const listCredentialsNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataSourceCredentialList
+      bodyMapper: Mappers.DataSourceCredentialList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listDataFeedsNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.DataFeedList
+      bodyMapper: Mappers.DataFeedList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
-  queryParameters: [
-    Parameters.skip,
-    Parameters.maxpagesize,
-    Parameters.dataFeedName,
-    Parameters.dataSourceType,
-    Parameters.granularityName,
-    Parameters.status,
-    Parameters.creator
-  ],
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
 const listHooksNextOperationSpec: coreClient.OperationSpec = {
   path: "{nextLink}",
   httpMethod: "GET",
   responses: {
     200: {
-      bodyMapper: Mappers.HookList
+      bodyMapper: Mappers.HookList,
     },
     default: {
-      bodyMapper: Mappers.ErrorCode
-    }
+      bodyMapper: Mappers.ErrorCode,
+    },
   },
-  queryParameters: [
-    Parameters.skip,
-    Parameters.maxpagesize,
-    Parameters.hookName
-  ],
   urlParameters: [Parameters.endpoint, Parameters.nextLink],
   headerParameters: [Parameters.accept],
-  serializer
+  serializer,
 };
-const getAnomalyDetectionConfigurationsByMetricNextOperationSpec: coreClient.OperationSpec = {
-  path: "{nextLink}",
-  httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.AnomalyDetectionConfigurationList
+const getAnomalyDetectionConfigurationsByMetricNextOperationSpec: coreClient.OperationSpec =
+  {
+    path: "{nextLink}",
+    httpMethod: "GET",
+    responses: {
+      200: {
+        bodyMapper: Mappers.AnomalyDetectionConfigurationList,
+      },
+      default: {
+        bodyMapper: Mappers.ErrorCode,
+      },
     },
-    default: {
-      bodyMapper: Mappers.ErrorCode
-    }
-  },
-  queryParameters: [Parameters.skip, Parameters.maxpagesize],
-  urlParameters: [
-    Parameters.endpoint,
-    Parameters.metricId,
-    Parameters.nextLink
-  ],
-  headerParameters: [Parameters.accept],
-  serializer
-};
+    urlParameters: [
+      Parameters.endpoint,
+      Parameters.metricId,
+      Parameters.nextLink,
+    ],
+    headerParameters: [Parameters.accept],
+    serializer,
+  };

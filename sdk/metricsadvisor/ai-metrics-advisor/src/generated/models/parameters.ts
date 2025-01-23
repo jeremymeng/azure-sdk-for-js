@@ -9,7 +9,7 @@
 import {
   OperationParameter,
   OperationURLParameter,
-  OperationQueryParameter
+  OperationQueryParameter,
 } from "@azure/core-client";
 import {
   AnomalyAlertingConfigurationPatch as AnomalyAlertingConfigurationPatchMapper,
@@ -34,7 +34,7 @@ import {
   MetricDataQueryOptions as MetricDataQueryOptionsMapper,
   MetricSeriesQueryOptions as MetricSeriesQueryOptionsMapper,
   MetricDimensionQueryOptions as MetricDimensionQueryOptionsMapper,
-  EnrichmentStatusQueryOption as EnrichmentStatusQueryOptionMapper
+  EnrichmentStatusQueryOption as EnrichmentStatusQueryOptionMapper,
 } from "../models/mappers.js";
 
 export const accept: OperationParameter = {
@@ -44,9 +44,9 @@ export const accept: OperationParameter = {
     isConstant: true,
     serializedName: "Accept",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const endpoint: OperationURLParameter = {
@@ -55,10 +55,10 @@ export const endpoint: OperationURLParameter = {
     serializedName: "endpoint",
     required: true,
     type: {
-      name: "String"
-    }
+      name: "String",
+    },
   },
-  skipEncoding: true
+  skipEncoding: true,
 };
 
 export const configurationId: OperationURLParameter = {
@@ -67,9 +67,9 @@ export const configurationId: OperationURLParameter = {
     serializedName: "configurationId",
     required: true,
     type: {
-      name: "Uuid"
-    }
-  }
+      name: "Uuid",
+    },
+  },
 };
 
 export const contentType: OperationParameter = {
@@ -79,14 +79,14 @@ export const contentType: OperationParameter = {
     isConstant: true,
     serializedName: "Content-Type",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const body: OperationParameter = {
   parameterPath: "body",
-  mapper: AnomalyAlertingConfigurationPatchMapper
+  mapper: AnomalyAlertingConfigurationPatchMapper,
 };
 
 export const contentType1: OperationParameter = {
@@ -96,19 +96,19 @@ export const contentType1: OperationParameter = {
     isConstant: true,
     serializedName: "Content-Type",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const body1: OperationParameter = {
   parameterPath: "body",
-  mapper: AnomalyAlertingConfigurationMapper
+  mapper: AnomalyAlertingConfigurationMapper,
 };
 
 export const body2: OperationParameter = {
   parameterPath: "body",
-  mapper: AlertingResultQueryMapper
+  mapper: AlertingResultQueryMapper,
 };
 
 export const skip: OperationQueryParameter = {
@@ -116,9 +116,9 @@ export const skip: OperationQueryParameter = {
   mapper: {
     serializedName: "$skip",
     type: {
-      name: "Number"
-    }
-  }
+      name: "Number",
+    },
+  },
 };
 
 export const maxpagesize: OperationQueryParameter = {
@@ -126,9 +126,9 @@ export const maxpagesize: OperationQueryParameter = {
   mapper: {
     serializedName: "$maxpagesize",
     type: {
-      name: "Number"
-    }
-  }
+      name: "Number",
+    },
+  },
 };
 
 export const alertId: OperationURLParameter = {
@@ -137,39 +137,39 @@ export const alertId: OperationURLParameter = {
     serializedName: "alertId",
     required: true,
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const body3: OperationParameter = {
   parameterPath: "body",
-  mapper: AnomalyDetectionConfigurationPatchMapper
+  mapper: AnomalyDetectionConfigurationPatchMapper,
 };
 
 export const body4: OperationParameter = {
   parameterPath: "body",
-  mapper: AnomalyDetectionConfigurationMapper
+  mapper: AnomalyDetectionConfigurationMapper,
 };
 
 export const body5: OperationParameter = {
   parameterPath: "body",
-  mapper: DetectionSeriesQueryMapper
+  mapper: DetectionSeriesQueryMapper,
 };
 
 export const body6: OperationParameter = {
   parameterPath: "body",
-  mapper: DetectionAnomalyResultQueryMapper
+  mapper: DetectionAnomalyResultQueryMapper,
 };
 
 export const body7: OperationParameter = {
   parameterPath: "body",
-  mapper: AnomalyDimensionQueryMapper
+  mapper: AnomalyDimensionQueryMapper,
 };
 
 export const body8: OperationParameter = {
   parameterPath: "body",
-  mapper: DetectionIncidentResultQueryMapper
+  mapper: DetectionIncidentResultQueryMapper,
 };
 
 export const token: OperationQueryParameter = {
@@ -177,9 +177,9 @@ export const token: OperationQueryParameter = {
   mapper: {
     serializedName: "$token",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const incidentId: OperationURLParameter = {
@@ -188,19 +188,19 @@ export const incidentId: OperationURLParameter = {
     serializedName: "incidentId",
     required: true,
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const body9: OperationParameter = {
   parameterPath: "body",
-  mapper: DataSourceCredentialMapper
+  mapper: DataSourceCredentialMapper,
 };
 
 export const body10: OperationParameter = {
   parameterPath: "body",
-  mapper: DataSourceCredentialPatchMapper
+  mapper: DataSourceCredentialPatchMapper,
 };
 
 export const credentialId: OperationURLParameter = {
@@ -209,9 +209,9 @@ export const credentialId: OperationURLParameter = {
     serializedName: "credentialId",
     required: true,
     type: {
-      name: "Uuid"
-    }
-  }
+      name: "Uuid",
+    },
+  },
 };
 
 export const dataFeedName: OperationQueryParameter = {
@@ -219,9 +219,9 @@ export const dataFeedName: OperationQueryParameter = {
   mapper: {
     serializedName: "dataFeedName",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const dataSourceType: OperationQueryParameter = {
@@ -243,10 +243,10 @@ export const dataSourceType: OperationQueryParameter = {
         "MongoDB",
         "MySql",
         "PostgreSql",
-        "SqlServer"
-      ]
-    }
-  }
+        "SqlServer",
+      ],
+    },
+  },
 };
 
 export const granularityName: OperationQueryParameter = {
@@ -262,10 +262,10 @@ export const granularityName: OperationQueryParameter = {
         "Daily",
         "Hourly",
         "Minutely",
-        "Custom"
-      ]
-    }
-  }
+        "Custom",
+      ],
+    },
+  },
 };
 
 export const status: OperationQueryParameter = {
@@ -274,9 +274,9 @@ export const status: OperationQueryParameter = {
     serializedName: "status",
     type: {
       name: "Enum",
-      allowedValues: ["Active", "Paused"]
-    }
-  }
+      allowedValues: ["Active", "Paused"],
+    },
+  },
 };
 
 export const creator: OperationQueryParameter = {
@@ -284,14 +284,14 @@ export const creator: OperationQueryParameter = {
   mapper: {
     serializedName: "creator",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const body11: OperationParameter = {
   parameterPath: "body",
-  mapper: DataFeedDetailMapper
+  mapper: DataFeedDetailMapper,
 };
 
 export const dataFeedId: OperationURLParameter = {
@@ -300,14 +300,14 @@ export const dataFeedId: OperationURLParameter = {
     serializedName: "dataFeedId",
     required: true,
     type: {
-      name: "Uuid"
-    }
-  }
+      name: "Uuid",
+    },
+  },
 };
 
 export const body12: OperationParameter = {
   parameterPath: "body",
-  mapper: DataFeedDetailPatchMapper
+  mapper: DataFeedDetailPatchMapper,
 };
 
 export const feedbackId: OperationURLParameter = {
@@ -316,19 +316,19 @@ export const feedbackId: OperationURLParameter = {
     serializedName: "feedbackId",
     required: true,
     type: {
-      name: "Uuid"
-    }
-  }
+      name: "Uuid",
+    },
+  },
 };
 
 export const body13: OperationParameter = {
   parameterPath: "body",
-  mapper: MetricFeedbackFilterMapper
+  mapper: MetricFeedbackFilterMapper,
 };
 
 export const body14: OperationParameter = {
   parameterPath: "body",
-  mapper: MetricFeedbackMapper
+  mapper: MetricFeedbackMapper,
 };
 
 export const hookName: OperationQueryParameter = {
@@ -336,14 +336,14 @@ export const hookName: OperationQueryParameter = {
   mapper: {
     serializedName: "hookName",
     type: {
-      name: "String"
-    }
-  }
+      name: "String",
+    },
+  },
 };
 
 export const body15: OperationParameter = {
   parameterPath: "body",
-  mapper: HookInfoMapper
+  mapper: HookInfoMapper,
 };
 
 export const hookId: OperationURLParameter = {
@@ -352,29 +352,29 @@ export const hookId: OperationURLParameter = {
     serializedName: "hookId",
     required: true,
     type: {
-      name: "Uuid"
-    }
-  }
+      name: "Uuid",
+    },
+  },
 };
 
 export const body16: OperationParameter = {
   parameterPath: "body",
-  mapper: HookInfoPatchMapper
+  mapper: HookInfoPatchMapper,
 };
 
 export const body17: OperationParameter = {
   parameterPath: "body",
-  mapper: IngestionStatusQueryOptionsMapper
+  mapper: IngestionStatusQueryOptionsMapper,
 };
 
 export const body18: OperationParameter = {
   parameterPath: "body",
-  mapper: IngestionProgressResetOptionsMapper
+  mapper: IngestionProgressResetOptionsMapper,
 };
 
 export const body19: OperationParameter = {
   parameterPath: "body",
-  mapper: MetricDataQueryOptionsMapper
+  mapper: MetricDataQueryOptionsMapper,
 };
 
 export const metricId: OperationURLParameter = {
@@ -383,24 +383,24 @@ export const metricId: OperationURLParameter = {
     serializedName: "metricId",
     required: true,
     type: {
-      name: "Uuid"
-    }
-  }
+      name: "Uuid",
+    },
+  },
 };
 
 export const body20: OperationParameter = {
   parameterPath: "body",
-  mapper: MetricSeriesQueryOptionsMapper
+  mapper: MetricSeriesQueryOptionsMapper,
 };
 
 export const body21: OperationParameter = {
   parameterPath: "body",
-  mapper: MetricDimensionQueryOptionsMapper
+  mapper: MetricDimensionQueryOptionsMapper,
 };
 
 export const body22: OperationParameter = {
   parameterPath: "body",
-  mapper: EnrichmentStatusQueryOptionMapper
+  mapper: EnrichmentStatusQueryOptionMapper,
 };
 
 export const nextLink: OperationURLParameter = {
@@ -409,8 +409,8 @@ export const nextLink: OperationURLParameter = {
     serializedName: "nextLink",
     required: true,
     type: {
-      name: "String"
-    }
+      name: "String",
+    },
   },
-  skipEncoding: true
+  skipEncoding: true,
 };

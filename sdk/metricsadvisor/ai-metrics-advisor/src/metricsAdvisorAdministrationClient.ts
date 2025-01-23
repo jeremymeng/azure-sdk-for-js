@@ -5,7 +5,7 @@
 
 import type { InternalPipelineOptions } from "@azure/core-rest-pipeline";
 import { bearerTokenAuthenticationPolicy } from "@azure/core-rest-pipeline";
-import type { FullOperationResponse, OperationOptions } from "@azure/core-client";
+import type { CommonClientOptions, FullOperationResponse, OperationOptions } from "@azure/core-client";
 import type { TokenCredential } from "@azure/core-auth";
 import { isTokenCredential } from "@azure/core-auth";
 import type { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
@@ -62,13 +62,12 @@ import {
   MetricsAdvisorLoggingAllowedHeaderNames,
   MetricsAdvisorLoggingAllowedQueryParameters,
 } from "./constants.js";
-import type { ExtendedCommonClientOptions } from "@azure/core-http-compat";
 import { tracingClient } from "./tracing.js";
 
 /**
  * Client options used to configure API requests.
  */
-export interface MetricsAdvisorAdministrationClientOptions extends ExtendedCommonClientOptions {}
+export interface MetricsAdvisorAdministrationClientOptions extends CommonClientOptions {}
 
 /**
  * Options for listing data feed ingestion status
@@ -424,7 +423,6 @@ export class MetricsAdvisorAdministrationClient {
     while (continuationToken) {
       segmentResponse = await this.client.listDataFeedsNext(continuationToken, {
         ...options.filter,
-        maxpagesize: options.maxPageSize,
         ...options,
       });
       const dataFeeds = segmentResponse.value?.map((d) => {
@@ -1559,7 +1557,6 @@ export class MetricsAdvisorAdministrationClient {
     delete options.skip;
     while (continuationToken) {
       segmentResponse = await this.client.listCredentialsNext(continuationToken, {
-        maxpagesize: options.maxPageSize,
         ...options,
       });
       const credentials = segmentResponse.value?.map((d) => {

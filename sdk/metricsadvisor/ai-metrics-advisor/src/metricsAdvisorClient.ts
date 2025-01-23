@@ -8,8 +8,7 @@ import { bearerTokenAuthenticationPolicy } from "@azure/core-rest-pipeline";
 import type { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
 import type { TokenCredential } from "@azure/core-auth";
 import { isTokenCredential } from "@azure/core-auth";
-import type { OperationOptions } from "@azure/core-client";
-import type { ExtendedCommonClientOptions } from "@azure/core-http-compat";
+import type { CommonClientOptions, OperationOptions } from "@azure/core-client";
 import { GeneratedClient } from "./generated/generatedClient.js";
 import type { MetricsAdvisorKeyCredential } from "./metricsAdvisorKeyCredentialPolicy.js";
 import { createMetricsAdvisorKeyCredentialPolicy } from "./metricsAdvisorKeyCredentialPolicy.js";
@@ -50,7 +49,7 @@ import { tracingClient } from "./tracing.js";
 /**
  * Client options used to configure Metrics Advisor API requests.
  */
-export interface MetricsAdvisorClientOptions extends ExtendedCommonClientOptions {}
+export interface MetricsAdvisorClientOptions extends CommonClientOptions {}
 
 /**
  * Options for listing incidents for detection configurations
@@ -473,7 +472,6 @@ export class MetricsAdvisorClient {
         continuationToken,
         {
           ...options,
-          maxpagesize: maxPageSize,
         },
       );
       const anomalies = segmentResponse.value?.map((a) => {
@@ -651,7 +649,6 @@ export class MetricsAdvisorClient {
         continuationToken,
         {
           ...options,
-          maxpagesize: maxPageSize,
         },
       );
       const incidents = segmentResponse.value?.map((incident) => {
@@ -1261,7 +1258,6 @@ export class MetricsAdvisorClient {
         continuationToken,
         {
           ...options,
-          maxpagesize: maxPageSize,
         },
       );
       const incidents = segmentResponse.value?.map((incident) => {

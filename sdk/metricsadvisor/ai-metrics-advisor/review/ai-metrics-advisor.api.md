@@ -4,7 +4,7 @@
 
 ```ts
 
-import type { ExtendedCommonClientOptions } from '@azure/core-http-compat';
+import type { CommonClientOptions } from '@azure/core-client';
 import type { FullOperationResponse } from '@azure/core-client';
 import type { OperationOptions } from '@azure/core-client';
 import type { PagedAsyncIterableIterator } from '@azure/core-paging';
@@ -883,7 +883,7 @@ export class MetricsAdvisorAdministrationClient {
 }
 
 // @public
-export interface MetricsAdvisorAdministrationClientOptions extends ExtendedCommonClientOptions {
+export interface MetricsAdvisorAdministrationClientOptions extends CommonClientOptions {
 }
 
 // @public
@@ -908,7 +908,7 @@ export class MetricsAdvisorClient {
 }
 
 // @public
-export interface MetricsAdvisorClientOptions extends ExtendedCommonClientOptions {
+export interface MetricsAdvisorClientOptions extends CommonClientOptions {
 }
 
 // @public
