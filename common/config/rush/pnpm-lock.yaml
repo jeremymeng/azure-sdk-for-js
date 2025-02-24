@@ -3697,7 +3697,7 @@ packages:
     version: 0.0.0
 
   '@rush-temp/core-xml@file:projects/core-xml.tgz':
-    resolution: {integrity: sha512-/0l4gaWNX1XLWL3BKOK35Au6+MEhE7NpUqGaMrQDvGfYfX48GSewDRIP8vmpXk2UIUzNFD20l7FWRSIVzL9y4A==, tarball: file:projects/core-xml.tgz}
+    resolution: {integrity: sha512-5Lavd9jlROqw0YE6ap9cJ9yzh+1ZG01+qRrJfCsY1zgEPJ/TnV2t0aDdBs5kDfxQcKu4sCgnCLJDW3QSaV949Q==, tarball: file:projects/core-xml.tgz}
     version: 0.0.0
 
   '@rush-temp/cosmos@file:projects/cosmos.tgz':
@@ -3765,15 +3765,15 @@ packages:
     version: 0.0.0
 
   '@rush-temp/health-insights-cancerprofiling@file:projects/health-insights-cancerprofiling.tgz':
-    resolution: {integrity: sha512-mUjY8RXdANXOqnwSaYF611CvnZ9jKXXESGfM1k9E3noUvxq73Wy0H5Q73UzQ3skjh411cmZeTE4KNNVQL8feRg==, tarball: file:projects/health-insights-cancerprofiling.tgz}
+    resolution: {integrity: sha512-CpWzmZ42bIIs+VoAHJaODjL4cXIYXzZLobh5yUjO9MyZFZ0cEwHkmkghUWbnTVYc3VKyfE1jcxhjyEtq1E3IDQ==, tarball: file:projects/health-insights-cancerprofiling.tgz}
     version: 0.0.0
 
   '@rush-temp/health-insights-clinicalmatching@file:projects/health-insights-clinicalmatching.tgz':
-    resolution: {integrity: sha512-x9ZfhcddShl9hZWssysQ/hG2TDiVxzAaUoRHGUZfA6zEzzRolzyj+wvzJHccIbgsFPG18Lg8pfUtVpY7HajLWw==, tarball: file:projects/health-insights-clinicalmatching.tgz}
+    resolution: {integrity: sha512-sxZem/WuyaUrUrKQ6kffS5r0+VrOIiDWYagMzGSBl8LKOnSgHokZk8w8GFvd1H4G4S8ISL7NMmmQZgEN/b4xlw==, tarball: file:projects/health-insights-clinicalmatching.tgz}
     version: 0.0.0
 
   '@rush-temp/health-insights-radiologyinsights@file:projects/health-insights-radiologyinsights.tgz':
-    resolution: {integrity: sha512-fYcEy80yPbG6jJwTunEqFEg4/hOycR0iPHlXPXOi7tLja1O8GrwO439drxFP0rFLqBhOggn5rguGPQZ4ICHC0Q==, tarball: file:projects/health-insights-radiologyinsights.tgz}
+    resolution: {integrity: sha512-GvT4/hL8NrpO+wwJ+OggN7UdrOGuxNPj2uVwesW0B4GaAO/+EQDK4nOj3qtOEgT/0T0I7aSYBmhx8s+qdm2VWQ==, tarball: file:projects/health-insights-radiologyinsights.tgz}
     version: 0.0.0
 
   '@rush-temp/identity-broker@file:projects/identity-broker.tgz':
@@ -5576,6 +5576,10 @@ packages:
 
   fast-xml-parser@4.5.3:
     resolution: {integrity: sha512-RKihhV+SHsIUGXObeVy9AXiBbFwkVk7Syp8XgwN5U3JV416+Gwp/GO9i0JYKmikykgz/UHRrrV4ROuZEo/T0ig==}
+    hasBin: true
+
+  fast-xml-parser@5.0.6:
+    resolution: {integrity: sha512-5zIl0jWsewL5LdneswG6aJXx1YH1FXQ02UVIe/CZI3wXhI3SqP62bjcIYRNOgU43/MnN1t/MCpH6UoOtBrDNug==}
     hasBin: true
 
   fastq@1.19.0:
@@ -7567,6 +7571,9 @@ packages:
 
   strnum@1.1.1:
     resolution: {integrity: sha512-O7aCHfYCamLCctjAiaucmE+fHf2DYHkus2OKCn4Wv03sykfFtgeECn505X6K4mPl8CRNd/qurC9guq+ynoN4pw==}
+
+  strnum@2.0.4:
+    resolution: {integrity: sha512-qrXhLMohxtEPKMlajtNaOp5zvAQUo6L3fNcdiJKzWH98kGfklqGwmxhFjM7DzxsuoVM7rJeiYr+lEcu4Jlu9UQ==}
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -20133,7 +20140,7 @@ snapshots:
       '@vitest/browser': 3.0.6(@types/node@18.19.76)(playwright@1.50.1)(typescript@5.7.3)(vite@6.1.1(@types/node@22.7.9)(tsx@4.19.3)(yaml@2.7.0))(vitest@3.0.6)
       '@vitest/coverage-istanbul': 3.0.6(vitest@3.0.6)
       eslint: 9.21.0
-      fast-xml-parser: 4.5.3
+      fast-xml-parser: 5.0.6
       playwright: 1.50.1
       tslib: 2.8.1
       typescript: 5.7.3
@@ -25317,6 +25324,10 @@ snapshots:
     dependencies:
       strnum: 1.1.1
 
+  fast-xml-parser@5.0.6:
+    dependencies:
+      strnum: 2.0.4
+
   fastq@1.19.0:
     dependencies:
       reusify: 1.0.4
@@ -27565,6 +27576,8 @@ snapshots:
   strip-json-comments@5.0.1: {}
 
   strnum@1.1.1: {}
+
+  strnum@2.0.4: {}
 
   supports-color@5.5.0:
     dependencies:
