@@ -1,0 +1,4 @@
+directory: specification/workloads/Workloads.SAPVirtualInstance.Management
+commit: 8d11f9cf8aa09a063f273cb1f088cd5ca1980e88
+repo: ../specs
+additionalDirectories: 

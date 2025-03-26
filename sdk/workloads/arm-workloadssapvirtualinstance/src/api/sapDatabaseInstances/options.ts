@@ -1,0 +1,44 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { OperationOptions } from "@azure-rest/core-client";
+
+/** Optional parameters. */
+export interface SAPDatabaseInstancesStopOptionalParams
+  extends OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+}
+
+/** Optional parameters. */
+export interface SAPDatabaseInstancesStartOptionalParams
+  extends OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+}
+
+/** Optional parameters. */
+export interface SAPDatabaseInstancesListOptionalParams
+  extends OperationOptions {}
+
+/** Optional parameters. */
+export interface SAPDatabaseInstancesDeleteOptionalParams
+  extends OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+}
+
+/** Optional parameters. */
+export interface SAPDatabaseInstancesUpdateOptionalParams
+  extends OperationOptions {}
+
+/** Optional parameters. */
+export interface SAPDatabaseInstancesCreateOptionalParams
+  extends OperationOptions {
+  /** Delay to wait until next poll, in milliseconds. */
+  updateIntervalInMs?: number;
+}
+
+/** Optional parameters. */
+export interface SAPDatabaseInstancesGetOptionalParams
+  extends OperationOptions {}

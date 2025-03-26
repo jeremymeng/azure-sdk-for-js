@@ -822,7 +822,7 @@ importers:
         version: file:projects/arm-workloads.tgz(@types/debug@4.1.12)(msw@2.7.3(@types/node@22.7.9)(typescript@5.8.2))(tsx@4.19.3)(vite@6.2.2(@types/node@22.7.9)(tsx@4.19.3)(yaml@2.7.0))(yaml@2.7.0)
       '@rush-temp/arm-workloadssapvirtualinstance':
         specifier: file:./projects/arm-workloadssapvirtualinstance.tgz
-        version: file:projects/arm-workloadssapvirtualinstance.tgz(@types/debug@4.1.12)(msw@2.7.3(@types/node@22.7.9)(typescript@5.8.2))(tsx@4.19.3)(vite@6.2.2(@types/node@22.7.9)(tsx@4.19.3)(yaml@2.7.0))(yaml@2.7.0)
+        version: file:projects/arm-workloadssapvirtualinstance.tgz
       '@rush-temp/arm-workspaces':
         specifier: file:./projects/arm-workspaces.tgz
         version: file:projects/arm-workspaces.tgz(@types/debug@4.1.12)(msw@2.7.3(@types/node@22.7.9)(typescript@5.8.2))(tsx@4.19.3)(vite@6.2.2(@types/node@22.7.9)(tsx@4.19.3)(yaml@2.7.0))(yaml@2.7.0)
@@ -2430,7 +2430,7 @@ packages:
     version: 0.0.0
 
   '@rush-temp/ai-text-analytics@file:projects/ai-text-analytics.tgz':
-    resolution: {integrity: sha512-s4t9LjNw4jfTuJNK3o4GbTjYemS/bCnBeA8MAOxRUKB0ngfJE2jivu4j3skv/rvpo4rp2TsJDJexv1GlPUYATw==, tarball: file:projects/ai-text-analytics.tgz}
+    resolution: {integrity: sha512-tXbqZpEP7z1uVnnduehvZ+RoAIcULbpXjVdJlxodpSfCVxtQgCJ8dqU7MN3l0r5Xwf2ihGDJYIofgUbN3cShIA==, tarball: file:projects/ai-text-analytics.tgz}
     version: 0.0.0
 
   '@rush-temp/ai-translation-document@file:projects/ai-translation-document.tgz':
@@ -3458,7 +3458,7 @@ packages:
     version: 0.0.0
 
   '@rush-temp/arm-workloadssapvirtualinstance@file:projects/arm-workloadssapvirtualinstance.tgz':
-    resolution: {integrity: sha512-o3lZF0cY8fQG02LgXkZaFR2eLpRgKb7fJHt18dmrCV+fA/SK/EmkH3iEGRc5hEfgFLv9NUax5RCL78KC0483aQ==, tarball: file:projects/arm-workloadssapvirtualinstance.tgz}
+    resolution: {integrity: sha512-zIf0Gm3Np3+RPv/Gp5yypyFLrhxqRJXp0Qhy98lBN6LZJ3PLgLCJ3Ida8dIU/p7s5EoHrl2XpLNR4sjyow5jIw==, tarball: file:projects/arm-workloadssapvirtualinstance.tgz}
     version: 0.0.0
 
   '@rush-temp/arm-workspaces@file:projects/arm-workspaces.tgz':
@@ -18974,40 +18974,16 @@ snapshots:
       - webdriverio
       - yaml
 
-  '@rush-temp/arm-workloadssapvirtualinstance@file:projects/arm-workloadssapvirtualinstance.tgz(@types/debug@4.1.12)(msw@2.7.3(@types/node@22.7.9)(typescript@5.8.2))(tsx@4.19.3)(vite@6.2.2(@types/node@22.7.9)(tsx@4.19.3)(yaml@2.7.0))(yaml@2.7.0)':
+  '@rush-temp/arm-workloadssapvirtualinstance@file:projects/arm-workloadssapvirtualinstance.tgz':
     dependencies:
-      '@azure/core-lro': 2.7.2
       '@types/node': 18.19.80
-      '@vitest/browser': 3.0.9(@types/node@18.19.80)(playwright@1.51.1)(typescript@5.8.2)(vite@6.2.2(@types/node@22.7.9)(tsx@4.19.3)(yaml@2.7.0))(vitest@3.0.9)
-      '@vitest/coverage-istanbul': 3.0.9(vitest@3.0.9)
       dotenv: 16.4.7
-      playwright: 1.51.1
+      eslint: 9.22.0
       tslib: 2.8.1
       typescript: 5.8.2
-      vitest: 3.0.9(@types/debug@4.1.12)(@types/node@18.19.80)(@vitest/browser@3.0.9)(msw@2.7.3(@types/node@22.7.9)(typescript@5.8.2))(tsx@4.19.3)(yaml@2.7.0)
     transitivePeerDependencies:
-      - '@edge-runtime/vm'
-      - '@types/debug'
-      - '@vitest/ui'
-      - bufferutil
-      - happy-dom
       - jiti
-      - jsdom
-      - less
-      - lightningcss
-      - msw
-      - safaridriver
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
       - supports-color
-      - terser
-      - tsx
-      - utf-8-validate
-      - vite
-      - webdriverio
-      - yaml
 
   '@rush-temp/arm-workspaces@file:projects/arm-workspaces.tgz(@types/debug@4.1.12)(msw@2.7.3(@types/node@22.7.9)(typescript@5.8.2))(tsx@4.19.3)(vite@6.2.2(@types/node@22.7.9)(tsx@4.19.3)(yaml@2.7.0))(yaml@2.7.0)':
     dependencies:
