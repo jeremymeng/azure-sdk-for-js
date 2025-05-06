@@ -9,7 +9,7 @@ export default defineConfig({
     testTimeout: 18000,
     reporters: [new AzureSDKReporter()],
     watch: false,
-    include: ["test/**/*.spec.js"],
+    include: ["test/**/*.spec.ts"],
     coverage: {
       provider: "istanbul",
       reporter: ["text", "json", "html"],

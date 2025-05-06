@@ -7,7 +7,7 @@
   "prettier": "../../../common/tools/eslint-plugin-azure-sdk/prettier.json",
   "scripts": {
     "build": "npm run format && npm run lint && npm run typecheck && npm run test",
-    "format": "prettier --write --config ../../../.prettierrc.json --ignore-path ../../../.prettierignore \"src/**/*.js\" \"test/**/*.js\"",
+    "format": "prettier --write --config ../../../.prettierrc.json --ignore-path ../../../.prettierignore \"src/**/*.ts\" \"test/**/*.ts\"",
     "typecheck": "tsc",
     "lint": "eslint src test",
     "test": "vitest"
@@ -23,7 +23,8 @@
     "@vitest/coverage-istanbul": "^3.0.9",
     "eslint": "^9.9.0",
     "prettier": "3.3.3",
-    "vitest": "^3.0.9",
-    "typescript": "~5.8.2"
+    "tsx": "^4.19.4",
+    "typescript": "~5.8.2",
+    "vitest": "^3.0.9"
   }
 }

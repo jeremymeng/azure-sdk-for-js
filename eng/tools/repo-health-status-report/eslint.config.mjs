@@ -5,7 +5,7 @@ import eslint from "@eslint/js";
 
 export default [
   {
-    files: ["./index.js"],
+    files: ["./src/**/*.ts"],
     rules: eslint.configs.recommended.rules,
   },
 ];

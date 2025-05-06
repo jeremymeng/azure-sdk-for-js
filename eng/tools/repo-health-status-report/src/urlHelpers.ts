@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-// @ts-check
-
 /**
  * @param {string} pipelineId
  * @return {string} - the url to get the latest build for the pipeline

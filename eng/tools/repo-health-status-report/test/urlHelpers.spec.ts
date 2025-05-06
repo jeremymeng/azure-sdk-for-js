@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-// @ts-check
-
 import { assert, describe, it } from "vitest";
 import {
   buildUrl,
