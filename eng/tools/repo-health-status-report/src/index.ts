@@ -4,7 +4,7 @@
 import { Octokit } from "octokit";
 import { DefaultAzureCredential } from "@azure/identity";
 import { getDataplanePackages } from "./packages.js";
-import { buildUrl, buildTimelineUrl } from "./urlHelpers.js";
+import { getAllBuilds, getBuildTimeline, getBuild } from "./urlHelpers.js";
 import type {
   CheckStatusCode,
   CheckTypes,
@@ -42,13 +42,13 @@ const SDK_OWNED = [
  *         2 if CI env var is set (github actions);
  *         0 if neither is set.
  */
-function inCI() {
+function runType() {
   if (process.env.TF_BUILD) {
-    return 1;
+    return "azure-devops";
   } else if (process.env.CI) {
-    return 2;
+    return "github-actions";
   } else {
-    return 0;
+    return "unknown";
   }
 }
 
@@ -65,7 +65,7 @@ function recordCheckResult(
 
 function recordTestResult(
   task,
-  kind: "ci" | "tests" | "weeklyTests" | "samples" | "docs" | "lint",
+  kind: "build" | "ci" | "tests" | "weeklyTests" | "samples" | "docs" | "lint",
   pipeline: PipelineResultsUnion,
 ): void {
   const unsuccessful = ["failed", "canceled", "abandoned", "skipped", "succeededWithIssues"];
@@ -87,7 +87,7 @@ function recordTestResult(
 }
 
 function recordAllPipeline(
-  kind: "ci" | "tests" | "weekly-tests",
+  kind: "ci" | "tests" | "weeklyTests",
   pipeline: PipelineResults,
   status: "succeeded" | "UNKNOWN",
 ): void {
@@ -107,7 +107,7 @@ function recordAllPipeline(
       tests: { status: status },
       samples: { status: status },
     };
-  } else if (kind === "weekly-tests") {
+  } else if (kind === "weeklyTests") {
     const weeklyTest = pipeline.weeklyTest;
     pipeline.weeklyTest = {
       ...weeklyTest,
@@ -128,55 +128,77 @@ function recordAllPackage(details: PackageStatus, status: CheckStatusCode): void
   };
 }
 
-async function getCiResult(
+async function getBuildResult(
+  kind: "ci" | "tests" | "weeklyTests",
   service: string,
   pipelines: Record<string, PipelineResults>,
   token: string,
   pipelineId?: number,
 ) {
   if (!pipelineId) {
-    console.warn(`No pipeline ID found for ${service}`);
-    recordAllPipeline("ci", pipelines[service], "UNKNOWN");
+    console.warn(`No ${kind} pipeline ID found for ${service}`);
+    recordAllPipeline(kind, pipelines[service], "UNKNOWN");
     return;
   }
 
-  const buildResponse = await getBuild(pipelineId, token);;
+  const buildResponse = await getBuild(pipelineId, token);
   const buildResult = await buildResponse.json();
   if (!buildResponse.ok || !buildResult["value"]) {
-    console.warn(`No CI result for ${service}`);
-    recordAllPipeline("ci", pipelines[service], "UNKNOWN");
+    console.warn(`No ${kind} result for ${service}`);
+    recordAllPipeline(kind, pipelines[service], "UNKNOWN");
     return;
   }
 
   const result = buildResult["value"][0];
-  pipelines[service].ci.link = result["_links"]["web"]["href"];
+  pipelines[service][kind].link = result["_links"]["web"]["href"];
   if (result["result"] === "succeeded") {
-    recordAllPipeline("ci", pipelines[service], "succeeded");
+    recordAllPipeline(kind, pipelines[service], "succeeded");
     return;
   }
 
   const orig = pipelines[service];
-  pipelines[service] = { ...orig, ci: { ...orig.ci, result: result["result"] } };
+  pipelines[service] = { ...orig, [kind]: { ...orig[kind], result: result["result"] } };
   const buildId = result["id"];
-  const timelineResponse = await fetch(buildTimelineUrl(buildId), {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const timelineResponse = await getBuildTimeline(buildId, token);
   if (!timelineResponse.ok) {
     recordAllPipeline("tests", pipelines[service], "UNKNOWN");
     return;
   }
   const timelineResult = await timelineResponse.json();
   for (const task of timelineResult["records"]) {
-    if (task["name"].includes("Tests")) {
-      recordTestResult(task, "ci", pipelines[service]["ci"]);
-    } else if (task["name"].includes("Docs")) {
-      recordTestResult(task, "docs", pipelines[service]["ci"]);
-    } else if (task["name"].includes("Lint")) {
-      recordTestResult(task, "lint", pipelines[service]["ci"]);
+    if (kind === "ci") {
+      // TODO: need to get the Build/Analyze/unit tests(linux-node and windows-browser)/legs?
+      if (task["name"].includes("Build libraries")) {
+        recordTestResult(task, "build", pipelines[service][kind]);
+      } else if (task["name"].includes("Build ESLint Plugin and Lint Libraries")) {
+        recordTestResult(task, "lint", pipelines[service][kind]);
+      } else if (task["name"].includes("Test libraries")) {
+        // TODO: NodeJS version, browser tests
+        recordTestResult(task, "ci", pipelines[service][kind]);
+      }
+    } else if (kind === "tests") {
+      // TODO: need to get linux-node and windows-browser, min/max legs
+      if (task["name"].includes("Test libraries")) {
+        recordTestResult(task, "tests", pipelines[service]["tests"]);
+      } else if (task["name"].includes("Execute Samples")) {
+        recordTestResult(task, "samples", pipelines[service]["tests"]);
+      }
+    } else if (kind === "weeklyTests") {
+      // TODO: NodeJS version, browser tests
+      if (task["name"].includes("Integration Tests")) {
+        recordTestResult(task, "tests", pipelines[service]["weeklyTest"]);
+      }
     }
   }
+}
+
+async function getCiResult(
+  service: string,
+  pipelines: Record<string, PipelineResults>,
+  token: string,
+  pipelineId?: number,
+) {
+  await getBuildResult("ci", service, pipelines, token, pipelineId);
 }
 
 async function getTestsResult(
@@ -185,52 +207,7 @@ async function getTestsResult(
   token: string,
   pipelineId?: number,
 ) {
-  if (!pipelineId) {
-    console.warn(`No live tests result for ${service}`);
-    recordAllPipeline("tests", pipelines[service], "UNKNOWN");
-    pipelines[service].tests.link = "";
-    return;
-  }
-
-  const buildResponse = await fetch(buildUrl(pipelineId), {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const buildResult = await buildResponse.json();
-  if (!buildResponse.ok || !buildResult["value"]) {
-    console.warn(`No live tests result for ${service}`);
-    recordAllPipeline("tests", pipelines[service], "UNKNOWN");
-    return;
-  }
-
-  const result = buildResult["value"][0];
-  pipelines[service].tests.link = result["_links"]["web"]["href"];
-  if (result["result"] === "succeeded") {
-    recordAllPipeline("tests", pipelines[service], "succeeded");
-    return;
-  }
-
-  const orig = pipelines[service];
-  pipelines[service] = { ...orig, tests: { ...orig.tests, result: result["result"] } };
-  const buildId = result["id"];
-  const timelineResponse = await fetch(buildTimelineUrl(buildId), {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!timelineResponse.ok) {
-    recordAllPipeline("tests", pipelines[service], "UNKNOWN");
-    return;
-  }
-  const timelineResult = await timelineResponse.json();
-  for (const task of timelineResult["records"]) {
-    if (task["name"].includes("Tests")) {
-      recordTestResult(task, "tests", pipelines[service]["tests"]);
-    } else if (task["name"].includes("Samples")) {
-      recordTestResult(task, "samples", pipelines[service]["tests"]);
-    }
-  }
+  getBuildResult("tests", service, pipelines, token, pipelineId);
 }
 
 async function getWeeklyTestsResult(
@@ -239,60 +216,14 @@ async function getWeeklyTestsResult(
   token: string,
   pipelineId?: number,
 ) {
-  if (!pipelineId) {
-    console.warn(`No weekly tests result for ${service}`);
-    recordAllPipeline("weekly-tests", pipelines[service], "UNKNOWN");
-    return;
-  }
-
-  const buildResponse = await fetch(buildUrl(pipelineId), {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const buildResult = await buildResponse.json();
-  if (!buildResponse.ok || !buildResult["value"]) {
-    console.warn(`No weekly tests result for ${service}`);
-    recordAllPipeline("weekly-tests", pipelines[service], "UNKNOWN");
-    return;
-  }
-
-  const result = buildResult["value"][0];
-  pipelines[service].weeklyTest.link = result["_links"]["web"]["href"];
-  if (result["result"] === "succeeded") {
-    recordAllPipeline("weekly-tests", pipelines[service], "succeeded");
-    return;
-  }
-
-  const orig = pipelines[service];
-  pipelines[service] = { ...orig, weeklyTest: { ...orig.weeklyTest, result: result["result"] } };
-  const buildId = result["id"];
-  const timelineResponse = await fetch(buildTimelineUrl(buildId), {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!timelineResponse.ok) {
-    recordAllPipeline("weekly-tests", pipelines[service], "UNKNOWN");
-    return;
-  }
-  const timelineResult = await timelineResponse.json();
-  for (const task of timelineResult["records"]) {
-    if (task["name"].includes("Run Tests")) {
-      recordTestResult(task, "tests", pipelines[service]["weeklyTest"]);
-    }
-  }
+  getBuildResult("weeklyTests", service, pipelines, token, pipelineId);
 }
 
 /**
  * Retrieves the "js - ..." pipelines from Azure DevOps.
  */
 async function getPipelines(dataplane, authToken): Promise<Record<string, PipelineResults>> {
-  const response = await fetch(LIST_BUILDS_URL, {
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-    },
-  });
+  const response = await getAllBuilds(authToken);
   if (!response.ok) {
     console.error(`Error fetching pipelines: ${response.statusText}`);
     return;
@@ -316,7 +247,7 @@ async function getPipelines(dataplane, authToken): Promise<Record<string, Pipeli
         recordAllPipeline("tests", pipelines[name], "UNKNOWN");
       } else if (`${serviceDir} - tests-weekly` === pipelineName.split("js - ")[1]) {
         pipelines[name] = { ...original, weeklyTest: { id: p.id, link: "" } };
-        recordAllPipeline("weekly-tests", pipelines[name], "UNKNOWN");
+        recordAllPipeline("weeklyTests", pipelines[name], "UNKNOWN");
       }
     }
   }
@@ -377,9 +308,7 @@ function reportCheckStatus(
   }
 }
 
-function reportStatus(dataplane, pipelines: Record<string, PipelineResults>): void {
-
-}
+function reportStatus(dataplane, pipelines: Record<string, PipelineResults>): void {}
 
 async function main() {
   const gitHubToken = process.env.GITHUB_TOKEN;
@@ -397,7 +326,7 @@ async function main() {
   } = await octokit.rest.users.getAuthenticated();
 
   let token;
-  if (inCI() !== 0) {
+  if (runType() !== "unknown") {
     token = process.env["SYSTEM_ACCESSTOKEN"];
   } else {
     const credential = new DefaultAzureCredential();
@@ -406,19 +335,17 @@ async function main() {
 
   const dataplane = await getDataplanePackages();
   const pipelines = await getPipelines(dataplane, token);
-  // console.dir({ pipelines }, { depth: 4 });
   for (const [pkgName, pipelineIds] of Object.entries(pipelines)) {
     console.dir({ l: "get results", pkgName, pipelineIds }, { depth: 4 });
-    getCiResult(pkgName, pipelines, token, pipelineIds.ci.id);
-    getTestsResult(pkgName, pipelines, token, pipelineIds.tests.id);
-    getWeeklyTestsResult(pkgName, pipelines, token, pipelineIds.weeklyTest.id);
+    getCiResult(pkgName, pipelines, token, pipelineIds.ci?.id);
+    getTestsResult(pkgName, pipelines, token, pipelineIds.tests?.id);
+    getWeeklyTestsResult(pkgName, pipelines, token, pipelineIds.weeklyTest?.id);
   }
 
   reportStatus(dataplane, pipelines);
 
-  if (inCI() !== 0) {
+  if (runType() !== "unknown") {
     const path = `/eng/tools/repo-health-status-report/health_report.csv`;
-    // TODO: write to github repo report branch
     await octokit.rest.repos.createOrUpdateFileContents({
       owner: login,
       repo: "azure-sdk-for-js",
