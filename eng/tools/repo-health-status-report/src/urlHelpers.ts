@@ -8,6 +8,30 @@
 export function buildUrl(pipelineId) {
   return `https://dev.azure.com/azure-sdk/internal/_apis/build/builds?definitions=${pipelineId}&$top=1&queryOrder=finishTimeDescending&reasonFilter=schedule&api-version=7.0`;
 }
+const LIST_BUILDS_URL = "https://dev.azure.com/azure-sdk/internal/_apis/pipelines?api-version=7.0";
+
+export function getAllBuilds(authToken: string) {
+  return fetch(LIST_BUILDS_URL, {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+}
+
+export function getBuild(pipelineId: number, authToken: string) {
+  return fetch(buildUrl(pipelineId), {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+}
+export function getBuildTimeline(buildId: number, authToken: string) {
+  return fetch(buildTimelineUrl(buildId), {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+}
 
 /**
  * @param {string} buildId

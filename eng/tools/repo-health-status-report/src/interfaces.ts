@@ -10,7 +10,7 @@ export type DevopsBuildStatus =
   | "succeededWithIssues"
   | "UNKNOWN";
 
-export type DevopsBuildStatus =
+export type DevopsTaskStatus =
   | "succeeded"
   | "failed"
   | "canceled"
@@ -18,14 +18,15 @@ export type DevopsBuildStatus =
   | "partiallySucceeded"
   | "UNKNOWN";
 
-export type CheckStatus = "PASS" | "FAIL" | "WARNING" | "DISABLED" | "UNKNOWN";
 
-export type LibraryStatus = "NEEDS_ACTION" | "BLOCKED" | "GOOD";
+export type PackageStatusCode = "NEEDS_ACTION" | "BLOCKED" | "GOOD";
 
-export type CheckStatus = "PASS" | "FAIL" | "WARNING" | "DISABLED" | "UNKNOWN";
+export type CheckStatusCode = "PASS" | "FAIL" | "WARNING" | "DISABLED" | "UNKNOWN";
+
+export type CheckTypes = "lint" | "tests" | "docs" | "ci";
 
 export interface Status {
-  status: CheckStatus;
+  status: CheckStatusCode;
   link?: string;
 }
 
@@ -37,31 +38,31 @@ export interface CheckStatus {
 export interface WeeklyTestPipelineResult {
   id: number;
   link: string;
-  result: DevopsBuildStatus;
-  lint: CheckStatus;
-  weeklyTest: CheckStatus;
+  result?: DevopsBuildStatus;
+  lint?: CheckStatus;
+  weeklyTest?: CheckStatus;
 }
 
 export interface TestsPipelineResult {
   id: number;
   link: string;
-  result: DevopsBuildStatus;
-  tests: CheckStatus;
-  samples: CheckStatus;
+  result?: DevopsBuildStatus;
+  tests?: CheckStatus;
+  samples?: CheckStatus;
 }
 
 export interface CiPipelineResult {
   id: number;
   link: string;
-  result: DevopsBuildStatus;
-  ci: CheckStatus;
-  lint: CheckStatus;
+  result?: DevopsBuildStatus;
+  ci?: CheckStatus;
+  lint?: CheckStatus;
 }
 
 export interface PipelineResults {
-  weeklyTest: WeeklyTestPipelineResult;
-  tests: TestsPipelineResult;
-  ci: CiPipelineResult;
+  weeklyTest?: WeeklyTestPipelineResult;
+  tests?: TestsPipelineResult;
+  ci?: CiPipelineResult;
 }
 
 export interface IssueDetails {
@@ -71,18 +72,19 @@ export interface IssueDetails {
 
 export interface SlaStatus {
   question: IssueDetails;
-  `open > 30 days`: IssueDetails;
+  // `open > 30 days`
   bug: IssueDetails;
-  `open > 90 days`: IssueDetails;
+  // `open > 90 days`
 }
 
 export interface PackageStatus {
-  status: LibraryStatus;
+  status: PackageStatusCode;
   path: string;
   label?: string;
   sla?: SlaStatus;
   customerIssues?: IssueDetails;
   sdkOwned: boolean;
+  // docs: Status; // TODO: add this back
   lint: Status;
   tests: Status;
   samples: Status;
