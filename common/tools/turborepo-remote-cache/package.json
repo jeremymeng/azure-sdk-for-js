@@ -1,5 +1,5 @@
 {
-  "name": "@azure/turborepo-remote-cache",
+  "name": "@azure-tools/turborepo-remote-cache",
   "version": "1.0.0",
   "sdk-type": "utility",
   "type": "module",

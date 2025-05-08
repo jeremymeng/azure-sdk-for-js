@@ -40,7 +40,7 @@ export interface WeeklyTestPipelineResult {
   link: string;
   result?: DevopsBuildStatus;
   lint?: CheckStatus;
-  weeklyTest?: CheckStatus;
+  weeklyTests?: CheckStatus;
 }
 
 export interface TestsPipelineResult {
@@ -60,7 +60,7 @@ export interface CiPipelineResult {
 }
 
 export interface PipelineResults {
-  weeklyTest?: WeeklyTestPipelineResult;
+  weeklyTests?: WeeklyTestPipelineResult;
   tests?: TestsPipelineResult;
   ci?: CiPipelineResult;
 }
@@ -77,7 +77,9 @@ export interface SlaStatus {
   // `open > 90 days`
 }
 
-export interface PackageStatus {
+export type Packages = Record<string, { src: string; projectFolder: string; versionPolicy: string }>
+
+export type PackageStatus = {
   status: PackageStatusCode;
   path: string;
   label?: string;
@@ -89,6 +91,8 @@ export interface PackageStatus {
   tests: Status;
   samples: Status;
   ci: Status;
-}
+} & { src: string; projectFolder: string; versionPolicy: string }
+
+export type PackagesWithStatus = Record<string, PackageStatus>;
 
 export type PipelineResultsUnion = CiPipelineResult | TestsPipelineResult | WeeklyTestPipelineResult;
