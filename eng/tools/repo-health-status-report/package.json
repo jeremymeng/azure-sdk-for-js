@@ -13,9 +13,9 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@azure-tools/eng-package-utils": "file:../eng-package-utils",
     "@azure/identity": "^4.9.1",
     "dotenv": "^16.5.0",
+    "glob":"^11.0.2",
     "octokit": "^4.1.3"
   },
   "devDependencies": {

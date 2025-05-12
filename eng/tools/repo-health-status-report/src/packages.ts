@@ -1,19 +1,33 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { getPackageJsons } from "@azure-tools/eng-package-utils";
+import { glob } from "glob";
+import { join } from "path";
+import { readFile } from "fs/promises";
 import { getBaseDir } from "./env.js";
 
-export async function getDataplanePackages() {
+export async function getDataplanePackages() : Promise<string, Package> {
   const workspaceRoot = getBaseDir();
-  const packages = await getPackageJsons(workspaceRoot);
-  const dataplanePackages: Awaited<ReturnType<typeof getPackageJsons>> = {};
-  for (const [key, value] of Object.entries(packages)) {
-    if (value.versionPolicy === "client") {
-      delete value.json;
-      delete value.newVer;
-      dataplanePackages[key] = value;
+  const sdkPackageJsonFiles = (await glob(`${workspaceRoot}/sdk/*/*/package.json`, {}))
+    .filter((file) => !file.includes(`/arm-`) && !file.includes(`\\arm-`))
+    .map((file) => file.replaceAll("\\", "/").replaceAll("../", ""));
+
+  const result = {};
+
+  for (const path of sdkPackageJsonFiles) {
+    const jsonFile = await readFile(join(workspaceRoot, path), "utf-8");
+    const json = JSON.parse(jsonFile);
+    if (json.name.startsWith("@azure-tests/") || json.name.startsWith("@azure-tools/")) {
+      continue;
     }
+    const [serviceDir, packageDir] = path.replace("sdk/", "").split("/");
+    result[json.name] = {
+      version: json.version,
+      projectPath: path,
+      serviceDir,
+      packageDir
+    };
   }
-  return dataplanePackages;
+  console.dir({ result }, { depth: 4 });
+  return result;
 }

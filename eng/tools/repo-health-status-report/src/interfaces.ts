@@ -18,7 +18,6 @@ export type DevopsTaskStatus =
   | "partiallySucceeded"
   | "UNKNOWN";
 
-
 export type PackageStatusCode = "NEEDS_ACTION" | "BLOCKED" | "GOOD";
 
 export type CheckStatusCode = "PASS" | "FAIL" | "WARNING" | "DISABLED" | "UNKNOWN";
@@ -37,6 +36,7 @@ export interface CheckStatus {
 
 export interface WeeklyTestPipelineResult {
   id: number;
+  buildNumber?: string;
   link: string;
   result?: DevopsBuildStatus;
   lint?: CheckStatus;
@@ -45,6 +45,7 @@ export interface WeeklyTestPipelineResult {
 
 export interface TestsPipelineResult {
   id: number;
+  buildNumber?: string;
   link: string;
   result?: DevopsBuildStatus;
   tests?: CheckStatus;
@@ -53,6 +54,7 @@ export interface TestsPipelineResult {
 
 export interface CiPipelineResult {
   id: number;
+  buildNumber?: string;
   link: string;
   result?: DevopsBuildStatus;
   ci?: CheckStatus;
@@ -77,9 +79,18 @@ export interface SlaStatus {
   // `open > 90 days`
 }
 
-export type Packages = Record<string, { src: string; projectFolder: string; versionPolicy: string }>
+export interface PackageInfo {
+  projectPath: string;
+  serviceDir: string;
+  packageDir: string;
+}
 
-export type PackageStatus = {
+export type Packages = Record<
+  string,
+  PackageInfo
+>;
+
+export interface PackageStatus extends PackageInfo {
   status: PackageStatusCode;
   path: string;
   label?: string;
@@ -91,8 +102,11 @@ export type PackageStatus = {
   tests: Status;
   samples: Status;
   ci: Status;
-} & { src: string; projectFolder: string; versionPolicy: string }
+};
 
 export type PackagesWithStatus = Record<string, PackageStatus>;
 
-export type PipelineResultsUnion = CiPipelineResult | TestsPipelineResult | WeeklyTestPipelineResult;
+export type PipelineResultsUnion =
+  | CiPipelineResult
+  | TestsPipelineResult
+  | WeeklyTestPipelineResult;

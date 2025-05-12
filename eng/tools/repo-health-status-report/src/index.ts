@@ -14,6 +14,7 @@ import type {
   PackagesWithStatus,
   PipelineResults,
   PipelineResultsUnion,
+  Status,
 } from "./interfaces.js";
 
 import "dotenv/config";
@@ -29,22 +30,70 @@ const MANDATORY_CHECKS = ["lint", "ci"];
 
 // TODO: add to package details
 const SDK_OWNED = [
+  "@azure/app-configuration",
+  "@azure/container-registry",
+  // core
   "@azure/abort-controller",
-  // ...
+  "@azure-rest/core-client",
+  "@azure/core-auth",
+  "@azure/core-amqp",
+  "@azure/core-client",
+  "@azure/core-http-compat",
+  "@azure/core-lro",
+  "@azure/core-paging",
+  "@azure/core-rest-pipeline",
+  "@azure/core-sse",
+  "@azure/core-tracing",
+  "@azure/core-xml",
+  "@azure/core-util",
+  "@azure/logger",
+  "@typespec/ts-http-runtime",
+  // eventgrid
+  "@azure/eventgrid",
+  "@azure/eventgrid-namespaces",
+  "@azure/eventgrid-systemevents",
+  // eventhubs
+  "@azure/event-hubs",
+  "@azure/eventhubs-checkpointstore-table",
+  "@azure/eventhubs-checkpointstore-blob",
+
+  "@azure/ai-form-recognizer",
+
+  // identity
   "@azure/identity",
-  // ...
+  "@azure/identity-broker",
+  "@azure/identity-cache-persistence",
+  "@azure/identity-vscode",
+
+  "@azure/opentelemetry-instrumentation-azure-sdk",
+  // keyvault
+  "@azure/keyvault-admin",
+  "@azure/keyvault-common",
   "@azure/keyvault-keys",
+  "@azure/keyvault-certificates",
   "@azure/keyvault-secrets",
   // ...
-  "@azure/service-bus",
+  "@azure/ai-metrics-advisor",
   // ...
+  "@azure/monitor-ingestion",
+  "@azure/monitor-query",
+
+  "@azure/notification-hubs",
+
+  "@azure/schema-registry-json",
+  "@azure/schema-registry-avro",
+  "@azure/schema-registry",
+
+  "@azure/search-documents",
+
+  "@azure/service-bus",
+
+  "@azure/data-tables",
+
+  "@azure/template-dpg",
+  "@azure/template",
 ];
 
-/**
- * Returns 1 if TF_BUILD env var is set (azure devops);
- *         2 if CI env var is set (github actions);
- *         0 if neither is set.
- */
 function runType() {
   if (process.env.TF_BUILD) {
     return "azure-devops";
@@ -74,7 +123,7 @@ function recordTestResult(
   if (!pipeline[runTaskKind]) {
     pipeline[runTaskKind] = { status: "UNKNOWN" };
   }
-  const unsuccessful = ["failed", "canceled", "abandoned", "skipped", "succeededWithIssues"];
+  const unsuccessful = ["failed", "canceled", "abandoned", "skip", "succeededWithIssues"];
   const old = pipeline[runTaskKind];
   if (task["result"] === "succeeded") {
     if (!unsuccessful.includes(pipeline[runTaskKind].status)) {
@@ -86,7 +135,11 @@ function recordTestResult(
     if (task["log"]) {
       pipeline[runTaskKind].log = task["log"].url;
     }
-  } else if (pipeline[runTaskKind].status !== "failed") {
+  } else if (
+    pipeline[runTaskKind].status !== "failed" &&
+    (task["result"] !== "skipped" ||
+      task["resultCode"] !== "Skipping step due to condition evaluation.")
+  ) {
     pipeline[runTaskKind] = { ...old, status: task["result"] };
     if (task["log"]) {
       pipeline[runTaskKind].log = task["log"].url;
@@ -149,8 +202,8 @@ async function getBuildResult(
     return;
   }
   const buildResponse = await getBuild(pipelineId, token);
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-  console.log("continue after 3 seconds delay");
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  console.log("continue after 1 seconds delay");
   const buildResult = await buildResponse.json();
   console.log("### Build result:", buildResult);
   if (!buildResponse.ok || !buildResult["value"]) {
@@ -166,11 +219,19 @@ async function getBuildResult(
     return;
   }
 
-  if (!pipelines[pkgName][buildKind]) {
-    pipelines[pkgName][buildKind] = { id: result["id"], link: result["_links"]["web"]["href"] };
-  } else {
-    pipelines[pkgName][buildKind].link = result["_links"]["web"]["href"];
-  }
+  const buildId = result["id"];
+  pipelines[pkgName][buildKind] = {
+    ...pipelines[pkgName][buildKind],
+    id: buildId,
+    link: result["_links"]["web"]["href"],
+    buildNumber: result["buildNumber"],
+  };
+  // if (!pipelines[pkgName][buildKind]) {
+  //   pipelines[pkgName][buildKind] = { id: buildId, link: result["_links"]["web"]["href"], buildNumber: result["buildNumber"] };
+  // } else {
+  //   pipelines[pkgName][buildKind].link = result["_links"]["web"]["href"];
+  //   pipelines[pkgName][buildKind].buildNumber = result["buildNumber"];
+  // }
 
   if (result["result"] === "succeeded") {
     recordAllPipeline(buildKind, pipelines[pkgName], "succeeded");
@@ -179,7 +240,6 @@ async function getBuildResult(
 
   const orig = pipelines[pkgName];
   pipelines[pkgName] = { ...orig, [buildKind]: { ...orig[buildKind], result: result["result"] } };
-  const buildId = result["id"];
   const timelineResponse = await getBuildTimeline(buildId, token);
   if (!timelineResponse.ok) {
     recordAllPipeline("tests", pipelines[pkgName], "UNKNOWN");
@@ -267,14 +327,7 @@ async function getPipelines(
     }
     const pipelineNameWithoutJsPrefix = p.name.split("js - ")[1];
     for (const [pkgName, pkgMetadata] of Object.entries(dataplane)) {
-      if (pkgMetadata.versionPolicy !== "client") {
-        continue;
-      }
-      if (pkgMetadata.projectFolder.includes("sdk/") !== true) {
-        console.warn(`Skipping ${pkgName} as it does not have a project folder`);
-        continue;
-      }
-      const [serviceDir, packageDir] = pkgMetadata.projectFolder.replace("sdk/", "").split("/");
+      const { serviceDir, packageDir } = pkgMetadata;
       console.log(
         `checking ${pkgName} - ${serviceDir} ${packageDir} against pipeline ${pipelineNameWithoutJsPrefix}`,
       );
@@ -300,11 +353,17 @@ function reportOverallStatus(packageDetails: PackageStatus): void {
     if (!RELEASE_BLOCKERS.includes(check)) {
       continue;
     }
-    if (status.status === "failed") {
+    if (
+      ["lint", "tests", "samples", "ci"].includes(check) &&
+      (status as unknown as Status).status === "FAIL"
+    ) {
       overallStatus = "BLOCKED";
       break;
     }
-    if (["DISABLED", "WARNING", "UNKNOWN"].includes(status.status)) {
+    if (
+      ["lint", "tests", "samples", "ci"].includes(check) &&
+      ["DISABLED", "WARNING", "UNKNOWN"].includes((status as unknown as Status).status)
+    ) {
       overallStatus = "NEEDS_ACTION";
       break;
     }
@@ -317,7 +376,12 @@ function reportTestResult(
   pipeline: PipelineResults,
   packageDetails: PackageStatus,
 ): void {
-  const testStatus = pipeline[testKind][testKind].status;
+  if (!pipeline) {
+    console.warn(`No ${testKind} pipeline found for ${packageDetails.projectFolder}`);
+    packageDetails[testKind] = { status: "UNKNOWN" };
+    return;
+  }
+  const testStatus = pipeline[testKind]?.[testKind]?.status;
   const old = packageDetails[testKind];
   if (testStatus === "succeeded" || testStatus === "partiallySucceeded") {
     packageDetails[testKind] = { ...old, status: "PASS", link: pipeline[testKind].link };
@@ -328,7 +392,7 @@ function reportTestResult(
   }
   console.dir(
     {
-      l: "### packageDetails",
+      l: "### packageDetails reportTestResult",
       pipeline,
       testKind,
       pf: packageDetails.projectFolder,
@@ -362,8 +426,9 @@ function reportCheckStatus(
 
 function reportStatus(dataplane: PackagesWithStatus, pipelines: Record<string, PipelineResults>) {
   for (const [packageName, packageDetails] of Object.entries(dataplane)) {
-    reportTestResult("ci", pipelines[packageName], packageDetails);
     reportTestResult("tests", pipelines[packageName], packageDetails);
+    reportTestResult("ci", pipelines[packageName], packageDetails);
+    reportOverallStatus(packageDetails);
   }
 }
 
@@ -373,28 +438,38 @@ function writeToCsv(
   dataplane: PackagesWithStatus,
   pipelines: Record<string, PipelineResults>,
 ): void {
+  // our weekly runs aren't too different from nightly runs for now
   const columnNames = [
+    "Service Directory",
     "Package",
     "Status",
+    "Owned by SDK team",
     "Tests - CI",
     "Tests - Live",
-    "Tests - Live Weekly",
+    // "Tests - Live Weekly",
     "Tests - CI Link",
+    "CI Build Number",
     "Tests - Live Link",
-    "Tests - Live Weekly Link",
+    "Tests Build Number",
+    // "Tests - Live Weekly Link",
+    // "Weekly Build Number",
   ];
   const csvData = Object.entries(dataplane).map(([pkgName, pkgDetails]) => {
     const status = pkgDetails.status;
-    const pipelineDetails = pipelines[pkgName];
     return [
+      pkgDetails.serviceDir,
       pkgName,
       status,
-      pipelineDetails.ci?.ci?.status ?? "",
-      pipelineDetails.tests?.tests?.status ?? "",
-      pipelineDetails.weeklyTests?.weeklyTests?.status ?? "",
-      pipelineDetails.ci?.link ?? "",
-      pipelineDetails.tests?.link ?? "",
-      pipelineDetails.weeklyTests?.link ?? "",
+      SDK_OWNED.includes(pkgName) ? "YES" : "NO",
+      pipelines[pkgName].ci?.ci?.status ?? "",
+      pipelines[pkgName].tests?.tests?.status ?? "",
+      // pipelines[pkgName].weeklyTests?.weeklyTests?.status ?? "",
+      pipelines[pkgName].ci?.link ?? "",
+      pipelines[pkgName].ci?.buildNumber ?? "",
+      pipelines[pkgName].tests?.link ?? "",
+      pipelines[pkgName].tests?.buildNumber ?? "",
+      // pipelines[pkgName].weeklyTests?.link ?? "",
+      // pipelines[pkgName].weeklyTests?.buildNumber ?? "",
     ].join(",");
   });
   writeFileSync(
@@ -404,6 +479,10 @@ ${csvData.join("\n")}
 `,
     "utf-8",
   );
+  console.log(`CSV report written to ${CSV_REPORT_FILE_NAME}`);
+  console.log(`${columnNames.join(",")}
+${csvData.join("\n")}
+`);
 }
 
 async function main() {
@@ -431,7 +510,7 @@ async function main() {
 
   const dataplane = await getDataplanePackages();
   const pipelines = await getPipelines(dataplane, token);
-  console.dir({ l: "### pipelines", pipelines }, { depth: 4 });
+
   for (const [pkgName, pipelineIds] of Object.entries(pipelines)) {
     await getCiResult(pkgName, pipelines, token, pipelineIds.ci?.id);
     await getTestsResult(pkgName, pipelines, token, pipelineIds.tests?.id);
