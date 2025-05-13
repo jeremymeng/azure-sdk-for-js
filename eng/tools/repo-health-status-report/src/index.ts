@@ -4,7 +4,7 @@
 import { Octokit } from "octokit";
 import { DefaultAzureCredential } from "@azure/identity";
 import { getDataplanePackages } from "./packages.js";
-import { getBuildTimeline, getBuild } from "./urlHelpers.js";
+import { getAllBuilds, getBuildTimeline, getBuild } from "./urlHelpers.js";
 import type {
   CheckStatusCode,
   CheckTypes,
@@ -226,12 +226,6 @@ async function getBuildResult(
     link: result["_links"]["web"]["href"],
     buildNumber: result["buildNumber"],
   };
-  // if (!pipelines[pkgName][buildKind]) {
-  //   pipelines[pkgName][buildKind] = { id: buildId, link: result["_links"]["web"]["href"], buildNumber: result["buildNumber"] };
-  // } else {
-  //   pipelines[pkgName][buildKind].link = result["_links"]["web"]["href"];
-  //   pipelines[pkgName][buildKind].buildNumber = result["buildNumber"];
-  // }
 
   if (result["result"] === "succeeded") {
     recordAllPipeline(buildKind, pipelines[pkgName], "succeeded");
@@ -310,14 +304,14 @@ async function getPipelines(
   dataplane: Packages,
   authToken,
 ): Promise<Record<string, PipelineResults>> {
-  // const response = await getAllBuilds(authToken);
-  // if (!response.ok) {
-  //   console.error(`Error fetching pipelines: ${response.statusText}`);
-  //   return;
-  // }
-  // const responseJson = await response.json();
+  const response = await getAllBuilds(authToken);
+  if (!response.ok) {
+    console.error(`Error fetching pipelines: ${response.statusText}`);
+    return;
+  }
+  const responseJson = await response.json();
 
-  const responseJson = JSON.parse(readFileSync("./pipelines-static.json", "utf-8"));
+  // const responseJson = JSON.parse(readFileSync("./pipelines-static.json", "utf-8"));
 
   const jsPipelines = responseJson.value.filter((p) => p.name.startsWith("js -"));
   const pipelines: Record<string, PipelineResults> = {};
