@@ -3,15 +3,15 @@
   "version": "2.0.0-beta.1",
   "description": "A generated SDK for HybridConnectivityClient.",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
-    "@azure-rest/core-client": "workspace:*",
-    "@azure/abort-controller": "workspace:*",
-    "@azure/core-auth": "workspace:*",
-    "@azure/core-lro": "workspace:*",
-    "@azure/core-paging": "workspace:*",
-    "@azure/core-rest-pipeline": "workspace:*",
+    "@azure-rest/core-client": "workspace:^",
+    "@azure/abort-controller": "workspace:^",
+    "@azure/core-auth": "workspace:^",
+    "@azure/core-lro": "workspace:^",
+    "@azure/core-paging": "workspace:^",
+    "@azure/core-rest-pipeline": "workspace:^",
     "tslib": "catalog:"
   },
   "keywords": [
@@ -27,12 +27,12 @@
   "module": "./dist/esm/index.js",
   "types": "./dist/commonjs/index.d.ts",
   "devDependencies": {
-    "@azure-tools/test-credential": "workspace:*",
-    "@azure-tools/test-recorder": "workspace:*",
-    "@azure-tools/test-utils-vitest": "workspace:*",
-    "@azure/dev-tool": "workspace:*",
+    "@azure-tools/test-credential": "workspace:^",
+    "@azure-tools/test-recorder": "workspace:^",
+    "@azure-tools/test-utils-vitest": "workspace:^",
+    "@azure/dev-tool": "workspace:^",
     "@azure/identity": "catalog:internal",
-    "@azure/logger": "workspace:*",
+    "@azure/logger": "workspace:^",
     "@types/node": "catalog:",
     "@vitest/browser": "catalog:testing",
     "@vitest/coverage-istanbul": "catalog:testing",
@@ -68,7 +68,7 @@
     "lint": "echo skipped",
     "lint:fix": "echo skipped",
     "minify": "echo skipped",
-    "pack": "npm pack 2>&1",
+    "pack": "pnpm pack 2>&1",
     "test": "npm run clean && dev-tool run build-package && npm run unit-test:node && npm run unit-test:browser && npm run integration-test",
     "test:browser": "npm run clean && npm run build:test && npm run unit-test:browser && npm run integration-test:browser",
     "test:node": "npm run clean && dev-tool run build-package && npm run unit-test:node && npm run integration-test:node",
