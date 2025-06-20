@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Octokit } from "octokit";
 import { DefaultAzureCredential } from "@azure/identity";
 import { getDataplanePackages } from "./packages.js";
 import { getAllBuilds, getBuildTimeline, getBuild } from "./urlHelpers.js";
@@ -18,7 +17,8 @@ import type {
 } from "./interfaces.js";
 
 import "dotenv/config";
-import { readFileSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
+import { uploadResultToGitHubJsRepo } from "./github.js";
 
 const DEVOPS_RESOURCE_UUID = "499b84ac-1321-427f-aa17-267ca6975798";
 
@@ -480,20 +480,6 @@ ${csvData.join("\n")}
 }
 
 async function main() {
-  const gitHubToken = process.env.GITHUB_TOKEN;
-  if (!gitHubToken) {
-    console.error("GITHUB_TOKEN is not set. Please set it in your environment variables.");
-    process.exit(1);
-  }
-
-  // GitHub
-  const octokit = new Octokit({
-    auth: gitHubToken,
-  });
-  const {
-    data: { login },
-  } = await octokit.rest.users.getAuthenticated();
-
   let token;
   if (runType() !== "unknown") {
     token = process.env["SYSTEM_ACCESSTOKEN"];
@@ -518,15 +504,7 @@ async function main() {
   writeToCsv(dataplane as unknown as PackagesWithStatus, pipelines);
 
   if (runType() !== "unknown") {
-    const path = `/eng/tools/repo-health-status-report/health_report.csv`;
-    await octokit.rest.repos.createOrUpdateFileContents({
-      owner: login,
-      repo: "azure-sdk-for-js",
-      branch: "js-sdk-health-report",
-      path,
-      message: "Update health report",
-      content: readFileSync(CSV_REPORT_FILE_NAME, "utf-8"),
-    });
+    await uploadResultToGitHubJsRepo(CSV_REPORT_FILE_NAME);
   }
 }
 
