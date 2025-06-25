@@ -3,7 +3,13 @@
 
 import { DefaultAzureCredential } from "@azure/identity";
 import { getDataplanePackages } from "./packages.js";
-import { getAllBuilds, getBuildTimeline, getBuild } from "./urlHelpers.js";
+import {
+  getAllDevopsBuilds,
+  getBuildTimeline,
+  getBuild,
+  githubTotalIssueLink,
+  githubIssueLinkUrl,
+} from "./urlHelpers.js";
 import type {
   CheckStatusCode,
   CheckTypes,
@@ -18,7 +24,7 @@ import type {
 
 import "dotenv/config";
 import { writeFileSync } from "fs";
-import { uploadResultToGitHubJsRepo } from "./github.js";
+import { getCustomerIssues, mapCodeownersToLabel, uploadResultToGitHubJsRepo } from "./github.js";
 
 const DEVOPS_RESOURCE_UUID = "499b84ac-1321-427f-aa17-267ca6975798";
 
@@ -178,17 +184,6 @@ function recordAllPipeline(
   }
 }
 
-function recordAllPackage(details: PackageStatus, status: CheckStatusCode): void {
-  details = {
-    ...details,
-    lint: { status },
-    ci: { status },
-    tests: { status },
-    samples: { status },
-    sdkOwned: true, // TODO: set this based on the package
-  };
-}
-
 async function getBuildResult(
   buildKind: "ci" | "tests" | "weeklyTests",
   pkgName: string,
@@ -304,12 +299,7 @@ async function getPipelines(
   dataplane: Packages,
   authToken,
 ): Promise<Record<string, PipelineResults>> {
-  const response = await getAllBuilds(authToken);
-  if (!response.ok) {
-    console.error(`Error fetching pipelines: ${response.statusText}`);
-    return;
-  }
-  const responseJson = await response.json();
+  const responseJson = await getAllDevopsBuilds(authToken);
 
   // const responseJson = JSON.parse(readFileSync("./pipelines-static.json", "utf-8"));
 
@@ -322,9 +312,9 @@ async function getPipelines(
     const pipelineNameWithoutJsPrefix = p.name.split("js - ")[1];
     for (const [pkgName, pkgMetadata] of Object.entries(dataplane)) {
       const { serviceDir, packageDir } = pkgMetadata;
-      console.log(
-        `checking ${pkgName} - ${serviceDir} ${packageDir} against pipeline ${pipelineNameWithoutJsPrefix}`,
-      );
+      // console.log(
+      //   `checking ${pkgName} - ${serviceDir} ${packageDir} against pipeline ${pipelineNameWithoutJsPrefix}`,
+      // );
       const original = pipelines[pkgName];
       if (serviceDir === pipelineNameWithoutJsPrefix) {
         pipelines[pkgName] = { ...original, ci: { id: p.id, link: "" } };
@@ -384,16 +374,112 @@ function reportTestResult(
   } else {
     packageDetails[testKind] = { ...old, status: "UNKNOWN", link: pipeline[testKind].link };
   }
-  console.dir(
-    {
-      l: "### packageDetails reportTestResult",
-      pipeline,
-      testKind,
-      pf: packageDetails.projectFolder,
-      pd: packageDetails[testKind],
-    },
-    { depth: 4 },
+  // console.dir(
+  //   {
+  //     l: "### packageDetails reportTestResult",
+  //     pipeline,
+  //     testKind,
+  //     pf: packageDetails.projectFolder,
+  //     pd: packageDetails[testKind],
+  //   },
+  //   { depth: 4 },
+  // );
+}
+
+function recordTotalCustomerIssues(
+  dataplane: PackagesWithStatus,
+  issues: any[],
+  trackedLabels: Record<string, string>,
+) {
+  for (const issue of issues) {
+    for (const label of issue.labels) {
+      if (trackedLabels[label.name]) {
+        const serviceDir = trackedLabels[label.name];
+        const packages = Object.keys(dataplane).filter(
+          (pkgName) => (dataplane[pkgName] as PackageStatus).serviceDir === serviceDir,
+        );
+        for (const pkgName of packages) {
+          if (label.name === (dataplane[pkgName] as PackageStatus).label) {
+            if (!(dataplane[pkgName] as PackageStatus).customerIssues) {
+              (dataplane[pkgName] as PackageStatus).customerIssues = { num: 0, link: "" };
+            }
+            (dataplane[pkgName] as PackageStatus).customerIssues.num++;
+            (dataplane[pkgName] as PackageStatus).customerIssues.link = githubTotalIssueLink(
+              label.name,
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+function recordSlaStatus(
+  dataplane: PackagesWithStatus,
+  issue: any,
+  trackedLabels: Record<string, string>,
+  timePeriod: number,
+  kind: "question" | "bug",
+): void {
+  for (const label of issue.labels) {
+    if (trackedLabels[label.name]) {
+      const serviceDir = trackedLabels[label.name];
+      const packages = Object.keys(dataplane).filter(
+        (pkgName) => (dataplane[pkgName] as PackageStatus).serviceDir === serviceDir,
+      );
+      for (const pkgName of packages) {
+        if (label.name === (dataplane[pkgName] as PackageStatus).label) {
+          if (!(dataplane[pkgName] as PackageStatus).sla) {
+            (dataplane[pkgName] as PackageStatus).sla = {
+              question: {
+                num: 0,
+                link: githubIssueLinkUrl(
+                  label.name,
+                  "question",
+                  new Date(timePeriod).toISOString().split("T")[0],
+                ),
+              },
+              bug: {
+                num: 0,
+                link: githubIssueLinkUrl(
+                  label.name,
+                  "bug",
+                  new Date(timePeriod).toISOString().split("T")[0],
+                ),
+              },
+            };
+          }
+          (dataplane[pkgName] as PackageStatus).sla[kind].num++;
+        }
+      }
+    }
+  }
+}
+
+async function reportSlaAndTotalIssues(dataplane: PackagesWithStatus) {
+  const trackedLabels = await mapCodeownersToLabel(dataplane);
+  const issues = await getCustomerIssues();
+  recordTotalCustomerIssues(dataplane, issues, trackedLabels);
+  const filtered = issues.filter(
+    (issue) =>
+      !issue.labels.some((label) =>
+        ["issue-addressed", "needs-author-feedback", "feature-request"].includes(label.name),
+      ),
   );
+  console.dir({ l: "### filtered issues", filtered }, { depth: 4 });
+  const today = Date.now();
+  const thirtyDaysAgo = today - 30 * 24 * 60 * 60 * 1000;
+  const ninetyDaysAgo = today - 90 * 24 * 60 * 60 * 1000;
+
+  for (const issue of filtered) {
+    const createdDate = new Date(issue.created_at);
+    if (issue.labels.some((l) => l.name === "question") && createdDate.getTime() < thirtyDaysAgo) {
+      recordSlaStatus(dataplane, issue, trackedLabels, thirtyDaysAgo, "question");
+    }
+    if (issue.labels.some((l) => l.name === "bug") && createdDate.getTime() < ninetyDaysAgo) {
+      recordSlaStatus(dataplane, issue, trackedLabels, ninetyDaysAgo, "bug");
+    }
+  }
 }
 
 function reportCheckStatus(
@@ -447,6 +533,12 @@ function writeToCsv(
     // "Tests - Live Weekly",
     // "Tests - Live Weekly Link",
     // "Weekly Build Number",
+    "SLA - Questions",
+    "SLA - Bugs",
+    "Total Customer-reported Issues",
+    "SLA - Questions Link",
+    "SLA - Bugs Link",
+    "Total Customer-reported Issues Link",
   ];
   const csvData = Object.entries(dataplane).map(([pkgName, pkgDetails]) => {
     const status = pkgDetails.status;
@@ -464,6 +556,12 @@ function writeToCsv(
       // pipelines[pkgName].weeklyTests?.weeklyTests?.status ?? "",
       // pipelines[pkgName].weeklyTests?.link ?? "",
       // pipelines[pkgName].weeklyTests?.buildNumber ?? "",
+      pkgDetails.sla?.question?.num ?? 0,
+      pkgDetails.sla?.bug?.num ?? 0,
+      pkgDetails.customerIssues?.num ?? 0,
+      pkgDetails.sla?.question?.link ?? "",
+      pkgDetails.sla?.bug?.link ?? "",
+      pkgDetails.customerIssues?.link ?? "",
     ].join(",");
   });
   writeFileSync(
@@ -498,6 +596,8 @@ async function main() {
   }
 
   reportStatus(dataplane as unknown as PackagesWithStatus, pipelines);
+
+  await reportSlaAndTotalIssues(dataplane as unknown as PackagesWithStatus);
 
   console.dir({ l: "### status", dataplane, pipelines }, { depth: 4 });
 

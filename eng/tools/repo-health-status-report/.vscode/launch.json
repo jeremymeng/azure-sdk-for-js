@@ -7,12 +7,12 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "debug issues.ts",
+            "name": "debug .ts",
             "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\issues.ts",
+            "program": "${workspaceFolder}\\src\\index.ts",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]

@@ -85,10 +85,7 @@ export interface PackageInfo {
   packageDir: string;
 }
 
-export type Packages = Record<
-  string,
-  PackageInfo
->;
+export type Packages = Record<string, PackageInfo>;
 
 export interface PackageStatus extends PackageInfo {
   status: PackageStatusCode;
@@ -102,7 +99,7 @@ export interface PackageStatus extends PackageInfo {
   tests: Status;
   samples: Status;
   ci: Status;
-};
+}
 
 export type PackagesWithStatus = Record<string, PackageStatus>;
 
