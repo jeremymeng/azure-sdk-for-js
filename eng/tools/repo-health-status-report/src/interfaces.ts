@@ -22,8 +22,6 @@ export type PackageStatusCode = "NEEDS_ACTION" | "BLOCKED" | "GOOD";
 
 export type CheckStatusCode = "PASS" | "FAIL" | "WARNING" | "DISABLED" | "UNKNOWN";
 
-export type CheckTypes = "lint" | "tests" | "docs" | "ci";
-
 export interface Status {
   status: CheckStatusCode;
   link?: string;

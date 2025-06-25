@@ -3,7 +3,7 @@
 
 import { Octokit } from "octokit";
 import "dotenv/config";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { PackageStatus, PackagesWithStatus } from "./interfaces.js";
 
 // GitHub
@@ -41,14 +41,6 @@ export async function uploadResultToGitHubJsRepo(csvPath: string) {
 }
 
 export async function getCustomerIssues() {
-  if (process.env.USE_LOCAL_MOKE_DATA) {
-    const content = await readFile("issues-static.json", "utf-8");
-    if (content) {
-      const issues = JSON.parse(content);
-      return issues.issues;
-    }
-    return [];
-  }
   const issues = [];
   const octokit = getOctokit();
 
@@ -138,73 +130,3 @@ export async function mapCodeownersToLabel(dataplane: PackagesWithStatus) {
 
   return trackedLabels;
 }
-
-async function testFilteredIssues() {
-  //   const gitHubToken = process.env.GITHUB_TOKEN;
-  //   if (!gitHubToken) {
-  //     console.error("GITHUB_TOKEN is not set. Please set it in your environment variables.");
-  //     process.exit(1);
-  //   }
-
-  //   // GitHub
-  //   const octokit = new Octokit({
-  //     auth: gitHubToken,
-  //   });
-
-  //   const issues = await getIssues(octokit);
-  //   console.dir({ issues }, { depth: 10 });
-
-  //   await writeFile("issues-static.json", JSON.stringify({ issues }, null, 2), "utf-8");
-  //   return;
-
-  const filtered = await getCustomerIssues();
-  const today = Date.now();
-  const thirtyDaysAgo = today - 30 * 24 * 60 * 60 * 1000;
-  const ninetyDaysAgo = today - 90 * 24 * 60 * 60 * 1000;
-
-  for (const issue of filtered) {
-    const createdDate = new Date(issue.created_at);
-    if (issue.labels.some((l) => l.name === "question") && createdDate.getTime() < thirtyDaysAgo) {
-      console.log(
-        `Question #${issue.number} created on ${createdDate.toISOString()} is older than 30 days. ${issue.html_url}`,
-      );
-    } else if (
-      issue.labels.some((l) => l.name === "bug") &&
-      createdDate.getTime() < ninetyDaysAgo
-    ) {
-      console.log(
-        `Bug #${issue.number} created on ${createdDate.toISOString()} is older than 90 days. ${issue.html_url}`,
-      );
-    }
-  }
-}
-
-async function testCodeowners() {
-  const dataplane = {
-    "@azure/monitor-opentelemetry": {
-      serviceDir: "monitor",
-    },
-    "@azure/search-documents": {
-      serviceDir: "search",
-    },
-    "@azure-rest/maps-search": {
-      serviceDir: "maps",
-    },
-    "@azure-rest/maps-route": {
-      serviceDir: "maps",
-    },
-    "@azure-rest/maps-render": {
-      serviceDir: "maps",
-    },
-    "@azure/communication-alpha-ids": {
-      serviceDir: "communication",
-    },
-  };
-  await mapCodeownersToLabel(dataplane);
-  console.dir(dataplane, { depth: 4 });
-}
-
-// testCodeowners().catch((error) => {
-//   console.error("Error fetching issues:", error);
-//   process.exit(1);
-// });

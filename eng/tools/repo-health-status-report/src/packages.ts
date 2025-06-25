@@ -6,7 +6,9 @@ import { join } from "path";
 import { readFile } from "fs/promises";
 import { getBaseDir } from "./env.js";
 
-export async function getDataplanePackages(): Promise<Record<string, any>> {
+export async function getDataplanePackages(): Promise<
+  Record<string, { version: string; projectPath: string; serviceDir: string; packageDir: string }>
+> {
   const workspaceRoot = getBaseDir();
   const sdkPackageJsonFiles = (await glob(`${workspaceRoot}/sdk/*/*/package.json`, {}))
     .filter((file) => !file.includes(`/arm-`) && !file.includes(`\\arm-`))

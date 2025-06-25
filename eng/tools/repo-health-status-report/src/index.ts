@@ -11,8 +11,6 @@ import {
   githubIssueLinkUrl,
 } from "./urlHelpers.js";
 import type {
-  CheckStatusCode,
-  CheckTypes,
   Packages,
   PackageStatus,
   PackageStatusCode,
@@ -23,18 +21,13 @@ import type {
 } from "./interfaces.js";
 
 import "dotenv/config";
-import { writeFileSync } from "fs";
+import { writeFile } from "node:fs/promises";
 import { getCustomerIssues, mapCodeownersToLabel, uploadResultToGitHubJsRepo } from "./github.js";
 
 const DEVOPS_RESOURCE_UUID = "499b84ac-1321-427f-aa17-267ca6975798";
 
 const RELEASE_BLOCKERS = ["lint", "ci"];
 
-const MANDATORY_CHECKS = ["lint", "ci"];
-
-// TODO: do we have JS equivalent? const INACTIVE_CLASSIFIER = "Development Status :: 7 - Inactive";
-
-// TODO: add to package details
 const SDK_OWNED = [
   "@azure/app-configuration",
   "@azure/container-registry",
@@ -107,17 +100,6 @@ function runType() {
     return "github-actions";
   } else {
     return "unknown";
-  }
-}
-
-function recordCheckResult(
-  task: Map<string, string>,
-  kind: string,
-  pipeline: PipelineResultsUnion,
-): void {
-  pipeline[kind] = task["result"];
-  if (task["log"]) {
-    pipeline[kind].log = task["log"].url;
   }
 }
 
@@ -200,7 +182,6 @@ async function getBuildResult(
   await new Promise((resolve) => setTimeout(resolve, 1000));
   console.log("continue after 1 seconds delay");
   const buildResult = await buildResponse.json();
-  console.log("### Build result:", buildResult);
   if (!buildResponse.ok || !buildResult["value"]) {
     console.warn(`No ${buildKind} build found for ${pkgName}`);
     recordAllPipeline(buildKind, pipelines[pkgName], "UNKNOWN");
@@ -312,9 +293,6 @@ async function getPipelines(
     const pipelineNameWithoutJsPrefix = p.name.split("js - ")[1];
     for (const [pkgName, pkgMetadata] of Object.entries(dataplane)) {
       const { serviceDir, packageDir } = pkgMetadata;
-      // console.log(
-      //   `checking ${pkgName} - ${serviceDir} ${packageDir} against pipeline ${pipelineNameWithoutJsPrefix}`,
-      // );
       const original = pipelines[pkgName];
       if (serviceDir === pipelineNameWithoutJsPrefix) {
         pipelines[pkgName] = { ...original, ci: { id: p.id, link: "" } };
@@ -361,7 +339,7 @@ function reportTestResult(
   packageDetails: PackageStatus,
 ): void {
   if (!pipeline) {
-    console.warn(`No ${testKind} pipeline found for ${packageDetails.projectFolder}`);
+    console.warn(`No ${testKind} pipeline found for ${packageDetails.serviceDir}`);
     packageDetails[testKind] = { status: "UNKNOWN" };
     return;
   }
@@ -374,24 +352,15 @@ function reportTestResult(
   } else {
     packageDetails[testKind] = { ...old, status: "UNKNOWN", link: pipeline[testKind].link };
   }
-  // console.dir(
-  //   {
-  //     l: "### packageDetails reportTestResult",
-  //     pipeline,
-  //     testKind,
-  //     pf: packageDetails.projectFolder,
-  //     pd: packageDetails[testKind],
-  //   },
-  //   { depth: 4 },
-  // );
 }
 
 function recordTotalCustomerIssues(
   dataplane: PackagesWithStatus,
-  issues: any[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  githubIssues: any[],
   trackedLabels: Record<string, string>,
 ) {
-  for (const issue of issues) {
+  for (const issue of githubIssues) {
     for (const label of issue.labels) {
       if (trackedLabels[label.name]) {
         const serviceDir = trackedLabels[label.name];
@@ -416,12 +385,13 @@ function recordTotalCustomerIssues(
 
 function recordSlaStatus(
   dataplane: PackagesWithStatus,
-  issue: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  githubIssue: any,
   trackedLabels: Record<string, string>,
   timePeriod: number,
   kind: "question" | "bug",
 ): void {
-  for (const label of issue.labels) {
+  for (const label of githubIssue.labels) {
     if (trackedLabels[label.name]) {
       const serviceDir = trackedLabels[label.name];
       const packages = Object.keys(dataplane).filter(
@@ -466,7 +436,6 @@ async function reportSlaAndTotalIssues(dataplane: PackagesWithStatus) {
         ["issue-addressed", "needs-author-feedback", "feature-request"].includes(label.name),
       ),
   );
-  console.dir({ l: "### filtered issues", filtered }, { depth: 4 });
   const today = Date.now();
   const thirtyDaysAgo = today - 30 * 24 * 60 * 60 * 1000;
   const ninetyDaysAgo = today - 90 * 24 * 60 * 60 * 1000;
@@ -482,28 +451,6 @@ async function reportSlaAndTotalIssues(dataplane: PackagesWithStatus) {
   }
 }
 
-function reportCheckStatus(
-  check: CheckTypes,
-  pipeline: PipelineResults,
-  packageDetails: PackageStatus,
-): void {
-  const enabled = true; // TODO: set this based on the package
-  if (!enabled) {
-    packageDetails[check] = { status: "DISABLED" };
-    return;
-  }
-
-  const ciCheck = pipeline[check].ci.status;
-  const old = packageDetails[check];
-  if (ciCheck === "succeeded") {
-    packageDetails[check] = { ...old, status: "PASS", link: pipeline[check].link };
-  } else if (ciCheck === "failed") {
-    packageDetails[check] = { ...old, status: "FAIL", link: pipeline[check].link };
-  } else {
-    packageDetails[check] = { ...old, status: "UNKNOWN", link: pipeline[check].link };
-  }
-}
-
 function reportStatus(dataplane: PackagesWithStatus, pipelines: Record<string, PipelineResults>) {
   for (const [packageName, packageDetails] of Object.entries(dataplane)) {
     reportTestResult("tests", pipelines[packageName], packageDetails);
@@ -514,11 +461,11 @@ function reportStatus(dataplane: PackagesWithStatus, pipelines: Record<string, P
 
 const CSV_REPORT_FILE_NAME = "health_report.csv";
 
-function writeToCsv(
+async function writeToCsv(
   dataplane: PackagesWithStatus,
   pipelines: Record<string, PipelineResults>,
-): void {
-  // our weekly runs aren't too different from nightly runs for now
+): Promise<void> {
+  // our weekly runs aren't too different from nightly runs for now so skipping them
   const columnNames = [
     "Service Directory",
     "Package",
@@ -564,7 +511,7 @@ function writeToCsv(
       pkgDetails.customerIssues?.link ?? "",
     ].join(",");
   });
-  writeFileSync(
+  await writeFile(
     CSV_REPORT_FILE_NAME,
     `${columnNames.join(",")}
 ${csvData.join("\n")}
@@ -572,9 +519,6 @@ ${csvData.join("\n")}
     "utf-8",
   );
   console.log(`CSV report written to ${CSV_REPORT_FILE_NAME}`);
-  console.log(`${columnNames.join(",")}
-${csvData.join("\n")}
-`);
 }
 
 async function main() {
@@ -599,9 +543,7 @@ async function main() {
 
   await reportSlaAndTotalIssues(dataplane as unknown as PackagesWithStatus);
 
-  console.dir({ l: "### status", dataplane, pipelines }, { depth: 4 });
-
-  writeToCsv(dataplane as unknown as PackagesWithStatus, pipelines);
+  await writeToCsv(dataplane as unknown as PackagesWithStatus, pipelines);
 
   if (runType() !== "unknown") {
     await uploadResultToGitHubJsRepo(CSV_REPORT_FILE_NAME);
