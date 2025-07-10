@@ -14,8 +14,11 @@ function drain(stream: ReadableStream<Uint8Array>): Promise<Blob> {
 async function toBlobPart(
   source: ReadableStream<Uint8Array> | Blob | Uint8Array,
 ): Promise<BlobPart> {
-  if (source instanceof Blob || source instanceof Uint8Array) {
+  if (source instanceof Blob) {
     return source;
+  } else if (source instanceof SharedArrayBuffer) {
+    const array: Uint8Array<ArrayBuffer> = new Uint8Array(source);
+    return new Blob([array]);
   }
 
   if (isWebReadableStream(source)) {

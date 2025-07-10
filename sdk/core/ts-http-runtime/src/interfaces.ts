@@ -94,10 +94,11 @@ export type RequestBodyType =
   | (() => NodeJS.ReadableStream)
   | ReadableStream<Uint8Array>
   | (() => ReadableStream<Uint8Array>)
-  | Blob
-  | ArrayBuffer
-  | ArrayBufferView
-  | FormData
+  // | Blob
+  // | ArrayBuffer
+  // | ArrayBufferView
+  // | FormData
+  | BodyInit
   | string
   | null;
 

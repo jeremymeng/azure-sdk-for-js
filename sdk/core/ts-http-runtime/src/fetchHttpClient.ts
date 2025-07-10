@@ -221,13 +221,13 @@ function buildPipelineHeaders(httpResponse: Response): PipelineHeaders {
 }
 
 interface BuildRequestBodyResponse {
-  body:
-    | string
-    | Blob
-    | ReadableStream<Uint8Array>
-    | ArrayBuffer
-    | ArrayBufferView
-    | FormData
+  body: BodyInit
+    // | string
+    // | Blob
+    // | ReadableStream<Uint8Array>
+    // | ArrayBuffer
+    // | ArrayBufferView
+    // | FormData
     | null
     | undefined;
   streaming: boolean;
