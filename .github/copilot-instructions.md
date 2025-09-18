@@ -1,12 +1,121 @@
-# Prompt for GitHub Copilot
+# Azure SDK for JavaScript - Copilot Instructions
 
-You are a highly experienced engineer with expertise in
+## Repository Overview
 
-- Node.js (https://nodejs.org)
-- TypeScript (https://www.typescriptlang.org)
-- JavaScript (https://developer.mozilla.org/docs/Web/JavaScript)
-- Vitest (https://vitest.dev/)
-- pnpm (https://pnpm.io).
+This is the **Azure SDK for JavaScript**, a monorepo containing client and management libraries for Azure services. The repository has ~440 workspace packages managed with **pnpm** workspaces and **Turbo** for build orchestration.
+
+**Key Facts:**
+
+- **Languages:** TypeScript, JavaScript
+- **Package Manager:** pnpm 10.12.1+ (required)
+- **Build System:** Turbo with remote caching
+- **Test Framework:** Vitest for both Node.js and browser
+- **Node.js:** 20+ required
+- **Monorepo Structure:** Individual packages under `/sdk/{service}/`
+
+## Build and Formatting Instructions
+
+- When building a single package under its directory, use `npx turbo build` to leverage turbo's dependency management and remote cache benefits.
+- To build multiple packages and their dependencies, use the `--filter` or `-F` option. For example: `pnpm turbo build -F @azure/<package_A>... -F @azure/<package_B>...`. The trailing `...` after a package name ensures that the package and all its dependencies are selected.
+- Before submitting a pull request for changes to a package, always run its `format` NPM script first to ensure code style consistency.
+
+## Essential Build Commands
+
+**Prerequisites (ALWAYS run first):**
+
+```bash
+pnpm install  # Takes ~15s, required before any other commands
+```
+
+**Building:**
+
+```bash
+# Single package (from package directory)
+npx turbo build
+
+# Multiple packages with dependencies (from repo root)
+pnpm turbo build -F @azure/<package-name>...
+
+# All packages (takes 1+ hour, rarely needed)
+pnpm build
+```
+
+**Testing:**
+
+```bash
+# From package directory
+pnpm test        # Runs both Node.js and browser tests
+pnpm test:node   # Node.js only
+pnpm test:browser # Browser only (requires system dependencies)
+```
+
+**Linting and Formatting:**
+
+```bash
+pnpm lint        # ESLint check
+pnpm format      # Prettier format (REQUIRED before PR)
+```
+
+**⚠️ Important Notes:**
+
+- Browser tests require additional system dependencies and may fail in some environments
+- Tests typically run in ~30-60 seconds for individual packages
+- Build times: single package ~2-5s, dependencies may add time
+- NEVER disable ESLint rules from `eslint-plugin-azure-sdk`
+
+## Project Structure
+
+**Core Architecture:**
+
+```
+/sdk/core/           # Foundational packages (@azure/core-*)
+/sdk/{service}/      # Service-specific packages
+/common/tools/       # Build tools (dev-tool, eslint-plugin-azure-sdk)
+/.github/workflows/  # CI/CD pipelines
+/documentation/      # Developer guides
+```
+
+**Key Configuration Files:**
+
+- `package.json` - Root package with scripts and pnpm config
+- `turbo.json` - Build orchestration with remote caching
+- `pnpm-workspace.yaml` - Workspace configuration and dependency catalogs
+- `tsconfig*.json` - TypeScript configurations (base, build, test variants)
+- `vitest.shared.config.ts` - Test configuration
+- `eslint.config.mjs` - ESLint configuration (per package)
+
+**Package Structure (typical):**
+
+```
+sdk/{service}/{package}/
+├── src/             # Source code
+├── test/            # Tests (.spec.ts files)
+├── dist/            # Build output (generated)
+├── review/          # API review files (generated)
+├── package.json     # Package manifest
+├── tsconfig.json    # TypeScript config
+└── eslint.config.mjs # ESLint config
+```
+
+## CI/CD and Validation
+
+**GitHub Workflows:**
+
+- Automated checks run on PR submission
+- API review generation and validation
+- Cross-platform testing (Node.js and browsers)
+- Dependency validation and security scanning
+
+**Pre-commit Validation Steps:**
+
+1. Run `pnpm format` in changed packages
+2. Run `pnpm lint` to check for issues
+3. Run `pnpm test` to verify tests pass
+4. Ensure builds complete: `npx turbo build`
+
+## Expert Guidelines
+
+You are a highly experienced engineer with expertise in Node.js, TypeScript, JavaScript, Vitest, and pnpm working within this Azure SDK monorepo.
 
 ## Behavior
 
@@ -69,7 +178,7 @@ In general, whenever a code refers to `@azure/core-*` packages, we will expect c
 - `@azure/core-xml`: `sdk/core/core-xml`
 - `@azure-rest/core-client`: `sdk/core/core-client-rest`
 
-If a change requires updates to the core packages, you will remind the user to run `pnpm build --filter=@azure/<package-name>...` commands.
+If a change requires updates to the core packages, you will remind the user to run `pnpm turbo build --filter=@azure/<package-name>...` commands.
 
 ### Pre-requisites
 
