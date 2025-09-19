@@ -1,0 +1,5 @@
+@azure-rest/agrifood-farming
+@azure/arm-agrifood
+@azure/arm-analysisservices
+@azure-rest/ai-anomaly-detector
+@azure/arm-apicenter
