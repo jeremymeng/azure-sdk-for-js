@@ -12,22 +12,22 @@ const __dirname = dirname(__filename);
 
 async function getLatestStableVersion(packageName) {
   try {
-    console.error(`  Checking ${packageName}...`);
+    console.log(`  Checking ${packageName}...`);
     const output = execSync(`npm view "${packageName}" version`, {
       encoding: "utf8",
       stdio: "pipe",
     });
     const version = output.trim();
-    console.error(`    found ${version}`);
+    console.log(`    found ${version}`);
     return version;
   } catch {
-    console.error(`    not found on npm`);
+    console.log(`    not found on npm`);
     return null;
   }
 }
 
 async function getAzureLkgPackagesFromWorkspace() {
-  console.error("Reading azurelkg catalog from pnpm-workspace.yaml...");
+  console.log("Reading azurelkg catalog from pnpm-workspace.yaml...");
 
   try {
     const workspaceYamlPath = resolve(__dirname, "../../../pnpm-workspace.yaml");
@@ -53,7 +53,7 @@ async function getAzureLkgPackagesFromWorkspace() {
     }
 
     packages.sort();
-    console.error(`Found ${packages.length} packages in azurelkg catalog`);
+    console.log(`Found ${packages.length} packages in azurelkg catalog`);
 
     return packages;
   } catch (error) {
@@ -92,7 +92,7 @@ async function updatePnpmWorkspaceYaml(packages) {
 
 async function main() {
   try {
-    console.error("Getting Azure SDK Core and Identity packages from azurelkg catalog...");
+    console.log("Getting Azure SDK Core and Identity packages from azurelkg catalog...");
     const packageNames = await getAzureLkgPackagesFromWorkspace();
 
     console.log("# Azure SDK Core and Identity packages with latest stable versions");
@@ -108,10 +108,10 @@ async function main() {
       }
     }
 
-    console.error("\nUpdating pnpm-workspace.yaml...");
+    console.log("\nUpdating pnpm-workspace.yaml...");
     await updatePnpmWorkspaceYaml(packages);
 
-    console.error(`\nProcessed ${Object.keys(packages).length} packages successfully!`);
+    console.log(`\nProcessed ${Object.keys(packages).length} packages successfully!`);
   } catch (error) {
     console.error("Error:", error.message);
     process.exit(1);
