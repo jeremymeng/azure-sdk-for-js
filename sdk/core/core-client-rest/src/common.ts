@@ -17,6 +17,64 @@ import type { RawHttpHeadersInput } from "@azure/core-rest-pipeline";
 import type { AbortSignalLike } from "@azure/abort-controller";
 import type { OperationTracingOptions } from "@azure/core-tracing";
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
+declare namespace NodeJS {
+  interface EventEmitter {
+    on(event: string | symbol, listener: (...args: any[]) => void): this;
+    off(event: string | symbol, listener: (...args: any[]) => void): this;
+    once(event: string | symbol, listener: (...args: any[]) => void): this;
+    emit(event: string | symbol, ...args: any[]): boolean;
+    addListener(event: string | symbol, listener: (...args: any[]) => void): this;
+    removeListener(event: string | symbol, listener: (...args: any[]) => void): this;
+    prependListener(event: string | symbol, listener: (...args: any[]) => void): this;
+    prependOnceListener(event: string | symbol, listener: (...args: any[]) => void): this;
+    eventNames(): Array<string | symbol>;
+    removeAllListeners(event?: string | symbol): this;
+    setMaxListeners(n: number): this;
+    getMaxListeners(): number;
+    listeners(event: string | symbol): any[];
+    rawListeners(event: string | symbol): any[];
+    listenerCount(event: string | symbol): number;
+  }
+  type BufferEncoding =
+    | "ascii"
+    | "utf8"
+    | "utf-8"
+    | "utf16le"
+    | "utf-16le"
+    | "ucs2"
+    | "ucs-2"
+    | "base64"
+    | "base64url"
+    | "latin1"
+    | "binary"
+    | "hex";
+  interface WritableStream extends NodeJS.EventEmitter {
+    writable: boolean;
+    write(buffer: Uint8Array | string, cb?: (err?: Error | null) => void): boolean;
+    write(str: string, encoding?: BufferEncoding, cb?: (err?: Error | null) => void): boolean;
+    end(cb?: () => void): this;
+    end(data: string | Uint8Array, cb?: () => void): this;
+    end(str: string, encoding?: BufferEncoding, cb?: () => void): this;
+  }
+  interface ReadableStream extends NodeJS.EventEmitter {
+    readable: boolean;
+    read(size?: number): string | Buffer;
+    setEncoding(encoding: BufferEncoding): this;
+    pause(): this;
+    resume(): this;
+    isPaused(): boolean;
+    pipe<T extends NodeJS.WritableStream>(
+      destination: T,
+      options?: { end?: boolean | undefined },
+    ): T;
+    unpipe(destination?: NodeJS.WritableStream): this;
+    unshift(chunk: string | Uint8Array, encoding?: BufferEncoding): void;
+    wrap(oldStream: ReadableStream): this;
+    [Symbol.asyncIterator](): AsyncIterableIterator<string | Buffer>;
+  }
+}
+
 /**
  * Shape of the default request parameters, this may be overridden by the specific
  * request types to provide strong types

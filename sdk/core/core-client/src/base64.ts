@@ -1,6 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+declare global {
+  interface BufferConstructor {
+    new (data: string | ArrayBuffer | ArrayBufferView): Buffer;
+    from(data: string | ArrayBuffer | ArrayBufferView, encoding?: string): Buffer;
+  }
+  var Buffer: BufferConstructor;
+  interface Buffer<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike>
+    extends Uint8Array<TArrayBuffer> {
+    toString(encoding?: string, start?: number, end?: number): string;
+  }
+}
+
 /**
  * Encodes a string in base64 format.
  * @param value - the string to encode
@@ -12,7 +24,7 @@ export function encodeString(value: string): string {
 
 /**
  * Encodes a byte array in base64 format.
- * @param value - the Uint8Aray to encode
+ * @param value - the Uint8Array to encode
  * @internal
  */
 export function encodeByteArray(value: Uint8Array): string {

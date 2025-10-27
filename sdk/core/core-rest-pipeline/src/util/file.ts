@@ -3,6 +3,14 @@
 
 import { isNodeLike } from "@azure/core-util";
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
+declare namespace NodeJS {
+  interface WritableStream {}
+  interface ReadableStream {
+    pipe(destination: NodeJS.WritableStream, options?: { end?: boolean }): NodeJS.WritableStream;
+  }
+}
+
 function isNodeReadableStream(x: unknown): x is NodeJS.ReadableStream {
   return Boolean(x && typeof (x as NodeJS.ReadableStream)["pipe"] === "function");
 }

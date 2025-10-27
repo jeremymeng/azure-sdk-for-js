@@ -1,6 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
+declare namespace NodeJS {
+  interface ReadableStream {}
+}
+
+declare global {
+  interface Buffer {}
+}
+
 import type { AbortSignalLike } from "@azure/abort-controller";
 import type { OperationTracingOptions } from "@azure/core-tracing";
 import type { HttpMethods } from "@azure/core-util";

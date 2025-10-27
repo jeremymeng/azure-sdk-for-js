@@ -115,8 +115,10 @@ export interface InnerError {
     innererror?: InnerError;
 }
 
+// Warning: (ae-forgotten-export) The symbol "NodeJS_2" needs to be exported by the entry point index.d.ts
+//
 // @public
-export interface NodeJSReadableStream extends NodeJS.ReadableStream {
+export interface NodeJSReadableStream extends NodeJS_2.ReadableStream {
     destroy(error?: Error): void;
 }
 

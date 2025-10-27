@@ -76,7 +76,7 @@ class XhrHttpClient implements HttpClient {
     } else if (typeof body === "object" && body && "buffer" in body) {
       xhr.send(arrayBufferViewToArrayBuffer(body));
     } else {
-      xhr.send(body === undefined ? null : body);
+      xhr.send(body === undefined ? null : (body as XMLHttpRequestBodyInit | Document));
     }
 
     if (xhr.responseType === "blob") {

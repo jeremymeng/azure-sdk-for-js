@@ -243,7 +243,7 @@ function buildRequestBody(request: PipelineRequest): BuildRequestBodyResponse {
   } else if (body === undefined) {
     return { streaming: false };
   } else {
-    return { streaming: false, body };
+    return { streaming: false, body: body as BodyInit | null };
   }
 }
 

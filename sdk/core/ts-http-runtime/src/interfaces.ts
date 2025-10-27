@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+declare global {
+  interface Buffer {}
+}
+
 import type { AuthScheme } from "./auth/schemes.js";
 
 /**

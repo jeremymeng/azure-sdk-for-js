@@ -82,7 +82,8 @@ export interface BearerTokenAuthenticationPolicyOptions {
 
 // @public
 export interface BodyPart {
-    body: ((() => ReadableStream<Uint8Array>) | (() => NodeJS.ReadableStream)) | ReadableStream<Uint8Array> | NodeJS.ReadableStream | Uint8Array | Blob;
+    // Warning: (ae-forgotten-export) The symbol "NodeJS_2" needs to be exported by the entry point index.d.ts
+    body: ((() => ReadableStream<Uint8Array>) | (() => NodeJS_2.ReadableStream)) | ReadableStream<Uint8Array> | NodeJS_2.ReadableStream | Uint8Array | Blob;
     headers: HttpHeaders;
 }
 
@@ -101,8 +102,10 @@ export function createEmptyPipeline(): Pipeline;
 // @public
 export function createFile(content: Uint8Array, name: string, options?: CreateFileOptions): File;
 
+// Warning: (ae-forgotten-export) The symbol "NodeJS_3" needs to be exported by the entry point index.d.ts
+//
 // @public
-export function createFileFromStream(stream: () => ReadableStream<Uint8Array> | NodeJS.ReadableStream, name: string, options?: CreateFileFromStreamOptions): File;
+export function createFileFromStream(stream: () => ReadableStream<Uint8Array> | NodeJS_3.ReadableStream, name: string, options?: CreateFileFromStreamOptions): File;
 
 // @public
 export interface CreateFileFromStreamOptions extends CreateFileOptions {
@@ -319,7 +322,7 @@ export interface PipelineResponse {
     bodyAsText?: string | null;
     browserStreamBody?: ReadableStream<Uint8Array>;
     headers: HttpHeaders;
-    readableStreamBody?: NodeJS.ReadableStream;
+    readableStreamBody?: NodeJS_2.ReadableStream;
     request: PipelineRequest;
     status: number;
 }
@@ -373,7 +376,7 @@ export interface RedirectPolicyOptions {
 }
 
 // @public
-export type RequestBodyType = NodeJS.ReadableStream | (() => NodeJS.ReadableStream) | ReadableStream<Uint8Array> | (() => ReadableStream<Uint8Array>) | Blob | ArrayBuffer | ArrayBufferView | FormData | string | null;
+export type RequestBodyType = NodeJS_2.ReadableStream | (() => NodeJS_2.ReadableStream) | ReadableStream<Uint8Array> | (() => ReadableStream<Uint8Array>) | Blob | ArrayBuffer | ArrayBufferView | FormData | string | null;
 
 // @public
 export interface RestError extends Error {
