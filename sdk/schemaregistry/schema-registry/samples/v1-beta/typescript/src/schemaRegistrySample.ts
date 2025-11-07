@@ -6,14 +6,10 @@
  */
 
 import { DefaultAzureCredential } from "@azure/identity";
-import {
-  SchemaRegistryClient,
-  SchemaDescription,
-  KnownSchemaFormats,
-} from "@azure/schema-registry";
-
-// Load the .env file if it exists
+import type { SchemaDescription } from "@azure/schema-registry";
+import { SchemaRegistryClient, KnownSchemaFormats } from "@azure/schema-registry";
 import "dotenv/config";
+
 // Set these environment variables or edit the following values
 const fullyQualifiedNamespace =
   process.env["SCHEMAREGISTRY_AVRO_FULLY_QUALIFIED_NAMESPACE"] || "<fullyQualifiedNamespace>";
@@ -53,7 +49,7 @@ export async function main(): Promise<void> {
   // Register a schema and get back its ID.
   const { id, version } = await client.registerSchema(schemaDescription);
   console.log(
-    `Registered schema with the following properties:\n- ID=${id}\n- Version: ${version}`
+    `Registered schema with the following properties:\n- ID=${id}\n- Version: ${version}`,
   );
 
   // Get definition of existing schema by its ID
