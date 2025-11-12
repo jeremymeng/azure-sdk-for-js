@@ -5,6 +5,9 @@ import { RestError } from "@azure/core-rest-pipeline";
 
 export * from "./BlobServiceClient.js";
 export * from "./Clients.js";
+export * from "./AppendBlobClient.js";
+export * from "./BlockBlobClient.js";
+export * from "./PageBlobClient.js";
 export * from "./ContainerClient.js";
 export * from "./BlobLeaseClient.js";
 export * from "./BlobBatch.js";

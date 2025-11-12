@@ -12,7 +12,7 @@ import type {
   BlobQueryCsvTextConfiguration,
   BlobQueryJsonTextConfiguration,
   BlobQueryParquetConfiguration,
-} from "../Clients.js";
+} from "../BlockBlobClient.js";
 import type {
   QuerySerialization,
   BlobTags,

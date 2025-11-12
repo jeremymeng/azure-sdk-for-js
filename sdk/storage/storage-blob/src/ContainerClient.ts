@@ -69,12 +69,12 @@ import {
   generateBlobSASQueryParametersInternal,
 } from "./sas/BlobSASSignatureValues.js";
 import { BlobLeaseClient } from "./BlobLeaseClient.js";
-import type {
-  BlobDeleteOptions,
-  BlockBlobUploadOptions,
-  CommonGenerateSasUrlOptions,
-} from "./Clients.js";
-import { AppendBlobClient, BlobClient, BlockBlobClient, PageBlobClient } from "./Clients.js";
+import type { BlobDeleteOptions, CommonGenerateSasUrlOptions } from "./Clients.js";
+import type { BlockBlobUploadOptions } from "./BlockBlobClient.js";
+import { BlobClient } from "./Clients.js";
+import { BlockBlobClient } from "./BlockBlobClient.js";
+import { PageBlobClient } from "./PageBlobClient.js";
+import { AppendBlobClient } from "./AppendBlobClient.js";
 import { BlobBatchClient } from "./BlobBatchClient.js";
 import type {
   ContainerCreateHeaders,

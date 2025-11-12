@@ -189,7 +189,7 @@ import type { SASProtocol } from "./SASQueryParameters.js";
 import type { SasIPRange } from "./SasIPRange.js";
 import type { FileSASPermissions } from "./FileSASPermissions.js";
 import type { ListFilesIncludeType } from "./generated/src/index.js";
-import { Readable } from "node:stream";
+import type { Readable } from "node:stream";
 
 export { ShareClientOptions, ShareClientConfig } from "./models.js";
 
