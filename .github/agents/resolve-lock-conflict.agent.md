@@ -67,7 +67,7 @@ Push the changes to your working branch,
 
 ```bash
 git checkout <your working branch>
-git reset --hard resolve-conflict-pr-<PR #>
+git merge resolve-conflict-pr-<PR #> --no-edit
 git push origin <your working branch>
 ```
 
