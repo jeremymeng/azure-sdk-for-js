@@ -28,6 +28,8 @@ Depending on your Git remote setup, you may need to use "upstream" instead of "o
 
 ### 1. Check out the pull request branch
 
+Before proceeding, run `git status` which should show your working branch.
+
 ```bash
 git fetch origin pull/<PR #>/head:resolve-conflict-pr-<PR #>
 git checkout resolve-conflict-pr-<PR #>
