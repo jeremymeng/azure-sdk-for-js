@@ -26,10 +26,11 @@ If you have permission to push to the pull request branch, you may do so in step
 
 Depending on your Git remote setup, you may need to use "upstream" instead of "origin", whichever pointing to Azure/azure-sdk-for-js.
 
-### 1. Check out the pull request branch, for example
+### 1. Check out the pull request branch
 
 ```bash
-git fetch origin pull/<PR #>/head:HEAD
+git fetch origin pull/<PR #>/head:resolve-conflict-pr-<PR #>
+git checkout resolve-conflict-pr-<PR #>
 ```
 
 ### 2. Merge changes from latest main of Azure/azure-sdk-for-js into pull request branch
@@ -55,7 +56,7 @@ git add pnpm-lock.yaml && git commit -m "Merging from latest main branch"
 #### a. If you have permission to push to the pull request branch
 
 ```bash
-git push origin HEAD:<PR branch>
+git push origin resolve-conflict-pr-<PR #>:<PR branch>
 ```
 
 #### b. If you do NOT have permission to push to the pull request branch
@@ -63,7 +64,9 @@ git push origin HEAD:<PR branch>
 Push the changes to your working branch,
 
 ```bash
-git push origin copilot/resolve-pnpm-lock-conflict-pr-<PR #>:<PR branch>
+git checkout <your working branch>
+git reset --hard resolve-conflict-pr-<PR #>
+git push origin <your working branch>
 ```
 
 Then provide a comparison link in the summary of your work:
