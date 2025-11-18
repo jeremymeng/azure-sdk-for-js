@@ -24,17 +24,15 @@ If you have permission to push to the pull request branch, you may do so in step
 
 ## Workflow
 
+Depending on your Git remote setup, you may need to use "upstream" instead of "origin", whichever pointing to Azure/azure-sdk-for-js.
+
 ### 1. Check out the pull request branch, for example
 
 ```bash
-git fetch origin pull/<PR #>/head:copilot/resolve-pnpm-lock-conflict-pr-<PR #> && git checkout copilot/resolve-pnpm-lock-conflict-pr-<PR #>
+git fetch origin pull/<PR #>/head:HEAD
 ```
 
-Ensure you switch to the `copilot/resolve-pnpm-lock-conflict-pr-<PR #>` branch before next step
-
 ### 2. Merge changes from latest main of Azure/azure-sdk-for-js into pull request branch
-
-Depending on your remote setup, you may need to use "upstream" instead of "origin" below.
 
 ```bash
 git fetch --unshallow origin main && git merge main
@@ -48,10 +46,8 @@ pnpm install --no-frozen-lockfile
 
 ### 4. Stage the changes to pnpm-lock.yaml and commit the merge
 
-Depending on your remote setup, you may need to use "upstream" instead of "origin" below.
-
 ```bash
-git add pnpm-lock.yaml && git commit -m "Merging from origin/main"
+git add pnpm-lock.yaml && git commit -m "Merging from latest main branch"
 ```
 
 ### 5. Push your merge commit
@@ -59,15 +55,21 @@ git add pnpm-lock.yaml && git commit -m "Merging from origin/main"
 #### a. If you have permission to push to the pull request branch
 
 ```bash
-git push origin copilot/resolve-pnpm-lock-conflict-pr-<PR #>:<PR branch>
+git push origin HEAD:<PR branch>
 ```
 
 #### b. If you do NOT have permission to push to the pull request branch
 
-Push the changes to your working branch, then provide a comparison link in the summary of your work:
+Push the changes to your working branch,
 
-- example link if the PR branch is in Azure/azure-sdk-for-js repository: "https://github.com/Azure/azure-sdk-for-js/compare/<PR branch>...copilot/resolve-pnpm-lock-conflict-pr-<PR #>"
-- example link if the PR branch is from a fork: "https://github.com/<fork owner>/azure-sdk-for-js/compare/<PR branch>...<your-working-branch>"
+```bash
+git push origin copilot/resolve-pnpm-lock-conflict-pr-<PR #>:<PR branch>
+```
+
+Then provide a comparison link in the summary of your work:
+
+- example link if the PR branch is in Azure/azure-sdk-for-js repository: "https://github.com/Azure/azure-sdk-for-js/compare/<PR branch>...<your working branch>"
+- example link if the PR branch is from a fork: "https://github.com/<fork owner name>/azure-sdk-for-js/compare/<PR branch>...<your working branch>"
 
 ## Error Handling
 
