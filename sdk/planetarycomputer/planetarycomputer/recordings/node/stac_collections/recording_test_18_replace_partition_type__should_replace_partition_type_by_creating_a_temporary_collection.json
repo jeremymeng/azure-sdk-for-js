@@ -92,7 +92,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/2913e63f-c6e8-4e5f-9544-a334f3f9b113?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/84909252-c509-4622-8d77-7bf8daf56bea?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "operation-location": "https://example.com",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -107,506 +107,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
+            "timestamp": "2025-12-23T14:41:31.1015127Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
-          {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
-          }
-        ],
-        "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
+        "creationTime": "2025-12-23T14:41:31.1012276Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -647,19 +152,19 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
+            "timestamp": "2025-12-23T14:41:31.1015127Z"
           },
           {
             "status": "Running",
-            "timestamp": "2025-11-05T11:53:07.858349Z"
+            "timestamp": "2025-12-23T14:41:33.3821528Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2025-11-05T11:53:08.1880632Z"
+            "timestamp": "2025-12-23T14:41:34.3336475Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
+        "creationTime": "2025-12-23T14:41:31.1012276Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -700,19 +205,19 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:52:46.2710742Z"
+            "timestamp": "2025-12-23T14:41:31.1015127Z"
           },
           {
             "status": "Running",
-            "timestamp": "2025-11-05T11:53:07.858349Z"
+            "timestamp": "2025-12-23T14:41:33.3821528Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2025-11-05T11:53:08.1880632Z"
+            "timestamp": "2025-12-23T14:41:34.3336475Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-11-05T11:52:46.2710691Z",
+        "creationTime": "2025-12-23T14:41:31.1012276Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -809,7 +314,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/6fbaa418-b8bd-4f24-8135-b34aa1465ba6?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/8d5646d3-1ecf-4c32-9061-b97a7d45439d?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "operation-location": "https://example.com",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -824,11 +329,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -869,11 +374,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -914,11 +419,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -959,11 +464,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1004,11 +509,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1049,11 +554,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1094,11 +599,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1139,11 +644,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1184,11 +689,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1229,11 +734,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1274,11 +779,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1319,11 +824,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1364,11 +869,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1409,11 +914,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1450,60 +955,19 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
+        "status": "Running",
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
-          }
-        ],
-        "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
-        "collectionId": "test-partition-type-collection"
-      }
-    },
-    {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
-      "RequestMethod": "GET",
-      "RequestHeaders": {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip,deflate",
-        "Authorization": "Sanitized",
-        "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
-        "x-ms-client-request-id": "Sanitized"
-      },
-      "RequestBody": null,
-      "StatusCode": 200,
-      "ResponseHeaders": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
-        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Expose-Headers": "Location",
-        "Access-Control-Max-Age": "1728000",
-        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json; charset=utf-8",
-        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Transfer-Encoding": "chunked",
-        "x-azure-ref": "Sanitized",
-        "X-Cache": "CONFIG_NOCACHE",
-        "X-Request-ID": "00000000000000000000000000000000"
-      },
-      "ResponseBody": {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Pending",
-        "statusHistory": [
+            "timestamp": "2025-12-23T14:41:37.334346Z"
+          },
           {
-            "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "status": "Running",
+            "timestamp": "2025-12-23T14:42:04.3832425Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     },
@@ -1544,19 +1008,19 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T11:53:09.3556206Z"
+            "timestamp": "2025-12-23T14:41:37.334346Z"
           },
           {
             "status": "Running",
-            "timestamp": "2025-11-05T11:53:38.2202018Z"
+            "timestamp": "2025-12-23T14:42:04.3832425Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2025-11-05T11:53:38.3664565Z"
+            "timestamp": "2025-12-23T14:42:04.8607999Z"
           }
         ],
         "type": "DeleteCollection",
-        "creationTime": "2025-11-05T11:53:09.3556192Z",
+        "creationTime": "2025-12-23T14:41:37.3343442Z",
         "collectionId": "test-partition-type-collection"
       }
     }

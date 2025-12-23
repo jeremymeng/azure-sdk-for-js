@@ -42,7 +42,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2025-11-24T18:18:37.032245Z",
+        "creationTime": "2025-12-23T14:51:18.0521295Z",
         "importType": "StaticCatalog",
         "displayName": "Ingestion for Run",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
@@ -76,7 +76,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/collections/naip-atl-00000000/ingestions/00000000-0000-0000-0000-000000000000/runs/ecbcb098-fdae-4cb8-a5b3-1434b5b50092?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/collections/naip-atl-00000000/ingestions/00000000-0000-0000-0000-000000000000/runs/a8512bfd-2183-436a-9d52-84ead23d3e7b?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         "Transfer-Encoding": "chunked",
@@ -86,7 +86,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2025-11-24T18:18:37.09379Z",
+        "creationTime": "2025-12-23T14:51:18.1287894Z",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
         "skipExistingItems": true,
         "keepOriginalAssets": true,
@@ -96,10 +96,10 @@
           "statusHistory": [
             {
               "status": "Pending",
-              "timestamp": "2025-11-24T18:18:37.0832287Z"
+              "timestamp": "2025-12-23T14:51:18.1145816Z"
             }
           ],
-          "creationTime": "2025-11-24T18:18:37.0832262Z",
+          "creationTime": "2025-12-23T14:51:18.1145801Z",
           "totalItems": 0,
           "totalPendingItems": 0,
           "totalSuccessfulItems": 0,

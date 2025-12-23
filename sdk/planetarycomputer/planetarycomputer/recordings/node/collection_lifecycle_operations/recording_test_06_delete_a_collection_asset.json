@@ -121,7 +121,7 @@
           }
         },
         "msft:_created": "2025-11-03T14:16:10.3539672Z",
-        "msft:_updated": "2025-11-07T20:13:42.561449Z",
+        "msft:_updated": "2025-12-23T14:46:53.008947Z",
         "title": "MPC Pro Sample Datasets",
         "extent": {
           "spatial": {
@@ -357,7 +357,7 @@
           }
         },
         "msft:_created": "2025-11-03T14:16:10.3539672Z",
-        "msft:_updated": "2025-11-07T20:13:43.240931Z",
+        "msft:_updated": "2025-12-23T14:46:53.317188Z",
         "title": "MPC Pro Sample Datasets",
         "extent": {
           "spatial": {
@@ -701,7 +701,7 @@
         },
         "stac_version": "1.0.0",
         "msft:_created": "2025-11-03T14:16:10.3539672Z",
-        "msft:_updated": "2025-11-07T20:13:43.240931Z",
+        "msft:_updated": "2025-12-23T14:46:53.317188Z",
         "stac_extensions": [
           "https://stac-extensions.github.io/item-assets/v1.0.0/schema.json",
           "https://stac-extensions.github.io/table/v1.2.0/schema.json"

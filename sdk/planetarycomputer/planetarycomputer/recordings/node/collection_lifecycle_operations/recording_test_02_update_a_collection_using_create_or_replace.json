@@ -82,8 +82,8 @@
         "license": "proprietary",
         "description": "Test collection for lifecycle operations",
         "stac_version": "1.0.0",
-        "msft:_created": "2025-11-07T20:12:10.4014047Z",
-        "msft:_updated": "2025-11-07T20:12:10.4014047Z"
+        "msft:_created": "2025-12-23T14:45:35.0628473Z",
+        "msft:_updated": "2025-12-23T14:45:35.0628473Z"
       }
     },
     {
@@ -101,8 +101,8 @@
       },
       "RequestBody": {
         "stac_version": "1.0.0",
-        "msft:_created": "2025-11-07T20:12:10.4014047Z",
-        "msft:_updated": "2025-11-07T20:12:10.4014047Z",
+        "msft:_created": "2025-12-23T14:45:35.0628473Z",
+        "msft:_updated": "2025-12-23T14:45:35.0628473Z",
         "id": "test-collection-lifecycle",
         "description": "Test collection for lifecycle operations - UPDATED",
         "links": [
@@ -172,8 +172,8 @@
       },
       "ResponseBody": {
         "stac_version": "1.0.0",
-        "msft:_created": "2025-11-07T20:12:10.4014047Z",
-        "msft:_updated": "2025-11-07T20:12:18.927821Z",
+        "msft:_created": "2025-12-23T14:45:35.0628473Z",
+        "msft:_updated": "2025-12-23T14:45:39.9986539Z",
         "id": "test-collection-lifecycle",
         "description": "Test collection for lifecycle operations - UPDATED",
         "links": [
@@ -246,7 +246,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "1074",
+        "Content-Length": "1075",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -305,8 +305,8 @@
         "license": "proprietary",
         "description": "Test collection for lifecycle operations - UPDATED",
         "stac_version": "1.0.0",
-        "msft:_created": "2025-11-07T20:12:10.4014047Z",
-        "msft:_updated": "2025-11-07T20:12:18.927821Z"
+        "msft:_created": "2025-12-23T14:45:35.0628473Z",
+        "msft:_updated": "2025-12-23T14:45:39.9986539Z"
       }
     }
   ],

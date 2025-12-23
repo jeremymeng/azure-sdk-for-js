@@ -75,8 +75,8 @@
         "value": [
           {
             "id": "00000000-0000-0000-0000-000000000000",
-            "kind": "BlobManagedIdentity",
-            "created": "2025-11-24T17:39:44.5236964Z"
+            "kind": "SasToken",
+            "created": "2025-12-16T20:49:23.1804601Z"
           }
         ]
       }
@@ -156,7 +156,7 @@
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
         "kind": "BlobManagedIdentity",
-        "created": "2025-11-24T18:13:59.5714082Z",
+        "created": "2025-12-23T14:47:00.7454967Z",
         "connectionInfo": {
           "containerUrl": "https://SANITIZED.blob.core.windows.net/sample-container",
           "objectId": "00000000-0000-0000-0000-000000000000"
@@ -199,7 +199,7 @@
           {
             "id": "00000000-0000-0000-0000-000000000000",
             "kind": "BlobManagedIdentity",
-            "created": "2025-11-24T18:13:59.5714082Z"
+            "created": "2025-12-23T14:47:00.7454967Z"
           }
         ]
       }

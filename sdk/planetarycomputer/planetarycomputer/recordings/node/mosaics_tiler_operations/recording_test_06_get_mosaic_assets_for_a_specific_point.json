@@ -97,7 +97,7 @@
       }
     },
     {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/ba13fc7947b9b585690d84ee61aaa653/-84.432027519,33.63964764/assets?api-version=2025-04-30-preview&scan_limit=100&items_limit=100&time_limit=30&exitwhenfull=true&00000000-0000-0000-0000-000000000000covered=true&coord-crs=EPSG%3A4326",
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/ba13fc7947b9b585690d84ee61aaa653/-84.432027519,33.63964764/assets?api-version=2025-04-30-preview&scan_limit=100&items_limit=100&time_limit=30&exitwhenfull=true&skipcovered=true&coord-crs=EPSG%3A4326",
       "RequestMethod": "GET",
       "RequestHeaders": {
         "Accept": "application/json",

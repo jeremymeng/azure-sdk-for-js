@@ -23,7 +23,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "956",
+        "Content-Length": "893",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -54,8 +54,8 @@
             },
             {
               "id": "test-mosaic-1",
-              "name": "Test Most recent available",
-              "description": "Most recent available imagery in this collection - updated",
+              "name": "Test Mosaic Updated",
+              "description": null,
               "cql": []
             }
           ],

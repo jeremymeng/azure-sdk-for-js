@@ -42,7 +42,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2025-11-24T18:19:31.2193419Z",
+        "creationTime": "2025-12-23T14:51:54.8603067Z",
         "importType": "StaticCatalog",
         "displayName": "Ingestion for Get Test",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
@@ -84,7 +84,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2025-11-24T18:19:31.2193419Z",
+        "creationTime": "2025-12-23T14:51:54.8603067Z",
         "importType": "StaticCatalog",
         "displayName": "Ingestion for Get Test",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",

@@ -85,7 +85,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/1611fade-6183-4f67-8325-aaee808d3c2d?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/739ccc63-6ffa-48e3-8d90-09bf9347867d?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "operation-location": "https://example.com",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -100,11 +100,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T12:23:43.4666958Z"
+            "timestamp": "2025-12-23T14:44:16.5513366Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2025-11-05T12:23:43.4666941Z",
+        "creationTime": "2025-12-23T14:44:16.5513344Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -145,11 +145,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T12:23:43.4666958Z"
+            "timestamp": "2025-12-23T14:44:16.5513366Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2025-11-05T12:23:43.4666941Z",
+        "creationTime": "2025-12-23T14:44:16.5513344Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -190,23 +190,23 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T12:23:43.466694Z"
+            "timestamp": "2025-12-23T14:44:16.551334Z"
           },
           {
             "status": "Running",
-            "timestamp": "2025-11-05T12:23:43.761378Z"
+            "timestamp": "2025-12-23T14:44:16.911367Z"
           },
           {
             "status": "Failed",
-            "timestamp": "2025-11-05T12:23:43.901962Z",
+            "timestamp": "2025-12-23T14:44:17.024795Z",
             "errorCode": "StacValidationFailed",
-            "errorMessage": "STAC validation failed. Reason: JSON (id = fake-item-id_replace_test) does not represent a STACObject instance. 'type' attribute is Feature"
+            "errorMessage": "STAC validation failed. Reason: JSON (id = fake-item-id_replace_test) does not represent a STACObject instance. 'type' attribute is Feature. The STAC item does not conform to the STAC specification. Verify your STAC JSON follows the correct schema and includes all required fields. Learn more about STAC: https://aka.ms/mpcpro-stac-overview"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2025-11-05T12:23:43.466694Z",
-        "startTime": "2025-11-05T12:23:43.466694Z",
-        "finishTime": "2025-11-05T12:23:43.901962Z",
+        "creationTime": "2025-12-23T14:44:16.551334Z",
+        "startTime": "2025-12-23T14:44:16.551334Z",
+        "finishTime": "2025-12-23T14:44:17.024795Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "1",
@@ -217,7 +217,7 @@
         "error": {
           "error": {
             "code": "StacValidationFailed",
-            "message": "STAC validation failed. Reason: JSON (id = fake-item-id_replace_test) does not represent a STACObject instance. 'type' attribute is Feature"
+            "message": "STAC validation failed. Reason: JSON (id = fake-item-id_replace_test) does not represent a STACObject instance. 'type' attribute is Feature. The STAC item does not conform to the STAC specification. Verify your STAC JSON follows the correct schema and includes all required fields. Learn more about STAC: https://aka.ms/mpcpro-stac-overview"
           }
         }
       }

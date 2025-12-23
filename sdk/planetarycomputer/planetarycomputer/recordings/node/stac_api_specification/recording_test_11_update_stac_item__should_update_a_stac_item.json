@@ -268,7 +268,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/59e00b35-0ebc-4784-a3c4-bf76fa2b0e57?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/2a13479f-3e3b-48dd-bdee-b93dd394cbe2?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "operation-location": "https://example.com",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -283,11 +283,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T12:23:30.6058225Z"
+            "timestamp": "2025-12-23T14:44:08.3395894Z"
           }
         ],
         "type": "UpdateItem",
-        "creationTime": "2025-11-05T12:23:30.6058213Z",
+        "creationTime": "2025-12-23T14:44:08.3395878Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -328,11 +328,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T12:23:30.6058225Z"
+            "timestamp": "2025-12-23T14:44:08.3395894Z"
           }
         ],
         "type": "UpdateItem",
-        "creationTime": "2025-11-05T12:23:30.6058213Z",
+        "creationTime": "2025-12-23T14:44:08.3395878Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -373,23 +373,23 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-11-05T12:23:30.605821Z"
+            "timestamp": "2025-12-23T14:44:08.339587Z"
           },
           {
             "status": "Running",
-            "timestamp": "2025-11-05T12:23:32.576806Z"
+            "timestamp": "2025-12-23T14:44:08.729601Z"
           },
           {
             "status": "Failed",
-            "timestamp": "2025-11-05T12:23:33.77298Z",
+            "timestamp": "2025-12-23T14:44:10.413592Z",
             "errorCode": "PublicAccessRestricted",
-            "errorMessage": "Asset transformation exception. Reason: Error retrieving content from public source. Reason: Public access is not permitted on this storage account. Source: https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/08a/fake-item-id_test/image.tif. Source: https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/08a/fake-item-id_test/image.tif"
+            "errorMessage": "Asset transformation exception. Reason: Error retrieving content from public source. Reason: Public access is not permitted on this storage account. The Azure Storage account has public access disabled. To ingest data, either enable public access on the storage account, configure appropriate access policies, or use authentication (SAS tokens or managed identity). Learn more about Ingestion Sources: https://aka.ms/mpcpro-ingestion-source. Source: https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/08a/fake-item-id_test/image.tif. Source: https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/08a/fake-item-id_test/image.tif"
           }
         ],
         "type": "UpdateItem",
-        "creationTime": "2025-11-05T12:23:30.605821Z",
-        "startTime": "2025-11-05T12:23:30.605821Z",
-        "finishTime": "2025-11-05T12:23:33.77298Z",
+        "creationTime": "2025-12-23T14:44:08.339587Z",
+        "startTime": "2025-12-23T14:44:08.339587Z",
+        "finishTime": "2025-12-23T14:44:10.413592Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "1",
@@ -400,7 +400,7 @@
         "error": {
           "error": {
             "code": "PublicAccessRestricted",
-            "message": "Asset transformation exception. Reason: Error retrieving content from public source. Reason: Public access is not permitted on this storage account. Source: https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/08a/fake-item-id_test/image.tif. Source: https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/08a/fake-item-id_test/image.tif"
+            "message": "Asset transformation exception. Reason: Error retrieving content from public source. Reason: Public access is not permitted on this storage account. The Azure Storage account has public access disabled. To ingest data, either enable public access on the storage account, configure appropriate access policies, or use authentication (SAS tokens or managed identity). Learn more about Ingestion Sources: https://aka.ms/mpcpro-ingestion-source. Source: https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/08a/fake-item-id_test/image.tif. Source: https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/08a/fake-item-id_test/image.tif"
           }
         }
       }
