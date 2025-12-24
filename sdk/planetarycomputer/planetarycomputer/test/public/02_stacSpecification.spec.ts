@@ -527,11 +527,12 @@ describe("STAC API Specification", () => {
     const collectionId = assertEnvironmentVariable(
       EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
     );
-    const itemId = "ga_m_3308421_se_16_060_20211114_test";
+    const itemId = "ga_m_3308421_se_16_060_20211114-test";
 
-    // Create sample STAC item
+    // Create sample STAC item using TypeScript SDK property names (camelCase)
+    // The SDK serializer will convert to wire format (snake_case)
     const stacItem = {
-      stac_version: "1.0.0",
+      stacVersion: "1.0.0",
       type: "Feature",
       id: itemId,
       collection: collectionId,
@@ -573,7 +574,7 @@ describe("STAC API Specification", () => {
           title: "RGBIR COG tile",
         },
       },
-      stac_extensions: ["https://stac-extensions.github.io/projection/v1.0.0/schema.json"],
+      stacExtensions: ["https://stac-extensions.github.io/projection/v1.0.0/schema.json"],
     } as any;
 
     console.log(`Creating STAC item: ${itemId}`);
@@ -588,7 +589,11 @@ describe("STAC API Specification", () => {
         console.log(`Deleted existing item ${itemId}`);
       }
     } catch (e: any) {
-      console.log(`Error checking/deleting existing item: ${e.message}`);
+      if (isRestError(e) && e.statusCode === 404) {
+        console.log(`Item ${itemId} does not exist, proceeding with creation`);
+      } else {
+        throw e;
+      }
     }
 
     // Create the item
@@ -614,8 +619,7 @@ describe("STAC API Specification", () => {
       console.log(`Created item has ${Object.keys(createdItem.assets!).length} assets`);
     } catch (e: any) {
       console.log(`Failed to create item: ${e.message}`);
-      // Don't fail the test if creation is not supported
-      console.log("Item creation may not be supported in this environment");
+      throw e;
     }
 
     console.log("Test PASSED\n");
@@ -629,7 +633,7 @@ describe("STAC API Specification", () => {
     const collectionId = assertEnvironmentVariable(
       EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
     );
-    const itemId = "ga_m_3308421_se_16_060_20211114_test";
+    const itemId = "ga_m_3308421_se_16_060_20211114-test";
 
     try {
       // Get existing item first
@@ -655,10 +659,7 @@ describe("STAC API Specification", () => {
       console.log(`Verified item update: ${updatedItem.id}`);
     } catch (e: any) {
       console.log(`Failed to update item: ${e.message}`);
-      // Based on log: Update fails with "PublicAccessRestricted"
-      // This is expected in the test environment
-      console.log("Item update may not be supported in this environment or item doesn't exist");
-      console.log("This is expected if public access is restricted on the storage account");
+      throw e;
     }
 
     console.log("Test PASSED\n");
@@ -730,11 +731,11 @@ describe("STAC API Specification", () => {
     const collectionId = assertEnvironmentVariable(
       EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
     );
-    const itemId = "ga_m_3308421_se_16_060_20211114_replace_test";
+    const itemId = "ga_m_3308421_se_16_060_20211114-replace-test";
 
     // Create sample STAC item
     const stacItem = {
-      stac_version: "1.0.0",
+      stacVersion: "1.0.0",
       type: "Feature",
       id: itemId,
       collection: collectionId,
@@ -777,68 +778,82 @@ describe("STAC API Specification", () => {
           title: "RGBIR COG tile",
         },
       },
-      stac_extensions: ["https://stac-extensions.github.io/projection/v1.0.0/schema.json"],
+      stacExtensions: ["https://stac-extensions.github.io/projection/v1.0.0/schema.json"],
     } as any;
 
     console.log(`Creating initial STAC item: ${itemId}`);
 
+    // Pre-cleanup: Delete the item if it already exists (like Python tests do)
     try {
-      // Step 1: Create the item
-      const createPoller = client.stac.createItem(collectionId, stacItem);
-      await createPoller.pollUntilDone();
-      console.log(`Created item ${itemId}`);
+      console.log(`Checking if item ${itemId} already exists...`);
+      await client.stac.getItem(collectionId, itemId);
+      console.log(`Item ${itemId} exists, deleting it first...`);
+      const deletePoller = client.stac.deleteItem(collectionId, itemId);
+      await deletePoller.pollUntilDone();
+      console.log(`Deleted existing item ${itemId}`);
     } catch (e: any) {
-      if (isRestError(e) && e.statusCode === 409) {
-        console.log(`Item ${itemId} already exists, continuing...`);
+      if (isRestError(e) && e.statusCode === 404) {
+        console.log(`Item ${itemId} does not exist, proceeding with creation`);
       } else {
         throw e;
       }
     }
 
-    // Verify creation
-    const createdItem = await client.stac.getItem(collectionId, itemId);
-    assert.isDefined(createdItem, "Created item should be retrievable");
-    assert.equal(createdItem.id, itemId, "Created item ID should match");
-    console.log(`Verified item ${createdItem.id}`);
+    // Step 1: Create the item
+    try {
+      const createPoller = client.stac.createItem(collectionId, stacItem);
+      await createPoller.pollUntilDone();
+      console.log(`Created item ${itemId}`);
 
-    // Step 2: Replace using createOrReplace
-    console.log(`Replacing item ${itemId} using createOrReplace...`);
-    stacItem.properties.platform = "Imagery Updated";
-    stacItem.properties.processing_level = "L2";
+      // Verify creation
+      const createdItem = await client.stac.getItem(collectionId, itemId);
+      assert.isDefined(createdItem, "Created item should be retrievable");
+      assert.equal(createdItem.id, itemId, "Created item ID should match");
+      console.log(`Verified item ${createdItem.id}`);
 
-    const replacePoller = client.stac.createOrReplaceItem(collectionId, itemId, stacItem);
-    await replacePoller.pollUntilDone();
-    console.log(`Replaced item ${itemId} using createOrReplace`);
+      // Step 2: Replace using createOrReplace
+      console.log(`Replacing item ${itemId} using createOrReplace...`);
+      stacItem.properties.platform = "Imagery Updated";
+      stacItem.properties.processing_level = "L2";
 
-    // Verify replacement
-    const replacedItem = await client.stac.getItem(collectionId, itemId);
-    assert.isDefined(replacedItem, "Replaced item should be retrievable");
-    assert.equal(replacedItem.id, itemId, "Replaced item ID should match");
+      const replacePoller = client.stac.createOrReplaceItem(collectionId, itemId, stacItem);
+      await replacePoller.pollUntilDone();
+      console.log(`Replaced item ${itemId} using createOrReplace`);
 
-    // Verify the updated properties
-    if (replacedItem.properties) {
-      const platform = (replacedItem.properties as any).platform || "N/A";
-      const processingLevel = (replacedItem.properties as any).processing_level || "N/A";
-      console.log(
-        `Verified replaced item, platform: ${platform}, processing_level: ${processingLevel}`,
-      );
+      // Verify replacement
+      const replacedItem = await client.stac.getItem(collectionId, itemId);
+      assert.isDefined(replacedItem, "Replaced item should be retrievable");
+      assert.equal(replacedItem.id, itemId, "Replaced item ID should match");
 
-      // Assert the properties were updated
-      assert.equal(
-        platform,
-        "Imagery Updated",
-        `Expected platform 'Imagery Updated', got '${platform}'`,
-      );
-      assert.equal(
-        processingLevel,
-        "L2",
-        `Expected processing_level 'L2', got '${processingLevel}'`,
-      );
-    } else {
-      console.log("Replaced item has no properties to verify");
+      // Verify the updated properties
+      if (replacedItem.properties) {
+        const platform = (replacedItem.properties as any).platform || "N/A";
+        const processingLevel = (replacedItem.properties as any).processing_level || "N/A";
+        console.log(
+          `Verified replaced item, platform: ${platform}, processing_level: ${processingLevel}`,
+        );
+
+        // Assert the properties were updated
+        assert.equal(
+          platform,
+          "Imagery Updated",
+          `Expected platform 'Imagery Updated', got '${platform}'`,
+        );
+        assert.equal(
+          processingLevel,
+          "L2",
+          `Expected processing_level 'L2', got '${processingLevel}'`,
+        );
+      } else {
+        console.log("Replaced item has no properties to verify");
+      }
+
+      console.log(`Successfully verified createOrReplace operation for item ${itemId}`);
+    } catch (e: any) {
+      console.log(`Failed to create/replace item: ${e.message}`);
+      throw e;
     }
 
-    console.log(`Successfully verified createOrReplace operation for item ${itemId}`);
     console.log("Test PASSED\n");
   });
 
@@ -850,11 +865,11 @@ describe("STAC API Specification", () => {
     const collectionId = assertEnvironmentVariable(
       EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
     );
-    const itemId = "ga_m_3308421_se_16_060_20211114_delete_test";
+    const itemId = "ga_m_3308421_se_16_060_20211114-delete-test";
 
     // Create sample STAC item to delete
     const stacItem = {
-      stac_version: "1.0.0",
+      stacVersion: "1.0.0",
       type: "Feature",
       id: itemId,
       collection: collectionId,
@@ -896,52 +911,66 @@ describe("STAC API Specification", () => {
           title: "RGBIR COG tile",
         },
       },
-      stac_extensions: ["https://stac-extensions.github.io/projection/v1.0.0/schema.json"],
+      stacExtensions: ["https://stac-extensions.github.io/projection/v1.0.0/schema.json"],
     } as any;
 
     console.log(`Creating STAC item to delete: ${itemId}`);
 
+    // Pre-cleanup: Delete the item if it already exists (like Python tests do)
     try {
-      // First, create an item to delete
+      console.log(`Checking if item ${itemId} already exists...`);
+      await client.stac.getItem(collectionId, itemId);
+      console.log(`Item ${itemId} exists, deleting it first...`);
+      const deletePoller = client.stac.deleteItem(collectionId, itemId);
+      await deletePoller.pollUntilDone();
+      console.log(`Deleted existing item ${itemId}`);
+    } catch (e: any) {
+      if (isRestError(e) && e.statusCode === 404) {
+        console.log(`Item ${itemId} does not exist, proceeding with creation`);
+      } else {
+        throw e;
+      }
+    }
+
+    // Create an item to delete
+    try {
       const createPoller = client.stac.createItem(collectionId, stacItem);
       await createPoller.pollUntilDone();
       console.log(`Created item ${itemId}`);
-    } catch (e: any) {
-      if (isRestError(e) && e.statusCode === 409) {
-        console.log(`Item ${itemId} already exists, will proceed to delete it`);
-      } else {
-        throw e;
+
+      // Verify the item exists
+      const existingItem = await client.stac.getItem(collectionId, itemId);
+      assert.isDefined(existingItem, "Item should exist before deletion");
+      assert.equal(existingItem.id, itemId, "Item ID should match");
+      console.log(`Verified item ${itemId} exists`);
+
+      // Delete the item
+      console.log(`Deleting item ${itemId}...`);
+      const deletePoller = client.stac.deleteItem(collectionId, itemId);
+      await deletePoller.pollUntilDone();
+      console.log(`Delete operation completed for item ${itemId}`);
+
+      // Verify deletion by attempting to retrieve the item
+      console.log(`Verifying item ${itemId} was deleted...`);
+      try {
+        await client.stac.getItem(collectionId, itemId);
+        console.log(`Item ${itemId} still exists after deletion (may take time to propagate)`);
+        // In some cases, deletion may take time to propagate, so we don't fail the test
+      } catch (e: any) {
+        if (isRestError(e) && e.statusCode === 404) {
+          console.log(`Verified item ${itemId} was successfully deleted`);
+        } else {
+          // Re-raise if it's a different error
+          throw e;
+        }
       }
+
+      console.log(`Successfully completed delete test for item ${itemId}`);
+    } catch (e: any) {
+      console.log(`Failed to create/delete item: ${e.message}`);
+      throw e;
     }
 
-    // Verify the item exists
-    const existingItem = await client.stac.getItem(collectionId, itemId);
-    assert.isDefined(existingItem, "Item should exist before deletion");
-    assert.equal(existingItem.id, itemId, "Item ID should match");
-    console.log(`Verified item ${itemId} exists`);
-
-    // Delete the item
-    console.log(`Deleting item ${itemId}...`);
-    const deletePoller = client.stac.deleteItem(collectionId, itemId);
-    await deletePoller.pollUntilDone();
-    console.log(`Delete operation completed for item ${itemId}`);
-
-    // Verify deletion by attempting to retrieve the item
-    console.log(`Verifying item ${itemId} was deleted...`);
-    try {
-      await client.stac.getItem(collectionId, itemId);
-      console.log(`Item ${itemId} still exists after deletion (may take time to propagate)`);
-      // In some cases, deletion may take time to propagate, so we don't fail the test
-    } catch (e: any) {
-      if (isRestError(e) && e.statusCode === 404) {
-        console.log(`Verified item ${itemId} was successfully deleted`);
-      } else {
-        // Re-raise if it's a different error
-        throw e;
-      }
-    }
-
-    console.log(`Successfully completed delete test for item ${itemId}`);
     console.log("Test PASSED\n");
   });
 });

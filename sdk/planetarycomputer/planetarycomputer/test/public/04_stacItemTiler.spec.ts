@@ -318,16 +318,10 @@ describe("STAC Item Tiler Operations", () => {
     };
 
     console.log("Calling: cropGeoJson(...)");
-    const response = await client.data.cropGeoJson(
-      collectionId,
-      itemId,
-      "crop.png",
-      geojsonFeature,
-      {
-        assets: ["image"],
-        assetBandIndices: "image|1,2,3",
-      },
-    );
+    const response = await client.data.cropGeoJson(collectionId, itemId, "png", geojsonFeature, {
+      assets: ["image"],
+      assetBandIndices: "image|1,2,3",
+    });
 
     const imageBytes = Buffer.from(response);
     console.log(`Image size: ${imageBytes.length} bytes`);
@@ -508,7 +502,7 @@ describe("STAC Item Tiler Operations", () => {
     console.log("=" + "=".repeat(79));
 
     console.log("Calling: getPreviewWithFormat(...)");
-    const response = await client.data.getPreviewWithFormat(collectionId, itemId, "preview.jpeg", {
+    const response = await client.data.getPreviewWithFormat(collectionId, itemId, "jpeg", {
       assets: ["image"],
       assetBandIndices: "image|1,2,3",
     });
