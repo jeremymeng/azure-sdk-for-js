@@ -151,7 +151,7 @@ export async function _submitBatchDeserialize(result: PathUncheckedResponse): Pr
     throw error;
   }
 
-  return _submitBatchRequestDeserializer(result.body);
+  return _submitBatchRequestDeserializer(result.body) as any;
 }
 
 /** The Batch operation allows multiple API calls to be embedded into a single HTTP request. */
