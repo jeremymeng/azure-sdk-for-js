@@ -91,7 +91,8 @@
     "safe-buffer": "^5.2.1",
     "tshy": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:testing",
+    "@typescript/native-preview": "latest"
   },
   "//sampleConfiguration": {
     "skipFolder": false,

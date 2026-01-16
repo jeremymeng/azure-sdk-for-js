@@ -114,7 +114,8 @@
     "tshy": "catalog:",
     "typescript": "catalog:",
     "unzipper": "~0.12.3",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:testing",
+    "@typescript/native-preview": "latest"
   },
   "type": "module",
   "tshy": {

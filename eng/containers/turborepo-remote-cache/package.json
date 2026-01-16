@@ -44,7 +44,8 @@
     "tsx": "^4.17.0",
     "typescript": "~5.8.2",
     "typescript-eslint": "~8.46.4",
-    "vitest": "^4.0.0"
+    "vitest": "^4.0.0",
+    "@typescript/native-preview": "latest"
   },
   "scripts": {
     "build": "tsc",

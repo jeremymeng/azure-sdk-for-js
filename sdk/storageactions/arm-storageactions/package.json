@@ -94,7 +94,8 @@
     "rimraf": "catalog:",
     "tshy": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:testing",
+    "@typescript/native-preview": "latest"
   },
   "scripts": {
     "build": "npm run clean && dev-tool run build-package && dev-tool run extract-api",

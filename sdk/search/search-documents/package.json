@@ -101,7 +101,8 @@
     "tshy": "catalog:",
     "type-plus": "^7.6.2",
     "typescript": "catalog:",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:testing",
+    "@typescript/native-preview": "latest"
   },
   "//sampleConfiguration": {
     "productName": "Azure Search Documents",

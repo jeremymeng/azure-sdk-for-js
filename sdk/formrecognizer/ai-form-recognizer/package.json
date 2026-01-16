@@ -100,7 +100,8 @@
     "rollup": "^4.0.0",
     "tshy": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:testing",
+    "@typescript/native-preview": "latest"
   },
   "//sampleConfiguration": {
     "skip": [

@@ -87,7 +87,8 @@
     "tshy": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:testing",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "@typescript/native-preview": "latest"
   },
   "//sampleConfiguration": {
     "productName": "Azure Web PubSub",

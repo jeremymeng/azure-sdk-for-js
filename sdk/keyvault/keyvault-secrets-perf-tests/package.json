@@ -57,7 +57,8 @@
     "prettier": "catalog:",
     "rimraf": "catalog:",
     "tshy": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@typescript/native-preview": "latest"
   },
   "private": true,
   "scripts": {

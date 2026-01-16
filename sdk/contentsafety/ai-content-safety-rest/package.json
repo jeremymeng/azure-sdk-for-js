@@ -78,7 +78,8 @@
     "rollup-plugin-copy": "^3.5.0",
     "tshy": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:testing",
+    "@typescript/native-preview": "latest"
   },
   "homepage": "https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/contentsafety/ai-content-safety-rest/README.md",
   "//metadata": {

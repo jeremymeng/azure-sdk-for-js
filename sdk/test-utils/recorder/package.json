@@ -70,7 +70,8 @@
     "tshy": "catalog:",
     "tslib": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:testing",
+    "@typescript/native-preview": "latest"
   },
   "tshy": {
     "exports": {

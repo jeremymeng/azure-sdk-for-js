@@ -77,7 +77,8 @@
     "rimraf": "catalog:",
     "tshy": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:testing",
+    "@typescript/native-preview": "latest"
   },
   "//sampleConfiguration": {
     "productName": "Azure Web PubSub Client",

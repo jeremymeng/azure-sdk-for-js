@@ -90,7 +90,8 @@
     "rimraf": "catalog:",
     "tshy": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:testing",
+    "@typescript/native-preview": "latest"
   },
   "//metadata": {
     "migrationDate": "2023-03-08T18:36:03.000Z"
