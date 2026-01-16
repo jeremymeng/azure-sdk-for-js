@@ -1,0 +1,21 @@
+diff --git a/dist/esm/which-tsc.js b/dist/esm/which-tsc.js
+index a50ef865e6dee508029f2fc032b71ec375faf3d5..4dabc776e73600fc6ec5f52aca602001920e912e 100644
+--- a/dist/esm/which-tsc.js
++++ b/dist/esm/which-tsc.js
+@@ -1,3 +1,4 @@
++//# sourceMappingURL=which-tsc.js.map
+ // find the location of the tsc binary
+ // This is necessary because pnpm install trees don't expose binaries
+ // of meta-deps, and it's nicer to not require that the tshy user has
+@@ -6,6 +7,10 @@
+ // tsc from their local node_modules/.bin/tsc location.
+ import { resolveImport } from 'resolve-import';
+ import { fileURLToPath } from 'url';
++import path from "path";
++import { existsSync } from 'fs';
+ const resolve = async () => await resolveImport('typescript', process.cwd() + '/x').catch(() => resolveImport('typescript', import.meta.url));
+-export default fileURLToPath(new URL('../bin/tsc', await resolve()));
++const tsgo = path.join(process.cwd(), 'node_modules', '@typescript', 'native-preview', 'bin', 'tsgo.js');
++console.log({tsgo, exists: existsSync(tsgo)});
++export default existsSync(tsgo) ? tsgo : fileURLToPath(new URL('../bin/tsc', await resolve()));
+ //# sourceMappingURL=which-tsc.js.map
