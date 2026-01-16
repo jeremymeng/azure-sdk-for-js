@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.test.node.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@azure-rest/storage-blob": ["./src/index.ts"],
+      "@azure-rest/storage-blob/*": ["./src/*"],
+      "$internal/*": ["./src/*"]
+    }
+  }
+}
