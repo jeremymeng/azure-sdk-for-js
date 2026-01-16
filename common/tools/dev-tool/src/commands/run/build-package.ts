@@ -40,6 +40,8 @@ stderr: ${proc.stderr.toString()}
   }
 
   log.info("Package built successfully.");
+  log.info(`stdout: ${proc.stdout.toString()}`);
+  log.info(`stderr: ${proc.stderr.toString()}`);
 
   return true;
 });
