@@ -10,7 +10,7 @@
         "Connection": "keep-alive",
         "Content-Length": "181",
         "Content-Type": "application/json",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": {
@@ -42,7 +42,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2025-12-23T14:51:15.0905984Z",
+        "creationTime": "2026-01-20T13:40:38.7716709Z",
         "importType": "StaticCatalog",
         "displayName": "Sample Dataset Ingestion",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
@@ -61,7 +61,7 @@
         "Connection": "keep-alive",
         "Content-Length": "69",
         "Content-Type": "application/merge-patch+json",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": {
@@ -89,7 +89,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2025-12-23T14:51:15.0905984Z",
+        "creationTime": "2026-01-20T13:40:38.7716709Z",
         "importType": "StaticCatalog",
         "displayName": "Updated Ingestion Name",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",

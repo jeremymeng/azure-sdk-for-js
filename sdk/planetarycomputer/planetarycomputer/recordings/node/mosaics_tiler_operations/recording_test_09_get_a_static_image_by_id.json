@@ -10,7 +10,7 @@
         "Connection": "keep-alive",
         "Content-Length": "613",
         "Content-Type": "application/json",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": {
@@ -96,18 +96,18 @@
         "X-Request-ID": "00000000000000000000000000000000"
       },
       "ResponseBody": {
-        "url": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/collections/naip-atl-00000000/image/static/geocatalog-naip-atl-00000000-db8ff7a1d41c4846a14830ecca62fc2e.png?api-version=2025-04-30-preview"
+        "url": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/collections/naip-atl-00000000/image/static/geocatalog-naip-atl-00000000-cc452c3cead1415095168e16eeaeee37.png?api-version=2025-04-30-preview"
       }
     },
     {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/collections/naip-atl-00000000/image/static/geocatalog-naip-atl-00000000-db8ff7a1d41c4846a14830ecca62fc2e.png?api-version=2025-04-30-preview",
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/collections/naip-atl-00000000/image/static/geocatalog-naip-atl-00000000-cc452c3cead1415095168e16eeaeee37.png?api-version=2025-04-30-preview",
       "RequestMethod": "GET",
       "RequestHeaders": {
         "Accept": "image/png",
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,

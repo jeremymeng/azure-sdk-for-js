@@ -10,7 +10,7 @@
         "Connection": "keep-alive",
         "Content-Length": "180",
         "Content-Type": "application/json",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": {
@@ -42,7 +42,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2025-12-23T14:51:27.8862772Z",
+        "creationTime": "2026-01-20T13:40:49.1954138Z",
         "importType": "StaticCatalog",
         "displayName": "Ingestion for Operation",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
@@ -60,7 +60,7 @@
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
         "Content-Length": "0",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -76,7 +76,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/collections/naip-atl-00000000/ingestions/00000000-0000-0000-0000-000000000000/runs/4b48ce97-7995-4d97-a487-5681c24f3ffe?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/collections/naip-atl-00000000/ingestions/00000000-0000-0000-0000-000000000000/runs/73047fb3-645a-4176-b008-50a3e84b3407?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         "Transfer-Encoding": "chunked",
@@ -86,7 +86,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2025-12-23T14:51:28.9281556Z",
+        "creationTime": "2026-01-20T13:40:49.2910407Z",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
         "skipExistingItems": true,
         "keepOriginalAssets": true,
@@ -96,10 +96,10 @@
           "statusHistory": [
             {
               "status": "Pending",
-              "timestamp": "2025-12-23T14:51:28.9163175Z"
+              "timestamp": "2026-01-20T13:40:49.2818854Z"
             }
           ],
-          "creationTime": "2025-12-23T14:51:28.9163161Z",
+          "creationTime": "2026-01-20T13:40:49.2818843Z",
           "totalItems": 0,
           "totalPendingItems": 0,
           "totalSuccessfulItems": 0,
@@ -115,7 +115,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -144,11 +144,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:51:28.9163175Z"
+            "timestamp": "2026-01-20T13:40:49.2818854Z"
           }
         ],
         "type": "IngestionStaticCatalog",
-        "creationTime": "2025-12-23T14:51:28.9163161Z",
+        "creationTime": "2026-01-20T13:40:49.2818843Z",
         "collectionId": "naip-atl-00000000"
       }
     }

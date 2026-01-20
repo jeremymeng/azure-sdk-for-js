@@ -10,7 +10,7 @@
         "Connection": "keep-alive",
         "Content-Length": "426",
         "Content-Type": "multipart/form-data; boundary=--RecordedTestMultipartBoundary",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": [
@@ -38,7 +38,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "3799",
+        "Content-Length": "2815",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -51,7 +51,7 @@
         "type": "Collection",
         "id": "naip-atl-00000000",
         "stac_version": "1.0.0",
-        "description": "A Subset of imagery for sample MPC Pro GeoCatalog deployments. - Updated for testing",
+        "description": "A Subset of imagery for sample MPC Pro GeoCatalog deployments.",
         "links": [
           {
             "rel": "items",
@@ -84,26 +84,7 @@
             "roles": [
               "data"
             ],
-            "title": "RGBIR COG tile",
-            "eo:bands": [
-              {
-                "name": "Red",
-                "common_name": "red"
-              },
-              {
-                "name": "Green",
-                "common_name": "green"
-              },
-              {
-                "name": "Blue",
-                "common_name": "blue"
-              },
-              {
-                "name": "NIR",
-                "common_name": "nir",
-                "description": "near-infrared"
-              }
-            ]
+            "title": "RGBIR COG tile"
           },
           "metadata": {
             "type": "text/plain",
@@ -120,8 +101,8 @@
             "title": "Thumbnail"
           }
         },
-        "msft:_created": "2025-11-03T14:16:10.3539672Z",
-        "msft:_updated": "2025-12-23T14:46:53.008947Z",
+        "msft:_created": "2026-01-15T18:27:30.5034845Z",
+        "msft:_updated": "2026-01-20T14:34:50.925320Z",
         "title": "MPC Pro Sample Datasets",
         "extent": {
           "spatial": {
@@ -200,7 +181,7 @@
         },
         "assets": {
           "thumbnail": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/thumbnail/thumbnail.png",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/thumbnail/thumbnail.png",
             "type": "image/png",
             "title": "Thumbnail",
             "roles": [
@@ -208,40 +189,15 @@
             ]
           },
           "test-asset": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset/test-asset-updated.txt",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/test-asset/test-asset-updated.txt",
             "type": "text/plain",
             "title": "Test Asset - Updated",
             "roles": [
               "metadata"
             ]
           },
-          "test-asset-js": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-js/test-asset-js.txt",
-            "type": "text/plain",
-            "title": "Test Asset",
-            "roles": [
-              "metadata"
-            ]
-          },
-          "test-asset-js-sdk": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-js-sdk/test-asset-sdk.txt",
-            "type": "text/plain",
-            "title": "Test Asset from SDK Script",
-            "description": "Testing multipart upload with SDK",
-            "roles": [
-              "metadata"
-            ]
-          },
-          "test-asset-js-standalone": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-js-standalone/test-asset-standalone.txt",
-            "type": "text/plain",
-            "title": "Test Asset from Standalone Script",
-            "roles": [
-              "metadata"
-            ]
-          },
           "test-asset-to-be-deleted": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-to-be-deleted/test-asset-to-delete.txt",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/test-asset-to-be-deleted/test-asset-to-delete.txt",
             "type": "text/plain",
             "title": "Test Asset To Be Deleted",
             "roles": [
@@ -259,7 +215,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -274,7 +230,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "3550",
+        "Content-Length": "2575",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -287,7 +243,7 @@
         "type": "Collection",
         "id": "naip-atl-00000000",
         "stac_version": "1.0.0",
-        "description": "A Subset of imagery for sample MPC Pro GeoCatalog deployments. - Updated for testing",
+        "description": "A Subset of imagery for sample MPC Pro GeoCatalog deployments.",
         "links": [
           {
             "rel": "items",
@@ -320,26 +276,7 @@
             "roles": [
               "data"
             ],
-            "title": "RGBIR COG tile",
-            "eo:bands": [
-              {
-                "name": "Red",
-                "common_name": "red"
-              },
-              {
-                "name": "Green",
-                "common_name": "green"
-              },
-              {
-                "name": "Blue",
-                "common_name": "blue"
-              },
-              {
-                "name": "NIR",
-                "common_name": "nir",
-                "description": "near-infrared"
-              }
-            ]
+            "title": "RGBIR COG tile"
           },
           "metadata": {
             "type": "text/plain",
@@ -356,8 +293,8 @@
             "title": "Thumbnail"
           }
         },
-        "msft:_created": "2025-11-03T14:16:10.3539672Z",
-        "msft:_updated": "2025-12-23T14:46:53.317188Z",
+        "msft:_created": "2026-01-15T18:27:30.5034845Z",
+        "msft:_updated": "2026-01-20T14:34:51.172785Z",
         "title": "MPC Pro Sample Datasets",
         "extent": {
           "spatial": {
@@ -436,7 +373,7 @@
         },
         "assets": {
           "thumbnail": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/thumbnail/thumbnail.png",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/thumbnail/thumbnail.png",
             "type": "image/png",
             "title": "Thumbnail",
             "roles": [
@@ -444,34 +381,9 @@
             ]
           },
           "test-asset": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset/test-asset-updated.txt",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/test-asset/test-asset-updated.txt",
             "type": "text/plain",
             "title": "Test Asset - Updated",
-            "roles": [
-              "metadata"
-            ]
-          },
-          "test-asset-js": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-js/test-asset-js.txt",
-            "type": "text/plain",
-            "title": "Test Asset",
-            "roles": [
-              "metadata"
-            ]
-          },
-          "test-asset-js-sdk": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-js-sdk/test-asset-sdk.txt",
-            "type": "text/plain",
-            "title": "Test Asset from SDK Script",
-            "description": "Testing multipart upload with SDK",
-            "roles": [
-              "metadata"
-            ]
-          },
-          "test-asset-js-standalone": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-js-standalone/test-asset-standalone.txt",
-            "type": "text/plain",
-            "title": "Test Asset from Standalone Script",
             "roles": [
               "metadata"
             ]
@@ -487,7 +399,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -502,7 +414,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "3550",
+        "Content-Length": "2575",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -540,7 +452,7 @@
         "title": "MPC Pro Sample Datasets",
         "assets": {
           "thumbnail": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/thumbnail/thumbnail.png",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/thumbnail/thumbnail.png",
             "type": "image/png",
             "roles": [
               "thumbnail"
@@ -548,37 +460,12 @@
             "title": "Thumbnail"
           },
           "test-asset": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset/test-asset-updated.txt",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/test-asset/test-asset-updated.txt",
             "type": "text/plain",
             "roles": [
               "metadata"
             ],
             "title": "Test Asset - Updated"
-          },
-          "test-asset-js": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-js/test-asset-js.txt",
-            "type": "text/plain",
-            "roles": [
-              "metadata"
-            ],
-            "title": "Test Asset"
-          },
-          "test-asset-js-sdk": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-js-sdk/test-asset-sdk.txt",
-            "type": "text/plain",
-            "roles": [
-              "metadata"
-            ],
-            "title": "Test Asset from SDK Script",
-            "description": "Testing multipart upload with SDK"
-          },
-          "test-asset-js-standalone": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-bde3e846/collection-assets/test-asset-js-standalone/test-asset-standalone.txt",
-            "type": "text/plain",
-            "roles": [
-              "metadata"
-            ],
-            "title": "Test Asset from Standalone Script"
           }
         },
         "extent": {
@@ -656,33 +543,14 @@
             }
           ]
         },
-        "description": "A Subset of imagery for sample MPC Pro GeoCatalog deployments. - Updated for testing",
+        "description": "A Subset of imagery for sample MPC Pro GeoCatalog deployments.",
         "item_assets": {
           "image": {
             "type": "image/tiff; application=geotiff; profile=cloud-optimized",
             "roles": [
               "data"
             ],
-            "title": "RGBIR COG tile",
-            "eo:bands": [
-              {
-                "name": "Red",
-                "common_name": "red"
-              },
-              {
-                "name": "Green",
-                "common_name": "green"
-              },
-              {
-                "name": "Blue",
-                "common_name": "blue"
-              },
-              {
-                "name": "NIR",
-                "common_name": "nir",
-                "description": "near-infrared"
-              }
-            ]
+            "title": "RGBIR COG tile"
           },
           "metadata": {
             "type": "text/plain",
@@ -700,8 +568,8 @@
           }
         },
         "stac_version": "1.0.0",
-        "msft:_created": "2025-11-03T14:16:10.3539672Z",
-        "msft:_updated": "2025-12-23T14:46:53.317188Z",
+        "msft:_created": "2026-01-15T18:27:30.5034845Z",
+        "msft:_updated": "2026-01-20T14:34:51.172785Z",
         "stac_extensions": [
           "https://stac-extensions.github.io/item-assets/v1.0.0/schema.json",
           "https://stac-extensions.github.io/table/v1.2.0/schema.json"

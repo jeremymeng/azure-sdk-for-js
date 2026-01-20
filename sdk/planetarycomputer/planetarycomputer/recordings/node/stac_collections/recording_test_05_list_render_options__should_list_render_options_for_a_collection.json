@@ -8,7 +8,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -22,7 +22,7 @@
         "Access-Control-Expose-Headers": "Location",
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
-        "Content-Length": "361",
+        "Content-Length": "167",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -30,7 +30,7 @@
         "X-Cache": "CONFIG_NOCACHE",
         "X-Request-ID": "00000000000000000000000000000000"
       },
-      "ResponseBody": "[{\"id\":\"natural-color\",\"name\":\"Natural color\",\"description\":\"RGB from visual assets\",\"type\":\"raster-tile\",\"options\":\"assets=image&asset_bidx=image|1,2,3\",\"minZoom\":6},{\"id\":\"test-natural-color\",\"name\":\"Test Natural color updated\",\"description\":\"RGB from visual assets - updated\",\"type\":\"raster-tile\",\"options\":\"assets=image&asset_bidx=image|1,2,3\",\"minZoom\":6}]"
+      "ResponseBody": "[{\"id\":\"natural-color\",\"name\":\"Natural color\",\"description\":\"RGB from visual assets\",\"type\":\"raster-tile\",\"options\":\"assets=image&asset_bidx=image|1,2,3\",\"minZoom\":6}]"
     }
   ],
   "Variables": {}

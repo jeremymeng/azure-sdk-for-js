@@ -1,6 +1,274 @@
 {
   "Entries": [
     {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Accept-Ranges": "bytes",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Length": "1520",
+        "Content-Type": "application/geo+json",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "traceparent": "00-00000000000000000000000000000000-0000000000000000-00",
+        "Vary": "Accept-Encoding",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "fake-item-id-replace-test",
+        "bbox": [
+          -84.44157,
+          33.621853,
+          -84.370894,
+          33.690654
+        ],
+        "type": "Feature",
+        "links": [
+          {
+            "rel": "collection",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000"
+          },
+          {
+            "rel": "parent",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000"
+          },
+          {
+            "rel": "root",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/"
+          },
+          {
+            "rel": "self",
+            "type": "application/geo+json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test"
+          }
+        ],
+        "assets": {
+          "image": {
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/441/fake-item-id-replace-test/image.tif",
+            "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+            "roles": [
+              "data"
+            ],
+            "title": "RGBIR COG tile"
+          }
+        },
+        "_msft:ts": "2026-01-20T14:23:01.305684Z",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -84.372943,
+                33.621853
+              ],
+              [
+                -84.370894,
+                33.689211
+              ],
+              [
+                -84.439575,
+                33.690654
+              ],
+              [
+                -84.44157,
+                33.623293
+              ],
+              [
+                -84.372943,
+                33.621853
+              ]
+            ]
+          ]
+        },
+        "_msft:etag": "56f044ae-8f27-4bb4-8603-328dccfebf3d",
+        "collection": "naip-atl-00000000",
+        "properties": {
+          "gsd": 0.6,
+          "datetime": "2021-11-14T16:00:00Z",
+          "platform": "Imagery Updated"
+        },
+        "stac_extensions": [
+          "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+        ],
+        "stac_version": "1.0.0"
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test?api-version=2025-04-30-preview",
+      "RequestMethod": "DELETE",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 202,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/06e39ad0-d0bf-47d9-ae49-684b89367b9b?api-version=2025-04-30-preview",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "operation-location": "https://example.com",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Pending",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-20T14:29:16.5672237Z"
+          }
+        ],
+        "type": "DeleteItem",
+        "creationTime": "2026-01-20T14:29:16.5672221Z",
+        "collectionId": "naip-atl-00000000"
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Pending",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-20T14:29:16.5672237Z"
+          }
+        ],
+        "type": "DeleteItem",
+        "creationTime": "2026-01-20T14:29:16.5672221Z",
+        "collectionId": "naip-atl-00000000"
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Succeeded",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-20T14:29:16.567222Z"
+          },
+          {
+            "status": "Running",
+            "timestamp": "2026-01-20T14:29:16.772089Z"
+          },
+          {
+            "status": "Finished",
+            "timestamp": "2026-01-20T14:29:17.286101Z"
+          }
+        ],
+        "type": "DeleteItem",
+        "creationTime": "2026-01-20T14:29:16.567222Z",
+        "startTime": "2026-01-20T14:29:16.567222Z",
+        "finishTime": "2026-01-20T14:29:17.286101Z",
+        "collectionId": "naip-atl-00000000",
+        "additionalInformation": {
+          "TotalFailedItems": "0",
+          "TotalItems": "1",
+          "TotalPendingItems": "0",
+          "TotalSuccessfulItems": "1"
+        }
+      }
+    },
+    {
       "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items?api-version=2025-04-30-preview",
       "RequestMethod": "POST",
       "RequestHeaders": {
@@ -8,19 +276,23 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "Content-Length": "782",
+        "Content-Length": "892",
         "Content-Type": "application/json",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": {
         "type": "Feature",
+        "stac_version": "1.0.0",
         "links": [
           {
             "rel": "collection",
             "type": "application/json",
             "href": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip-atl-00000000"
           }
+        ],
+        "stac_extensions": [
+          "https://stac-extensions.github.io/projection/v1.0.0/schema.json"
         ],
         "geometry": {
           "type": "Polygon",
@@ -49,7 +321,7 @@
             ]
           ]
         },
-        "id": "fake-item-id_replace_test",
+        "id": "fake-item-id-replace-test",
         "collection": "naip-atl-00000000",
         "bbox": [
           -84.44157,
@@ -65,7 +337,7 @@
         "assets": {
           "image": {
             "title": "RGBIR COG tile",
-            "href": "https://SANITIZED.blob.core.windows.net/naip/v002/ga/2021/ga_060cm_2021/33084/m_3308421_se_16_060_20211114.tif",
+            "href": "https://naipeuwest.blob.core.windows.net/naip/v002/ga/2021/ga_060cm_2021/33084/m_3308421_se_16_060_20211114.tif",
             "type": "image/tiff; application=geotiff; profile=cloud-optimized",
             "roles": [
               "data"
@@ -85,7 +357,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/739ccc63-6ffa-48e3-8d90-09bf9347867d?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/48ec8240-b4f8-4f79-8a20-8a72d2842c20?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "operation-location": "https://example.com",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -100,11 +372,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:44:16.5513366Z"
+            "timestamp": "2026-01-20T14:29:18.8317066Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2025-12-23T14:44:16.5513344Z",
+        "creationTime": "2026-01-20T14:29:18.8317049Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -116,7 +388,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -145,11 +417,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:44:16.5513366Z"
+            "timestamp": "2026-01-20T14:29:18.8317066Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2025-12-23T14:44:16.5513344Z",
+        "creationTime": "2026-01-20T14:29:18.8317049Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -161,7 +433,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -186,40 +458,779 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "status": "Failed",
+        "status": "Running",
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:44:16.551334Z"
+            "timestamp": "2026-01-20T14:29:18.831704Z"
           },
           {
             "status": "Running",
-            "timestamp": "2025-12-23T14:44:16.911367Z"
-          },
-          {
-            "status": "Failed",
-            "timestamp": "2025-12-23T14:44:17.024795Z",
-            "errorCode": "StacValidationFailed",
-            "errorMessage": "STAC validation failed. Reason: JSON (id = fake-item-id_replace_test) does not represent a STACObject instance. 'type' attribute is Feature. The STAC item does not conform to the STAC specification. Verify your STAC JSON follows the correct schema and includes all required fields. Learn more about STAC: https://aka.ms/mpcpro-stac-overview"
+            "timestamp": "2026-01-20T14:29:19.276891Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2025-12-23T14:44:16.551334Z",
-        "startTime": "2025-12-23T14:44:16.551334Z",
-        "finishTime": "2025-12-23T14:44:17.024795Z",
+        "creationTime": "2026-01-20T14:29:18.831704Z",
+        "startTime": "2026-01-20T14:29:18.831704Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
-          "TotalFailedItems": "1",
+          "TotalFailedItems": "0",
+          "TotalItems": "1",
+          "TotalPendingItems": "1",
+          "TotalSuccessfulItems": "0"
+        }
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Running",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-20T14:29:18.831704Z"
+          },
+          {
+            "status": "Running",
+            "timestamp": "2026-01-20T14:29:19.276891Z"
+          }
+        ],
+        "type": "AddItem",
+        "creationTime": "2026-01-20T14:29:18.831704Z",
+        "startTime": "2026-01-20T14:29:18.831704Z",
+        "collectionId": "naip-atl-00000000",
+        "additionalInformation": {
+          "TotalFailedItems": "0",
+          "TotalItems": "1",
+          "TotalPendingItems": "1",
+          "TotalSuccessfulItems": "0"
+        }
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Succeeded",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-20T14:29:18.831704Z"
+          },
+          {
+            "status": "Running",
+            "timestamp": "2026-01-20T14:29:19.276891Z"
+          },
+          {
+            "status": "Finished",
+            "timestamp": "2026-01-20T14:29:23.537837Z"
+          }
+        ],
+        "type": "AddItem",
+        "creationTime": "2026-01-20T14:29:18.831704Z",
+        "startTime": "2026-01-20T14:29:18.831704Z",
+        "finishTime": "2026-01-20T14:29:23.537837Z",
+        "collectionId": "naip-atl-00000000",
+        "additionalInformation": {
+          "TotalFailedItems": "0",
           "TotalItems": "1",
           "TotalPendingItems": "0",
-          "TotalSuccessfulItems": "0"
+          "TotalSuccessfulItems": "1"
+        }
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Succeeded",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-20T14:29:18.831704Z"
+          },
+          {
+            "status": "Running",
+            "timestamp": "2026-01-20T14:29:19.276891Z"
+          },
+          {
+            "status": "Finished",
+            "timestamp": "2026-01-20T14:29:23.537837Z"
+          }
+        ],
+        "type": "AddItem",
+        "creationTime": "2026-01-20T14:29:18.831704Z",
+        "startTime": "2026-01-20T14:29:18.831704Z",
+        "finishTime": "2026-01-20T14:29:23.537837Z",
+        "collectionId": "naip-atl-00000000",
+        "additionalInformation": {
+          "TotalFailedItems": "0",
+          "TotalItems": "1",
+          "TotalPendingItems": "0",
+          "TotalSuccessfulItems": "1"
+        }
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Accept-Ranges": "bytes",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Length": "1521",
+        "Content-Type": "application/geo+json",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "traceparent": "00-00000000000000000000000000000000-0000000000000000-00",
+        "Vary": "Accept-Encoding",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "fake-item-id-replace-test",
+        "bbox": [
+          -84.44157,
+          33.621853,
+          -84.370894,
+          33.690654
+        ],
+        "type": "Feature",
+        "links": [
+          {
+            "rel": "collection",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000"
+          },
+          {
+            "rel": "parent",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000"
+          },
+          {
+            "rel": "root",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/"
+          },
+          {
+            "rel": "self",
+            "type": "application/geo+json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test"
+          }
+        ],
+        "assets": {
+          "image": {
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/441/fake-item-id-replace-test/image.tif",
+            "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+            "roles": [
+              "data"
+            ],
+            "title": "RGBIR COG tile"
+          }
         },
-        "error": {
-          "error": {
-            "code": "StacValidationFailed",
-            "message": "STAC validation failed. Reason: JSON (id = fake-item-id_replace_test) does not represent a STACObject instance. 'type' attribute is Feature. The STAC item does not conform to the STAC specification. Verify your STAC JSON follows the correct schema and includes all required fields. Learn more about STAC: https://aka.ms/mpcpro-stac-overview"
+        "_msft:ts": "2026-01-20T14:29:23.537897Z",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -84.372943,
+                33.621853
+              ],
+              [
+                -84.370894,
+                33.689211
+              ],
+              [
+                -84.439575,
+                33.690654
+              ],
+              [
+                -84.44157,
+                33.623293
+              ],
+              [
+                -84.372943,
+                33.621853
+              ]
+            ]
+          ]
+        },
+        "_msft:etag": "1631a846-b6d4-41e5-a125-b43301f994dc",
+        "collection": "naip-atl-00000000",
+        "properties": {
+          "gsd": 0.6,
+          "datetime": "2021-11-14T16:00:00Z",
+          "platform": "Imagery Original"
+        },
+        "stac_extensions": [
+          "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+        ],
+        "stac_version": "1.0.0"
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test?api-version=2025-04-30-preview",
+      "RequestMethod": "PUT",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "Content-Length": "891",
+        "Content-Type": "application/json",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": {
+        "type": "Feature",
+        "stac_version": "1.0.0",
+        "links": [
+          {
+            "rel": "collection",
+            "type": "application/json",
+            "href": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip-atl-00000000"
+          }
+        ],
+        "stac_extensions": [
+          "https://stac-extensions.github.io/projection/v1.0.0/schema.json"
+        ],
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -84.372943,
+                33.621853
+              ],
+              [
+                -84.370894,
+                33.689211
+              ],
+              [
+                -84.439575,
+                33.690654
+              ],
+              [
+                -84.44157,
+                33.623293
+              ],
+              [
+                -84.372943,
+                33.621853
+              ]
+            ]
+          ]
+        },
+        "id": "fake-item-id-replace-test",
+        "collection": "naip-atl-00000000",
+        "bbox": [
+          -84.44157,
+          33.621853,
+          -84.370894,
+          33.690654
+        ],
+        "properties": {
+          "platform": "Imagery Updated",
+          "gsd": 0.6,
+          "datetime": "2021-11-14T16:00:00Z"
+        },
+        "assets": {
+          "image": {
+            "title": "RGBIR COG tile",
+            "href": "https://naipeuwest.blob.core.windows.net/naip/v002/ga/2021/ga_060cm_2021/33084/m_3308421_se_16_060_20211114.tif",
+            "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+            "roles": [
+              "data"
+            ]
           }
         }
+      },
+      "StatusCode": 202,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/cc34dc21-c11c-4a33-89dc-207965bd8f3f?api-version=2025-04-30-preview",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "operation-location": "https://example.com",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Pending",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-20T14:29:25.1140824Z"
+          }
+        ],
+        "type": "UpdateItem",
+        "creationTime": "2026-01-20T14:29:25.1140794Z",
+        "collectionId": "naip-atl-00000000"
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Running",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-20T14:29:25.114079Z"
+          },
+          {
+            "status": "Running",
+            "timestamp": "2026-01-20T14:29:25.453805Z"
+          }
+        ],
+        "type": "UpdateItem",
+        "creationTime": "2026-01-20T14:29:25.114079Z",
+        "startTime": "2026-01-20T14:29:25.114079Z",
+        "collectionId": "naip-atl-00000000",
+        "additionalInformation": {
+          "TotalFailedItems": "0",
+          "TotalItems": "1",
+          "TotalPendingItems": "1",
+          "TotalSuccessfulItems": "0"
+        }
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Succeeded",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-20T14:29:25.114079Z"
+          },
+          {
+            "status": "Running",
+            "timestamp": "2026-01-20T14:29:25.453805Z"
+          },
+          {
+            "status": "Finished",
+            "timestamp": "2026-01-20T14:29:26.181174Z"
+          }
+        ],
+        "type": "UpdateItem",
+        "creationTime": "2026-01-20T14:29:25.114079Z",
+        "startTime": "2026-01-20T14:29:25.114079Z",
+        "finishTime": "2026-01-20T14:29:26.181174Z",
+        "collectionId": "naip-atl-00000000",
+        "additionalInformation": {
+          "TotalFailedItems": "0",
+          "TotalItems": "1",
+          "TotalPendingItems": "0",
+          "TotalSuccessfulItems": "1"
+        }
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Accept-Ranges": "bytes",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Length": "1520",
+        "Content-Type": "application/geo+json",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "traceparent": "00-00000000000000000000000000000000-0000000000000000-00",
+        "Vary": "Accept-Encoding",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "fake-item-id-replace-test",
+        "bbox": [
+          -84.44157,
+          33.621853,
+          -84.370894,
+          33.690654
+        ],
+        "type": "Feature",
+        "links": [
+          {
+            "rel": "collection",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000"
+          },
+          {
+            "rel": "parent",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000"
+          },
+          {
+            "rel": "root",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/"
+          },
+          {
+            "rel": "self",
+            "type": "application/geo+json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test"
+          }
+        ],
+        "assets": {
+          "image": {
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/441/fake-item-id-replace-test/image.tif",
+            "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+            "roles": [
+              "data"
+            ],
+            "title": "RGBIR COG tile"
+          }
+        },
+        "_msft:ts": "2026-01-20T14:29:26.181211Z",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -84.372943,
+                33.621853
+              ],
+              [
+                -84.370894,
+                33.689211
+              ],
+              [
+                -84.439575,
+                33.690654
+              ],
+              [
+                -84.44157,
+                33.623293
+              ],
+              [
+                -84.372943,
+                33.621853
+              ]
+            ]
+          ]
+        },
+        "_msft:etag": "f04834cf-757f-4c5a-8dbe-ee1f4dd7438b",
+        "collection": "naip-atl-00000000",
+        "properties": {
+          "gsd": 0.6,
+          "datetime": "2021-11-14T16:00:00Z",
+          "platform": "Imagery Updated"
+        },
+        "stac_extensions": [
+          "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+        ],
+        "stac_version": "1.0.0"
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Accept-Ranges": "bytes",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Length": "1520",
+        "Content-Type": "application/geo+json",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "traceparent": "00-00000000000000000000000000000000-0000000000000000-00",
+        "Vary": "Accept-Encoding",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "fake-item-id-replace-test",
+        "bbox": [
+          -84.44157,
+          33.621853,
+          -84.370894,
+          33.690654
+        ],
+        "type": "Feature",
+        "links": [
+          {
+            "rel": "collection",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000"
+          },
+          {
+            "rel": "parent",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000"
+          },
+          {
+            "rel": "root",
+            "type": "application/json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/"
+          },
+          {
+            "rel": "self",
+            "type": "application/geo+json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/stac/collections/naip-atl-00000000/items/fake-item-id-replace-test"
+          }
+        ],
+        "assets": {
+          "image": {
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/441/fake-item-id-replace-test/image.tif",
+            "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+            "roles": [
+              "data"
+            ],
+            "title": "RGBIR COG tile"
+          }
+        },
+        "_msft:ts": "2026-01-20T14:29:26.181211Z",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -84.372943,
+                33.621853
+              ],
+              [
+                -84.370894,
+                33.689211
+              ],
+              [
+                -84.439575,
+                33.690654
+              ],
+              [
+                -84.44157,
+                33.623293
+              ],
+              [
+                -84.372943,
+                33.621853
+              ]
+            ]
+          ]
+        },
+        "_msft:etag": "f04834cf-757f-4c5a-8dbe-ee1f4dd7438b",
+        "collection": "naip-atl-00000000",
+        "properties": {
+          "gsd": 0.6,
+          "datetime": "2021-11-14T16:00:00Z",
+          "platform": "Imagery Updated"
+        },
+        "stac_extensions": [
+          "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+        ],
+        "stac_version": "1.0.0"
       }
     }
   ],

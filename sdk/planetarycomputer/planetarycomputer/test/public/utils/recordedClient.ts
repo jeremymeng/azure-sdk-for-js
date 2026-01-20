@@ -75,10 +75,11 @@ const recorderEnvSetup: RecorderStartOptions = {
         target: '"id"\\s*:\\s*"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"',
         value: '"id": "00000000-0000-0000-0000-000000000000"',
       },
-      // Sanitize ALL blob storage URLs in response bodies
+      // Sanitize blob storage URLs in response bodies, but keep known public accounts
       {
         regex: true,
-        target: "https://[a-z0-9]{3,24}\\.blob\\.core\\.windows\\.net",
+        target:
+          "https://(?!naipeuwest\\.blob\\.core\\.windows\\.net)[a-z0-9]{3,24}\\.blob\\.core\\.windows\\.net",
         value: "https://SANITIZED.blob.core.windows.net",
       },
       // Sanitize container URLs in JSON fields
@@ -99,18 +100,8 @@ const recorderEnvSetup: RecorderStartOptions = {
         target: '"naip-atl-[a-f0-9]{8}"',
         value: '"naip-atl-00000000"',
       },
-      // Sanitize specific STAC item ID used in tests
-      {
-        regex: true,
-        target: "ga_m_3308421_se_16_060_20211114",
-        value: "fake-item-id",
-      },
-      // Sanitize specific blob storage URL used in tests
-      {
-        regex: true,
-        target: "https://naipeuwest\\.blob\\.core\\.windows\\.net",
-        value: "https://SANITIZED.blob.core.windows.net",
-      },
+      // NOTE: Do NOT sanitize naipeuwest.blob.core.windows.net - it's a public storage account
+      // that must remain accessible for tests to work. Only sanitize private storage accounts.
       // Sanitize naip-atl collection ID without suffix
       {
         regex: true,
@@ -145,13 +136,15 @@ const recorderEnvSetup: RecorderStartOptions = {
       // Storage account URL sanitization with URL-encoded protocol prefix
       {
         regex: true,
-        target: "https%3A%2F%2F[a-z0-9]+\\.blob\\.core\\.windows\\.net",
+        target:
+          "https%3A%2F%2F(?!naipeuwest%2Eblob%2Ecore%2Ewindows%2Enet)[a-z0-9]+\\.blob\\.core\\.windows\\.net",
         value: "https%3A%2F%2FSANITIZED.blob.core.windows.net",
       },
       // Storage account URLs in URIs (normal URLs)
       {
         regex: true,
-        target: "[a-z0-9]{3,24}\\.blob\\.core\\.windows\\.net(?!/)",
+        target:
+          "(?!naipeuwest\\.blob\\.core\\.windows\\.net)[a-z0-9]{3,24}\\.blob\\.core\\.windows\\.net(?!/)",
         value: "SANITIZED.blob.core.windows.net",
       },
       // Prevent double-sanitization of already-sanitized storage URLs
@@ -190,12 +183,6 @@ const recorderEnvSetup: RecorderStartOptions = {
         regex: true,
         target: "naip-atl-[a-f0-9]{8}",
         value: "naip-atl-00000000",
-      },
-      // Sanitize specific STAC item ID used in tests
-      {
-        regex: true,
-        target: "ga_m_3308421_se_16_060_20211114",
-        value: "fake-item-id",
       },
       // Sanitize naip-atl collection ID without suffix
       {

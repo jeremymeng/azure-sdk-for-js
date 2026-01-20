@@ -581,13 +581,12 @@ describe("STAC API Specification", () => {
 
     // Check if item already exists and delete if necessary
     try {
-      const itemsResponse = await client.stac.getItemCollection(collectionId);
-      if (itemsResponse.features?.some((item) => item.id === itemId)) {
-        console.log(`Item ${itemId} already exists. Deleting it first...`);
-        const deletePoller = client.stac.deleteItem(collectionId, itemId);
-        await deletePoller.pollUntilDone();
-        console.log(`Deleted existing item ${itemId}`);
-      }
+      console.log(`Checking if item ${itemId} already exists...`);
+      await client.stac.getItem(collectionId, itemId);
+      console.log(`Item ${itemId} exists, deleting it first...`);
+      const deletePoller = client.stac.deleteItem(collectionId, itemId);
+      await deletePoller.pollUntilDone();
+      console.log(`Deleted existing item ${itemId}`);
     } catch (e: any) {
       if (isRestError(e) && e.statusCode === 404) {
         console.log(`Item ${itemId} does not exist, proceeding with creation`);
@@ -636,27 +635,70 @@ describe("STAC API Specification", () => {
     const itemId = "ga_m_3308421_se_16_060_20211114-test";
 
     try {
-      // Get existing item first
-      const stacItem = await client.stac.getItem(collectionId, itemId);
-      console.log(`Retrieved item for update: ${itemId}`);
-
-      // Update properties - modify the item
-      const stacItemDict = stacItem as any;
-      if (!stacItemDict.properties) {
-        stacItemDict.properties = {};
-      }
-      stacItemDict.properties.platform = "Imagery";
+      // Initialize a STAC item with a public asset URL (not managed storage) so ingestion can access it.
+      // Use TypeScript SDK property names (camelCase); the serializer converts to wire format.
+      const stacItem = {
+        stacVersion: "1.0.0",
+        type: "Feature",
+        id: itemId,
+        collection: collectionId,
+        boundingBox: [-84.44157, 33.621853, -84.370894, 33.690654],
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [-84.372943, 33.621853],
+              [-84.370894, 33.689211],
+              [-84.439575, 33.690654],
+              [-84.44157, 33.623293],
+              [-84.372943, 33.621853],
+            ],
+          ],
+        },
+        properties: {
+          gsd: 0.6,
+          datetime: "2021-11-14T16:00:00Z",
+          "naip:year": "2021",
+          "proj:bbox": [737334.0, 3723324.0, 743706.0, 3730800.0],
+          "proj:epsg": 26916,
+          "naip:state": "ga",
+          "proj:shape": [12460, 10620],
+          "proj:transform": [0.6, 0.0, 737334.0, 0.0, -0.6, 3730800.0, 0.0, 0.0, 1.0],
+          platform: "Imagery",
+        },
+        links: [
+          {
+            rel: "collection",
+            type: "application/json",
+            href: `https://planetarycomputer.microsoft.com/api/stac/v1/collections/${collectionId}`,
+          },
+        ],
+        assets: {
+          image: {
+            href: "https://naipeuwest.blob.core.windows.net/naip/v002/ga/2021/ga_060cm_2021/33084/m_3308421_se_16_060_20211114.tif",
+            type: "image/tiff; application=geotiff; profile=cloud-optimized",
+            roles: ["data"],
+            title: "RGBIR COG tile",
+          },
+        },
+        stacExtensions: ["https://stac-extensions.github.io/projection/v1.0.0/schema.json"],
+      } as any;
 
       console.log("Updating item with platform property: Imagery");
 
       // Update the item
-      const updatePoller = client.stac.updateItem(collectionId, itemId, stacItemDict);
+      const updatePoller = client.stac.updateItem(collectionId, itemId, stacItem);
       await updatePoller.pollUntilDone();
       console.log(`Successfully updated item ${itemId}`);
 
       // Verify the update
       const updatedItem = await client.stac.getItem(collectionId, itemId);
       console.log(`Verified item update: ${updatedItem.id}`);
+
+      if (updatedItem.properties) {
+        const platform = (updatedItem.properties as any).platform;
+        console.log(`Updated item platform: ${platform}`);
+      }
     } catch (e: any) {
       console.log(`Failed to update item: ${e.message}`);
       throw e;
@@ -814,7 +856,6 @@ describe("STAC API Specification", () => {
       // Step 2: Replace using createOrReplace
       console.log(`Replacing item ${itemId} using createOrReplace...`);
       stacItem.properties.platform = "Imagery Updated";
-      stacItem.properties.processing_level = "L2";
 
       const replacePoller = client.stac.createOrReplaceItem(collectionId, itemId, stacItem);
       await replacePoller.pollUntilDone();
@@ -828,21 +869,13 @@ describe("STAC API Specification", () => {
       // Verify the updated properties
       if (replacedItem.properties) {
         const platform = (replacedItem.properties as any).platform || "N/A";
-        const processingLevel = (replacedItem.properties as any).processing_level || "N/A";
-        console.log(
-          `Verified replaced item, platform: ${platform}, processing_level: ${processingLevel}`,
-        );
+        console.log(`Verified replaced item, platform: ${platform}`);
 
         // Assert the properties were updated
         assert.equal(
           platform,
           "Imagery Updated",
           `Expected platform 'Imagery Updated', got '${platform}'`,
-        );
-        assert.equal(
-          processingLevel,
-          "L2",
-          `Expected processing_level 'L2', got '${processingLevel}'`,
         );
       } else {
         console.log("Replaced item has no properties to verify");

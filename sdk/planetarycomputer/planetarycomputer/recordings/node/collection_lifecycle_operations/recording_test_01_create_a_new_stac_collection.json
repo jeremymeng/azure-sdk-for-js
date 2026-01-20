@@ -8,7 +8,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -48,7 +48,7 @@
         "Connection": "keep-alive",
         "Content-Length": "337",
         "Content-Type": "application/json",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": {
@@ -92,7 +92,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/dd2dbb24-1c49-4aae-9cb0-fada808c2e9f?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/f40cfa3f-543b-41aa-a6b9-67f54568daee?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "operation-location": "https://example.com",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -107,11 +107,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -123,7 +123,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -152,11 +152,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -168,7 +168,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -197,11 +197,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -213,7 +213,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -242,11 +242,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -258,7 +258,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -287,11 +287,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -303,7 +303,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -332,11 +332,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -348,7 +348,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -377,11 +377,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -393,7 +393,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -422,11 +422,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -438,7 +438,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -467,11 +467,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -483,7 +483,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -512,11 +512,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -528,7 +528,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -557,11 +557,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -573,7 +573,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -602,11 +602,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -618,7 +618,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -647,11 +647,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -663,7 +663,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -692,19 +692,19 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           },
           {
             "status": "Running",
-            "timestamp": "2025-12-23T14:45:34.9798598Z"
+            "timestamp": "2026-01-20T14:34:05.4137184Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2025-12-23T14:45:35.2800138Z"
+            "timestamp": "2026-01-20T14:34:05.6597046Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -716,7 +716,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -745,19 +745,19 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2025-12-23T14:45:11.8178081Z"
+            "timestamp": "2026-01-20T14:33:41.3752566Z"
           },
           {
             "status": "Running",
-            "timestamp": "2025-12-23T14:45:34.9798598Z"
+            "timestamp": "2026-01-20T14:34:05.4137184Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2025-12-23T14:45:35.2800138Z"
+            "timestamp": "2026-01-20T14:34:05.6597046Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2025-12-23T14:45:11.8178065Z",
+        "creationTime": "2026-01-20T14:33:41.3752543Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -769,7 +769,7 @@
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -784,7 +784,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "1065",
+        "Content-Length": "1063",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -843,8 +843,8 @@
         "license": "proprietary",
         "description": "Test collection for lifecycle operations",
         "stac_version": "1.0.0",
-        "msft:_created": "2025-12-23T14:45:35.0628473Z",
-        "msft:_updated": "2025-12-23T14:45:35.0628473Z"
+        "msft:_created": "2026-01-20T14:34:05.515545Z",
+        "msft:_updated": "2026-01-20T14:34:05.515545Z"
       }
     }
   ],

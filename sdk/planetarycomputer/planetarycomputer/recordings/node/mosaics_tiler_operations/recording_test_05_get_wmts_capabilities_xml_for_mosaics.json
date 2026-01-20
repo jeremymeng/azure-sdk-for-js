@@ -10,7 +10,7 @@
         "Connection": "keep-alive",
         "Content-Length": "285",
         "Content-Type": "application/json",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": {
@@ -73,22 +73,22 @@
         "X-Request-ID": "00000000000000000000000000000000"
       },
       "ResponseBody": {
-        "searchid": "ba13fc7947b9b585690d84ee61aaa653",
+        "searchid": "b3ee3c402e3a8546f80d7ef8675d3a20",
         "links": [
           {
-            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/ba13fc7947b9b585690d84ee61aaa653/info",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/b3ee3c402e3a8546f80d7ef8675d3a20/info",
             "rel": "metadata",
             "type": "application/json",
             "title": "Mosaic metadata"
           },
           {
-            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/ba13fc7947b9b585690d84ee61aaa653/tilejson.json",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/b3ee3c402e3a8546f80d7ef8675d3a20/tilejson.json",
             "rel": "tilejson",
             "type": "application/json",
             "title": "Link for TileJSON"
           },
           {
-            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/ba13fc7947b9b585690d84ee61aaa653/WMTSCapabilities.xml",
+            "href": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/b3ee3c402e3a8546f80d7ef8675d3a20/WMTSCapabilities.xml",
             "rel": "wmts",
             "type": "application/json",
             "title": "Link for WMTS"
@@ -97,14 +97,14 @@
       }
     },
     {
-      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/ba13fc7947b9b585690d84ee61aaa653/WebMercatorQuad/WMTSCapabilities.xml?api-version=2025-04-30-preview&assets=image&asset_bidx=image%7C1%2C2%2C3&tile_format=png&tile_scale=1&minzoom=7&maxzoom=13",
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/b3ee3c402e3a8546f80d7ef8675d3a20/WebMercatorQuad/WMTSCapabilities.xml?api-version=2025-04-30-preview&assets=image&asset_bidx=image%7C1%2C2%2C3&tile_format=png&tile_scale=1&minzoom=7&maxzoom=13",
       "RequestMethod": "GET",
       "RequestHeaders": {
         "Accept": "application/xml",
         "Accept-Encoding": "gzip,deflate",
         "Authorization": "Sanitized",
         "Connection": "keep-alive",
-        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.2 Node/22.16.0 OS/(x64-Windows_NT-10.0.26100)",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
         "x-ms-client-request-id": "Sanitized"
       },
       "RequestBody": null,
@@ -139,7 +139,7 @@
         "        <ows:Operation name=\"GetCapabilities\">\n",
         "            <ows:DCP>\n",
         "                <ows:HTTP>\n",
-        "                    <ows:Get xlink:href=\"https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/ba13fc7947b9b585690d84ee61aaa653/WebMercatorQuad/WMTSCapabilities.xml?api-version=2025-04-30-preview&amp;assets=image&amp;asset_bidx=image%7C1%2C2%2C3&amp;tile_format=png&amp;tile_scale=1&amp;minzoom=7&amp;maxzoom=13\">\n",
+        "                    <ows:Get xlink:href=\"https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/b3ee3c402e3a8546f80d7ef8675d3a20/WebMercatorQuad/WMTSCapabilities.xml?api-version=2025-04-30-preview&amp;assets=image&amp;asset_bidx=image%7C1%2C2%2C3&amp;tile_format=png&amp;tile_scale=1&amp;minzoom=7&amp;maxzoom=13\">\n",
         "                        <ows:Constraint name=\"GetEncoding\">\n",
         "                            <ows:AllowedValues>\n",
         "                                <ows:Value>RESTful</ows:Value>\n",
@@ -152,7 +152,7 @@
         "        <ows:Operation name=\"GetTile\">\n",
         "            <ows:DCP>\n",
         "                <ows:HTTP>\n",
-        "                    <ows:Get xlink:href=\"https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/ba13fc7947b9b585690d84ee61aaa653/WebMercatorQuad/WMTSCapabilities.xml?api-version=2025-04-30-preview&amp;assets=image&amp;asset_bidx=image%7C1%2C2%2C3&amp;tile_format=png&amp;tile_scale=1&amp;minzoom=7&amp;maxzoom=13\">\n",
+        "                    <ows:Get xlink:href=\"https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/b3ee3c402e3a8546f80d7ef8675d3a20/WebMercatorQuad/WMTSCapabilities.xml?api-version=2025-04-30-preview&amp;assets=image&amp;asset_bidx=image%7C1%2C2%2C3&amp;tile_format=png&amp;tile_scale=1&amp;minzoom=7&amp;maxzoom=13\">\n",
         "                        <ows:Constraint name=\"GetEncoding\">\n",
         "                            <ows:AllowedValues>\n",
         "                                <ows:Value>RESTful</ows:Value>\n",
@@ -250,7 +250,7 @@
         "                        </TileMatrix>\n",
         "        </TileMatrixSet>\n",
         "    </Contents>\n",
-        "    <ServiceMetadataURL xlink:href=\"https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/ba13fc7947b9b585690d84ee61aaa653/WebMercatorQuad/WMTSCapabilities.xml?api-version=2025-04-30-preview&amp;assets=image&amp;asset_bidx=image%7C1%2C2%2C3&amp;tile_format=png&amp;tile_scale=1&amp;minzoom=7&amp;maxzoom=13\" />\n",
+        "    <ServiceMetadataURL xlink:href=\"https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/data/mosaic/b3ee3c402e3a8546f80d7ef8675d3a20/WebMercatorQuad/WMTSCapabilities.xml?api-version=2025-04-30-preview&amp;assets=image&amp;asset_bidx=image%7C1%2C2%2C3&amp;tile_format=png&amp;tile_scale=1&amp;minzoom=7&amp;maxzoom=13\" />\n",
         "</Capabilities>"
       ]
     }
