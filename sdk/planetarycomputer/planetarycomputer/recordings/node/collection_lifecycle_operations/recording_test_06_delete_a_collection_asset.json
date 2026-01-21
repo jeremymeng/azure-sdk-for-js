@@ -38,7 +38,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "2815",
+        "Content-Length": "2842",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -101,8 +101,8 @@
             "title": "Thumbnail"
           }
         },
-        "msft:_created": "2026-01-15T18:27:30.5034845Z",
-        "msft:_updated": "2026-01-20T14:34:50.925320Z",
+        "msft:_created": "2026-01-15T18:47:31.2942763Z",
+        "msft:_updated": "2026-01-21T15:01:27.699519Z",
         "title": "MPC Pro Sample Datasets",
         "extent": {
           "spatial": {
@@ -181,7 +181,7 @@
         },
         "assets": {
           "thumbnail": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/thumbnail/thumbnail.png",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/thumbnail/thumbnail.png",
             "type": "image/png",
             "title": "Thumbnail",
             "roles": [
@@ -189,7 +189,7 @@
             ]
           },
           "test-asset": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/test-asset/test-asset-updated.txt",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/test-asset/test-asset-updated.txt",
             "type": "text/plain",
             "title": "Test Asset - Updated",
             "roles": [
@@ -197,7 +197,7 @@
             ]
           },
           "test-asset-to-be-deleted": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/test-asset-to-be-deleted/test-asset-to-delete.txt",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/test-asset-to-be-deleted/test-asset-to-delete.txt",
             "type": "text/plain",
             "title": "Test Asset To Be Deleted",
             "roles": [
@@ -230,7 +230,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "2575",
+        "Content-Length": "2593",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -293,8 +293,8 @@
             "title": "Thumbnail"
           }
         },
-        "msft:_created": "2026-01-15T18:27:30.5034845Z",
-        "msft:_updated": "2026-01-20T14:34:51.172785Z",
+        "msft:_created": "2026-01-15T18:47:31.2942763Z",
+        "msft:_updated": "2026-01-21T15:01:27.988286Z",
         "title": "MPC Pro Sample Datasets",
         "extent": {
           "spatial": {
@@ -373,7 +373,7 @@
         },
         "assets": {
           "thumbnail": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/thumbnail/thumbnail.png",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/thumbnail/thumbnail.png",
             "type": "image/png",
             "title": "Thumbnail",
             "roles": [
@@ -381,7 +381,7 @@
             ]
           },
           "test-asset": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/test-asset/test-asset-updated.txt",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/test-asset/test-asset-updated.txt",
             "type": "text/plain",
             "title": "Test Asset - Updated",
             "roles": [
@@ -414,7 +414,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "2575",
+        "Content-Length": "2593",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -452,7 +452,7 @@
         "title": "MPC Pro Sample Datasets",
         "assets": {
           "thumbnail": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/thumbnail/thumbnail.png",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/thumbnail/thumbnail.png",
             "type": "image/png",
             "roles": [
               "thumbnail"
@@ -460,7 +460,7 @@
             "title": "Thumbnail"
           },
           "test-asset": {
-            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-bde3e846/collection-assets/test-asset/test-asset-updated.txt",
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/test-asset/test-asset-updated.txt",
             "type": "text/plain",
             "roles": [
               "metadata"
@@ -568,8 +568,8 @@
           }
         },
         "stac_version": "1.0.0",
-        "msft:_created": "2026-01-15T18:27:30.5034845Z",
-        "msft:_updated": "2026-01-20T14:34:51.172785Z",
+        "msft:_created": "2026-01-15T18:47:31.2942763Z",
+        "msft:_updated": "2026-01-21T15:01:27.988286Z",
         "stac_extensions": [
           "https://stac-extensions.github.io/item-assets/v1.0.0/schema.json",
           "https://stac-extensions.github.io/table/v1.2.0/schema.json"

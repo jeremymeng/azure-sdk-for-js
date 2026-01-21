@@ -527,7 +527,10 @@ describe("STAC API Specification", () => {
     const collectionId = assertEnvironmentVariable(
       EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
     );
-    const itemId = "ga_m_3308421_se_16_060_20211114-test";
+    const baseItemId = assertEnvironmentVariable(
+      EnvironmentVariableNames.PLANETARYCOMPUTER_ITEM_ID,
+    );
+    const itemId = `${baseItemId}-test`;
 
     // Create sample STAC item using TypeScript SDK property names (camelCase)
     // The SDK serializer will convert to wire format (snake_case)
@@ -632,7 +635,10 @@ describe("STAC API Specification", () => {
     const collectionId = assertEnvironmentVariable(
       EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
     );
-    const itemId = "ga_m_3308421_se_16_060_20211114-test";
+    const baseItemId = assertEnvironmentVariable(
+      EnvironmentVariableNames.PLANETARYCOMPUTER_ITEM_ID,
+    );
+    const itemId = `${baseItemId}-test`;
 
     try {
       // Initialize a STAC item with a public asset URL (not managed storage) so ingestion can access it.
@@ -773,7 +779,10 @@ describe("STAC API Specification", () => {
     const collectionId = assertEnvironmentVariable(
       EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
     );
-    const itemId = "ga_m_3308421_se_16_060_20211114-replace-test";
+    const baseItemId = assertEnvironmentVariable(
+      EnvironmentVariableNames.PLANETARYCOMPUTER_ITEM_ID,
+    );
+    const itemId = `${baseItemId}-replace-test`;
 
     // Create sample STAC item
     const stacItem = {
@@ -898,7 +907,10 @@ describe("STAC API Specification", () => {
     const collectionId = assertEnvironmentVariable(
       EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
     );
-    const itemId = "ga_m_3308421_se_16_060_20211114-delete-test";
+    const baseItemId = assertEnvironmentVariable(
+      EnvironmentVariableNames.PLANETARYCOMPUTER_ITEM_ID,
+    );
+    const itemId = `${baseItemId}-delete-test`;
 
     // Create sample STAC item to delete
     const stacItem = {

@@ -89,9 +89,9 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/5647f13e-0c2d-471a-a33e-c737a772ea4d?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "operation-location": "https://example.com",
+        "operation-location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         "Transfer-Encoding": "chunked",
         "x-azure-ref": "Sanitized",
@@ -104,11 +104,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:29:08.8349801Z"
+            "timestamp": "2026-01-21T13:49:57.858599Z"
           }
         ],
         "type": "UpdateItem",
-        "creationTime": "2026-01-20T14:29:08.8349774Z",
+        "creationTime": "2026-01-21T13:49:57.8585975Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -149,11 +149,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:29:08.8349801Z"
+            "timestamp": "2026-01-21T13:49:57.858599Z"
           }
         ],
         "type": "UpdateItem",
-        "creationTime": "2026-01-20T14:29:08.8349774Z",
+        "creationTime": "2026-01-21T13:49:57.8585975Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -194,21 +194,21 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:29:08.834977Z"
+            "timestamp": "2026-01-21T13:49:57.858597Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-20T14:29:09.253687Z"
+            "timestamp": "2026-01-21T13:49:58.9253Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-20T14:29:10.050682Z"
+            "timestamp": "2026-01-21T13:50:00.042489Z"
           }
         ],
         "type": "UpdateItem",
-        "creationTime": "2026-01-20T14:29:08.834977Z",
-        "startTime": "2026-01-20T14:29:08.834977Z",
-        "finishTime": "2026-01-20T14:29:10.050682Z",
+        "creationTime": "2026-01-21T13:49:57.858597Z",
+        "startTime": "2026-01-21T13:49:57.858597Z",
+        "finishTime": "2026-01-21T13:50:00.042489Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -255,21 +255,21 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:29:08.834977Z"
+            "timestamp": "2026-01-21T13:49:57.858597Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-20T14:29:09.253687Z"
+            "timestamp": "2026-01-21T13:49:58.9253Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-20T14:29:10.050682Z"
+            "timestamp": "2026-01-21T13:50:00.042489Z"
           }
         ],
         "type": "UpdateItem",
-        "creationTime": "2026-01-20T14:29:08.834977Z",
-        "startTime": "2026-01-20T14:29:08.834977Z",
-        "finishTime": "2026-01-20T14:29:10.050682Z",
+        "creationTime": "2026-01-21T13:49:57.858597Z",
+        "startTime": "2026-01-21T13:49:57.858597Z",
+        "finishTime": "2026-01-21T13:50:00.042489Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -353,7 +353,7 @@
             "title": "RGBIR COG tile"
           }
         },
-        "_msft:ts": "2026-01-20T14:29:10.050718Z",
+        "_msft:ts": "2026-01-21T13:50:00.042526Z",
         "geometry": {
           "type": "Polygon",
           "coordinates": [
@@ -381,7 +381,7 @@
             ]
           ]
         },
-        "_msft:etag": "105895ee-9827-41c1-bcdd-ff75f71b0f9e",
+        "_msft:etag": "35563a71-0256-4750-bae3-bea104abe0df",
         "collection": "naip-atl-00000000",
         "properties": {
           "gsd": 0.6,

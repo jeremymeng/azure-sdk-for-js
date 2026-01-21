@@ -31,7 +31,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "21579",
+        "Content-Length": "21600",
         "Content-Type": "application/geo+json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -879,7 +879,7 @@
                 "title": "RGBIR COG tile"
               }
             },
-            "_msft:ts": "2026-01-20T14:28:18.462195Z",
+            "_msft:ts": "2026-01-21T11:28:18.035753Z",
             "geometry": {
               "type": "Polygon",
               "coordinates": [
@@ -907,11 +907,12 @@
                 ]
               ]
             },
-            "_msft:etag": "ce8e959a-cc74-4872-926a-edebb874e10f",
+            "_msft:etag": "7567da09-b718-4c2f-b871-e77510302cfe",
             "collection": "naip-atl-00000000",
             "properties": {
               "gsd": 0.6,
-              "datetime": "2021-11-14T16:00:00Z"
+              "datetime": "2021-11-14T16:00:00Z",
+              "platform": "Imagery"
             },
             "stac_extensions": [
               "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
@@ -959,7 +960,7 @@
                 "title": "RGBIR COG tile"
               }
             },
-            "_msft:ts": "2026-01-20T14:23:01.305684Z",
+            "_msft:ts": "2026-01-21T11:28:33.810668Z",
             "geometry": {
               "type": "Polygon",
               "coordinates": [
@@ -987,7 +988,7 @@
                 ]
               ]
             },
-            "_msft:etag": "56f044ae-8f27-4bb4-8603-328dccfebf3d",
+            "_msft:etag": "ab7275fb-971a-4c64-ae8c-fb1116f19081",
             "collection": "naip-atl-00000000",
             "properties": {
               "gsd": 0.6,

@@ -31,7 +31,7 @@
         "X-Request-ID": "00000000000000000000000000000000"
       },
       "ResponseBody": {
-        "msft:expiry": "2026-01-20T15:32:02Z",
+        "msft:expiry": "2026-01-21T15:13:18Z",
         "token": "Sanitized"
       }
     },

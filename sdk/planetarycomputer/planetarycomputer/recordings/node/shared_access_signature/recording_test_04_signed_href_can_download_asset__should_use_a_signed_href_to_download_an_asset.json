@@ -208,8 +208,8 @@
         "X-Request-ID": "00000000000000000000000000000000"
       },
       "ResponseBody": {
-        "msft:expiry": "2026-01-21T14:31:59Z",
-        "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/thumbnail/thumbnail.png?st=2026-01-19T14%3A31%3A59Z&se=2026-01-21T14%3A31%3A59Z&sp=rl&sv=Sanitized&sr=c&skoid=f3267c15-016e-4c75-af2c-24daf0bc92e4&sktid=33e01921-4d64-4f8c-a055-5bdaffd5e33d&skt=2026-01-20T14%3A31%3A53Z&ske=2026-01-27T14%3A30%3A53Z&sks=b&skv=2025-01-05&sig=Sanitized"
+        "msft:expiry": "2026-01-22T14:13:14Z",
+        "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/thumbnail/thumbnail.png?st=2026-01-20T14%3A13%3A14Z&se=2026-01-22T14%3A13%3A14Z&sp=rl&sv=Sanitized&sr=c&skoid=f3267c15-016e-4c75-af2c-24daf0bc92e4&sktid=33e01921-4d64-4f8c-a055-5bdaffd5e33d&skt=2026-01-21T14%3A13%3A08Z&ske=2026-01-28T14%3A12%3A08Z&sks=b&skv=2025-01-05&sig=Sanitized"
       }
     }
   ],

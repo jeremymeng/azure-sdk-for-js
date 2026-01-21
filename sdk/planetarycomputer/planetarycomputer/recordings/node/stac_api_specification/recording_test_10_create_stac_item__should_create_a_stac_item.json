@@ -23,7 +23,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "1467",
+        "Content-Length": "1488",
         "Content-Type": "application/geo+json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -74,7 +74,7 @@
             "title": "RGBIR COG tile"
           }
         },
-        "_msft:ts": "2026-01-20T14:28:18.462195Z",
+        "_msft:ts": "2026-01-21T11:28:18.035753Z",
         "geometry": {
           "type": "Polygon",
           "coordinates": [
@@ -102,11 +102,12 @@
             ]
           ]
         },
-        "_msft:etag": "ce8e959a-cc74-4872-926a-edebb874e10f",
+        "_msft:etag": "7567da09-b718-4c2f-b871-e77510302cfe",
         "collection": "naip-atl-00000000",
         "properties": {
           "gsd": 0.6,
-          "datetime": "2021-11-14T16:00:00Z"
+          "datetime": "2021-11-14T16:00:00Z",
+          "platform": "Imagery"
         },
         "stac_extensions": [
           "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
@@ -138,9 +139,9 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/56c2c9bd-69dd-4787-96cb-9f6c804c56e5?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "operation-location": "https://example.com",
+        "operation-location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         "Transfer-Encoding": "chunked",
         "x-azure-ref": "Sanitized",
@@ -153,11 +154,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:28:57.8118889Z"
+            "timestamp": "2026-01-21T13:49:44.3973507Z"
           }
         ],
         "type": "DeleteItem",
-        "creationTime": "2026-01-20T14:28:57.8118876Z",
+        "creationTime": "2026-01-21T13:49:44.3973456Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -198,12 +199,68 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:28:57.8118889Z"
+            "timestamp": "2026-01-21T13:49:44.3973507Z"
           }
         ],
         "type": "DeleteItem",
-        "creationTime": "2026-01-20T14:28:57.8118876Z",
+        "creationTime": "2026-01-21T13:49:44.3973456Z",
         "collectionId": "naip-atl-00000000"
+      }
+    },
+    {
+      "RequestUri": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
+      "RequestMethod": "GET",
+      "RequestHeaders": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip,deflate",
+        "Authorization": "Sanitized",
+        "Connection": "keep-alive",
+        "User-Agent": "azsdk-js-client azsdk-js-api azsdk-js-planetarycomputer/1.0.0-beta.1 core-rest-pipeline/1.22.3 Node/22.16.0 (Windows_NT 10.0.26200; x64)",
+        "x-ms-client-request-id": "Sanitized"
+      },
+      "RequestBody": null,
+      "StatusCode": 200,
+      "ResponseHeaders": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "X-PC-Request-Entity,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Location",
+        "Access-Control-Allow-Methods": "PUT, GET, POST, OPTIONS, DELETE, PATCH",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Location",
+        "Access-Control-Max-Age": "1728000",
+        "api-supported-versions": "2024-01-31-preview, 2025-04-30-preview",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Transfer-Encoding": "chunked",
+        "x-azure-ref": "Sanitized",
+        "X-Cache": "CONFIG_NOCACHE",
+        "X-Request-ID": "00000000000000000000000000000000"
+      },
+      "ResponseBody": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "status": "Running",
+        "statusHistory": [
+          {
+            "status": "Pending",
+            "timestamp": "2026-01-21T13:49:44.397345Z"
+          },
+          {
+            "status": "Running",
+            "timestamp": "2026-01-21T13:49:45.321261Z"
+          }
+        ],
+        "type": "DeleteItem",
+        "creationTime": "2026-01-21T13:49:44.397345Z",
+        "startTime": "2026-01-21T13:49:44.397345Z",
+        "collectionId": "naip-atl-00000000",
+        "additionalInformation": {
+          "TotalFailedItems": "0",
+          "TotalItems": "1",
+          "TotalPendingItems": "1",
+          "TotalSuccessfulItems": "0"
+        }
       }
     },
     {
@@ -243,21 +300,21 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:28:57.811887Z"
+            "timestamp": "2026-01-21T13:49:44.397345Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-20T14:28:58.070758Z"
+            "timestamp": "2026-01-21T13:49:45.321261Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-20T14:28:58.676663Z"
+            "timestamp": "2026-01-21T13:49:46.915869Z"
           }
         ],
         "type": "DeleteItem",
-        "creationTime": "2026-01-20T14:28:57.811887Z",
-        "startTime": "2026-01-20T14:28:57.811887Z",
-        "finishTime": "2026-01-20T14:28:58.676663Z",
+        "creationTime": "2026-01-21T13:49:44.397345Z",
+        "startTime": "2026-01-21T13:49:44.397345Z",
+        "finishTime": "2026-01-21T13:49:46.915869Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -355,9 +412,9 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/09063b9a-123f-4d7a-9116-3ee57ec3bbeb?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
-        "operation-location": "https://example.com",
+        "operation-location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         "Transfer-Encoding": "chunked",
         "x-azure-ref": "Sanitized",
@@ -370,11 +427,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:28:59.9854605Z"
+            "timestamp": "2026-01-21T13:49:49.0330476Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-20T14:28:59.9854588Z",
+        "creationTime": "2026-01-21T13:49:49.0330461Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -415,11 +472,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:28:59.9854605Z"
+            "timestamp": "2026-01-21T13:49:49.0330476Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-20T14:28:59.9854588Z",
+        "creationTime": "2026-01-21T13:49:49.0330461Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -460,16 +517,16 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:28:59.985458Z"
+            "timestamp": "2026-01-21T13:49:49.033046Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-20T14:29:00.305519Z"
+            "timestamp": "2026-01-21T13:49:49.532354Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-20T14:28:59.985458Z",
-        "startTime": "2026-01-20T14:28:59.985458Z",
+        "creationTime": "2026-01-21T13:49:49.033046Z",
+        "startTime": "2026-01-21T13:49:49.033046Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -516,16 +573,16 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:28:59.985458Z"
+            "timestamp": "2026-01-21T13:49:49.033046Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-20T14:29:00.305519Z"
+            "timestamp": "2026-01-21T13:49:49.532354Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-20T14:28:59.985458Z",
-        "startTime": "2026-01-20T14:28:59.985458Z",
+        "creationTime": "2026-01-21T13:49:49.033046Z",
+        "startTime": "2026-01-21T13:49:49.033046Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -572,21 +629,21 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:28:59.985458Z"
+            "timestamp": "2026-01-21T13:49:49.033046Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-20T14:29:00.305519Z"
+            "timestamp": "2026-01-21T13:49:49.532354Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-20T14:29:04.739855Z"
+            "timestamp": "2026-01-21T13:49:54.172414Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-20T14:28:59.985458Z",
-        "startTime": "2026-01-20T14:28:59.985458Z",
-        "finishTime": "2026-01-20T14:29:04.739855Z",
+        "creationTime": "2026-01-21T13:49:49.033046Z",
+        "startTime": "2026-01-21T13:49:49.033046Z",
+        "finishTime": "2026-01-21T13:49:54.172414Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -633,21 +690,21 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-20T14:28:59.985458Z"
+            "timestamp": "2026-01-21T13:49:49.033046Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-20T14:29:00.305519Z"
+            "timestamp": "2026-01-21T13:49:49.532354Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-20T14:29:04.739855Z"
+            "timestamp": "2026-01-21T13:49:54.172414Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-20T14:28:59.985458Z",
-        "startTime": "2026-01-20T14:28:59.985458Z",
-        "finishTime": "2026-01-20T14:29:04.739855Z",
+        "creationTime": "2026-01-21T13:49:49.033046Z",
+        "startTime": "2026-01-21T13:49:49.033046Z",
+        "finishTime": "2026-01-21T13:49:54.172414Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -731,7 +788,7 @@
             "title": "RGBIR COG tile"
           }
         },
-        "_msft:ts": "2026-01-20T14:29:04.739916Z",
+        "_msft:ts": "2026-01-21T13:49:54.172456Z",
         "geometry": {
           "type": "Polygon",
           "coordinates": [
@@ -759,7 +816,7 @@
             ]
           ]
         },
-        "_msft:etag": "9dd73301-ae58-474b-9538-1b0669d30448",
+        "_msft:etag": "ca9c967a-65e7-4f18-a6b6-2425086ec82b",
         "collection": "naip-atl-00000000",
         "properties": {
           "gsd": 0.6,

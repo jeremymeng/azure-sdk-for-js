@@ -42,7 +42,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2026-01-20T13:40:38.7716709Z",
+        "creationTime": "2026-01-21T11:56:38.5639596Z",
         "importType": "StaticCatalog",
         "displayName": "Sample Dataset Ingestion",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
@@ -89,7 +89,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2026-01-20T13:40:38.7716709Z",
+        "creationTime": "2026-01-21T11:56:38.5639596Z",
         "importType": "StaticCatalog",
         "displayName": "Updated Ingestion Name",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",

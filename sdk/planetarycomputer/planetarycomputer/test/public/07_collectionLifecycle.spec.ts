@@ -7,6 +7,7 @@ import { createRecorder, createRecordedClient } from "./utils/recordedClient.js"
 import { assert, beforeEach, afterEach, it, describe } from "vitest";
 import type { PlanetaryComputerProClient } from "../../src/index.js";
 import { isRestError } from "@azure/core-rest-pipeline";
+import { EnvironmentVariableNames, assertEnvironmentVariable } from "./utils/envVars.js";
 
 /**
  * Test suite for STAC Collection lifecycle operations (create, update, delete).
@@ -171,7 +172,9 @@ describe("Collection Lifecycle Operations", () => {
     console.log("TEST: test_04_create_collection_asset");
     console.log("=" + "=".repeat(79));
 
-    const collectionId = "naip-atl"; // Use existing test collection
+    const collectionId = assertEnvironmentVariable(
+      EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
+    ); // Use existing test collection
 
     // Delete the asset if it already exists
     try {
@@ -221,7 +224,9 @@ describe("Collection Lifecycle Operations", () => {
     console.log("TEST: test_05_replace_collection_asset");
     console.log("=" + "=".repeat(79));
 
-    const collectionId = "naip-atl"; // Use existing test collection
+    const collectionId = assertEnvironmentVariable(
+      EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
+    ); // Use existing test collection
 
     const assetData = {
       key: "test-asset",
@@ -256,7 +261,9 @@ describe("Collection Lifecycle Operations", () => {
     console.log("TEST: test_06_delete_collection_asset");
     console.log("=" + "=".repeat(79));
 
-    const collectionId = "naip-atl"; // Use existing test collection
+    const collectionId = assertEnvironmentVariable(
+      EnvironmentVariableNames.PLANETARYCOMPUTER_COLLECTION_ID,
+    ); // Use existing test collection
 
     // First create the asset to be deleted
     console.log("Creating asset for deletion: test-asset-to-be-deleted");
