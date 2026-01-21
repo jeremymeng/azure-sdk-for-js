@@ -37,14 +37,18 @@ const recorderEnvSetup: RecorderStartOptions = {
       { key: "Server-Timing", value: "total;dur=0.0" },
       { key: "traceparent", value: "00-00000000000000000000000000000000-0000000000000000-00" },
       { key: "mise-correlation-id", value: "00000000-0000-0000-0000-000000000000" },
-      // Sanitize operation-location header for LRO polling
+      // Sanitize operation-location header for LRO polling - always replace with sanitized URL
       {
         key: "operation-location",
-        regex: true,
-        target:
-          "https?://[^/]+/inma/operations/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}",
         value:
-          "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000",
+          "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/operations/00000000-0000-0000-0000-000000000000?api-version=2025-04-30-preview",
+      },
+      // Sanitize Location header for LRO operations (also used by some SDKs for polling)
+      {
+        key: "Location",
+        regex: true,
+        target: "/inma/operations/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}",
+        value: "/inma/operations/00000000-0000-0000-0000-000000000000",
       },
       // Sanitize Location header for resource creation
       {
@@ -216,7 +220,8 @@ const recorderEnvSetup: RecorderStartOptions = {
   removeCentralSanitizers: [
     "AZSDK3493", // Sanitizes JSON path $..name
     "AZSDK3430", // Sanitizes JSON path $..id - we handle IDs with recorder.variable()
-    "AZSDK2003", // Default hostname sanitizer
+    "AZSDK2003", // Default Location header sanitizer
+    "AZSDK2030", // Default operation-location header sanitizer - we use our own
   ],
 };
 
