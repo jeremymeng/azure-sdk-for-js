@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { PlanetaryComputerProClient } from "../../../src/index.js";
-import { createLiveCredential } from "@azure-tools/test-credential";
+import { createTestCredential } from "@azure-tools/test-credential";
 import { EnvironmentVariableNames, assertEnvironmentVariable } from "./envVars.js";
 import type { Recorder } from "@azure-tools/test-recorder";
 import type { PlanetaryComputerProClientOptionalParams } from "../../../src/api/index.js";
@@ -25,7 +25,7 @@ export function createTestClient(
   options?: PlanetaryComputerProClientOptionalParams,
 ): PlanetaryComputerProClient {
   const endpoint = assertEnvironmentVariable(EnvironmentVariableNames.PLANETARYCOMPUTER_ENDPOINT);
-  const credential = createLiveCredential();
+  const credential = createTestCredential();
 
   // Wrap the options with recorder configuration to enable recording
   const clientOptions = recorder.configureClientOptions(options || {});
