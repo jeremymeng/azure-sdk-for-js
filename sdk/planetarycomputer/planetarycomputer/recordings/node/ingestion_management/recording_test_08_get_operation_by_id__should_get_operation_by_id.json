@@ -42,7 +42,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2026-01-21T11:56:52.7935703Z",
+        "creationTime": "2026-01-21T15:35:54.6456698Z",
         "importType": "StaticCatalog",
         "displayName": "Ingestion for Operation",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
@@ -76,7 +76,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/collections/naip-atl-00000000/ingestions/00000000-0000-0000-0000-000000000000/runs/d517af35-33af-4c4d-8511-fb3a58cc9467?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/collections/naip-atl-00000000/ingestions/00000000-0000-0000-0000-000000000000/runs/fe3bd4b2-d55a-4d2b-9243-e10d6ba7e49a?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         "Transfer-Encoding": "chunked",
@@ -86,7 +86,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2026-01-21T11:56:52.8503111Z",
+        "creationTime": "2026-01-21T15:35:54.7211267Z",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
         "skipExistingItems": true,
         "keepOriginalAssets": true,
@@ -96,10 +96,10 @@
           "statusHistory": [
             {
               "status": "Pending",
-              "timestamp": "2026-01-21T11:56:52.8415417Z"
+              "timestamp": "2026-01-21T15:35:54.7122845Z"
             }
           ],
-          "creationTime": "2026-01-21T11:56:52.8415398Z",
+          "creationTime": "2026-01-21T15:35:54.7122827Z",
           "totalItems": 0,
           "totalPendingItems": 0,
           "totalSuccessfulItems": 0,
@@ -144,11 +144,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T11:56:52.8415417Z"
+            "timestamp": "2026-01-21T15:35:54.7122845Z"
           }
         ],
         "type": "IngestionStaticCatalog",
-        "creationTime": "2026-01-21T11:56:52.8415398Z",
+        "creationTime": "2026-01-21T15:35:54.7122827Z",
         "collectionId": "naip-atl-00000000"
       }
     }

@@ -82,8 +82,8 @@
         "license": "proprietary",
         "description": "Test collection for lifecycle operations",
         "stac_version": "1.0.0",
-        "msft:_created": "2026-01-21T15:00:42.8388344Z",
-        "msft:_updated": "2026-01-21T15:00:42.8388344Z"
+        "msft:_created": "2026-01-21T15:45:15.0025887Z",
+        "msft:_updated": "2026-01-21T15:45:15.0025887Z"
       }
     },
     {
@@ -101,8 +101,8 @@
       },
       "RequestBody": {
         "stac_version": "1.0.0",
-        "msft:_created": "2026-01-21T15:00:42.8388344Z",
-        "msft:_updated": "2026-01-21T15:00:42.8388344Z",
+        "msft:_created": "2026-01-21T15:45:15.0025887Z",
+        "msft:_updated": "2026-01-21T15:45:15.0025887Z",
         "id": "test-collection-lifecycle",
         "description": "Test collection for lifecycle operations - UPDATED",
         "links": [
@@ -172,8 +172,8 @@
       },
       "ResponseBody": {
         "stac_version": "1.0.0",
-        "msft:_created": "2026-01-21T15:00:42.8388344Z",
-        "msft:_updated": "2026-01-21T15:00:47.3478406Z",
+        "msft:_created": "2026-01-21T15:45:15.0025887Z",
+        "msft:_updated": "2026-01-21T15:45:19.6290235Z",
         "id": "test-collection-lifecycle",
         "description": "Test collection for lifecycle operations - UPDATED",
         "links": [
@@ -305,8 +305,8 @@
         "license": "proprietary",
         "description": "Test collection for lifecycle operations - UPDATED",
         "stac_version": "1.0.0",
-        "msft:_created": "2026-01-21T15:00:42.8388344Z",
-        "msft:_updated": "2026-01-21T15:00:47.3478406Z"
+        "msft:_created": "2026-01-21T15:45:15.0025887Z",
+        "msft:_updated": "2026-01-21T15:45:19.6290235Z"
       }
     }
   ],

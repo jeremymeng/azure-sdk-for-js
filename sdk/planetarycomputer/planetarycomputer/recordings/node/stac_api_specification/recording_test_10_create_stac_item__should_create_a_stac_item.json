@@ -74,7 +74,7 @@
             "title": "RGBIR COG tile"
           }
         },
-        "_msft:ts": "2026-01-21T11:28:18.035753Z",
+        "_msft:ts": "2026-01-21T13:50:00.042526Z",
         "geometry": {
           "type": "Polygon",
           "coordinates": [
@@ -102,7 +102,7 @@
             ]
           ]
         },
-        "_msft:etag": "7567da09-b718-4c2f-b871-e77510302cfe",
+        "_msft:etag": "35563a71-0256-4750-bae3-bea104abe0df",
         "collection": "naip-atl-00000000",
         "properties": {
           "gsd": 0.6,
@@ -154,11 +154,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:44.3973507Z"
+            "timestamp": "2026-01-21T15:36:42.6798742Z"
           }
         ],
         "type": "DeleteItem",
-        "creationTime": "2026-01-21T13:49:44.3973456Z",
+        "creationTime": "2026-01-21T15:36:42.6798724Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -199,11 +199,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:44.3973507Z"
+            "timestamp": "2026-01-21T15:36:42.6798742Z"
           }
         ],
         "type": "DeleteItem",
-        "creationTime": "2026-01-21T13:49:44.3973456Z",
+        "creationTime": "2026-01-21T15:36:42.6798724Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -244,16 +244,16 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:44.397345Z"
+            "timestamp": "2026-01-21T15:36:42.679872Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-21T13:49:45.321261Z"
+            "timestamp": "2026-01-21T15:36:43.560499Z"
           }
         ],
         "type": "DeleteItem",
-        "creationTime": "2026-01-21T13:49:44.397345Z",
-        "startTime": "2026-01-21T13:49:44.397345Z",
+        "creationTime": "2026-01-21T15:36:42.679872Z",
+        "startTime": "2026-01-21T15:36:42.679872Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -300,21 +300,21 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:44.397345Z"
+            "timestamp": "2026-01-21T15:36:42.679872Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-21T13:49:45.321261Z"
+            "timestamp": "2026-01-21T15:36:43.560499Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-21T13:49:46.915869Z"
+            "timestamp": "2026-01-21T15:36:44.475176Z"
           }
         ],
         "type": "DeleteItem",
-        "creationTime": "2026-01-21T13:49:44.397345Z",
-        "startTime": "2026-01-21T13:49:44.397345Z",
-        "finishTime": "2026-01-21T13:49:46.915869Z",
+        "creationTime": "2026-01-21T15:36:42.679872Z",
+        "startTime": "2026-01-21T15:36:42.679872Z",
+        "finishTime": "2026-01-21T15:36:44.475176Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -427,11 +427,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:49.0330476Z"
+            "timestamp": "2026-01-21T15:36:46.9218318Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-21T13:49:49.0330461Z",
+        "creationTime": "2026-01-21T15:36:46.9218302Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -472,11 +472,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:49.0330476Z"
+            "timestamp": "2026-01-21T15:36:46.9218318Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-21T13:49:49.0330461Z",
+        "creationTime": "2026-01-21T15:36:46.9218302Z",
         "collectionId": "naip-atl-00000000"
       }
     },
@@ -517,16 +517,16 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:49.033046Z"
+            "timestamp": "2026-01-21T15:36:46.92183Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-21T13:49:49.532354Z"
+            "timestamp": "2026-01-21T15:36:47.27409Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-21T13:49:49.033046Z",
-        "startTime": "2026-01-21T13:49:49.033046Z",
+        "creationTime": "2026-01-21T15:36:46.92183Z",
+        "startTime": "2026-01-21T15:36:46.92183Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -573,16 +573,16 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:49.033046Z"
+            "timestamp": "2026-01-21T15:36:46.92183Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-21T13:49:49.532354Z"
+            "timestamp": "2026-01-21T15:36:47.27409Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-21T13:49:49.033046Z",
-        "startTime": "2026-01-21T13:49:49.033046Z",
+        "creationTime": "2026-01-21T15:36:46.92183Z",
+        "startTime": "2026-01-21T15:36:46.92183Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -629,21 +629,21 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:49.033046Z"
+            "timestamp": "2026-01-21T15:36:46.92183Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-21T13:49:49.532354Z"
+            "timestamp": "2026-01-21T15:36:47.27409Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-21T13:49:54.172414Z"
+            "timestamp": "2026-01-21T15:36:51.517808Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-21T13:49:49.033046Z",
-        "startTime": "2026-01-21T13:49:49.033046Z",
-        "finishTime": "2026-01-21T13:49:54.172414Z",
+        "creationTime": "2026-01-21T15:36:46.92183Z",
+        "startTime": "2026-01-21T15:36:46.92183Z",
+        "finishTime": "2026-01-21T15:36:51.517808Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -690,21 +690,21 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T13:49:49.033046Z"
+            "timestamp": "2026-01-21T15:36:46.92183Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-21T13:49:49.532354Z"
+            "timestamp": "2026-01-21T15:36:47.27409Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-21T13:49:54.172414Z"
+            "timestamp": "2026-01-21T15:36:51.517808Z"
           }
         ],
         "type": "AddItem",
-        "creationTime": "2026-01-21T13:49:49.033046Z",
-        "startTime": "2026-01-21T13:49:49.033046Z",
-        "finishTime": "2026-01-21T13:49:54.172414Z",
+        "creationTime": "2026-01-21T15:36:46.92183Z",
+        "startTime": "2026-01-21T15:36:46.92183Z",
+        "finishTime": "2026-01-21T15:36:51.517808Z",
         "collectionId": "naip-atl-00000000",
         "additionalInformation": {
           "TotalFailedItems": "0",
@@ -788,7 +788,7 @@
             "title": "RGBIR COG tile"
           }
         },
-        "_msft:ts": "2026-01-21T13:49:54.172456Z",
+        "_msft:ts": "2026-01-21T15:36:51.517844Z",
         "geometry": {
           "type": "Polygon",
           "coordinates": [
@@ -816,7 +816,7 @@
             ]
           ]
         },
-        "_msft:etag": "ca9c967a-65e7-4f18-a6b6-2425086ec82b",
+        "_msft:etag": "d202af28-036c-4244-848d-c2b9b7e81077",
         "collection": "naip-atl-00000000",
         "properties": {
           "gsd": 0.6,

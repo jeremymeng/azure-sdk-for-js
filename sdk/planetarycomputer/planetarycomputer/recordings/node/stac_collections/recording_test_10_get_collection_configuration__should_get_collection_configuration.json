@@ -23,7 +23,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "566",
+        "Content-Length": "956",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -51,6 +51,12 @@
               "name": "Most recent available",
               "description": "Most recent available imagery in this collection",
               "cql": []
+            },
+            {
+              "id": "test-mosaic-1",
+              "name": "Test Most recent available",
+              "description": "Most recent available imagery in this collection - updated",
+              "cql": []
             }
           ],
           "renderOptions": [
@@ -58,6 +64,17 @@
               "id": "natural-color",
               "name": "Natural color",
               "description": "RGB from visual assets",
+              "type": "raster-tile",
+              "options": "assets=image&asset_bidx=image|1,2,3",
+              "vectorOptions": null,
+              "minZoom": 6,
+              "legend": null,
+              "conditions": null
+            },
+            {
+              "id": "test-natural-color",
+              "name": "Test Natural color updated",
+              "description": "RGB from visual assets - updated",
               "type": "raster-tile",
               "options": "assets=image&asset_bidx=image|1,2,3",
               "vectorOptions": null,

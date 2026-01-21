@@ -42,7 +42,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2026-01-21T11:56:45.867538Z",
+        "creationTime": "2026-01-21T15:35:49.4298105Z",
         "importType": "StaticCatalog",
         "displayName": "Ingestion for Status Check",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
@@ -76,7 +76,7 @@
         "Connection": "keep-alive",
         "Content-Type": "application/json; charset=utf-8",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
-        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/collections/naip-atl-00000000/ingestions/00000000-0000-0000-0000-000000000000/runs/af47ae99-2757-4691-8ba5-24deacb2906f?api-version=2025-04-30-preview",
+        "Location": "https://Sanitized.sanitized_label.sanitized_location.geocatalog.spatio.azure.com/inma/collections/naip-atl-00000000/ingestions/00000000-0000-0000-0000-000000000000/runs/39df7bce-be7c-4931-b827-5f05bfd12c0f?api-version=2025-04-30-preview",
         "mise-correlation-id": "00000000-0000-0000-0000-000000000000",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         "Transfer-Encoding": "chunked",
@@ -86,7 +86,7 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2026-01-21T11:56:45.9202433Z",
+        "creationTime": "2026-01-21T15:35:49.4962487Z",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
         "skipExistingItems": true,
         "keepOriginalAssets": true,
@@ -96,10 +96,10 @@
           "statusHistory": [
             {
               "status": "Pending",
-              "timestamp": "2026-01-21T11:56:45.9108193Z"
+              "timestamp": "2026-01-21T15:35:49.4879294Z"
             }
           ],
-          "creationTime": "2026-01-21T11:56:45.9108178Z",
+          "creationTime": "2026-01-21T15:35:49.487927Z",
           "totalItems": 0,
           "totalPendingItems": 0,
           "totalSuccessfulItems": 0,
@@ -140,27 +140,22 @@
       },
       "ResponseBody": {
         "id": "00000000-0000-0000-0000-000000000000",
-        "creationTime": "2026-01-21T11:56:45.9202433Z",
+        "creationTime": "2026-01-21T15:35:49.4962487Z",
         "sourceCatalogUrl": "https://fake.example.com/catalog.json",
         "skipExistingItems": true,
         "keepOriginalAssets": true,
         "operation": {
           "id": "00000000-0000-0000-0000-000000000000",
-          "status": "Running",
+          "status": "Pending",
           "statusHistory": [
             {
               "status": "Pending",
-              "timestamp": "2026-01-21T11:56:45.910817Z"
-            },
-            {
-              "status": "Running",
-              "timestamp": "2026-01-21T11:56:46.116677Z"
+              "timestamp": "2026-01-21T15:35:49.4879294Z"
             }
           ],
-          "creationTime": "2026-01-21T11:56:45.910817Z",
-          "startTime": "2026-01-21T11:56:45.910817Z",
-          "totalItems": 46,
-          "totalPendingItems": 46,
+          "creationTime": "2026-01-21T15:35:49.487927Z",
+          "totalItems": 0,
+          "totalPendingItems": 0,
           "totalSuccessfulItems": 0,
           "totalFailedItems": 0
         }

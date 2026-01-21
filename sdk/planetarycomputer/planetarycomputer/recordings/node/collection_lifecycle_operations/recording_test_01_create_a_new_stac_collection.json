@@ -107,11 +107,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T15:00:40.1359344Z"
+            "timestamp": "2026-01-21T15:45:12.3047325Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2026-01-21T15:00:40.1359333Z",
+        "creationTime": "2026-01-21T15:45:12.3047289Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -152,11 +152,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T15:00:40.1359344Z"
+            "timestamp": "2026-01-21T15:45:12.3047325Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2026-01-21T15:00:40.1359333Z",
+        "creationTime": "2026-01-21T15:45:12.3047289Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -197,11 +197,11 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T15:00:40.1359344Z"
+            "timestamp": "2026-01-21T15:45:12.3047325Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2026-01-21T15:00:40.1359333Z",
+        "creationTime": "2026-01-21T15:45:12.3047289Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -242,19 +242,19 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T15:00:40.1359344Z"
+            "timestamp": "2026-01-21T15:45:12.3047325Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-21T15:00:42.7125926Z"
+            "timestamp": "2026-01-21T15:45:14.8999674Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-21T15:00:43.0123226Z"
+            "timestamp": "2026-01-21T15:45:15.1163304Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2026-01-21T15:00:40.1359333Z",
+        "creationTime": "2026-01-21T15:45:12.3047289Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -295,19 +295,19 @@
         "statusHistory": [
           {
             "status": "Pending",
-            "timestamp": "2026-01-21T15:00:40.1359344Z"
+            "timestamp": "2026-01-21T15:45:12.3047325Z"
           },
           {
             "status": "Running",
-            "timestamp": "2026-01-21T15:00:42.7125926Z"
+            "timestamp": "2026-01-21T15:45:14.8999674Z"
           },
           {
             "status": "Finished",
-            "timestamp": "2026-01-21T15:00:43.0123226Z"
+            "timestamp": "2026-01-21T15:45:15.1163304Z"
           }
         ],
         "type": "AddCollection",
-        "creationTime": "2026-01-21T15:00:40.1359333Z",
+        "creationTime": "2026-01-21T15:45:12.3047289Z",
         "collectionId": "test-collection-lifecycle"
       }
     },
@@ -393,8 +393,8 @@
         "license": "proprietary",
         "description": "Test collection for lifecycle operations",
         "stac_version": "1.0.0",
-        "msft:_created": "2026-01-21T15:00:42.8388344Z",
-        "msft:_updated": "2026-01-21T15:00:42.8388344Z"
+        "msft:_created": "2026-01-21T15:45:15.0025887Z",
+        "msft:_updated": "2026-01-21T15:45:15.0025887Z"
       }
     }
   ],

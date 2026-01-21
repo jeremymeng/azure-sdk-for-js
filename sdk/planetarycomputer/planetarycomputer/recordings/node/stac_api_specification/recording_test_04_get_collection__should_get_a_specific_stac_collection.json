@@ -23,7 +23,7 @@
         "Access-Control-Max-Age": "1728000",
         "Connection": "keep-alive",
         "Content-Encoding": "gzip",
-        "Content-Length": "2378",
+        "Content-Length": "2593",
         "Content-Type": "application/json",
         "Date": "Mon, 01 Jan 2024 00:00:00 GMT",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -67,6 +67,14 @@
               "thumbnail"
             ],
             "title": "Thumbnail"
+          },
+          "test-asset": {
+            "href": "https://SANITIZED.blob.core.windows.net/naip-atl-00000000-1232d7af/collection-assets/test-asset/test-asset-updated.txt",
+            "type": "text/plain",
+            "roles": [
+              "metadata"
+            ],
+            "title": "Test Asset - Updated"
           }
         },
         "extent": {
@@ -170,7 +178,7 @@
         },
         "stac_version": "1.0.0",
         "msft:_created": "2026-01-15T18:47:31.2942763Z",
-        "msft:_updated": "2026-01-15T18:47:35.392652Z",
+        "msft:_updated": "2026-01-21T15:01:27.988286Z",
         "stac_extensions": [
           "https://stac-extensions.github.io/item-assets/v1.0.0/schema.json",
           "https://stac-extensions.github.io/table/v1.2.0/schema.json"
