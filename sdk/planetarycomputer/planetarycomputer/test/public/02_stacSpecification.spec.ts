@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import type { Recorder } from "@azure-tools/test-recorder";
-import { isPlaybackMode } from "@azure-tools/test-recorder";
+import { isPlaybackMode, testPollingOptions } from "@azure-tools/test-recorder";
 import { createRecorder, createRecordedClient } from "./utils/recordedClient.js";
 import { assert, beforeEach, afterEach, it, describe } from "vitest";
 import type { PlanetaryComputerProClient } from "../../src/index.js";
@@ -587,7 +587,7 @@ describe("STAC API Specification", () => {
       console.log(`Checking if item ${itemId} already exists...`);
       await client.stac.getItem(collectionId, itemId);
       console.log(`Item ${itemId} exists, deleting it first...`);
-      const deletePoller = client.stac.deleteItem(collectionId, itemId);
+      const deletePoller = client.stac.deleteItem(collectionId, itemId, testPollingOptions);
       await deletePoller.pollUntilDone();
       console.log(`Deleted existing item ${itemId}`);
     } catch (e: any) {
@@ -600,7 +600,7 @@ describe("STAC API Specification", () => {
 
     // Create the item
     try {
-      const createPoller = client.stac.createItem(collectionId, stacItem);
+      const createPoller = client.stac.createItem(collectionId, stacItem, testPollingOptions);
       await createPoller.pollUntilDone();
       console.log(`Successfully created item ${itemId}`);
 
@@ -693,7 +693,12 @@ describe("STAC API Specification", () => {
       console.log("Updating item with platform property: Imagery");
 
       // Update the item
-      const updatePoller = client.stac.updateItem(collectionId, itemId, stacItem);
+      const updatePoller = client.stac.updateItem(
+        collectionId,
+        itemId,
+        stacItem,
+        testPollingOptions,
+      );
       await updatePoller.pollUntilDone();
       console.log(`Successfully updated item ${itemId}`);
 
@@ -839,7 +844,7 @@ describe("STAC API Specification", () => {
       console.log(`Checking if item ${itemId} already exists...`);
       await client.stac.getItem(collectionId, itemId);
       console.log(`Item ${itemId} exists, deleting it first...`);
-      const deletePoller = client.stac.deleteItem(collectionId, itemId);
+      const deletePoller = client.stac.deleteItem(collectionId, itemId, testPollingOptions);
       await deletePoller.pollUntilDone();
       console.log(`Deleted existing item ${itemId}`);
     } catch (e: any) {
@@ -852,7 +857,7 @@ describe("STAC API Specification", () => {
 
     // Step 1: Create the item
     try {
-      const createPoller = client.stac.createItem(collectionId, stacItem);
+      const createPoller = client.stac.createItem(collectionId, stacItem, testPollingOptions);
       await createPoller.pollUntilDone();
       console.log(`Created item ${itemId}`);
 
@@ -866,7 +871,12 @@ describe("STAC API Specification", () => {
       console.log(`Replacing item ${itemId} using createOrReplace...`);
       stacItem.properties.platform = "Imagery Updated";
 
-      const replacePoller = client.stac.createOrReplaceItem(collectionId, itemId, stacItem);
+      const replacePoller = client.stac.createOrReplaceItem(
+        collectionId,
+        itemId,
+        stacItem,
+        testPollingOptions,
+      );
       await replacePoller.pollUntilDone();
       console.log(`Replaced item ${itemId} using createOrReplace`);
 
@@ -966,7 +976,7 @@ describe("STAC API Specification", () => {
       console.log(`Checking if item ${itemId} already exists...`);
       await client.stac.getItem(collectionId, itemId);
       console.log(`Item ${itemId} exists, deleting it first...`);
-      const deletePoller = client.stac.deleteItem(collectionId, itemId);
+      const deletePoller = client.stac.deleteItem(collectionId, itemId, testPollingOptions);
       await deletePoller.pollUntilDone();
       console.log(`Deleted existing item ${itemId}`);
     } catch (e: any) {
@@ -979,7 +989,7 @@ describe("STAC API Specification", () => {
 
     // Create an item to delete
     try {
-      const createPoller = client.stac.createItem(collectionId, stacItem);
+      const createPoller = client.stac.createItem(collectionId, stacItem, testPollingOptions);
       await createPoller.pollUntilDone();
       console.log(`Created item ${itemId}`);
 
@@ -991,7 +1001,7 @@ describe("STAC API Specification", () => {
 
       // Delete the item
       console.log(`Deleting item ${itemId}...`);
-      const deletePoller = client.stac.deleteItem(collectionId, itemId);
+      const deletePoller = client.stac.deleteItem(collectionId, itemId, testPollingOptions);
       await deletePoller.pollUntilDone();
       console.log(`Delete operation completed for item ${itemId}`);
 

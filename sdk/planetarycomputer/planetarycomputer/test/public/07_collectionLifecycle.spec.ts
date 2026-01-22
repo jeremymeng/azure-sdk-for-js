@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import type { Recorder } from "@azure-tools/test-recorder";
-import { isPlaybackMode } from "@azure-tools/test-recorder";
+import { isPlaybackMode, testPollingOptions } from "@azure-tools/test-recorder";
 import { createRecorder, createRecordedClient } from "./utils/recordedClient.js";
 import { assert, beforeEach, afterEach, it, describe } from "vitest";
 import type { PlanetaryComputerProClient } from "../../src/index.js";
@@ -39,7 +39,7 @@ describe("Collection Lifecycle Operations", () => {
       const existingCollection = await client.stac.getCollection(testCollectionId);
       if (existingCollection) {
         console.log(`Collection '${testCollectionId}' already exists, deleting first...`);
-        const poller = client.stac.deleteCollection(testCollectionId);
+        const poller = client.stac.deleteCollection(testCollectionId, testPollingOptions);
         await poller.pollUntilDone();
         console.log(`Deleted existing collection '${testCollectionId}'`);
       }
@@ -141,13 +141,13 @@ describe("Collection Lifecycle Operations", () => {
     };
 
     console.log("Creating collection to be deleted...");
-    const createPoller = client.stac.createCollection(collectionData as any);
+    const createPoller = client.stac.createCollection(collectionData as any, testPollingOptions);
     await createPoller.pollUntilDone();
     console.log("Collection created");
 
     // Now delete it
     console.log(`Calling: deleteCollection(collection_id='${deletionTestCollectionId}')`);
-    const deletePoller = client.stac.deleteCollection(deletionTestCollectionId);
+    const deletePoller = client.stac.deleteCollection(deletionTestCollectionId, testPollingOptions);
     await deletePoller.pollUntilDone();
 
     console.log("Delete operation completed");

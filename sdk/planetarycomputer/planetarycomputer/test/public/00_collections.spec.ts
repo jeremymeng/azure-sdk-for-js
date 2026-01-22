@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import type { Recorder } from "@azure-tools/test-recorder";
-import { isPlaybackMode } from "@azure-tools/test-recorder";
+import { isPlaybackMode, testPollingOptions } from "@azure-tools/test-recorder";
 import { createRecorder, createRecordedClient } from "./utils/recordedClient.js";
 import { assert, beforeEach, afterEach, it, describe } from "vitest";
 import type { PlanetaryComputerProClient } from "../../src/index.js";
@@ -733,7 +733,7 @@ describe("STAC Collections", () => {
     try {
       await client.stac.getCollection(testCollectionId);
       console.log(`Collection '${testCollectionId}' already exists, deleting first...`);
-      const deletePoller = client.stac.deleteCollection(testCollectionId);
+      const deletePoller = client.stac.deleteCollection(testCollectionId, testPollingOptions);
       await deletePoller.pollUntilDone();
       console.log(`Deleted existing collection '${testCollectionId}'`);
     } catch {
@@ -769,7 +769,7 @@ describe("STAC Collections", () => {
 
     // Create the collection (LRO)
     console.log("Creating collection using createCollection (LRO)");
-    const createPoller = client.stac.createCollection(collectionData);
+    const createPoller = client.stac.createCollection(collectionData, testPollingOptions);
     await createPoller.pollUntilDone();
     console.log("Temporary collection created");
 
@@ -793,7 +793,7 @@ describe("STAC Collections", () => {
       // Clean up: delete the temporary collection
       console.log(`Deleting temporary collection: ${testCollectionId}`);
       try {
-        const deletePoller = client.stac.deleteCollection(testCollectionId);
+        const deletePoller = client.stac.deleteCollection(testCollectionId, testPollingOptions);
         await deletePoller.pollUntilDone();
         console.log("Temporary collection deleted");
       } catch (e) {

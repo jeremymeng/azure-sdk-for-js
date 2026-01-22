@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import type { Recorder } from "@azure-tools/test-recorder";
-import { isPlaybackMode } from "@azure-tools/test-recorder";
+import { isPlaybackMode, testPollingOptions } from "@azure-tools/test-recorder";
 import { createRecorder, createRecordedClient } from "./utils/recordedClient.js";
 import { assert, beforeEach, afterEach, it, describe } from "vitest";
 import type { PlanetaryComputerProClient } from "../../src/index.js";
@@ -188,7 +188,7 @@ describe("Ingestion Management", () => {
     }
 
     for (const ingestion of existingIngestions) {
-      const deletePoller = client.ingestion.delete(collectionId, ingestion.id!);
+      const deletePoller = client.ingestion.delete(collectionId, ingestion.id!, testPollingOptions);
       await deletePoller.pollUntilDone();
       console.log(`  Deleted existing ingestion: ${ingestion.id}`);
     }
