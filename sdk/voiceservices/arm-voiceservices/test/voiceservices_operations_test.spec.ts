@@ -90,7 +90,6 @@ describe("voiceservices test", () => {
         ],
         teamsVoicemailPilotNumber: "1234567890",
       },
-      testPollingOptions,
     );
     assert.equal(res.name, communicationsGatewayName);
   });

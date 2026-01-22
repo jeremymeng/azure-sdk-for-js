@@ -100,7 +100,7 @@ describe("Service Fabric Rest Level Client Test", () => {
         clusterName,
       )
       .put(parameters);
-    const poller = await getLongRunningPoller(client, initialResponse, testPollingOptions);
+    const poller = await getLongRunningPoller(client, initialResponse );
     const result = await poller.pollUntilDone();
     assert.equal(result.status, "200");
     assert.equal((result.body as ClusterOutput).name, clusterName);

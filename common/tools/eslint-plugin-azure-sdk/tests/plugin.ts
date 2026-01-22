@@ -41,6 +41,7 @@ const ruleList = [
   "ts-package-json-sideeffects",
   "ts-package-json-types",
   "ts-pagination-list",
+  "ts-test-poller-options",
   "ts-use-interface-parameters",
   "ts-use-promises",
   "ts-use-cjs-polyfill",
