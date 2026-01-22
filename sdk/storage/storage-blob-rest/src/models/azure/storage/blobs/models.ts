@@ -285,13 +285,13 @@ export interface GeoReplication {
   /** The status of the secondary location */
   status: GeoReplicationStatusType;
   /** A GMT date/time value, to the second. All primary writes preceding this value are guaranteed to be available for read operations at the secondary. Primary writes after this point in time may or may not be available for reads. */
-  lastSyncTime: Date;
+  lastSyncOn: Date;
 }
 
 export function geoReplicationDeserializer(item: any): GeoReplication {
   return {
     status: item["status"],
-    lastSyncTime: new Date(item["lastSyncTime"]),
+    lastSyncOn: new Date(item["lastSyncOn"]),
   };
 }
 
@@ -437,13 +437,13 @@ export function keyInfoSerializer(item: KeyInfo): any {
 /** A user delegation key. */
 export interface UserDelegationKey {
   /** The Azure Active Directory object ID in GUID format. */
-  signedOid: string;
+  signedObjectId: string;
   /** The Azure Active Directory tenant ID in GUID format. */
-  signedTid: string;
+  signedTenantId: string;
   /** The date-time the key is active. */
-  signedStart: string;
+  signedStartsOn: string;
   /** The date-time the key expires. */
-  signedExpiry: string;
+  signedExpiresOn: string;
   /** Abbreviation of the Azure Storage service that accepts the key. */
   signedService: string;
   /** The service version that created the key. */
@@ -456,10 +456,10 @@ export interface UserDelegationKey {
 
 export function userDelegationKeyDeserializer(item: any): UserDelegationKey {
   return {
-    signedOid: item["signedOid"],
-    signedTid: item["signedTid"],
-    signedStart: item["signedStart"],
-    signedExpiry: item["signedExpiry"],
+    signedObjectId: item["signedObjectId"],
+    signedTenantId: item["signedTenantId"],
+    signedStartsOn: item["signedStartsOn"],
+    signedExpiresOn: item["signedExpiresOn"],
     signedService: item["signedService"],
     signedVersion: item["signedVersion"],
     signedDelegatedUserTid: item["signedDelegatedUserTid"],
