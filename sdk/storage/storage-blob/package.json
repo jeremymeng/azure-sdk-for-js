@@ -94,6 +94,7 @@
     }
   },
   "dependencies": {
+    "@azure-rest/core-client": "^2.5.1",
     "@azure/abort-controller": "^2.1.2",
     "@azure/core-auth": "^1.9.0",
     "@azure/core-client": "^1.9.3",
