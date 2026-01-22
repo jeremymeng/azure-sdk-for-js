@@ -1,4 +1,5 @@
 **/src/generated/
+**/src/generated-*/
 **/review/*.api.md
 **/recordings/**
 **/*.yml
