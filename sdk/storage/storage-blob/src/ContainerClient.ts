@@ -12,7 +12,7 @@ import {
   StorageSharedKeyCredential,
   UserDelegationKey,
 } from "@azure/storage-common";
-import type { Container } from "./generated/src/operationsInterfaces/index.js";
+import { Container } from "./generated/container/container.js";
 import type {
   BlobDeleteResponse,
   BlobPrefix,

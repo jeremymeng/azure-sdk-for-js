@@ -72,7 +72,7 @@ import {
   PageRange,
   BlobGetAccountInfoHeaders,
   ContainerGetAccountInfoHeaders,
-} from "./generated/src/models/index.js";
+} from "./generated-compat/src/models/index.js";
 import {
   WithResponse,
   ResponseWithBody,

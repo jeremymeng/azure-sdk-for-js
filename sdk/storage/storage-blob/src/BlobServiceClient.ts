@@ -9,10 +9,10 @@ import type {
   ServiceGetUserDelegationKeyHeaders,
   ContainerCreateResponse,
   ContainerDeleteResponse,
-  ServiceGetPropertiesResponse,
+  // ServiceGetPropertiesResponse,
   BlobServiceProperties,
   ServiceSetPropertiesResponse,
-  ServiceGetStatisticsResponse,
+  // ServiceGetStatisticsResponse,
   ServiceGetAccountInfoResponse,
   ServiceListContainersSegmentResponse,
   ContainerItem,
@@ -27,7 +27,7 @@ import type {
   ServiceGetStatisticsResponseInternal,
   ServiceListContainersSegmentResponseInternal,
 } from "./generatedModels.js";
-import type { Service } from "./generated/src/operationsInterfaces/index.js";
+import { BlobClient as Service } from "./generated/blobClient.js";
 import type { StoragePipelineOptions, PipelineLike } from "./Pipeline.js";
 import { newPipeline, isPipelineLike } from "./Pipeline.js";
 import type { ContainerCreateOptions, ContainerDeleteMethodOptions } from "./ContainerClient.js";
@@ -69,6 +69,11 @@ import type {
   ServiceListContainersSegmentHeaders,
   ServiceSetPropertiesHeaders,
 } from "./generated/src/index.js";
+
+import {
+  StorageServiceProperties as ServiceGetPropertiesResponse,
+  StorageServiceStats as ServiceGetStatisticsResponse,
+} from "./generated/index.js";
 
 /**
  * Options to configure the {@link BlobServiceClient.getProperties} operation.
@@ -575,12 +580,10 @@ export class BlobServiceClient extends StorageClient {
       "BlobServiceClient-getProperties",
       options,
       async (updatedOptions) => {
-        return assertResponse<ServiceGetPropertiesResponseInternal, ServiceGetPropertiesHeaders>(
-          await this.serviceContext.getProperties({
-            abortSignal: options.abortSignal,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        return this.serviceContext.getProperties({
+          abortSignal: options.abortSignal,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
       },
     );
   }
@@ -628,12 +631,10 @@ export class BlobServiceClient extends StorageClient {
       "BlobServiceClient-getStatistics",
       options,
       async (updatedOptions) => {
-        return assertResponse<ServiceGetStatisticsResponseInternal, ServiceGetStatisticsHeaders>(
-          await this.serviceContext.getStatistics({
-            abortSignal: options.abortSignal,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        return this.serviceContext.getStatistics({
+          abortSignal: options.abortSignal,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
       },
     );
   }
@@ -655,14 +656,12 @@ export class BlobServiceClient extends StorageClient {
       "BlobServiceClient-getAccountInfo",
       options,
       async (updatedOptions) => {
-        return assertResponse<ServiceGetAccountInfoHeaders, ServiceGetAccountInfoHeaders>(
-          await this.serviceContext.getAccountInfo({
-            abortSignal: options.abortSignal,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        return this.serviceContext.getAccountInfo({
+          abortSignal: options.abortSignal,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
       },
-    );
+    ) as unknown as Promise<ServiceGetAccountInfoResponse>;
   }
 
   /**
@@ -687,18 +686,13 @@ export class BlobServiceClient extends StorageClient {
       "BlobServiceClient-listContainersSegment",
       options,
       async (updatedOptions) => {
-        return assertResponse<
-          ServiceListContainersSegmentResponseInternal,
-          ServiceListContainersSegmentHeaders
-        >(
-          await this.serviceContext.listContainersSegment({
-            abortSignal: options.abortSignal,
-            marker,
-            ...options,
-            include: typeof options.include === "string" ? [options.include] : options.include,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        return this.serviceContext.listContainersSegment({
+          abortSignal: options.abortSignal,
+          marker,
+          ...options,
+          include: typeof options.include === "string" ? [options.include] : options.include,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
       },
     );
   }
@@ -730,23 +724,16 @@ export class BlobServiceClient extends StorageClient {
       "BlobServiceClient-findBlobsByTagsSegment",
       options,
       async (updatedOptions) => {
-        const response = assertResponse<
-          ServiceFilterBlobsResponse,
-          ServiceFilterBlobsHeaders,
-          FilterBlobSegmentModel
-        >(
-          await this.serviceContext.filterBlobs({
-            abortSignal: options.abortSignal,
-            where: tagFilterSqlExpression,
-            marker,
-            maxPageSize: options.maxPageSize,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        const response = await this.serviceContext.filterBlobs({
+          abortSignal: options.abortSignal,
+          where: tagFilterSqlExpression,
+          marker,
+          maxresults: options.maxPageSize,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
 
         const wrappedResponse: ServiceFindBlobsByTagsSegmentResponse = {
           ...response,
-          _response: response._response, // _response is made non-enumerable
           blobs: response.blobs.map((blob) => {
             let tagValue = "";
             if (blob.tags?.blobTagSet.length === 1) {
@@ -1186,15 +1173,10 @@ export class BlobServiceClient extends StorageClient {
       );
     }
 
-    if (expiresOn === undefined) {
-      const now = new Date();
-      expiresOn = new Date(now.getTime() + 3600 * 1000);
-    }
-
     const sas = generateAccountSASQueryParameters(
       {
         permissions,
-        expiresOn,
+        expiresOn: expiresOn ?? new Date(Date.now() + 3600 * 1000),
         resourceTypes,
         services: AccountSASServices.parse("b").toString(),
         ...options,
@@ -1231,15 +1213,10 @@ export class BlobServiceClient extends StorageClient {
       );
     }
 
-    if (expiresOn === undefined) {
-      const now = new Date();
-      expiresOn = new Date(now.getTime() + 3600 * 1000);
-    }
-
     return generateAccountSASQueryParametersInternal(
       {
         permissions,
-        expiresOn,
+        expiresOn: expiresOn ?? new Date(Date.now() + 3600 * 1000),
         resourceTypes,
         services: AccountSASServices.parse("b").toString(),
         ...options,
