@@ -1,28 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-export { createContainer, ContainerContext, ContainerOptionalParams } from "./containerContext.js";
+export { Container } from "./container.js";
 export {
-  getAccountInfo,
-  listBlobHierarchySegment,
-  listBlobFlatSegment,
-  changeLease,
-  breakLease,
-  renewLease,
-  releaseLease,
-  acquireLease,
-  findBlobsByTags,
-  submitBatch,
-  rename,
-  restore,
-  setAccessPolicy,
-  getAccessPolicy,
-  setMetadata,
-  $delete,
-  getProperties,
-  create,
-} from "./operations.js";
-export {
+  ContainerContext,
+  ContainerOptionalParams,
   GetAccountInfoOptionalParams,
   ListBlobHierarchySegmentOptionalParams,
   ListBlobFlatSegmentOptionalParams,
@@ -41,4 +23,4 @@ export {
   DeleteOptionalParams,
   GetPropertiesOptionalParams,
   CreateOptionalParams,
-} from "./options.js";
+} from "./api/index.js";

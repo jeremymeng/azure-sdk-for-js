@@ -15,7 +15,7 @@ import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** The service properties. */
-export interface StorageServiceProperties {
+export interface BlobServiceProperties {
   /** The logging properties. */
   blobAnalyticsLogging?: Logging;
   /** The hour metrics properties. */
@@ -32,7 +32,7 @@ export interface StorageServiceProperties {
   staticWebsite?: StaticWebsite;
 }
 
-export function storageServicePropertiesSerializer(item: StorageServiceProperties): any {
+export function blobServicePropertiesSerializer(item: BlobServiceProperties): any {
   return {
     blobAnalyticsLogging: !item["blobAnalyticsLogging"]
       ? item["blobAnalyticsLogging"]
@@ -54,7 +54,7 @@ export function storageServicePropertiesSerializer(item: StorageServicePropertie
   };
 }
 
-export function storageServicePropertiesDeserializer(item: any): StorageServiceProperties {
+export function blobServicePropertiesDeserializer(item: any): BlobServiceProperties {
   return {
     blobAnalyticsLogging: !item["blobAnalyticsLogging"]
       ? item["blobAnalyticsLogging"]
@@ -269,6 +269,122 @@ export function storageErrorDeserializer(item: any): StorageError {
     copySourceErrorMessage: item["copySourceErrorMessage"],
   };
 }
+
+/** Error codes returned by the Azure Blob Storage service. */
+export type StorageErrorCode =
+  | "AccountAlreadyExists"
+  | "AccountBeingCreated"
+  | "AccountIsDisabled"
+  | "AuthenticationFailed"
+  | "AuthorizationFailure"
+  | "ConditionHeadersNotSupported"
+  | "ConditionNotMet"
+  | "EmptyMetadataKey"
+  | "InsufficientAccountPermissions"
+  | "InternalError"
+  | "InvalidAuthenticationInfo"
+  | "InvalidHeaderValue"
+  | "InvalidHttpVerb"
+  | "InvalidInput"
+  | "InvalidMd5"
+  | "InvalidMetadata"
+  | "InvalidQueryParameterValue"
+  | "InvalidRange"
+  | "InvalidRequestUrl"
+  | "InvalidUri"
+  | "InvalidXmlDocument"
+  | "InvalidXmlNodeValue"
+  | "Md5Mismatch"
+  | "MetadataTooLarge"
+  | "MissingContentLengthHeader"
+  | "MissingRequiredXmlNode"
+  | "MissingRequiredHeader"
+  | "MissingRequiredQueryParameter"
+  | "MultipleConditionHeadersNotSupported"
+  | "OperationTimedOut"
+  | "OutOfRangeInput"
+  | "OutOfRangeQueryParameterValue"
+  | "RequestBodyTooLarge"
+  | "ResourceTypeMismatch"
+  | "RequestUrlFailedToParse"
+  | "ResourceAlreadyExists"
+  | "ResourceNotFound"
+  | "ServerBusy"
+  | "UnsupportedHeader"
+  | "UnsupportedXmlNode"
+  | "UnsupportedQueryParameter"
+  | "UnsupportedHttpVerb"
+  | "AppendPositionConditionNotMet"
+  | "BlobAlreadyExists"
+  | "BlobImmutableDueToPolicy"
+  | "BlobNotFound"
+  | "BlobOverwritten"
+  | "BlobTierInadequateForContentLength"
+  | "BlobUsesCustomerSpecifiedEncryption"
+  | "BlockCountExceedsLimit"
+  | "BlockListTooLong"
+  | "CannotChangeToLowerTier"
+  | "CannotVerifyCopySource"
+  | "ContainerAlreadyExists"
+  | "ContainerBeingDeleted"
+  | "ContainerDisabled"
+  | "ContainerNotFound"
+  | "ContentLengthLargerThanTierLimit"
+  | "CopyAcrossAccountsNotSupported"
+  | "CopyIdMismatch"
+  | "FeatureVersionMismatch"
+  | "IncrementalCopyBlobMismatch"
+  | "IncrementalCopyOfEarlierVersionSnapshotNotAllowed"
+  | "IncrementalCopySourceMustBeSnapshot"
+  | "InfiniteLeaseDurationRequired"
+  | "InvalidBlobOrBlock"
+  | "InvalidBlobTier"
+  | "InvalidBlobType"
+  | "InvalidBlockId"
+  | "InvalidBlockList"
+  | "InvalidOperation"
+  | "InvalidPageRange"
+  | "InvalidSourceBlobType"
+  | "InvalidSourceBlobUrl"
+  | "InvalidVersionForPageBlobOperation"
+  | "LeaseAlreadyPresent"
+  | "LeaseAlreadyBroken"
+  | "LeaseIdMismatchWithBlobOperation"
+  | "LeaseIdMismatchWithContainerOperation"
+  | "LeaseIdMismatchWithLeaseOperation"
+  | "LeaseIdMissing"
+  | "LeaseIsBreakingAndCannotBeAcquired"
+  | "LeaseIsBreakingAndCannotBeChanged"
+  | "LeaseIsBrokenAndCannotBeRenewed"
+  | "LeaseLost"
+  | "LeaseNotPresentWithBlobOperation"
+  | "LeaseNotPresentWithContainerOperation"
+  | "LeaseNotPresentWithLeaseOperation"
+  | "MaxBlobSizeConditionNotMet"
+  | "NoPendingCopyOperation"
+  | "OperationNotAllowedOnIncrementalCopyBlob"
+  | "PendingCopyOperation"
+  | "PreviousSnapshotNotFound"
+  | "PreviousSnapshotOperationNotSupported"
+  | "PreviousSnapshotCannotBeNewer"
+  | "SequenceNumberConditionNotMet"
+  | "SequenceNumberIncrementTooLarge"
+  | "SnapshotCountExceeded"
+  | "SnapshotOperationRateExceeded"
+  | "SnapshotsPresent"
+  | "SourceConditionNotMet"
+  | "SystemInUse"
+  | "TargetConditionNotMet"
+  | "UnauthorizedBlobOverwrite"
+  | "BlobBeingRehydrated"
+  | "BlobArchived"
+  | "BlobNotArchived"
+  | "AuthorizationSourceIPMismatch"
+  | "AuthorizationProtocolMismatch"
+  | "AuthorizationPermissionMismatch"
+  | "AuthorizationServiceMismatch"
+  | "AuthorizationResourceTypeMismatch"
+  | "BlobAccessTierNotSupportedForAccountType";
 
 /** Stats for the storage service. */
 export interface StorageServiceStats {
@@ -593,6 +709,34 @@ export function blobTagDeserializer(item: any): BlobTag {
   };
 }
 
+/** Represents an array of signed identifiers */
+export interface SignedIdentifiers {
+  /** The array of signed identifiers. */
+  items: SignedIdentifier[];
+}
+
+export function signedIdentifiersSerializer(item: SignedIdentifiers): any {
+  return { items: signedIdentifierArraySerializer(item["items"]) };
+}
+
+export function signedIdentifiersDeserializer(item: any): SignedIdentifiers {
+  return {
+    items: signedIdentifierArrayDeserializer(item["items"]),
+  };
+}
+
+export function signedIdentifierArraySerializer(result: Array<SignedIdentifier>): any[] {
+  return result.map((item) => {
+    return signedIdentifierSerializer(item);
+  });
+}
+
+export function signedIdentifierArrayDeserializer(result: Array<SignedIdentifier>): any[] {
+  return result.map((item) => {
+    return signedIdentifierDeserializer(item);
+  });
+}
+
 /** The signed identifier. */
 export interface SignedIdentifier {
   /** The unique ID for the signed identifier. */
@@ -624,8 +768,8 @@ export interface AccessPolicy {
 
 export function accessPolicySerializer(item: AccessPolicy): any {
   return {
-    startsOn: item["startsOn"].toUTCString(),
-    expiresOn: item["expiresOn"].toUTCString(),
+    startsOn: item["startsOn"].toISOString(),
+    expiresOn: item["expiresOn"].toISOString(),
     permissions: item["permissions"],
   };
 }
@@ -823,7 +967,7 @@ export interface BlobPropertiesInternal {
   /** The immutability policy until time of the blob. */
   immutabilityPolicyExpiresOn?: Date;
   /** The immutability policy mode of the blob. */
-  immutabilityPolicyMode?: BlobImmutabilityPolicyMode;
+  immutabilityPolicyMode?: ImmutabilityPolicyMode;
   /** Whether the blob is under legal hold. */
   legalHold?: boolean;
 }
@@ -914,8 +1058,8 @@ export type ArchiveStatus =
   | "rehydrate-pending-to-cold";
 /** If an object is in rehydrate pending state then this header is returned with priority of rehydrate. Valid values are High and Standard. */
 export type RehydratePriority = "High" | "Standard";
-/** The immutability policy mode. */
-export type BlobImmutabilityPolicyMode = "Mutable" | "Locked" | "Unlocked";
+/** The immutability policy mode used in requests and responses. */
+export type ImmutabilityPolicyMode = "mutable" | "locked" | "unlocked";
 
 /** The blob metadata. */
 export interface BlobMetadata {
@@ -1324,6 +1468,17 @@ export type AccountKind =
   | "BlockBlobStorage";
 /** The filter blobs includes. */
 export type FilterBlobsIncludeItem = "none" | "versions";
+
+/** The Azure.Storage.Blob service versions. */
+export enum KnownVersions {
+  /** The 2025-11-05 version of the Azure.Storage.Blob service. */
+  V20251105 = "2025-11-05",
+  /** The 2026-02-06 version of the Azure.Storage.Blob service. */
+  V20260206 = "2026-02-06",
+  /** The 2026-04-06 version of the Azure.Storage.Blob service. */
+  V20260406 = "2026-04-06",
+}
+
 /** The list blob includes parameter values. */
 export type ListBlobsIncludeItem =
   | "copy"
@@ -1344,8 +1499,6 @@ export type DeleteSnapshotsOptionType = "only" | "include";
 export type BlobDeleteType = "Permanent";
 /** The blob expiration options. */
 export type BlobExpiryOptions = "NeverExpire" | "RelativeToCreation" | "RelativeToNow" | "Absolute";
-/** The immutability policy mode used in requests. */
-export type ImmutabilityPolicyMode = "Locked" | "Unlocked";
 /** The blob copy source tags types. */
 export type BlobCopySourceTags = "REPLACE" | "COPY";
 /** The file share token intent types. */
@@ -1367,25 +1520,3 @@ export type PremiumPageBlobAccessTier =
 export type SequenceNumberActionType = "increment" | "max" | "update";
 /** The block list types. */
 export type BlockListType = "committed" | "uncommitted" | "all";
-
-/** The Azure.Storage.Blob service versions. */
-export enum KnownVersions {
-  /** The 2025-11-05 version of the Azure.Storage.Blob service. */
-  V20251105 = "2025-11-05",
-  /** The 2026-02-06 version of the Azure.Storage.Blob service. */
-  V20260206 = "2026-02-06",
-  /** The 2026-04-06 version of the Azure.Storage.Blob service. */
-  V20260406 = "2026-04-06",
-}
-
-export function signedIdentifierArraySerializer(result: Array<SignedIdentifier>): any[] {
-  return result.map((item) => {
-    return signedIdentifierSerializer(item);
-  });
-}
-
-export function signedIdentifierArrayDeserializer(result: Array<SignedIdentifier>): any[] {
-  return result.map((item) => {
-    return signedIdentifierDeserializer(item);
-  });
-}

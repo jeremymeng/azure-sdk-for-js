@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Blob, BlobOptionalParams } from "./blob/blob.js";
 import { createContainer, ContainerContext, ContainerOptionalParams } from "./api/index.js";
 import {
   FilterBlobSegment,
-  SignedIdentifier,
+  SignedIdentifiers,
   BlobItemInternal,
 } from "../models/azure/storage/blobs/models.js";
 import { PagedAsyncIterableIterator } from "../static-helpers/pagingHelpers.js";
@@ -18,7 +17,7 @@ import {
   renewLease,
   releaseLease,
   acquireLease,
-  filterBlobs,
+  findBlobsByTags,
   submitBatch,
   rename,
   restore,
@@ -38,7 +37,7 @@ import {
   RenewLeaseOptionalParams,
   ReleaseLeaseOptionalParams,
   AcquireLeaseOptionalParams,
-  FilterBlobsOptionalParams,
+  FindBlobsByTagsOptionalParams,
   SubmitBatchOptionalParams,
   RenameOptionalParams,
   RestoreOptionalParams,
@@ -58,30 +57,21 @@ export class Container {
   private _client: ContainerContext;
   /** The pipeline used by this client to make requests */
   public readonly pipeline: Pipeline;
-  /** The parent client parameters that are used in the constructors. */
-  private _clientParams: {
-    endpointParam: string;
-    credential: TokenCredential;
-    containerName: string;
-    options: ContainerOptionalParams;
-  };
 
   constructor(
     endpointParam: string,
     credential: TokenCredential,
-    containerName: string,
     options: ContainerOptionalParams = {},
   ) {
     const prefixFromOptions = options?.userAgentOptions?.userAgentPrefix;
     const userAgentPrefix = prefixFromOptions
       ? `${prefixFromOptions} azsdk-js-client`
       : `azsdk-js-client`;
-    this._client = createContainer(endpointParam, credential, containerName, {
+    this._client = createContainer(endpointParam, credential, {
       ...options,
       userAgentOptions: { userAgentPrefix },
     });
     this.pipeline = this._client.pipeline;
-    this._clientParams = { endpointParam, credential, containerName, options };
   }
 
   /** Returns the sku name and account kind */
@@ -143,10 +133,11 @@ export class Container {
   }
 
   /** The Filter Blobs operation enables callers to list blobs in a container whose tags match a given search expression.  Filter blobs searches within the given container. */
-  filterBlobs(
-    options: FilterBlobsOptionalParams = { requestOptions: {} },
+  findBlobsByTags(
+    filterExpression: string,
+    options: FindBlobsByTagsOptionalParams = { requestOptions: {} },
   ): Promise<FilterBlobSegment> {
-    return filterBlobs(this._client, options);
+    return findBlobsByTags(this._client, filterExpression, options);
   }
 
   /** The Batch operation allows multiple API calls to be embedded into a single HTTP request. */
@@ -179,7 +170,7 @@ export class Container {
 
   /** sets the permissions for the specified container. The permissions indicate whether blobs in a container may be accessed publicly. */
   setAccessPolicy(
-    containerAcl: SignedIdentifier[],
+    containerAcl: SignedIdentifiers,
     options: SetAccessPolicyOptionalParams = { requestOptions: {} },
   ): Promise<void> {
     return setAccessPolicy(this._client, containerAcl, options);
@@ -188,13 +179,16 @@ export class Container {
   /** gets the permissions for the specified container. The permissions indicate whether container data may be accessed publicly. */
   getAccessPolicy(
     options: GetAccessPolicyOptionalParams = { requestOptions: {} },
-  ): Promise<SignedIdentifier[]> {
+  ): Promise<SignedIdentifiers> {
     return getAccessPolicy(this._client, options);
   }
 
   /** operation sets one or more user-defined name-value pairs for the specified container. */
-  setMetadata(options: SetMetadataOptionalParams = { requestOptions: {} }): Promise<void> {
-    return setMetadata(this._client, options);
+  setMetadata(
+    metadata: string,
+    options: SetMetadataOptionalParams = { requestOptions: {} },
+  ): Promise<void> {
+    return setMetadata(this._client, metadata, options);
   }
 
   /** operation marks the specified container for deletion. The container and any blobs contained within it are later deleted during garbage collection */
@@ -215,15 +209,5 @@ export class Container {
   /** Creates a new container under the specified account. If the container with the same name already exists, the operation fails. */
   create(options: CreateOptionalParams = { requestOptions: {} }): Promise<void> {
     return create(this._client, options);
-  }
-
-  getBlob(blobName: string, options: BlobOptionalParams = {}): Blob {
-    return new Blob(
-      this._clientParams.endpointParam,
-      this._clientParams.credential,
-      this._clientParams.containerName,
-      blobName,
-      { ...this._clientParams.options, ...options },
-    );
   }
 }

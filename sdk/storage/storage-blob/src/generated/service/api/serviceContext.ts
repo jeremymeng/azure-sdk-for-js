@@ -5,22 +5,22 @@ import { logger } from "../../logger.js";
 import { Client, ClientOptions, getClient } from "@azure-rest/core-client";
 import { TokenCredential } from "@azure/core-auth";
 
-export interface ContainerContext extends Client {
+export interface ServiceContext extends Client {
   /** Specifies the version of the operation to use for this request. */
   version: string;
 }
 
 /** Optional parameters for the client. */
-export interface ContainerOptionalParams extends ClientOptions {
+export interface ServiceOptionalParams extends ClientOptions {
   /** Specifies the version of the operation to use for this request. */
   version?: string;
 }
 
-export function createContainer(
+export function createService(
   endpointParam: string,
   credential: TokenCredential,
-  options: ContainerOptionalParams = {},
-): ContainerContext {
+  options: ServiceOptionalParams = {},
+): ServiceContext {
   const endpointUrl = options.endpoint ?? String(endpointParam);
   const prefixFromOptions = options?.userAgentOptions?.userAgentPrefix;
   const userAgentInfo = `azsdk-js-storage-blob/1.0.0-beta.1`;
@@ -50,5 +50,5 @@ export function createContainer(
       return next(req);
     },
   });
-  return { ...clientContext, version } as ContainerContext;
+  return { ...clientContext, version } as ServiceContext;
 }

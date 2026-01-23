@@ -8,14 +8,14 @@ import {
   _submitBatchRequestDeserializer,
   FilterBlobSegment,
   filterBlobSegmentDeserializer,
-  SignedIdentifier,
+  SignedIdentifiers,
+  signedIdentifiersSerializer,
+  signedIdentifiersDeserializer,
   _ListBlobsFlatSegmentResponse,
   _listBlobsFlatSegmentResponseDeserializer,
   BlobItemInternal,
   _ListBlobsHierarchySegmentResponse,
   _listBlobsHierarchySegmentResponseDeserializer,
-  signedIdentifierArraySerializer,
-  signedIdentifierArrayDeserializer,
 } from "../../models/azure/storage/blobs/models.js";
 import {
   PagedAsyncIterableIterator,
@@ -31,7 +31,7 @@ import {
   RenewLeaseOptionalParams,
   ReleaseLeaseOptionalParams,
   AcquireLeaseOptionalParams,
-  FilterBlobsOptionalParams,
+  FindBlobsByTagsOptionalParams,
   SubmitBatchOptionalParams,
   RenameOptionalParams,
   RestoreOptionalParams,
@@ -54,9 +54,8 @@ export function _getAccountInfoSend(
   options: GetAccountInfoOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=account&comp=properties{?timeout}",
+    "/?restype=account&comp=properties{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -105,9 +104,8 @@ export function _listBlobHierarchySegmentSend(
   options: ListBlobHierarchySegmentOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container&comp=list&hierarchy{?delimiter,prefix,marker,maxresults,include,timeout,startFrom}",
+    "/?restype=container&comp=list&hierarchy{?delimiter,prefix,marker,maxresults,include,timeout,startFrom}",
     {
-      containerName: context.containerName,
       delimiter: delimiter,
       prefix: options?.prefix,
       marker: options?.marker,
@@ -174,9 +172,8 @@ export function _listBlobFlatSegmentSend(
   options: ListBlobFlatSegmentOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container&comp=list&flat{?prefix,marker,maxresults,include,timeout,startFrom}",
+    "/?restype=container&comp=list&flat{?prefix,marker,maxresults,include,timeout,startFrom}",
     {
-      containerName: context.containerName,
       prefix: options?.prefix,
       marker: options?.marker,
       maxresults: options?.maxresults,
@@ -243,9 +240,8 @@ export function _changeLeaseSend(
   options: ChangeLeaseOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?comp=lease&restype=container&change{?timeout}",
+    "/?comp=lease&restype=container&change{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -260,9 +256,6 @@ export function _changeLeaseSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         "x-ms-lease-id": leaseId,
         "x-ms-proposed-lease-id": proposedLeaseId,
         ...(options?.ifModifiedSince !== undefined
@@ -280,6 +273,9 @@ export function _changeLeaseSend(
             }
           : {}),
         action: "change",
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
+          : {}),
         ...options.requestOptions?.headers,
       },
     });
@@ -312,9 +308,8 @@ export function _breakLeaseSend(
   options: BreakLeaseOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?comp=lease&restype=container&break{?timeout}",
+    "/?comp=lease&restype=container&break{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -329,9 +324,6 @@ export function _breakLeaseSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         ...(options?.ifModifiedSince !== undefined
           ? {
               "If-Modified-Since": !options?.ifModifiedSince
@@ -350,6 +342,9 @@ export function _breakLeaseSend(
           ? { "x-ms-lease-break-period": options?.breakPeriod }
           : {}),
         action: "break",
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
+          : {}),
         ...options.requestOptions?.headers,
       },
     });
@@ -381,9 +376,8 @@ export function _renewLeaseSend(
   options: RenewLeaseOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?comp=lease&restype=container&renew{?timeout}",
+    "/?comp=lease&restype=container&renew{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -398,9 +392,6 @@ export function _renewLeaseSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         "x-ms-lease-id": leaseId,
         ...(options?.ifModifiedSince !== undefined
           ? {
@@ -417,6 +408,9 @@ export function _renewLeaseSend(
             }
           : {}),
         action: "renew",
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
+          : {}),
         ...options.requestOptions?.headers,
       },
     });
@@ -449,9 +443,8 @@ export function _releaseLeaseSend(
   options: ReleaseLeaseOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?comp=lease&restype=container&release{?timeout}",
+    "/?comp=lease&restype=container&release{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -466,9 +459,6 @@ export function _releaseLeaseSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         "x-ms-lease-id": leaseId,
         ...(options?.ifModifiedSince !== undefined
           ? {
@@ -485,6 +475,9 @@ export function _releaseLeaseSend(
             }
           : {}),
         action: "release",
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
+          : {}),
         ...options.requestOptions?.headers,
       },
     });
@@ -517,9 +510,8 @@ export function _acquireLeaseSend(
   options: AcquireLeaseOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?comp=lease&restype=container&acquire{?timeout}",
+    "/?comp=lease&restype=container&acquire{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -533,9 +525,6 @@ export function _acquireLeaseSend(
       ...operationOptionsToRequestParameters(options),
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         "x-ms-lease-duration": duration,
         ...(options?.proposedLeaseId !== undefined
           ? { "x-ms-proposed-lease-id": options?.proposedLeaseId }
@@ -555,6 +544,9 @@ export function _acquireLeaseSend(
             }
           : {}),
         action: "acquire",
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
+          : {}),
         ...options.requestOptions?.headers,
       },
     });
@@ -581,16 +573,16 @@ export async function acquireLease(
   return _acquireLeaseDeserialize(result);
 }
 
-export function _filterBlobsSend(
+export function _findBlobsByTagsSend(
   context: Client,
-  options: FilterBlobsOptionalParams = { requestOptions: {} },
+  filterExpression: string,
+  options: FindBlobsByTagsOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container&comp=blobs{?timeout,where,marker,maxresults,include}",
+    "/?restype=container&comp=blobs{?timeout,where,marker,maxresults,include}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
-      where: options?.where,
+      where: filterExpression,
       marker: options?.marker,
       maxresults: options?.maxresults,
       include: !options?.include
@@ -620,7 +612,7 @@ export function _filterBlobsSend(
     });
 }
 
-export async function _filterBlobsDeserialize(
+export async function _findBlobsByTagsDeserialize(
   result: PathUncheckedResponse,
 ): Promise<FilterBlobSegment> {
   const expectedStatuses = ["200"];
@@ -634,12 +626,13 @@ export async function _filterBlobsDeserialize(
 }
 
 /** The Filter Blobs operation enables callers to list blobs in a container whose tags match a given search expression.  Filter blobs searches within the given container. */
-export async function filterBlobs(
+export async function findBlobsByTags(
   context: Client,
-  options: FilterBlobsOptionalParams = { requestOptions: {} },
+  filterExpression: string,
+  options: FindBlobsByTagsOptionalParams = { requestOptions: {} },
 ): Promise<FilterBlobSegment> {
-  const result = await _filterBlobsSend(context, options);
-  return _filterBlobsDeserialize(result);
+  const result = await _findBlobsByTagsSend(context, filterExpression, options);
+  return _findBlobsByTagsDeserialize(result);
 }
 
 export function _submitBatchSend(
@@ -652,9 +645,8 @@ export function _submitBatchSend(
   options: SubmitBatchOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container&comp=batch{?timeout}",
+    "/?restype=container&comp=batch{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -717,9 +709,8 @@ export function _renameSend(
   options: RenameOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container&comp=rename{?timeout}",
+    "/?restype=container&comp=rename{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -734,12 +725,12 @@ export function _renameSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         "x-ms-source-container-name": sourceContainerName,
         ...(options?.sourceLeaseId !== undefined
           ? { "x-ms-source-lease-id": options?.sourceLeaseId }
+          : {}),
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
           : {}),
         ...options.requestOptions?.headers,
       },
@@ -772,9 +763,8 @@ export function _restoreSend(
   options: RestoreOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container&comp=undelete{?timeout}",
+    "/?restype=container&comp=undelete{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -789,14 +779,14 @@ export function _restoreSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         ...(options?.deletedContainerName !== undefined
           ? { "x-ms-deleted-container-name": options?.deletedContainerName }
           : {}),
         ...(options?.deletedContainerVersion !== undefined
           ? { "x-ms-deleted-container-version": options?.deletedContainerVersion }
+          : {}),
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
           : {}),
         ...options.requestOptions?.headers,
       },
@@ -825,13 +815,12 @@ export async function restore(
 
 export function _setAccessPolicySend(
   context: Client,
-  containerAcl: SignedIdentifier[],
+  containerAcl: SignedIdentifiers,
   options: SetAccessPolicyOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container&comp=acl{?timeout}",
+    "/?restype=container&comp=acl{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -846,9 +835,6 @@ export function _setAccessPolicySend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
         ...(options?.access !== undefined ? { "x-ms-blob-public-access": options?.access } : {}),
         ...(options?.ifModifiedSince !== undefined
@@ -865,9 +851,12 @@ export function _setAccessPolicySend(
                 : options?.ifUnmodifiedSince.toUTCString(),
             }
           : {}),
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
+          : {}),
         ...options.requestOptions?.headers,
       },
-      body: signedIdentifierArraySerializer(containerAcl),
+      body: signedIdentifiersSerializer(containerAcl),
     });
 }
 
@@ -885,7 +874,7 @@ export async function _setAccessPolicyDeserialize(result: PathUncheckedResponse)
 /** sets the permissions for the specified container. The permissions indicate whether blobs in a container may be accessed publicly. */
 export async function setAccessPolicy(
   context: Client,
-  containerAcl: SignedIdentifier[],
+  containerAcl: SignedIdentifiers,
   options: SetAccessPolicyOptionalParams = { requestOptions: {} },
 ): Promise<void> {
   const result = await _setAccessPolicySend(context, containerAcl, options);
@@ -897,9 +886,8 @@ export function _getAccessPolicySend(
   options: GetAccessPolicyOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container&comp=acl{?timeout}",
+    "/?restype=container&comp=acl{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -914,10 +902,10 @@ export function _getAccessPolicySend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
+        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
         ...(options?.clientRequestId !== undefined
           ? { "x-ms-client-request-id": options?.clientRequestId }
           : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
         accept: "application/xml",
         ...options.requestOptions?.headers,
       },
@@ -926,7 +914,7 @@ export function _getAccessPolicySend(
 
 export async function _getAccessPolicyDeserialize(
   result: PathUncheckedResponse,
-): Promise<SignedIdentifier[]> {
+): Promise<SignedIdentifiers> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
@@ -934,26 +922,26 @@ export async function _getAccessPolicyDeserialize(
     throw error;
   }
 
-  return signedIdentifierArrayDeserializer(result.body);
+  return signedIdentifiersDeserializer(result.body);
 }
 
 /** gets the permissions for the specified container. The permissions indicate whether container data may be accessed publicly. */
 export async function getAccessPolicy(
   context: Client,
   options: GetAccessPolicyOptionalParams = { requestOptions: {} },
-): Promise<SignedIdentifier[]> {
+): Promise<SignedIdentifiers> {
   const result = await _getAccessPolicySend(context, options);
   return _getAccessPolicyDeserialize(result);
 }
 
 export function _setMetadataSend(
   context: Client,
+  metadata: string,
   options: SetMetadataOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container&comp=metadata{?timeout}",
+    "/?restype=container&comp=metadata{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -968,17 +956,17 @@ export function _setMetadataSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
+        "x-ms-meta": metadata,
         ...(options?.ifModifiedSince !== undefined
           ? {
               "If-Modified-Since": !options?.ifModifiedSince
                 ? options?.ifModifiedSince
                 : options?.ifModifiedSince.toUTCString(),
             }
+          : {}),
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
           : {}),
         ...options.requestOptions?.headers,
       },
@@ -999,9 +987,10 @@ export async function _setMetadataDeserialize(result: PathUncheckedResponse): Pr
 /** operation sets one or more user-defined name-value pairs for the specified container. */
 export async function setMetadata(
   context: Client,
+  metadata: string,
   options: SetMetadataOptionalParams = { requestOptions: {} },
 ): Promise<void> {
-  const result = await _setMetadataSend(context, options);
+  const result = await _setMetadataSend(context, metadata, options);
   return _setMetadataDeserialize(result);
 }
 
@@ -1010,9 +999,8 @@ export function _$deleteSend(
   options: DeleteOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container{?timeout}",
+    "/?restype=container{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -1027,9 +1015,6 @@ export function _$deleteSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
         ...(options?.ifModifiedSince !== undefined
           ? {
@@ -1044,6 +1029,9 @@ export function _$deleteSend(
                 ? options?.ifUnmodifiedSince
                 : options?.ifUnmodifiedSince.toUTCString(),
             }
+          : {}),
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
           : {}),
         ...options.requestOptions?.headers,
       },
@@ -1080,9 +1068,8 @@ export function _getPropertiesSend(
   options: GetPropertiesOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container{?timeout}",
+    "/?restype=container{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -1097,10 +1084,10 @@ export function _getPropertiesSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
+        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
         ...(options?.clientRequestId !== undefined
           ? { "x-ms-client-request-id": options?.clientRequestId }
           : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
         ...options.requestOptions?.headers,
       },
     });
@@ -1131,9 +1118,8 @@ export function _createSend(
   options: CreateOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/{containerName}?restype=container{?timeout}",
+    "/?restype=container{?timeout}",
     {
-      containerName: context.containerName,
       timeout: options?.timeout,
     },
     {
@@ -1148,9 +1134,6 @@ export function _createSend(
       contentType: "application/xml",
       headers: {
         "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
         ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
         ...(options?.access !== undefined ? { "x-ms-blob-public-access": options?.access } : {}),
         ...(options?.defaultEncryptionScope !== undefined
@@ -1158,6 +1141,9 @@ export function _createSend(
           : {}),
         ...(options?.preventEncryptionScopeOverride !== undefined
           ? { "x-ms-deny-encryption-scope-override": options?.preventEncryptionScopeOverride }
+          : {}),
+        ...(options?.clientRequestId !== undefined
+          ? { "x-ms-client-request-id": options?.clientRequestId }
           : {}),
         ...options.requestOptions?.headers,
       },

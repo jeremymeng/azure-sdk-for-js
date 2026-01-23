@@ -8,15 +8,16 @@ import {
   PagedAsyncIterableIterator,
 } from "./static-helpers/pagingHelpers.js";
 
-export { BlobClient } from "./blobClient.js";
+export { Service } from "./service/service.js";
 export {
-  StorageServiceProperties,
+  BlobServiceProperties,
   Logging,
   RetentionPolicy,
   Metrics,
   CorsRule,
   StaticWebsite,
   StorageError,
+  StorageErrorCode,
   StorageServiceStats,
   GeoReplication,
   GeoReplicationStatusType,
@@ -32,6 +33,7 @@ export {
   FilterBlobItem,
   BlobTags,
   BlobTag,
+  SignedIdentifiers,
   SignedIdentifier,
   AccessPolicy,
   BlobFlatListSegment,
@@ -43,7 +45,7 @@ export {
   AccessTier,
   ArchiveStatus,
   RehydratePriority,
-  BlobImmutabilityPolicyMode,
+  ImmutabilityPolicyMode,
   BlobMetadata,
   ObjectReplicationMetadata,
   BlobHierarchyListSegment,
@@ -68,22 +70,20 @@ export {
   SkuName,
   AccountKind,
   FilterBlobsIncludeItem,
+  KnownVersions,
   ListBlobsIncludeItem,
   EncryptionAlgorithmType,
   DeleteSnapshotsOptionType,
   BlobDeleteType,
   BlobExpiryOptions,
-  ImmutabilityPolicyMode,
   BlobCopySourceTags,
   FileShareTokenIntent,
   PremiumPageBlobAccessTier,
   SequenceNumberActionType,
   BlockListType,
-  KnownVersions,
 } from "./models/azure/storage/blobs/index.js";
 export {
-  BlobClientOptionalParams,
-  FilterBlobsOptionalParams,
+  FindBlobsByTagsOptionalParams,
   SubmitBatchOptionalParams,
   GetAccountInfoOptionalParams,
   GetUserDelegationKeyOptionalParams,
@@ -91,7 +91,8 @@ export {
   GetStatisticsOptionalParams,
   GetPropertiesOptionalParams,
   SetPropertiesOptionalParams,
-} from "./api/index.js";
+  ServiceOptionalParams,
+} from "./service/api/index.js";
 export { PageSettings, ContinuablePage, PagedAsyncIterableIterator };
 export { FileContents };
 export { Container } from "./container/container.js";
@@ -105,7 +106,7 @@ export {
   RenewLeaseOptionalParams,
   ReleaseLeaseOptionalParams,
   AcquireLeaseOptionalParams,
-  FilterBlobsOptionalParams as ContainerFilterBlobsOptionalParams,
+  FindBlobsByTagsOptionalParams as ContainerFindBlobsByTagsOptionalParams,
   SubmitBatchOptionalParams as ContainerSubmitBatchOptionalParams,
   RenameOptionalParams,
   RestoreOptionalParams,
@@ -116,7 +117,7 @@ export {
   GetPropertiesOptionalParams as ContainerGetPropertiesOptionalParams,
   CreateOptionalParams,
 } from "./container/api/index.js";
-export { Blob } from "./container/blob/blob.js";
+export { Blob } from "./blob/blob.js";
 export {
   BlobOptionalParams,
   SetTagsOptionalParams,
@@ -142,8 +143,8 @@ export {
   DeleteOptionalParams as BlobDeleteOptionalParams,
   GetPropertiesOptionalParams as BlobGetPropertiesOptionalParams,
   DownloadOptionalParams,
-} from "./container/blob/api/index.js";
-export { PageBlob } from "./container/blob/pageBlob/pageBlob.js";
+} from "./blob/api/index.js";
+export { PageBlob } from "./pageBlob/pageBlob.js";
 export {
   CopyIncrementalOptionalParams,
   SetSequenceNumberOptionalParams,
@@ -155,16 +156,16 @@ export {
   UploadPagesOptionalParams,
   CreateOptionalParams as PageBlobCreateOptionalParams,
   PageBlobOptionalParams,
-} from "./container/blob/pageBlob/api/index.js";
-export { AppendBlob } from "./container/blob/appendBlob/appendBlob.js";
+} from "./pageBlob/api/index.js";
+export { AppendBlob } from "./appendBlob/appendBlob.js";
 export {
   AppendBlobOptionalParams,
   SealOptionalParams,
   AppendBlockFromUrlOptionalParams,
   AppendBlockOptionalParams,
   CreateOptionalParams as AppendBlobCreateOptionalParams,
-} from "./container/blob/appendBlob/api/index.js";
-export { BlockBlob } from "./container/blob/blockBlob/blockBlob.js";
+} from "./appendBlob/api/index.js";
+export { BlockBlob } from "./blockBlob/blockBlob.js";
 export {
   BlockBlobOptionalParams,
   QueryOptionalParams,
@@ -172,6 +173,6 @@ export {
   CommitBlockListOptionalParams,
   StageBlockFromUrlOptionalParams,
   StageBlockOptionalParams,
-  PutBlobFromUrlOptionalParams,
+  UploadBlobFromUrlOptionalParams,
   UploadOptionalParams,
-} from "./container/blob/blockBlob/api/index.js";
+} from "./blockBlob/api/index.js";
