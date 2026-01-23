@@ -10,6 +10,7 @@ import type { PagedAsyncIterableIterator, PageSettings } from "@azure/core-pagin
 import {
   AnonymousCredential,
   StorageSharedKeyCredential,
+  storageSharedKeyCredentialPolicy,
   UserDelegationKey,
 } from "@azure/storage-common";
 import { Container } from "./generated/container/container.js";
@@ -47,8 +48,7 @@ import type {
   ContainerRequestConditions,
   ModifiedAccessConditions,
 } from "./models.js";
-import type { PipelineLike, StoragePipelineOptions } from "./Pipeline.js";
-import { newPipeline, isPipelineLike } from "./Pipeline.js";
+import type { StorageClientOptions } from "./Pipeline.js";
 import type { CommonOptions } from "./StorageClient.js";
 import { StorageClient } from "./StorageClient.js";
 import { tracingClient } from "./utils/tracing.js";
@@ -56,7 +56,7 @@ import type { WithResponse } from "./utils/utils.common.js";
 import {
   appendToURLPath,
   appendToURLQuery,
-  assertResponse,
+  // assertResponse,
   BlobNameToString,
   ConvertInternalResponseOfListBlobFlat,
   ConvertInternalResponseOfListBlobHierarchy,
@@ -92,6 +92,7 @@ import type {
   ContainerListBlobHierarchySegmentResponse as ContainerListBlobHierarchySegmentResponseModel,
   ContainerGetAccountInfoHeaders,
 } from "./generated/src/index.js";
+import { FullOperationResponse } from "../../../core/core-client-rest/dist/esm/common.js";
 
 /**
  * Options to configure {@link ContainerClient.create} operation.
@@ -189,7 +190,7 @@ export interface ContainerGetAccessPolicyOptions extends CommonOptions {
    * If specified, contains the lease id that must be matched and lease with this id
    * must be active in order for the operation to succeed.
    */
-  conditions?: LeaseAccessConditions;
+  leaseId?: string;
 }
 
 /**
@@ -629,7 +630,7 @@ export class ContainerClient extends StorageClient {
    */
   // Legacy, no fix for eslint error without breaking. Disable it for this interface.
   /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
-  constructor(connectionString: string, containerName: string, options?: StoragePipelineOptions);
+  constructor(connectionString: string, containerName: string, options?: StorageClientOptions);
   /**
    * Creates an instance of ContainerClient.
    * This method accepts an URL pointing to a container.
@@ -648,7 +649,7 @@ export class ContainerClient extends StorageClient {
     credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential,
     // Legacy, no fix for eslint error without breaking. Disable it for this interface.
     /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
-    options?: StoragePipelineOptions,
+    options?: StorageClientOptions,
   );
   /**
    * Creates an instance of ContainerClient.
@@ -663,48 +664,35 @@ export class ContainerClient extends StorageClient {
    * @param pipeline - Call newPipeline() to create a default
    *                            pipeline, or provide a customized pipeline.
    */
-  constructor(url: string, pipeline: PipelineLike);
   constructor(
     urlOrConnectionString: string,
-    credentialOrPipelineOrContainerName?:
+    credentialOrContainerName?:
       | string
       | StorageSharedKeyCredential
       | AnonymousCredential
-      | TokenCredential
-      | PipelineLike,
+      | TokenCredential,
     // Legacy, no fix for eslint error without breaking. Disable it for this interface.
     /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
-    options?: StoragePipelineOptions,
+    options?: StorageClientOptions,
   ) {
-    let pipeline: PipelineLike;
     let url: string;
     options = options || {};
-    if (isPipelineLike(credentialOrPipelineOrContainerName)) {
-      // (url: string, pipeline: Pipeline)
-      url = urlOrConnectionString;
-      pipeline = credentialOrPipelineOrContainerName;
-    } else if (
-      (isNodeLike && credentialOrPipelineOrContainerName instanceof StorageSharedKeyCredential) ||
-      credentialOrPipelineOrContainerName instanceof AnonymousCredential ||
-      isTokenCredential(credentialOrPipelineOrContainerName)
+    if (
+      (isNodeLike && credentialOrContainerName instanceof StorageSharedKeyCredential) ||
+      credentialOrContainerName instanceof AnonymousCredential ||
+      isTokenCredential(credentialOrContainerName)
     ) {
       // (url: string, credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential, options?: StoragePipelineOptions)
       url = urlOrConnectionString;
-      pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
-    } else if (
-      !credentialOrPipelineOrContainerName &&
-      typeof credentialOrPipelineOrContainerName !== "string"
-    ) {
+      super(urlOrConnectionString, credentialOrContainerName);
+    } else if (!credentialOrContainerName && typeof credentialOrContainerName !== "string") {
       // (url: string, credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential, options?: StoragePipelineOptions)
       // The second parameter is undefined. Use anonymous credential.
       url = urlOrConnectionString;
-      pipeline = newPipeline(new AnonymousCredential(), options);
-    } else if (
-      credentialOrPipelineOrContainerName &&
-      typeof credentialOrPipelineOrContainerName === "string"
-    ) {
+      super(url, new AnonymousCredential());
+    } else if (credentialOrContainerName && typeof credentialOrContainerName === "string") {
       // (connectionString: string, containerName: string, blobName: string, options?: StoragePipelineOptions)
-      const containerName = credentialOrPipelineOrContainerName;
+      const containerName = credentialOrContainerName;
 
       const extractedCreds = extractConnectionStringParts(urlOrConnectionString);
       if (extractedCreds.kind === "AccountConnString") {
@@ -719,7 +707,7 @@ export class ContainerClient extends StorageClient {
             options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
           }
 
-          pipeline = newPipeline(sharedKeyCredential, options);
+          super(url, sharedKeyCredential);
         } else {
           throw new Error("Account connection string is only supported in Node.js environment");
         }
@@ -728,7 +716,7 @@ export class ContainerClient extends StorageClient {
           appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)) +
           "?" +
           extractedCreds.accountSas;
-        pipeline = newPipeline(new AnonymousCredential(), options);
+        super(url, new AnonymousCredential());
       } else {
         throw new Error(
           "Connection string must be either an Account connection string or a SAS connection string",
@@ -737,9 +725,26 @@ export class ContainerClient extends StorageClient {
     } else {
       throw new Error("Expecting non-empty strings for containerName parameter");
     }
-    super(url, pipeline);
     this._containerName = this.getContainerNameFromUrl();
-    this.containerContext = this.storageClientContext.container;
+    if (isTokenCredential(this.credential)) {
+      this.containerContext = new Container(url, this.credential, this._containerName, options);
+    } else {
+      this.containerContext = new Container(
+        this.url,
+        undefined as any,
+        this._containerName,
+        options,
+      );
+      if (this.credential instanceof StorageSharedKeyCredential) {
+        this.containerContext.pipeline.addPolicy(
+          storageSharedKeyCredentialPolicy({
+            accountName: this.credential.accountName,
+            accountKey: (this.credential as any).accountKey,
+          }),
+          { phase: "Sign" },
+        );
+      }
+    }
   }
 
   /**
@@ -771,9 +776,8 @@ export class ContainerClient extends StorageClient {
    */
   public async create(options: ContainerCreateOptions = {}): Promise<ContainerCreateResponse> {
     return tracingClient.withSpan("ContainerClient-create", options, async (updatedOptions) => {
-      return assertResponse<ContainerCreateHeaders, ContainerCreateHeaders>(
-        await this.containerContext.create(updatedOptions),
-      );
+      const result = await this.containerContext.create(updatedOptions);
+      return result;
     });
   }
 
@@ -786,6 +790,7 @@ export class ContainerClient extends StorageClient {
    * @param options -
    */
   public async createIfNotExists(
+    // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
     options: ContainerCreateOptions = {},
   ): Promise<ContainerCreateIfNotExistsResponse> {
     return tracingClient.withSpan(
@@ -847,7 +852,10 @@ export class ContainerClient extends StorageClient {
    * @returns A new BlobClient object for the given blob name.
    */
   public getBlobClient(blobName: string): BlobClient {
-    return new BlobClient(appendToURLPath(this.url, EscapePath(blobName)), this.pipeline);
+    return new BlobClient(
+      appendToURLPath(this.url, EscapePath(blobName)),
+      this.containerContext.pipeline,
+    );
   }
 
   /**
@@ -856,7 +864,10 @@ export class ContainerClient extends StorageClient {
    * @param blobName - An append blob name
    */
   public getAppendBlobClient(blobName: string): AppendBlobClient {
-    return new AppendBlobClient(appendToURLPath(this.url, EscapePath(blobName)), this.pipeline);
+    return new AppendBlobClient(
+      appendToURLPath(this.url, EscapePath(blobName)),
+      this.containerContext.pipeline,
+    );
   }
 
   /**
@@ -887,7 +898,10 @@ export class ContainerClient extends StorageClient {
    * ```
    */
   public getBlockBlobClient(blobName: string): BlockBlobClient {
-    return new BlockBlobClient(appendToURLPath(this.url, EscapePath(blobName)), this.pipeline);
+    return new BlockBlobClient(
+      appendToURLPath(this.url, EscapePath(blobName)),
+      this.containerContext.pipeline,
+    );
   }
 
   /**
@@ -896,7 +910,10 @@ export class ContainerClient extends StorageClient {
    * @param blobName - A page blob name
    */
   public getPageBlobClient(blobName: string): PageBlobClient {
-    return new PageBlobClient(appendToURLPath(this.url, EscapePath(blobName)), this.pipeline);
+    return new PageBlobClient(
+      appendToURLPath(this.url, EscapePath(blobName)),
+      this.containerContext.pipeline,
+    );
   }
 
   /**
@@ -941,6 +958,7 @@ export class ContainerClient extends StorageClient {
    * @param options - Options to Container Delete operation.
    */
   public async delete(
+    // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
     options: ContainerDeleteMethodOptions = {},
   ): Promise<ContainerDeleteResponse> {
     if (!options.conditions) {
@@ -948,14 +966,14 @@ export class ContainerClient extends StorageClient {
     }
 
     return tracingClient.withSpan("ContainerClient-delete", options, async (updatedOptions) => {
-      return assertResponse<ContainerDeleteHeaders, ContainerDeleteHeaders>(
-        await this.containerContext.delete({
-          abortSignal: options.abortSignal,
-          leaseAccessConditions: options.conditions,
-          modifiedAccessConditions: options.conditions,
-          tracingOptions: updatedOptions.tracingOptions,
-        }),
-      );
+      const result = await this.containerContext.delete({
+        abortSignal: options.abortSignal,
+        leaseAccessConditions: options.conditions,
+        modifiedAccessConditions: options.conditions,
+        tracingOptions: updatedOptions.tracingOptions,
+      });
+
+      return result;
     });
   }
 
@@ -967,6 +985,7 @@ export class ContainerClient extends StorageClient {
    * @param options - Options to Container Delete operation.
    */
   public async deleteIfExists(
+    // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
     options: ContainerDeleteMethodOptions = {},
   ): Promise<ContainerDeleteIfExistsResponse> {
     return tracingClient.withSpan(
@@ -1024,15 +1043,14 @@ export class ContainerClient extends StorageClient {
       "ContainerClient-setMetadata",
       options,
       async (updatedOptions) => {
-        return assertResponse<ContainerSetMetadataHeaders, ContainerSetMetadataHeaders>(
-          await this.containerContext.setMetadata({
-            abortSignal: options.abortSignal,
-            leaseAccessConditions: options.conditions,
-            metadata,
-            modifiedAccessConditions: options.conditions,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        const result = await this.containerContext.setMetadata({
+          abortSignal: options.abortSignal,
+          leaseAccessConditions: options.conditions,
+          metadata,
+          modifiedAccessConditions: options.conditions,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
+        return result;
       },
     );
   }
@@ -1059,32 +1077,30 @@ export class ContainerClient extends StorageClient {
       "ContainerClient-getAccessPolicy",
       options,
       async (updatedOptions) => {
-        const response = assertResponse<
-          ContainerGetAccessPolicyResponseModel,
-          ContainerGetAccessPolicyHeaders,
-          SignedIdentifierModel
-        >(
-          await this.containerContext.getAccessPolicy({
-            abortSignal: options.abortSignal,
-            leaseAccessConditions: options.conditions,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        let _response: FullOperationResponse;
+        const result = await this.containerContext.getAccessPolicy({
+          abortSignal: options.abortSignal,
+          leaseId: options.leaseId,
+          tracingOptions: updatedOptions.tracingOptions,
+          onResponse: (rawResponse) => {
+            options?.onResponse?.(rawResponse);
+            _response = rawResponse;
+          },
+        });
 
         const res: ContainerGetAccessPolicyResponse = {
-          _response: response._response,
-          blobPublicAccess: response.blobPublicAccess,
-          date: response.date,
-          etag: response.etag,
-          errorCode: response.errorCode,
-          lastModified: response.lastModified,
-          requestId: response.requestId,
-          clientRequestId: response.clientRequestId,
+          blobPublicAccess: result.blobPublicAccess,
+          date: result.date,
+          etag: result.etag,
+          errorCode: result.errorCode,
+          lastModified: result.lastModified,
+          requestId: result.requestId,
+          clientRequestId: result.clientRequestId,
           signedIdentifiers: [],
-          version: response.version,
+          version: result.version,
         };
 
-        for (const identifier of response) {
+        for (const identifier of result) {
           let accessPolicy: any = undefined;
           if (identifier.accessPolicy) {
             accessPolicy = {
@@ -1154,16 +1170,14 @@ export class ContainerClient extends StorageClient {
           });
         }
 
-        return assertResponse<ContainerSetAccessPolicyHeaders, ContainerSetAccessPolicyHeaders>(
-          await this.containerContext.setAccessPolicy(acl, {
-            abortSignal: options.abortSignal,
-            access,
-            containerAcl: acl,
-            leaseAccessConditions: options.conditions,
-            modifiedAccessConditions: options.conditions,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        return await this.containerContext.setAccessPolicy(acl, {
+          abortSignal: options.abortSignal,
+          access,
+          containerAcl: acl,
+          leaseAccessConditions: options.conditions,
+          modifiedAccessConditions: options.conditions,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
       },
     );
   }
@@ -1262,24 +1276,19 @@ export class ContainerClient extends StorageClient {
       "ContainerClient-listBlobFlatSegment",
       options,
       async (updatedOptions) => {
-        const response = assertResponse<
-          ListBlobsFlatSegmentResponseInternal,
-          ContainerListBlobFlatSegmentHeaders,
-          ListBlobsFlatSegmentResponseInternal
-        >(
-          await this.containerContext.listBlobFlatSegment({
-            marker,
-            ...options,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        let _response: FullOperationResponse;
+        const response = await this.containerContext.listBlobFlatSegment({
+          marker,
+          ...options,
+          tracingOptions: updatedOptions.tracingOptions,
+          onResponse: (rawResponse) => {
+            updatedOptions?.onResponse?.(rawResponse);
+            _response = rawResponse;
+          },
+        });
 
         const wrappedResponse: ContainerListBlobFlatSegmentResponse = {
           ...response,
-          _response: {
-            ...response._response,
-            parsedBody: ConvertInternalResponseOfListBlobFlat(response._response.parsedBody),
-          }, // _response is made non-enumerable
           segment: {
             ...response.segment,
             blobItems: response.segment.blobItems.map((blobItemInternal) => {
@@ -1805,23 +1814,16 @@ export class ContainerClient extends StorageClient {
       "ContainerClient-findBlobsByTagsSegment",
       options,
       async (updatedOptions) => {
-        const response = assertResponse<
-          ContainerFilterBlobsResponse,
-          ContainerFilterBlobsHeaders,
-          FilterBlobSegmentModel
-        >(
-          await this.containerContext.filterBlobs({
-            abortSignal: options.abortSignal,
-            where: tagFilterSqlExpression,
-            marker,
-            maxPageSize: options.maxPageSize,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        const response = await this.containerContext.filterBlobs({
+          abortSignal: options.abortSignal,
+          where: tagFilterSqlExpression,
+          marker,
+          maxPageSize: options.maxPageSize,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
 
         const wrappedResponse: ContainerFindBlobsByTagsSegmentResponse = {
           ...response,
-          _response: response._response, // _response is made non-enumerable
           blobs: response.blobs.map((blob) => {
             let tagValue = "";
             if (blob.tags?.blobTagSet.length === 1) {
@@ -2019,12 +2021,10 @@ export class ContainerClient extends StorageClient {
       "ContainerClient-getAccountInfo",
       options,
       async (updatedOptions) => {
-        return assertResponse<ContainerGetAccountInfoHeaders, ContainerGetAccountInfoHeaders>(
-          await this.containerContext.getAccountInfo({
-            abortSignal: options.abortSignal,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        return await this.containerContext.getAccountInfo({
+          abortSignal: options.abortSignal,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
       },
     );
   }
@@ -2139,6 +2139,7 @@ export class ContainerClient extends StorageClient {
    * @returns The SAS URI consisting of the URI to the resource represented by this client, followed by the generated SAS token.
    */
   public generateUserDelegationSasUrl(
+    // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
     options: ContainerGenerateSasUrlOptions,
     userDelegationKey: UserDelegationKey,
   ): Promise<string> {
@@ -2168,6 +2169,7 @@ export class ContainerClient extends StorageClient {
    */
 
   public generateUserDelegationSasStringToSign(
+    // eslint-disable-next-line @azure/azure-sdk/ts-naming-options
     options: ContainerGenerateSasUrlOptions,
     userDelegationKey: UserDelegationKey,
   ): string {
@@ -2189,6 +2191,6 @@ export class ContainerClient extends StorageClient {
    * @returns A new BlobBatchClient object for this container.
    */
   public getBlobBatchClient(): BlobBatchClient {
-    return new BlobBatchClient(this.url, this.pipeline);
+    return new BlobBatchClient(this.url, this.containerContext.pipeline);
   }
 }

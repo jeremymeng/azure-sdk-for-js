@@ -11,19 +11,14 @@ import {
   iEqual,
   getAccountNameFromUrl,
 } from "./utils/utils.common.js";
-import type { AnonymousCredential, StorageSharedKeyCredential } from "@azure/storage-common";
+import { AnonymousCredential, StorageSharedKeyCredential } from "@azure/storage-common";
 import type { TokenCredential } from "@azure/core-auth";
-import type { OperationTracingOptions } from "@azure/core-tracing";
+import { OperationOptions } from "@azure-rest/core-client";
 
 /**
  * An interface for options common to every remote operation.
  */
-export interface CommonOptions {
-  /**
-   * Options to configure spans created when tracing is enabled.
-   */
-  tracingOptions?: OperationTracingOptions;
-}
+export interface CommonOptions extends OperationOptions {}
 
 /**
  * A StorageClient represents a based URL class for {@link BlobServiceClient}, {@link ContainerClient}
@@ -35,12 +30,7 @@ export abstract class StorageClient {
    */
   public readonly url: string;
   public readonly accountName: string;
-  /**
-   * Request policy pipeline.
-   *
-   * @internal
-   */
-  protected readonly pipeline: PipelineLike;
+
   /**
    * Such as AnonymousCredential, StorageSharedKeyCredential or any credential from the `@azure/identity` package to authenticate requests to the service. You can also provide an object that implements the TokenCredential interface. If not specified, AnonymousCredential is used.
    */
@@ -57,21 +47,17 @@ export abstract class StorageClient {
   /**
    * Creates an instance of StorageClient.
    * @param url - url to resource
-   * @param pipeline - request policy pipeline.
    */
-  protected constructor(url: string, pipeline: PipelineLike) {
+  protected constructor(
+    url: string,
+    credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential,
+  ) {
     // URL should be encoded and only once, protocol layer shouldn't encode URL again
     this.url = escapeURLPath(url);
     this.accountName = getAccountNameFromUrl(url);
-    this.pipeline = pipeline;
-    this.storageClientContext = new StorageContextClient(this.url, getCoreClientOptions(pipeline));
 
     this.isHttps = iEqual(getURLScheme(this.url) || "", "https");
 
-    this.credential = getCredentialFromPipeline(pipeline);
-
-    // Override protocol layer's default content-type
-    const storageClientContext = this.storageClientContext as any;
-    storageClientContext.requestContentType = undefined;
+    this.credential = credential ?? new AnonymousCredential();
   }
 }

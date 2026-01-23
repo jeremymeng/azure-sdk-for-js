@@ -54,6 +54,7 @@ import {
   StorageBlobLoggingAllowedQueryParameters,
   SDK_VERSION,
 } from "./utils/constants.js";
+import { ClientOptions } from "@azure-rest/core-client";
 
 // Export following interfaces and types for customers who want to implement their
 // own RequestPolicy or HTTPClient
@@ -182,6 +183,8 @@ export class Pipeline implements PipelineLike {
     };
   }
 }
+
+export interface StorageClientOptions extends ClientOptions {}
 
 /**
  * Options interface for the {@link newPipeline} function.

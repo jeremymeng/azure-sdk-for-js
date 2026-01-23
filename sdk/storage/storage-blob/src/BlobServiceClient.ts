@@ -28,7 +28,7 @@ import type {
   ServiceListContainersSegmentResponseInternal,
 } from "./generatedModels.js";
 import { BlobClient as Service } from "./generated/blobClient.js";
-import type { StoragePipelineOptions, PipelineLike } from "./Pipeline.js";
+import type { StoragePipelineOptions, PipelineLike, StorageClientOptions } from "./Pipeline.js";
 import { newPipeline, isPipelineLike } from "./Pipeline.js";
 import type { ContainerCreateOptions, ContainerDeleteMethodOptions } from "./ContainerClient.js";
 import { ContainerClient } from "./ContainerClient.js";
@@ -43,6 +43,7 @@ import {
   StorageSharedKeyCredential,
   AnonymousCredential,
   UserDelegationKey,
+  storageSharedKeyCredentialPolicy,
 } from "@azure/storage-common";
 import type { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
 import { truncatedISO8061Date, assertResponse } from "./utils/utils.common.js";
@@ -74,6 +75,7 @@ import {
   StorageServiceProperties as ServiceGetPropertiesResponse,
   StorageServiceStats as ServiceGetStatisticsResponse,
 } from "./generated/index.js";
+import { ClientOptions } from "@azure-rest/core-client";
 
 /**
  * Options to configure the {@link BlobServiceClient.getProperties} operation.
@@ -328,9 +330,8 @@ export class BlobServiceClient extends StorageClient {
    */
   public static fromConnectionString(
     connectionString: string,
-    // Legacy, no fix for eslint error without breaking. Disable it for this interface.
     /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
-    options?: StoragePipelineOptions,
+    options?: StorageClientOptions,
   ): BlobServiceClient {
     options = options || {};
     const extractedCreds = extractConnectionStringParts(connectionString);
@@ -345,14 +346,16 @@ export class BlobServiceClient extends StorageClient {
           options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
         }
 
-        const pipeline = newPipeline(sharedKeyCredential, options);
-        return new BlobServiceClient(extractedCreds.url, pipeline);
+        return new BlobServiceClient(extractedCreds.url, sharedKeyCredential, options);
       } else {
         throw new Error("Account connection string is only supported in Node.js environment");
       }
     } else if (extractedCreds.kind === "SASConnString") {
-      const pipeline = newPipeline(new AnonymousCredential(), options);
-      return new BlobServiceClient(extractedCreds.url + "?" + extractedCreds.accountSas, pipeline);
+      return new BlobServiceClient(
+        extractedCreds.url + "?" + extractedCreds.accountSas,
+        new AnonymousCredential(),
+        options,
+      );
     } else {
       throw new Error(
         "Connection string must be either an Account connection string or a SAS connection string",
@@ -405,46 +408,24 @@ export class BlobServiceClient extends StorageClient {
   constructor(
     url: string,
     credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential,
-    // Legacy, no fix for eslint error without breaking. Disable it for this interface.
     /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
-    options?: StoragePipelineOptions,
-  );
-  /**
-   * Creates an instance of BlobServiceClient.
-   *
-   * @param url - A Client string pointing to Azure Storage blob service, such as
-   *                     "https://myaccount.blob.core.windows.net". You can append a SAS
-   *                     if using AnonymousCredential, such as "https://myaccount.blob.core.windows.net?sasString".
-   * @param pipeline - Call newPipeline() to create a default
-   *                            pipeline, or provide a customized pipeline.
-   */
-  constructor(url: string, pipeline: PipelineLike);
-  constructor(
-    url: string,
-    credentialOrPipeline?:
-      | StorageSharedKeyCredential
-      | AnonymousCredential
-      | TokenCredential
-      | PipelineLike,
-    // Legacy, no fix for eslint error without breaking. Disable it for this interface.
-    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
-    options?: StoragePipelineOptions,
+    options?: StorageClientOptions,
   ) {
-    let pipeline: PipelineLike;
-    if (isPipelineLike(credentialOrPipeline)) {
-      pipeline = credentialOrPipeline;
-    } else if (
-      (isNodeLike && credentialOrPipeline instanceof StorageSharedKeyCredential) ||
-      credentialOrPipeline instanceof AnonymousCredential ||
-      isTokenCredential(credentialOrPipeline)
-    ) {
-      pipeline = newPipeline(credentialOrPipeline, options);
+    super(url, credential);
+    if (isTokenCredential(this.credential)) {
+      this.serviceContext = new Service(this.url, this.credential, options);
     } else {
-      // The second parameter is undefined. Use anonymous credential
-      pipeline = newPipeline(new AnonymousCredential(), options);
+      this.serviceContext = new Service(this.url, undefined as any, options);
+      if (credential instanceof StorageSharedKeyCredential) {
+        this.serviceContext.pipeline.addPolicy(
+          storageSharedKeyCredentialPolicy({
+            accountName: credential.accountName,
+            accountKey: (credential as any).accountKey,
+          }),
+          { phase: "Sign" },
+        );
+      }
     }
-    super(url, pipeline);
-    this.serviceContext = this.storageClientContext.service;
   }
 
   /**
@@ -471,7 +452,7 @@ export class BlobServiceClient extends StorageClient {
   public getContainerClient(containerName: string): ContainerClient {
     return new ContainerClient(
       appendToURLPath(this.url, encodeURIComponent(containerName)),
-      this.pipeline,
+      this.serviceContext.pipeline,
     );
   }
 
@@ -1144,7 +1125,7 @@ export class BlobServiceClient extends StorageClient {
    * @returns A new BlobBatchClient object for this service.
    */
   public getBlobBatchClient(): BlobBatchClient {
-    return new BlobBatchClient(this.url, this.pipeline);
+    return new BlobBatchClient(this.url, this.serviceContext.pipeline);
   }
 
   /**
