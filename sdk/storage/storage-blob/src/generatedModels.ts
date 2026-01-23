@@ -420,7 +420,7 @@ export {
   ServiceSubmitBatchOptionalParams as ServiceSubmitBatchOptionalParamsModel,
   ContainerEncryptionScope,
   SyncCopyStatusType,
-} from "./generated/src/models/index.js";
+} from "./generated-compat/src/models/index.js";
 
 // Following definitions are to avoid breaking change.
 export interface BlobPrefix {

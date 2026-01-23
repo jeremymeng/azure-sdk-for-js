@@ -1155,7 +1155,7 @@ export class ContainerClient extends StorageClient {
         }
 
         return assertResponse<ContainerSetAccessPolicyHeaders, ContainerSetAccessPolicyHeaders>(
-          await this.containerContext.setAccessPolicy({
+          await this.containerContext.setAccessPolicy(acl, {
             abortSignal: options.abortSignal,
             access,
             containerAcl: acl,

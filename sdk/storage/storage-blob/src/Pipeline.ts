@@ -289,23 +289,9 @@ export function getCoreClientOptions(pipeline: PipelineLike): ExtendedServiceCli
       },
       serializationOptions: {
         stringifyXML,
-        serializerOptions: {
-          xml: {
-            // Use customized XML char key of "#" so we can deserialize metadata
-            // with "_" key
-            xmlCharKey: "#",
-          },
-        },
       },
       deserializationOptions: {
         parseXML,
-        serializerOptions: {
-          xml: {
-            // Use customized XML char key of "#" so we can deserialize metadata
-            // with "_" key
-            xmlCharKey: "#",
-          },
-        },
       },
     });
     corePipeline.removePolicy({ phase: "Retry" });
