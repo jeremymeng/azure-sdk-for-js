@@ -141,6 +141,21 @@ export function isPipelineLike(pipeline: unknown): pipeline is PipelineLike {
   );
 }
 
+export function isCorePipeline(pipeline: unknown): pipeline is CorePipeline {
+  if (!pipeline || typeof pipeline !== "object") {
+    return false;
+  }
+
+  const castPipeline = pipeline as CorePipeline;
+
+  return (
+    typeof castPipeline.addPolicy === "function" &&
+    typeof castPipeline.removePolicy === "function" &&
+    typeof castPipeline.sendRequest === "function" &&
+    typeof castPipeline.getOrderedPolicies === "function"    
+  );
+}
+
 /**
  * A Pipeline class containing HTTP request policies.
  * You can create a default Pipeline by calling {@link newPipeline}.

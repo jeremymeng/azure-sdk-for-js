@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import type { TokenCredential } from "@azure/core-auth";
 import { isTokenCredential } from "@azure/core-auth";
-import { getDefaultProxySettings } from "@azure/core-rest-pipeline";
+import { Pipeline } from "@azure/core-rest-pipeline";
 import { isNodeLike } from "@azure/core-util";
 import type { AbortSignalLike } from "@azure/abort-controller";
 import type {
@@ -27,9 +27,9 @@ import type {
   ServiceGetStatisticsResponseInternal,
   ServiceListContainersSegmentResponseInternal,
 } from "./generatedModels.js";
-import { BlobClient as Service } from "./generated/blobClient.js";
-import type { StoragePipelineOptions, PipelineLike, StorageClientOptions } from "./Pipeline.js";
-import { newPipeline, isPipelineLike } from "./Pipeline.js";
+import { Service } from "./generated/service/service.js";
+import type { StorageClientOptions } from "./Pipeline.js";
+import { isCorePipeline } from "./Pipeline.js";
 import type { ContainerCreateOptions, ContainerDeleteMethodOptions } from "./ContainerClient.js";
 import { ContainerClient } from "./ContainerClient.js";
 import type { WithResponse } from "./utils/utils.common.js";
@@ -72,7 +72,7 @@ import type {
 } from "./generated/src/index.js";
 
 import {
-  StorageServiceProperties as ServiceGetPropertiesResponse,
+  BlobServiceProperties as ServiceGetPropertiesResponse,
   StorageServiceStats as ServiceGetStatisticsResponse,
 } from "./generated/index.js";
 import { ClientOptions } from "@azure-rest/core-client";
@@ -363,6 +363,12 @@ export class BlobServiceClient extends StorageClient {
     }
   }
 
+  constructor(
+    url: string,
+    credential?: Pipeline,
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
+    options?: StorageClientOptions,
+  );
   /**
    * Creates an instance of BlobServiceClient.
    *
@@ -410,7 +416,19 @@ export class BlobServiceClient extends StorageClient {
     credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential,
     /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
     options?: StorageClientOptions,
+  );
+  constructor(
+    url: string,
+    credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential | Pipeline,
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
+    options?: StorageClientOptions,
   ) {
+    if (isCorePipeline(credential)) {
+      super(url, undefined);
+      this.serviceContext = new Service(url, undefined as any, options);
+      (this.serviceContext.pipeline as any) = credential;
+      return;
+    }
     super(url, credential);
     if (isTokenCredential(this.credential)) {
       this.serviceContext = new Service(this.url, this.credential, options);

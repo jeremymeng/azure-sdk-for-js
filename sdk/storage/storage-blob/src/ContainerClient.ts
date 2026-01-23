@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import type { AbortSignalLike } from "@azure/abort-controller";
-import type { RequestBodyType as HttpRequestBody } from "@azure/core-rest-pipeline";
+import type { RequestBodyType as HttpRequestBody, Pipeline } from "@azure/core-rest-pipeline";
 import { getDefaultProxySettings } from "@azure/core-rest-pipeline";
 import { isNodeLike } from "@azure/core-util";
 import type { TokenCredential } from "@azure/core-auth";
@@ -48,7 +48,7 @@ import type {
   ContainerRequestConditions,
   ModifiedAccessConditions,
 } from "./models.js";
-import type { StorageClientOptions } from "./Pipeline.js";
+import { isCorePipeline, type StorageClientOptions } from "./Pipeline.js";
 import type { CommonOptions } from "./StorageClient.js";
 import { StorageClient } from "./StorageClient.js";
 import { tracingClient } from "./utils/tracing.js";
@@ -92,7 +92,7 @@ import type {
   ContainerListBlobHierarchySegmentResponse as ContainerListBlobHierarchySegmentResponseModel,
   ContainerGetAccountInfoHeaders,
 } from "./generated/src/index.js";
-import { FullOperationResponse } from "../../../core/core-client-rest/dist/esm/common.js";
+import { FullOperationResponse } from "@azure-rest/core-client";
 
 /**
  * Options to configure {@link ContainerClient.create} operation.
@@ -661,38 +661,62 @@ export class ContainerClient extends StorageClient {
    *                     "https://myaccount.blob.core.windows.net/mycontainer". You can
    *                     append a SAS if using AnonymousCredential, such as
    *                     "https://myaccount.blob.core.windows.net/mycontainer?sasString".
-   * @param pipeline - Call newPipeline() to create a default
-   *                            pipeline, or provide a customized pipeline.
+   * @param pipeline - to provide a customized pipeline.
    */
   constructor(
     urlOrConnectionString: string,
-    credentialOrContainerName?:
+    pipeline?: Pipeline,
+    // Legacy, no fix for eslint error without breaking. Disable it for this interface.
+    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
+    options?: StorageClientOptions,
+  );
+  constructor(
+    urlOrConnectionString: string,
+    credentialOrPipelineOrContainerName?:
       | string
       | StorageSharedKeyCredential
       | AnonymousCredential
-      | TokenCredential,
+      | TokenCredential
+      | Pipeline,
     // Legacy, no fix for eslint error without breaking. Disable it for this interface.
     /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
     options?: StorageClientOptions,
   ) {
     let url: string;
     options = options || {};
+    if (isCorePipeline(credentialOrPipelineOrContainerName)) {
+      // (url: string, pipeline: Pipeline, options?: StoragePipelineOptions)
+      url = urlOrConnectionString;
+      super(urlOrConnectionString, undefined);
+      this._containerName = this.getContainerNameFromUrl();
+      this.containerContext = new Container(url, undefined as any, options);
+      (this.containerContext as any).pipeline = credentialOrPipelineOrContainerName;
+      return;
+    }
+
     if (
-      (isNodeLike && credentialOrContainerName instanceof StorageSharedKeyCredential) ||
-      credentialOrContainerName instanceof AnonymousCredential ||
-      isTokenCredential(credentialOrContainerName)
+      (isNodeLike && credentialOrPipelineOrContainerName instanceof StorageSharedKeyCredential) ||
+      credentialOrPipelineOrContainerName instanceof AnonymousCredential ||
+      isTokenCredential(credentialOrPipelineOrContainerName)
     ) {
       // (url: string, credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential, options?: StoragePipelineOptions)
+      // The second parameter is a credential.
       url = urlOrConnectionString;
-      super(urlOrConnectionString, credentialOrContainerName);
-    } else if (!credentialOrContainerName && typeof credentialOrContainerName !== "string") {
+      super(urlOrConnectionString, credentialOrPipelineOrContainerName);
+    } else if (
+      !credentialOrPipelineOrContainerName &&
+      typeof credentialOrPipelineOrContainerName !== "string"
+    ) {
       // (url: string, credential?: StorageSharedKeyCredential | AnonymousCredential | TokenCredential, options?: StoragePipelineOptions)
       // The second parameter is undefined. Use anonymous credential.
       url = urlOrConnectionString;
       super(url, new AnonymousCredential());
-    } else if (credentialOrContainerName && typeof credentialOrContainerName === "string") {
+    } else if (
+      credentialOrPipelineOrContainerName &&
+      typeof credentialOrPipelineOrContainerName === "string"
+    ) {
       // (connectionString: string, containerName: string, blobName: string, options?: StoragePipelineOptions)
-      const containerName = credentialOrContainerName;
+      const containerName = credentialOrPipelineOrContainerName;
 
       const extractedCreds = extractConnectionStringParts(urlOrConnectionString);
       if (extractedCreds.kind === "AccountConnString") {
@@ -727,14 +751,9 @@ export class ContainerClient extends StorageClient {
     }
     this._containerName = this.getContainerNameFromUrl();
     if (isTokenCredential(this.credential)) {
-      this.containerContext = new Container(url, this.credential, this._containerName, options);
+      this.containerContext = new Container(url, this.credential, options);
     } else {
-      this.containerContext = new Container(
-        this.url,
-        undefined as any,
-        this._containerName,
-        options,
-      );
+      this.containerContext = new Container(this.url, undefined as any, options);
       if (this.credential instanceof StorageSharedKeyCredential) {
         this.containerContext.pipeline.addPolicy(
           storageSharedKeyCredentialPolicy({
