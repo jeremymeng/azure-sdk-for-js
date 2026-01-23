@@ -17,7 +17,7 @@ import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
 /** The service properties. */
 export interface StorageServiceProperties {
   /** The logging properties. */
-  logging?: Logging;
+  blobAnalyticsLogging?: Logging;
   /** The hour metrics properties. */
   hourMetrics?: Metrics;
   /** The minute metrics properties. */
@@ -34,7 +34,9 @@ export interface StorageServiceProperties {
 
 export function storageServicePropertiesSerializer(item: StorageServiceProperties): any {
   return {
-    logging: !item["logging"] ? item["logging"] : loggingSerializer(item["logging"]),
+    blobAnalyticsLogging: !item["blobAnalyticsLogging"]
+      ? item["blobAnalyticsLogging"]
+      : loggingSerializer(item["blobAnalyticsLogging"]),
     hourMetrics: !item["hourMetrics"]
       ? item["hourMetrics"]
       : metricsSerializer(item["hourMetrics"]),
@@ -54,7 +56,9 @@ export function storageServicePropertiesSerializer(item: StorageServicePropertie
 
 export function storageServicePropertiesDeserializer(item: any): StorageServiceProperties {
   return {
-    logging: !item["logging"] ? item["logging"] : loggingDeserializer(item["logging"]),
+    blobAnalyticsLogging: !item["blobAnalyticsLogging"]
+      ? item["blobAnalyticsLogging"]
+      : loggingDeserializer(item["blobAnalyticsLogging"]),
     hourMetrics: !item["hourMetrics"]
       ? item["hourMetrics"]
       : metricsDeserializer(item["hourMetrics"]),
@@ -382,7 +386,7 @@ export interface ContainerProperties {
   /** Whether to prevent encryption scope override. */
   preventEncryptionScopeOverride?: boolean;
   /** The deleted time of the container. */
-  deletedTime?: Date;
+  deletedOn?: Date;
   /** The remaining retention days of the container. */
   remainingRetentionDays?: number;
   /** Whether immutable storage with versioning is enabled. */
@@ -401,7 +405,7 @@ export function containerPropertiesDeserializer(item: any): ContainerProperties 
     hasLegalHold: item["hasLegalHold"],
     defaultEncryptionScope: item["defaultEncryptionScope"],
     preventEncryptionScopeOverride: item["PreventEncryptionScopeOverride"],
-    deletedTime: !item["deletedTime"] ? item["deletedTime"] : new Date(item["deletedTime"]),
+    deletedOn: !item["deletedOn"] ? item["deletedOn"] : new Date(item["deletedOn"]),
     remainingRetentionDays: item["remainingRetentionDays"],
     isImmutableStorageWithVersioningEnabled: item["IsImmutableStorageWithVersioningEnabled"],
   };
@@ -419,17 +423,17 @@ export type PublicAccessType = "blob" | "container";
 /** Key information */
 export interface KeyInfo {
   /** The date-time the key is active. */
-  start: string;
+  startsOn: string;
   /** The date-time the key expires. */
-  expiry: string;
+  expiresOn: string;
   /** The delegated user tenant id in Azure AD. */
   delegatedUserTid?: string;
 }
 
 export function keyInfoSerializer(item: KeyInfo): any {
   return {
-    start: item["start"],
-    expiry: item["expiry"],
+    startsOn: item["startsOn"],
+    expiresOn: item["expiresOn"],
     delegatedUserTid: item["delegatedUserTid"],
   };
 }
@@ -611,26 +615,26 @@ export function signedIdentifierDeserializer(item: any): SignedIdentifier {
 /** Represents an access policy. */
 export interface AccessPolicy {
   /** The date-time the policy is active. */
-  start: Date;
+  startsOn: Date;
   /** The date-time the policy expires. */
-  expiry: Date;
+  expiresOn: Date;
   /** The permissions for acl the policy. */
-  permission: string;
+  permissions: string;
 }
 
 export function accessPolicySerializer(item: AccessPolicy): any {
   return {
-    start: item["start"].toUTCString(),
-    expiry: item["expiry"].toUTCString(),
-    permission: item["permission"],
+    startsOn: item["startsOn"].toUTCString(),
+    expiresOn: item["expiresOn"].toUTCString(),
+    permissions: item["permissions"],
   };
 }
 
 export function accessPolicyDeserializer(item: any): AccessPolicy {
   return {
-    start: new Date(item["start"]),
-    expiry: new Date(item["expiry"]),
-    permission: item["permission"],
+    startsOn: new Date(item["startsOn"]),
+    expiresOn: new Date(item["expiresOn"]),
+    permissions: item["permissions"],
   };
 }
 
@@ -743,7 +747,7 @@ export function blobNameDeserializer(item: any): BlobName {
 /** The properties of a blob. */
 export interface BlobPropertiesInternal {
   /** The date-time the blob was created in RFC1123 format. */
-  creationTime?: Date;
+  createdOn?: Date;
   /** The date-time the blob was last modified in RFC1123 format. */
   lastModified: Date;
   /** The blob ETag. */
@@ -781,7 +785,7 @@ export interface BlobPropertiesInternal {
   /** The copy progress of the blob. */
   copyProgress?: string;
   /** The copy completion time of the blob. */
-  copyCompletionTime?: Date;
+  copyCompletedOn?: Date;
   /** The copy status description of the blob. */
   copyStatusDescription?: string;
   /** Whether the blob is encrypted on the server. */
@@ -791,7 +795,7 @@ export interface BlobPropertiesInternal {
   /** The name of the destination snapshot. */
   destinationSnapshot?: string;
   /** The time the blob was deleted. */
-  deletedTime?: Date;
+  deletedOn?: Date;
   /** The remaining retention days of the blob. */
   remainingRetentionDays?: number;
   /** The access tier of the blob. */
@@ -805,7 +809,7 @@ export interface BlobPropertiesInternal {
   /** The encryption scope of the blob. */
   encryptionScope?: string;
   /** The access tier change time of the blob. */
-  accessTierChangeTime?: Date;
+  accessTierChangedOn?: Date;
   /** The number of tags for the blob. */
   tagCount?: number;
   /** The expire time of the blob. */
@@ -826,7 +830,7 @@ export interface BlobPropertiesInternal {
 
 export function blobPropertiesInternalDeserializer(item: any): BlobPropertiesInternal {
   return {
-    creationTime: !item["creationTime"] ? item["creationTime"] : new Date(item["creationTime"]),
+    createdOn: !item["createdOn"] ? item["createdOn"] : new Date(item["createdOn"]),
     lastModified: new Date(item["lastModified"]),
     eTag: item["eTag"],
     contentLength: item["contentLength"],
@@ -849,23 +853,23 @@ export function blobPropertiesInternalDeserializer(item: any): BlobPropertiesInt
     copyStatus: item["copyStatus"],
     copySource: item["copySource"],
     copyProgress: item["copyProgress"],
-    copyCompletionTime: !item["copyCompletionTime"]
-      ? item["copyCompletionTime"]
-      : new Date(item["copyCompletionTime"]),
+    copyCompletedOn: !item["copyCompletedOn"]
+      ? item["copyCompletedOn"]
+      : new Date(item["copyCompletedOn"]),
     copyStatusDescription: item["copyStatusDescription"],
     serverEncrypted: item["serverEncrypted"],
     incrementalCopy: item["incrementalCopy"],
     destinationSnapshot: item["destinationSnapshot"],
-    deletedTime: !item["deletedTime"] ? item["deletedTime"] : new Date(item["deletedTime"]),
+    deletedOn: !item["deletedOn"] ? item["deletedOn"] : new Date(item["deletedOn"]),
     remainingRetentionDays: item["remainingRetentionDays"],
     accessTier: item["accessTier"],
     accessTierInferred: item["accessTierInferred"],
     archiveStatus: item["archiveStatus"],
     customerProvidedKeySha256: item["customerProvidedKeySha256"],
     encryptionScope: item["encryptionScope"],
-    accessTierChangeTime: !item["accessTierChangeTime"]
-      ? item["accessTierChangeTime"]
-      : new Date(item["accessTierChangeTime"]),
+    accessTierChangedOn: !item["accessTierChangedOn"]
+      ? item["accessTierChangedOn"]
+      : new Date(item["accessTierChangedOn"]),
     tagCount: item["tagCount"],
     expiresOn: !item["ExpiresOn"] ? item["ExpiresOn"] : new Date(item["ExpiresOn"]),
     isSealed: item["IsSealed"],
