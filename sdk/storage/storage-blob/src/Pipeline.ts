@@ -54,7 +54,7 @@ import {
   StorageBlobLoggingAllowedQueryParameters,
   SDK_VERSION,
 } from "./utils/constants.js";
-import { ClientOptions } from "@azure-rest/core-client";
+import type { ClientOptions } from "@azure-rest/core-client";
 
 // Export following interfaces and types for customers who want to implement their
 // own RequestPolicy or HTTPClient

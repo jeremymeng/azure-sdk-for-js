@@ -17,6 +17,8 @@ import "dotenv/config";
 // Alternatively, logging can be enabled at runtime by calling `setLogLevel("info");`
 // `setLogLevel` can be imported from the `@azure/logger` package
 import { setLogLevel } from "@azure/logger";
+import { ContainerClient } from "../src/index.js";
+import { DefaultAzureCredential } from "@azure/identity";
 setLogLevel("info");
 
 async function main(): Promise<void> {
@@ -39,6 +41,18 @@ async function main(): Promise<void> {
     `https://${account}.blob.core.windows.net${accountSas}`,
     pipeline,
   );
+
+  const container = new ContainerClient("url", new DefaultAzureCredential(), {
+    retryOptions: { maxRetries: 5, retryDelayInMs: 2000, maxRetryDelayInMs: 10000 },
+    proxyOptions: { host: "myproxy", port: 3128 },
+    userAgentOptions: { userAgentPrefix: "ContainerClientSample V1.0.0" },
+    httpClient: undefined,
+    credentials: {
+      scopes: ["audience"],    
+    },
+    // additionalPolicies: [disableKeepAlivePolicy]
+  });
+  await container.create();
 
   // Create a container
   const containerName = `newcontainer${new Date().getTime()}`;

@@ -6,7 +6,8 @@
  * @azsdk-weight 0
  */
 
-import { BlobServiceClient, StorageSharedKeyCredential, newPipeline } from "@azure/storage-blob";
+import { createPipelineFromOptions } from "@azure/core-rest-pipeline";
+import { BlobServiceClient, StorageSharedKeyCredential, newPipeline } from "../src/index.js";
 
 // Load the .env file if it exists
 import "dotenv/config";
@@ -21,11 +22,20 @@ async function main(): Promise<void> {
   const sharedKeyCredential = new StorageSharedKeyCredential(account, accountKey);
 
   // Use sharedKeyCredential, tokenCredential or anonymousCredential to create a pipeline
-  const pipeline = newPipeline(sharedKeyCredential, {
+  const pipeline1 = newPipeline(sharedKeyCredential, {
     // httpClient: MyHTTPClient, // A customized HTTP client implementing IHttpClient interface
     retryOptions: { maxTries: 4 }, // Retry options
     userAgentOptions: { userAgentPrefix: "Sample V1.0.0" }, // Customized telemetry string
   });
+
+  const pipeline = createPipelineFromOptions({
+    retryOptions: { maxRetries: 4 }, // Retry options
+    userAgentOptions: { userAgentPrefix: "Sample V1.0.0" }, // Customized telemetry string
+  });
+  pipeline.addPolicy({
+    name: "storageRetryPolicy",
+    storageRetryP
+  })
 
   // List containers
   const blobServiceClient = new BlobServiceClient(

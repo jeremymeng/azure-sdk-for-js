@@ -21,7 +21,7 @@ import type {
   ListBlobsHierarchySegmentResponse,
   PageRange,
   ClearRange,
-} from "../generated/src/models/index.js";
+} from "../generated-compat/src/models/index.js";
 import {
   DevelopmentConnectionString,
   HeaderConstants,
@@ -942,80 +942,4 @@ export interface HttpResponse {
    * The HTTP status code returned from the service.
    */
   status: number;
-}
-
-/**
- * An object with a _response property that has
- * headers already parsed into a typed object.
- */
-export interface ResponseWithHeaders<Headers> {
-  /**
-   * The underlying HTTP response.
-   */
-  _response: HttpResponse & {
-    /**
-     * The parsed HTTP response headers.
-     */
-    parsedHeaders: Headers;
-  };
-}
-
-/**
- * An object with a _response property that has body
- * and headers already parsed into known types.
- */
-export interface ResponseWithBody<Headers, Body> {
-  /**
-   * The underlying HTTP response.
-   */
-  _response: HttpResponse & {
-    /**
-     * The parsed HTTP response headers.
-     */
-    parsedHeaders: Headers;
-    /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: Body;
-  };
-}
-
-/**
- * An object with a simple _response property.
- */
-export interface ResponseLike {
-  /**
-   * The underlying HTTP response.
-   */
-  _response: HttpResponse;
-}
-
-/**
- * A type that represents an operation result with a known _response property.
- */
-export type WithResponse<T, Headers = undefined, Body = undefined> = T &
-  (Body extends object
-    ? ResponseWithBody<Headers, Body>
-    : Headers extends object
-      ? ResponseWithHeaders<Headers>
-      : ResponseLike);
-
-/**
- * A typesafe helper for ensuring that a given response object has
- * the original _response attached.
- * @param response - A response object from calling a client operation
- * @returns The same object, but with known _response property
- */
-export function assertResponse<T extends object, Headers = undefined, Body = undefined>(
-  response: T,
-): WithResponse<T, Headers, Body> {
-  if (`_response` in response) {
-    return response as WithResponse<T, Headers, Body>;
-  }
-
-  throw new TypeError(`Unexpected response object ${response}`);
 }

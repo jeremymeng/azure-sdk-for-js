@@ -2,22 +2,22 @@
 // Licensed under the MIT License.
 import type { TokenCredential } from "@azure/core-auth";
 import { isTokenCredential } from "@azure/core-auth";
-import { Pipeline } from "@azure/core-rest-pipeline";
+import { getDefaultProxySettings, type Pipeline } from "@azure/core-rest-pipeline";
 import { isNodeLike } from "@azure/core-util";
 import type { AbortSignalLike } from "@azure/abort-controller";
 import type {
   ServiceGetUserDelegationKeyHeaders,
-  ContainerCreateResponse,
-  ContainerDeleteResponse,
+  // ContainerCreateResponse,
+  // ContainerDeleteResponse,
   // ServiceGetPropertiesResponse,
   BlobServiceProperties,
-  ServiceSetPropertiesResponse,
+  // ServiceSetPropertiesResponse,
   // ServiceGetStatisticsResponse,
-  ServiceGetAccountInfoResponse,
-  ServiceListContainersSegmentResponse,
+  // ServiceGetAccountInfoResponse,
+  // ServiceListContainersSegmentResponse,
   ContainerItem,
   UserDelegationKeyModel,
-  ContainerUndeleteResponse,
+  // ContainerUndeleteResponse,
   FilterBlobSegmentModel,
   ServiceFilterBlobsHeaders,
   LeaseAccessConditions,
@@ -32,7 +32,6 @@ import type { StorageClientOptions } from "./Pipeline.js";
 import { isCorePipeline } from "./Pipeline.js";
 import type { ContainerCreateOptions, ContainerDeleteMethodOptions } from "./ContainerClient.js";
 import { ContainerClient } from "./ContainerClient.js";
-import type { WithResponse } from "./utils/utils.common.js";
 import {
   appendToURLPath,
   appendToURLQuery,
@@ -46,7 +45,7 @@ import {
   storageSharedKeyCredentialPolicy,
 } from "@azure/storage-common";
 import type { PageSettings, PagedAsyncIterableIterator } from "@azure/core-paging";
-import { truncatedISO8061Date, assertResponse } from "./utils/utils.common.js";
+import { truncatedISO8061Date } from "./utils/utils.common.js";
 import { tracingClient } from "./utils/tracing.js";
 import { BlobBatchClient } from "./BlobBatchClient.js";
 import type { CommonOptions } from "./StorageClient.js";
@@ -59,19 +58,20 @@ import {
   generateAccountSASQueryParametersInternal,
 } from "./sas/AccountSASSignatureValues.js";
 import { AccountSASServices } from "./sas/AccountSASServices.js";
-import type {
-  ContainerRestoreHeaders,
-  ListContainersIncludeType,
-  ServiceFilterBlobsResponse,
-  ServiceGetAccountInfoHeaders,
-  ServiceGetPropertiesHeaders,
-  ServiceGetStatisticsHeaders,
-  ServiceGetUserDelegationKeyResponse as ServiceGetUserDelegationKeyResponseModel,
-  ServiceListContainersSegmentHeaders,
-  ServiceSetPropertiesHeaders,
-} from "./generated/src/index.js";
+// import type {
+//   // ContainerRestoreHeaders,
+//   // ListContainersIncludeType,
+//   ServiceFilterBlobsResponse,
+//   ServiceGetAccountInfoHeaders,
+//   ServiceGetPropertiesHeaders,
+//   ServiceGetStatisticsHeaders,
+//   ServiceGetUserDelegationKeyResponse as ServiceGetUserDelegationKeyResponseModel,
+//   ServiceListContainersSegmentHeaders,
+//   ServiceSetPropertiesHeaders,
+// } from "./generated/src/index.js";
 
 import {
+  ListContainersIncludeType,
   BlobServiceProperties as ServiceGetPropertiesResponse,
   StorageServiceStats as ServiceGetStatisticsResponse,
 } from "./generated/index.js";
@@ -225,24 +225,6 @@ export interface ServiceFindBlobByTagsOptions extends CommonOptions {
    */
   abortSignal?: AbortSignalLike;
 }
-
-/**
- * The response of {@link BlobServiceClient.findBlobsByTags} operation.
- */
-export type ServiceFindBlobsByTagsSegmentResponse = WithResponse<
-  FilterBlobSegment & ServiceFilterBlobsHeaders,
-  ServiceFilterBlobsHeaders,
-  FilterBlobSegmentModel
->;
-
-/**
- * Contains response data for the {@link getUserDelegationKey} operation.
- */
-export declare type ServiceGetUserDelegationKeyResponse = WithResponse<
-  UserDelegationKey & ServiceGetUserDelegationKeyHeaders,
-  ServiceGetUserDelegationKeyHeaders,
-  UserDelegationKeyModel
->;
 
 /**
  * Options to configure {@link BlobServiceClient.undeleteContainer} operation.
@@ -604,12 +586,10 @@ export class BlobServiceClient extends StorageClient {
       "BlobServiceClient-setProperties",
       options,
       async (updatedOptions) => {
-        return assertResponse<ServiceSetPropertiesHeaders, ServiceSetPropertiesHeaders>(
-          await this.serviceContext.setProperties(properties, {
-            abortSignal: options.abortSignal,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        );
+        return await this.serviceContext.setProperties(properties, {
+          abortSignal: options.abortSignal,
+          tracingOptions: updatedOptions.tracingOptions,
+        });
       },
     );
   }
@@ -723,15 +703,15 @@ export class BlobServiceClient extends StorageClient {
       "BlobServiceClient-findBlobsByTagsSegment",
       options,
       async (updatedOptions) => {
-        const response = await this.serviceContext.filterBlobs({
+        const response = await this.serviceContext.findBlobsByTags(tagFilterSqlExpression, {
           abortSignal: options.abortSignal,
-          where: tagFilterSqlExpression,
+          // where: tagFilterSqlExpression,
           marker,
           maxresults: options.maxPageSize,
           tracingOptions: updatedOptions.tracingOptions,
         });
 
-        const wrappedResponse: ServiceFindBlobsByTagsSegmentResponse = {
+        const wrappedResponse = {
           ...response,
           blobs: response.blobs.map((blob) => {
             let tagValue = "";

@@ -15,23 +15,23 @@ import {
 } from "@azure/storage-common";
 import { Container } from "./generated/container/container.js";
 import type {
-  BlobDeleteResponse,
+  // BlobDeleteResponse,
   BlobPrefix,
   BlobProperties,
-  BlockBlobUploadResponse,
-  ContainerCreateResponse,
-  ContainerDeleteResponse,
+  // BlockBlobUploadResponse,
+  // ContainerCreateResponse,
+  // ContainerDeleteResponse,
   ContainerEncryptionScope,
   ContainerFilterBlobsHeaders,
   ContainerFilterBlobsResponse,
   ContainerGetAccessPolicyHeaders,
   ContainerGetAccessPolicyResponseModel,
-  ContainerGetAccountInfoResponse,
-  ContainerGetPropertiesResponse,
+  // ContainerGetAccountInfoResponse,
+  // ContainerGetPropertiesResponse,
   ContainerListBlobFlatSegmentHeaders,
   ContainerListBlobHierarchySegmentHeaders,
-  ContainerSetAccessPolicyResponse,
-  ContainerSetMetadataResponse,
+  // ContainerSetAccessPolicyResponse,
+  // ContainerSetMetadataResponse,
   FilterBlobItem,
   FilterBlobSegment,
   FilterBlobSegmentModel,
@@ -663,13 +663,7 @@ export class ContainerClient extends StorageClient {
    *                     "https://myaccount.blob.core.windows.net/mycontainer?sasString".
    * @param pipeline - to provide a customized pipeline.
    */
-  constructor(
-    urlOrConnectionString: string,
-    pipeline?: Pipeline,
-    // Legacy, no fix for eslint error without breaking. Disable it for this interface.
-    /* eslint-disable-next-line @azure/azure-sdk/ts-naming-options*/
-    options?: StorageClientOptions,
-  );
+  constructor(url: string, pipeline?: Pipeline);
   constructor(
     urlOrConnectionString: string,
     credentialOrPipelineOrContainerName?:
