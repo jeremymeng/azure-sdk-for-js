@@ -25,7 +25,7 @@
  * @summary authenticate with the storage service using Azure Active Directory
  **/
 
-const { BlobServiceClient } = require("@azure/storage-blob");
+const { BlobServiceClient } = require("../../../dist/commonjs");
 const { DefaultAzureCredential } = require("@azure/identity");
 
 // Load the .env file if it exists
@@ -52,6 +52,9 @@ async function main() {
     `https://${account}.blob.core.windows.net`,
     new DefaultAzureCredential()
   );
+
+  const properties = await blobServiceClient.getProperties();
+  console.log("Service properties:", properties);
 
   // Create a container
   const containerName = `newcontainer${new Date().getTime()}`;

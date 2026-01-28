@@ -64,19 +64,17 @@ export function _getAccountInfoSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _getAccountInfoDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -125,20 +123,18 @@ export function _listBlobHierarchySegmentSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _listBlobHierarchySegmentDeserialize(
@@ -193,20 +189,18 @@ export function _listBlobFlatSegmentSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _listBlobFlatSegmentDeserialize(
@@ -253,36 +247,34 @@ export function _changeLeaseSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        "x-ms-lease-id": leaseId,
-        "x-ms-proposed-lease-id": proposedLeaseId,
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        action: "change",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      "x-ms-lease-id": leaseId,
+      "x-ms-proposed-lease-id": proposedLeaseId,
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      action: "change",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _changeLeaseDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -322,37 +314,35 @@ export function _breakLeaseSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.breakPeriod !== undefined
-          ? { "x-ms-lease-break-period": options?.breakPeriod }
-          : {}),
-        action: "break",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.breakPeriod !== undefined
+        ? { "x-ms-lease-break-period": options?.breakPeriod }
+        : {}),
+      action: "break",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _breakLeaseDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -391,35 +381,33 @@ export function _renewLeaseSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        "x-ms-lease-id": leaseId,
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        action: "renew",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      "x-ms-lease-id": leaseId,
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      action: "renew",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _renewLeaseDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -459,35 +447,33 @@ export function _releaseLeaseSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        "x-ms-lease-id": leaseId,
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        action: "release",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      "x-ms-lease-id": leaseId,
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      action: "release",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _releaseLeaseDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -527,37 +513,35 @@ export function _acquireLeaseSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        "x-ms-lease-duration": duration,
-        ...(options?.proposedLeaseId !== undefined
-          ? { "x-ms-proposed-lease-id": options?.proposedLeaseId }
-          : {}),
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        action: "acquire",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      "x-ms-lease-duration": duration,
+      ...(options?.proposedLeaseId !== undefined
+        ? { "x-ms-proposed-lease-id": options?.proposedLeaseId }
+        : {}),
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      action: "acquire",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _acquireLeaseDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -604,20 +588,18 @@ export function _filterBlobsSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _filterBlobsDeserialize(
@@ -662,22 +644,20 @@ export function _submitBatchSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .post({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "multipart/mixed",
-      headers: {
-        "Content-Length": contentLength,
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        accept: "multipart/mixed",
-        ...options.requestOptions?.headers,
-      },
-      body: _submitBatchRequestSerializer(body),
-    });
+  return context.path(path).post({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "multipart/mixed",
+    headers: {
+      "Content-Length": contentLength,
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      accept: "multipart/mixed",
+      ...options.requestOptions?.headers,
+    },
+    body: _submitBatchRequestSerializer(body),
+  });
 }
 
 export async function _submitBatchDeserialize(result: PathUncheckedResponse): Promise<{
@@ -727,23 +707,21 @@ export function _renameSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        "x-ms-source-container-name": sourceContainerName,
-        ...(options?.sourceLeaseId !== undefined
-          ? { "x-ms-source-lease-id": options?.sourceLeaseId }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      "x-ms-source-container-name": sourceContainerName,
+      ...(options?.sourceLeaseId !== undefined
+        ? { "x-ms-source-lease-id": options?.sourceLeaseId }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _renameDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -782,25 +760,23 @@ export function _restoreSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.deletedContainerName !== undefined
-          ? { "x-ms-deleted-container-name": options?.deletedContainerName }
-          : {}),
-        ...(options?.deletedContainerVersion !== undefined
-          ? { "x-ms-deleted-container-version": options?.deletedContainerVersion }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.deletedContainerName !== undefined
+        ? { "x-ms-deleted-container-name": options?.deletedContainerName }
+        : {}),
+      ...(options?.deletedContainerVersion !== undefined
+        ? { "x-ms-deleted-container-version": options?.deletedContainerVersion }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _restoreDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -839,36 +815,34 @@ export function _setAccessPolicySend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.access !== undefined ? { "x-ms-blob-public-access": options?.access } : {}),
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-      body: signedIdentifierArraySerializer(containerAcl),
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.access !== undefined ? { "x-ms-blob-public-access": options?.access } : {}),
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+    body: signedIdentifierArraySerializer(containerAcl),
+  });
 }
 
 export async function _setAccessPolicyDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -907,21 +881,19 @@ export function _getAccessPolicySend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _getAccessPolicyDeserialize(
@@ -961,28 +933,26 @@ export function _setMetadataSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _setMetadataDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -1020,34 +990,32 @@ export function _$deleteSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .delete({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).delete({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _$deleteDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -1090,20 +1058,18 @@ export function _getPropertiesSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _getPropertiesDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -1141,27 +1107,25 @@ export function _createSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
-        ...(options?.access !== undefined ? { "x-ms-blob-public-access": options?.access } : {}),
-        ...(options?.defaultEncryptionScope !== undefined
-          ? { "x-ms-default-encryption-scope": options?.defaultEncryptionScope }
-          : {}),
-        ...(options?.preventEncryptionScopeOverride !== undefined
-          ? { "x-ms-deny-encryption-scope-override": options?.preventEncryptionScopeOverride }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
+      ...(options?.access !== undefined ? { "x-ms-blob-public-access": options?.access } : {}),
+      ...(options?.defaultEncryptionScope !== undefined
+        ? { "x-ms-default-encryption-scope": options?.defaultEncryptionScope }
+        : {}),
+      ...(options?.preventEncryptionScopeOverride !== undefined
+        ? { "x-ms-deny-encryption-scope-override": options?.preventEncryptionScopeOverride }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _createDeserialize(result: PathUncheckedResponse): Promise<void> {

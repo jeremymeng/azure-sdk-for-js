@@ -6,7 +6,13 @@
  * @azsdk-weight 0
  */
 
-import { BlobServiceClient, StorageSharedKeyCredential, newPipeline } from "@azure/storage-blob";
+import {
+  BlobServiceClient,
+  Pipeline,
+  StorageRetryPolicyFactory,
+  StorageSharedKeyCredential,
+  newPipeline,
+} from "../src/index.js";
 
 // Load the .env file if it exists
 import "dotenv/config";

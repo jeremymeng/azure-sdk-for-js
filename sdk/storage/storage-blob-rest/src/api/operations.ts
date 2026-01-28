@@ -65,20 +65,18 @@ export function _filterBlobsSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _filterBlobsDeserialize(
@@ -122,22 +120,20 @@ export function _submitBatchSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .post({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "multipart/mixed",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        "Content-Length": contentLength,
-        accept: "multipart/mixed",
-        ...options.requestOptions?.headers,
-      },
-      body: _submitBatchRequestSerializer(body),
-    });
+  return context.path(path).post({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "multipart/mixed",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      "Content-Length": contentLength,
+      accept: "multipart/mixed",
+      ...options.requestOptions?.headers,
+    },
+    body: _submitBatchRequestSerializer(body),
+  });
 }
 
 export async function _submitBatchDeserialize(result: PathUncheckedResponse): Promise<{
@@ -185,19 +181,17 @@ export function _getAccountInfoSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _getAccountInfoDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -235,21 +229,19 @@ export function _getUserDelegationKeySend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .post({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-      body: keyInfoSerializer(keyInfo),
-    });
+  return context.path(path).post({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+    body: keyInfoSerializer(keyInfo),
+  });
 }
 
 export async function _getUserDelegationKeyDeserialize(
@@ -297,20 +289,18 @@ export function _listContainersSegmentSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _listContainersSegmentDeserialize(
@@ -354,20 +344,18 @@ export function _getStatisticsSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _getStatisticsDeserialize(
@@ -406,20 +394,18 @@ export function _getPropertiesSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _getPropertiesDeserialize(
@@ -459,20 +445,18 @@ export function _setPropertiesSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-      body: storageServicePropertiesSerializer(storageServiceProperties),
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+    body: storageServicePropertiesSerializer(storageServiceProperties),
+  });
 }
 
 export async function _setPropertiesDeserialize(result: PathUncheckedResponse): Promise<void> {

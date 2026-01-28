@@ -27,9 +27,8 @@ import type {
   ServiceGetStatisticsResponseInternal,
   ServiceListContainersSegmentResponseInternal,
 } from "./generatedModels.js";
-import type { Service } from "./generated/src/operationsInterfaces/index.js";
 import type { StoragePipelineOptions, PipelineLike } from "./Pipeline.js";
-import { newPipeline, isPipelineLike } from "./Pipeline.js";
+import { newPipeline, isPipelineLike, getCoreClientOptions } from "./Pipeline.js";
 import type { ContainerCreateOptions, ContainerDeleteMethodOptions } from "./ContainerClient.js";
 import { ContainerClient } from "./ContainerClient.js";
 import type { WithResponse } from "./utils/utils.common.js";
@@ -69,6 +68,8 @@ import type {
   ServiceListContainersSegmentHeaders,
   ServiceSetPropertiesHeaders,
 } from "./generated/src/index.js";
+
+import { BlobClient as Service } from "./storage-blob-rest/index.js"
 
 /**
  * Options to configure the {@link BlobServiceClient.getProperties} operation.
@@ -307,7 +308,7 @@ export class BlobServiceClient extends StorageClient {
   /**
    * serviceContext provided by protocol layer.
    */
-  private serviceContext: Service;
+  private readonly client: Service;
 
   /**
    *
@@ -439,7 +440,10 @@ export class BlobServiceClient extends StorageClient {
       pipeline = newPipeline(new AnonymousCredential(), options);
     }
     super(url, pipeline);
-    this.serviceContext = this.storageClientContext.service;
+    const credential = {} as StorageSharedKeyCredential | AnonymousCredential | TokenCredential;
+    this.client = new Service(this.url, credential, getCoreClientOptions(pipeline));
+
+    console.log(`client: ${this.client}`); // For debugging purpose only
   }
 
   /**
@@ -575,8 +579,9 @@ export class BlobServiceClient extends StorageClient {
       "BlobServiceClient-getProperties",
       options,
       async (updatedOptions) => {
+        
         return assertResponse<ServiceGetPropertiesResponseInternal, ServiceGetPropertiesHeaders>(
-          await this.serviceContext.getProperties({
+          await this.client.getProperties({
             abortSignal: options.abortSignal,
             tracingOptions: updatedOptions.tracingOptions,
           }),
@@ -603,7 +608,7 @@ export class BlobServiceClient extends StorageClient {
       options,
       async (updatedOptions) => {
         return assertResponse<ServiceSetPropertiesHeaders, ServiceSetPropertiesHeaders>(
-          await this.serviceContext.setProperties(properties, {
+          await this.client.setProperties(properties, {
             abortSignal: options.abortSignal,
             tracingOptions: updatedOptions.tracingOptions,
           }),
@@ -629,7 +634,7 @@ export class BlobServiceClient extends StorageClient {
       options,
       async (updatedOptions) => {
         return assertResponse<ServiceGetStatisticsResponseInternal, ServiceGetStatisticsHeaders>(
-          await this.serviceContext.getStatistics({
+          await this.client.getStatistics({
             abortSignal: options.abortSignal,
             tracingOptions: updatedOptions.tracingOptions,
           }),
@@ -656,7 +661,7 @@ export class BlobServiceClient extends StorageClient {
       options,
       async (updatedOptions) => {
         return assertResponse<ServiceGetAccountInfoHeaders, ServiceGetAccountInfoHeaders>(
-          await this.serviceContext.getAccountInfo({
+          await this.client.getAccountInfo({
             abortSignal: options.abortSignal,
             tracingOptions: updatedOptions.tracingOptions,
           }),
@@ -691,7 +696,7 @@ export class BlobServiceClient extends StorageClient {
           ServiceListContainersSegmentResponseInternal,
           ServiceListContainersSegmentHeaders
         >(
-          await this.serviceContext.listContainersSegment({
+          await this.client.listContainersSegment({
             abortSignal: options.abortSignal,
             marker,
             ...options,
@@ -735,7 +740,7 @@ export class BlobServiceClient extends StorageClient {
           ServiceFilterBlobsHeaders,
           FilterBlobSegmentModel
         >(
-          await this.serviceContext.filterBlobs({
+          await this.client.filterBlobs({
             abortSignal: options.abortSignal,
             where: tagFilterSqlExpression,
             marker,
@@ -1112,7 +1117,7 @@ export class BlobServiceClient extends StorageClient {
           ServiceGetUserDelegationKeyHeaders,
           UserDelegationKeyModel
         >(
-          await this.serviceContext.getUserDelegationKey(
+          await this.client.getUserDelegationKey(
             {
               startsOn: truncatedISO8061Date(startsOn, false),
               expiresOn: truncatedISO8061Date(expiresOn, false),

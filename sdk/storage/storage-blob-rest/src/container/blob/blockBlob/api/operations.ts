@@ -49,48 +49,46 @@ export function _querySend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .post({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.encryptionKey !== undefined
-          ? { "x-ms-encryption-key": options?.encryptionKey }
-          : {}),
-        ...(options?.encryptionKeySha256 !== undefined
-          ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
-          : {}),
-        ...(options?.encryptionAlgorithm !== undefined
-          ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
-          : {}),
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifNoneMatch !== undefined ? { "If-None-Match": options?.ifNoneMatch } : {}),
-        ...(options?.ifMatch !== undefined ? { "If-Match": options?.ifMatch } : {}),
-        ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
-        accept: "application/octet-stream",
-        ...options.requestOptions?.headers,
-      },
-      body: queryRequestSerializer(queryRequest),
-    });
+  return context.path(path).post({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.encryptionKey !== undefined
+        ? { "x-ms-encryption-key": options?.encryptionKey }
+        : {}),
+      ...(options?.encryptionKeySha256 !== undefined
+        ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
+        : {}),
+      ...(options?.encryptionAlgorithm !== undefined
+        ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
+        : {}),
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifNoneMatch !== undefined ? { "If-None-Match": options?.ifNoneMatch } : {}),
+      ...(options?.ifMatch !== undefined ? { "If-Match": options?.ifMatch } : {}),
+      ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
+      accept: "application/octet-stream",
+      ...options.requestOptions?.headers,
+    },
+    body: queryRequestSerializer(queryRequest),
+  });
 }
 
 export async function _queryDeserialize(result: PathUncheckedResponse): Promise<Uint8Array> {
@@ -134,22 +132,20 @@ export function _getBlockListSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .get({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
-        accept: "application/xml",
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).get({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
+      accept: "application/xml",
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _getBlockListDeserialize(result: PathUncheckedResponse): Promise<BlockList> {
@@ -190,100 +186,98 @@ export function _commitBlockListSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.blobCacheControl !== undefined
-          ? { "x-ms-blob-cache-control": options?.blobCacheControl }
-          : {}),
-        ...(options?.blobContentType !== undefined
-          ? { "x-ms-blob-content-type": options?.blobContentType }
-          : {}),
-        ...(options?.blobContentEncoding !== undefined
-          ? { "x-ms-blob-content-encoding": options?.blobContentEncoding }
-          : {}),
-        ...(options?.blobContentLanguage !== undefined
-          ? { "x-ms-blob-content-language": options?.blobContentLanguage }
-          : {}),
-        ...(options?.blobContentMd5 !== undefined
-          ? {
-              "x-ms-blob-content-md5": !options?.blobContentMd5
-                ? options?.blobContentMd5
-                : uint8ArrayToString(options?.blobContentMd5, "base64"),
-            }
-          : {}),
-        ...(options?.transactionalContentMD5 !== undefined
-          ? {
-              "Content-MD5": !options?.transactionalContentMD5
-                ? options?.transactionalContentMD5
-                : uint8ArrayToString(options?.transactionalContentMD5, "base64"),
-            }
-          : {}),
-        ...(options?.transactionalContentCrc64 !== undefined
-          ? {
-              "x-ms-content-crc64": !options?.transactionalContentCrc64
-                ? options?.transactionalContentCrc64
-                : uint8ArrayToString(options?.transactionalContentCrc64, "base64"),
-            }
-          : {}),
-        ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.blobContentDisposition !== undefined
-          ? { "x-ms-blob-content-disposition": options?.blobContentDisposition }
-          : {}),
-        ...(options?.encryptionKey !== undefined
-          ? { "x-ms-encryption-key": options?.encryptionKey }
-          : {}),
-        ...(options?.encryptionKeySha256 !== undefined
-          ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
-          : {}),
-        ...(options?.encryptionAlgorithm !== undefined
-          ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
-          : {}),
-        ...(options?.encryptionScope !== undefined
-          ? { "x-ms-encryption-scope": options?.encryptionScope }
-          : {}),
-        ...(options?.tier !== undefined ? { "x-ms-access-tier": options?.tier } : {}),
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifNoneMatch !== undefined ? { "If-None-Match": options?.ifNoneMatch } : {}),
-        ...(options?.ifMatch !== undefined ? { "If-Match": options?.ifMatch } : {}),
-        ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
-        ...(options?.blobTagsString !== undefined ? { "x-ms-tags": options?.blobTagsString } : {}),
-        ...(options?.immutabilityPolicyExpiry !== undefined
-          ? {
-              "x-ms-immutability-policy-until-date": !options?.immutabilityPolicyExpiry
-                ? options?.immutabilityPolicyExpiry
-                : options?.immutabilityPolicyExpiry.toUTCString(),
-            }
-          : {}),
-        ...(options?.immutabilityPolicyMode !== undefined
-          ? { "x-ms-immutability-policy-mode": options?.immutabilityPolicyMode }
-          : {}),
-        ...(options?.legalHold !== undefined ? { "x-ms-legal-hold": options?.legalHold } : {}),
-        ...options.requestOptions?.headers,
-      },
-      body: blockLookupListSerializer(blocks),
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.blobCacheControl !== undefined
+        ? { "x-ms-blob-cache-control": options?.blobCacheControl }
+        : {}),
+      ...(options?.blobContentType !== undefined
+        ? { "x-ms-blob-content-type": options?.blobContentType }
+        : {}),
+      ...(options?.blobContentEncoding !== undefined
+        ? { "x-ms-blob-content-encoding": options?.blobContentEncoding }
+        : {}),
+      ...(options?.blobContentLanguage !== undefined
+        ? { "x-ms-blob-content-language": options?.blobContentLanguage }
+        : {}),
+      ...(options?.blobContentMd5 !== undefined
+        ? {
+            "x-ms-blob-content-md5": !options?.blobContentMd5
+              ? options?.blobContentMd5
+              : uint8ArrayToString(options?.blobContentMd5, "base64"),
+          }
+        : {}),
+      ...(options?.transactionalContentMD5 !== undefined
+        ? {
+            "Content-MD5": !options?.transactionalContentMD5
+              ? options?.transactionalContentMD5
+              : uint8ArrayToString(options?.transactionalContentMD5, "base64"),
+          }
+        : {}),
+      ...(options?.transactionalContentCrc64 !== undefined
+        ? {
+            "x-ms-content-crc64": !options?.transactionalContentCrc64
+              ? options?.transactionalContentCrc64
+              : uint8ArrayToString(options?.transactionalContentCrc64, "base64"),
+          }
+        : {}),
+      ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.blobContentDisposition !== undefined
+        ? { "x-ms-blob-content-disposition": options?.blobContentDisposition }
+        : {}),
+      ...(options?.encryptionKey !== undefined
+        ? { "x-ms-encryption-key": options?.encryptionKey }
+        : {}),
+      ...(options?.encryptionKeySha256 !== undefined
+        ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
+        : {}),
+      ...(options?.encryptionAlgorithm !== undefined
+        ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
+        : {}),
+      ...(options?.encryptionScope !== undefined
+        ? { "x-ms-encryption-scope": options?.encryptionScope }
+        : {}),
+      ...(options?.tier !== undefined ? { "x-ms-access-tier": options?.tier } : {}),
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifNoneMatch !== undefined ? { "If-None-Match": options?.ifNoneMatch } : {}),
+      ...(options?.ifMatch !== undefined ? { "If-Match": options?.ifMatch } : {}),
+      ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
+      ...(options?.blobTagsString !== undefined ? { "x-ms-tags": options?.blobTagsString } : {}),
+      ...(options?.immutabilityPolicyExpiry !== undefined
+        ? {
+            "x-ms-immutability-policy-until-date": !options?.immutabilityPolicyExpiry
+              ? options?.immutabilityPolicyExpiry
+              : options?.immutabilityPolicyExpiry.toUTCString(),
+          }
+        : {}),
+      ...(options?.immutabilityPolicyMode !== undefined
+        ? { "x-ms-immutability-policy-mode": options?.immutabilityPolicyMode }
+        : {}),
+      ...(options?.legalHold !== undefined ? { "x-ms-legal-hold": options?.legalHold } : {}),
+      ...options.requestOptions?.headers,
+    },
+    body: blockLookupListSerializer(blocks),
+  });
 }
 
 export async function _commitBlockListDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -327,86 +321,82 @@ export function _stageBlockFromUrlSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/xml",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        "Content-Length": contentLength,
-        "x-ms-copy-source": sourceUrl,
-        ...(options?.sourceRange !== undefined
-          ? { "x-ms-source-range": options?.sourceRange }
-          : {}),
-        ...(options?.sourceContentMd5 !== undefined
-          ? {
-              "x-ms-source-content-md5": !options?.sourceContentMd5
-                ? options?.sourceContentMd5
-                : uint8ArrayToString(options?.sourceContentMd5, "base64"),
-            }
-          : {}),
-        ...(options?.sourceContentCrc64 !== undefined
-          ? {
-              "x-ms-source-content-crc64": !options?.sourceContentCrc64
-                ? options?.sourceContentCrc64
-                : uint8ArrayToString(options?.sourceContentCrc64, "base64"),
-            }
-          : {}),
-        ...(options?.encryptionKey !== undefined
-          ? { "x-ms-encryption-key": options?.encryptionKey }
-          : {}),
-        ...(options?.encryptionKeySha256 !== undefined
-          ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
-          : {}),
-        ...(options?.encryptionAlgorithm !== undefined
-          ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
-          : {}),
-        ...(options?.encryptionScope !== undefined
-          ? { "x-ms-encryption-scope": options?.encryptionScope }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.sourceIfModifiedSince !== undefined
-          ? {
-              "x-ms-source-if-modified-since": !options?.sourceIfModifiedSince
-                ? options?.sourceIfModifiedSince
-                : options?.sourceIfModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.sourceIfUnmodifiedSince !== undefined
-          ? {
-              "x-ms-source-if-unmodified-since": !options?.sourceIfUnmodifiedSince
-                ? options?.sourceIfUnmodifiedSince
-                : options?.sourceIfUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.sourceIfMatch !== undefined
-          ? { "x-ms-source-if-match": options?.sourceIfMatch }
-          : {}),
-        ...(options?.sourceIfNoneMatch !== undefined
-          ? { "x-ms-source-if-none-match": options?.sourceIfNoneMatch }
-          : {}),
-        ...(options?.copySourceAuthorization !== undefined
-          ? { "x-ms-copy-source-authorization": options?.copySourceAuthorization }
-          : {}),
-        ...(options?.fileRequestIntent !== undefined
-          ? { "x-ms-file-request-intent": options?.fileRequestIntent }
-          : {}),
-        ...(options?.sourceEncryptionKey !== undefined
-          ? { "x-ms-source-encryption-key": options?.sourceEncryptionKey }
-          : {}),
-        ...(options?.sourceEncryptionKeySha256 !== undefined
-          ? { "x-ms-source-encryption-key-sha256": options?.sourceEncryptionKeySha256 }
-          : {}),
-        ...(options?.sourceEncryptionAlgorithm !== undefined
-          ? { "x-ms-source-encryption-algorithm": options?.sourceEncryptionAlgorithm }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/xml",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      "Content-Length": contentLength,
+      "x-ms-copy-source": sourceUrl,
+      ...(options?.sourceRange !== undefined ? { "x-ms-source-range": options?.sourceRange } : {}),
+      ...(options?.sourceContentMd5 !== undefined
+        ? {
+            "x-ms-source-content-md5": !options?.sourceContentMd5
+              ? options?.sourceContentMd5
+              : uint8ArrayToString(options?.sourceContentMd5, "base64"),
+          }
+        : {}),
+      ...(options?.sourceContentCrc64 !== undefined
+        ? {
+            "x-ms-source-content-crc64": !options?.sourceContentCrc64
+              ? options?.sourceContentCrc64
+              : uint8ArrayToString(options?.sourceContentCrc64, "base64"),
+          }
+        : {}),
+      ...(options?.encryptionKey !== undefined
+        ? { "x-ms-encryption-key": options?.encryptionKey }
+        : {}),
+      ...(options?.encryptionKeySha256 !== undefined
+        ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
+        : {}),
+      ...(options?.encryptionAlgorithm !== undefined
+        ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
+        : {}),
+      ...(options?.encryptionScope !== undefined
+        ? { "x-ms-encryption-scope": options?.encryptionScope }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.sourceIfModifiedSince !== undefined
+        ? {
+            "x-ms-source-if-modified-since": !options?.sourceIfModifiedSince
+              ? options?.sourceIfModifiedSince
+              : options?.sourceIfModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.sourceIfUnmodifiedSince !== undefined
+        ? {
+            "x-ms-source-if-unmodified-since": !options?.sourceIfUnmodifiedSince
+              ? options?.sourceIfUnmodifiedSince
+              : options?.sourceIfUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.sourceIfMatch !== undefined
+        ? { "x-ms-source-if-match": options?.sourceIfMatch }
+        : {}),
+      ...(options?.sourceIfNoneMatch !== undefined
+        ? { "x-ms-source-if-none-match": options?.sourceIfNoneMatch }
+        : {}),
+      ...(options?.copySourceAuthorization !== undefined
+        ? { "x-ms-copy-source-authorization": options?.copySourceAuthorization }
+        : {}),
+      ...(options?.fileRequestIntent !== undefined
+        ? { "x-ms-file-request-intent": options?.fileRequestIntent }
+        : {}),
+      ...(options?.sourceEncryptionKey !== undefined
+        ? { "x-ms-source-encryption-key": options?.sourceEncryptionKey }
+        : {}),
+      ...(options?.sourceEncryptionKeySha256 !== undefined
+        ? { "x-ms-source-encryption-key-sha256": options?.sourceEncryptionKeySha256 }
+        : {}),
+      ...(options?.sourceEncryptionAlgorithm !== undefined
+        ? { "x-ms-source-encryption-algorithm": options?.sourceEncryptionAlgorithm }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _stageBlockFromUrlDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -452,54 +442,52 @@ export function _stageBlockSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/octet-stream",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        "Content-Length": contentLength,
-        ...(options?.transactionalContentMD5 !== undefined
-          ? {
-              "Content-MD5": !options?.transactionalContentMD5
-                ? options?.transactionalContentMD5
-                : uint8ArrayToString(options?.transactionalContentMD5, "base64"),
-            }
-          : {}),
-        ...(options?.transactionalContentCrc64 !== undefined
-          ? {
-              "x-ms-content-crc64": !options?.transactionalContentCrc64
-                ? options?.transactionalContentCrc64
-                : uint8ArrayToString(options?.transactionalContentCrc64, "base64"),
-            }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.encryptionKey !== undefined
-          ? { "x-ms-encryption-key": options?.encryptionKey }
-          : {}),
-        ...(options?.encryptionKeySha256 !== undefined
-          ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
-          : {}),
-        ...(options?.encryptionAlgorithm !== undefined
-          ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
-          : {}),
-        ...(options?.encryptionScope !== undefined
-          ? { "x-ms-encryption-scope": options?.encryptionScope }
-          : {}),
-        ...(options?.structuredBodyType !== undefined
-          ? { "x-ms-structured-body": options?.structuredBodyType }
-          : {}),
-        ...(options?.structuredContentLength !== undefined
-          ? { "x-ms-structured-content-length": options?.structuredContentLength }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-      body: body,
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/octet-stream",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      "Content-Length": contentLength,
+      ...(options?.transactionalContentMD5 !== undefined
+        ? {
+            "Content-MD5": !options?.transactionalContentMD5
+              ? options?.transactionalContentMD5
+              : uint8ArrayToString(options?.transactionalContentMD5, "base64"),
+          }
+        : {}),
+      ...(options?.transactionalContentCrc64 !== undefined
+        ? {
+            "x-ms-content-crc64": !options?.transactionalContentCrc64
+              ? options?.transactionalContentCrc64
+              : uint8ArrayToString(options?.transactionalContentCrc64, "base64"),
+          }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.encryptionKey !== undefined
+        ? { "x-ms-encryption-key": options?.encryptionKey }
+        : {}),
+      ...(options?.encryptionKeySha256 !== undefined
+        ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
+        : {}),
+      ...(options?.encryptionAlgorithm !== undefined
+        ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
+        : {}),
+      ...(options?.encryptionScope !== undefined
+        ? { "x-ms-encryption-scope": options?.encryptionScope }
+        : {}),
+      ...(options?.structuredBodyType !== undefined
+        ? { "x-ms-structured-body": options?.structuredBodyType }
+        : {}),
+      ...(options?.structuredContentLength !== undefined
+        ? { "x-ms-structured-content-length": options?.structuredContentLength }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+    body: body,
+  });
 }
 
 export async function _stageBlockDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -543,134 +531,132 @@ export function _putBlobFromUrlSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
-        ...(options?.transactionalContentMD5 !== undefined
-          ? {
-              "Content-MD5": !options?.transactionalContentMD5
-                ? options?.transactionalContentMD5
-                : uint8ArrayToString(options?.transactionalContentMD5, "base64"),
-            }
-          : {}),
-        "Content-Length": contentLength,
-        ...(options?.blobContentType !== undefined
-          ? { "x-ms-blob-content-type": options?.blobContentType }
-          : {}),
-        ...(options?.blobContentEncoding !== undefined
-          ? { "x-ms-blob-content-encoding": options?.blobContentEncoding }
-          : {}),
-        ...(options?.blobContentLanguage !== undefined
-          ? { "x-ms-blob-content-language": options?.blobContentLanguage }
-          : {}),
-        ...(options?.blobContentMd5 !== undefined
-          ? {
-              "x-ms-blob-content-md5": !options?.blobContentMd5
-                ? options?.blobContentMd5
-                : uint8ArrayToString(options?.blobContentMd5, "base64"),
-            }
-          : {}),
-        ...(options?.blobCacheControl !== undefined
-          ? { "x-ms-blob-cache-control": options?.blobCacheControl }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.blobContentDisposition !== undefined
-          ? { "x-ms-blob-content-disposition": options?.blobContentDisposition }
-          : {}),
-        ...(options?.encryptionKey !== undefined
-          ? { "x-ms-encryption-key": options?.encryptionKey }
-          : {}),
-        ...(options?.encryptionKeySha256 !== undefined
-          ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
-          : {}),
-        ...(options?.encryptionAlgorithm !== undefined
-          ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
-          : {}),
-        ...(options?.encryptionScope !== undefined
-          ? { "x-ms-encryption-scope": options?.encryptionScope }
-          : {}),
-        ...(options?.tier !== undefined ? { "x-ms-access-tier": options?.tier } : {}),
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifNoneMatch !== undefined ? { "If-None-Match": options?.ifNoneMatch } : {}),
-        ...(options?.ifMatch !== undefined ? { "If-Match": options?.ifMatch } : {}),
-        ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
-        ...(options?.sourceIfModifiedSince !== undefined
-          ? {
-              "x-ms-source-if-modified-since": !options?.sourceIfModifiedSince
-                ? options?.sourceIfModifiedSince
-                : options?.sourceIfModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.sourceIfUnmodifiedSince !== undefined
-          ? {
-              "x-ms-source-if-unmodified-since": !options?.sourceIfUnmodifiedSince
-                ? options?.sourceIfUnmodifiedSince
-                : options?.sourceIfUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.sourceIfMatch !== undefined
-          ? { "x-ms-source-if-match": options?.sourceIfMatch }
-          : {}),
-        ...(options?.sourceIfNoneMatch !== undefined
-          ? { "x-ms-source-if-none-match": options?.sourceIfNoneMatch }
-          : {}),
-        ...(options?.sourceIfTags !== undefined
-          ? { "x-ms-source-if-tags": options?.sourceIfTags }
-          : {}),
-        ...(options?.sourceContentMd5 !== undefined
-          ? {
-              "x-ms-source-content-md5": !options?.sourceContentMd5
-                ? options?.sourceContentMd5
-                : uint8ArrayToString(options?.sourceContentMd5, "base64"),
-            }
-          : {}),
-        ...(options?.blobTagsString !== undefined ? { "x-ms-tags": options?.blobTagsString } : {}),
-        "x-ms-copy-source": copySource,
-        ...(options?.copySourceBlobProperties !== undefined
-          ? { "x-ms-copy-source-blob-properties": options?.copySourceBlobProperties }
-          : {}),
-        ...(options?.copySourceAuthorization !== undefined
-          ? { "x-ms-copy-source-authorization": options?.copySourceAuthorization }
-          : {}),
-        ...(options?.copySourceTags !== undefined
-          ? { "x-ms-copy-source-tag-option": options?.copySourceTags }
-          : {}),
-        blobType: "BlockBlob",
-        ...(options?.fileRequestIntent !== undefined
-          ? { "x-ms-file-request-intent": options?.fileRequestIntent }
-          : {}),
-        ...(options?.sourceEncryptionKey !== undefined
-          ? { "x-ms-source-encryption-key": options?.sourceEncryptionKey }
-          : {}),
-        ...(options?.sourceEncryptionKeySha256 !== undefined
-          ? { "x-ms-source-encryption-key-sha256": options?.sourceEncryptionKeySha256 }
-          : {}),
-        ...(options?.sourceEncryptionAlgorithm !== undefined
-          ? { "x-ms-source-encryption-algorithm": options?.sourceEncryptionAlgorithm }
-          : {}),
-        ...options.requestOptions?.headers,
-      },
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
+      ...(options?.transactionalContentMD5 !== undefined
+        ? {
+            "Content-MD5": !options?.transactionalContentMD5
+              ? options?.transactionalContentMD5
+              : uint8ArrayToString(options?.transactionalContentMD5, "base64"),
+          }
+        : {}),
+      "Content-Length": contentLength,
+      ...(options?.blobContentType !== undefined
+        ? { "x-ms-blob-content-type": options?.blobContentType }
+        : {}),
+      ...(options?.blobContentEncoding !== undefined
+        ? { "x-ms-blob-content-encoding": options?.blobContentEncoding }
+        : {}),
+      ...(options?.blobContentLanguage !== undefined
+        ? { "x-ms-blob-content-language": options?.blobContentLanguage }
+        : {}),
+      ...(options?.blobContentMd5 !== undefined
+        ? {
+            "x-ms-blob-content-md5": !options?.blobContentMd5
+              ? options?.blobContentMd5
+              : uint8ArrayToString(options?.blobContentMd5, "base64"),
+          }
+        : {}),
+      ...(options?.blobCacheControl !== undefined
+        ? { "x-ms-blob-cache-control": options?.blobCacheControl }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.blobContentDisposition !== undefined
+        ? { "x-ms-blob-content-disposition": options?.blobContentDisposition }
+        : {}),
+      ...(options?.encryptionKey !== undefined
+        ? { "x-ms-encryption-key": options?.encryptionKey }
+        : {}),
+      ...(options?.encryptionKeySha256 !== undefined
+        ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
+        : {}),
+      ...(options?.encryptionAlgorithm !== undefined
+        ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
+        : {}),
+      ...(options?.encryptionScope !== undefined
+        ? { "x-ms-encryption-scope": options?.encryptionScope }
+        : {}),
+      ...(options?.tier !== undefined ? { "x-ms-access-tier": options?.tier } : {}),
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifNoneMatch !== undefined ? { "If-None-Match": options?.ifNoneMatch } : {}),
+      ...(options?.ifMatch !== undefined ? { "If-Match": options?.ifMatch } : {}),
+      ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
+      ...(options?.sourceIfModifiedSince !== undefined
+        ? {
+            "x-ms-source-if-modified-since": !options?.sourceIfModifiedSince
+              ? options?.sourceIfModifiedSince
+              : options?.sourceIfModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.sourceIfUnmodifiedSince !== undefined
+        ? {
+            "x-ms-source-if-unmodified-since": !options?.sourceIfUnmodifiedSince
+              ? options?.sourceIfUnmodifiedSince
+              : options?.sourceIfUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.sourceIfMatch !== undefined
+        ? { "x-ms-source-if-match": options?.sourceIfMatch }
+        : {}),
+      ...(options?.sourceIfNoneMatch !== undefined
+        ? { "x-ms-source-if-none-match": options?.sourceIfNoneMatch }
+        : {}),
+      ...(options?.sourceIfTags !== undefined
+        ? { "x-ms-source-if-tags": options?.sourceIfTags }
+        : {}),
+      ...(options?.sourceContentMd5 !== undefined
+        ? {
+            "x-ms-source-content-md5": !options?.sourceContentMd5
+              ? options?.sourceContentMd5
+              : uint8ArrayToString(options?.sourceContentMd5, "base64"),
+          }
+        : {}),
+      ...(options?.blobTagsString !== undefined ? { "x-ms-tags": options?.blobTagsString } : {}),
+      "x-ms-copy-source": copySource,
+      ...(options?.copySourceBlobProperties !== undefined
+        ? { "x-ms-copy-source-blob-properties": options?.copySourceBlobProperties }
+        : {}),
+      ...(options?.copySourceAuthorization !== undefined
+        ? { "x-ms-copy-source-authorization": options?.copySourceAuthorization }
+        : {}),
+      ...(options?.copySourceTags !== undefined
+        ? { "x-ms-copy-source-tag-option": options?.copySourceTags }
+        : {}),
+      blobType: "BlockBlob",
+      ...(options?.fileRequestIntent !== undefined
+        ? { "x-ms-file-request-intent": options?.fileRequestIntent }
+        : {}),
+      ...(options?.sourceEncryptionKey !== undefined
+        ? { "x-ms-source-encryption-key": options?.sourceEncryptionKey }
+        : {}),
+      ...(options?.sourceEncryptionKeySha256 !== undefined
+        ? { "x-ms-source-encryption-key-sha256": options?.sourceEncryptionKeySha256 }
+        : {}),
+      ...(options?.sourceEncryptionAlgorithm !== undefined
+        ? { "x-ms-source-encryption-algorithm": options?.sourceEncryptionAlgorithm }
+        : {}),
+      ...options.requestOptions?.headers,
+    },
+  });
 }
 
 export async function _putBlobFromUrlDeserialize(result: PathUncheckedResponse): Promise<void> {
@@ -713,108 +699,106 @@ export function _uploadSend(
     },
   );
   context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .put({
-      ...operationOptionsToRequestParameters(options),
-      contentType: "application/octet-stream",
-      headers: {
-        "x-ms-version": context.version,
-        ...(options?.clientRequestId !== undefined
-          ? { "x-ms-client-request-id": options?.clientRequestId }
-          : {}),
-        ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
-        ...(options?.transactionalContentMD5 !== undefined
-          ? {
-              "Content-MD5": !options?.transactionalContentMD5
-                ? options?.transactionalContentMD5
-                : uint8ArrayToString(options?.transactionalContentMD5, "base64"),
-            }
-          : {}),
-        "Content-Length": contentLength,
-        ...(options?.blobContentType !== undefined
-          ? { "x-ms-blob-content-type": options?.blobContentType }
-          : {}),
-        ...(options?.blobContentEncoding !== undefined
-          ? { "x-ms-blob-content-encoding": options?.blobContentEncoding }
-          : {}),
-        ...(options?.blobContentLanguage !== undefined
-          ? { "x-ms-blob-content-language": options?.blobContentLanguage }
-          : {}),
-        ...(options?.blobContentMd5 !== undefined
-          ? {
-              "x-ms-blob-content-md5": !options?.blobContentMd5
-                ? options?.blobContentMd5
-                : uint8ArrayToString(options?.blobContentMd5, "base64"),
-            }
-          : {}),
-        ...(options?.blobCacheControl !== undefined
-          ? { "x-ms-blob-cache-control": options?.blobCacheControl }
-          : {}),
-        ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
-        ...(options?.blobContentDisposition !== undefined
-          ? { "x-ms-blob-content-disposition": options?.blobContentDisposition }
-          : {}),
-        ...(options?.encryptionKey !== undefined
-          ? { "x-ms-encryption-key": options?.encryptionKey }
-          : {}),
-        ...(options?.encryptionKeySha256 !== undefined
-          ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
-          : {}),
-        ...(options?.encryptionAlgorithm !== undefined
-          ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
-          : {}),
-        ...(options?.encryptionScope !== undefined
-          ? { "x-ms-encryption-scope": options?.encryptionScope }
-          : {}),
-        ...(options?.tier !== undefined ? { "x-ms-access-tier": options?.tier } : {}),
-        ...(options?.ifModifiedSince !== undefined
-          ? {
-              "If-Modified-Since": !options?.ifModifiedSince
-                ? options?.ifModifiedSince
-                : options?.ifModifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifUnmodifiedSince !== undefined
-          ? {
-              "If-Unmodified-Since": !options?.ifUnmodifiedSince
-                ? options?.ifUnmodifiedSince
-                : options?.ifUnmodifiedSince.toUTCString(),
-            }
-          : {}),
-        ...(options?.ifNoneMatch !== undefined ? { "If-None-Match": options?.ifNoneMatch } : {}),
-        ...(options?.ifMatch !== undefined ? { "If-Match": options?.ifMatch } : {}),
-        ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
-        ...(options?.blobTagsString !== undefined ? { "x-ms-tags": options?.blobTagsString } : {}),
-        ...(options?.immutabilityPolicyExpiry !== undefined
-          ? {
-              "x-ms-immutability-policy-until-date": !options?.immutabilityPolicyExpiry
-                ? options?.immutabilityPolicyExpiry
-                : options?.immutabilityPolicyExpiry.toUTCString(),
-            }
-          : {}),
-        ...(options?.immutabilityPolicyMode !== undefined
-          ? { "x-ms-immutability-policy-mode": options?.immutabilityPolicyMode }
-          : {}),
-        ...(options?.legalHold !== undefined ? { "x-ms-legal-hold": options?.legalHold } : {}),
-        ...(options?.transactionalContentCrc64 !== undefined
-          ? {
-              "x-ms-content-crc64": !options?.transactionalContentCrc64
-                ? options?.transactionalContentCrc64
-                : uint8ArrayToString(options?.transactionalContentCrc64, "base64"),
-            }
-          : {}),
-        ...(options?.structuredBodyType !== undefined
-          ? { "x-ms-structured-body": options?.structuredBodyType }
-          : {}),
-        ...(options?.structuredContentLength !== undefined
-          ? { "x-ms-structured-content-length": options?.structuredContentLength }
-          : {}),
-        blobType: "BlockBlob",
-        ...options.requestOptions?.headers,
-      },
-      body: body,
-    });
+  return context.path(path).put({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/octet-stream",
+    headers: {
+      "x-ms-version": context.version,
+      ...(options?.clientRequestId !== undefined
+        ? { "x-ms-client-request-id": options?.clientRequestId }
+        : {}),
+      ...(options?.metadata !== undefined ? { "x-ms-meta": options?.metadata } : {}),
+      ...(options?.transactionalContentMD5 !== undefined
+        ? {
+            "Content-MD5": !options?.transactionalContentMD5
+              ? options?.transactionalContentMD5
+              : uint8ArrayToString(options?.transactionalContentMD5, "base64"),
+          }
+        : {}),
+      "Content-Length": contentLength,
+      ...(options?.blobContentType !== undefined
+        ? { "x-ms-blob-content-type": options?.blobContentType }
+        : {}),
+      ...(options?.blobContentEncoding !== undefined
+        ? { "x-ms-blob-content-encoding": options?.blobContentEncoding }
+        : {}),
+      ...(options?.blobContentLanguage !== undefined
+        ? { "x-ms-blob-content-language": options?.blobContentLanguage }
+        : {}),
+      ...(options?.blobContentMd5 !== undefined
+        ? {
+            "x-ms-blob-content-md5": !options?.blobContentMd5
+              ? options?.blobContentMd5
+              : uint8ArrayToString(options?.blobContentMd5, "base64"),
+          }
+        : {}),
+      ...(options?.blobCacheControl !== undefined
+        ? { "x-ms-blob-cache-control": options?.blobCacheControl }
+        : {}),
+      ...(options?.leaseId !== undefined ? { "x-ms-lease-id": options?.leaseId } : {}),
+      ...(options?.blobContentDisposition !== undefined
+        ? { "x-ms-blob-content-disposition": options?.blobContentDisposition }
+        : {}),
+      ...(options?.encryptionKey !== undefined
+        ? { "x-ms-encryption-key": options?.encryptionKey }
+        : {}),
+      ...(options?.encryptionKeySha256 !== undefined
+        ? { "x-ms-encryption-key-sha256": options?.encryptionKeySha256 }
+        : {}),
+      ...(options?.encryptionAlgorithm !== undefined
+        ? { "x-ms-encryption-algorithm": options?.encryptionAlgorithm }
+        : {}),
+      ...(options?.encryptionScope !== undefined
+        ? { "x-ms-encryption-scope": options?.encryptionScope }
+        : {}),
+      ...(options?.tier !== undefined ? { "x-ms-access-tier": options?.tier } : {}),
+      ...(options?.ifModifiedSince !== undefined
+        ? {
+            "If-Modified-Since": !options?.ifModifiedSince
+              ? options?.ifModifiedSince
+              : options?.ifModifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifUnmodifiedSince !== undefined
+        ? {
+            "If-Unmodified-Since": !options?.ifUnmodifiedSince
+              ? options?.ifUnmodifiedSince
+              : options?.ifUnmodifiedSince.toUTCString(),
+          }
+        : {}),
+      ...(options?.ifNoneMatch !== undefined ? { "If-None-Match": options?.ifNoneMatch } : {}),
+      ...(options?.ifMatch !== undefined ? { "If-Match": options?.ifMatch } : {}),
+      ...(options?.ifTags !== undefined ? { "x-ms-if-tags": options?.ifTags } : {}),
+      ...(options?.blobTagsString !== undefined ? { "x-ms-tags": options?.blobTagsString } : {}),
+      ...(options?.immutabilityPolicyExpiry !== undefined
+        ? {
+            "x-ms-immutability-policy-until-date": !options?.immutabilityPolicyExpiry
+              ? options?.immutabilityPolicyExpiry
+              : options?.immutabilityPolicyExpiry.toUTCString(),
+          }
+        : {}),
+      ...(options?.immutabilityPolicyMode !== undefined
+        ? { "x-ms-immutability-policy-mode": options?.immutabilityPolicyMode }
+        : {}),
+      ...(options?.legalHold !== undefined ? { "x-ms-legal-hold": options?.legalHold } : {}),
+      ...(options?.transactionalContentCrc64 !== undefined
+        ? {
+            "x-ms-content-crc64": !options?.transactionalContentCrc64
+              ? options?.transactionalContentCrc64
+              : uint8ArrayToString(options?.transactionalContentCrc64, "base64"),
+          }
+        : {}),
+      ...(options?.structuredBodyType !== undefined
+        ? { "x-ms-structured-body": options?.structuredBodyType }
+        : {}),
+      ...(options?.structuredContentLength !== undefined
+        ? { "x-ms-structured-content-length": options?.structuredContentLength }
+        : {}),
+      blobType: "BlockBlob",
+      ...options.requestOptions?.headers,
+    },
+    body: body,
+  });
 }
 
 export async function _uploadDeserialize(result: PathUncheckedResponse): Promise<void> {

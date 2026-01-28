@@ -6,7 +6,7 @@
  * @azsdk-weight 85
  */
 
-import { BlobServiceClient, AnonymousCredential } from "@azure/storage-blob";
+import { BlobServiceClient, AnonymousCredential } from "../src/index.js";
 
 // Load the .env file if it exists
 import "dotenv/config";
@@ -33,6 +33,7 @@ async function main(): Promise<void> {
   const containerClient = blobServiceClient.getContainerClient(containerName);
 
   const createContainerResponse = await containerClient.create();
+  console.log(`raw response:`, createContainerResponse._response.parsedBody);
   console.log(`Created container ${containerName} successfully`, createContainerResponse.requestId);
 
   // Delete container

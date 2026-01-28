@@ -8,7 +8,14 @@
 
 import fs from "node:fs";
 
-import { AnonymousCredential, BlobServiceClient, newPipeline } from "@azure/storage-blob";
+import {
+  AnonymousCredential,
+  BlobServiceClient,
+  HttpOperationResponse,
+  IHttpClient,
+  newPipeline,
+  WebResource,
+} from "../src/index.js";
 
 // Load the .env file if it exists
 import "dotenv/config";
@@ -17,7 +24,19 @@ import "dotenv/config";
 // Alternatively, logging can be enabled at runtime by calling `setLogLevel("info");`
 // `setLogLevel` can be imported from the `@azure/logger` package
 import { setLogLevel } from "@azure/logger";
+import { DefaultAzureCredential } from "@azure/identity";
+import { ContainerClient } from "../src/index.js";
 setLogLevel("info");
+
+class CustomHttpClient implements IHttpClient {
+  sendRequest(request: WebResource): Promise<HttpOperationResponse> {
+    const headers = request.headers;
+    if (!headers.contains("my-header-name")) {
+      headers.set("my-header-name", "my-header-value");
+    }
+    throw new Error("Method not implemented.");
+  }
+}
 
 async function main(): Promise<void> {
   // Fill in following settings before running this sample
@@ -39,6 +58,20 @@ async function main(): Promise<void> {
     `https://${account}.blob.core.windows.net${accountSas}`,
     pipeline,
   );
+
+  const container = new ContainerClient("url", new DefaultAzureCredential(), {
+    retryOptions: {
+      maxTries: 5,
+      retryDelayInMs: 2000,
+      maxRetryDelayInMs: 10000,
+      secondaryHost: "s",
+    },
+    proxyOptions: { host: "myproxy", port: 3128 },
+    userAgentOptions: { userAgentPrefix: "ContainerClientSample V1.0.0" },
+    keepAliveOptions: { enable: false },
+    httpClient: new CustomHttpClient(),
+    audience: "audience",
+  });
 
   // Create a container
   const containerName = `newcontainer${new Date().getTime()}`;
