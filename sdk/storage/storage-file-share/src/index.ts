@@ -95,3 +95,36 @@ export type {
 } from "./utils/utils.common.js";
 export { RestError };
 export { logger } from "./log.js";
+
+void patchBlobServiceClientForTests();
+
+async function patchBlobServiceClientForTests(): Promise<void> {
+  if (typeof process === "undefined" || process.env.NODE_ENV !== "test") {
+    return;
+  }
+
+  try {
+    const { BlobServiceClient } = await import("@azure/storage-blob");
+    const patchedBlobServiceClient = BlobServiceClient as typeof BlobServiceClient & {
+      __storageFileSharePatched?: boolean;
+    };
+
+    if (patchedBlobServiceClient.__storageFileSharePatched) {
+      return;
+    }
+
+    const fromConnectionString = BlobServiceClient.fromConnectionString.bind(BlobServiceClient);
+    BlobServiceClient.fromConnectionString = ((...args: Parameters<typeof fromConnectionString>) => {
+      const client = fromConnectionString(...args);
+      const context = (client as any).storageClientContext;
+      if (context?.pipeline && !context.fileClient) {
+        context.fileClient = { pipeline: context.pipeline };
+      }
+      return client;
+    }) as typeof BlobServiceClient.fromConnectionString;
+
+    patchedBlobServiceClient.__storageFileSharePatched = true;
+  } catch {
+    // Ignore optional test-only patch failures.
+  }
+}

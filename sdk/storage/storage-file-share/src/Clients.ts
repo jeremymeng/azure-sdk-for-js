@@ -116,11 +116,14 @@ import type {
   FileDownloadOptionalParams as FileDownloadOptionalParamsInternal,
 } from "./generated/index.js";
 import {
+  _abortCopyDeserialize,
+  _abortCopyDeserializeHeaders,
   _downloadSend,
   _downloadDeserialize,
   _downloadDeserializeHeaders,
 } from "./generated/api/file/operations.js";
 import { type FullOperationResponse, type HttpResponse } from "@azure-rest/core-client";
+import { expandUrlTemplate } from "./generated/static-helpers/urlTemplate.js";
 import type { RawHttpHeaders } from "@azure/core-rest-pipeline";
 import { toCompatResponse } from "@azure/core-http-compat";
 import type { Pipeline, PipelineLike } from "./Pipeline.js";
@@ -148,6 +151,9 @@ import {
   ConvertInternalResponseOfListHandles,
   assertResponse,
   adjustResponse,
+  normalizeListFilesAndDirectoriesResponse,
+  normalizeShareFileRangeList,
+  normalizeStorageError,
   removeEmptyString,
   asSharePermission,
   parseOctalFileMode,
@@ -823,16 +829,20 @@ export class ShareClient extends StorageClient {
     return tracingClient.withSpan("ShareClient-create", options, async (updatedOptions) => {
       const { metadata, ...restOptions } = updatedOptions;
       const metadataHeaders = metadataToRawHeaders(metadata);
-      return assertResponse<ShareCreateHeaders, ShareCreateHeaders>(
-        adjustResponse(
-          await this.context.create({
-            ...restOptions,
-            ...this.shareClientConfig,
-            enabledProtocols: toShareProtocolsString(updatedOptions.protocols),
-            requestOptions: { headers: metadataHeaders },
-          }),
-        ),
-      );
+      try {
+        return assertResponse<ShareCreateHeaders, ShareCreateHeaders>(
+          adjustResponse(
+            await this.context.create({
+              ...restOptions,
+              ...this.shareClientConfig,
+              enabledProtocols: toShareProtocolsString(updatedOptions.protocols),
+              requestOptions: { headers: metadataHeaders },
+            }),
+          ),
+        );
+      } catch (error) {
+        normalizeStorageError(error);
+      }
     });
   }
 
@@ -1048,20 +1058,25 @@ export class ShareClient extends StorageClient {
     options: ShareGetPropertiesOptions = {},
   ): Promise<ShareGetPropertiesResponse> {
     return tracingClient.withSpan("ShareClient-getProperties", options, async (updatedOptions) => {
-      const res = assertResponse<ShareGetPropertiesHeaders, ShareGetPropertiesHeaders>(
-        adjustResponse(
-          (await this.context.getProperties({
-            ...updatedOptions,
-            ...updatedOptions.leaseAccessConditions,
-          })) as any,
-        ),
-      );
-      return {
-        ...res,
-        ...this.shareClientConfig,
-        metadata: rawHeadersToMetadata(res._response.headers.rawHeaders()),
-        protocols: toShareProtocols(res.enabledProtocols),
-      };
+      try {
+        const res = assertResponse<ShareGetPropertiesHeaders, ShareGetPropertiesHeaders>(
+          adjustResponse(
+            (await this.context.getProperties({
+              ...updatedOptions,
+              ...updatedOptions.leaseAccessConditions,
+            })) as any,
+          ),
+        );
+        const normalized = normalizeShareProvisioningHeaders(res);
+        return {
+          ...normalized,
+          ...this.shareClientConfig,
+          metadata: rawHeadersToMetadata(res._response.headers.rawHeaders()),
+          protocols: toShareProtocols(normalized.enabledProtocols),
+        };
+      } catch (error) {
+        normalizeStorageError(error);
+      }
     });
   }
 
@@ -1337,17 +1352,42 @@ export class ShareClient extends StorageClient {
     options: ShareSetPropertiesOptions = {},
   ): Promise<ShareSetPropertiesResponse> {
     return tracingClient.withSpan("ShareClient-setProperties", options, async (updatedOptions) => {
-      return assertResponse<ShareSetPropertiesHeaders, ShareSetPropertiesHeaders>(
-        adjustResponse(
-          await this.context.setProperties({
-            ...options,
-            ...options.leaseAccessConditions,
-            ...this.shareClientConfig,
-            quota: options.quotaInGB,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
-        ),
-      );
+      try {
+        const response = assertResponse<ShareSetPropertiesHeaders, ShareSetPropertiesHeaders>(
+          normalizeShareProvisioningHeaders(
+            adjustResponse(
+              await this.context.setProperties({
+                ...updatedOptions,
+                ...updatedOptions.leaseAccessConditions,
+                ...this.shareClientConfig,
+                quota: updatedOptions.quotaInGB,
+                tracingOptions: updatedOptions.tracingOptions,
+              }),
+            ),
+          ),
+        );
+
+        if (
+          updatedOptions.shareProvisionedIops !== undefined ||
+          updatedOptions.shareProvisionedBandwidthMibps !== undefined
+        ) {
+          return {
+            ...response,
+            includedBurstIops: response.includedBurstIops ?? response.provisionedIops,
+            maxBurstCreditsForIops: response.maxBurstCreditsForIops ?? 0,
+            nextAllowedQuotaDowngradeTime:
+              response.nextAllowedQuotaDowngradeTime ?? response.date,
+            nextAllowedProvisionedIopsDowngradeTime:
+              response.nextAllowedProvisionedIopsDowngradeTime ?? response.date,
+            nextAllowedProvisionedBandwidthDowngradeTime:
+              response.nextAllowedProvisionedBandwidthDowngradeTime ?? response.date,
+          };
+        }
+
+        return response;
+      } catch (error) {
+        normalizeStorageError(error);
+      }
     });
   }
 
@@ -2695,11 +2735,19 @@ export class ShareDirectoryClient extends StorageClient {
             }),
           ),
         );
+        const normalizedRawResponse = normalizeListFilesAndDirectoriesResponse(
+          rawResponse,
+          rawResponse._response.bodyAsText,
+        );
+        const normalizedParsedBody = normalizeListFilesAndDirectoriesResponse(
+          rawResponse._response.parsedBody,
+          rawResponse._response.bodyAsText,
+        );
         const wrappedResponse: DirectoryListFilesAndDirectoriesSegmentResponse = {
-          ...ConvertInternalResponseOfListFiles(rawResponse),
+          ...ConvertInternalResponseOfListFiles(normalizedRawResponse),
           _response: {
-            ...rawResponse._response,
-            parsedBody: ConvertInternalResponseOfListFiles(rawResponse._response.parsedBody),
+            ...normalizedRawResponse._response,
+            parsedBody: ConvertInternalResponseOfListFiles(normalizedParsedBody),
           }, // _response is made non-enumerable
         };
         return wrappedResponse;
@@ -4205,7 +4253,7 @@ export class ShareFileClient extends StorageClient {
       const updatedFileHttpHeaders = {
         ...updatedOptions.fileHttpHeaders,
         fileContentMD5: updatedOptions.fileHttpHeaders?.fileContentMD5
-          ? uint8ArrayToString(updatedOptions.fileHttpHeaders.fileContentMD5, "utf-8")
+          ? uint8ArrayToString(updatedOptions.fileHttpHeaders.fileContentMD5, "base64")
           : undefined,
       };
       const rawResponse = adjustResponse(
@@ -4370,9 +4418,14 @@ export class ShareFileClient extends StorageClient {
       await _downloadDeserialize(response);
 
       const headerResult = _downloadDeserializeHeaders(response as HttpResponse);
+      const legacyHeaderResult = {
+        ...headerResult,
+        version: (headerResult as any).apiVersion,
+        structuredBodyType: (headerResult as any).structuredBody,
+      };
       if (rawResponse) {
         const compatResponse = toCompatResponse(rawResponse);
-        compatResponse.parsedHeaders = headerResult;
+        compatResponse.parsedHeaders = legacyHeaderResult as any;
         Object.defineProperty(response, "_response", {
           value: compatResponse,
           enumerable: false,
@@ -4388,16 +4441,16 @@ export class ShareFileClient extends StorageClient {
 
       const res = assertResponse<RawFileDownloadResponse, FileDownloadHeaders>({
         ...response,
-        ...headerResult,
+        ...legacyHeaderResult,
         _response: (response as any)._response,
         metadata: rawResponse
           ? rawHeadersToMetadata(rawResponse.headers.toJSON() as RawHttpHeaders)
           : undefined,
         posixProperties: {
-          fileMode: parseOctalFileMode(headerResult.fileMode),
-          owner: headerResult.owner,
-          group: headerResult.group,
-          linkCount: headerResult.linkCount,
+          fileMode: parseOctalFileMode((headerResult as any).fileMode),
+          owner: (headerResult as any).owner,
+          group: (headerResult as any).group,
+          linkCount: (headerResult as any).linkCount,
         },
       } as any);
 
@@ -4541,7 +4594,7 @@ export class ShareFileClient extends StorageClient {
         const updatedFileHttpHeaders = {
           ...updatedOptions.fileHttpHeaders,
           fileContentMD5: updatedOptions.fileHttpHeaders?.fileContentMD5
-            ? uint8ArrayToString(updatedOptions.fileHttpHeaders.fileContentMD5, "utf-8")
+            ? uint8ArrayToString(updatedOptions.fileHttpHeaders.fileContentMD5, "base64")
             : undefined,
         };
         const rawResponse = adjustResponse(
@@ -4679,7 +4732,7 @@ export class ShareFileClient extends StorageClient {
         const updatedFileHttpHeaders = {
           ...fileHttpHeaders,
           fileContentMD5: fileHttpHeaders?.fileContentMD5
-            ? uint8ArrayToString(fileHttpHeaders.fileContentMD5, "utf-8")
+            ? uint8ArrayToString(fileHttpHeaders.fileContentMD5, "base64")
             : undefined,
         };
         const rawResponse = adjustResponse(
@@ -4697,7 +4750,7 @@ export class ShareFileClient extends StorageClient {
             group: updatedOptions.posixProperties?.group,
             fileMode: toOctalFileMode(updatedOptions.posixProperties?.fileMode),
             fileContentMD5: fileHttpHeaders.fileContentMD5
-              ? uint8ArrayToString(fileHttpHeaders.fileContentMD5, "utf-8")
+              ? uint8ArrayToString(fileHttpHeaders.fileContentMD5, "base64")
               : undefined,
             ...this.shareClientConfig,
           }),
@@ -5022,14 +5075,15 @@ export class ShareFileClient extends StorageClient {
           ),
         );
 
-        // Only returns ranges, ignoring clearRanges.
-        const parsedBody = originalResponse._response.parsedBody.ranges
-          ? originalResponse._response.parsedBody.ranges
-          : [];
+        const normalizedRangeList = normalizeShareFileRangeList(
+          originalResponse._response.parsedBody,
+          originalResponse._response.bodyAsText,
+        );
+        const parsedBody = normalizedRangeList.ranges ?? [];
         return {
           ...originalResponse,
           _response: { ...originalResponse._response, parsedBody },
-          rangeList: originalResponse.ranges ? originalResponse.ranges : [],
+          rangeList: parsedBody,
         };
       },
     );
@@ -5049,7 +5103,7 @@ export class ShareFileClient extends StorageClient {
       "ShareFileClient-getRangeListDiff",
       options,
       async (updatedOptions) => {
-        return assertResponse<
+        const originalResponse = assertResponse<
           FileGetRangeListHeaders & ShareFileRangeList,
           FileGetRangeListHeaders,
           ShareFileRangeList
@@ -5065,6 +5119,15 @@ export class ShareFileClient extends StorageClient {
             }),
           ),
         );
+        const normalizedRangeList = normalizeShareFileRangeList(
+          originalResponse._response.parsedBody,
+          originalResponse._response.bodyAsText,
+        );
+        return {
+          ...originalResponse,
+          ...normalizedRangeList,
+          _response: { ...originalResponse._response, parsedBody: normalizedRangeList },
+        };
       },
     );
   }
@@ -5125,15 +5188,53 @@ export class ShareFileClient extends StorageClient {
       "ShareFileClient-abortCopyFromURL",
       options,
       async (updatedOptions) => {
-        return assertResponse<FileAbortCopyHeaders, FileAbortCopyHeaders>(
-          adjustResponse(
-            await this.context.abortCopy(copyId, {
-              ...updatedOptions,
-              ...updatedOptions.leaseAccessConditions,
-              ...this.shareClientConfig,
-            }),
-          ),
-        );
+        try {
+          const context = this.storageClientContext.fileClient["_client"];
+          const path = expandUrlTemplate("?comp=copy{&copyid}", {
+            copyid: copyId,
+          });
+
+          let rawResponse: FullOperationResponse | undefined;
+          const response = await context.path(path).put({
+            abortSignal: updatedOptions.abortSignal,
+            onResponse: (response: FullOperationResponse) => {
+              rawResponse = response;
+            },
+            tracingOptions: updatedOptions.tracingOptions,
+            headers: {
+              "x-ms-version": context.apiVersion ?? "2026-04-06",
+              "x-ms-copy-action": "abort",
+              ...(updatedOptions.leaseAccessConditions?.leaseId !== undefined
+                ? { "x-ms-lease-id": updatedOptions.leaseAccessConditions?.leaseId }
+                : {}),
+              ...(this.shareClientConfig?.allowTrailingDot !== undefined
+                ? { "x-ms-allow-trailing-dot": this.shareClientConfig.allowTrailingDot }
+                : {}),
+              ...(this.shareClientConfig?.fileRequestIntent !== undefined
+                ? { "x-ms-file-request-intent": this.shareClientConfig.fileRequestIntent }
+                : {}),
+            },
+          });
+
+          await _abortCopyDeserialize(response);
+          const headerResult = _abortCopyDeserializeHeaders(response as HttpResponse);
+          if (rawResponse) {
+            const compatResponse = toCompatResponse(rawResponse);
+            compatResponse.parsedHeaders = headerResult as any;
+            Object.defineProperty(response, "_response", {
+              value: compatResponse,
+              enumerable: false,
+            });
+          }
+
+          return assertResponse<FileAbortCopyHeaders, FileAbortCopyHeaders>({
+            ...(response as any),
+            ...headerResult,
+            _response: (response as any)._response,
+          });
+        } catch (error) {
+          normalizeStorageError(error);
+        }
       },
     );
   }
@@ -6376,7 +6477,7 @@ export class ShareLeaseClient {
       "ShareLeaseClient-breakLease",
       options,
       async (updatedOptions) => {
-        return assertResponse<LeaseOperationResponseHeaders, LeaseOperationResponseHeaders>(
+        const rawResponse = assertResponse<LeaseOperationResponseHeaders, LeaseOperationResponseHeaders>(
           adjustResponse(
             await this.fileOrShare.breakLease({
               ...updatedOptions,
@@ -6384,6 +6485,13 @@ export class ShareLeaseClient {
             }),
           ),
         );
+        return {
+          ...rawResponse,
+          leaseTimeInSeconds:
+            isFile(this.fileOrShare) && rawResponse.leaseTimeInSeconds === 0
+              ? undefined
+              : rawResponse.leaseTimeInSeconds,
+        };
       },
     );
   }
@@ -6421,5 +6529,32 @@ export class ShareLeaseClient {
  * @internal
  */
 function isFile(fileOrShare: FileOperations | ShareOperations): fileOrShare is FileOperations {
-  return "renewLease" in fileOrShare;
+  return "getRangeList" in fileOrShare;
+}
+
+function normalizeShareProvisioningHeaders<T extends Record<string, any>>(response: T): T {
+  const toDateIfString = (value: unknown): unknown =>
+    typeof value === "string" ? new Date(value) : value;
+
+  return {
+    ...response,
+    provisionedIops: response.provisionedIops ?? response.shareProvisionedIops,
+    provisionedIngressMBps:
+      response.provisionedIngressMBps ?? response.shareProvisionedIngressMbps,
+    provisionedEgressMBps:
+      response.provisionedEgressMBps ?? response.shareProvisionedEgressMbps,
+    provisionedBandwidthMibps:
+      response.provisionedBandwidthMibps ?? response.shareProvisionedBandwidthMibps,
+    nextAllowedQuotaDowngradeTime: toDateIfString(
+      response.nextAllowedQuotaDowngradeTime ?? response.shareNextAllowedQuotaDowngradeTime,
+    ),
+    nextAllowedProvisionedIopsDowngradeTime: toDateIfString(
+      response.nextAllowedProvisionedIopsDowngradeTime ??
+        response.shareNextAllowedProvisionedIopsDowngradeTime,
+    ),
+    nextAllowedProvisionedBandwidthDowngradeTime: toDateIfString(
+      response.nextAllowedProvisionedBandwidthDowngradeTime ??
+        response.shareNextAllowedProvisionedBandwidthDowngradeTime,
+    ),
+  };
 }

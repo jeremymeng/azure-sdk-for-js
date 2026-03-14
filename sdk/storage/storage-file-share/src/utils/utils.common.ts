@@ -16,7 +16,19 @@ import type {
   HandleItem,
   ListFilesAndDirectoriesSegmentResponse,
   ListHandlesResponse,
+  ShareFileRangeList,
 } from "../generatedModels.js";
+import {
+  clearRangeXmlDeserializer,
+  clearRangeXmlObjectDeserializer,
+  directoryItemXmlDeserializer,
+  directoryItemXmlObjectDeserializer,
+  fileItemXmlDeserializer,
+  fileItemXmlObjectDeserializer,
+  fileRangeXmlDeserializer,
+  fileRangeXmlObjectDeserializer,
+} from "../generated/models/azure/storage/files/shares/models.js";
+import { parseXmlString } from "../generated/static-helpers/serialization/xml-helpers.js";
 import {
   HttpAuthorization,
   NfsFileMode,
@@ -719,6 +731,14 @@ export function adjustResponse<
   compatResponse.bodyAsText = result._response.rawResponse.bodyAsText;
   (result as any)._response = compatResponse;
 
+  // Map generated property names to legacy names
+  if ("apiVersion" in result && !("version" in result)) {
+    (result as any).version = (result as any).apiVersion;
+  }
+  if ("structuredBody" in result && !("structuredBodyType" in result)) {
+    (result as any).structuredBodyType = (result as any).structuredBody;
+  }
+
   return result as T & {
     _response: HttpResponse & {
       parsedHeaders: THeaders;
@@ -736,9 +756,183 @@ export function StringEncodedToString(name: StringEncoded): string {
   }
 }
 
+function toArray<T>(value: T | T[] | undefined): T[] {
+  if (value === undefined) {
+    return [];
+  }
+  return Array.isArray(value) ? value : [value];
+}
+
+function unwrapSingleElementArray<T>(value: T | T[] | undefined): T | undefined {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+  return value;
+}
+
+function getXmlRoot(bodyAsText?: string): Record<string, unknown> | undefined {
+  if (!bodyAsText) {
+    return undefined;
+  }
+
+  const xmlObject = parseXmlString(bodyAsText) as Record<string, unknown>;
+  const knownRoot =
+    xmlObject.EnumerationResults ?? xmlObject.ShareFileRangeList ?? xmlObject.RangeList ?? undefined;
+  if (knownRoot) {
+    return unwrapSingleElementArray(knownRoot as Record<string, unknown> | Record<string, unknown>[]);
+  }
+
+  const [firstRoot] = Object.entries(xmlObject).find(([key]) => key !== "?xml") ?? [];
+  if (!firstRoot) {
+    return undefined;
+  }
+
+  return unwrapSingleElementArray(
+    xmlObject[firstRoot] as Record<string, unknown> | Record<string, unknown>[],
+  );
+}
+
+function extractXmlElements<T>(
+  bodyAsText: string | undefined,
+  elementName: string,
+  deserialize: (xmlString: string) => T,
+): T[] {
+  if (!bodyAsText) {
+    return [];
+  }
+
+  const matcher = new RegExp(`<${elementName}(?:\\s+[^>]*)?>[\\s\\S]*?<\\/${elementName}>`, "g");
+  return Array.from(bodyAsText.matchAll(matcher), (match) => deserialize(match[0]));
+}
+
+export function normalizeListFilesAndDirectoriesResponse<T extends ListFilesAndDirectoriesSegmentResponseInternal>(
+  response: T,
+  bodyAsText?: string,
+): T {
+  const directoryItems = extractXmlElements(bodyAsText, "Directory", directoryItemXmlDeserializer);
+  const fileItems = extractXmlElements(bodyAsText, "File", fileItemXmlDeserializer);
+
+  if (directoryItems.length > 0 || fileItems.length > 0) {
+    return {
+      ...response,
+      segment: {
+        directoryItems,
+        fileItems,
+      },
+    };
+  }
+
+  if (response.segment) {
+    return response;
+  }
+
+  const root = getXmlRoot(bodyAsText);
+  const entries = unwrapSingleElementArray(root?.Entries as Record<string, unknown> | Record<string, unknown>[]);
+  const segment = {
+    directoryItems: toArray(entries?.Directory as Record<string, unknown> | Record<string, unknown>[]).map(
+      (directory) =>
+        directoryItemXmlObjectDeserializer(
+          unwrapSingleElementArray(directory) as Record<string, unknown>,
+        ),
+    ),
+    fileItems: toArray(entries?.File as Record<string, unknown> | Record<string, unknown>[]).map(
+      (file) => fileItemXmlObjectDeserializer(unwrapSingleElementArray(file) as Record<string, unknown>),
+    ),
+  };
+
+  return {
+    ...response,
+    segment,
+  };
+}
+
+function hasRangeCoordinates(ranges?: { start?: number; end?: number }[]): boolean {
+  return !!ranges?.some((range) => range?.start !== undefined || range?.end !== undefined);
+}
+
+export function normalizeShareFileRangeList(
+  rangeList: ShareFileRangeList,
+  bodyAsText?: string,
+): ShareFileRangeList {
+  const extractedRanges = extractXmlElements(bodyAsText, "Range", fileRangeXmlDeserializer);
+  const extractedClearRanges = extractXmlElements(bodyAsText, "ClearRange", clearRangeXmlDeserializer);
+
+  if (extractedRanges.length > 0 || extractedClearRanges.length > 0) {
+    return {
+      ranges: extractedRanges,
+      clearRanges: extractedClearRanges,
+    };
+  }
+
+  if (hasRangeCoordinates(rangeList.ranges) && hasRangeCoordinates(rangeList.clearRanges)) {
+    return {
+      ranges: rangeList.ranges,
+      clearRanges: rangeList.clearRanges,
+    };
+  }
+
+  const root = getXmlRoot(bodyAsText);
+  const rangesWrapper = unwrapSingleElementArray(
+    root?.Ranges as Record<string, unknown> | Record<string, unknown>[],
+  );
+  const clearRangesWrapper = unwrapSingleElementArray(
+    root?.ClearRanges as Record<string, unknown> | Record<string, unknown>[],
+  );
+
+  const ranges = hasRangeCoordinates(rangeList.ranges)
+    ? rangeList.ranges
+    : toArray(rangesWrapper?.Range as Record<string, unknown> | Record<string, unknown>[]).map((range) =>
+        fileRangeXmlObjectDeserializer(unwrapSingleElementArray(range) as Record<string, unknown>),
+      );
+  const clearRanges = hasRangeCoordinates(rangeList.clearRanges)
+    ? rangeList.clearRanges
+    : toArray(
+        clearRangesWrapper?.ClearRange as Record<string, unknown> | Record<string, unknown>[],
+      ).map((range) =>
+        clearRangeXmlObjectDeserializer(unwrapSingleElementArray(range) as Record<string, unknown>),
+      );
+
+  return {
+    ranges,
+    clearRanges,
+  };
+}
+
+export function normalizeStorageError(error: unknown): never {
+  if (error && typeof error === "object") {
+    const storageError = error as {
+      statusCode?: number;
+      status?: number | string;
+      details?: { additionalProperties?: Record<string, unknown> } & Record<string, unknown>;
+    };
+
+    if (storageError.statusCode === undefined && storageError.status !== undefined) {
+      storageError.statusCode = Number(storageError.status);
+    }
+
+    if (storageError.details?.additionalProperties) {
+      for (const [key, value] of Object.entries(storageError.details.additionalProperties)) {
+        const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+        if (!(camelKey in storageError.details)) {
+          storageError.details[camelKey] = value;
+        }
+      }
+    }
+
+    const detailsMessage =
+      typeof storageError.details?.message === "string" ? storageError.details.message.trim() : undefined;
+    if (detailsMessage && (storageError as { message?: string }).message !== detailsMessage) {
+      (storageError as { message?: string }).message = detailsMessage;
+    }
+  }
+
+  throw error;
+}
+
 export function ConvertInternalResponseOfListFiles(
   internalResponse: ListFilesAndDirectoriesSegmentResponseInternal,
 ): ListFilesAndDirectoriesSegmentResponse {
+  const segment = internalResponse.segment ?? { fileItems: [], directoryItems: [] };
   const wrappedResponse = {
     ...internalResponse,
     prefix: undefined,
@@ -747,17 +941,33 @@ export function ConvertInternalResponseOfListFiles(
       content: internalResponse.directoryPath,
     }),
     segment: {
-      fileItems: internalResponse.segment.fileItems.map((fileItemInternal) => {
+      fileItems: segment.fileItems.map((fileItemInternal) => {
         const fileItem: FileItem = {
           ...fileItemInternal,
           name: StringEncodedToString(fileItemInternal.name),
+          properties: fileItemInternal.properties
+            ? {
+                ...fileItemInternal.properties,
+                lastAccessTime:
+                  (fileItemInternal.properties as any).lastAccessTime ??
+                  (fileItemInternal.properties as any).lastAccessedOn,
+              }
+            : fileItemInternal.properties,
         };
         return fileItem;
       }),
-      directoryItems: internalResponse.segment.directoryItems.map((directoryItemInternal) => {
+      directoryItems: segment.directoryItems.map((directoryItemInternal) => {
         const directoryItem: DirectoryItem = {
           ...directoryItemInternal,
           name: StringEncodedToString(directoryItemInternal.name),
+          properties: directoryItemInternal.properties
+            ? {
+                ...directoryItemInternal.properties,
+                lastAccessTime:
+                  (directoryItemInternal.properties as any).lastAccessTime ??
+                  (directoryItemInternal.properties as any).lastAccessedOn,
+              }
+            : directoryItemInternal.properties,
         };
         return directoryItem;
       }),

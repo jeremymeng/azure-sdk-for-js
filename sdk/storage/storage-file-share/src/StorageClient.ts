@@ -16,6 +16,7 @@ import type { AnonymousCredential } from "@azure/storage-common";
 import type { StorageSharedKeyCredential } from "@azure/storage-common";
 import type { TokenCredential } from "@azure/core-auth";
 import type { ExtendedServiceClientOptions } from "@azure/core-http-compat";
+import type { Pipeline as CorePipeline } from "@azure/core-rest-pipeline";
 
 /**
  * An interface for options common to every remote operation.
@@ -30,6 +31,7 @@ export class StorageClientContext {
   share: ShareOperations;
   directory: DirectoryOperations;
   file: FileOperations;
+  pipeline: CorePipeline;
 
   constructor(url: string, options: ExtendedServiceClientOptions = {}) {
     const cr = {} as TokenCredential;
@@ -43,6 +45,7 @@ export class StorageClientContext {
     if (!corePipeline) {
       throw new Error("Pipeline is required in options");
     }
+    this.pipeline = corePipeline;
     (this.fileClient as any).pipeline = corePipeline;
     this.fileClient["_client"].pipeline = corePipeline;
   }
