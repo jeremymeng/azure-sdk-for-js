@@ -174,9 +174,14 @@ export abstract class StorageClient {
       coreClientOptions.credential = this.credential;
     }
 
-    this.storageClientContext = new StorageClientContext(this.dfsEndpointUrl, coreClientOptions);
+    // Create StorageClientContext with account-level URLs (no path segments).
+    // The generated operations add /{filesystem}/{path} via URL templates.
+    const dfsAccountUrl = new URL(this.dfsEndpointUrl).origin;
+    const blobAccountUrl = new URL(this.blobEndpointUrl).origin;
+
+    this.storageClientContext = new StorageClientContext(dfsAccountUrl, coreClientOptions);
     this.storageClientContextToBlobEndpoint = new StorageClientContext(
-      this.blobEndpointUrl,
+      blobAccountUrl,
       coreClientOptions,
     );
 
