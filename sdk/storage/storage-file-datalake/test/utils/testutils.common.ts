@@ -3,6 +3,8 @@
 
 import type { AccessToken, GetTokenOptions, TokenCredential } from "@azure/core-auth";
 import type { Recorder, RecorderStartOptions } from "@azure-tools/test-recorder";
+import type { TestContext } from "vitest";
+import { Recorder as RecorderImpl } from "@azure-tools/test-recorder";
 import { isPlaybackMode, delay } from "@azure-tools/test-recorder";
 import type { FindReplaceSanitizer } from "@azure-tools/test-recorder";
 import type {
@@ -72,6 +74,17 @@ export const recorderEnvSetup: RecorderStartOptions = {
     "AZSDK3493", // .name in the body is not a secret and is listed below in the beforeEach section
   ],
 };
+
+export async function createAndStartRecorder(testContext?: TestContext): Promise<Recorder> {
+  const recorder = new RecorderImpl(testContext);
+  await recorder.start(recorderEnvSetup);
+  await recorder.addSanitizers({ uriSanitizers: uriSanitizers }, ["record", "playback"]);
+  await recorder.setMatcher("CustomDefaultMatcher", {
+    excludedHeaders: ["Accept"],
+    ignoreQueryOrdering: true,
+  });
+  return recorder;
+}
 
 /**
  * A TokenCredential that always returns the given token. This class can be

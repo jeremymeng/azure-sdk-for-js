@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Recorder } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
 import { DataLakeServiceClient, getDataLakeServiceAccountAudience } from "../../src/index.js";
 import {
-  recorderEnvSetup,
   getConnectionStringFromEnvironment,
   getDataLakeServiceClient,
   configureStorageClient,
   SimpleTokenCredential,
+  createAndStartRecorder,
 } from "../utils/index.js";
 import { createTestCredential } from "@azure-tools/test-credential";
 import { describe, it, assert, beforeEach, afterEach } from "vitest";
@@ -17,8 +17,7 @@ describe("DataLakeServiceClient", () => {
   let recorder: Recorder;
 
   beforeEach(async (ctx) => {
-    recorder = new Recorder(ctx);
-    await recorder.start(recorderEnvSetup);
+    recorder = await createAndStartRecorder(ctx);
   });
 
   afterEach(async () => {

@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { isLiveMode, Recorder } from "@azure-tools/test-recorder";
+import { isLiveMode } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
 import { type DataLakeFileClient, type DataLakeFileSystemClient } from "../../src/index.js";
-import {
-  getDataLakeServiceClient,
-  getUniqueName,
-  recorderEnvSetup,
-  uriSanitizers,
-} from "../utils/index.js";
+import { getDataLakeServiceClient, getUniqueName, createAndStartRecorder } from "../utils/index.js";
 import { getBrowserFile, arrayBufferEqual } from "../utils/index-browser.mjs";
 import { MB } from "../../src/utils/constants.js";
 import { describe, it, assert, beforeEach, afterEach, beforeAll } from "vitest";
@@ -25,9 +21,7 @@ describe("ContentChecksumValidation with client config - CRC64", () => {
   let recorder: Recorder;
 
   beforeEach(async (ctx) => {
-    recorder = new Recorder(ctx);
-    await recorder.start(recorderEnvSetup);
-    await recorder.addSanitizers({ uriSanitizers }, ["record", "playback"]);
+    recorder = await createAndStartRecorder(ctx);
     const serviceClient = getDataLakeServiceClient(recorder, {
       uploadContentChecksumAlgorithm: "StorageCrc64",
       downloadContentChecksumAlgorithm: "StorageCrc64",

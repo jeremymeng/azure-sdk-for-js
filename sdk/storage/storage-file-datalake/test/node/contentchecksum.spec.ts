@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { isLiveMode, Recorder } from "@azure-tools/test-recorder";
+import { isLiveMode } from "@azure-tools/test-recorder";
+import type { Recorder } from "@azure-tools/test-recorder";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { type DataLakeFileClient, type DataLakeFileSystemClient } from "../../src/index.js";
@@ -10,7 +11,7 @@ import {
   createRandomLocalFile,
   getDataLakeServiceClient,
   getUniqueName,
-  recorderEnvSetup,
+  createAndStartRecorder,
 } from "../utils/index.js";
 import { MB, FILE_MAX_SINGLE_UPLOAD_THRESHOLD } from "../../src/utils/constants.js";
 import { readStreamToLocalFileWithLogs } from "../utils/testutils.node.js";
@@ -31,8 +32,7 @@ describe("ContentChecksumValidation with client config - CRC64", () => {
   let recorder: Recorder;
 
   beforeEach(async (ctx) => {
-    recorder = new Recorder(ctx);
-    await recorder.start(recorderEnvSetup);
+    recorder = await createAndStartRecorder(ctx);
     await recorder.addSanitizers(
       {
         removeHeaderSanitizer: {
