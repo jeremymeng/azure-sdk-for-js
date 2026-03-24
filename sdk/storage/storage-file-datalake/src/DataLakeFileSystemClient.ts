@@ -8,7 +8,7 @@ import { isPipelineLike, newPipeline } from "./Pipeline.js";
 import { StorageSharedKeyCredential } from "./credentials/StorageSharedKeyCredential.js";
 import { AnonymousCredential } from "@azure/storage-blob";
 import { DataLakeLeaseClient } from "./DataLakeLeaseClient.js";
-import { FileSystemOperationsImpl as FileSystem } from "./generated/src/operations/index.js";
+import type { FileSystemOperations } from "./generated/index.js";
 import type {
   AccessPolicy,
   FileSystemCreateOptions,
@@ -48,6 +48,7 @@ import { StorageClient } from "./StorageClient.js";
 import { toContainerPublicAccessType, toPublicAccessType, toPermissions } from "./transforms.js";
 import { tracingClient } from "./utils/tracing.js";
 import {
+  adjustResponse,
   appendToURLPath,
   appendToURLQuery,
   assertResponse,
@@ -71,12 +72,12 @@ export class DataLakeFileSystemClient extends StorageClient {
   /**
    * fileSystemContext provided by protocol layer.
    */
-  private fileSystemContext: FileSystem;
+  private fileSystemContext: FileSystemOperations;
 
   /**
    * fileSystemContext provided by protocol layer.
    */
-  private fileSystemContextToBlobEndpoint: FileSystem;
+  private fileSystemContextToBlobEndpoint: FileSystemOperations;
 
   /**
    * blobContainerClient provided by `@azure/storage-blob` package.
@@ -136,8 +137,8 @@ export class DataLakeFileSystemClient extends StorageClient {
       super(url, pipeline, options);
     }
 
-    this.fileSystemContext = new FileSystem(this.storageClientContext);
-    this.fileSystemContextToBlobEndpoint = new FileSystem(this.storageClientContextToBlobEndpoint);
+    this.fileSystemContext = this.storageClientContext.fileSystem;
+    this.fileSystemContextToBlobEndpoint = this.storageClientContextToBlobEndpoint.fileSystem;
     this.blobContainerClient = new ContainerClient(this.blobEndpointUrl, this.pipeline);
   }
 
@@ -602,12 +603,14 @@ export class DataLakeFileSystemClient extends StorageClient {
       "DataLakeFileSystemClient-listPathsSegment",
       options,
       async (updatedOptions) => {
-        const rawResponse = await this.fileSystemContext.listPaths(options.recursive || false, {
-          continuation,
-          ...updatedOptions,
-          upn: options.userPrincipalName,
-          beginFrom: options.startFrom,
-        });
+        const rawResponse = adjustResponse(
+          await this.fileSystemContext.listPaths(this.name, options.recursive || false, {
+            continuation,
+            ...updatedOptions,
+            upn: options.userPrincipalName,
+            beginFrom: options.startFrom,
+          }),
+        );
 
         const response = rawResponse as FileSystemListPathsResponse;
         response.pathItems = [];
@@ -617,6 +620,7 @@ export class DataLakeFileSystemClient extends StorageClient {
             permissions: toPermissions(path.permissions),
             createdOn: windowsFileTimeTicksToTime(path.creationTime),
             expiresOn: windowsFileTimeTicksToTime(path.expiryTime),
+            lastModified: path.lastModified ? new Date(path.lastModified) : undefined,
           });
         }
         delete rawResponse.paths;
@@ -795,11 +799,13 @@ export class DataLakeFileSystemClient extends StorageClient {
       "DataLakeFileSystemClient-listDeletedPathsSegment",
       options,
       async (updatedOptions) => {
-        const rawResponse = await this.fileSystemContextToBlobEndpoint.listBlobHierarchySegment({
-          marker: continuation,
-          ...updatedOptions,
-          prefix: options.prefix === "" ? undefined : options.prefix,
-        });
+        const rawResponse = adjustResponse(
+          await this.fileSystemContextToBlobEndpoint.listBlobHierarchySegment(this.name, {
+            marker: continuation,
+            ...updatedOptions,
+            prefix: options.prefix === "" ? undefined : options.prefix,
+          }),
+        );
 
         const response = rawResponse as FileSystemListDeletedPathsResponse;
         response.pathItems = [];
@@ -847,11 +853,13 @@ export class DataLakeFileSystemClient extends StorageClient {
         );
 
         const rawResponse = assertResponse<PathUndeleteHeaders, PathUndeleteHeaders>(
-          await pathClient.blobPathContext.undelete({
-            undeleteSource: "?" + DeletionIdKey + "=" + deletionId,
-            ...options,
-            tracingOptions: updatedOptions.tracingOptions,
-          }),
+          adjustResponse(
+            await pathClient.blobPathContext.undelete(pathClient.fileSystemName, pathClient.name, {
+              undeleteSource: "?" + DeletionIdKey + "=" + deletionId,
+              ...options,
+              tracingOptions: updatedOptions.tracingOptions,
+            }),
+          ),
         );
 
         if (rawResponse.resourceType === PathResultTypeConstants.DirectoryResourceType) {

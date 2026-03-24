@@ -8,6 +8,7 @@ import {
   CpkInfo,
   DataLakeGetUserDelegationKeyParameters,
   FileSystemEncryptionScope,
+  Metadata,
   PathAccessControlItem,
   PathPermissions,
   StorageChecksumAlgorithm,
@@ -21,9 +22,10 @@ import {
   UrlConstants,
 } from "./constants.js";
 import type { HttpResponse } from "@azure/storage-blob";
-import type { HttpHeadersLike } from "@azure/core-http-compat";
+import type { HttpHeadersLike, RawHttpHeaders } from "@azure/core-http-compat";
 import { toAcl, toPermissions } from "../transforms.js";
 import { PathHttpHeaders } from "../generated-classic-models.js";
+import type { StorageCompatResponseInfo } from "../generated/static-helpers/storageCompatResponse.js";
 import { StorageCRC64Calculator, structuredMessageEncoding } from "@azure/storage-common";
 
 /**
@@ -631,6 +633,29 @@ export function EscapePath(pathName: string): string {
   return split.join("/");
 }
 
+const xMsMetaPrefix = "x-ms-meta-";
+
+export function metadataToRawHeaders(metadata: Metadata | undefined): RawHttpHeaders {
+  const metadataHeaders: RawHttpHeaders = {};
+  if (metadata) {
+    for (const key of Object.keys(metadata)) {
+      metadataHeaders[`${xMsMetaPrefix}${key.toLowerCase()}`] = metadata[key];
+    }
+  }
+  return metadataHeaders;
+}
+
+export function rawHeadersToMetadata(rawHeaders: RawHttpHeaders): Metadata {
+  const metadata: Metadata = {};
+  for (const key of Object.keys(rawHeaders)) {
+    if (key.toLowerCase().startsWith(xMsMetaPrefix)) {
+      const metadataKey = key.substring(xMsMetaPrefix.length);
+      metadata[metadataKey] = rawHeaders[key] as string;
+    }
+  }
+  return metadata;
+}
+
 /**
  * A typesafe helper for ensuring that a given response object has
  * the original _response attached.
@@ -645,6 +670,43 @@ export function assertResponse<T extends object, Headers = undefined, Body = und
   }
 
   throw new TypeError(`Unexpected response object ${response}`);
+}
+
+export function adjustResponse<
+  T extends object,
+  THeaders extends Record<string, unknown>,
+  TBody = unknown,
+>(
+  result: T & StorageCompatResponseInfo<TBody, THeaders>,
+): T & {
+  _response: HttpResponse & {
+    parsedHeaders: THeaders;
+    bodyAsText: string;
+    parsedBody: TBody;
+  };
+} {
+  const rawResponse = result._response.rawResponse as unknown as HttpResponse & {
+    parsedHeaders: THeaders;
+    bodyAsText: string;
+    parsedBody: TBody;
+  };
+  rawResponse.parsedHeaders = { ...result._response.parsedHeaders };
+  if (result._response.parsedBody !== undefined) {
+    rawResponse.parsedBody = result._response.parsedBody;
+  }
+  rawResponse.bodyAsText = result._response.rawResponse.bodyAsText ?? "";
+  Object.defineProperty(result, "_response", {
+    value: rawResponse,
+    enumerable: false,
+  });
+
+  return result as T & {
+    _response: HttpResponse & {
+      parsedHeaders: THeaders;
+      bodyAsText: string;
+      parsedBody: TBody;
+    };
+  };
 }
 
 export interface PathGetPropertiesRawResponseWithExtraPropertiesLike {
@@ -703,6 +765,7 @@ export function ParsePathGetPropertiesExtraHeaderValues(
 interface UploadChecksumParametersLike {
   /** Parameter group */
   pathHttpHeaders?: PathHttpHeaders;
+  transactionalContentHash?: Uint8Array;
   transactionalContentCrc64?: Uint8Array;
   contentChecksumAlgorithm?: StorageChecksumAlgorithm;
   structuredBodyType?: string;
@@ -748,7 +811,7 @@ export async function setUploadChecksumParameters(
       };
     } else {
       parameters.pathHttpHeaders.transactionalContentHash = uploadOptions.transactionalContentMD5;
-      (parameters as any).transactionalContentHash = uploadOptions.transactionalContentMD5;
+      parameters.transactionalContentHash = uploadOptions.transactionalContentMD5;
     }
     parameters.transactionalContentCrc64 = uploadOptions.transactionalContentCrc64;
   } else if (contentChecksumAlgorithm === "StorageCrc64") {

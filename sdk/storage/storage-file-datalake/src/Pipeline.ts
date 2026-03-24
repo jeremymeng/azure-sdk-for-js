@@ -30,7 +30,7 @@ import {
   decompressResponsePolicyName,
 } from "@azure/core-rest-pipeline";
 import { authorizeRequestOnTenantChallenge, createClientPipeline } from "@azure/core-client";
-import { parseXML, stringifyXML } from "@azure/core-xml";
+import { XMLBuilder, XMLParser, XMLValidator } from "fast-xml-parser";
 import type { TokenCredential } from "@azure/core-auth";
 import { isTokenCredential } from "@azure/core-auth";
 
@@ -61,6 +61,69 @@ import {
   isPipelineLike,
   Pipeline,
 } from "@azure/storage-blob";
+
+interface XmlOptions {
+  rootName?: string;
+  includeRoot?: boolean;
+  xmlCharKey?: string;
+  cdataPropName?: string;
+  stopNodes?: string[];
+}
+
+function stringifyXML(obj: unknown, opts: XmlOptions = {}): string {
+  const rootNodeName = opts.rootName ?? "root";
+  const builder = new XMLBuilder({
+    attributesGroupName: "$",
+    textNodeName: opts.xmlCharKey ?? "_",
+    ignoreAttributes: false,
+    attributeNamePrefix: "@_",
+    format: true,
+    suppressEmptyNode: true,
+    indentBy: "",
+    cdataPropName: opts.cdataPropName ?? "__cdata",
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${builder
+    .build({ [rootNodeName]: obj })
+    .replace(/\n/g, "")}`;
+}
+
+async function parseXML(str: string, opts: XmlOptions = {}): Promise<unknown> {
+  if (!str) {
+    throw new Error("Document is empty");
+  }
+
+  const validation = XMLValidator.validate(str);
+  if (validation !== true) {
+    throw validation;
+  }
+
+  const parser = new XMLParser({
+    attributesGroupName: "$",
+    textNodeName: opts.xmlCharKey ?? "_",
+    ignoreAttributes: false,
+    parseAttributeValue: false,
+    parseTagValue: false,
+    attributeNamePrefix: "",
+    stopNodes: opts.stopNodes,
+    processEntities: true,
+    trimValues: false,
+  });
+  const parsedXml = parser.parse(str) as Record<string, unknown>;
+
+  if (parsedXml["?xml"]) {
+    delete parsedXml["?xml"];
+  }
+
+  if (!opts.includeRoot) {
+    for (const key of Object.keys(parsedXml)) {
+      const value = parsedXml[key];
+      return typeof value === "object" && value !== null ? { ...value } : value;
+    }
+  }
+
+  return parsedXml;
+}
 
 // Export following interfaces and types for customers who want to implement their
 // own RequestPolicy or HTTPClient
