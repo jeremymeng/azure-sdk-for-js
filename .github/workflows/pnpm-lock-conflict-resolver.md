@@ -3,6 +3,10 @@ on:
   workflow_dispatch:  # Manual trigger
   pull_request:
     types: [opened, synchronize]
+  pull_request_target:
+    types: [labeled]
+labels: [resolve-lockfile-conflict]
+if: github.event.label.name == 'resolve-lockfile-conflict'
 description: "resolve pnpm-lock.yaml comflict in pull requests"
 permissions:
   contents: read
@@ -16,9 +20,8 @@ tools:
 network: defaults
 safe-outputs:
   push-to-pull-request-branch:
-    allowed-files: ["pnpm-lock.yaml", "sdk/", "eng/tools", "common/tools/"]
+    protected-files: allowed # merging from main could bring any file changes
   update-pull-request:
-
 ---
 
 # pnpm-lock-conflict-resolver
