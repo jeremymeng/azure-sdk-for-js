@@ -6,6 +6,7 @@
  */
 
 import { DataLakeServiceClient, StorageSharedKeyCredential } from "@azure/storage-file-datalake";
+import { text } from "node:stream/consumers";
 
 // Load the .env file if it exists
 import "dotenv/config";
@@ -83,7 +84,7 @@ export async function main(): Promise<void> {
     throw new Error("Expected a readable stream body, but none was returned.");
   }
 
-  const readFileContent = (await streamToBuffer(readFileResponse.readableStreamBody)).toString();
+  const readFileContent = await text(readFileResponse.readableStreamBody);
 
   console.log(`Downloaded file content: ${readFileContent}`);
 
@@ -91,20 +92,6 @@ export async function main(): Promise<void> {
   await fileSystemClient.delete();
 
   console.log(`Deleted file system ${fileSystemClient.name}.`);
-}
-
-// A helper method used to read a Node.js readable stream into a Buffer
-async function streamToBuffer(readableStream: NodeJS.ReadableStream): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    readableStream.on("data", (data: Buffer | string) => {
-      chunks.push(typeof data === "string" ? Buffer.from(data) : data);
-    });
-    readableStream.on("end", () => {
-      resolve(Buffer.concat(chunks));
-    });
-    readableStream.on("error", reject);
-  });
 }
 
 main().catch((error) => {

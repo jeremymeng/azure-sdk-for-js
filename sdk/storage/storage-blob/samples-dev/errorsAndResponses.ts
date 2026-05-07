@@ -8,7 +8,7 @@
 
 import { BlobServiceClient } from "@azure/storage-blob";
 
-import { streamToBuffer } from "./utils/stream.js";
+import { text } from "node:stream/consumers";
 
 // Load the .env file if it exists
 import "dotenv/config";
@@ -93,9 +93,7 @@ async function main(): Promise<void> {
     blockBlobClient = containerClient.getBlockBlobClient(blobName);
     const downloadBlockBlobResponse = await blockBlobClient.download();
     console.log(
-      `Downloaded blob content - ${(
-        await streamToBuffer(downloadBlockBlobResponse.readableStreamBody!)
-      ).toString()},`,
+      `Downloaded blob content - ${await text(downloadBlockBlobResponse.readableStreamBody!)},`,
     );
     console.log(
       `requestId - ${downloadBlockBlobResponse.requestId}, statusCode - ${downloadBlockBlobResponse._response.status}\n`,

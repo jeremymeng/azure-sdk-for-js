@@ -23,7 +23,7 @@
 
 import { ContainerClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 
-import { streamToBuffer } from "./utils/stream.js";
+import { text } from "node:stream/consumers";
 
 // Load the .env file if it exists
 import "dotenv/config";
@@ -67,7 +67,7 @@ async function main(): Promise<void> {
 
   console.log(
     "Downloaded blob content",
-    (await streamToBuffer(response.readableStreamBody!)).toString(),
+    await text(response.readableStreamBody!),
   );
 
   // Delete container
