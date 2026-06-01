@@ -259,24 +259,19 @@ that have been tested to confirm support for managed identity authentication.
 
 ### InteractiveBrowserCredential
 
-The `InteractiveBrowserCredential` follows the [implicit grant
-flow](https://learn.microsoft.com/azure/active-directory/develop/v2-oauth2-implicit-grant-flow)
-which enables authentication for clients that run completely in the browser. It
-is primarily useful for single-page web applications (SPAs) which need to
-authenticate to access Azure resources and APIs directly.
+The `InteractiveBrowserCredential` enables interactive authentication to
+Microsoft Entra ID in the browser and in Node.js. In Node.js, it uses the
+[authorization code flow with PKCE](https://learn.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow)
+by default. It is primarily useful for single-page web applications (SPAs) and
+desktop/CLI applications that can open a browser window for interactive sign-in.
 
-To use this credential successfully, your app registration will need to be
-configured with both the **Access tokens** and **ID tokens** options checked under
-**Implicit grant** in the **Authentication** page.
-
-You will also need to add a redirect URI in the **Redirect URIs** section of the
-**Authentication** page for your app registration. The redirect URI must point
-to the URI of your web application. You must also make sure to specify the same
-URI in the `redirectUri` field of the `InteractiveBrowserCredentialOptions` when
-creating an `InteractiveBrowserCredential`.
-
-> NOTE: At this time, this credential can only be used in the browser but
-> Node.js support will be added in the future (see issue [#4774](https://github.com/Azure/azure-sdk-for-js/issues/4774)).
+To use this credential successfully, you need to add a redirect URI in the
+**Redirect URIs** section of the **Authentication** page for your app
+registration. The redirect URI must point to the URI of your web application
+(or `http://localhost` for local development). You must also make sure to
+specify the same URI in the `redirectUri` field of the
+`InteractiveBrowserCredentialOptions` when creating an
+`InteractiveBrowserCredential`.
 
 ### DeviceCodeCredential
 
@@ -314,7 +309,12 @@ which tries each of the following credential types in order until one of them
 succeeds:
 
 - `EnvironmentCredential`
+- `WorkloadIdentityCredential`
 - `ManagedIdentityCredential`
+- `VisualStudioCodeCredential`
+- `AzureCliCredential`
+- `AzurePowerShellCredential`
+- `AzureDeveloperCliCredential`
 
 This credential type is ideal when one of the credentials in the chain will work
 in the current environment, whether it's your local development or a production
