@@ -9,15 +9,15 @@ If you're looking to be onboarded to the asset-sync workflow to push out the tes
 | script name             | What does it do?                                                                                                |
 |:------------------------|:----------------------------------------------------------------------------------------------------------------|
 | `pnpm install`          | Updates dependencies                                                                                            |
-| `pnpm -F {./}... build` | Expected to be run from inside your package(`sdk/service-name/package-name`). Builds the whole dependency tree. |
+| `pnpm turbo build --filter=<package-name>... --token 1` | Run from the repo root to build a package and its dependency tree. |
 |                         |                                                                                                                 |
 
 ## Commands - to run the tests inside the package directory
 
 | script name         | command(usually)                     |
 |:--------------------|:-------------------------------------|
-| `pnpm test:browser` | `dev-tool run test:vitest --browser` |
-| `pnpm test:node`    | `dev-tool run test:vitest`           |
+| `pnpm test:browser` | `pnpm run test:browser` |
+| `pnpm test:node`    | `pnpm run test:node`    |
 |                        |                                      |
 
 ## After migrating to asset-sync
@@ -62,7 +62,7 @@ export default mergeConfig(
 ```ts
    it.only("test title...")
 ```
-Run the test command such as `pnpm unit-test:node` to run the test
+Run the test command such as `pnpm test:node` to run the test
 
 [powershell]: https://github.com/PowerShell/PowerShell
 

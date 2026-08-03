@@ -20,16 +20,16 @@ If the generated code does not fit your needs, you can use the JavaScript custom
 
 Install `js-sdk-release-tools`
 ```
-npm --prefix eng/tools/js-sdk-release-tools ci
+npm ci --prefix eng/tools/js-sdk-release-tools
 ```
 
 After you build your package, run
 ```
-npm --prefix eng/tools/js-sdk-release-tools exec --no -- changelog-tool <your-package-path>
+npm exec --prefix eng/tools/js-sdk-release-tools --no -- changelog-tool <your-package-path>
 ```
 Here is the example
 ```
-npm --prefix eng/tools/js-sdk-release-tools exec --no -- changelog-tool sdk/advisor/arm-advisor
+npm exec --prefix eng/tools/js-sdk-release-tools --no -- changelog-tool sdk/advisor/arm-advisor
 ```
 
 # Improve README.md document
