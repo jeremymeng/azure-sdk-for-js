@@ -70,8 +70,7 @@ not duplicate findings from other agents.
 
 ## Using Agents Locally in VS Code
 
-The same agents are available as **custom agents** in VS Code Copilot Chat
-(via Copilot CLI). Their definitions live in `.github/agents/*.agent.md`.
+The same agents are available as **custom agents** in VS Code Copilot Chat and in Copilot CLI. Their definitions live in `.github/agents/*.agent.md`, and the CI triggers live in `.github/workflows/*.md` plus the generated `.lock.yml` files.
 
 ### Prerequisites
 
@@ -168,7 +167,8 @@ Agent definitions and their detailed review guidelines are stored in:
     ├── mgmt-review.md / mgmt-review.lock.yml
     ├── scribe.md / scribe.lock.yml
     ├── sentinel.md / sentinel.lock.yml
-    └── tester.md / tester.lock.yml
+    ├── tester.md / tester.lock.yml
+    └── upgrade-agentic-workflows.md / upgrade-agentic-workflows.lock.yml
 ```
 
 - **`.github/agents/*.agent.md`** — Defines the agent persona, checklist, scope,
