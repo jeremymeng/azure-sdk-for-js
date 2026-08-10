@@ -40,7 +40,7 @@ Please note that this quickstart is based on version 4.x of the recorder tool (`
 
 - pnpm
   - Install/update pnpm globally via [pnpm installation instructions](https://pnpm.io/installation)
-- Any of [the LTS versions of Node.js](https://github.com/nodejs/release#release-schedule)
+- Any of [the LTS versions of Node.js](https://github.com/nodejs/release#release-schedule) (the repo currently requires Node.js 22 or later; see the root `package.json` `engines.node` field)
 - A C++ compiler toolchain and Python (for compiling machine-code modules)
   - Refer [here](https://github.com/Azure/azure-sdk-for-js/blob/main/CONTRIBUTING.md#prerequisites) for more details
 
@@ -48,11 +48,11 @@ To be able to leverage the asset-sync workflow
 
 - Install [Powershell](https://github.com/PowerShell/PowerShell)
   - Make sure "pwsh" command works at this step (If you follow the above link, "pwsh" is typically added to the system environment variables by default)
-- Add `dev-tool` to the `devDependencies` in the `package.json`.
+- No extra package installation is required for `dev-tool`; run it from this repo with `npx dev-tool ...` after `pnpm install`.
 
 # How to run test
 
-This section describes how to run the SDK tests. If you want to run the tests of a specific project, go to that project's folder and execute `pnpm test`. All of the tests will automatically run both in NodeJS and in the browser. To target these environments individually, you can run `pnpm test:node` and `pnpm test:browser`. Let's take `purview-datamap-rest` as an example.
+This section describes how to run the SDK tests. If you want to run the tests of a specific project, go to that project's folder and execute `pnpm test`. Many packages run both Node.js and browser suites from that command, while some packages intentionally skip one environment. To target environments individually, use the scripts defined in the package such as `pnpm test:node` and `pnpm test:browser`. Let's take `purview-datamap-rest` as an example.
 
 To select a subset of test files and/or test cases:
 
