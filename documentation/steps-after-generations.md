@@ -253,7 +253,7 @@ TypeScript emitter can only help you generate SDK code, there is something you n
 
 ## CHANGELOG.md
 
-CHANGELOG can help customers know the change of new version quickly, so you need to update it according to the change of this new version. It is also necessary to update release date like `1.0.0-beta.1 (2022-11-11)` (rough time is fine and no need to be very accurate).
+CHANGELOG can help customers know the change of new version quickly, so you need to update it according to the change of this new version. The top changelog entry should match the package version and normally stays in the unreleased format (for example `1.0.0-beta.1 (Unreleased)`) until release.
 
 ## Version Number
 

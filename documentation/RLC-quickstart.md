@@ -15,9 +15,9 @@ Join the [JavaScript - Reviews](https://teams.microsoft.com/l/channel/19%3a408c5
 
 ## Prerequisites
 
-- [LTS versions of Node.js](https://nodejs.org/en/about/releases/)
+- Node.js 22 or later (matches the repo's `package.json` engines and `.nvmrc`)
 - Install pnpm via the [pnpm installation instructions](https://pnpm.io/installation).
-- Install tsp-client dependencies with `npm --prefix eng/common/tsp-client ci`
+- Install `tsp-client` dependencies: `npm --prefix eng/common/tsp-client ci`
 
 # Set up your development environment
 
@@ -27,21 +27,19 @@ Follow the [setup guide](https://github.com/Azure/azure-sdk-for-js/blob/main/CON
 
 The `service name` is a concise identifier for the Azure service and should be consistent across all SDK languages. It's typically the name of the directory in the `azure-rest-api-specs` repository containing your service's REST API definition.
 
-The `package name` is used when publishing to [npmjs](https://www.npmjs.com/). It usually follows the format `@azure/{service-name}-rest` or `@azure/{service-name}-{module}-rest` for services with multiple modules.
+The `package name` is used when publishing to [npmjs](https://www.npmjs.com/). It usually follows the format `@azure-rest/{service-name}` or `@azure-rest/{service-name}-{module}` for services with multiple modules.
 
 # Structure your project
 
-1. **SDK Repo Root**: the generated libraries should be in the [azure-sdk-for-js](https://github.com/Azure/azure-sdk-for-js) repo, so fork and clone it in your local. Then, the absolute path is called **${SDK_REPO_ROOT} folder**.
-
-1. **Project Folder Structure**: the typical structure is `sdk/{servicename}/{servicename}-{modulename}-rest`, e.g., `sdk/agrifood/agrifood-farming-rest`. That folder is under {SDK_REPO_ROOT} and will be your **${PROJECT_ROOT} folder**. 
-
-1. **Package Name Convention**: follow the format `@azure-rest/{service-name}-{module}`, like `@azure-rest/agrifood-farming`.
+1. **SDK Repo Root**: the generated libraries should be in the [azure-sdk-for-js](https://github.com/Azure/azure-sdk-for-js) repo, so fork and clone it locally. The absolute path to that clone is your **${SDK_REPO_ROOT}** folder.
+2. **Project Folder Structure**: the typical structure is `sdk/{service-name}/{package-directory}-rest`. For example, `sdk/agrifood/agrifood-farming-rest` is a current package path in this repo. That folder is under `${SDK_REPO_ROOT}` and will be your **${PROJECT_ROOT}** folder.
+3. **Package Name Convention**: follow the format `@azure-rest/{service-name}-{module}`, like `@azure-rest/agrifood-farming`.
 
 # Steps to generate RLC
 
-1. **Configure tspconfig.yaml in spec repository** 
-   
-   In your specs repository, update or create `tspconfig.yaml` to configure the TypeScript emitter. Replace `YOUR_SERVICE_DIRECTORY`, `YOUR_SERVICE_FOLDER` and `YOUR_PACKAGE_NAME` with your specific details.
+1. **Configure `tspconfig.yaml` in the spec repository**
+
+   In your specs repository, update or create `tspconfig.yaml` to configure the TypeScript emitter. Replace `YOUR_SERVICE_DIRECTORY`, `YOUR_PACKAGE_DIRECTORY`, and `YOUR_PACKAGE_NAME` with your specific details.
 
    ```yaml
    parameters:
@@ -52,7 +50,7 @@ The `package name` is used when publishing to [npmjs](https://www.npmjs.com/). I
 
    options:
      "@azure-tools/typespec-ts":
-       emitter-output-dir: "{output-dir}/{service-dir}/YOUR_SERVICE_FOLDER-rest"
+       emitter-output-dir: "{output-dir}/{service-dir}/YOUR_PACKAGE_DIRECTORY-rest"
        is-modular-library: false
        package-details:
          name: YOUR_PACKAGE_NAME
@@ -61,45 +59,46 @@ The `package name` is used when publishing to [npmjs](https://www.npmjs.com/). I
    ```
 
 2. **Generate code**
-    
-    **Initialize a new TypeScript RLC library**
-    
-    For initial set up, use the `tsp-client` CLI tool to initialize the generation process. From the root of your local `azure-sdk-for-js` repository clone, run the following command, replacing `YOUR_REMOTE_TSPCONFIG_URL` with the URL to your TypeSpec configuration file:
 
-    ```sh
-    npm --prefix eng/common/tsp-client exec --no -- tsp-client init -c YOUR_REMOTE_TSPCONFIG_URL
-    ```
+   **Initialize a new TypeScript RLC library**
 
-    If you are generating the RLC library for Azure Cognitive Services Content Safety, and your TypeSpec configuration file is located at `https://github.com/Azure/azure-rest-api-specs/blob/46ca83821edd120552403d4d11cf1dd22360c0b5/specification/cognitiveservices/ContentSafety/tspconfig.yaml`, you would initialize the library like this:
+   From the root of your local `azure-sdk-for-js` clone, run:
 
-    ```shell
-    npm --prefix eng/common/tsp-client exec --no -- tsp-client init -c https://github.com/Azure/azure-rest-api-specs/blob/46ca83821edd120552403d4d11cf1dd22360c0b5/specification/cognitiveservices/ContentSafety/tspconfig.yaml
-    ```
+   ```sh
+   npm --prefix eng/common/tsp-client exec --no -- tsp-client init -c YOUR_REMOTE_TSPCONFIG_URL
+   ```
 
-    This command sets up your local SDK repository with the necessary structure and files based on your `tspconfig.yaml` file and then generate SDKs with given url typespec.
+   For example:
 
-    **Re-generate an existing TypeScript RLC library**
-    
-    If you'd like to update/regenerate an existing SDK, go to your SDK folder and then update `tsp-location.yaml`. You can refer to the [tsp-location.yaml](https://github.com/Azure/azure-sdk-tools/blob/main/doc/common/TypeSpec-Project-Scripts.md#tsp-locationyaml) which describes the supported properties in the file.
+   ```sh
+   npm --prefix eng/common/tsp-client exec --no -- tsp-client init -c https://github.com/Azure/azure-rest-api-specs/blob/46ca83821edd120552403d4d11cf1dd22360c0b5/specification/cognitiveservices/ContentSafety/tspconfig.yaml
+   ```
 
-    ```yaml
-    directory: specification/agrifood/DataPlane
-    commit: b646a42aa3b7a0ce488d05f1724827ea41d12cf1 # the commit id you'd like to refer for generation
-    repo: Azure/azure-rest-api-specs
-    ```
-    
-    Run the `update` command from SDK directory (i.e sdk/agrifood/agrifood-farming) to re-generate the code:
+   This command sets up your local SDK repository with the necessary structure and files based on your `tspconfig.yaml` file.
 
-    ```shell
-    npm --prefix ../../../eng/common/tsp-client exec --no -- tsp-client update
-    ```
+   **Re-generate an existing TypeScript RLC library**
 
-    ---  
-    **NOTE**
-    The version of typespec-ts is configured in [emitter-package.json](https://github.com/Azure/azure-sdk-for-js/blob/main/eng/emitter-package.json) and relevant lock file [emitter-package-lock.json](https://github.com/Azure/azure-sdk-for-js/blob/main/eng/emitter-package-lock.json). Change them in local, if you would like to use a different version of typespec-ts.
+   If you'd like to update/regenerate an existing SDK, go to your SDK folder and update `tsp-location.yaml`. You can refer to the [tsp-location.yaml documentation](https://github.com/Azure/azure-sdk-tools/blob/main/doc/common/TypeSpec-Project-Scripts.md#tsp-locationyaml), which describes the supported properties in the file.
 
-    --- 
+   ```yaml
+   directory: specification/agrifood/DataPlane
+   commit: b646a42aa3b7a0ce488d05f1724827ea41d12cf1 # the commit id you'd like to use for generation
+   repo: Azure/azure-rest-api-specs
+   ```
+
+   Run the `update` command from the SDK directory (e.g. `sdk/agrifood/agrifood-farming-rest`):
+
+   ```sh
+   npm --prefix ../../../eng/common/tsp-client exec --no -- tsp-client update
+   ```
+
+   ---
+   **NOTE**
+
+   The version of `@azure-tools/typespec-ts` is configured in [eng/emitter-package.json](https://github.com/Azure/azure-sdk-for-js/blob/main/eng/emitter-package.json) and the workspace lockfile `pnpm-lock.yaml`.
+
+   ---
 
 # After SDK generation
 
-The generated code is not enough to release at once and you need to update it for better usage experience. Please follow [steps after generation guide](https://github.com/Azure/azure-sdk-for-js/blob/main/documentation/steps-after-generations.md) to check the code.
+The generated code is not enough to release at once and you need to update it for better usage experience. Please follow the [steps after generation guide](https://github.com/Azure/azure-sdk-for-js/blob/main/documentation/steps-after-generations.md) to check the code.
