@@ -71,7 +71,7 @@ not duplicate findings from other agents.
 ## Using Agents Locally in VS Code
 
 The same agents are available as **custom agents** in VS Code Copilot Chat
-(via Copilot CLI). Their definitions live in `.github/agents/*.agent.md`.
+(via Copilot CLI). Their definitions live under `.github/agents/`.
 
 ### Prerequisites
 
@@ -133,7 +133,7 @@ In the Copilot Chat panel, use the `@` prefix to summon an agent by name:
 - You can ask an agent to review specific files, a git diff, or the entire
   branch.
 - Agents follow the detailed guidance and references in `.github/prompts/`.
-- Agents respect the same scoping rules as in CI: they ignore `src/generated/`,
+- Agents respect the same scoping rules as in CI: they ignore `generated/`,
   `snippets.spec.ts`, formatting issues, and domains outside their expertise.
 
 ## Agent Configuration
@@ -160,6 +160,7 @@ Agent definitions and their detailed review guidelines are stored in:
 │   ├── mgmt-review-guidelines.md
 │   ├── documentation-review-guidelines.md
 │   ├── security-review-guidelines.md
+│   ├── test-recording.prompt.md
 │   └── test-review-guidelines.md
 └── workflows/                       # CI workflow triggers
     ├── archie.md / archie.lock.yml
@@ -168,15 +169,17 @@ Agent definitions and their detailed review guidelines are stored in:
     ├── mgmt-review.md / mgmt-review.lock.yml
     ├── scribe.md / scribe.lock.yml
     ├── sentinel.md / sentinel.lock.yml
-    └── tester.md / tester.lock.yml
+    ├── tester.md / tester.lock.yml
+    ├── agent-observability.md / agent-observability.lock.yml
+    └── docs-consistency-check.md / docs-consistency-check.lock.yml
 ```
 
-- **`.github/agents/*.agent.md`** — Defines the agent persona, checklist, scope,
+- **Files under `.github/agents/`** — Define each agent persona, checklist, scope,
   and output format. Used by both VS Code Copilot Chat and CI workflows.
-- **`.github/prompts/*.md`** — Comprehensive review and analysis guidance plus
+- **Files under `.github/prompts/`** — Comprehensive review and analysis guidance plus
   supporting references used by agents. Edit these to update review criteria or
   analysis behavior.
-- **`.github/workflows/*.md`** — Agentic Workflow source files that define the
+- **Agentic Workflow source files under `.github/workflows/`** — Define the
   CI trigger (label), permissions, and tools. Compiled to `.lock.yml` via
   `gh aw compile`.
 
