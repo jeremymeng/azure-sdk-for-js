@@ -39,13 +39,13 @@ These values can be obtained from the portal. You could follow the [instructions
 As an example, to install the latest Azure VMware Solution module, you would run:
 
 ```sh
-npm i @azure/arm-avs@latest
+pnpm add @azure/arm-avs@latest
 ```
 
 We also recommend installing the authentication package:
 
 ```sh
-npm i @azure/identity
+pnpm add @azure/identity
 ```
 
 ## Authentication
@@ -200,7 +200,7 @@ async function main() {
 
 ## Code Samples
 
-You can find additional code samples for using the JavaScript/TypeScript SDK in this repo. These samples are located in the samples folder alongside the SDK source code—for example, AVS-related samples are available at https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/avs/arm-avs/samples.
+You can find additional code samples for using the JavaScript/TypeScript SDK in this repo. These samples are located in the `samples` folder alongside the SDK source code—for example, AVS-related samples are available in [`sdk/avs/arm-avs/samples`](../sdk/avs/arm-avs/samples).
 
 ## Need help?
 

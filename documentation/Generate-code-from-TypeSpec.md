@@ -46,11 +46,9 @@ SDK module would be generated under the SDK project folder at `sdk/<service>/<mo
 ### Generate Code with code-gen-pipeline tool (recommend)
 **Notice** These steps are to generate code using the local spec repo. If you want to generate code with the github url, please refer [Generate Code with tsp-client tool](#generate-code-with-tsp-client-tool)
 
-Install dependencies to use code-gen-pipeline,  
+Install dependencies to use the current toolchain,  
 ```ps
-npm --prefix eng/common/tsp-client ci
-npm install -g pnpm
-npm --prefix eng/tools/js-sdk-release-tools ci
+pnpm install
 ```
 
 Create a local json file named generatedInput.json with content similar to that shown below
@@ -68,7 +66,7 @@ Create a local json file named generatedInput.json with content similar to that 
 
 Run the command
 ```
-npm --prefix eng/tools/js-sdk-release-tools exec --no -- code-gen-pipeline --inputJsonPath=<path-to-generatedInput.json> --outputJsonPath=<path-to-generatedOutput.json> --typespecEmitter=@azure-tools/typespec-ts --local
+pnpm --dir eng/tools/js-sdk-release-tools exec code-gen-pipeline --inputJsonPath=<path-to-generatedInput.json> --outputJsonPath=<path-to-generatedOutput.json> --typespecEmitter=@azure-tools/typespec-ts --local
 ```
 
 > path-to-generatedOutput.json is the detailed information of generated package, you can ignore it without pipeline. [generateOutput.json](https://github.com/Azure/azure-rest-api-specs/blob/main/documentation/sdkautomation/GenerateOutputSchema.json) is to show us the location of generated artifact and any other messages.
@@ -91,30 +89,30 @@ After all the steps finished, you can prepare the release for this generation. S
 Install `tsp-client` CLI tool
 
 ```ps
-npm --prefix eng/common/tsp-client ci
+pnpm install
 ```
 
 For initial set up, from the root of the SDK repo, call
 
 ```
-npm --prefix eng/common/tsp-client exec --no -- tsp-client init -c <url-to-tspconfig>
+pnpm --dir eng/common/tsp-client exec tsp-client init -c <url-to-tspconfig>
 ```
 
 For updating TypeSpec generated SDK, call below in the SDK module folder (`sdk/<service>/<module>`) where `tsp-location.yaml` exists
 
 ```ps
-npm --prefix ../../../eng/common/tsp-client exec --no -- tsp-client update
+pnpm --dir ../../../eng/common/tsp-client exec tsp-client update
 ```
 
 **Notice**
 If you use tsp-client to generate code and your generated SDK is new, you need to do one extra thing:
 
 
-**1**: You should add `ci.yml` or `ci.mgmt.yml` under `sdk/<service>/<module`. `ci.yml` is for `Data Plane SDKs` and `ci.mgmt.yml` is for `Mgmt Plane SDKs`. See [Create/Update the ci.yaml](https://github.com/Azure/azure-sdk-for-js/blob/main/documentation/steps-after-generations.md#createupdate-the-ciyaml)
+**1**: You should add `ci.yml` or `ci.mgmt.yml` under `sdk/<service>/<module>`. `ci.yml` is for data-plane SDKs and `ci.mgmt.yml` is for management-plane SDKs. See [Create/Update the ci.yml](./steps-after-generations.md#createupdate-the-ciyaml)
 
 #### Build
 
-See [steps-after-generations](https://github.com/Azure/azure-sdk-for-js/blob/main/documentation/steps-after-generations.md).
+See [steps-after-generations](./steps-after-generations.md).
 
 After all the steps finished, you can prepare the release PullRequest for this generation. See [Prepare Release](#prepare-release)
 
