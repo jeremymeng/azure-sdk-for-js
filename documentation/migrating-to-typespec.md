@@ -31,10 +31,10 @@ Before starting the migration, ensure you have:
 
 ### Step 1: Install Required Tools
 
-Install the TypeSpec client generator CLI globally:
+The `tsp-client` tool is available in the repository via `pnpm`. From the root of your local `azure-sdk-for-js` repository clone, you can run:
 
 ```bash
-npm install -g @azure-tools/typespec-client-generator-cli
+pnpm --dir eng/common/tsp-client exec tsp-client --help
 ```
 
 For more information on tsp-client, see the [TypeSpec Client Generator CLI documentation](https://aka.ms/azsdk/tsp-client)
@@ -140,7 +140,7 @@ Run the TypeSpec client generation:
 
 ```bash
 cd sdk/your-service/your-package
-npm run generate:client
+pnpm run generate:client
 ```
 
 ### Step 7: Apply Customizations
@@ -148,7 +148,7 @@ npm run generate:client
 Use the dev-tool customization command to copy generated files to `src/` and merge with existing customizations:
 
 ```bash
-npx dev-tool customization apply --skip index.ts
+pnpm exec dev-tool customization apply --skip index.ts
 ```
 
 This command:
@@ -237,13 +237,13 @@ Delete the following files that are no longer needed:
 1. **Generate and apply customizations:**
 
    ```bash
-   npm run generate:client
+   pnpm run generate:client
    ```
 
 2. **Build the package:**
 
    ```bash
-   pnpm turbo build --token 1
+   pnpm turbo build --filter=<your-package-name>... --token 1
    ```
 
 3. **Run tests:**
@@ -268,8 +268,8 @@ Delete the following files that are no longer needed:
 After migration, your development workflow becomes:
 
 1. **Update TypeSpec definitions** in azure-rest-api-specs
-2. **Generate new code:** `npm run generate:client`
-3. **Build and test:** `pnpm turbo build --token 1 && pnpm test`
+2. **Generate new code:** `pnpm run generate:client`
+3. **Build and test:** `pnpm turbo build --filter=<your-package-name>... --token 1 && pnpm test`
 
 ### Version Management
 
