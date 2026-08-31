@@ -594,10 +594,10 @@ TypeScript
 
 ```typescript
 async function createVirtualMachines() {
-  createResourceGroup();
-  createVirtualNetwork();
-  createSubnet();
-  createNetworkInterface(resourceGroupName, location, interfaceName);
+  await createResourceGroup();
+  await createVirtualNetwork();
+  await createSubnet();
+  await createNetworkInterface(resourceGroupName, location, interfaceName);
   const parameter: VirtualMachine = {
     location: location,
     hardwareProfile: {
@@ -670,10 +670,10 @@ JavaScript
 
 ```javascript
 async function createVirtualMachines() {
-  createResourceGroup();
-  createVirtualNetwork();
-  createSubnet();
-  createNetworkInterface(resourceGroupName, location, interfaceName);
+  await createResourceGroup();
+  await createVirtualNetwork();
+  await createSubnet();
+  await createNetworkInterface(resourceGroupName, location, interfaceName);
   const parameter = {
     location: location,
     hardwareProfile: {
