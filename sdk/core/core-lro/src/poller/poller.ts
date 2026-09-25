@@ -68,6 +68,7 @@ export function buildCreatePoller<TResponse, TResult, TState extends OperationSt
       }).then((s) => (state = s));
     }
     let resultPromise: Promise<TResult> | undefined;
+    let pollQueue = Promise.resolve();
     const abortController = new AbortController();
     // Progress handlers
     type Handler = (state: TState) => void;
@@ -149,52 +150,59 @@ export function buildCreatePoller<TResponse, TResult, TState extends OperationSt
         });
         return resultPromise;
       },
-      async poll(pollOptions?: { abortSignal?: AbortSignalLike }): Promise<TState> {
-        await statePromise;
-        if (!state) {
-          throw new Error("Poller should be initialized but it is not!");
-        }
-        if (resolveOnUnsuccessful) {
-          if (poller.isDone) return state;
-        } else {
-          switch (state.status) {
-            case "succeeded":
-              return state;
-            case "canceled":
-              throw new Error(cancelErrMsg);
-            case "failed":
-              throw state.error;
+      poll(pollOptions?: { abortSignal?: AbortSignalLike }): Promise<TState> {
+        const pollResult = pollQueue.then(async () => {
+          await statePromise;
+          if (!state) {
+            throw new Error("Poller should be initialized but it is not!");
           }
-        }
-        await pollOperation({
-          poll,
-          state,
-          getOperationLocation,
-          isOperationError,
-          withOperationLocation,
-          getPollingInterval,
-          getOperationStatus: getStatusFromPollResponse,
-          getResourceLocation,
-          processResult,
-          getError,
-          updateState,
-          options: pollOptions,
-          setDelay: (pollIntervalInMs) => {
-            currentPollIntervalInMs = pollIntervalInMs;
-          },
-          setErrorAsResult: !resolveOnUnsuccessful,
-        });
-        await handleProgressEvents();
-        if (!resolveOnUnsuccessful) {
-          switch (state.status) {
-            case "canceled":
-              throw new Error(cancelErrMsg);
-            case "failed":
-              throw state.error;
+          if (resolveOnUnsuccessful) {
+            if (poller.isDone) return state;
+          } else {
+            switch (state.status) {
+              case "succeeded":
+                return state;
+              case "canceled":
+                throw new Error(cancelErrMsg);
+              case "failed":
+                throw state.error;
+            }
           }
-        }
+          await pollOperation({
+            poll,
+            state,
+            getOperationLocation,
+            isOperationError,
+            withOperationLocation,
+            getPollingInterval,
+            getOperationStatus: getStatusFromPollResponse,
+            getResourceLocation,
+            processResult,
+            getError,
+            updateState,
+            options: pollOptions,
+            setDelay: (pollIntervalInMs) => {
+              currentPollIntervalInMs = pollIntervalInMs;
+            },
+            setErrorAsResult: !resolveOnUnsuccessful,
+          });
+          await handleProgressEvents();
+          if (!resolveOnUnsuccessful) {
+            switch (state.status) {
+              case "canceled":
+                throw new Error(cancelErrMsg);
+              case "failed":
+                throw state.error;
+            }
+          }
 
-        return state;
+          return state;
+        });
+        pollQueue = pollResult.then(
+          () => undefined,
+          () => undefined,
+        );
+        return pollResult;
       },
       then<TResult1 = TResult, TResult2 = never>(
         onfulfilled?: ((value: TResult) => TResult1 | PromiseLike<TResult1>) | undefined | null,

@@ -65,6 +65,49 @@ describe("getOperationStatus for ResourceLocation mode", () => {
 });
 
 describe("buildCreatePoller", () => {
+  it("serializes concurrent polls", async () => {
+    const responseResolvers: Array<(response: { status: string }) => void> = [];
+    const poll = vi.fn(
+      () =>
+        new Promise<{ status: string }>((resolve) => {
+          responseResolvers.push(resolve);
+        }),
+    );
+    const createPoller = buildCreatePoller<
+      { status: string },
+      { status: string },
+      OperationState<{ status: string }>
+    >({
+      getStatusFromInitialResponse: () => "running",
+      getStatusFromPollResponse: ({ status }) =>
+        status as "running" | "succeeded" | "failed" | "canceled",
+      isOperationError: () => false,
+      getResourceLocation: () => undefined,
+      resolveOnUnsuccessful: false,
+    });
+    const lroPoller = createPoller({
+      init: async () => ({
+        response: { status: "running" },
+        operationLocation: "/poll",
+      }),
+      poll,
+    });
+
+    await lroPoller.submitted();
+    const firstPoll = lroPoller.poll();
+    await vi.waitFor(() => expect(poll).toHaveBeenCalledTimes(1));
+    const secondPoll = lroPoller.poll();
+
+    expect(poll).toHaveBeenCalledTimes(1);
+    responseResolvers[0]({ status: "running" });
+    await firstPoll;
+    await vi.waitFor(() => expect(poll).toHaveBeenCalledTimes(2));
+    responseResolvers[1]({ status: "succeeded" });
+
+    await expect(secondPoll).resolves.toMatchObject({ status: "succeeded" });
+    expect(lroPoller.isDone).toBe(true);
+  });
+
   it("completes polling when getPollingInterval is provided", async () => {
     let pollCount = 0;
     const getPollingInterval = vi.fn().mockReturnValue(42);

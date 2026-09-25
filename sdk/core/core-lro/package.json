@@ -84,6 +84,7 @@
     "test": "tsc -b --noEmit && npm run test:node && npm run test:browser",
     "test:browser": "dev-tool run test:vitest --no-test-proxy --browser",
     "test:node": "dev-tool run test:vitest --no-test-proxy",
+    "test:tla": "node tla/run-tlc.mjs",
     "update-snippets": "dev-tool run update-snippets"
   },
   "dependencies": {
