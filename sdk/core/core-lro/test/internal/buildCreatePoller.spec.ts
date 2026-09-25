@@ -151,6 +151,44 @@ describe("buildCreatePoller", () => {
     expect(poll).toHaveBeenCalledTimes(1);
   });
 
+  it("does not poll when aborted during initialization", async () => {
+    let resolveInitialization:
+      ((response: { response: { status: string }; operationLocation: string }) => void) | undefined;
+    const init = vi.fn(
+      () =>
+        new Promise<{ response: { status: string }; operationLocation: string }>((resolve) => {
+          resolveInitialization = resolve;
+        }),
+    );
+    const poll = vi.fn(async () => ({ status: "succeeded" }));
+    const createPoller = buildCreatePoller<
+      { status: string },
+      { status: string },
+      OperationState<{ status: string }>
+    >({
+      getStatusFromInitialResponse: () => "running",
+      getStatusFromPollResponse: ({ status }) =>
+        status as "running" | "succeeded" | "failed" | "canceled",
+      isOperationError: () => false,
+      getResourceLocation: () => undefined,
+      resolveOnUnsuccessful: false,
+    });
+    const lroPoller = createPoller({ init, poll });
+    const abortController = new AbortController();
+    const pollResult = lroPoller.poll({ abortSignal: abortController.signal });
+
+    abortController.abort();
+
+    await expect(pollResult).rejects.toMatchObject({ name: "AbortError" });
+    resolveInitialization?.({
+      response: { status: "running" },
+      operationLocation: "/poll",
+    });
+    await lroPoller.submitted();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(poll).not.toHaveBeenCalled();
+  });
+
   it("completes polling when getPollingInterval is provided", async () => {
     let pollCount = 0;
     const getPollingInterval = vi.fn().mockReturnValue(42);

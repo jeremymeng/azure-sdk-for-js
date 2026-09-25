@@ -156,6 +156,9 @@ export function buildCreatePoller<TResponse, TResult, TState extends OperationSt
             throw new AbortError("The operation was aborted.");
           }
           await statePromise;
+          if (pollOptions?.abortSignal?.aborted) {
+            throw new AbortError("The operation was aborted.");
+          }
           if (!state) {
             throw new Error("Poller should be initialized but it is not!");
           }
