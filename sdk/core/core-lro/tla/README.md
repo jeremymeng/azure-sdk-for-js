@@ -31,15 +31,15 @@ of `resolveOnUnsuccessful` and verifies the invariants listed in
 
 ## Implementation correspondence
 
-| Model action | TypeScript implementation |
-| --- | --- |
-| `Initialize*` | `initOperation` and `getStatusFromInitialResponse` |
-| `EnqueuePoll`, `StartPoll` | the promise queue in `PollerLike.poll` |
-| `CompleteRunning` | `pollOperation` handling a nonterminal response |
+| Model action                                             | TypeScript implementation                          |
+| -------------------------------------------------------- | -------------------------------------------------- |
+| `Initialize*`                                            | `initOperation` and `getStatusFromInitialResponse` |
+| `EnqueuePoll`, `StartPoll`                               | the promise queue in `PollerLike.poll`             |
+| `CompleteRunning`                                        | `pollOperation` handling a nonterminal response    |
 | `CompleteSucceeded`, `BeginFinalGet`, `CompleteFinalGet` | `pollOperationHelper` and `processOperationStatus` |
-| `CompleteFailed`, `CompleteCanceled` | `processOperationStatus` |
-| `CompleteOperationError`, `CompleteTransientError` | `setStateError` |
-| `DrainTerminal` | the terminal-state guard in `PollerLike.poll` |
+| `CompleteFailed`, `CompleteCanceled`                     | `processOperationStatus`                           |
+| `CompleteOperationError`, `CompleteTransientError`       | `setStateError`                                    |
+| `DrainTerminal`                                          | the terminal-state guard in `PollerLike.poll`      |
 
 The serialized queue is required for `TerminalIsAbsorbing`: without it, two
 concurrent requests can complete out of order and a stale running response can

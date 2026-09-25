@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { describe, it, assert, vi } from "vitest";
+import { describe, it, assert, expect, vi } from "vitest";
 import { buildCreatePoller } from "../../src/poller/poller.js";
 import { getOperationStatus, getOperationLocation } from "../../src/http/operation.js";
 import type { OperationResponse, OperationState } from "../../src/index.js";
