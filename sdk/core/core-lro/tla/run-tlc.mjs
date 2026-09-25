@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 import { spawnSync } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
+import os from "node:os";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -12,11 +14,27 @@ if (!jar) {
 }
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
-const result = spawnSync(
-  "java",
-  ["-jar", path.resolve(jar), "-workers", "auto", "-config", "LroPoller.cfg", "LroPoller.tla"],
-  { cwd: directory, stdio: "inherit" },
-);
+const metaDirectory = mkdtempSync(path.join(os.tmpdir(), "core-lro-tlc-"));
+let result;
+try {
+  result = spawnSync(
+    "java",
+    [
+      "-jar",
+      path.resolve(jar),
+      "-workers",
+      "auto",
+      "-metadir",
+      metaDirectory,
+      "-config",
+      "LroPoller.cfg",
+      "LroPoller.tla",
+    ],
+    { cwd: directory, stdio: "inherit" },
+  );
+} finally {
+  rmSync(metaDirectory, { force: true, recursive: true });
+}
 
 if (result.error) {
   console.error(result.error.message);
