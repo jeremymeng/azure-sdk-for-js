@@ -81,7 +81,7 @@ InitializeTerminal(s) ==
                   queuedClients, requestCount, finalGetCount >>
 
 EnqueuePoll(client) ==
-  /\ phase = "ready"
+  /\ phase \in {"initializing", "ready"}
   /\ client \in Clients
   /\ client # activeClient
   /\ client \notin queuedClients
