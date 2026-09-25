@@ -10,7 +10,8 @@
 - optional final resource GETs;
 - operation and transient request errors;
 - `resolveOnUnsuccessful`; and
-- concurrent callers waiting on the poller's serialized request queue.
+- concurrent and canceled callers waiting on the poller's serialized request
+  queue.
 
 HTTP header and response-body parsing are covered by unit tests rather than this
 model. The model also makes no unconditional liveness claim because an Azure
@@ -34,7 +35,7 @@ of `resolveOnUnsuccessful` and verifies the invariants listed in
 | Model action                                             | TypeScript implementation                          |
 | -------------------------------------------------------- | -------------------------------------------------- |
 | `Initialize*`                                            | `initOperation` and `getStatusFromInitialResponse` |
-| `EnqueuePoll`, `StartPoll`                               | the promise queue in `PollerLike.poll`             |
+| `EnqueuePoll`, `CancelQueuedPoll`, `StartPoll`           | the promise queue in `PollerLike.poll`             |
 | `CompleteRunning`                                        | `pollOperation` handling a nonterminal response    |
 | `CompleteSucceeded`, `BeginFinalGet`, `CompleteFinalGet` | `pollOperationHelper` and `processOperationStatus` |
 | `CompleteFailed`, `CompleteCanceled`                     | `processOperationStatus`                           |

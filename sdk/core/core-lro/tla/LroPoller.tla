@@ -90,6 +90,13 @@ EnqueuePoll(client) ==
                   resolveOnUnsuccessful, activeClient, requestCount,
                   finalGetCount, terminalSnapshot >>
 
+CancelQueuedPoll(client) ==
+  /\ client \in queuedClients
+  /\ queuedClients' = queuedClients \ {client}
+  /\ UNCHANGED << status, phase, location, result, error,
+                  resolveOnUnsuccessful, activeClient, requestCount,
+                  finalGetCount, terminalSnapshot >>
+
 (*
  * Only one request may become active. This models the promise queue in
  * poller.ts and prevents out-of-order responses from regressing state.
@@ -212,6 +219,7 @@ Next ==
   \/ InitializeWithoutLocation
   \/ \E s \in TerminalStatuses : InitializeTerminal(s)
   \/ \E client \in Clients : EnqueuePoll(client)
+  \/ \E client \in Clients : CancelQueuedPoll(client)
   \/ \E client \in Clients : StartPoll(client)
   \/ \E client \in Clients, loc \in Locations :
        CompleteRunning(client, loc)

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { AbortSignalLike } from "@azure/abort-controller";
+import { AbortError, type AbortSignalLike } from "@azure/abort-controller";
 import type {
   BuildCreatePollerOptions,
   CreatePollerOptions,
@@ -12,7 +12,7 @@ import type {
 } from "./models.js";
 import { deserializeState, initOperation, pollOperation } from "./operation.js";
 import { POLL_INTERVAL_IN_MS } from "./constants.js";
-import { delay } from "@azure/core-util";
+import { createAbortablePromise, delay } from "@azure/core-util";
 /**
  * Returns a poller factory.
  */
@@ -152,6 +152,9 @@ export function buildCreatePoller<TResponse, TResult, TState extends OperationSt
       },
       poll(pollOptions?: { abortSignal?: AbortSignalLike }): Promise<TState> {
         const pollResult = pollQueue.then(async () => {
+          if (pollOptions?.abortSignal?.aborted) {
+            throw new AbortError("The operation was aborted.");
+          }
           await statePromise;
           if (!state) {
             throw new Error("Poller should be initialized but it is not!");
@@ -202,7 +205,9 @@ export function buildCreatePoller<TResponse, TResult, TState extends OperationSt
           () => undefined,
           () => undefined,
         );
-        return pollResult;
+        return createAbortablePromise((resolve, reject) => pollResult.then(resolve, reject), {
+          abortSignal: pollOptions?.abortSignal,
+        });
       },
       then<TResult1 = TResult, TResult2 = never>(
         onfulfilled?: ((value: TResult) => TResult1 | PromiseLike<TResult1>) | undefined | null,
