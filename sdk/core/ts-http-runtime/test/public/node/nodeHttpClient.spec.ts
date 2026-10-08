@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { describe, it, assert, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, assert, expect, vi, beforeEach, afterEach } from "vitest";
 import { PassThrough, Writable } from "node:stream";
+import { TLSSocket } from "node:tls";
 import type { ClientRequest, IncomingHttpHeaders, IncomingMessage } from "http";
 import { createPipelineRequest, createDefaultHttpClient } from "../../../src/index.js";
 
@@ -41,6 +42,11 @@ class FakeResponse extends PassThrough {
 }
 
 class FakeRequest extends PassThrough {}
+
+class FakeContinueRequest extends FakeRequest {
+  public flushHeaders = vi.fn();
+  public shouldKeepAlive = true;
+}
 
 /**
  * Generic NodeJS streams accept typed arrays just fine,
@@ -583,5 +589,130 @@ describe("NodeHttpClient", function () {
     const [eventName] = removeEventListenerSpy.mock.calls[0];
     assert.strictEqual(eventName, "abort", "should remove abort listener");
     removeEventListenerSpy.mockRestore();
+  });
+
+  describe("100-continue prototype", () => {
+    for (const timerFirst of [false, true]) {
+      it(`sends once when ${timerFirst ? "fallback" : "continue"} wins the race`, async () => {
+        const transport = new FakeContinueRequest();
+        vi.mocked(https.request).mockReturnValueOnce(transport as unknown as ClientRequest);
+        const end = vi.spyOn(transport, "end");
+        const uploadDone = new Promise<void>((resolve) => transport.once("finish", resolve));
+        const factory = vi.fn(() => {
+          const source = new PassThrough();
+          source.end("prototype");
+          return source;
+        });
+        const request = createPipelineRequest({
+          url: "https://example.com",
+          body: factory,
+        });
+        request.headers.set("Expect", "other, 100-ConTinue");
+        const promise = createDefaultHttpClient().sendRequest(request);
+        transport.emit("socket", new PassThrough());
+        assert.equal(factory.mock.calls.length, 0);
+        if (timerFirst) {
+          vi.advanceTimersByTime(1000);
+        }
+        transport.emit("continue");
+        transport.emit("continue");
+        vi.advanceTimersByTime(2000);
+        await uploadDone;
+        yieldHttpsResponse(createResponse(200));
+        await promise;
+        assert.equal(factory.mock.calls.length, 1);
+        assert.equal(end.mock.calls.length, 1);
+        assert.equal(vi.getTimerCount(), 0);
+      });
+    }
+
+    for (const terminal of ["response", "abort", "error", "close"] as const) {
+      it(`never prepares a body after waiting is terminated by ${terminal}`, async () => {
+        const transport = new FakeContinueRequest();
+        vi.mocked(https.request).mockReturnValueOnce(transport as unknown as ClientRequest);
+        const factory = vi.fn(() => new PassThrough());
+        const progress = vi.fn();
+        const controller = new AbortController();
+        const request = createPipelineRequest({
+          url: "https://example.com",
+          body: factory,
+          abortSignal: controller.signal,
+          onUploadProgress: progress,
+        });
+        request.headers.set("Expect", "100-continue");
+        const promise = createDefaultHttpClient().sendRequest(request);
+        transport.emit("socket", new PassThrough());
+        if (terminal === "response") {
+          yieldHttpsResponse(createResponse(403, "readable rejection"));
+          const response = await promise;
+          assert.equal(response.bodyAsText, "readable rejection");
+          assert.isFalse(transport.shouldKeepAlive);
+        } else {
+          if (terminal === "abort") controller.abort();
+          if (terminal === "error") transport.emit("error", new Error("prototype failure"));
+          if (terminal === "close") transport.emit("close");
+          await expect(promise).rejects.toThrow(
+            /aborted|prototype failure|closed before a response/,
+          );
+        }
+        transport.emit("continue");
+        vi.advanceTimersByTime(2000);
+        assert.equal(factory.mock.calls.length, 0);
+        assert.equal(progress.mock.calls.length, 0);
+        assert.equal(transport.listenerCount("continue"), 0);
+        assert.equal(transport.listenerCount("socket"), 0);
+        assert.equal(vi.getTimerCount(), 0);
+      });
+    }
+
+    it("starts fallback after TLS connects, not while connecting", async () => {
+      const transport = new FakeContinueRequest();
+      vi.mocked(https.request).mockReturnValueOnce(transport as unknown as ClientRequest);
+      const socket = Object.assign(new PassThrough(), { connecting: true });
+      const factory = vi.fn(() => {
+        const source = new PassThrough();
+        source.end("prototype");
+        return source;
+      });
+      const request = createPipelineRequest({ url: "https://example.com", body: factory });
+      request.headers.set("Expect", "100-continue");
+      const promise = createDefaultHttpClient().sendRequest(request);
+      transport.emit("socket", socket);
+      vi.advanceTimersByTime(1500);
+      assert.equal(factory.mock.calls.length, 0);
+      assert.equal(transport.flushHeaders.mock.calls.length, 0);
+      socket.emit("secureConnect");
+      assert.equal(transport.flushHeaders.mock.calls.length, 1);
+      vi.advanceTimersByTime(999);
+      assert.equal(factory.mock.calls.length, 0);
+      vi.advanceTimersByTime(1);
+      await Promise.resolve();
+      yieldHttpsResponse(createResponse(200));
+      await promise;
+      assert.equal(factory.mock.calls.length, 1);
+      assert.equal(socket.listenerCount("secureConnect"), 0);
+    });
+
+    it("also waits for TLS when TCP is already connected", async () => {
+      const transport = new FakeContinueRequest();
+      vi.mocked(https.request).mockReturnValueOnce(transport as unknown as ClientRequest);
+      const socket = new TLSSocket(new PassThrough());
+      assert.isFalse(socket.connecting);
+      assert.isNull(socket.alpnProtocol);
+      const factory = vi.fn(() => new PassThrough());
+      const request = createPipelineRequest({ url: "https://example.com", body: factory });
+      request.headers.set("Expect", "100-continue");
+      const promise = createDefaultHttpClient().sendRequest(request);
+      transport.emit("socket", socket);
+      vi.advanceTimersByTime(1500);
+      assert.equal(factory.mock.calls.length, 0);
+      assert.equal(transport.flushHeaders.mock.calls.length, 0);
+      socket.emit("secureConnect");
+      assert.equal(transport.flushHeaders.mock.calls.length, 1);
+      yieldHttpsResponse(createResponse(403));
+      await promise;
+      assert.equal(vi.getTimerCount(), 0);
+      socket.destroy();
+    });
   });
 });
