@@ -368,7 +368,7 @@ This simple test creates a resource and checks that the service handles it corre
 ```typescript
 import { Recorder } from "@azure-tools/test-recorder";
 import { describe, it, assert, beforeEach, afterEach } from "vitest";
-import type { PurviewDataMapClient } from "../../src/index.js";
+import { isUnexpected, type PurviewDataMapClient } from "../../src/index.js";
 import { createClient, createRecorder } from "./utils/recordedClient.js";
 
 describe("My test", () => {
