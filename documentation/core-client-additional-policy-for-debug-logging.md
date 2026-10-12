@@ -131,4 +131,4 @@ const client = new Client(endpoint, credential, {
 });
 ```
 
-Note that the policy runs _after_ the default policies but _before_ any policies that are appended to the pipeline by the client itself, so for example it runs _after_ the retry policy, but _before_ an appended KeyCredentialPolicy or BearerTokenAuthenticationPolicy.
+Note that the policy runs _after_ the default policies but _before_ any policies that are appended to the pipeline by the client itself. Note that "perCall" policies run before the retry policy (once per operation), while "perRetry" policies run after it, on each attempt, before KeyCredentialPolicy or BearerTokenAuthenticationPolicy.
