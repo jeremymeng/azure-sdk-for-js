@@ -54,12 +54,18 @@ function monitorStreamCompletion(stream: NodeJS.ReadableStream, onComplete: () =
   stream.on("error", handler);
 }
 
-function isArrayBuffer(body: any): body is ArrayBuffer {
-  return types.isArrayBuffer(body);
+function isArrayBuffer(body: unknown): body is ArrayBuffer | ArrayBufferView {
+  return types.isArrayBuffer(body) || ArrayBuffer.isView(body);
 }
 
-function isArrayBufferView(body: any): body is ArrayBufferView {
-  return ArrayBuffer.isView(body);
+function arrayBufferToBuffer(body: ArrayBuffer | ArrayBufferView): Buffer {
+  if (Buffer.isBuffer(body)) {
+    return body;
+  }
+
+  return ArrayBuffer.isView(body)
+    ? Buffer.from(body.buffer, body.byteOffset, body.byteLength)
+    : Buffer.from(body);
 }
 
 function isHeaderObject(
@@ -475,9 +481,7 @@ class NodeHttpClient implements HttpClient {
             return;
           }
           if (body && isArrayBuffer(body)) {
-            body = Buffer.from(body);
-          } else if (isArrayBufferView(body)) {
-            body = Buffer.from(body.buffer, body.byteOffset, body.byteLength);
+            body = arrayBufferToBuffer(body);
           }
           if (isReadableStream(body)) {
             source = body;
@@ -681,7 +685,7 @@ export function getBodyLength(body: RequestBodyType): number | null {
     return body.length;
   } else if (isReadableStream(body)) {
     return null;
-  } else if (isArrayBuffer(body) || isArrayBufferView(body)) {
+  } else if (isArrayBuffer(body)) {
     return body.byteLength;
   } else if (typeof body === "string") {
     return Buffer.from(body).length;
