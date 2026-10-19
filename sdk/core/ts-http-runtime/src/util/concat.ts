@@ -81,6 +81,12 @@ export async function concat(
     let readRequested = false;
     const stream = new Readable({
       read() {
+        if (stream.readableLength >= stream.readableHighWaterMark) {
+          waitingForRead = true;
+          readRequested = false;
+          current?.pause();
+          return;
+        }
         waitingForRead = false;
         readRequested = true;
         if (current) current.resume();
@@ -152,6 +158,11 @@ export async function concat(
           queueMicrotask(() => {
             advancePending = false;
             if (stream.destroyed) return;
+            if (stream.readableLength >= stream.readableHighWaterMark) {
+              waitingForRead = true;
+              readRequested = false;
+              return;
+            }
             if (stream.readableFlowing === false && stream.listenerCount("data") > 0) {
               waitingForRead = true;
               readRequested = false;

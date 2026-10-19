@@ -81,9 +81,11 @@ describe("lazy multipart concatenation", () => {
     const later = vi.fn(() => Readable.from("later"));
     const wrapper = (await streamFor([Buffer.alloc(16 * 1024), later])) as Readable;
     await new Promise<void>((resolve) => wrapper.once("readable", resolve));
+    wrapper._read(wrapper.readableHighWaterMark);
     await new Promise((resolve) => setImmediate(resolve));
     expect(later).not.toHaveBeenCalled();
     expect(wrapper.read(16 * 1024)).not.toBeNull();
+    wrapper._read(wrapper.readableHighWaterMark);
     await new Promise((resolve) => setImmediate(resolve));
     expect(later).toHaveBeenCalledOnce();
     wrapper.destroy();
