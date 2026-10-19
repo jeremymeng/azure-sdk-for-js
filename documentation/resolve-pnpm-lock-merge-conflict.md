@@ -12,7 +12,7 @@ Here's the recommended process to resolve merge conflicts of `pnpm-lock.yaml` in
 8. Commit the merge
 9. Push the commit to your pull request branch, assuming "origin" is the git remote name of your fork, `git push origin`
 
-Step 4) to 6) can be combined and enhanced to run under any directory under the repo if you are using a \*NIX environment:
+Step 5) to 7) can be combined and enhanced to run under any directory under the repo if you are using a \*NIX environment:
 
 ```shell
 git checkout upstream/main `git rev-parse --show-toplevel`/pnpm-lock.yaml && pnpm install && git add `git rev-parse --show-toplevel`/pnpm-lock.yaml
