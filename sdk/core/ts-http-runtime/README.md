@@ -52,7 +52,7 @@ does not guarantee that the server has received the headers. The existing
 `timeout` still cancels the entire request, including negotiation and buffered
 response reading; it is not the continue timeout. As before, total timeout ends
 when a streamed response is returned, but explicit cancellation remains active
-until that response stream completes.
+until both the response stream and request upload complete.
 
 A final response before permission leaves body factories, multipart part
 factories, source reads, and upload progress untouched. Known-empty bodies retain
@@ -62,17 +62,18 @@ including factories returning empty streams, still negotiate. Effective
 matched case-insensitively. Do not supply conflicting or inaccurate framing
 headers.
 
-Direct streams remain caller-owned. On an early final response during upload,
-the transport unpipes and pauses them; the caller is responsible for their
-remaining lifetime. Factory-returned streams and SDK-created wrappers are
-request-owned and may be destroyed during cleanup. Paused sources
-may finish an in-flight read after being paused; late errors are logged until
-the source closes. Already-flowing sources
-cannot be made lazy retroactively, and in-memory serialization or policy signing
-may occur before negotiation. Upload progress measures bytes read into the
-upload path, not bytes acknowledged by the server; queued bytes cannot be unsent.
-Connections with an interrupted outgoing body are retired after the readable
-response completes.
+Direct streams remain caller-owned. When a non-success response rejects,
+redirects, or challenges an active upload, the transport unpipes and pauses
+them; the caller is responsible for their remaining lifetime. Successful
+responses may run full-duplex with the upload, including responses received
+before an explicit-length source reaches EOF. Factory-returned streams and
+SDK-created wrappers are request-owned and may be destroyed during cleanup.
+Paused sources may finish an in-flight read after being paused; late errors are
+logged until the source closes. Already-flowing sources cannot be made lazy
+retroactively, and in-memory serialization or policy signing may occur before
+negotiation. Upload progress measures bytes read into the upload path, not bytes
+acknowledged by the server; queued bytes cannot be unsent. Connections with an
+interrupted outgoing body are retired after the readable response completes.
 
 For body-preserving retries, redirects, or authentication challenges, use a
 factory returning a fresh stream. Untouched one-shot sources can be reused;

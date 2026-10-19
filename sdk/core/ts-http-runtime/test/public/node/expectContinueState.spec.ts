@@ -256,6 +256,17 @@ describe("Expect: 100-continue attempt state", () => {
     },
   );
 
+  it("does not classify an unsupported body as a request send error", async () => {
+    const error = await start(new Blob(["unsupported"]), {
+      headers: createHttpHeaders(),
+    }).catch((caught) => caught);
+    expect(error).toMatchObject({
+      name: "RestError",
+      message: "Unrecognized body type",
+    });
+    expect(error.code).toBeUndefined();
+  });
+
   it("disposes a factory result when its factory aborts synchronously", async () => {
     const controller = new AbortController();
     const source = new Readable({

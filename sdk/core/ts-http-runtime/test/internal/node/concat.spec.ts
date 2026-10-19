@@ -2,7 +2,8 @@
 // Licensed under the MIT License.
 
 import { describe, expect, it, vi } from "vitest";
-import { Readable } from "node:stream";
+import { EventEmitter } from "node:events";
+import { Readable, Writable } from "node:stream";
 import { concat } from "../../../src/util/concat.js";
 import { startBodyStream } from "../../../src/util/nodeBody.js";
 import type { ConcatSource } from "../../../src/util/concat.js";
@@ -88,15 +89,55 @@ describe("lazy multipart concatenation", () => {
     wrapper.destroy();
   });
 
+  it("does not advance while a pipe destination is backpressured", async () => {
+    const later = vi.fn(() => Readable.from("later"));
+    const wrapper = (await streamFor([Buffer.alloc(64 * 1024), later])) as Readable;
+    let releaseWrite!: () => void;
+    let resolveBlocked!: () => void;
+    const blocked = new Promise<void>((resolve) => {
+      resolveBlocked = resolve;
+    });
+    const destination = new Writable({
+      highWaterMark: 1,
+      write(_chunk, _encoding, callback) {
+        releaseWrite = callback;
+        resolveBlocked();
+      },
+    });
+    wrapper.pipe(destination);
+    await blocked;
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(wrapper.readableFlowing).toBe(false);
+    expect(later).not.toHaveBeenCalled();
+
+    releaseWrite();
+    wrapper.destroy();
+    destination.destroy();
+  });
+
+  it("tracks non-negotiated custom streams by identity", () => {
+    const source = Object.assign(new EventEmitter(), {
+      readable: true,
+      pipe: vi.fn(),
+      pause: vi.fn(),
+      unpipe: vi.fn(),
+    }) as unknown as NodeJS.ReadableStream;
+
+    startBodyStream(source);
+    expect(() => startBodyStream(source)).toThrow(
+      "Cannot resend an already-started request body stream",
+    );
+  });
+
   it("rejects replay of the actual one-shot part, not just the fresh wrapper", async () => {
     const part = Readable.from("once");
     const first = await streamFor([part]);
-    startBodyStream(first, true);
+    startBodyStream(first);
     for await (const _chunk of first) {
       /* drain */
     }
     const second = await streamFor([part]);
-    expect(() => startBodyStream(second, true)).toThrow(
+    expect(() => startBodyStream(second)).toThrow(
       "Cannot resend an already-started request body stream",
     );
   });
@@ -136,7 +177,7 @@ describe("lazy multipart concatenation", () => {
       first.resume();
     });
     const second = await streamFor([part]);
-    expect(() => startBodyStream(second, true)).toThrow(
+    expect(() => startBodyStream(second)).toThrow(
       "Cannot resend an already-started request body stream",
     );
     part.destroy();
@@ -159,7 +200,7 @@ describe("lazy multipart concatenation", () => {
     await new Promise((resolve) => setImmediate(resolve));
     expect(part.locked).toBe(false);
     const second = await streamFor([part]);
-    expect(() => startBodyStream(second, true)).toThrow(
+    expect(() => startBodyStream(second)).toThrow(
       "Cannot resend an already-started multipart stream",
     );
   });

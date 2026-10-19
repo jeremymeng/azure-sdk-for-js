@@ -76,21 +76,25 @@ export async function concat(
     let index = 0;
     let current: NodeJS.ReadableStream | undefined;
     let cleanupCurrent: (() => void) | undefined;
-    let protectReplay = false;
     let waitingForRead = false;
+    let advancePending = false;
+    let readRequested = false;
     const stream = new Readable({
       read() {
         waitingForRead = false;
+        readRequested = true;
         if (current) current.resume();
-        else advance();
+        else if (!advancePending) {
+          readRequested = false;
+          advance();
+        }
       },
       destroy(error, callback) {
         cleanupCurrent?.();
         callback(error);
       },
     });
-    registerMultipartStream(stream, (enabled) => {
-      protectReplay = enabled;
+    registerMultipartStream(stream, () => {
       for (const source of sources) {
         if (typeof source === "function" || source instanceof Uint8Array || isBlob(source)) {
           continue;
@@ -125,15 +129,16 @@ export async function concat(
         if (!(resolved instanceof Uint8Array) && !isBlob(resolved)) {
           if (resolved instanceof ReadableStream) {
             // Web sources also need identity-based replay protection before taking a reader.
-            startWebSource(resolved, protectReplay);
+            startWebSource(resolved);
           } else {
-            startBodyStream(resolved, protectReplay);
+            startBodyStream(resolved);
           }
         }
         const part = toStream(resolved, owned);
         current = part;
         const onData = (chunk: Buffer | string): void => {
-          if (!stream.push(chunk)) {
+          readRequested = false;
+          if (!stream.push(chunk) || stream.readableFlowing === false) {
             waitingForRead = true;
             part.pause();
           }
@@ -142,9 +147,27 @@ export async function concat(
           stream.destroy(error);
         };
         const onEnd = (): void => {
-          const shouldAdvance = !waitingForRead;
           cleanupCurrent?.();
-          if (shouldAdvance) advance();
+          advancePending = true;
+          queueMicrotask(() => {
+            advancePending = false;
+            if (stream.destroyed) return;
+            if (stream.readableFlowing === false && stream.listenerCount("data") > 0) {
+              waitingForRead = true;
+              readRequested = false;
+              return;
+            }
+            if (readRequested) {
+              readRequested = false;
+              advance();
+              return;
+            }
+            if (waitingForRead || stream.readableFlowing === false) {
+              waitingForRead = true;
+              return;
+            }
+            advance();
+          });
         };
         const onClose = (): void => {
           if (current === part) stream.destroy(new Error("Multipart source closed before ending"));
@@ -187,7 +210,7 @@ function assertWebSourceAvailable(source: ReadableStream): void {
   }
 }
 
-function startWebSource(source: ReadableStream, protectReplay: boolean): void {
+function startWebSource(source: ReadableStream): void {
   assertWebSourceAvailable(source);
-  if (protectReplay) startedWebSources.add(source);
+  startedWebSources.add(source);
 }

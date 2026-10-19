@@ -8,13 +8,13 @@ import { logger } from "../log.js";
 const startedSources = new WeakSet<object>();
 const disposedSources = new WeakSet<object>();
 const monitoredSources = new WeakSet<object>();
-const multipartStreams = new WeakMap<NodeJS.ReadableStream, (protectReplay: boolean) => void>();
+const multipartStreams = new WeakMap<NodeJS.ReadableStream, () => void>();
 
 export function registerMultipartStream(
   stream: NodeJS.ReadableStream,
-  protectReplay: (enabled: boolean) => void,
+  prepareSources: () => void,
 ): void {
-  multipartStreams.set(stream, protectReplay);
+  multipartStreams.set(stream, prepareSources);
 }
 
 export function assertBodyStreamAvailable(stream: NodeJS.ReadableStream): void {
@@ -33,10 +33,10 @@ export function assertBodyStreamAvailable(stream: NodeJS.ReadableStream): void {
   }
 }
 
-export function startBodyStream(stream: NodeJS.ReadableStream, protectReplay: boolean): void {
+export function startBodyStream(stream: NodeJS.ReadableStream): void {
   assertBodyStreamAvailable(stream);
-  if (protectReplay) startedSources.add(stream);
-  multipartStreams.get(stream)?.(protectReplay);
+  startedSources.add(stream);
+  multipartStreams.get(stream)?.();
 }
 
 export function destroyBodyStream(stream: NodeJS.ReadableStream, error?: Error): void {

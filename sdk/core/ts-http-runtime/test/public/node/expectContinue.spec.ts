@@ -295,6 +295,134 @@ describe("Expect: 100-continue on the wire", () => {
     expect(attempts).toBe(2);
   });
 
+  it.each([false, true])(
+    "preserves a full-duplex upload after early 200 (Expect=%s)",
+    async (negotiate) => {
+      const fixture = await setup();
+      const respond = (incoming: http.IncomingMessage, response: http.ServerResponse): void => {
+        response.writeHead(200);
+        response.flushHeaders();
+        incoming.pipe(response);
+      };
+      fixture.server.on(negotiate ? "checkContinue" : "request", (incoming, response) => {
+        if (negotiate) response.writeContinue();
+        respond(incoming, response);
+      });
+      async function* body(): AsyncGenerator<string> {
+        yield "first ";
+        await new Promise((resolve) => setTimeout(resolve, 25));
+        yield "second";
+      }
+      const response = await createDefaultHttpClient().sendRequest(
+        pipelineRequest(fixture, {
+          body: Readable.from(body()),
+          headers: negotiate ? createHttpHeaders({ Expect: "100-continue" }) : createHttpHeaders(),
+          timeout: 1000,
+        }),
+      );
+      expect(response.status).toBe(200);
+      expect(response.bodyAsText).toBe("first second");
+    },
+  );
+
+  it("keeps cancellation connected after a successful response ends during upload", async () => {
+    const fixture = await setup();
+    fixture.agent.maxSockets = 1;
+    let attempts = 0;
+    fixture.server.on("request", (incoming, response) => {
+      attempts++;
+      if (attempts === 1) {
+        incoming.once("data", () => {
+          incoming.pause();
+          response.end("early success");
+        });
+      } else {
+        response.end("next");
+      }
+    });
+    let reads = 0;
+    const source = new Readable({
+      read() {
+        reads++;
+        this.push(Buffer.alloc(64 * 1024));
+      },
+    });
+    cleanups.push(async () => {
+      source.destroy();
+    });
+    const controller = new AbortController();
+    const client = createDefaultHttpClient();
+    const first = await client.sendRequest(
+      pipelineRequest(fixture, {
+        body: source,
+        headers: createHttpHeaders(),
+        abortSignal: controller.signal,
+      }),
+    );
+    expect(first.bodyAsText).toBe("early success");
+    controller.abort();
+    const stoppedAt = reads;
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    expect(reads).toBe(stoppedAt);
+
+    const next = await client.sendRequest(
+      pipelineRequest(fixture, {
+        method: "GET",
+        headers: createHttpHeaders(),
+        timeout: 500,
+      }),
+    );
+    expect(next.bodyAsText).toBe("next");
+    expect(attempts).toBe(2);
+  });
+
+  it("finishes an explicit-length source after the server responds to all body bytes", async () => {
+    const fixture = await setup();
+    let connections = 0;
+    fixture.server.on("connection", () => {
+      connections++;
+    });
+    fixture.server.on("request", (incoming, response) => {
+      if (incoming.method === "GET") {
+        response.end("next");
+        return;
+      }
+      let received = 0;
+      incoming.on("data", (chunk: Buffer) => {
+        received += chunk.length;
+        if (received === 4) response.end("complete");
+      });
+    });
+    let finalized = false;
+    async function* body(): AsyncGenerator<Buffer> {
+      try {
+        yield Buffer.from("body");
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      } finally {
+        finalized = true;
+      }
+    }
+    const client = createDefaultHttpClient();
+    const response = await client.sendRequest(
+      pipelineRequest(fixture, {
+        body: Readable.from(body()),
+        headers: createHttpHeaders({ "Content-Length": "4" }),
+        timeout: 1000,
+      }),
+    );
+    expect(response.bodyAsText).toBe("complete");
+    await vi.waitFor(() => expect(finalized).toBe(true));
+
+    const next = await client.sendRequest(
+      pipelineRequest(fixture, {
+        method: "GET",
+        headers: createHttpHeaders(),
+      }),
+    );
+    expect(next.bodyAsText).toBe("next");
+    expect(connections).toBe(1);
+  });
+
   it.each(["text", "stream", "gzip", "deflate", "HEAD"])(
     "preserves early %s responses",
     async (kind) => {
@@ -500,6 +628,40 @@ describe("Expect: 100-continue on the wire", () => {
     controller.abort();
     await expect(reading).rejects.toMatchObject({ name: "AbortError" });
     gzip.destroy();
+  });
+
+  it("handles aborting inside a compressed streamed response end listener", async () => {
+    const fixture = await setup();
+    const payload = gzipSync(Buffer.from("complete"));
+    fixture.server.on("checkContinue", (_incoming, response) => {
+      response.writeHead(417, {
+        "Content-Encoding": "gzip",
+        "Content-Length": payload.length,
+      });
+      response.end(payload);
+    });
+    const controller = new AbortController();
+    const response = await createDefaultHttpClient().sendRequest(
+      pipelineRequest(fixture, {
+        body: "body",
+        abortSignal: controller.signal,
+        headers: createHttpHeaders({
+          Expect: "100-continue",
+          "Accept-Encoding": "gzip",
+        }),
+        streamResponseStatusCodes: new Set([417]),
+      }),
+    );
+    const stream = response.readableStreamBody!;
+    const ended = new Promise<void>((resolve) => {
+      stream.once("end", () => {
+        controller.abort();
+        resolve();
+      });
+    });
+    stream.resume();
+    await ended;
+    await new Promise((resolve) => setImmediate(resolve));
   });
 
   it("does not pause a caller-owned source again after an early response completes", async () => {
