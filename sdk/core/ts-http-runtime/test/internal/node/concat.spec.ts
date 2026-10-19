@@ -79,8 +79,7 @@ describe("lazy multipart concatenation", () => {
 
   it("does not advance to the next part while the wrapper is backpressured", async () => {
     const later = vi.fn(() => Readable.from("later"));
-    let wrapper!: Readable;
-    wrapper = (await streamFor([
+    const wrapper = (await streamFor([
       () => Buffer.alloc(wrapper.readableHighWaterMark),
       later,
     ])) as Readable;
