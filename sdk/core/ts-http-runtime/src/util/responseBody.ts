@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { PipelineResponse } from "../interfaces.js";
 import { logger } from "../log.js";
 
 interface NodeResponseBody {
@@ -31,7 +30,17 @@ function isBrowserResponseBody(value: unknown): value is BrowserResponseBody {
   );
 }
 
-export async function disposeResponseBody(response: PipelineResponse): Promise<void> {
+/**
+ * Releases the body of a response that will not be read, so the underlying connection can be
+ * reused or closed. Handles Node readable streams and browser web streams, and never throws:
+ * disposal failures are logged as warnings.
+ *
+ * @param response - The response whose `readableStreamBody` or `browserStreamBody` should be disposed.
+ */
+export async function disposeResponseBody(response: {
+  readableStreamBody?: unknown;
+  browserStreamBody?: unknown;
+}): Promise<void> {
   try {
     const readableStream: unknown = response.readableStreamBody;
     if (isNodeResponseBody(readableStream)) {

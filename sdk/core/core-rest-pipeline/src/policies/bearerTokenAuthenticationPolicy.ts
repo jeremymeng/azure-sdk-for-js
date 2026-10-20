@@ -9,7 +9,7 @@ import { createTokenCycler } from "../util/tokenCycler.js";
 import { logger as coreLogger } from "../log.js";
 import type { RestError } from "../restError.js";
 import { isRestError } from "../restError.js";
-import { disposeResponseBody } from "../util/responseBody.js";
+import { disposeResponseBody } from "@typespec/ts-http-runtime/internal/util";
 
 /**
  * The programmatic identifier of the bearerTokenAuthenticationPolicy.

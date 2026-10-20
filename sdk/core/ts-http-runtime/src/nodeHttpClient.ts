@@ -21,7 +21,13 @@ import { isRestError, RestError } from "./restError.js";
 import type { IncomingMessage } from "node:http";
 import { logger } from "./log.js";
 import { Sanitizer } from "./util/sanitizer.js";
-import { effectiveHeaders, hasExpectContinue, headerValues } from "./util/expectContinue.js";
+import { toError } from "./util/error.js";
+import {
+  effectiveHeaders,
+  hasExpectContinue,
+  headerPairs,
+  headerValues,
+} from "./util/expectContinue.js";
 import {
   destroyBodyStream,
   disposeBodyStream,
@@ -68,10 +74,62 @@ function arrayBufferToBuffer(body: ArrayBuffer | ArrayBufferView): Buffer {
     : Buffer.from(body);
 }
 
-function isHeaderObject(
-  headers: http.RequestOptions["headers"],
-): headers is http.OutgoingHttpHeaders {
-  return headers !== undefined && !Array.isArray(headers);
+/**
+ * Adds the framing header Node would otherwise defer until the body is sent, converts raw
+ * array headers to an object, and removes `Expect` from `options.headers` so that it can be
+ * set once the socket is available.
+ * @returns the removed `Expect` header value, if any.
+ */
+function prepareExpectContinueHeaders(
+  options: http.RequestOptions,
+  bodyLength: number | null,
+): http.OutgoingHttpHeaders[string] {
+  if (
+    headerValues(options.headers, "content-length").length === 0 &&
+    headerValues(options.headers, "transfer-encoding").length === 0
+  ) {
+    const name = bodyLength === null ? "Transfer-Encoding" : "Content-Length";
+    const value = bodyLength === null ? "chunked" : String(bodyLength);
+    if (Array.isArray(options.headers)) {
+      options.headers = Array.isArray(options.headers[0])
+        ? [...options.headers, [name, value]]
+        : [...options.headers, name, value];
+    } else {
+      options.headers = { ...options.headers, [name]: value };
+    }
+  }
+
+  let headers: http.OutgoingHttpHeaders;
+  if (Array.isArray(options.headers)) {
+    headers = Object.create(null);
+    for (const [name, value] of headerPairs(options.headers) as [string, string][]) {
+      http.validateHeaderName(name);
+      http.validateHeaderValue(name, value);
+      const key = name.toLowerCase();
+      const previous = headers[key];
+      headers[key] =
+        previous === undefined
+          ? value
+          : [...(Array.isArray(previous) ? previous : [String(previous)]), value];
+    }
+    if (headerValues(headers, "host").length > 0) {
+      options.setHost = false;
+    }
+  } else {
+    headers = (options.headers ?? {}) as http.OutgoingHttpHeaders;
+  }
+
+  let expectHeader: http.OutgoingHttpHeaders[string];
+  const deferredHeaders = { ...headers };
+  for (const [name, value] of Object.entries(deferredHeaders)) {
+    if (name.toLowerCase() === "expect" && value !== undefined) {
+      http.validateHeaderValue(name, String(value));
+      expectHeader = value;
+      delete deferredHeaders[name];
+    }
+  }
+  options.headers = deferredHeaders;
+  return expectHeader;
 }
 
 interface NodeRequestResult {
@@ -108,6 +166,14 @@ class ReportTransform extends Transform {
     super();
     this.progressCallback = progressCallback;
   }
+}
+
+function toRequestError(error: Error & { code?: string }, request: PipelineRequest): Error {
+  if (error.name === "AbortError" || isRestError(error)) return error;
+  return new RestError(error.message, {
+    code: error.code ?? RestError.REQUEST_SEND_ERROR,
+    request,
+  });
 }
 
 /**
@@ -299,57 +365,7 @@ class NodeHttpClient implements HttpClient {
       headers: request.headers.toJSON({ preserveCase: true }),
       ...request.requestOverrides,
     };
-    if (
-      negotiate &&
-      headerValues(options.headers, "content-length").length === 0 &&
-      headerValues(options.headers, "transfer-encoding").length === 0
-    ) {
-      const name = bodyLength === null ? "Transfer-Encoding" : "Content-Length";
-      const value = bodyLength === null ? "chunked" : String(bodyLength);
-      if (Array.isArray(options.headers)) {
-        options.headers = Array.isArray(options.headers[0])
-          ? [...options.headers, [name, value]]
-          : [...options.headers, name, value];
-      } else {
-        options.headers = { ...options.headers, [name]: value };
-      }
-    }
-    let expectHeader: http.OutgoingHttpHeaders[string];
-    if (negotiate) {
-      if (Array.isArray(options.headers)) {
-        const raw = options.headers;
-        const pairs = Array.isArray(raw[0])
-          ? raw
-          : Array.from({ length: Math.ceil(raw.length / 2) }, (_, i) => [
-              raw[i * 2],
-              raw[i * 2 + 1],
-            ]);
-        const normalized: http.OutgoingHttpHeaders = Object.create(null);
-        for (const [name, value] of pairs) {
-          http.validateHeaderName(name);
-          http.validateHeaderValue(name, value);
-          const key = name.toLowerCase();
-          const previous = normalized[key];
-          normalized[key] =
-            previous === undefined
-              ? value
-              : [...(Array.isArray(previous) ? previous : [String(previous)]), value];
-        }
-        options.headers = normalized;
-        if (headerValues(normalized, "host").length > 0) {
-          options.setHost = false;
-        }
-      }
-      const deferredHeaders = { ...(isHeaderObject(options.headers) ? options.headers : {}) };
-      for (const [name, value] of Object.entries(deferredHeaders)) {
-        if (name.toLowerCase() === "expect" && value !== undefined) {
-          http.validateHeaderValue(name, String(value));
-          expectHeader = value;
-          delete deferredHeaders[name];
-        }
-      }
-      options.headers = deferredHeaders;
-    }
+    const expectHeader = negotiate ? prepareExpectContinueHeaders(options, bodyLength) : undefined;
 
     return new Promise<NodeRequestResult>((resolve, reject) => {
       let state: "waiting" | "sending" | "terminal" = "waiting";
@@ -402,15 +418,7 @@ class NodeHttpClient implements HttpClient {
         state = "terminal";
         cleanupWait();
         stopUpload();
-        const restError =
-          error.name === "AbortError"
-            ? error
-            : isRestError(error)
-              ? error
-              : new RestError(error.message, {
-                  code: error.code ?? RestError.REQUEST_SEND_ERROR,
-                  request,
-                });
+        const restError = toRequestError(error, request);
         completeRequest();
         if (response) {
           if (!response.complete) response.destroy(restError);
@@ -457,12 +465,7 @@ class NodeHttpClient implements HttpClient {
             completeRequest();
             return;
           }
-          const restError = isRestError(error)
-            ? error
-            : new RestError(error.message, {
-                code: error.code ?? RestError.REQUEST_SEND_ERROR,
-                request,
-              });
+          const restError = toRequestError(error, request);
           completeRequest();
           response.destroy(restError);
         } else fail(error);
@@ -531,8 +534,7 @@ class NodeHttpClient implements HttpClient {
           else if (typeof body === "string" || Buffer.isBuffer(body)) req.end(body);
           else throw new RestError("Unrecognized body type", { request });
         } catch (error) {
-          fail(error instanceof Error ? error : new Error(String(error)));
-          return;
+          fail(toError(error));
         }
       }
       function flushHeaders(): void {
@@ -553,8 +555,7 @@ class NodeHttpClient implements HttpClient {
             }
           });
         } catch (error) {
-          fail(error instanceof Error ? error : new Error(String(error)));
-          return;
+          fail(toError(error));
         }
       }
       if (negotiate && expectHeader !== undefined) {
@@ -562,7 +563,7 @@ class NodeHttpClient implements HttpClient {
           // Avoid constructor-time writes before an agent has finished rewriting the headers.
           req.setHeader("Expect", expectHeader);
         } catch (error) {
-          fail(error instanceof Error ? error : new Error(String(error)));
+          fail(toError(error));
           return;
         }
       }

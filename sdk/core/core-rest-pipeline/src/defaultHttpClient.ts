@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { HttpClient } from "./interfaces.js";
+import type { HttpClient, PipelineResponse } from "./interfaces.js";
 import { createDefaultHttpClient as tspCreateDefaultHttpClient } from "@typespec/ts-http-runtime";
 import { wrapAbortSignalLike } from "#platform/wrapAbortSignal";
 import { type PipelineRequest as TspPipelineRequest } from "@typespec/ts-http-runtime";
 import { cleanupAbortSignal } from "./util/abortSignalCleanup.js";
-import type { PipelineResponse } from "./interfaces.js";
 
 /**
  * Create the correct HttpClient for the current environment.

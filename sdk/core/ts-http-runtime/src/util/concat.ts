@@ -12,6 +12,7 @@ import {
 } from "./nodeBody.js";
 import { logger } from "../log.js";
 import { RestError } from "../restError.js";
+import { toError } from "./error.js";
 
 function toStream(
   source: ReadableStream<Uint8Array> | NodeJS.ReadableStream | Uint8Array | Blob,
@@ -30,11 +31,7 @@ function toStream(
           .then(
             ({ done, value }) => !stream.destroyed && stream.push(done ? null : Buffer.from(value)),
           )
-          .catch((error: unknown) =>
-            stream.destroyed
-              ? stream
-              : stream.destroy(error instanceof Error ? error : new Error(String(error))),
-          );
+          .catch((error: unknown) => (stream.destroyed ? stream : stream.destroy(toError(error))));
       },
       destroy(error, callback) {
         reader.releaseLock();
@@ -187,7 +184,7 @@ export async function concat(
         part.once("close", onClose);
         part.resume();
       } catch (error) {
-        stream.destroy(error instanceof Error ? error : new Error(String(error)));
+        stream.destroy(toError(error));
       }
     }
     return stream;
