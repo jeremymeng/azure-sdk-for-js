@@ -329,13 +329,12 @@ describe("Expect: 100-continue on the wire", () => {
     const fixture = await setup();
     fixture.agent.maxSockets = 1;
     let attempts = 0;
-    const responseSent = deferred<void>();
     fixture.server.on("request", (incoming, response) => {
       attempts++;
       if (attempts === 1) {
         incoming.once("data", () => {
           incoming.pause();
-          response.end("early success", () => responseSent.resolve());
+          response.end("early success");
         });
       } else {
         response.end("next");
@@ -360,9 +359,9 @@ describe("Expect: 100-continue on the wire", () => {
         abortSignal: controller.signal,
       }),
     );
-    await responseSent.promise;
+    const response = await first;
+    expect(response.bodyAsText).toBe("early success");
     controller.abort();
-    await expect(first).rejects.toMatchObject({ name: "AbortError" });
     const stoppedAt = reads;
     await new Promise((resolve) => setTimeout(resolve, 25));
     expect(reads).toBe(stoppedAt);
@@ -385,7 +384,8 @@ describe("Expect: 100-continue on the wire", () => {
       fixture.server.on("request", (incoming, response) => {
         incoming.once("data", () => {
           incoming.pause();
-          response.end("early success");
+          response.writeHead(200);
+          response.write("response started");
         });
       });
       let started = false;

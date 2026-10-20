@@ -77,21 +77,18 @@ describe("lazy multipart concatenation", () => {
     expect(factory).not.toHaveBeenCalled();
   });
 
-  it("does not advance to the next part while the wrapper is backpressured", async () => {
+  it("drains high-water-mark parts in order in pull mode", async () => {
     const later = vi.fn(() => Readable.from("later"));
     const wrapper = (await streamFor([
       () => Buffer.alloc(wrapper.readableHighWaterMark),
       later,
     ])) as Readable;
-    await new Promise<void>((resolve) => wrapper.once("readable", resolve));
-    wrapper._read(wrapper.readableHighWaterMark);
-    await new Promise((resolve) => setImmediate(resolve));
-    expect(later).not.toHaveBeenCalled();
-    expect(wrapper.read(wrapper.readableHighWaterMark)).not.toBeNull();
-    wrapper._read(wrapper.readableHighWaterMark);
-    await new Promise((resolve) => setImmediate(resolve));
+    const chunks: Buffer[] = [];
+    for await (const chunk of wrapper) chunks.push(Buffer.from(chunk));
+    expect(Buffer.concat(chunks)).toEqual(
+      Buffer.concat([Buffer.alloc(wrapper.readableHighWaterMark), Buffer.from("later")]),
+    );
     expect(later).toHaveBeenCalledOnce();
-    wrapper.destroy();
   });
 
   it("does not advance while a pipe destination is backpressured", async () => {

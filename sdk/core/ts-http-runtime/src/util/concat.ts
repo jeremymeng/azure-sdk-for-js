@@ -80,7 +80,7 @@ export async function concat(
     const stream = new Readable({
       read() {
         const pipePaused = this.readableFlowing === false && this.listenerCount("data") > 0;
-        if (this.readableLength >= this.readableHighWaterMark || pipePaused) {
+        if (pipePaused) {
           waitingForRead = true;
           current?.pause();
           return;
@@ -97,11 +97,7 @@ export async function concat(
     const isPipePaused = (): boolean =>
       stream.readableFlowing === false && stream.listenerCount("data") > 0;
     stream.on("resume", () => {
-      if (
-        !waitingForRead ||
-        stream.destroyed ||
-        stream.readableLength >= stream.readableHighWaterMark
-      ) {
+      if (!waitingForRead || stream.destroyed) {
         return;
       }
       waitingForRead = false;
