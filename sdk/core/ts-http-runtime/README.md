@@ -66,8 +66,10 @@ Direct streams remain caller-owned. When a non-success response rejects,
 redirects, or challenges an active upload, the transport unpipes and pauses
 them; the caller is responsible for their remaining lifetime. Successful
 responses may run full-duplex with the upload, including responses received
-before an explicit-length source reaches EOF. Factory-returned streams and
-SDK-created wrappers are request-owned and may be destroyed during cleanup.
+before an explicit-length source reaches EOF. An upload failure remains a
+request error even if the successful response body finishes first.
+Factory-returned streams and SDK-created wrappers are request-owned and may be
+destroyed during cleanup.
 Paused sources may finish an in-flight read after being paused; late errors are
 logged until the source closes. Already-flowing sources cannot be made lazy
 retroactively, and in-memory serialization or policy signing may occur before

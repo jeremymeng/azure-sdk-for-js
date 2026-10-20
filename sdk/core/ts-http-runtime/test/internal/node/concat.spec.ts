@@ -105,10 +105,15 @@ describe("lazy multipart concatenation", () => {
     const destination = new Writable({
       highWaterMark: 1,
       write(_chunk, _encoding, callback) {
-        releaseWrite = callback;
-        resolveBlocked();
+        if (!releaseWrite) {
+          releaseWrite = callback;
+          resolveBlocked();
+        } else {
+          callback();
+        }
       },
     });
+    const finished = new Promise<void>((resolve) => destination.once("finish", resolve));
     wrapper.pipe(destination);
     await blocked;
     await new Promise((resolve) => setImmediate(resolve));
@@ -116,8 +121,44 @@ describe("lazy multipart concatenation", () => {
     expect(later).not.toHaveBeenCalled();
 
     releaseWrite();
-    wrapper.destroy();
-    destination.destroy();
+    await finished;
+    expect(later).toHaveBeenCalledOnce();
+  });
+
+  it("does not resume a multi-chunk part before pipe backpressure drains", async () => {
+    const source = Readable.from([Buffer.alloc(64 * 1024), Buffer.alloc(64 * 1024)]);
+    const later = vi.fn(() => Readable.from("later"));
+    const wrapper = (await streamFor([source, later])) as Readable;
+    let releaseWrite!: () => void;
+    let resolveBlocked!: () => void;
+    const blocked = new Promise<void>((resolve) => {
+      resolveBlocked = resolve;
+    });
+    let writes = 0;
+    const destination = new Writable({
+      highWaterMark: 1,
+      write(_chunk, _encoding, callback) {
+        writes++;
+        if (writes === 1) {
+          releaseWrite = callback;
+          resolveBlocked();
+        } else {
+          callback();
+        }
+      },
+    });
+    const finished = new Promise<void>((resolve) => destination.once("finish", resolve));
+    wrapper.pipe(destination);
+    await blocked;
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(source.readableFlowing).toBe(false);
+    expect(writes).toBe(1);
+    expect(later).not.toHaveBeenCalled();
+
+    releaseWrite();
+    await finished;
+    expect(writes).toBe(3);
+    expect(later).toHaveBeenCalledOnce();
   });
 
   it("tracks non-negotiated custom streams by identity", () => {

@@ -5,7 +5,7 @@ import http from "node:http";
 import https from "node:https";
 import zlib from "node:zlib";
 import { types } from "node:util";
-import { Transform } from "node:stream";
+import { Readable, Transform } from "node:stream";
 import { AbortError } from "./abort-controller/AbortError.js";
 import type {
   HttpClient,
@@ -78,6 +78,7 @@ interface NodeRequestResult {
   response: IncomingMessage;
   requestComplete: Promise<void>;
   isRequestComplete: () => boolean;
+  getRequestError: () => Error | undefined;
 }
 
 function createDeferred(): { promise: Promise<void>; resolve: () => void } {
@@ -108,6 +109,33 @@ class ReportTransform extends Transform {
     super();
     this.progressCallback = progressCallback;
   }
+}
+
+function createRequestCompletionStream(
+  source: NodeJS.ReadableStream,
+  requestComplete: Promise<void>,
+  getRequestError: () => Error | undefined,
+): NodeJS.ReadableStream {
+  const readable = source as Readable;
+  const result = Readable.from(
+    (async function* () {
+      try {
+        for await (const chunk of readable.iterator({ destroyOnReturn: false })) {
+          yield chunk;
+        }
+        await requestComplete;
+        const requestError = getRequestError();
+        if (requestError) throw requestError;
+      } finally {
+        if (source.readable) destroyBodyStream(source);
+      }
+    })(),
+    { objectMode: false },
+  );
+  result.once("close", () => {
+    if (source.readable) destroyBodyStream(source);
+  });
+  return result;
 }
 
 /**
@@ -208,6 +236,9 @@ class NodeHttpClient implements HttpClient {
           cleanupIfComplete();
         });
         res.resume();
+        await result.requestComplete;
+        const requestError = result.getRequestError();
+        if (requestError) throw requestError;
         return response;
       }
 
@@ -228,6 +259,11 @@ class NodeHttpClient implements HttpClient {
         pipeResponse(responseStream, downloadReportStream);
         responseStream = downloadReportStream;
       }
+      responseStream = createRequestCompletionStream(
+        responseStream,
+        result.requestComplete,
+        result.getRequestError,
+      );
       responseTracked = true;
       monitorStreamCompletion(responseStream, () => {
         responseDone = true;
@@ -361,10 +397,12 @@ class NodeHttpClient implements HttpClient {
       let response: IncomingMessage | undefined;
       let constructed = false;
       let requestCompleteResolved = false;
+      let requestError: Error | undefined;
       const { promise: requestComplete, resolve: resolveRequestComplete } = createDeferred();
-      const completeRequest = (): void => {
+      const completeRequest = (error?: Error): void => {
         if (requestCompleteResolved) return;
         requestCompleteResolved = true;
+        requestError = error;
         resolveRequestComplete();
         if (response) state = "terminal";
       };
@@ -411,7 +449,9 @@ class NodeHttpClient implements HttpClient {
                   code: error.code ?? RestError.REQUEST_SEND_ERROR,
                   request,
                 });
-        req.destroy();
+        completeRequest(restError);
+        if (response && !response.complete) response.destroy(restError);
+        req.destroy(response ? undefined : restError);
         reject(restError);
       }
       function onSourceEnd(): void {
@@ -438,16 +478,29 @@ class NodeHttpClient implements HttpClient {
           // Leave incoming data readable; Node retires the socket when the response ends.
           req.shouldKeepAlive = false;
           stopUpload();
+          completeRequest();
         }
         resolve({
           response: res,
           requestComplete,
           isRequestComplete: () => requestCompleteResolved,
+          getRequestError: () => requestError,
         });
       }
       req.on("error", (error: Error & { code?: string }) => {
         if (response) {
-          if (!response.complete) response.destroy(error);
+          if (response.complete) {
+            completeRequest();
+            return;
+          }
+          const restError = isRestError(error)
+            ? error
+            : new RestError(error.message, {
+                code: error.code ?? RestError.REQUEST_SEND_ERROR,
+                request,
+              });
+          completeRequest(restError);
+          response.destroy(restError);
         } else fail(error);
       });
       const onAbort = (): void => {
@@ -457,16 +510,22 @@ class NodeHttpClient implements HttpClient {
         const abortError = new AbortError(
           "The operation was aborted. Rejecting from abort signal callback while making request.",
         );
-        req.destroy(abortError);
+        completeRequest(abortError);
+        if (response && !response.complete) {
+          queueMicrotask(() => {
+            if (response && !response.destroyed) response.destroy(abortError);
+          });
+        }
+        req.destroy(response ? undefined : abortError);
         reject(abortError);
       };
       abortController.signal.addEventListener("abort", onAbort);
       req.once("close", () => {
-        completeRequest();
         cleanupWait();
         stopUpload();
         abortController.signal.removeEventListener("abort", onAbort);
         if (!response) fail(new Error("Request closed before a response"));
+        else completeRequest();
         state = "terminal";
       });
       function sendBody(): void {
@@ -664,7 +723,7 @@ function streamToText(stream: NodeJS.ReadableStream): Promise<string> {
       resolve(Buffer.concat(buffer).toString("utf8"));
     });
     stream.on("error", (e) => {
-      if (e && e?.name === "AbortError") {
+      if (e && (e?.name === "AbortError" || isRestError(e))) {
         reject(e);
       } else {
         reject(

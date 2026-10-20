@@ -77,28 +77,36 @@ export async function concat(
     let current: NodeJS.ReadableStream | undefined;
     let cleanupCurrent: (() => void) | undefined;
     let waitingForRead = false;
-    let advancePending = false;
-    let readRequested = false;
     const stream = new Readable({
       read() {
-        if (stream.readableLength >= stream.readableHighWaterMark) {
+        const pipePaused = this.readableFlowing === false && this.listenerCount("data") > 0;
+        if (this.readableLength >= this.readableHighWaterMark || pipePaused) {
           waitingForRead = true;
-          readRequested = false;
           current?.pause();
           return;
         }
         waitingForRead = false;
-        readRequested = true;
         if (current) current.resume();
-        else if (!advancePending) {
-          readRequested = false;
-          advance();
-        }
+        else advance();
       },
       destroy(error, callback) {
         cleanupCurrent?.();
         callback(error);
       },
+    });
+    const isPipePaused = (): boolean =>
+      stream.readableFlowing === false && stream.listenerCount("data") > 0;
+    stream.on("resume", () => {
+      if (
+        !waitingForRead ||
+        stream.destroyed ||
+        stream.readableLength >= stream.readableHighWaterMark
+      ) {
+        return;
+      }
+      waitingForRead = false;
+      if (current) current.resume();
+      else advance();
     });
     registerMultipartStream(stream, () => {
       for (const source of sources) {
@@ -143,8 +151,7 @@ export async function concat(
         const part = toStream(resolved, owned);
         current = part;
         const onData = (chunk: Buffer | string): void => {
-          readRequested = false;
-          if (!stream.push(chunk) || stream.readableFlowing === false) {
+          if (!stream.push(chunk) || isPipePaused()) {
             waitingForRead = true;
             part.pause();
           }
@@ -154,31 +161,15 @@ export async function concat(
         };
         const onEnd = (): void => {
           cleanupCurrent?.();
-          advancePending = true;
-          queueMicrotask(() => {
-            advancePending = false;
-            if (stream.destroyed) return;
-            if (stream.readableLength >= stream.readableHighWaterMark) {
-              waitingForRead = true;
-              readRequested = false;
-              return;
-            }
-            if (stream.readableFlowing === false && stream.listenerCount("data") > 0) {
-              waitingForRead = true;
-              readRequested = false;
-              return;
-            }
-            if (readRequested) {
-              readRequested = false;
-              advance();
-              return;
-            }
-            if (waitingForRead || stream.readableFlowing === false) {
-              waitingForRead = true;
-              return;
-            }
-            advance();
-          });
+          if (
+            waitingForRead ||
+            stream.readableLength >= stream.readableHighWaterMark ||
+            isPipePaused()
+          ) {
+            waitingForRead = true;
+            return;
+          }
+          advance();
         };
         const onClose = (): void => {
           if (current === part) stream.destroy(new Error("Multipart source closed before ending"));

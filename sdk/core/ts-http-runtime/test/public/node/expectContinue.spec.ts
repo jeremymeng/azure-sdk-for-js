@@ -329,12 +329,13 @@ describe("Expect: 100-continue on the wire", () => {
     const fixture = await setup();
     fixture.agent.maxSockets = 1;
     let attempts = 0;
+    const responseSent = deferred<void>();
     fixture.server.on("request", (incoming, response) => {
       attempts++;
       if (attempts === 1) {
         incoming.once("data", () => {
           incoming.pause();
-          response.end("early success");
+          response.end("early success", () => responseSent.resolve());
         });
       } else {
         response.end("next");
@@ -352,15 +353,16 @@ describe("Expect: 100-continue on the wire", () => {
     });
     const controller = new AbortController();
     const client = createDefaultHttpClient();
-    const first = await client.sendRequest(
+    const first = client.sendRequest(
       pipelineRequest(fixture, {
         body: source,
         headers: createHttpHeaders(),
         abortSignal: controller.signal,
       }),
     );
-    expect(first.bodyAsText).toBe("early success");
+    await responseSent.promise;
     controller.abort();
+    await expect(first).rejects.toMatchObject({ name: "AbortError" });
     const stoppedAt = reads;
     await new Promise((resolve) => setTimeout(resolve, 25));
     expect(reads).toBe(stoppedAt);
@@ -375,6 +377,46 @@ describe("Expect: 100-continue on the wire", () => {
     expect(next.bodyAsText).toBe("next");
     expect(attempts).toBe(2);
   });
+
+  it.each([false, true])(
+    "surfaces an upload error after successful response headers (stream=%s)",
+    async (streamResponse) => {
+      const fixture = await setup();
+      fixture.server.on("request", (incoming, response) => {
+        incoming.once("data", () => {
+          incoming.pause();
+          response.end("early success");
+        });
+      });
+      let started = false;
+      const source = new Readable({
+        read() {
+          if (started) return;
+          started = true;
+          this.push("first");
+          setTimeout(() => this.destroy(new Error("upload failed")), 25);
+        },
+      });
+      const pending = createDefaultHttpClient().sendRequest(
+        pipelineRequest(fixture, {
+          body: source,
+          headers: createHttpHeaders(),
+          streamResponseStatusCodes: streamResponse ? new Set([200]) : undefined,
+        }),
+      );
+      const assertion = {
+        name: "RestError",
+        code: "REQUEST_SEND_ERROR",
+        message: "upload failed",
+      };
+      if (streamResponse) {
+        const response = await pending;
+        await expect(readText(response.readableStreamBody!)).rejects.toMatchObject(assertion);
+      } else {
+        await expect(pending).rejects.toMatchObject(assertion);
+      }
+    },
+  );
 
   it("finishes an explicit-length source after the server responds to all body bytes", async () => {
     const fixture = await setup();

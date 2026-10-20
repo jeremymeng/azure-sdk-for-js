@@ -49,18 +49,21 @@ class FakeRequest extends PassThrough {}
  *
  * This fake asserts we have only passed the correct types.
  */
-const httpRequestChecker: ClientRequest = {
-  on() {
-    /* no op */
-  },
-  once() {
-    /* no op */
-  },
-  end(chunk: unknown) {
-    const isString = typeof chunk === "string";
-    assert(isString || Buffer.isBuffer(chunk), "Expected either string or Buffer");
-  },
-} as unknown as ClientRequest;
+function createWritableRequest(onChunk?: (chunk: Buffer) => void): ClientRequest {
+  return new Writable({
+    autoDestroy: false,
+    write(chunk: Buffer, _encoding, callback) {
+      onChunk?.(chunk);
+      callback();
+    },
+  }) as unknown as ClientRequest;
+}
+
+function createHttpRequestChecker(): ClientRequest {
+  return createWritableRequest((chunk) => {
+    assert(Buffer.isBuffer(chunk), "Expected a Buffer");
+  });
+}
 
 function createResponse(statusCode: number, body = ""): IncomingMessage {
   const response = new FakeResponse();
@@ -402,7 +405,7 @@ describe("NodeHttpClient", function () {
 
   it("should handle typed array bodies correctly", async function () {
     const client = createDefaultHttpClient();
-    vi.mocked(https.request).mockReturnValueOnce(httpRequestChecker);
+    vi.mocked(https.request).mockReturnValueOnce(createHttpRequestChecker());
 
     const data = new Uint8Array(10);
     for (let i = 0; i < 10; i++) {
@@ -422,17 +425,9 @@ describe("NodeHttpClient", function () {
   it("should send only the ArrayBufferView window for subarray bodies", async function () {
     const client = createDefaultHttpClient();
     let sentChunk: unknown;
-    const captureChunkRequest: ClientRequest = {
-      on() {
-        /* no op */
-      },
-      once() {
-        /* no op */
-      },
-      end(chunk: unknown) {
-        sentChunk = chunk;
-      },
-    } as unknown as ClientRequest;
+    const captureChunkRequest = createWritableRequest((chunk) => {
+      sentChunk = chunk;
+    });
     vi.mocked(https.request).mockReturnValueOnce(captureChunkRequest);
 
     const data = Uint8Array.from([0, 1, 2, 3, 4, 5, 6, 7]);
@@ -456,7 +451,7 @@ describe("NodeHttpClient", function () {
     "should set Content-Length for empty binary bodies",
     async function (body) {
       const client = createDefaultHttpClient();
-      vi.mocked(https.request).mockReturnValueOnce(httpRequestChecker);
+      vi.mocked(https.request).mockReturnValueOnce(createHttpRequestChecker());
       const request = createPipelineRequest({
         url: "https://example.com",
         body,
@@ -470,7 +465,7 @@ describe("NodeHttpClient", function () {
 
   it("should handle ArrayBuffer bodies correctly", async function () {
     const client = createDefaultHttpClient();
-    vi.mocked(https.request).mockReturnValueOnce(httpRequestChecker);
+    vi.mocked(https.request).mockReturnValueOnce(createHttpRequestChecker());
 
     const data = new Uint8Array(10);
     for (let i = 0; i < 10; i++) {
@@ -490,17 +485,9 @@ describe("NodeHttpClient", function () {
   it("should handle Buffer bodies correctly", async function () {
     const client = createDefaultHttpClient();
     let sentChunk: unknown;
-    const captureChunkRequest: ClientRequest = {
-      on() {
-        /* no op */
-      },
-      once() {
-        /* no op */
-      },
-      end(chunk: unknown) {
-        sentChunk = chunk;
-      },
-    } as unknown as ClientRequest;
+    const captureChunkRequest = createWritableRequest((chunk) => {
+      sentChunk = chunk;
+    });
     vi.mocked(https.request).mockReturnValueOnce(captureChunkRequest);
 
     const data = Buffer.from("example text");
@@ -518,7 +505,7 @@ describe("NodeHttpClient", function () {
 
   it("should handle string bodies correctly", async function () {
     const client = createDefaultHttpClient();
-    vi.mocked(https.request).mockReturnValueOnce(httpRequestChecker);
+    vi.mocked(https.request).mockReturnValueOnce(createHttpRequestChecker());
 
     const request = createPipelineRequest({ url: "https://example.com", body: "test data" });
     const promise = client.sendRequest(request);
