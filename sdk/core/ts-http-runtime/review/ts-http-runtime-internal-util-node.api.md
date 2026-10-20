@@ -18,7 +18,7 @@ export function computeSha256Hash(content: string, encoding: "base64" | "hex"): 
 // @public
 export function computeSha256Hmac(key: string, stringToSign: string, encoding: "base64" | "hex"): Promise<string>;
 
-// @public (undocumented)
+// @public
 export function disposeResponseBody(response: {
     readableStreamBody?: unknown;
     browserStreamBody?: unknown;

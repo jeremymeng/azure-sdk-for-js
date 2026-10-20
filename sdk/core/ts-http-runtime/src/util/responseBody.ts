@@ -30,6 +30,13 @@ function isBrowserResponseBody(value: unknown): value is BrowserResponseBody {
   );
 }
 
+/**
+ * Releases the body of a response that will not be read, so the underlying connection can be
+ * reused or closed. Handles Node readable streams and browser web streams, and never throws:
+ * disposal failures are logged as warnings.
+ *
+ * @param response - The response whose `readableStreamBody` or `browserStreamBody` should be disposed.
+ */
 export async function disposeResponseBody(response: {
   readableStreamBody?: unknown;
   browserStreamBody?: unknown;
