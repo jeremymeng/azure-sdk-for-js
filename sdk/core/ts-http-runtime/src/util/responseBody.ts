@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import type { PipelineResponse } from "../interfaces.js";
 import { logger } from "../log.js";
 
 interface NodeResponseBody {
@@ -31,7 +30,10 @@ function isBrowserResponseBody(value: unknown): value is BrowserResponseBody {
   );
 }
 
-export async function disposeResponseBody(response: PipelineResponse): Promise<void> {
+export async function disposeResponseBody(response: {
+  readableStreamBody?: unknown;
+  browserStreamBody?: unknown;
+}): Promise<void> {
   try {
     const readableStream: unknown = response.readableStreamBody;
     if (isNodeResponseBody(readableStream)) {

@@ -3,23 +3,21 @@
 
 import type { PipelineRequest } from "../interfaces.js";
 
+export function headerPairs(headers: readonly unknown[]): unknown[][] {
+  // Node accepts either [[name, value], ...] or a flat [name, value, ...] list.
+  return Array.isArray(headers[0])
+    ? (headers as unknown[][])
+    : Array.from({ length: Math.ceil(headers.length / 2) }, (_, i) => [
+        headers[i * 2],
+        headers[i * 2 + 1],
+      ]);
+}
+
 export function headerValues(headers: unknown, name: string): unknown[] {
   if (Array.isArray(headers)) {
-    const values: unknown[] = [];
-    if (Array.isArray(headers[0])) {
-      for (const pair of headers) {
-        if (Array.isArray(pair) && typeof pair[0] === "string" && pair[0].toLowerCase() === name) {
-          values.push(pair[1]);
-        }
-      }
-    } else {
-      for (let i = 0; i < headers.length; i += 2) {
-        if (typeof headers[i] === "string" && headers[i].toLowerCase() === name) {
-          values.push(headers[i + 1]);
-        }
-      }
-    }
-    return values.flat();
+    return headerPairs(headers)
+      .filter(([key]) => typeof key === "string" && key.toLowerCase() === name)
+      .flatMap(([, value]) => value);
   }
   if (headers && typeof headers === "object") {
     // Node's setHeader replaces an earlier spelling of the same object key.
@@ -55,6 +53,14 @@ function withoutContinue(value: unknown): unknown {
   return tokens.length ? tokens.join(",") : undefined;
 }
 
+// Returns undefined when the header must be dropped from a body-less redirected request.
+function stripBodyHeader(name: unknown, value: unknown): unknown {
+  if (typeof name !== "string") return undefined;
+  const lower = name.toLowerCase();
+  if (lower === "content-length" || lower === "transfer-encoding") return undefined;
+  return lower === "expect" ? withoutContinue(value) : value;
+}
+
 export function removeBodyHeaders(request: PipelineRequest): void {
   const expect = withoutContinue(request.headers.get("Expect"));
   if (typeof expect === "string") request.headers.set("Expect", expect);
@@ -64,33 +70,26 @@ export function removeBodyHeaders(request: PipelineRequest): void {
   const overrides = request.requestOverrides;
   if (!overrides) return;
   const headers = overrides.headers;
-  const remove = (name: string): boolean =>
-    name.toLowerCase() === "content-length" || name.toLowerCase() === "transfer-encoding";
   if (Array.isArray(headers)) {
-    const pairs: unknown[][] = Array.isArray(headers[0])
-      ? headers
-      : Array.from({ length: headers.length / 2 }, (_, index) => [
-          headers[index * 2],
-          headers[index * 2 + 1],
-        ]);
-    const updated = pairs.flatMap(([name, value]) => {
-      if (typeof name !== "string" || remove(name)) return [];
-      const result = name.toLowerCase() === "expect" ? withoutContinue(value) : value;
+    const pairs = headerPairs(headers).flatMap(([name, value]) => {
+      const result = stripBodyHeader(name, value);
       return result === undefined ? [] : [[name, result]];
     });
     request.requestOverrides = {
       ...overrides,
       method: "GET",
-      headers: Array.isArray(headers[0]) ? updated : updated.flat(),
+      headers: Array.isArray(headers[0]) ? pairs : pairs.flat(),
     };
   } else if (headers && typeof headers === "object") {
-    const updated: Record<string, unknown> = {};
-    for (const [name, value] of Object.entries(headers)) {
-      if (remove(name)) continue;
-      const result = name.toLowerCase() === "expect" ? withoutContinue(value) : value;
-      if (result !== undefined) updated[name] = result;
-    }
-    request.requestOverrides = { ...overrides, method: "GET", headers: updated };
+    const entries = Object.entries(headers).flatMap(([name, value]) => {
+      const result = stripBodyHeader(name, value);
+      return result === undefined ? [] : [[name, result]];
+    });
+    request.requestOverrides = {
+      ...overrides,
+      method: "GET",
+      headers: Object.fromEntries(entries),
+    };
   } else {
     request.requestOverrides = { ...overrides, method: "GET" };
   }
