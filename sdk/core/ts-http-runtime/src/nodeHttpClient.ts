@@ -448,10 +448,10 @@ class NodeHttpClient implements HttpClient {
         state = continueUpload ? "sending" : "terminal";
         cleanupWait();
         if (!req.writableFinished && !continueUpload) {
-          // Leave incoming data readable; Node retires the socket when the response ends.
           req.shouldKeepAlive = false;
           stopUpload();
-          completeRequest();
+          // Preserve the response, then force closure even if outgoing writes cannot drain.
+          res.once("end", () => req.destroy());
         }
         resolve({
           response: res,

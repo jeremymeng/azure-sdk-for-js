@@ -296,6 +296,97 @@ describe("Expect: 100-continue on the wire", () => {
   });
 
   it.each([false, true])(
+    "retires backpressured outgoing writes after reading an early rejection (Expect=%s)",
+    async (negotiate) => {
+      const fixture = await setup();
+      fixture.agent.maxSockets = 1;
+      let connections = 0;
+      fixture.server.on("connection", () => {
+        connections++;
+      });
+      const rejectUpload = (
+        incoming: http.IncomingMessage,
+        response: http.ServerResponse,
+      ): void => {
+        incoming.once("data", () => {
+          incoming.pause();
+          response.writeHead(413, { Connection: "keep-alive", "Content-Length": 8 });
+          response.write("reje");
+          setTimeout(() => response.end("cted"), 25);
+        });
+      };
+      fixture.server.on("request", (incoming, response) => {
+        if (incoming.method === "GET") response.end("next");
+        else rejectUpload(incoming, response);
+      });
+      fixture.server.on("checkContinue", (incoming, response) => {
+        response.writeContinue();
+        rejectUpload(incoming, response);
+      });
+      const createConnection = fixture.agent.createConnection.bind(fixture.agent);
+      const payload = Buffer.alloc(64 * 1024);
+      let releaseWrite: (() => void) | undefined;
+      vi.spyOn(fixture.agent, "createConnection").mockImplementationOnce((options, callback) => {
+        const socket = createConnection(options, callback);
+        if (!socket || !socket._writev) throw new Error("Expected a writable socket");
+        // Hold write completion to reproduce a saturated send buffer on every platform.
+        const write = socket._write.bind(socket);
+        const writev = socket._writev.bind(socket);
+        vi.spyOn(socket, "_write").mockImplementation((chunk, encoding, done) => {
+          write(chunk, encoding, (error) => {
+            if (error || chunk !== payload) done(error);
+            else releaseWrite = () => done();
+          });
+        });
+        vi.spyOn(socket, "_writev").mockImplementation((chunks, done) => {
+          writev(chunks, (error) => {
+            if (error || !chunks.some(({ chunk }) => chunk === payload)) done(error);
+            else releaseWrite = () => done();
+          });
+        });
+        return socket;
+      });
+      cleanups.push(async () => {
+        releaseWrite?.();
+      });
+      let started = false;
+      const source = new Readable({
+        read() {
+          if (started) return;
+          started = true;
+          this.push(payload);
+        },
+      });
+      cleanups.push(async () => {
+        source.destroy();
+      });
+      const client = createDefaultHttpClient();
+      const response = await client.sendRequest(
+        pipelineRequest(fixture, {
+          body: source,
+          headers: negotiate ? createHttpHeaders({ Expect: "100-continue" }) : createHttpHeaders(),
+          streamResponseStatusCodes: new Set([413]),
+        }),
+      );
+      const [socket] = Object.values(fixture.agent.sockets).flat();
+      expect(socket?.writableLength).toBeGreaterThan(0);
+      expect(response.status).toBe(413);
+      expect(await readText(response.readableStreamBody!)).toBe("rejected");
+      expect(source.destroyed).toBe(false);
+      const next = await client.sendRequest(
+        pipelineRequest(fixture, {
+          method: "GET",
+          headers: createHttpHeaders(),
+          timeout: 1000,
+        }),
+      );
+      expect(next.bodyAsText).toBe("next");
+      expect(connections).toBe(2);
+    },
+    10000,
+  );
+
+  it.each([false, true])(
     "preserves a full-duplex upload after early 200 (Expect=%s)",
     async (negotiate) => {
       const fixture = await setup();

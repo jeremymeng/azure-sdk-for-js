@@ -186,6 +186,24 @@ describe("Expect: 100-continue attempt state", () => {
     },
   );
 
+  it("keeps cancellation attached until an interrupted request closes after the response ends", async () => {
+    const controller = new AbortController();
+    const removeListener = vi.spyOn(controller.signal, "removeEventListener");
+    const pending = start(() => Readable.from("unused"), { abortSignal: controller.signal });
+    let closeRequest!: () => void;
+    vi.spyOn(outgoing, "_destroy").mockImplementation((_error, callback) => {
+      closeRequest = () => callback(null);
+    });
+    finalResponse(413);
+    expect(outgoing.destroyed).toBe(false);
+    expect((await pending).bodyAsText).toBe("final");
+    expect(removeListener).not.toHaveBeenCalled();
+    expect(outgoing.destroyed).toBe(true);
+    closeRequest();
+    await vi.runAllTimersAsync();
+    expect(removeListener).toHaveBeenCalledOnce();
+  });
+
   it("never dispatches a pre-aborted request", async () => {
     const controller = new AbortController();
     controller.abort();

@@ -74,7 +74,8 @@ logged until the source closes. Already-flowing sources cannot be made lazy
 retroactively, and in-memory serialization or policy signing may occur before
 negotiation. Upload progress measures bytes read into the upload path, not bytes
 acknowledged by the server; queued bytes cannot be unsent. Connections with an
-interrupted outgoing body are retired after the readable response completes.
+interrupted outgoing body are forcibly closed after the incoming response ends,
+even if outgoing writes remain backpressured.
 
 For body-preserving retries, redirects, or authentication challenges, use a
 factory returning a fresh stream. Untouched one-shot sources can be reused;
