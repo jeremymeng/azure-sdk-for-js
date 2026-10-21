@@ -219,6 +219,7 @@ class NodeRequestAttempt {
 
   private state: "waiting" | "sending" | "terminal" = "waiting";
   private fallback: ReturnType<typeof setTimeout> | undefined;
+  private pendingSource: NodeJS.ReadableStream | undefined;
   private source: NodeJS.ReadableStream | undefined;
   private report: ReportTransform | undefined;
   private sourceOwned = false;
@@ -242,6 +243,10 @@ class NodeRequestAttempt {
     this.resolveRequestComplete = resolve;
 
     this.req = (config.isInsecure ? http : https).request(config.options, this.receiveResponse);
+    if (isReadableStream(this.body) && typeof this.request.body !== "function") {
+      this.pendingSource = this.body;
+      this.pendingSource.on("error", this.fail);
+    }
     this.constructed = true;
   }
 
@@ -288,11 +293,17 @@ class NodeRequestAttempt {
   }
 
   private stopUpload(): void {
+    const pendingSource = this.pendingSource;
     const uploadSource = this.source;
     const uploadReport = this.report;
     const uploadSourceOwned = this.sourceOwned;
+    this.pendingSource = undefined;
     this.source = undefined;
     this.report = undefined;
+    if (pendingSource) {
+      pendingSource.removeListener("error", this.fail);
+      monitorBodyStreamErrors(pendingSource);
+    }
     if (uploadSource) {
       uploadSource.unpipe(uploadReport ?? this.req);
       uploadSource.pause();
@@ -414,7 +425,11 @@ class NodeRequestAttempt {
       }
       if (isReadableStream(this.body)) {
         this.source = this.body;
-        this.source.on("error", this.fail);
+        if (this.pendingSource === this.source) {
+          this.pendingSource = undefined;
+        } else {
+          this.source.on("error", this.fail);
+        }
         this.source.once("end", this.onSourceEnd);
         this.source.once("close", this.onSourceClose);
         startBodyStream(this.source);
