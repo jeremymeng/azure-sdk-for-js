@@ -198,6 +198,33 @@ describe("Expect: 100-continue on the wire", () => {
     },
   );
 
+  it("rejects direct source errors before upload permission", async () => {
+    const fixture = await setup();
+    const headersSeen = deferred<void>();
+    fixture.server.on("checkContinue", () => {
+      headersSeen.resolve();
+    });
+    const source = new Readable({
+      read() {
+        throw new Error("Source must remain unread");
+      },
+    });
+    const pending = createDefaultHttpClient().sendRequest(
+      pipelineRequest(fixture, {
+        body: source,
+        timeout: 1000,
+      }),
+    );
+    const assertion = expect(pending).rejects.toMatchObject({
+      name: "RestError",
+      code: "REQUEST_SEND_ERROR",
+      message: "source failed before permission",
+    });
+    await headersSeen.promise;
+    source.destroy(new Error("source failed before permission"));
+    await assertion;
+  });
+
   it.each([401, 413, 417, 429, 503])(
     "returns early %s without touching caller streams and retires framing",
     async (status) => {
