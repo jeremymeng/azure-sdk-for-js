@@ -34,6 +34,7 @@ import {
   monitorBodyStreamErrors,
   startBodyStream,
 } from "./util/nodeBody.js";
+import { setRequestCompletion } from "./util/requestCompletion.js";
 
 const DEFAULT_TLS_SETTINGS = {};
 const EXPECT_CONTINUE_TIMEOUT_IN_MS = 1000;
@@ -529,6 +530,9 @@ class NodeHttpClient implements HttpClient {
         headers,
         request,
       };
+      if (!result.isRequestComplete()) {
+        setRequestCompletion(response, result.requestComplete);
+      }
 
       // Responses to HEAD must not have a body.
       // If they do return a body, that body must be ignored.
@@ -609,7 +613,7 @@ class NodeHttpClient implements HttpClient {
     const requestBody = request.body;
     const bodyFromFactory = typeof requestBody === "function";
     const negotiate = hasExpectContinue(request);
-    let body = negotiate ? requestBody : bodyFromFactory ? requestBody() : requestBody;
+    const body = negotiate ? requestBody : bodyFromFactory ? requestBody() : requestBody;
     if (!negotiate && bodyFromFactory && abortController.signal.aborted) {
       if (isReadableStream(body)) disposeBodyStream(body);
       throw new AbortError(

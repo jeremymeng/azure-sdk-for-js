@@ -31,6 +31,9 @@ export type EncodingType = "utf-8" | "base64" | "base64url" | "hex";
 export function getRandomIntegerInclusive(min: number, max: number): number;
 
 // @public
+export function getRequestCompletion(response: object): Promise<void> | undefined;
+
+// @public
 export const isBrowser: boolean;
 
 // @public

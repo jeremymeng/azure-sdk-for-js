@@ -7,6 +7,7 @@ import https from "node:https";
 import { readFileSync } from "node:fs";
 import { resolve as resolvePath } from "node:path";
 import { Readable } from "node:stream";
+import { text } from "node:stream/consumers";
 import type { Socket } from "node:net";
 import type { PipelineRequestOptions } from "../../../src/pipelineRequest.js";
 import type { AbortSignalLike } from "@azure/abort-controller";
@@ -199,6 +200,66 @@ describe("Node Expect negotiation through core-rest-pipeline", () => {
       expect(legacy.removeEventListener).toHaveBeenCalledOnce();
       expect(source.destroyed).toBe(false);
       source.destroy();
+    },
+  );
+
+  it.each([
+    { boundary: "client", streamed: false },
+    { boundary: "client", streamed: true },
+    { boundary: "policy", streamed: false },
+    { boundary: "policy", streamed: true },
+  ])(
+    "keeps legacy cancellation alive after an early 2xx response ($boundary, streamed=$streamed)",
+    async ({ boundary, streamed }) => {
+      const fixture = await setup();
+      fixture.server.on("checkContinue", (incoming, response) => {
+        response.writeContinue();
+        incoming.once("data", () => {
+          incoming.pause();
+          response.end("early success");
+        });
+      });
+      const controller = new AbortController();
+      const legacy: AbortSignalLike = {
+        get aborted() {
+          return controller.signal.aborted;
+        },
+        addEventListener: vi.fn(controller.signal.addEventListener.bind(controller.signal)),
+        removeEventListener: vi.fn(controller.signal.removeEventListener.bind(controller.signal)),
+      };
+      let reads = 0;
+      const source = new Readable({
+        read() {
+          reads++;
+          this.push(Buffer.alloc(64 * 1024));
+        },
+      });
+      cleanups.push(async () => {
+        source.destroy();
+      });
+      const request = fixture.request({
+        body: source,
+        abortSignal: legacy,
+        streamResponseStatusCodes: streamed ? new Set([200]) : undefined,
+      });
+      const client = createDefaultHttpClient();
+      const response =
+        boundary === "client"
+          ? await client.sendRequest(request)
+          : await wrapAbortSignalLikePolicy().sendRequest(request, (r) => client.sendRequest(r));
+      expect(streamed ? await text(response.readableStreamBody!) : response.bodyAsText).toBe(
+        "early success",
+      );
+      expect(request.abortSignal).toBe(legacy);
+      expect(legacy.removeEventListener).not.toHaveBeenCalled();
+
+      controller.abort();
+      await vi.waitFor(() => expect(legacy.removeEventListener).toHaveBeenCalledOnce());
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      const stoppedAt = reads;
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      expect(reads).toBe(stoppedAt);
+      expect(source.destroyed).toBe(false);
     },
   );
 });

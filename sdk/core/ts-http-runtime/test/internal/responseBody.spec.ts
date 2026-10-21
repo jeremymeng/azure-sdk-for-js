@@ -1,26 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { describe, expect, it } from "vitest";
-import { createHttpHeaders, createPipelineRequest } from "../../src/index.js";
+import { describe, expect, it, vi } from "vitest";
 import { disposeResponseBody } from "../../src/util/responseBody.js";
 
 describe("disposeResponseBody", () => {
   it("ignores cancellation failure from an errored browser stream", async () => {
-    const stream = new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.error(new Error("response failed"));
-      },
-    });
-    const request = createPipelineRequest({ url: "https://example.com" });
+    const cancel = vi.fn().mockRejectedValue(new Error("response failed"));
 
-    await expect(
-      disposeResponseBody({
-        request,
-        headers: createHttpHeaders(),
-        status: 503,
-        browserStreamBody: stream,
-      }),
-    ).resolves.toBeUndefined();
+    await expect(disposeResponseBody({ browserStreamBody: { cancel } })).resolves.toBeUndefined();
+    expect(cancel).toHaveBeenCalledOnce();
   });
 });

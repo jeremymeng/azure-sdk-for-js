@@ -4,8 +4,16 @@
 import { logger } from "../log.js";
 
 interface NodeResponseBody {
+  closed?: boolean;
   destroy?: () => void;
   resume: () => void;
+}
+
+interface NodeEventEmitterBody {
+  on(event: "error", listener: (error: unknown) => void): unknown;
+  once(event: "close", listener: () => void): unknown;
+  removeListener(event: "error", listener: (error: unknown) => void): unknown;
+  removeListener(event: "close", listener: () => void): unknown;
 }
 
 interface BrowserResponseBody {
@@ -18,6 +26,19 @@ function isNodeResponseBody(value: unknown): value is NodeResponseBody {
     value !== null &&
     "resume" in value &&
     typeof value.resume === "function"
+  );
+}
+
+function isNodeEventEmitterBody(
+  value: NodeResponseBody,
+): value is NodeResponseBody & NodeEventEmitterBody {
+  return (
+    "on" in value &&
+    typeof value.on === "function" &&
+    "once" in value &&
+    typeof value.once === "function" &&
+    "removeListener" in value &&
+    typeof value.removeListener === "function"
   );
 }
 
@@ -44,8 +65,27 @@ export async function disposeResponseBody(response: {
   try {
     const readableStream: unknown = response.readableStreamBody;
     if (isNodeResponseBody(readableStream)) {
+      if (readableStream.closed === true) return;
       if (readableStream.destroy) {
-        readableStream.destroy();
+        if (isNodeEventEmitterBody(readableStream)) {
+          const onError = (error: unknown): void => {
+            logger.warning("Error disposing response body", error);
+          };
+          const onClose = (): void => {
+            readableStream.removeListener("error", onError);
+          };
+          readableStream.on("error", onError);
+          readableStream.once("close", onClose);
+          try {
+            readableStream.destroy();
+          } catch (error) {
+            readableStream.removeListener("error", onError);
+            readableStream.removeListener("close", onClose);
+            throw error;
+          }
+        } else {
+          readableStream.destroy();
+        }
       } else {
         readableStream.resume();
       }

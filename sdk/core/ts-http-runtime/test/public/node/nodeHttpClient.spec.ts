@@ -5,6 +5,7 @@ import { describe, it, assert, vi, beforeEach, afterEach } from "vitest";
 import { PassThrough, Writable } from "node:stream";
 import type { ClientRequest, IncomingHttpHeaders, IncomingMessage } from "http";
 import { createPipelineRequest, createDefaultHttpClient } from "../../../src/index.js";
+import { getRequestCompletion } from "../../../src/util/requestCompletion.js";
 
 vi.mock("node:https", async () => {
   const actual = await vi.importActual("node:https");
@@ -133,6 +134,16 @@ describe("NodeHttpClient", function () {
     yieldHttpsResponse(createResponse(404));
     const response = await promise;
     assert.strictEqual(response.status, 404);
+  });
+
+  it("does not retain request completion metadata after a completed request", async function () {
+    const client = createDefaultHttpClient();
+    const request = createPipelineRequest({ url: "https://example.com" });
+    const promise = client.sendRequest(request);
+    yieldHttpsResponse(createResponse(200));
+    const response = await promise;
+
+    assert.isUndefined(getRequestCompletion(response));
   });
 
   it("should allow canceling of requests", async function () {

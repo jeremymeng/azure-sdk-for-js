@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { getRequestCompletion } from "@typespec/ts-http-runtime/internal/util";
+
 export function cleanupAbortSignal(
   response:
     | {
@@ -15,17 +17,33 @@ export function cleanupAbortSignal(
 ): void {
   if (!cleanup) return;
   const stream = response?.readableStreamBody;
-  if (!stream || !stream.readable) {
-    cleanup();
-    return;
-  }
-  const onComplete = (): void => {
-    stream.removeListener("end", onComplete);
-    stream.removeListener("close", onComplete);
-    stream.removeListener("error", onComplete);
+  const requestCompletion = response ? getRequestCompletion(response) : undefined;
+  let requestDone = requestCompletion === undefined;
+  let responseDone = !stream || !stream.readable;
+  let cleanedUp = false;
+  const cleanupIfComplete = (): void => {
+    if (cleanedUp || !requestDone || !responseDone) return;
+    cleanedUp = true;
     cleanup();
   };
-  stream.once("end", onComplete);
-  stream.once("close", onComplete);
-  stream.once("error", onComplete);
+  const onResponseComplete = (): void => {
+    stream?.removeListener("end", onResponseComplete);
+    stream?.removeListener("close", onResponseComplete);
+    stream?.removeListener("error", onResponseComplete);
+    responseDone = true;
+    cleanupIfComplete();
+  };
+  if (!responseDone && stream) {
+    stream.once("end", onResponseComplete);
+    stream.once("close", onResponseComplete);
+    stream.once("error", onResponseComplete);
+  }
+  if (requestCompletion) {
+    void requestCompletion.then(() => {
+      requestDone = true;
+      cleanupIfComplete();
+      return undefined;
+    });
+  }
+  cleanupIfComplete();
 }
