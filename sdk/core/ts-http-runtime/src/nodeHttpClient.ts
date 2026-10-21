@@ -190,6 +190,20 @@ interface NodeRequestAttemptConfig {
   reject: (error: unknown) => void;
 }
 
+/**
+ * Manages the state and resources for one Node HTTP request attempt.
+ *
+ * Each retry, redirect, or authentication resend creates a new attempt. The attempt coordinates
+ * optional `Expect: 100-continue` negotiation, exactly-once body dispatch, upload ownership and
+ * cleanup, early final responses, cancellation, and outgoing request completion.
+ *
+ * The attempt transitions from `waiting` for upload permission, to `sending` while the body may
+ * flow, and finally to `terminal`, where no new body work can start. The incoming response and
+ * outgoing request can complete independently, so `requestComplete` remains separate from the
+ * promise that resolves when response headers arrive.
+ *
+ * @internal
+ */
 class NodeRequestAttempt {
   private readonly request: PipelineRequest;
   private readonly abortSignal: AbortSignal;
