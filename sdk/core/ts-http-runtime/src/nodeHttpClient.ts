@@ -314,10 +314,14 @@ class NodeRequestAttempt {
     const restError = toRequestError(error, this.request);
     this.completeRequest();
     if (this.response) {
-      if (!this.response.complete) this.response.destroy(restError);
-      else logger.warning("Request upload failed after response completed", restError);
+      queueMicrotask(() => {
+        if (!this.response?.complete) this.response?.destroy(restError);
+        else logger.warning("Request upload failed after response completed", restError);
+        this.req.destroy();
+      });
+    } else {
+      this.req.destroy(restError);
     }
-    this.req.destroy(this.response ? undefined : restError);
     this.reject(restError);
   };
 

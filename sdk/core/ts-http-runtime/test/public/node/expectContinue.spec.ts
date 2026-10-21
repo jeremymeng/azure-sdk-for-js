@@ -4,6 +4,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import http from "node:http";
 import https from "node:https";
+import net from "node:net";
 import { performance } from "node:perf_hooks";
 import { Readable, Writable } from "node:stream";
 import { createGzip, gzipSync, deflateSync } from "node:zlib";
@@ -14,7 +15,9 @@ import {
   createProxy,
   createRelay,
   createServer,
+  listen,
   testCertificate,
+  trackServer,
 } from "../../internal/node/httpServer.js";
 import {
   createDefaultHttpClient,
@@ -508,6 +511,41 @@ describe("Expect: 100-continue on the wire", () => {
       }
     },
   );
+
+  it("surfaces an immediate upload error when 100 and final headers arrive together", async () => {
+    const server = net.createServer((socket) => {
+      socket.once("data", () => {
+        socket.write(
+          "HTTP/1.1 100 Continue\r\n\r\n" +
+            "HTTP/1.1 200 OK\r\nContent-Length: 100\r\n\r\nunfinished",
+        );
+      });
+    });
+    cleanups.push(trackServer(server));
+    const port = await listen(server);
+    const source = new Readable({
+      read() {
+        this.destroy(new Error("upload failed"));
+      },
+    });
+
+    await expect(
+      createDefaultHttpClient().sendRequest(
+        createPipelineRequest({
+          url: `http://127.0.0.1:${port}`,
+          method: "POST",
+          allowInsecureConnection: true,
+          headers: createHttpHeaders({ Expect: "100-continue" }),
+          body: source,
+          timeout: 500,
+        }),
+      ),
+    ).rejects.toMatchObject({
+      name: "RestError",
+      code: "REQUEST_SEND_ERROR",
+      message: "upload failed",
+    });
+  });
 
   it("finishes an explicit-length source after the server responds to all body bytes", async () => {
     const fixture = await setup();
