@@ -68,4 +68,16 @@ describe("effective Expect headers", () => {
       expect(JSON.stringify(headers)).toBe(before);
     },
   );
+
+  it("drops an Expect header whose array values contain only 100-continue", () => {
+    const request = createPipelineRequest({
+      url: "https://localhost",
+      method: "POST",
+      requestOverrides: { headers: { Expect: ["100-continue"] }, method: "POST" },
+    });
+
+    removeBodyHeaders(request);
+
+    expect(request.requestOverrides?.headers).toEqual({});
+  });
 });

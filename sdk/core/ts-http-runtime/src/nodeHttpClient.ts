@@ -32,6 +32,7 @@ import {
   destroyBodyStream,
   disposeBodyStream,
   monitorBodyStreamErrors,
+  observePendingBodyErrors,
   startBodyStream,
 } from "./util/nodeBody.js";
 import { setRequestCompletion } from "./util/requestCompletion.js";
@@ -219,7 +220,7 @@ class NodeRequestAttempt {
 
   private state: "waiting" | "sending" | "terminal" = "waiting";
   private fallback: ReturnType<typeof setTimeout> | undefined;
-  private pendingSource: NodeJS.ReadableStream | undefined;
+  private pendingSourceCleanup: (() => void) | undefined;
   private source: NodeJS.ReadableStream | undefined;
   private report: ReportTransform | undefined;
   private sourceOwned = false;
@@ -243,10 +244,7 @@ class NodeRequestAttempt {
     this.resolveRequestComplete = resolve;
 
     this.req = (config.isInsecure ? http : https).request(config.options, this.receiveResponse);
-    if (isReadableStream(this.body) && typeof this.request.body !== "function") {
-      this.pendingSource = this.body;
-      this.pendingSource.on("error", this.fail);
-    }
+    this.pendingSourceCleanup = observePendingBodyErrors(this.body, this.fail);
     this.constructed = true;
   }
 
@@ -293,17 +291,13 @@ class NodeRequestAttempt {
   }
 
   private stopUpload(): void {
-    const pendingSource = this.pendingSource;
     const uploadSource = this.source;
     const uploadReport = this.report;
     const uploadSourceOwned = this.sourceOwned;
-    this.pendingSource = undefined;
+    this.pendingSourceCleanup?.();
+    this.pendingSourceCleanup = undefined;
     this.source = undefined;
     this.report = undefined;
-    if (pendingSource) {
-      pendingSource.removeListener("error", this.fail);
-      monitorBodyStreamErrors(pendingSource);
-    }
     if (uploadSource) {
       uploadSource.unpipe(uploadReport ?? this.req);
       uploadSource.pause();
@@ -342,7 +336,7 @@ class NodeRequestAttempt {
 
   private readonly onSourceClose = (): void => {
     this.source?.removeListener("error", this.fail);
-    if (this.negotiate && !this.sourceEnded && this.state === "sending") {
+    if (!this.sourceEnded && this.state === "sending") {
       this.fail(new Error("Request body stream closed before ending"));
     }
   };
@@ -362,7 +356,13 @@ class NodeRequestAttempt {
       this.req.shouldKeepAlive = false;
       this.stopUpload();
       // Preserve the response, then force closure even if outgoing writes cannot drain.
-      res.once("end", () => this.req.destroy());
+      const retireRequest = (): void => {
+        res.removeListener("end", retireRequest);
+        res.removeListener("close", retireRequest);
+        this.req.destroy();
+      };
+      res.once("end", retireRequest);
+      res.once("close", retireRequest);
     }
     this.resolve({
       response: res,
@@ -372,17 +372,21 @@ class NodeRequestAttempt {
   };
 
   private readonly onRequestError = (error: Error & { code?: string }): void => {
-    if (this.response) {
-      if (this.response.complete) {
-        this.completeRequest();
-        return;
-      }
-      const restError = toRequestError(error, this.request);
-      this.completeRequest();
-      this.response.destroy(restError);
-    } else {
+    if (!this.response) {
       this.fail(error);
+      return;
     }
+    this.stopUpload();
+    if (this.response.complete) {
+      this.completeRequest();
+      return;
+    }
+    const restError = toRequestError(error, this.request);
+    this.completeRequest();
+    queueMicrotask(() => {
+      if (!this.response?.complete) this.response?.destroy(restError);
+      this.req.destroy();
+    });
   };
 
   private readonly onAbort = (): void => {
@@ -429,11 +433,7 @@ class NodeRequestAttempt {
       }
       if (isReadableStream(this.body)) {
         this.source = this.body;
-        if (this.pendingSource === this.source) {
-          this.pendingSource = undefined;
-        } else {
-          this.source.on("error", this.fail);
-        }
+        this.source.on("error", this.fail);
         this.source.once("end", this.onSourceEnd);
         this.source.once("close", this.onSourceClose);
         startBodyStream(this.source);

@@ -325,6 +325,48 @@ describe("Expect: 100-continue attempt state", () => {
     await assertion;
   });
 
+  it("rejects a non-negotiated source that closes without ending", async () => {
+    const source = new Readable({
+      read() {
+        this.destroy();
+      },
+    });
+    const pending = start(source, {
+      headers: createHttpHeaders(),
+      timeout: 500,
+    });
+    const assertion = expect(pending).rejects.toMatchObject({
+      name: "RestError",
+      code: "REQUEST_SEND_ERROR",
+      message: "Request body stream closed before ending",
+    });
+    await vi.runAllTimersAsync();
+    await assertion;
+  });
+
+  it("retires an interrupted request when an early response closes without ending", async () => {
+    const source = new Readable({
+      read() {
+        this.push("body");
+      },
+    });
+    const pending = start(source, { streamResponseStatusCodes: new Set([417]) });
+    flush();
+    outgoing.emit("continue");
+    const response = new http.IncomingMessage(new Socket());
+    response.statusCode = 417;
+    response.headers = {};
+    respond(response);
+    await pending;
+    expect(outgoing.destroyed).toBe(false);
+
+    response.destroy();
+    await vi.runAllTimersAsync();
+
+    expect(outgoing.destroyed).toBe(true);
+    source.destroy();
+  });
+
   it("handles owned-stream cleanup errors after a synchronous factory abort", async () => {
     const controller = new AbortController();
     const source = new Readable({

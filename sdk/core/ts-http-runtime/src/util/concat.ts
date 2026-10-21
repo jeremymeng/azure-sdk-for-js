@@ -7,6 +7,7 @@ import {
   assertBodyStreamAvailable,
   disposeBodyStream,
   monitorBodyStreamErrors,
+  registerPendingBodyErrorSources,
   registerMultipartStream,
   startBodyStream,
 } from "./nodeBody.js";
@@ -69,7 +70,7 @@ export type ConcatSource =
 export async function concat(
   sources: (ConcatSource | (() => ConcatSource))[],
 ): Promise<(() => NodeJS.ReadableStream) | Blob> {
-  return function () {
+  const createStream = function (): NodeJS.ReadableStream {
     let index = 0;
     let current: NodeJS.ReadableStream | undefined;
     let cleanupCurrent: (() => void) | undefined;
@@ -189,6 +190,17 @@ export async function concat(
     }
     return stream;
   };
+  registerPendingBodyErrorSources(
+    createStream,
+    sources.filter(
+      (source): source is NodeJS.ReadableStream =>
+        typeof source !== "function" &&
+        !(source instanceof Uint8Array) &&
+        !isBlob(source) &&
+        !(source instanceof ReadableStream),
+    ),
+  );
+  return createStream;
 }
 
 const startedWebSources = new WeakSet<ReadableStream>();

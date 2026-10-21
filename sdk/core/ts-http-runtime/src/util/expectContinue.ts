@@ -46,7 +46,8 @@ export function hasExpectContinue(request: PipelineRequest): boolean {
 
 function withoutContinue(value: unknown): unknown {
   if (Array.isArray(value)) {
-    return value.map(withoutContinue).filter((entry) => entry !== undefined);
+    const values = value.map(withoutContinue).filter((entry) => entry !== undefined);
+    return values.length ? values : undefined;
   }
   if (typeof value !== "string") return value;
   const tokens = value.split(",").filter((token) => token.trim().toLowerCase() !== "100-continue");

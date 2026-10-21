@@ -256,6 +256,7 @@ describe("Expect: 100-continue on the wire", () => {
       expect(first.bodyAsText).toBe("early final");
       expect(source.destroyed).toBe(false);
       expect(source.readableFlowing).toBe(null);
+      expect(source.listenerCount("error")).toBe(0);
       expect(progress).not.toHaveBeenCalled();
       const next = await client.sendRequest(
         pipelineRequest(fixture, {
@@ -536,6 +537,50 @@ describe("Expect: 100-continue on the wire", () => {
       } else {
         await expect(pending).rejects.toMatchObject(assertion);
       }
+    },
+  );
+
+  it.each([200, 417])(
+    "surfaces a request parser error after %s response headers arrive",
+    async (status) => {
+      const server = net.createServer((socket) => {
+        socket.once("data", () => {
+          socket.write(
+            "HTTP/1.1 100 Continue\r\n\r\n" +
+              `HTTP/1.1 ${status} Response\r\nTransfer-Encoding: chunked\r\n\r\ninvalid\r\n`,
+          );
+        });
+      });
+      cleanups.push(trackServer(server));
+      const port = await listen(server);
+      let pushed = false;
+      const source = new Readable({
+        read() {
+          if (!pushed) {
+            pushed = true;
+            this.push("body");
+          }
+        },
+      });
+      cleanups.push(async () => {
+        source.destroy();
+      });
+
+      await expect(
+        createDefaultHttpClient().sendRequest(
+          createPipelineRequest({
+            url: `http://127.0.0.1:${port}`,
+            method: "POST",
+            allowInsecureConnection: true,
+            headers: createHttpHeaders({ Expect: "100-continue" }),
+            body: source,
+            timeout: 500,
+          }),
+        ),
+      ).rejects.toMatchObject({
+        name: "RestError",
+        code: "HPE_INVALID_CHUNK_SIZE",
+      });
     },
   );
 
@@ -1051,6 +1096,64 @@ describe("Expect: 100-continue on the wire", () => {
     );
     expect(response.bodyAsText).toBe("no multipart");
     expect(factory).not.toHaveBeenCalled();
+  });
+
+  it("leaves an early-rejected direct multipart source untouched", async () => {
+    const fixture = await setup();
+    fixture.server.on("checkContinue", (_incoming, response) => {
+      response.writeHead(417);
+      response.end("no multipart");
+    });
+    const source = new Readable({
+      read() {
+        throw new Error("Untouched multipart source was read");
+      },
+    });
+
+    const response = await createPipelineFromOptions({}).sendRequest(
+      createDefaultHttpClient(),
+      pipelineRequest(fixture, {
+        multipartBody: {
+          parts: [{ headers: createHttpHeaders(), body: source }],
+        },
+      }),
+    );
+
+    expect(response.bodyAsText).toBe("no multipart");
+    expect(source.destroyed).toBe(false);
+    expect(source.readableFlowing).toBe(null);
+    expect(source.listenerCount("error")).toBe(0);
+    source.destroy();
+  });
+
+  it("rejects direct multipart source errors before upload permission", async () => {
+    const fixture = await setup();
+    const headersSeen = deferred<void>();
+    fixture.server.on("checkContinue", () => {
+      headersSeen.resolve();
+    });
+    const source = new Readable({
+      read() {
+        throw new Error("Source must remain unread");
+      },
+    });
+    const pending = createPipelineFromOptions({}).sendRequest(
+      createDefaultHttpClient(),
+      pipelineRequest(fixture, {
+        timeout: 1000,
+        multipartBody: {
+          parts: [{ headers: createHttpHeaders(), body: source }],
+        },
+      }),
+    );
+    const assertion = expect(pending).rejects.toMatchObject({
+      name: "RestError",
+      code: "REQUEST_SEND_ERROR",
+      message: "multipart source failed before permission",
+    });
+    await headersSeen.promise;
+    source.destroy(new Error("multipart source failed before permission"));
+    await assertion;
   });
 
   it.each(["early", "continue"])(
