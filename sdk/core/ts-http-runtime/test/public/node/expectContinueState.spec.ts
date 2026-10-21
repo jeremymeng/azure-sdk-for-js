@@ -119,6 +119,23 @@ describe("Expect: 100-continue attempt state", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it("transfers a direct source error listener when upload starts", async () => {
+    const source = new Readable({ read() {} });
+    const pending = start(source);
+    expect(source.listenerCount("error")).toBe(1);
+    flush();
+    outgoing.emit("continue");
+    expect(source.listenerCount("error")).toBe(1);
+
+    finalResponse(417);
+    await pending;
+
+    expect(source.listenerCount("error")).toBe(1);
+    source.destroy();
+    await vi.runAllTimersAsync();
+    expect(source.listenerCount("error")).toBe(0);
+  });
+
   it("ignores 102 and 103 and waits a full second after the write barrier", async () => {
     const factory = vi.fn(() => Readable.from("body"));
     const pending = start(factory);

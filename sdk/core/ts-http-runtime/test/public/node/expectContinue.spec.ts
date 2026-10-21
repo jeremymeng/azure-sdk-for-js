@@ -540,6 +540,39 @@ describe("Expect: 100-continue on the wire", () => {
     },
   );
 
+  it("preserves a complete unread streamed response after an upload error", async () => {
+    const fixture = await setup();
+    const payload = "complete response";
+    fixture.server.on("request", (incoming, response) => {
+      incoming.once("data", () => {
+        incoming.pause();
+        response.end(payload);
+      });
+    });
+    let pushed = false;
+    const source = new Readable({
+      read() {
+        if (!pushed) {
+          pushed = true;
+          this.push("body");
+        }
+      },
+    });
+    const response = await createDefaultHttpClient().sendRequest(
+      pipelineRequest(fixture, {
+        body: source,
+        headers: createHttpHeaders(),
+        streamResponseStatusCodes: new Set([200]),
+      }),
+    );
+    const responseStream = response.readableStreamBody! as http.IncomingMessage;
+    await vi.waitFor(() => expect(responseStream.complete).toBe(true));
+    source.destroy(new Error("upload failed after complete response"));
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(await readText(responseStream)).toBe(payload);
+  });
+
   it.each([200, 417])(
     "surfaces a request parser error after %s response headers arrive",
     async (status) => {
@@ -1154,6 +1187,115 @@ describe("Expect: 100-continue on the wire", () => {
     await headersSeen.promise;
     source.destroy(new Error("multipart source failed before permission"));
     await assertion;
+  });
+
+  it("rejects inactive direct multipart source errors without Expect", async () => {
+    const fixture = await setup();
+    const uploadStarted = deferred<void>();
+    fixture.server.on("request", (incoming) => {
+      incoming.once("data", () => {
+        incoming.pause();
+        uploadStarted.resolve();
+      });
+    });
+    let pushed = false;
+    const first = new Readable({
+      read() {
+        if (!pushed) {
+          pushed = true;
+          this.push("first");
+        }
+      },
+    });
+    const second = new Readable({ read() {} });
+    const pending = createPipelineFromOptions({}).sendRequest(
+      createDefaultHttpClient(),
+      pipelineRequest(fixture, {
+        headers: createHttpHeaders(),
+        timeout: 1000,
+        multipartBody: {
+          parts: [
+            { headers: createHttpHeaders(), body: first },
+            { headers: createHttpHeaders(), body: second },
+          ],
+        },
+      }),
+    );
+    const assertion = expect(pending).rejects.toMatchObject({
+      name: "RestError",
+      code: "REQUEST_SEND_ERROR",
+      message: "inactive multipart source failed",
+    });
+    await uploadStarted.promise;
+    second.destroy(new Error("inactive multipart source failed"));
+    await assertion;
+    first.destroy();
+  });
+
+  it("removes inactive multipart listeners after a non-negotiated early response", async () => {
+    const fixture = await setup();
+    fixture.server.on("request", (incoming, response) => {
+      incoming.once("data", () => {
+        incoming.pause();
+        response.writeHead(413);
+        response.end("rejected");
+      });
+    });
+    let pushed = false;
+    const first = new Readable({
+      read() {
+        if (!pushed) {
+          pushed = true;
+          this.push("first");
+        }
+      },
+    });
+    const second = new Readable({
+      read() {
+        throw new Error("Inactive multipart source was read");
+      },
+    });
+
+    const response = await createPipelineFromOptions({}).sendRequest(
+      createDefaultHttpClient(),
+      pipelineRequest(fixture, {
+        headers: createHttpHeaders(),
+        multipartBody: {
+          parts: [
+            { headers: createHttpHeaders(), body: first },
+            { headers: createHttpHeaders(), body: second },
+          ],
+        },
+      }),
+    );
+
+    expect(response.status).toBe(413);
+    expect(response.bodyAsText).toBe("rejected");
+    expect(second.listenerCount("error")).toBe(0);
+    first.destroy();
+    second.destroy();
+  });
+
+  it("does not attach multipart source listeners for a pre-aborted request", async () => {
+    const fixture = await setup();
+    const source = new Readable({ read() {} });
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      createPipelineFromOptions({}).sendRequest(
+        createDefaultHttpClient(),
+        pipelineRequest(fixture, {
+          abortSignal: controller.signal,
+          multipartBody: {
+            parts: [{ headers: createHttpHeaders(), body: source }],
+          },
+        }),
+      ),
+    ).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(source.listenerCount("error")).toBe(0);
+    source.destroy();
   });
 
   it.each(["early", "continue"])(

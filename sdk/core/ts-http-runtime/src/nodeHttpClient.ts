@@ -32,6 +32,7 @@ import {
   destroyBodyStream,
   disposeBodyStream,
   monitorBodyStreamErrors,
+  observeBodyStreamErrors,
   observePendingBodyErrors,
   startBodyStream,
 } from "./util/nodeBody.js";
@@ -221,6 +222,7 @@ class NodeRequestAttempt {
   private state: "waiting" | "sending" | "terminal" = "waiting";
   private fallback: ReturnType<typeof setTimeout> | undefined;
   private pendingSourceCleanup: (() => void) | undefined;
+  private pendingPartsCleanup: (() => void) | undefined;
   private source: NodeJS.ReadableStream | undefined;
   private report: ReportTransform | undefined;
   private sourceOwned = false;
@@ -244,7 +246,8 @@ class NodeRequestAttempt {
     this.resolveRequestComplete = resolve;
 
     this.req = (config.isInsecure ? http : https).request(config.options, this.receiveResponse);
-    this.pendingSourceCleanup = observePendingBodyErrors(this.body, this.fail);
+    this.pendingSourceCleanup = observeBodyStreamErrors(this.body, this.fail);
+    this.pendingPartsCleanup = observePendingBodyErrors(this.request.body, this.fail);
     this.constructed = true;
   }
 
@@ -296,6 +299,8 @@ class NodeRequestAttempt {
     const uploadSourceOwned = this.sourceOwned;
     this.pendingSourceCleanup?.();
     this.pendingSourceCleanup = undefined;
+    this.pendingPartsCleanup?.();
+    this.pendingPartsCleanup = undefined;
     this.source = undefined;
     this.report = undefined;
     if (uploadSource) {
@@ -320,9 +325,14 @@ class NodeRequestAttempt {
     this.completeRequest();
     if (this.response) {
       queueMicrotask(() => {
-        if (!this.response?.complete) this.response?.destroy(restError);
-        else logger.warning("Request upload failed after response completed", restError);
-        this.req.destroy();
+        if (!this.response?.complete) {
+          this.response?.destroy(restError);
+          this.req.destroy();
+        } else {
+          logger.warning("Request upload failed after response completed", restError);
+          this.req.shouldKeepAlive = false;
+          this.retireRequestAfterResponse(this.response);
+        }
       });
     } else {
       this.req.destroy(restError);
@@ -355,14 +365,7 @@ class NodeRequestAttempt {
     if (!this.req.writableFinished && !continueUpload) {
       this.req.shouldKeepAlive = false;
       this.stopUpload();
-      // Preserve the response, then force closure even if outgoing writes cannot drain.
-      const retireRequest = (): void => {
-        res.removeListener("end", retireRequest);
-        res.removeListener("close", retireRequest);
-        this.req.destroy();
-      };
-      res.once("end", retireRequest);
-      res.once("close", retireRequest);
+      this.retireRequestAfterResponse(res);
     }
     this.resolve({
       response: res,
@@ -408,6 +411,19 @@ class NodeRequestAttempt {
     this.reject(abortError);
   };
 
+  private retireRequestAfterResponse(response: IncomingMessage): void {
+    const retireRequest = (): void => {
+      response.removeListener("end", retireRequest);
+      response.removeListener("close", retireRequest);
+      this.req.destroy();
+    };
+    if (response.readableEnded || response.destroyed) retireRequest();
+    else {
+      response.once("end", retireRequest);
+      response.once("close", retireRequest);
+    }
+  }
+
   private readonly onRequestClose = (): void => {
     this.cleanupWait();
     this.stopUpload();
@@ -433,6 +449,8 @@ class NodeRequestAttempt {
       }
       if (isReadableStream(this.body)) {
         this.source = this.body;
+        this.pendingSourceCleanup?.();
+        this.pendingSourceCleanup = undefined;
         this.source.on("error", this.fail);
         this.source.once("end", this.onSourceEnd);
         this.source.once("close", this.onSourceClose);
