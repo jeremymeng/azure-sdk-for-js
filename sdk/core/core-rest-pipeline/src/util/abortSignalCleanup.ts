@@ -3,7 +3,10 @@
 
 import { getRequestCompletion } from "@typespec/ts-http-runtime/internal/util";
 
-export function cleanupAbortSignal(
+/**
+ * Runs `cleanup` callback when both request and response stream has completed.
+ */
+export function cleanupOnRequestAndResponseCompletion(
   response:
     | {
         readableStreamBody?: {
@@ -13,11 +16,14 @@ export function cleanupAbortSignal(
         };
       }
     | undefined,
-  cleanup: (() => void) | undefined,
+  cleanup: () => void,
 ): void {
-  if (!cleanup) return;
-  const stream = response?.readableStreamBody;
-  const requestCompletion = response ? getRequestCompletion(response) : undefined;
+  if (response === undefined) {
+    cleanup();
+    return;
+  }
+  const stream = response.readableStreamBody;
+  const requestCompletion = getRequestCompletion(response);
   let requestDone = requestCompletion === undefined;
   let responseDone = !stream || !stream.readable;
   let cleanedUp = false;
@@ -38,12 +44,10 @@ export function cleanupAbortSignal(
     stream.once("close", onResponseComplete);
     stream.once("error", onResponseComplete);
   }
-  if (requestCompletion) {
-    void requestCompletion.then(() => {
-      requestDone = true;
-      cleanupIfComplete();
-      return undefined;
-    });
-  }
+  requestCompletion?.then(() => {
+    requestDone = true;
+    cleanupIfComplete();
+    return undefined;
+  });
   cleanupIfComplete();
 }

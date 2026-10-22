@@ -4,7 +4,7 @@
 import type { PipelineRequest, PipelineResponse, SendRequest } from "../interfaces.js";
 import type { PipelinePolicy } from "../pipeline.js";
 import { logger } from "../log.js";
-import { hasExpectContinue, removeBodyHeaders } from "../util/expectContinue.js";
+import { hasExpectContinueHeader, removeBodyHeaders } from "../util/expectContinue.js";
 import { disposeResponseBody } from "../util/responseBody.js";
 
 /**
@@ -88,7 +88,7 @@ async function handleRedirect(
     // POST request with Status code 303 should be converted into a
     // redirected GET request if the redirect url is present in the location header
     if (status === 303) {
-      if (hasExpectContinue(request)) removeBodyHeaders(request);
+      if (hasExpectContinueHeader(request)) removeBodyHeaders(request);
       request.method = "GET";
       request.headers.delete("Content-Length");
       delete request.body;

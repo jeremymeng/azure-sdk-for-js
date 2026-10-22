@@ -24,7 +24,7 @@ import { Sanitizer } from "./util/sanitizer.js";
 import { toError } from "./util/error.js";
 import {
   effectiveHeaders,
-  hasExpectContinue,
+  hasExpectContinueHeader,
   headerPairs,
   headerValues,
 } from "./util/expectContinue.js";
@@ -80,7 +80,21 @@ function arrayBufferToBuffer(body: ArrayBuffer | ArrayBufferView): Buffer {
 /**
  * Adds the framing header Node would otherwise defer until the body is sent, converts raw
  * array headers to an object, and removes `Expect` from `options.headers` so that it can be
- * set once the socket is available.
+ * set once the socket is available. Removing it is intentional: **passing `Expect` to `http.request()` 
+ * causes Node to serialize and queue the headers during construction**, rather than waiting for our explicit `flushHeaders()`.
+ * 
+ * Node’s constructor calls `_storeHeader()` when `Expect` is present, and `_storeHeader()` immediately calls `_send("")`.
+ * That happens **before `agent.addRequest()`**, so a proxy agent that needs to rewrite the path or add headers can encounter
+ * already-committed headers (`ERR_HTTP_HEADERS_SENT`).
+
+ * The remove-and-restore sequence avoids that:
+
+ * 1. `prepareExpectContinueHeaders` saves and removes `Expect` before constructing the request.
+ * 2. `start` restores it with `setHeader()`, which **does not flush headers**.
+ * 3. `flushHeaders` explicitly sends them once the socket is assigned, allowing the agent’s setup to happen first.
+
+ * So the header still goes over the wire; we’re changing **when Node commits it**, not whether it’s sent.
+ *
  * @returns the removed `Expect` header value, if any.
  */
 function prepareExpectContinueHeaders(
@@ -537,8 +551,8 @@ class NodeHttpClient implements HttpClient {
       }, request.timeout);
     }
 
-    const negotiate = hasExpectContinue(request);
-    const acceptEncoding = negotiate
+    const hasExpectHeader = hasExpectContinueHeader(request);
+    const acceptEncoding = hasExpectHeader
       ? headerValues(effectiveHeaders(request), "accept-encoding").join(",")
       : request.headers.get("Accept-Encoding");
     const shouldDecompress =
@@ -588,7 +602,7 @@ class NodeHttpClient implements HttpClient {
       // Responses to HEAD must not have a body.
       // If they do return a body, that body must be ignored.
       const method =
-        negotiate && typeof request.requestOverrides?.method === "string"
+        typeof request.requestOverrides?.method === "string"
           ? request.requestOverrides.method.toUpperCase()
           : request.method;
       if (method === "HEAD") {
@@ -663,9 +677,9 @@ class NodeHttpClient implements HttpClient {
     const agent = (request.agent as http.Agent) ?? this.getOrCreateAgent(request, isInsecure);
     const requestBody = request.body;
     const bodyFromFactory = typeof requestBody === "function";
-    const negotiate = hasExpectContinue(request);
-    const body = negotiate ? requestBody : bodyFromFactory ? requestBody() : requestBody;
-    if (!negotiate && bodyFromFactory && abortController.signal.aborted) {
+    const hasExpectHeader = hasExpectContinueHeader(request);
+    const body = hasExpectHeader ? requestBody : bodyFromFactory ? requestBody() : requestBody;
+    if (!hasExpectHeader && bodyFromFactory && abortController.signal.aborted) {
       if (isReadableStream(body)) disposeBodyStream(body);
       throw new AbortError(
         "The operation was aborted. Request body factory aborted before dispatch.",
@@ -675,7 +689,7 @@ class NodeHttpClient implements HttpClient {
     const headers = effectiveHeaders(request);
     if (
       bodyLength !== null &&
-      (Boolean(body) || negotiate) &&
+      (Boolean(body) || hasExpectHeader) &&
       headerValues(headers, "content-length").length === 0 &&
       headerValues(headers, "transfer-encoding").length === 0 &&
       !(request.requestOverrides && "headers" in request.requestOverrides)
@@ -691,16 +705,18 @@ class NodeHttpClient implements HttpClient {
       headers: request.headers.toJSON({ preserveCase: true }),
       ...request.requestOverrides,
     };
-    const expectHeader = negotiate ? prepareExpectContinueHeaders(options, bodyLength) : undefined;
+    const expectHeaderValue = hasExpectHeader
+      ? prepareExpectContinueHeaders(options, bodyLength)
+      : undefined;
 
     return new Promise<NodeRequestResult>((resolve, reject) => {
       new NodeRequestAttempt({
         request,
         abortSignal: abortController.signal,
-        negotiate,
+        negotiate: hasExpectHeader,
         body,
         bodyLength,
-        expectHeader,
+        expectHeader: expectHeaderValue,
         isInsecure,
         options,
         resolve,

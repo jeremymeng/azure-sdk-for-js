@@ -36,7 +36,7 @@ export function effectiveHeaders(request: PipelineRequest): unknown {
     : request.headers.toJSON({ preserveCase: true });
 }
 
-export function hasExpectContinue(request: PipelineRequest): boolean {
+export function hasExpectContinueHeader(request: PipelineRequest): boolean {
   return headerValues(effectiveHeaders(request), "expect").some(
     (value) =>
       typeof value === "string" &&

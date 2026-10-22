@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { createPipelineRequest } from "../../src/pipelineRequest.js";
 import { createHttpHeaders } from "../../src/httpHeaders.js";
 import {
-  hasExpectContinue,
+  hasExpectContinueHeader,
   headerValues,
   removeBodyHeaders,
 } from "../../src/util/expectContinue.js";
@@ -37,7 +37,7 @@ describe("effective Expect headers", () => {
       headers: createHttpHeaders({ Expect: "100-continue" }),
       requestOverrides: { headers },
     });
-    expect(hasExpectContinue(request)).toBe(expected);
+    expect(hasExpectContinueHeader(request)).toBe(expected);
   });
 
   it.each(["object", "flat", "pairs"])(

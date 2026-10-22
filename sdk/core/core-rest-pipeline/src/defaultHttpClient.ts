@@ -5,7 +5,7 @@ import type { HttpClient, PipelineResponse } from "./interfaces.js";
 import { createDefaultHttpClient as tspCreateDefaultHttpClient } from "@typespec/ts-http-runtime";
 import { wrapAbortSignalLike } from "#platform/wrapAbortSignal";
 import { type PipelineRequest as TspPipelineRequest } from "@typespec/ts-http-runtime";
-import { cleanupAbortSignal } from "./util/abortSignalCleanup.js";
+import { cleanupOnRequestAndResponseCompletion } from "./util/abortSignalCleanup.js";
 
 /**
  * Create the correct HttpClient for the current environment.
@@ -27,7 +27,9 @@ export function createDefaultHttpClient(): HttpClient {
         return response;
       } finally {
         request.abortSignal = originalAbortSignal;
-        cleanupAbortSignal(response, cleanup);
+        if (cleanup !== undefined) {
+          cleanupOnRequestAndResponseCompletion(response, cleanup);
+        }
       }
     },
   };
