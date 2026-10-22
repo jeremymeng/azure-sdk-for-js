@@ -8,7 +8,7 @@ import {
   hasExpectContinueHeader,
   headerValues,
   removeBodyHeaders,
-} from "../../src/util/expectContinue.js";
+} from "../../src/util/expectContinueHeaders.js";
 
 describe("effective Expect headers", () => {
   it.each([

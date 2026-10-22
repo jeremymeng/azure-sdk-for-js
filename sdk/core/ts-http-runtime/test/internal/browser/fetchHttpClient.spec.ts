@@ -13,7 +13,7 @@ import {
 import { systemErrorRetryPolicy } from "../../../src/policies/internal.js";
 import { png } from "./mocks/encodedPng.js";
 import { delay } from "../../../src/util/helpers.js";
-import { arrayBufferViewToArrayBuffer } from "../../../src/util/arrayBuffer.js";
+import { arrayBufferViewToArrayBuffer } from "../../../src/util/arrayBufferView.js";
 
 const streamBody = new ReadableStream({
   async start(controller) {

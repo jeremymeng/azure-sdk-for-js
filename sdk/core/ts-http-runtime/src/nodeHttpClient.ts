@@ -4,8 +4,7 @@
 import http from "node:http";
 import https from "node:https";
 import zlib from "node:zlib";
-import { types } from "node:util";
-import { Transform } from "node:stream";
+import type { Transform } from "node:stream";
 import { AbortError } from "./abort-controller/AbortError.js";
 import type {
   HttpClient,
@@ -14,36 +13,29 @@ import type {
   PipelineResponse,
   RequestBodyType,
   TlsSettings,
-  TransferProgressEvent,
 } from "./interfaces.js";
 import { createHttpHeaders } from "./httpHeaders.js";
 import { isRestError, RestError } from "./restError.js";
 import type { IncomingMessage } from "node:http";
 import { logger } from "./log.js";
+import { isArrayBuffer } from "./util/nodeArrayBuffer.js";
 import { Sanitizer } from "./util/sanitizer.js";
-import { toError } from "./util/error.js";
+import {
+  createExpectContinueRequest,
+  isReadableStream,
+  prepareExpectContinueHeaders,
+  ReportTransform,
+  type NodeRequestResult,
+} from "./util/nodeExpectContinue.js";
 import {
   effectiveHeaders,
   hasExpectContinueHeader,
-  headerPairs,
   headerValues,
-} from "./util/expectContinue.js";
-import {
-  destroyBodyStream,
-  disposeBodyStream,
-  monitorBodyStreamErrors,
-  observeBodyStreamErrors,
-  observePendingBodyErrors,
-  startBodyStream,
-} from "./util/nodeBody.js";
+} from "./util/expectContinueHeaders.js";
+import { destroyBodyStream, disposeBodyStream } from "./util/nodeBody.js";
 import { setRequestCompletion } from "./util/requestCompletion.js";
 
 const DEFAULT_TLS_SETTINGS = {};
-const EXPECT_CONTINUE_TIMEOUT_IN_MS = 1000;
-
-function isReadableStream(body: any): body is NodeJS.ReadableStream {
-  return body && typeof body.pipe === "function";
-}
 
 function monitorStreamCompletion(stream: NodeJS.ReadableStream, onComplete: () => void): void {
   if (stream.readable === false) {
@@ -61,456 +53,6 @@ function monitorStreamCompletion(stream: NodeJS.ReadableStream, onComplete: () =
   stream.on("close", handler);
   stream.on("end", handler);
   stream.on("error", handler);
-}
-
-function isArrayBuffer(body: unknown): body is ArrayBuffer | ArrayBufferView {
-  return types.isArrayBuffer(body) || ArrayBuffer.isView(body);
-}
-
-function arrayBufferToBuffer(body: ArrayBuffer | ArrayBufferView): Buffer {
-  if (Buffer.isBuffer(body)) {
-    return body;
-  }
-
-  return ArrayBuffer.isView(body)
-    ? Buffer.from(body.buffer, body.byteOffset, body.byteLength)
-    : Buffer.from(body);
-}
-
-/**
- * Adds the framing header Node would otherwise defer until the body is sent, converts raw
- * array headers to an object, and removes `Expect` from `options.headers` so that it can be
- * set once the socket is available. Removing it is intentional: **passing `Expect` to `http.request()` 
- * causes Node to serialize and queue the headers during construction**, rather than waiting for our explicit `flushHeaders()`.
- * 
- * Node’s constructor calls `_storeHeader()` when `Expect` is present, and `_storeHeader()` immediately calls `_send("")`.
- * That happens **before `agent.addRequest()`**, so a proxy agent that needs to rewrite the path or add headers can encounter
- * already-committed headers (`ERR_HTTP_HEADERS_SENT`).
-
- * The remove-and-restore sequence avoids that:
-
- * 1. `prepareExpectContinueHeaders` saves and removes `Expect` before constructing the request.
- * 2. `start` restores it with `setHeader()`, which **does not flush headers**.
- * 3. `flushHeaders` explicitly sends them once the socket is assigned, allowing the agent’s setup to happen first.
-
- * So the header still goes over the wire; we’re changing **when Node commits it**, not whether it’s sent.
- *
- * @returns the removed `Expect` header value, if any.
- */
-function prepareExpectContinueHeaders(
-  options: http.RequestOptions,
-  bodyLength: number | null,
-): http.OutgoingHttpHeaders[string] {
-  if (
-    headerValues(options.headers, "content-length").length === 0 &&
-    headerValues(options.headers, "transfer-encoding").length === 0
-  ) {
-    const name = bodyLength === null ? "Transfer-Encoding" : "Content-Length";
-    const value = bodyLength === null ? "chunked" : String(bodyLength);
-    if (Array.isArray(options.headers)) {
-      options.headers = Array.isArray(options.headers[0])
-        ? [...options.headers, [name, value]]
-        : [...options.headers, name, value];
-    } else {
-      options.headers = { ...options.headers, [name]: value };
-    }
-  }
-
-  let headers: http.OutgoingHttpHeaders;
-  if (Array.isArray(options.headers)) {
-    headers = Object.create(null);
-    for (const [name, value] of headerPairs(options.headers) as [string, string][]) {
-      http.validateHeaderName(name);
-      http.validateHeaderValue(name, value);
-      const key = name.toLowerCase();
-      const previous = headers[key];
-      headers[key] =
-        previous === undefined
-          ? value
-          : [...(Array.isArray(previous) ? previous : [String(previous)]), value];
-    }
-    if (headerValues(headers, "host").length > 0) {
-      options.setHost = false;
-    }
-  } else {
-    headers = (options.headers ?? {}) as http.OutgoingHttpHeaders;
-  }
-
-  let expectHeader: http.OutgoingHttpHeaders[string];
-  const deferredHeaders = { ...headers };
-  for (const [name, value] of Object.entries(deferredHeaders)) {
-    if (name.toLowerCase() === "expect" && value !== undefined) {
-      http.validateHeaderValue(name, String(value));
-      expectHeader = value;
-      delete deferredHeaders[name];
-    }
-  }
-  options.headers = deferredHeaders;
-  return expectHeader;
-}
-
-interface NodeRequestResult {
-  response: IncomingMessage;
-  requestComplete: Promise<void>;
-  isRequestComplete: () => boolean;
-}
-
-function createDeferred(): { promise: Promise<void>; resolve: () => void } {
-  let complete!: () => void;
-  const promise = new Promise<void>((resolve) => {
-    complete = resolve;
-  });
-  return { promise, resolve: complete };
-}
-
-class ReportTransform extends Transform {
-  private loadedBytes = 0;
-  private progressCallback: (progress: TransferProgressEvent) => void;
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  _transform(chunk: string | Buffer, _encoding: string, callback: Function): void {
-    this.push(chunk);
-    this.loadedBytes += chunk.length;
-    try {
-      this.progressCallback({ loadedBytes: this.loadedBytes });
-      callback();
-    } catch (e: any) {
-      callback(e);
-    }
-  }
-
-  constructor(progressCallback: (progress: TransferProgressEvent) => void) {
-    super();
-    this.progressCallback = progressCallback;
-  }
-}
-
-function toRequestError(error: Error & { code?: string }, request: PipelineRequest): Error {
-  if (error.name === "AbortError" || isRestError(error)) return error;
-  return new RestError(error.message, {
-    code: error.code ?? RestError.REQUEST_SEND_ERROR,
-    request,
-  });
-}
-
-interface NodeRequestAttemptConfig {
-  request: PipelineRequest;
-  abortSignal: AbortSignal;
-  negotiate: boolean;
-  body: RequestBodyType | undefined;
-  bodyLength: number | null;
-  expectHeader: http.OutgoingHttpHeaders[string];
-  isInsecure: boolean;
-  options: http.RequestOptions;
-  resolve: (result: NodeRequestResult) => void;
-  reject: (error: unknown) => void;
-}
-
-/**
- * Manages the state and resources for one Node HTTP request attempt.
- *
- * Each retry, redirect, or authentication resend creates a new attempt. The attempt coordinates
- * optional `Expect: 100-continue` negotiation, exactly-once body dispatch, upload ownership and
- * cleanup, early final responses, cancellation, and outgoing request completion.
- *
- * The attempt transitions from `waiting` for upload permission, to `sending` while the body may
- * flow, and finally to `terminal`, where no new body work can start. The incoming response and
- * outgoing request can complete independently, so `requestComplete` remains separate from the
- * promise that resolves when response headers arrive.
- *
- * @internal
- */
-class NodeRequestAttempt {
-  private readonly request: PipelineRequest;
-  private readonly abortSignal: AbortSignal;
-  private readonly negotiate: boolean;
-  private body: RequestBodyType | undefined;
-  private readonly bodyLength: number | null;
-  private readonly expectHeader: http.OutgoingHttpHeaders[string];
-  private readonly resolve: (result: NodeRequestResult) => void;
-  private readonly reject: (error: unknown) => void;
-  private readonly req: http.ClientRequest;
-  private readonly requestComplete: Promise<void>;
-  private readonly resolveRequestComplete: () => void;
-
-  private state: "waiting" | "sending" | "terminal" = "waiting";
-  private fallback: ReturnType<typeof setTimeout> | undefined;
-  private pendingSourceCleanup: (() => void) | undefined;
-  private pendingPartsCleanup: (() => void) | undefined;
-  private source: NodeJS.ReadableStream | undefined;
-  private report: ReportTransform | undefined;
-  private sourceOwned = false;
-  private sourceEnded = false;
-  private response: IncomingMessage | undefined;
-  private constructed = false;
-  private requestCompleteResolved = false;
-
-  constructor(config: NodeRequestAttemptConfig) {
-    this.request = config.request;
-    this.abortSignal = config.abortSignal;
-    this.negotiate = config.negotiate;
-    this.body = config.body;
-    this.bodyLength = config.bodyLength;
-    this.expectHeader = config.expectHeader;
-    this.resolve = config.resolve;
-    this.reject = config.reject;
-
-    const { promise, resolve } = createDeferred();
-    this.requestComplete = promise;
-    this.resolveRequestComplete = resolve;
-
-    this.req = (config.isInsecure ? http : https).request(config.options, this.receiveResponse);
-    this.pendingSourceCleanup = observeBodyStreamErrors(this.body, this.fail);
-    this.pendingPartsCleanup = observePendingBodyErrors(this.request.body, this.fail);
-    this.constructed = true;
-  }
-
-  public start(): void {
-    this.req.once("finish", this.completeRequest);
-    this.req.on("error", this.onRequestError);
-    this.abortSignal.addEventListener("abort", this.onAbort);
-    this.req.once("close", this.onRequestClose);
-
-    if (this.negotiate && this.expectHeader !== undefined) {
-      try {
-        // Avoid constructor-time writes before an agent has finished rewriting the headers.
-        this.req.setHeader("Expect", this.expectHeader);
-      } catch (error) {
-        this.fail(toError(error));
-        return;
-      }
-    }
-    if (this.abortSignal.aborted) {
-      this.onAbort();
-    } else if (this.negotiate) {
-      if (this.bodyLength !== 0) this.req.on("continue", this.sendBody);
-      if (this.req.socket) this.flushHeaders();
-      else this.req.once("socket", this.flushHeaders);
-    } else {
-      this.sendBody();
-    }
-  }
-
-  private readonly completeRequest = (): void => {
-    if (this.requestCompleteResolved) return;
-    this.requestCompleteResolved = true;
-    this.resolveRequestComplete();
-    if (this.response) this.state = "terminal";
-  };
-
-  private cleanupWait(): void {
-    if (this.fallback !== undefined) clearTimeout(this.fallback);
-    this.fallback = undefined;
-    if (this.negotiate) {
-      this.req.removeListener("continue", this.sendBody);
-      this.req.removeListener("socket", this.flushHeaders);
-    }
-  }
-
-  private stopUpload(): void {
-    const uploadSource = this.source;
-    const uploadReport = this.report;
-    const uploadSourceOwned = this.sourceOwned;
-    this.pendingSourceCleanup?.();
-    this.pendingSourceCleanup = undefined;
-    this.pendingPartsCleanup?.();
-    this.pendingPartsCleanup = undefined;
-    this.source = undefined;
-    this.report = undefined;
-    if (uploadSource) {
-      uploadSource.unpipe(uploadReport ?? this.req);
-      uploadSource.pause();
-      uploadSource.removeListener("end", this.onSourceEnd);
-      uploadSource.removeListener("error", this.fail);
-      uploadSource.removeListener("close", this.onSourceClose);
-      if (uploadSourceOwned) disposeBodyStream(uploadSource);
-      else monitorBodyStreamErrors(uploadSource);
-    }
-    uploadReport?.unpipe(this.req);
-    uploadReport?.destroy();
-  }
-
-  private readonly fail = (error: Error & { code?: string }): void => {
-    if (this.state === "terminal") return;
-    this.state = "terminal";
-    this.cleanupWait();
-    this.stopUpload();
-    const restError = toRequestError(error, this.request);
-    this.completeRequest();
-    if (this.response) {
-      queueMicrotask(() => {
-        if (!this.response?.complete) {
-          this.response?.destroy(restError);
-          this.req.destroy();
-        } else {
-          logger.warning("Request upload failed after response completed", restError);
-          this.req.shouldKeepAlive = false;
-          this.retireRequestAfterResponse(this.response);
-        }
-      });
-    } else {
-      this.req.destroy(restError);
-    }
-    this.reject(restError);
-  };
-
-  private readonly onSourceEnd = (): void => {
-    this.sourceEnded = true;
-  };
-
-  private readonly onSourceClose = (): void => {
-    this.source?.removeListener("error", this.fail);
-    if (!this.sourceEnded && this.state === "sending") {
-      this.fail(new Error("Request body stream closed before ending"));
-    }
-  };
-
-  private readonly receiveResponse = (res: IncomingMessage): void => {
-    if (!this.constructed) {
-      queueMicrotask(() => this.receiveResponse(res));
-      return;
-    }
-    this.response = res;
-    const status = res.statusCode ?? 0;
-    const continueUpload =
-      !this.req.writableFinished && this.state === "sending" && status >= 200 && status < 300;
-    this.state = continueUpload ? "sending" : "terminal";
-    this.cleanupWait();
-    if (!this.req.writableFinished && !continueUpload) {
-      this.req.shouldKeepAlive = false;
-      this.stopUpload();
-      this.retireRequestAfterResponse(res);
-    }
-    this.resolve({
-      response: res,
-      requestComplete: this.requestComplete,
-      isRequestComplete: () => this.requestCompleteResolved,
-    });
-  };
-
-  private readonly onRequestError = (error: Error & { code?: string }): void => {
-    if (!this.response) {
-      this.fail(error);
-      return;
-    }
-    this.stopUpload();
-    if (this.response.complete) {
-      this.completeRequest();
-      return;
-    }
-    const restError = toRequestError(error, this.request);
-    this.completeRequest();
-    queueMicrotask(() => {
-      if (!this.response?.complete) this.response?.destroy(restError);
-      this.req.destroy();
-    });
-  };
-
-  private readonly onAbort = (): void => {
-    this.state = "terminal";
-    this.cleanupWait();
-    this.stopUpload();
-    const abortError = new AbortError(
-      "The operation was aborted. Rejecting from abort signal callback while making request.",
-    );
-    this.completeRequest();
-    if (this.response) {
-      queueMicrotask(() => {
-        if (!this.response?.destroyed) this.response?.destroy(abortError);
-        this.req.destroy();
-      });
-    } else {
-      this.req.destroy(abortError);
-    }
-    this.reject(abortError);
-  };
-
-  private retireRequestAfterResponse(response: IncomingMessage): void {
-    const retireRequest = (): void => {
-      response.removeListener("end", retireRequest);
-      response.removeListener("close", retireRequest);
-      this.req.destroy();
-    };
-    if (response.readableEnded || response.destroyed) retireRequest();
-    else {
-      response.once("end", retireRequest);
-      response.once("close", retireRequest);
-    }
-  }
-
-  private readonly onRequestClose = (): void => {
-    this.cleanupWait();
-    this.stopUpload();
-    this.abortSignal.removeEventListener("abort", this.onAbort);
-    if (!this.response) this.fail(new Error("Request closed before a response"));
-    else this.completeRequest();
-    this.state = "terminal";
-  };
-
-  private readonly sendBody = (): void => {
-    if (this.state !== "waiting") return;
-    this.state = "sending";
-    this.cleanupWait();
-    try {
-      this.sourceOwned = typeof this.request.body === "function";
-      if (typeof this.body === "function") this.body = this.body();
-      if (this.state !== "sending") {
-        if (this.sourceOwned && isReadableStream(this.body)) disposeBodyStream(this.body);
-        return;
-      }
-      if (this.body && isArrayBuffer(this.body)) {
-        this.body = arrayBufferToBuffer(this.body);
-      }
-      if (isReadableStream(this.body)) {
-        this.source = this.body;
-        this.pendingSourceCleanup?.();
-        this.pendingSourceCleanup = undefined;
-        this.source.on("error", this.fail);
-        this.source.once("end", this.onSourceEnd);
-        this.source.once("close", this.onSourceClose);
-        startBodyStream(this.source);
-      }
-      if (this.body && this.request.onUploadProgress) {
-        this.report = new ReportTransform(this.request.onUploadProgress);
-        this.report.on("error", this.fail);
-        if (this.source) this.source.pipe(this.report);
-        else this.report.end(this.body);
-      }
-      if (this.state !== "sending") {
-        this.stopUpload();
-        return;
-      }
-      if (this.report) this.report.pipe(this.req);
-      else if (this.source) this.source.pipe(this.req);
-      else if (!this.body) this.req.end();
-      else if (typeof this.body === "string" || Buffer.isBuffer(this.body)) this.req.end(this.body);
-      else throw new RestError("Unrecognized body type", { request: this.request });
-    } catch (error) {
-      this.fail(toError(error));
-    }
-  };
-
-  private readonly flushHeaders = (): void => {
-    if (this.state !== "waiting") return;
-    this.req.removeListener("socket", this.flushHeaders);
-    if (this.bodyLength === 0) {
-      this.sendBody();
-      return;
-    }
-    try {
-      this.req.flushHeaders();
-      if (this.state !== "waiting") return;
-      // An ordered empty write waits for DNS/TCP/TLS and preceding header writes.
-      this.req.write("", (error) => {
-        if (error) this.fail(error);
-        else if (this.state === "waiting") {
-          this.fallback = setTimeout(this.sendBody, EXPECT_CONTINUE_TIMEOUT_IN_MS);
-        }
-      });
-    } catch (error) {
-      this.fail(toError(error));
-    }
-  };
 }
 
 /**
@@ -550,13 +92,6 @@ class NodeHttpClient implements HttpClient {
         abortController.abort();
       }, request.timeout);
     }
-
-    const hasExpectHeader = hasExpectContinueHeader(request);
-    const acceptEncoding = hasExpectHeader
-      ? headerValues(effectiveHeaders(request), "accept-encoding").join(",")
-      : request.headers.get("Accept-Encoding");
-    const shouldDecompress =
-      acceptEncoding?.includes("gzip") || acceptEncoding?.includes("deflate");
 
     let responseStream: NodeJS.ReadableStream | undefined;
     let responseAbortListener: (() => void) | undefined;
@@ -617,6 +152,12 @@ class NodeHttpClient implements HttpClient {
         return response;
       }
 
+      const hasExpectHeader = hasExpectContinueHeader(request);
+      const acceptEncoding = hasExpectHeader
+        ? headerValues(effectiveHeaders(request), "accept-encoding").join(",")
+        : request.headers.get("Accept-Encoding");
+      const shouldDecompress =
+        acceptEncoding?.includes("gzip") || acceptEncoding?.includes("deflate");
       responseStream = shouldDecompress ? getDecodedResponseStream(res, headers) : res;
       responseAbortListener = () => {
         if (responseStream && !responseDone) {
@@ -705,24 +246,56 @@ class NodeHttpClient implements HttpClient {
       headers: request.headers.toJSON({ preserveCase: true }),
       ...request.requestOverrides,
     };
-    const expectHeaderValue = hasExpectHeader
-      ? prepareExpectContinueHeaders(options, bodyLength)
-      : undefined;
 
-    return new Promise<NodeRequestResult>((resolve, reject) => {
-      new NodeRequestAttempt({
+    if (hasExpectHeader) {
+      const expectHeaderValue = hasExpectHeader
+        ? prepareExpectContinueHeaders(options, bodyLength)
+        : undefined;
+      return createExpectContinueRequest({
         request,
         abortSignal: abortController.signal,
-        negotiate: hasExpectHeader,
+        hasExpectHeader: true,
         body,
         bodyLength,
         expectHeader: expectHeaderValue,
         isInsecure,
         options,
-        resolve,
-        reject,
-      }).start();
-    });
+      });
+    } else {
+      return new Promise<NodeRequestResult>((resolve, reject) => {
+        const req = (isInsecure ? http : https).request(options, resolve);
+
+        req.once("error", (err: Error & { code?: string }) => {
+          reject(
+            new RestError(err.message, {
+              code: err.code ?? RestError.REQUEST_SEND_ERROR,
+              request,
+            }),
+          );
+        });
+
+        abortController.signal.addEventListener("abort", () => {
+          const abortError = new AbortError(
+            "The operation was aborted. Rejecting from abort signal callback while making request.",
+          );
+          req.destroy(abortError);
+          reject(abortError);
+        });
+        if (body && isReadableStream(body)) {
+          body.pipe(req);
+        } else if (body) {
+          if (typeof body === "string" || Buffer.isBuffer(body)) {
+            req.end(body);
+          } else {
+            logger.error("Unrecognized body type", body);
+            reject(new RestError("Unrecognized body type"));
+          }
+        } else {
+          // streams don't like "undefined" being passed as data
+          req.end();
+        }
+      });
+    }
   }
 
   private getOrCreateAgent(request: PipelineRequest, isInsecure: boolean): http.Agent {

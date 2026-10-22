@@ -12,8 +12,9 @@ import type {
 import { RestError } from "./restError.js";
 import { createHttpHeaders } from "./httpHeaders.js";
 import { isNodeReadableStream, isWebReadableStream } from "./util/typeGuards.js";
-import { arrayBufferViewToArrayBuffer } from "./util/arrayBuffer.js";
+import { arrayBufferViewToArrayBuffer } from "./util/arrayBufferView.js";
 import { isObject } from "./util/object.js";
+import { hasExpectContinueHeader } from "./util/expectContinueHeaders.js";
 
 // The Fetch spec requires `duplex: "half"` when body is a ReadableStream,
 // but TypeScript's lib.dom.d.ts hasn't added it to RequestInit yet.
@@ -41,6 +42,9 @@ class FetchHttpClient implements HttpClient {
    * @param request - The request to be made.
    */
   public async sendRequest(request: PipelineRequest): Promise<PipelineResponse> {
+    if (hasExpectContinueHeader(request)) {
+      throw new Error("The Expect header is not supported by the Fetch HttpClient.");
+    }
     const url = new URL(request.url);
     const isInsecure = url.protocol !== "https:";
 

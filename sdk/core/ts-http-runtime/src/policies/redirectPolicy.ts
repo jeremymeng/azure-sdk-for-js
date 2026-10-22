@@ -4,7 +4,7 @@
 import type { PipelineRequest, PipelineResponse, SendRequest } from "../interfaces.js";
 import type { PipelinePolicy } from "../pipeline.js";
 import { logger } from "../log.js";
-import { hasExpectContinueHeader, removeBodyHeaders } from "../util/expectContinue.js";
+import { hasExpectContinueHeader, removeBodyHeaders } from "../util/expectContinueHeaders.js";
 import { disposeResponseBody } from "../util/responseBody.js";
 
 /**

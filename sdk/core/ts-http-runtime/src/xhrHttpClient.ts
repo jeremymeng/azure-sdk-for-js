@@ -9,10 +9,11 @@ import type {
   PipelineResponse,
   TransferProgressEvent,
 } from "./interfaces.js";
+import { hasExpectContinueHeader } from "./util/expectContinueHeaders.js";
 import { createHttpHeaders } from "./httpHeaders.js";
 import { RestError } from "./restError.js";
 import { isReadableStream } from "./util/typeGuards.js";
-import { arrayBufferViewToArrayBuffer } from "./util/arrayBuffer.js";
+import { arrayBufferViewToArrayBuffer } from "./util/arrayBufferView.js";
 
 /**
  * A HttpClient implementation that uses XMLHttpRequest to send HTTP requests.
@@ -24,6 +25,9 @@ class XhrHttpClient implements HttpClient {
    * @param request - The request to be made.
    */
   public async sendRequest(request: PipelineRequest): Promise<PipelineResponse> {
+    if (hasExpectContinueHeader(request)) {
+      throw new Error("The Expect header is not supported by the XHR HttpClient.");
+    }
     const url = new URL(request.url);
     const isInsecure = url.protocol !== "https:";
 
