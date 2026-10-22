@@ -89,7 +89,7 @@ function stripBodyHeader(name: unknown, value: unknown): unknown {
 }
 
 /**
- * Removes body-related headers and changes an overridden method to GET after a redirect.
+ * Removes body-related headers before following a body-less redirect.
  *
  * @param request - The redirected pipeline request to update.
  */
@@ -109,7 +109,6 @@ export function removeBodyHeaders(request: PipelineRequest): void {
     });
     request.requestOverrides = {
       ...overrides,
-      method: "GET",
       headers: Array.isArray(headers[0]) ? pairs : pairs.flat(),
     };
   } else if (headers && typeof headers === "object") {
@@ -119,10 +118,7 @@ export function removeBodyHeaders(request: PipelineRequest): void {
     });
     request.requestOverrides = {
       ...overrides,
-      method: "GET",
       headers: Object.fromEntries(entries),
     };
-  } else {
-    request.requestOverrides = { ...overrides, method: "GET" };
   }
 }

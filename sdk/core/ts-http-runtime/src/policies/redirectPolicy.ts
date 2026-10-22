@@ -88,8 +88,11 @@ async function handleRedirect(
     // POST request with Status code 303 should be converted into a
     // redirected GET request if the redirect url is present in the location header
     if (status === 303) {
-      if (hasExpectContinueHeader(request)) removeBodyHeaders(request);
       request.method = "GET";
+      if (request.requestOverrides && "method" in request.requestOverrides) {
+        request.requestOverrides = { ...request.requestOverrides, method: "GET" };
+      }
+      if (hasExpectContinueHeader(request)) removeBodyHeaders(request);
       request.headers.delete("Content-Length");
       delete request.body;
     }

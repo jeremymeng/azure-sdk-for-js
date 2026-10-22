@@ -59,7 +59,7 @@ describe("effective Expect headers", () => {
         requestOverrides: { headers, method: "POST" },
       });
       removeBodyHeaders(request);
-      expect(request.requestOverrides?.method).toBe("GET");
+      expect(request.requestOverrides?.method).toBe("POST");
       expect(headerValues(request.requestOverrides?.headers, "expect")).toEqual(["other"]);
       expect(headerValues(request.requestOverrides?.headers, "content-length")).toEqual([]);
       expect(headerValues(request.requestOverrides?.headers, "transfer-encoding")).toEqual([]);
