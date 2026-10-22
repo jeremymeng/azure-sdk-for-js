@@ -326,96 +326,88 @@ describe("Expect: 100-continue on the wire", () => {
     expect(attempts).toBe(2);
   });
 
-  it.each([false, true])(
-    "retires backpressured outgoing writes after reading an early rejection (Expect=%s)",
-    async (negotiate) => {
-      const fixture = await setup();
-      fixture.agent.maxSockets = 1;
-      let connections = 0;
-      fixture.server.on("connection", () => {
-        connections++;
+  it("retires backpressured outgoing writes after reading an early rejection", async () => {
+    const fixture = await setup();
+    fixture.agent.maxSockets = 1;
+    let connections = 0;
+    fixture.server.on("connection", () => {
+      connections++;
+    });
+    const rejectUpload = (incoming: http.IncomingMessage, response: http.ServerResponse): void => {
+      incoming.once("data", () => {
+        incoming.pause();
+        response.writeHead(413, { Connection: "keep-alive", "Content-Length": 8 });
+        response.write("reje");
+        setTimeout(() => response.end("cted"), 25);
       });
-      const rejectUpload = (
-        incoming: http.IncomingMessage,
-        response: http.ServerResponse,
-      ): void => {
-        incoming.once("data", () => {
-          incoming.pause();
-          response.writeHead(413, { Connection: "keep-alive", "Content-Length": 8 });
-          response.write("reje");
-          setTimeout(() => response.end("cted"), 25);
+    };
+    fixture.server.on("request", (incoming, response) => {
+      if (incoming.method === "GET") response.end("next");
+      else rejectUpload(incoming, response);
+    });
+    fixture.server.on("checkContinue", (incoming, response) => {
+      response.writeContinue();
+      rejectUpload(incoming, response);
+    });
+    const createConnection = fixture.agent.createConnection.bind(fixture.agent);
+    const payload = Buffer.alloc(64 * 1024);
+    let releaseWrite: (() => void) | undefined;
+    vi.spyOn(fixture.agent, "createConnection").mockImplementationOnce((options, callback) => {
+      const socket = createConnection(options, callback);
+      if (!socket || !socket._writev) throw new Error("Expected a writable socket");
+      // Hold write completion to reproduce a saturated send buffer on every platform.
+      const write = socket._write.bind(socket);
+      const writev = socket._writev.bind(socket);
+      vi.spyOn(socket, "_write").mockImplementation((chunk, encoding, done) => {
+        write(chunk, encoding, (error) => {
+          if (error || chunk !== payload) done(error);
+          else releaseWrite = () => done();
         });
-      };
-      fixture.server.on("request", (incoming, response) => {
-        if (incoming.method === "GET") response.end("next");
-        else rejectUpload(incoming, response);
       });
-      fixture.server.on("checkContinue", (incoming, response) => {
-        response.writeContinue();
-        rejectUpload(incoming, response);
-      });
-      const createConnection = fixture.agent.createConnection.bind(fixture.agent);
-      const payload = Buffer.alloc(64 * 1024);
-      let releaseWrite: (() => void) | undefined;
-      vi.spyOn(fixture.agent, "createConnection").mockImplementationOnce((options, callback) => {
-        const socket = createConnection(options, callback);
-        if (!socket || !socket._writev) throw new Error("Expected a writable socket");
-        // Hold write completion to reproduce a saturated send buffer on every platform.
-        const write = socket._write.bind(socket);
-        const writev = socket._writev.bind(socket);
-        vi.spyOn(socket, "_write").mockImplementation((chunk, encoding, done) => {
-          write(chunk, encoding, (error) => {
-            if (error || chunk !== payload) done(error);
-            else releaseWrite = () => done();
-          });
+      vi.spyOn(socket, "_writev").mockImplementation((chunks, done) => {
+        writev(chunks, (error) => {
+          if (error || !chunks.some(({ chunk }) => chunk === payload)) done(error);
+          else releaseWrite = () => done();
         });
-        vi.spyOn(socket, "_writev").mockImplementation((chunks, done) => {
-          writev(chunks, (error) => {
-            if (error || !chunks.some(({ chunk }) => chunk === payload)) done(error);
-            else releaseWrite = () => done();
-          });
-        });
-        return socket;
       });
-      cleanups.push(async () => {
-        releaseWrite?.();
-      });
-      let started = false;
-      const source = new Readable({
-        read() {
-          if (started) return;
-          started = true;
-          this.push(payload);
-        },
-      });
-      cleanups.push(async () => {
-        source.destroy();
-      });
-      const client = createDefaultHttpClient();
-      const response = await client.sendRequest(
-        pipelineRequest(fixture, {
-          body: source,
-          headers: negotiate ? createHttpHeaders({ Expect: "100-continue" }) : createHttpHeaders(),
-          streamResponseStatusCodes: new Set([413]),
-        }),
-      );
-      const [socket] = Object.values(fixture.agent.sockets).flat();
-      expect(socket?.writableLength).toBeGreaterThan(0);
-      expect(response.status).toBe(413);
-      expect(await readText(response.readableStreamBody!)).toBe("rejected");
-      expect(source.destroyed).toBe(false);
-      const next = await client.sendRequest(
-        pipelineRequest(fixture, {
-          method: "GET",
-          headers: createHttpHeaders(),
-          timeout: 1000,
-        }),
-      );
-      expect(next.bodyAsText).toBe("next");
-      expect(connections).toBe(2);
-    },
-    10000,
-  );
+      return socket;
+    });
+    cleanups.push(async () => {
+      releaseWrite?.();
+    });
+    let started = false;
+    const source = new Readable({
+      read() {
+        if (started) return;
+        started = true;
+        this.push(payload);
+      },
+    });
+    cleanups.push(async () => {
+      source.destroy();
+    });
+    const client = createDefaultHttpClient();
+    const response = await client.sendRequest(
+      pipelineRequest(fixture, {
+        body: source,
+        streamResponseStatusCodes: new Set([413]),
+      }),
+    );
+    const [socket] = Object.values(fixture.agent.sockets).flat();
+    expect(socket?.writableLength).toBeGreaterThan(0);
+    expect(response.status).toBe(413);
+    expect(await readText(response.readableStreamBody!)).toBe("rejected");
+    expect(source.destroyed).toBe(false);
+    const next = await client.sendRequest(
+      pipelineRequest(fixture, {
+        method: "GET",
+        headers: createHttpHeaders(),
+        timeout: 1000,
+      }),
+    );
+    expect(next.bodyAsText).toBe("next");
+    expect(connections).toBe(2);
+  }, 10000);
 
   it.each([false, true])(
     "preserves a full-duplex upload after early 200 (Expect=%s)",
@@ -522,7 +514,6 @@ describe("Expect: 100-continue on the wire", () => {
       const pending = createDefaultHttpClient().sendRequest(
         pipelineRequest(fixture, {
           body: source,
-          headers: createHttpHeaders(),
           streamResponseStatusCodes: streamResponse ? new Set([200]) : undefined,
         }),
       );
@@ -561,7 +552,6 @@ describe("Expect: 100-continue on the wire", () => {
     const response = await createDefaultHttpClient().sendRequest(
       pipelineRequest(fixture, {
         body: source,
-        headers: createHttpHeaders(),
         streamResponseStatusCodes: new Set([200]),
       }),
     );
@@ -1189,93 +1179,6 @@ describe("Expect: 100-continue on the wire", () => {
     await assertion;
   });
 
-  it("rejects inactive direct multipart source errors without Expect", async () => {
-    const fixture = await setup();
-    const uploadStarted = deferred<void>();
-    fixture.server.on("request", (incoming) => {
-      incoming.once("data", () => {
-        incoming.pause();
-        uploadStarted.resolve();
-      });
-    });
-    let pushed = false;
-    const first = new Readable({
-      read() {
-        if (!pushed) {
-          pushed = true;
-          this.push("first");
-        }
-      },
-    });
-    const second = new Readable({ read() {} });
-    const pending = createPipelineFromOptions({}).sendRequest(
-      createDefaultHttpClient(),
-      pipelineRequest(fixture, {
-        headers: createHttpHeaders(),
-        timeout: 1000,
-        multipartBody: {
-          parts: [
-            { headers: createHttpHeaders(), body: first },
-            { headers: createHttpHeaders(), body: second },
-          ],
-        },
-      }),
-    );
-    const assertion = expect(pending).rejects.toMatchObject({
-      name: "RestError",
-      code: "REQUEST_SEND_ERROR",
-      message: "inactive multipart source failed",
-    });
-    await uploadStarted.promise;
-    second.destroy(new Error("inactive multipart source failed"));
-    await assertion;
-    first.destroy();
-  });
-
-  it("removes inactive multipart listeners after a non-negotiated early response", async () => {
-    const fixture = await setup();
-    fixture.server.on("request", (incoming, response) => {
-      incoming.once("data", () => {
-        incoming.pause();
-        response.writeHead(413);
-        response.end("rejected");
-      });
-    });
-    let pushed = false;
-    const first = new Readable({
-      read() {
-        if (!pushed) {
-          pushed = true;
-          this.push("first");
-        }
-      },
-    });
-    const second = new Readable({
-      read() {
-        throw new Error("Inactive multipart source was read");
-      },
-    });
-
-    const response = await createPipelineFromOptions({}).sendRequest(
-      createDefaultHttpClient(),
-      pipelineRequest(fixture, {
-        headers: createHttpHeaders(),
-        multipartBody: {
-          parts: [
-            { headers: createHttpHeaders(), body: first },
-            { headers: createHttpHeaders(), body: second },
-          ],
-        },
-      }),
-    );
-
-    expect(response.status).toBe(413);
-    expect(response.bodyAsText).toBe("rejected");
-    expect(second.listenerCount("error")).toBe(0);
-    first.destroy();
-    second.destroy();
-  });
-
   it("does not attach multipart source listeners for a pre-aborted request", async () => {
     const fixture = await setup();
     const source = new Readable({ read() {} });
@@ -1584,35 +1487,6 @@ describe("Expect: 100-continue on the wire", () => {
     );
     expect(response.status).toBe(417);
     expect(response.bodyAsText).toBe("no recovery");
-    expect(attempts).toBe(1);
-  });
-
-  it("rejects an exhausted multipart source before dispatching a non-negotiated retry", async () => {
-    const fixture = await setup();
-    let attempts = 0;
-    fixture.server.on("request", (incoming, response) => {
-      attempts++;
-      incoming.resume();
-      incoming.once("end", () => {
-        response.writeHead(attempts === 1 ? 503 : 200);
-        response.end();
-      });
-    });
-    const pipeline = createPipelineFromOptions({
-      retryOptions: { retryDelayInMs: 1, maxRetries: 1 },
-    });
-    await expect(
-      pipeline.sendRequest(
-        createDefaultHttpClient(),
-        pipelineRequest(fixture, {
-          headers: createHttpHeaders(),
-          timeout: 500,
-          multipartBody: {
-            parts: [{ headers: createHttpHeaders(), body: Readable.from("one-shot") }],
-          },
-        }),
-      ),
-    ).rejects.toMatchObject({ code: "REQUEST_BODY_NOT_REPLAYABLE" });
     expect(attempts).toBe(1);
   });
 

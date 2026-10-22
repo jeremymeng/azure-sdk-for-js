@@ -248,9 +248,7 @@ class NodeHttpClient implements HttpClient {
     };
 
     if (hasExpectHeader) {
-      const expectHeaderValue = hasExpectHeader
-        ? prepareExpectContinueHeaders(options, bodyLength)
-        : undefined;
+      const expectHeaderValue = prepareExpectContinueHeaders(options, bodyLength);
       return createExpectContinueRequest({
         request,
         abortSignal: abortController.signal,
@@ -263,7 +261,29 @@ class NodeHttpClient implements HttpClient {
       });
     } else {
       return new Promise<NodeRequestResult>((resolve, reject) => {
-        const req = (isInsecure ? http : https).request(options, resolve);
+        const req = (isInsecure ? http : https).request(options);
+
+        let requestDone = false;
+        // eslint-disable-next-line promise/param-names
+        const requestComplete = new Promise<void>((resolveComplete) => {
+          const onComplete = (): void => {
+            requestDone = true;
+            req.removeListener("finish", onComplete);
+            req.removeListener("close", onComplete);
+            resolveComplete();
+          };
+
+          req.once("finish", onComplete);
+          req.once("close", onComplete);
+        });
+
+        req.once("response", (response) => {
+          resolve({
+            response,
+            requestComplete,
+            isRequestComplete: () => requestDone,
+          });
+        });
 
         req.once("error", (err: Error & { code?: string }) => {
           reject(
@@ -281,13 +301,36 @@ class NodeHttpClient implements HttpClient {
           req.destroy(abortError);
           reject(abortError);
         });
-        if (body && isReadableStream(body)) {
-          body.pipe(req);
-        } else if (body) {
-          if (typeof body === "string" || Buffer.isBuffer(body)) {
-            req.end(body);
+
+        let uploadBody = body;
+        if (uploadBody && request.onUploadProgress) {
+          const uploadReportStream = new ReportTransform(request.onUploadProgress);
+          uploadReportStream.on("error", (e) => {
+            logger.error("Error in upload progress", e);
+          });
+
+          if (isReadableStream(uploadBody)) {
+            uploadBody.pipe(uploadReportStream);
           } else {
-            logger.error("Unrecognized body type", body);
+            uploadReportStream.end(uploadBody);
+          }
+
+          uploadBody = uploadReportStream;
+        }
+
+        if (uploadBody && isReadableStream(uploadBody)) {
+          uploadBody.pipe(req);
+        } else if (uploadBody) {
+          if (typeof uploadBody === "string" || Buffer.isBuffer(uploadBody)) {
+            req.end(uploadBody);
+          } else if (isArrayBuffer(uploadBody)) {
+            req.end(
+              ArrayBuffer.isView(uploadBody)
+                ? Buffer.from(uploadBody.buffer, uploadBody.byteOffset, uploadBody.byteLength)
+                : Buffer.from(uploadBody),
+            );
+          } else {
+            logger.error("Unrecognized body type", uploadBody);
             reject(new RestError("Unrecognized body type"));
           }
         } else {
