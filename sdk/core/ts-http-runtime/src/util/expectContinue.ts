@@ -3,6 +3,12 @@
 
 import type { PipelineRequest } from "../interfaces.js";
 
+/**
+ * Normalizes Node's flat or tuple-array header representation into header pairs.
+ *
+ * @param headers - The Node request headers to normalize.
+ * @returns The normalized header pairs.
+ */
 export function headerPairs(headers: readonly unknown[]): unknown[][] {
   // Node accepts either [[name, value], ...] or a flat [name, value, ...] list.
   return Array.isArray(headers[0])
@@ -13,6 +19,13 @@ export function headerPairs(headers: readonly unknown[]): unknown[][] {
       ]);
 }
 
+/**
+ * Gets all values for a header from any Node-supported header representation.
+ *
+ * @param headers - The Node request headers to inspect.
+ * @param name - The lowercase header name to find.
+ * @returns The matching header values.
+ */
 export function headerValues(headers: unknown, name: string): unknown[] {
   if (Array.isArray(headers)) {
     return headerPairs(headers)
@@ -30,12 +43,24 @@ export function headerValues(headers: unknown, name: string): unknown[] {
   return [];
 }
 
+/**
+ * Gets the headers that will be sent after applying request overrides.
+ *
+ * @param request - The pipeline request whose effective headers are needed.
+ * @returns The request's effective headers.
+ */
 export function effectiveHeaders(request: PipelineRequest): unknown {
   return request.requestOverrides && "headers" in request.requestOverrides
     ? request.requestOverrides.headers
     : request.headers.toJSON({ preserveCase: true });
 }
 
+/**
+ * Determines whether the effective headers request a 100-continue handshake.
+ *
+ * @param request - The pipeline request to inspect.
+ * @returns Whether an Expect header contains the 100-continue token.
+ */
 export function hasExpectContinueHeader(request: PipelineRequest): boolean {
   return headerValues(effectiveHeaders(request), "expect").some(
     (value) =>
@@ -44,6 +69,7 @@ export function hasExpectContinueHeader(request: PipelineRequest): boolean {
   );
 }
 
+// Removes the 100-continue token while preserving any other Expect tokens.
 function withoutContinue(value: unknown): unknown {
   if (Array.isArray(value)) {
     const values = value.map(withoutContinue).filter((entry) => entry !== undefined);
@@ -54,7 +80,7 @@ function withoutContinue(value: unknown): unknown {
   return tokens.length ? tokens.join(",") : undefined;
 }
 
-// Returns undefined when the header must be dropped from a body-less redirected request.
+// Removes body framing and 100-continue headers from a body-less redirected request.
 function stripBodyHeader(name: unknown, value: unknown): unknown {
   if (typeof name !== "string") return undefined;
   const lower = name.toLowerCase();
@@ -62,6 +88,11 @@ function stripBodyHeader(name: unknown, value: unknown): unknown {
   return lower === "expect" ? withoutContinue(value) : value;
 }
 
+/**
+ * Removes body-related headers and changes an overridden method to GET after a redirect.
+ *
+ * @param request - The redirected pipeline request to update.
+ */
 export function removeBodyHeaders(request: PipelineRequest): void {
   const expect = withoutContinue(request.headers.get("Expect"));
   if (typeof expect === "string") request.headers.set("Expect", expect);
