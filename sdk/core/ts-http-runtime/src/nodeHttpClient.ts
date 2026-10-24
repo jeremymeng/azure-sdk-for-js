@@ -4,7 +4,7 @@
 import http from "node:http";
 import https from "node:https";
 import zlib from "node:zlib";
-import type { Transform } from "node:stream";
+import { finished, type Transform } from "node:stream";
 import { AbortError } from "./abort-controller/AbortError.js";
 import type {
   HttpClient,
@@ -18,7 +18,7 @@ import { createHttpHeaders } from "./httpHeaders.js";
 import { isRestError, RestError } from "./restError.js";
 import type { IncomingMessage } from "node:http";
 import { logger } from "./log.js";
-import { isArrayBuffer } from "./util/nodeArrayBuffer.js";
+import { arrayBufferToBuffer, isArrayBuffer } from "./util/nodeArrayBuffer.js";
 import { Sanitizer } from "./util/sanitizer.js";
 import {
   createExpectContinueRequest,
@@ -32,7 +32,7 @@ import {
   hasExpectContinueHeader,
   headerValues,
 } from "./util/expectContinueHeaders.js";
-import { destroyBodyStream, disposeBodyStream } from "./util/nodeBody.js";
+import { destroyBodyStream, disposeBodyStream, monitorBodyStreamErrors } from "./util/nodeBody.js";
 import { setRequestCompletion } from "./util/requestCompletion.js";
 
 const DEFAULT_TLS_SETTINGS = {};
@@ -302,9 +302,46 @@ class NodeHttpClient implements HttpClient {
           reject(abortError);
         });
 
-        let uploadBody = body;
+        let uploadBody = body && isArrayBuffer(body) ? arrayBufferToBuffer(body) : body;
+        let uploadReportStream: ReportTransform | undefined;
+        if (isReadableStream(uploadBody)) {
+          const source = uploadBody;
+          const cleanupFinished = finished(source, { writable: false }, (error) => {
+            if (!error) {
+              cleanupSource();
+              return;
+            }
+            stopUpload();
+            const prematureClose = error.code === "ERR_STREAM_PREMATURE_CLOSE";
+            const requestError = new RestError(
+              prematureClose ? "Request body stream closed before ending" : error.message,
+              {
+                code: prematureClose
+                  ? RestError.REQUEST_SEND_ERROR
+                  : (error.code ?? RestError.REQUEST_SEND_ERROR),
+                request,
+              },
+            );
+            req.destroy(requestError);
+            reject(requestError);
+          });
+          function cleanupSource(): void {
+            cleanupFinished();
+            req.removeListener("close", stopUpload);
+            monitorBodyStreamErrors(source);
+          }
+          function stopUpload(): void {
+            cleanupSource();
+            source.unpipe(uploadReportStream ?? req);
+            source.pause();
+            uploadReportStream?.unpipe(req);
+            uploadReportStream?.destroy();
+          }
+          req.once("close", stopUpload);
+        }
+
         if (uploadBody && request.onUploadProgress) {
-          const uploadReportStream = new ReportTransform(request.onUploadProgress);
+          uploadReportStream = new ReportTransform(request.onUploadProgress);
           uploadReportStream.on("error", (e) => {
             logger.error("Error in upload progress", e);
           });
@@ -323,12 +360,6 @@ class NodeHttpClient implements HttpClient {
         } else if (uploadBody) {
           if (typeof uploadBody === "string" || Buffer.isBuffer(uploadBody)) {
             req.end(uploadBody);
-          } else if (isArrayBuffer(uploadBody)) {
-            req.end(
-              ArrayBuffer.isView(uploadBody)
-                ? Buffer.from(uploadBody.buffer, uploadBody.byteOffset, uploadBody.byteLength)
-                : Buffer.from(uploadBody),
-            );
           } else {
             logger.error("Unrecognized body type", uploadBody);
             reject(new RestError("Unrecognized body type"));

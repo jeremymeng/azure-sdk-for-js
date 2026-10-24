@@ -10,17 +10,18 @@ import { createHttpHeaders, createPipelineRequest } from "../../../src/index.js"
 import { createNodeHttpClient } from "../../../src/nodeHttpClient.js";
 
 let outgoing: MockRequest;
-let respond: (response: http.IncomingMessage) => void;
 vi.mock("node:http", async (importOriginal) => {
   const original = await importOriginal<typeof http>();
   return {
     default: {
       ...original,
-      request: vi.fn((options: http.RequestOptions, callback: typeof respond) => {
-        outgoing = new MockRequest(options);
-        respond = callback;
-        return outgoing;
-      }),
+      request: vi.fn(
+        (options: http.RequestOptions, callback?: (response: http.IncomingMessage) => void) => {
+          outgoing = new MockRequest(options);
+          if (callback) outgoing.once("response", callback);
+          return outgoing;
+        },
+      ),
     },
   };
 });
@@ -65,7 +66,7 @@ function finalResponse(status = 200): void {
   response.headers = {};
   response.push("final");
   response.push(null);
-  respond(response);
+  outgoing.emit("response", response);
 }
 
 async function readText(stream: NodeJS.ReadableStream): Promise<string> {
@@ -342,24 +343,56 @@ describe("Expect: 100-continue attempt state", () => {
     await assertion;
   });
 
-  it("rejects a non-negotiated source that closes without ending", async () => {
-    const source = new Readable({
-      read() {
-        this.destroy();
-      },
-    });
-    const pending = start(source, {
-      headers: createHttpHeaders(),
-      timeout: 500,
-    });
-    const assertion = expect(pending).rejects.toMatchObject({
-      name: "RestError",
-      code: "REQUEST_SEND_ERROR",
-      message: "Request body stream closed before ending",
-    });
-    await vi.runAllTimersAsync();
-    await assertion;
-  });
+  it.each(["direct", "factory", "progress"])(
+    "rejects a non-negotiated %s source that closes without ending",
+    async (kind) => {
+      const source = new Readable({
+        read() {
+          this.destroy();
+        },
+      });
+      const pending = start(kind === "factory" ? () => source : source, {
+        headers: createHttpHeaders(),
+        timeout: 500,
+        onUploadProgress: kind === "progress" ? vi.fn() : undefined,
+      });
+      const assertion = expect(pending).rejects.toMatchObject({
+        name: "RestError",
+        code: "REQUEST_SEND_ERROR",
+        message: "Request body stream closed before ending",
+      });
+      await vi.runAllTimersAsync();
+      await assertion;
+      expect(outgoing.destroyed).toBe(true);
+      expect(source.listenerCount("error")).toBe(0);
+      expect(source.listenerCount("close")).toBe(0);
+    },
+  );
+
+  it.each([false, true])(
+    "rejects non-negotiated source errors without waiting for a timeout (progress=%s)",
+    async (progress) => {
+      const source = new Readable({
+        read() {
+          this.destroy(Object.assign(new Error("upload failed"), { code: "EIO" }));
+        },
+      });
+      const pending = start(source, {
+        headers: createHttpHeaders(),
+        onUploadProgress: progress ? vi.fn() : undefined,
+      });
+      const assertion = expect(pending).rejects.toMatchObject({
+        name: "RestError",
+        code: "EIO",
+        message: "upload failed",
+      });
+      await vi.runAllTimersAsync();
+      await assertion;
+      expect(outgoing.destroyed).toBe(true);
+      expect(source.listenerCount("error")).toBe(0);
+      expect(source.listenerCount("close")).toBe(0);
+    },
+  );
 
   it("retires an interrupted request when an early response closes without ending", async () => {
     const source = new Readable({
@@ -373,7 +406,7 @@ describe("Expect: 100-continue attempt state", () => {
     const response = new http.IncomingMessage(new Socket());
     response.statusCode = 417;
     response.headers = {};
-    respond(response);
+    outgoing.emit("response", response);
     await pending;
     expect(outgoing.destroyed).toBe(false);
 
@@ -432,7 +465,7 @@ describe("Expect: 100-continue attempt state", () => {
     response.complete = true;
     response.push("complete");
     response.push(null);
-    respond(response);
+    outgoing.emit("response", response);
     const result = await pending;
     outgoing.emit("error", new Error("late request error"));
     expect(await readText(result.readableStreamBody!)).toBe("complete");

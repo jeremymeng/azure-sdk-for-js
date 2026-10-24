@@ -26,11 +26,9 @@ describe("[Node] Streams", () => {
   });
 
   it("should get a JSON body response as a stream", async () => {
-    vi.mocked(https.request).mockImplementation((_url, cb) => {
+    vi.mocked(https.request).mockImplementation(() => {
       const response = createResponse(200, JSON.stringify({ foo: "foo" }));
-      const callback = cb as (res: IncomingMessage) => void;
-      callback(response);
-      return createRequest();
+      return createRequest(response);
     });
 
     const { getClient } = await import("../../../src/client/getClient.js");
@@ -47,11 +45,9 @@ describe("[Node] Streams", () => {
   });
 
   it("should get a JSON body response", async () => {
-    vi.mocked(https.request).mockImplementation((_url, cb) => {
+    vi.mocked(https.request).mockImplementation(() => {
       const response = createResponse(200, JSON.stringify({ foo: "foo" }));
-      const callback = cb as (res: IncomingMessage) => void;
-      callback(response);
-      return createRequest();
+      return createRequest(response);
     });
 
     const { getClient } = await import("../../../src/client/getClient.js");
@@ -96,11 +92,9 @@ describe("[Node] Streams", () => {
   });
 
   it("should throw when attempting to use browser streams", async () => {
-    vi.mocked(https.request).mockImplementation((_url, cb) => {
+    vi.mocked(https.request).mockImplementation(() => {
       const response = createResponse(200, JSON.stringify({ foo: "foo" }));
-      const callback = cb as (res: IncomingMessage) => void;
-      callback(response);
-      return createRequest();
+      return createRequest(response);
     });
 
     const { getClient } = await import("../../../src/client/getClient.js");
@@ -118,8 +112,9 @@ describe("[Node] Streams", () => {
   });
 });
 
-function createRequest(): ClientRequest {
+function createRequest(response: IncomingMessage): ClientRequest {
   const request = new FakeRequest();
+  queueMicrotask(() => request.emit("response", response));
   return request as unknown as ClientRequest;
 }
 

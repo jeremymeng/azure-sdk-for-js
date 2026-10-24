@@ -81,37 +81,19 @@ function createRequest(): ClientRequest {
 }
 
 function yieldHttpsResponse(response: IncomingMessage): void {
-  const lastCall = vi.mocked<{
-    (
-      options: string | https.RequestOptions | URL,
-      callback?: ((res: IncomingMessage) => void) | undefined,
-    ): ClientRequest;
-  }>(https.request).mock.lastCall;
-  if (!lastCall) {
-    throw new Error("Cannot yield response because mock has not been called");
+  const lastResult = vi.mocked(https.request).mock.results.at(-1);
+  if (!lastResult || lastResult.type !== "return") {
+    throw new Error("Cannot yield response because mock has not returned a request");
   }
-
-  if (!lastCall[1]) {
-    throw new Error("Mock was not called with a callback in the second parameter");
-  }
-  lastCall[1](response);
+  lastResult.value.emit("response", response);
 }
 
 function yieldHttpResponse(response: IncomingMessage): void {
-  const lastCall = vi.mocked<{
-    (
-      options: string | http.RequestOptions | URL,
-      callback?: ((res: IncomingMessage) => void) | undefined,
-    ): ClientRequest;
-  }>(http.request).mock.lastCall;
-  if (!lastCall) {
-    throw new Error("Cannot yield response because mock has not been called");
+  const lastResult = vi.mocked(http.request).mock.results.at(-1);
+  if (!lastResult || lastResult.type !== "return") {
+    throw new Error("Cannot yield response because mock has not returned a request");
   }
-
-  if (!lastCall[1]) {
-    throw new Error("Mock was not called with a callback in the second parameter");
-  }
-  lastCall[1](response);
+  lastResult.value.emit("response", response);
 }
 
 describe("NodeHttpClient", function () {
@@ -222,6 +204,11 @@ describe("NodeHttpClient", function () {
   it.each([
     ["ArrayBuffer", Uint8Array.from([0, 1, 2, 3]).buffer, [0, 1, 2, 3]],
     ["DataView window", new DataView(Uint8Array.from([0, 1, 2, 3, 4, 5]).buffer, 2, 3), [2, 3, 4]],
+    [
+      "typed array window",
+      new Uint16Array(Uint8Array.from([0, 1, 2, 3, 4, 5]).buffer, 2, 2),
+      [2, 3, 4, 5],
+    ],
   ] satisfies [string, ArrayBuffer | ArrayBufferView, number[]][])(
     "should report upload progress for a %s body",
     async (_, body, expectedBytes) => {
