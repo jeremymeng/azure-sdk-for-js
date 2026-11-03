@@ -30,7 +30,6 @@ function observeUnusedSource(stream: NodeJS.ReadableStream): void {
 
 interface ExpectContinueRequestOptions {
   abortSignal: AbortSignal;
-  knownBodyLength: number | null;
   bodyStreams?: readonly NodeJS.ReadableStream[];
   createRequest: (onResponse: (response: http.IncomingMessage) => void) => http.ClientRequest;
   onAbort: (request: http.ClientRequest) => void;
@@ -149,7 +148,6 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
   let bodyStarted = false;
   let errorReported = false;
   let abortHandled = false;
-  let responseBeforeRequest: http.IncomingMessage | undefined;
   let request: http.ClientRequest;
   let bodyError: Error | undefined;
   const bodyStreams = new Set(options.bodyStreams);
@@ -172,7 +170,7 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
     return;
   }
 
-  function stopWaiting(): void {
+  function stopWaiting(keepBodyObserved = false): void {
     waiting = false;
     if (fallback !== undefined) {
       clearTimeout(fallback);
@@ -180,6 +178,9 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
     }
     request?.removeListener("continue", sendBody);
     request?.removeListener("socket", onSocket);
+    if (!keepBodyObserved) {
+      stopObservingBody();
+    }
   }
 
   function onError(error: unknown): Error {
@@ -188,7 +189,6 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
     if (!errorReported) {
       errorReported = true;
       stopWaiting();
-      stopObservingBody();
       options.onError(requestError);
     }
     return requestError;
@@ -211,7 +211,6 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
     errorReported = true;
     bodyError = error;
     stopWaiting();
-    stopObservingBody();
     options.onBodyError(error);
     request?.destroy(error);
   }
@@ -221,7 +220,7 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
       return;
     }
     bodyStarted = true;
-    stopWaiting();
+    stopWaiting(true);
     try {
       options.sendBody(request);
     } catch (error: unknown) {
@@ -234,18 +233,10 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
 
   function onAbort(): void {
     stopWaiting();
-    stopObservingBody();
     if (!abortHandled) {
       abortHandled = true;
       options.onAbort(request);
     }
-  }
-
-  function onClose(): void {
-    stopWaiting();
-    stopObservingBody();
-    // Request close can precede consumption of buffered response data.
-    // Keep private abort forwarding until sendRequest's outer lifecycle disconnects the caller.
   }
 
   function onSocket(): void {
@@ -272,12 +263,6 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
 
   function onResponse(response: http.IncomingMessage): void {
     stopWaiting();
-    stopObservingBody();
-    if (!request) {
-      // A custom request factory may deliver a response before returning its request.
-      responseBeforeRequest = response;
-      return;
-    }
     if (!bodyStarted) {
       request.shouldKeepAlive = false;
       const destroyRequest = (): void => {
@@ -296,15 +281,13 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
 
   request.once("error", onError);
   options.abortSignal.addEventListener("abort", onAbort, { once: true });
-  request.once("close", onClose);
+  // Request close can precede consumption of buffered response data.
+  // Keep private abort forwarding until sendRequest's outer lifecycle disconnects the caller.
+  request.once("close", () => stopWaiting());
 
   if (bodyError) {
     request.destroy(bodyError);
     return;
-  }
-
-  if (responseBeforeRequest) {
-    onResponse(responseBeforeRequest);
   }
 
   if (options.abortSignal.aborted) {
@@ -313,22 +296,14 @@ export function createExpectContinueRequest(options: ExpectContinueRequestOption
   }
 
   if (request.destroyed || request.closed) {
-    onClose();
+    stopWaiting();
   }
 
   if (!waiting) {
-    return;
-  }
-
-  if (options.knownBodyLength === 0) {
-    sendBody();
     return;
   }
 
   request.once("continue", sendBody);
-  if (!waiting) {
-    return;
-  }
   if (request.socket) {
     onSocket();
   } else {
